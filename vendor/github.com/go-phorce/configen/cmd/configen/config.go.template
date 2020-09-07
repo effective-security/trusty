@@ -25,6 +25,12 @@ import (
 	"time"
 )
 
+// LoadJSONFunc defines a function type to load JSON configuration file
+type LoadJSONFunc func (filename string, v interface{}) error
+
+// JSONLoader allows to specify a custom loader
+var JSONLoader LoadJSONFunc = loadJSON
+
 // Duration represents a period of time, its the same as time.Duration
 // but supports better marshalling from json
 type Duration time.Duration
@@ -104,7 +110,7 @@ func Load(configFilename, envKeyName, hostnameOverride string) (*Configuration, 
 // do more intricate examination of the entire set of configurations
 func LoadConfigurations(filename string) (*Configurations, error) {
 	configs := new(Configurations)
-	err := loadJSON(filename, configs)
+	err := JSONLoader(filename, configs)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +130,7 @@ func LoadConfigurations(filename string) (*Configurations, error) {
 			}
 
 			config := new(Configuration)
-			err = loadJSON(fn, config)
+			err = JSONLoader(fn, config)
 			if err != nil {
 				return nil, err
 			}

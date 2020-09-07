@@ -1,6 +1,11 @@
+# github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc
+github.com/alecthomas/template
+github.com/alecthomas/template/parse
+# github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf
+github.com/alecthomas/units
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/go-phorce/configen v0.5.0
+# github.com/go-phorce/configen v0.5.1-0.20200810213452-d4cce3de762c
 ## explicit
 github.com/go-phorce/configen/cmd/configen
 github.com/go-phorce/configen/version
@@ -8,6 +13,12 @@ github.com/go-phorce/configen/version
 ## explicit
 github.com/go-phorce/cov-report/cmd/cov-report
 github.com/go-phorce/cov-report/version
+# github.com/go-phorce/dolly v0.4.0
+## explicit
+github.com/go-phorce/dolly/fileutil/resolve
+github.com/go-phorce/dolly/netutil
+github.com/go-phorce/dolly/xlog
+github.com/go-phorce/dolly/xlog/logrotate
 # github.com/gogo/protobuf v1.3.1
 ## explicit
 github.com/gogo/protobuf/gogoproto
@@ -32,6 +43,7 @@ github.com/grpc-ecosystem/grpc-gateway/utilities
 # github.com/joho/godotenv v1.3.0
 github.com/joho/godotenv
 # github.com/juju/errors v0.0.0-20200330140219-3fe23663418f
+## explicit
 github.com/juju/errors
 # github.com/mattn/go-colorable v0.1.4
 github.com/mattn/go-colorable
@@ -45,6 +57,12 @@ github.com/pmezard/go-difflib/difflib
 # github.com/stretchr/testify v1.6.1
 ## explicit
 github.com/stretchr/testify/assert
+github.com/stretchr/testify/require
+# go.uber.org/dig v1.10.0
+## explicit
+go.uber.org/dig
+go.uber.org/dig/internal/digreflect
+go.uber.org/dig/internal/dot
 # golang.org/x/lint v0.0.0-20200302205851-738671d3881b
 ## explicit
 golang.org/x/lint
@@ -52,7 +70,7 @@ golang.org/x/lint/golint
 # golang.org/x/mod v0.3.0
 golang.org/x/mod/module
 golang.org/x/mod/semver
-# golang.org/x/net v0.0.0-20200822124328-c89045814202
+# golang.org/x/net v0.0.0-20200904194848-62affa334b73
 ## explicit
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp
@@ -206,6 +224,11 @@ google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/timestamppb
 google.golang.org/protobuf/types/known/wrapperspb
+# gopkg.in/alecthomas/kingpin.v2 v2.2.6
+## explicit
+gopkg.in/alecthomas/kingpin.v2
+# gopkg.in/natefinch/lumberjack.v2 v2.0.0-20170531160350-a96e63847dc3
+gopkg.in/natefinch/lumberjack.v2
 # gopkg.in/yaml.v2 v2.3.0
 gopkg.in/yaml.v2
 # gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776

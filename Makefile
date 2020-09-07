@@ -75,3 +75,7 @@ hsmconfig:
         --generate-pin -s trusty_unittest \
         -o /tmp/trusty/softhsm/unittest_hsm.json \
 		--delete --list-slots --list-object
+
+coveralls:
+	echo "*** Running coveralls"
+	goveralls -v -coverprofile=coverage.out -service=travis-ci -package ./...

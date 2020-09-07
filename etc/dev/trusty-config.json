@@ -1,0 +1,47 @@
+{
+    "defaults": {
+        "Region": "dev",
+        "Environment": "test",
+        "ServiceName": "trusty",
+        "ClusterName": "local",
+        "LogLevels": [
+            {
+                "Repo": "*",
+                "Level": "INFO"
+            },
+            {
+                "Repo": "github.com/go-phorce/trusty",
+                "Package": "*",
+                "Level": "TRACE"
+            },
+            {
+                "Repo": "github.com/go-phorce/trusty/health",
+                "Package": "xhttp",
+                "Level": "ERROR"
+            },
+            {
+                "Repo": "github.com/go-phorce/dolly",
+                "Package": "*",
+                "Level": "TRACE"
+            }
+        ],
+        "Logger": {
+            "Directory": "/tmp/trusty/logs",
+            "MaxAgeDays": 3,
+            "MaxSizeMb": 10
+        },
+        "Audit": {
+            "Directory": "/tmp/trusty/audit",
+            "MaxAgeDays": 7,
+            "MaxSizeMb": 10
+        },
+        "CryptoProv": {
+            "Default": "/tmp/trusty/softhsm/unittest_hsm.json",
+            "Providers": []
+        },
+        "Metrics": {
+            "Provider": "funnel",
+            "Disabled": true
+        }
+    }
+}
