@@ -1,0 +1,13 @@
+/.coverage
+/.rpm
+
+.DS_Store
+.vagrant/
+.idea
+.docker/
+debug
+debug.test
+coverage.out
+change_log.txt
+
+bin/
