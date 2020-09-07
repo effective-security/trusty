@@ -35,6 +35,7 @@ tools:
 	go install github.com/go-phorce/cov-report/cmd/cov-report
 	go install github.com/go-phorce/configen/cmd/configen
 	go install github.com/mattn/goreman
+	go install github.com/mattn/goveralls
 
 folders:
 	mkdir -p /tmp/trusty/softhsm/tokens \
@@ -75,7 +76,3 @@ hsmconfig:
         --generate-pin -s trusty_unittest \
         -o /tmp/trusty/softhsm/unittest_hsm.json \
 		--delete --list-slots --list-object
-
-coveralls:
-	echo "*** Running coveralls"
-	goveralls -v -coverprofile=coverage.out -service=travis-ci -package ./...

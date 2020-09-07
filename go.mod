@@ -11,6 +11,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.14.8
 	github.com/juju/errors v0.0.0-20200330140219-3fe23663418f
 	github.com/mattn/goreman v0.3.7
+	github.com/mattn/goveralls v0.0.6
 	github.com/stretchr/testify v1.6.1
 	go.uber.org/dig v1.10.0
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b
