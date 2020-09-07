@@ -53,6 +53,9 @@ version:
 	echo "*** building version"
 	gofmt -r '"GIT_VERSION" -> "$(GIT_VERSION)"' version/current.template > version/current.go
 
+proto:
+	./scripts/build/genproto.sh
+
 build_trusty:
 	echo "*** Building trusty"
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/trusty ./cmd/trusty

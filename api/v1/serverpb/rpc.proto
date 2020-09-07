@@ -1,0 +1,44 @@
+syntax = "proto3";
+package serverpb;
+
+import "gogoproto/gogo.proto";
+// for grpc-gateway
+import "google/api/annotations.proto";
+
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+
+service Status {
+    // Version returns the server version.
+    rpc Version(EmptyRequest) returns (VersionResponse) {
+        option (google.api.http) = {
+            get: "/v1/status/version"
+        };
+    }
+
+    // Server returns the server status.
+    rpc Server(EmptyRequest) returns (ServerStatusResponse) {
+        option (google.api.http) = {
+            get: "/v1/status/server"
+      };
+    }
+}
+
+message EmptyRequest {
+}
+
+message VersionResponse {
+    // version is the server version.
+    string version = 1;
+}
+
+message ServerStatus {
+    // nodename is the human-readable name of the cluster member.
+    string nodename = 1;
+    // nodename is operating system's host name.
+    string hostname = 2;
+}
+
+message ServerStatusResponse {
+    ServerStatus status = 1;
+}
