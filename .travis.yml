@@ -30,12 +30,6 @@ notifications:
     on_success: change
     on_failure: always
 
-# Anything in before_script that returns a nonzero exit code will flunk the
-# build and immediately stop. It's sorta like having set -e enabled in bash.
-# Make sure golangci-lint is vendored by running
-#   dep ensure -add github.com/golangci/golangci-lint/cmd/golangci-lint
-# ...and adding this to your Gopkg.toml file.
-#   required = ["github.com/golangci/golangci-lint/cmd/golangci-lint"]
 before_script:
   - make vars generate
 
@@ -43,4 +37,4 @@ before_script:
 # failing test, we want to see both. Configure golangci-lint with a
 # .golangci.yml file at the top level of your repo.
 script:
-  - make vars hsmconfig build
+  - make vars hsmconfig build covtest coveralls

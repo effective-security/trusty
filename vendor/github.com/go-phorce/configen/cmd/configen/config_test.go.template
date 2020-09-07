@@ -6,6 +6,7 @@ import (
   "encoding/json"
   "io/ioutil"
   "os"
+  "strings"
   "testing"
   "time"
 
@@ -179,4 +180,47 @@ func Test_LoadInvalidJson(t *testing.T) {
   if err == nil || err.Error() != "invalid character 'b' looking for beginning of object key string" {
     t.Errorf("Should get a json error with an invalid config file, but got %v", err)
   }
+}
+
+func loadJSONEWithENV(filename string, v interface{}) error {
+    bytes, err := ioutil.ReadFile(filename)
+    if err != nil {
+        return err
+    }
+
+    val := strings.ReplaceAll(string(bytes),"${ENV}", "ENV_VALUE")
+    return json.NewDecoder(strings.NewReader(val)).Decode(v)
+}
+
+func Test_LoadCustomJSON(t *testing.T) {
+{{ $t := (index .Structs "Configuration").GoType }}
+  c := Configurations{
+    Defaults: {{index $t.ExampleValues 1}},
+    Hosts : map[string]string{ "bob" : "${ENV}"},
+    Overrides : map[string]Configuration{
+      "${ENV}" : {{index $t.ExampleValues 2}},
+    },
+  }
+  f,err := ioutil.TempFile("", "customjson")
+  if err != nil {
+    t.Fatalf("Uanble to create temp file: %v", err)
+  }
+  json.NewEncoder(f).Encode(&c)
+  f.Close()
+  defer os.Remove(f.Name())
+
+  JSONLoader = loadJSONEWithENV
+  config, err := Load(f.Name(), "", "")
+  if err != nil {
+    t.Fatalf("Unexpected error loading config: %v", err)
+  }
+  require.Equal(t, c.Defaults, *config, "Loaded configuration should match default, but doesn't, expecting %#v, got %#v", c.Defaults, *config)
+
+  JSONLoader = loadJSONEWithENV
+  config, err = Load(f.Name(), "", "bob")
+  if err != nil {
+    t.Fatalf("Unexpected error loading config: %v", err)
+  }
+  require.Equal(t, c.Overrides["${ENV}"], *config,
+    "Loaded configuration should match default, but doesn't, expecting %#v, got %#v\nOverrides: %v", c.Overrides["${ENV}"], *config, c.Overrides)
 }

@@ -1,0 +1,68 @@
+{
+    "Configuration" : {
+        "comment" : "Configuration contains the user configurable data for a Raphty node",
+        "Fields" : [
+            { "name" : "Region",        "type" : "string",        "comment" : "Region specifies the Region / Datacenter where the instance is running" },
+            { "name" : "Environment",   "type" : "string",        "comment" : "Environment specifies the environment where the instance is running: prod|stage|dev" },
+            { "name" : "ServiceName",   "type" : "string",        "comment" : "ServiceName specifies the service name to be used in logs, metrics, etc" },
+            { "name" : "ClusterName",   "type" : "string",        "comment" : "ClusterName specifies the cluster name" },
+            { "name" : "CryptoProv",    "type" : "CryptoProv",    "comment" : "CryptoProv specifies the configuration for crypto providers" },
+            { "name" : "Audit",         "type" : "Logger",        "comment" : "Audit contains configuration for the audit logger" },
+            { "name" : "Logger",        "type" : "Logger",        "comment" : "Logger contains configuration for the logger" },
+            { "name" : "LogLevels",     "type" : "[]RepoLogLevel","comment" : "LogLevels specifies the log levels per package" },
+            { "name" : "TrustyClient",  "type" : "TrustyClient",  "comment" : "TrustyClient specifies configurations for the client to connect to the cluster"}
+        ]
+    },
+    "RelatedTypes" : {
+        "TrustyClient" : {
+            "comment" : "TrustyClient specifies configurations for the client to connect to the cluster",
+            "WithGetter" : true,
+            "Fields" : [
+                { "name" : "Servers",   "type" : "[]string", "comment" : "Servers decribes the list of server URLs to contact"},
+                { "name" : "ClientTLS", "type" : "TLSInfo",  "comment" : "ClientTLS describes the TLS certs used to connect to the cluster"}
+            ]
+        },        
+        "RepoLogLevel" : {
+            "comment" : "RepoLogLevel contains information about the log level per repo. Use * to set up global level.",
+            "Fields" : [
+              { "name" : "Repo",    "type" : "string", "comment" : "Repo specifies the repo name, or '*' for all repos [Global]" },
+              { "name" : "Package", "type" : "string", "comment" : "Package specifies the package name" },
+              { "name" : "Level",   "type" : "string", "comment" : "Level specifies the log level for the repo [ERROR,WARNING,NOTICE,INFO,DEBUG,TRACE]." }
+            ]
+        },
+        "Logger" : {
+            "comment" : "Logger contains information about the configuration of a logger/log rotation",
+            "WithGetter" : true,
+            "Fields" : [
+              { "name" : "Directory", "type" : "string", "comment" : "Directory contains where to store the log files; if value is empty, them stderr is used for output" },
+              { "name" : "MaxAgeDays","type" : "int",    "comment" : "MaxAgeDays controls how old files are before deletion" },
+              { "name" : "MaxSizeMb", "type" : "int",    "comment" : "MaxSizeMb contols how large a single log file can be before its rotated" }
+            ]
+        },
+        "TLSInfo" : {
+            "comment" : "TLSInfo contains configuration info for the TLS",
+            "WithGetter" : true,
+            "Fields" : [
+                { "name" : "CertFile",       "type" : "string",   "comment" : "CertFile specifies location of the cert" },
+                { "name" : "KeyFile",        "type" : "string",   "comment" : "KeyFile specifies location of the key" },
+                { "name" : "TrustedCAFile",  "type" : "string",   "comment" : "TrustedCAFile specifies location of the trusted Root file" },
+                { "name" : "ClientCertAuth", "type" : "*bool",    "comment" : "ClientCertAuth controls client auth" }
+            ]
+        },
+        "CryptoProv" : {
+            "comment" : "CryptoProv specifies the configuration for crypto providers",
+            "Fields" : [
+                { "name" : "Default",   "type" : "string",   "comment" : "Default specifies the location of the configuration file for default provider" },
+                { "name" : "Providers", "type" : "[]string", "comment" : "Providers specifies the list of locations of the configuration files" }
+            ]
+        },
+        "Metrics" : {
+            "comment" : "Metrics specifies the metrics pipeline configuration",
+            "WithGetter" : true,
+            "Fields" : [
+                { "name" : "Disabled", "type" : "*bool",  "comment" : "Disabled specifies if the metrics provider is disabled" },
+                { "name" : "Provider", "type" : "string", "comment" : "Provider specifies the metrics provider: funnel|prometeus|inmem" }
+            ]
+        }
+    }
+}

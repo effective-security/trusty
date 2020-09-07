@@ -35,6 +35,7 @@ tools:
 	go install github.com/go-phorce/cov-report/cmd/cov-report
 	go install github.com/go-phorce/configen/cmd/configen
 	go install github.com/mattn/goreman
+	go install github.com/mattn/goveralls
 
 folders:
 	mkdir -p /tmp/trusty/softhsm/tokens \
