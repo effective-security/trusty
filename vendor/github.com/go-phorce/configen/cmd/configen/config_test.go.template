@@ -1,0 +1,182 @@
+package {{.PackageName}}
+
+// *** THIS IS GENERATED CODE: DO NOT EDIT ***
+
+import (
+  "encoding/json"
+  "io/ioutil"
+  "os"
+  "testing"
+  "time"
+
+  //"github.com/stretchr/testify/assert"
+  "github.com/stretchr/testify/require"
+)
+
+var (
+    falseVal = false
+    trueVal = true
+)
+
+func TestDuration_String(t *testing.T) {
+	f := func(d time.Duration, exp string) {
+		actual := Duration(d).String()
+		if actual != exp {
+			t.Errorf("String() for duration %d expected to return %s, but got %s", d, exp, actual)
+		}
+	}
+	f(time.Second, "1s")
+	f(time.Second*30, "30s")
+	f(time.Minute, "1m0s")
+	f(time.Second*90, "1m30s")
+	f(0, "0s")
+}
+
+func TestDuration_JSON(t *testing.T) {
+	f := func(d time.Duration, exp string) {
+		v := Duration(d)
+		bytes, err := json.Marshal(&v)
+		if err != nil {
+			t.Fatalf("Unable to json.Marshal our Duration of %+v: %v", v, err)
+		}
+		if string(bytes) != exp {
+			t.Errorf("Marshaled duration expected to generate %v, but got %v", exp, string(bytes))
+		}
+		var decoded Duration
+		if err := json.Unmarshal(bytes, &decoded); err != nil {
+			t.Errorf("Got error trying to unmarshal %v to a Duration: %v", string(bytes), err)
+		}
+		if decoded != v {
+			t.Errorf("Encoded/Decoded duration no longer equal!, original %v, round-tripped %v", v, decoded)
+		}
+	}
+	f(0, `"0s"`)
+	f(time.Second, `"1s"`)
+	f(time.Minute*5, `"5m0s"`)
+	f(time.Second*90, `"1m30s"`)
+	f(time.Hour*2, `"2h0m0s"`)
+	f(time.Millisecond*10, `"10ms"`)
+}
+
+func TestDuration_JSONDecode(t *testing.T) {
+    f := func(j string, exp time.Duration) {
+        var act Duration
+        err := json.Unmarshal([]byte(j), &act)
+        if err != nil {
+            t.Fatalf("Unable to json.Unmarshal %s: %v", j, err)
+        }
+        if act.TimeDuration() != exp {
+            t.Errorf("Expecting json of %s to production duration %s, but got %s", j, exp, act)
+        }
+    }
+    f(`"5m"`, time.Minute *5)
+    f(`120`, time.Second * 120)
+    f(`0`, 0)
+    f(`"1m5s"`, time.Second * 65)
+}
+
+{{range $t := .BaseTypes}}
+func Test_{{$t.OverrideFunc}}(t *testing.T) {
+    d := {{index $t.ExampleValues 0}}
+    var zero {{$t.Name}}
+	{{ $t.OverrideFunc }}(&d, &zero)
+    require.NotEqual(t, d, zero, "{{$t.OverrideFunc}} shouldn't have overriden the value as the override is the default/zero value. value now %v", d)
+    o := {{index $t.ExampleValues 1}}
+    {{ $t.OverrideFunc }}(&d, &o)
+    require.Equal(t, d, o, "{{$t.OverrideFunc}} should of overriden the value but didn't. value %v, expecting %v", d, o)
+}
+{{end}}
+
+{{range $n, $t := .Structs}}
+func Test{{$n}}_overrideFrom(t *testing.T) {
+    orig := {{index $t.GoType.ExampleValues 0}}
+    dest := orig
+    var zero {{$n}}
+	dest.overrideFrom(&zero)
+    require.Equal(t, dest, orig, "{{$n}}.overrideFrom shouldn't have overriden the value as the override is the default/zero value. value now %#v", dest)
+    o := {{index $t.GoType.ExampleValues 1}}
+	dest.overrideFrom(&o)
+    require.Equal(t, dest, o, "{{$n}}.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
+    o2 := {{index $t.GoType.ExampleValues 3}}
+	dest.overrideFrom(&o2)
+    exp := o
+    {{$firstField := index $t.Fields 0}}
+    exp.{{$firstField.Name}} = o2.{{$firstField.Name}}
+    require.Equal(t, dest, exp, "{{$n}}.overrideFrom should have overriden the field {{$firstField.Name}}. value now %#v, expecting %#v", dest, exp)
+}
+
+{{if $t.WithGetter}}
+func Test{{$n}}_Getters(t *testing.T) {
+    orig := {{index $t.GoType.ExampleValues 0}}
+    {{range $idx, $f := $t.Fields}}
+        {{if $f.IsStruct}}
+            gv{{$idx}} := orig.Get{{$f.Name}}Cfg()
+            require.Equal(t, orig.{{$f.Name}}, *gv{{$idx}}, "{{$n}}.Get{{$f.Name}}Cfg() does not match")
+        {{else if $f.IsBoolPtr}}
+            gv{{$idx}} := orig.Get{{$f.Name}}()
+            require.Equal(t, orig.{{$f.Name}}, &gv{{$idx}}, "{{$n}}.Get{{$f.Name}}() does not match")
+        {{else if $f.IsDuration}}
+            gv{{$idx}} := orig.Get{{$f.Name}}()
+            require.Equal(t, orig.{{$f.Name}}.TimeDuration(), gv{{$idx}}, "{{$n}}.Get{{$f.Name}}() does not match")
+        {{else}}
+            gv{{$idx}} := orig.Get{{$f.Name}}()
+            require.Equal(t, orig.{{$f.Name}}, gv{{$idx}}, "{{$n}}.Get{{$f.Name}}Cfg() does not match")
+        {{end}}
+	{{end}}
+}
+{{end}}
+
+{{end}}
+
+func Test_LoadOverrides(t *testing.T) {
+{{ $t := (index .Structs "Configuration").GoType }}
+  c := Configurations{
+    Defaults: {{index $t.ExampleValues 1}},
+    Hosts : map[string]string{ "bob" : "example2", "bob2":"missing"},
+    Overrides : map[string]Configuration{
+      "example2" : {{index $t.ExampleValues 2}},
+    },
+  }
+  f,err := ioutil.TempFile("", "config")
+  if err != nil {
+    t.Fatalf("Uanble to create temp file: %v", err)
+  }
+  json.NewEncoder(f).Encode(&c)
+  f.Close()
+  defer os.Remove(f.Name())
+  config, err := Load(f.Name(), "", "")
+  if err != nil {
+    t.Fatalf("Unexpected error loading config: %v", err)
+  }
+  require.Equal(t, c.Defaults, *config, "Loaded configuration should match default, but doesn't, expecting %#v, got %#v", c.Defaults, *config)
+  config, err = Load(f.Name(), "", "bob")
+  if err != nil {
+    t.Fatalf("Unexpected error loading config: %v", err)
+  }
+  require.Equal(t, c.Overrides["example2"], *config, "Loaded configuration should match default, but doesn't, expecting %#v, got %#v", c.Overrides["example2"], *config)
+  _, err = Load(f.Name(), "", "bob2")
+  if err == nil || err.Error() != "Configuration for host bob2 specified override set missing but that doesn't exist" {
+    t.Errorf("Should of gotten error about missing override set, but got %v", err)
+  }
+}
+
+func Test_LoadMissingFile(t *testing.T) {
+  f, err :=ioutil.TempFile("", "missing")
+  f.Close()
+  os.Remove(f.Name())
+  _, err = Load(f.Name(), "", "")
+  if !os.IsNotExist(err) {
+    t.Errorf("Expecting a file doesn't exist error when trying to load from a non-existant file, but got %v", err)
+  }
+}
+
+func Test_LoadInvalidJson(t *testing.T) {
+  f, err :=ioutil.TempFile("", "invalid")
+  f.WriteString("{boom}")
+  f.Close()
+  defer os.Remove(f.Name())
+  _, err = Load(f.Name(), "", "")
+  if err == nil || err.Error() != "invalid character 'b' looking for beginning of object key string" {
+    t.Errorf("Should get a json error with an invalid config file, but got %v", err)
+  }
+}
