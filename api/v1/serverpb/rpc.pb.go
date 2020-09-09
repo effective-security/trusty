@@ -12,6 +12,8 @@
 		VersionResponse
 		ServerStatus
 		ServerStatusResponse
+		CallerStatusResponse
+		Error
 */
 package serverpb
 
@@ -51,8 +53,8 @@ func (*EmptyRequest) ProtoMessage()               {}
 func (*EmptyRequest) Descriptor() ([]byte, []int) { return fileDescriptorRpc, []int{0} }
 
 type VersionResponse struct {
-	// version is the server version.
-	Version string `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
+	// Version is the server version.
+	Version string `protobuf:"bytes,1,opt,name=Version,proto3" json:"Version,omitempty"`
 }
 
 func (m *VersionResponse) Reset()                    { *m = VersionResponse{} }
@@ -68,16 +70,32 @@ func (m *VersionResponse) GetVersion() string {
 }
 
 type ServerStatus struct {
-	// nodename is the human-readable name of the cluster member.
-	Nodename string `protobuf:"bytes,1,opt,name=nodename,proto3" json:"nodename,omitempty"`
-	// nodename is operating system's host name.
-	Hostname string `protobuf:"bytes,2,opt,name=hostname,proto3" json:"hostname,omitempty"`
+	// Name of the server or application.
+	Name string `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
+	// Nodename is the human-readable name of the cluster member,
+	// or empty for single host.
+	Nodename string `protobuf:"bytes,2,opt,name=Nodename,proto3" json:"Nodename,omitempty"`
+	// Hostname is operating system's host name.
+	Hostname string `protobuf:"bytes,3,opt,name=Hostname,proto3" json:"Hostname,omitempty"`
+	// ListenURLs is the list of URLs the service is listening on.
+	ListenURLs []string `protobuf:"bytes,4,rep,name=ListenURLs" json:"ListenURLs,omitempty"`
+	// StartedAt is the Unix time when the server has started.
+	StartedAt int64 `protobuf:"varint,5,opt,name=StartedAt,proto3" json:"StartedAt,omitempty"`
+	// Version is the server version.
+	Version string `protobuf:"bytes,6,opt,name=Version,proto3" json:"Version,omitempty"`
 }
 
 func (m *ServerStatus) Reset()                    { *m = ServerStatus{} }
 func (m *ServerStatus) String() string            { return proto.CompactTextString(m) }
 func (*ServerStatus) ProtoMessage()               {}
 func (*ServerStatus) Descriptor() ([]byte, []int) { return fileDescriptorRpc, []int{2} }
+
+func (m *ServerStatus) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
 
 func (m *ServerStatus) GetNodename() string {
 	if m != nil {
@@ -93,8 +111,30 @@ func (m *ServerStatus) GetHostname() string {
 	return ""
 }
 
+func (m *ServerStatus) GetListenURLs() []string {
+	if m != nil {
+		return m.ListenURLs
+	}
+	return nil
+}
+
+func (m *ServerStatus) GetStartedAt() int64 {
+	if m != nil {
+		return m.StartedAt
+	}
+	return 0
+}
+
+func (m *ServerStatus) GetVersion() string {
+	if m != nil {
+		return m.Version
+	}
+	return ""
+}
+
 type ServerStatusResponse struct {
-	Status *ServerStatus `protobuf:"bytes,1,opt,name=status" json:"status,omitempty"`
+	// Status of the server.
+	Status *ServerStatus `protobuf:"bytes,1,opt,name=Status" json:"Status,omitempty"`
 }
 
 func (m *ServerStatusResponse) Reset()                    { *m = ServerStatusResponse{} }
@@ -109,11 +149,63 @@ func (m *ServerStatusResponse) GetStatus() *ServerStatus {
 	return nil
 }
 
+type CallerStatusResponse struct {
+	// Role of the caller.
+	Role string `protobuf:"bytes,1,opt,name=Role,proto3" json:"Role,omitempty"`
+}
+
+func (m *CallerStatusResponse) Reset()                    { *m = CallerStatusResponse{} }
+func (m *CallerStatusResponse) String() string            { return proto.CompactTextString(m) }
+func (*CallerStatusResponse) ProtoMessage()               {}
+func (*CallerStatusResponse) Descriptor() ([]byte, []int) { return fileDescriptorRpc, []int{4} }
+
+func (m *CallerStatusResponse) GetRole() string {
+	if m != nil {
+		return m.Role
+	}
+	return ""
+}
+
+// Error is the generic error returned from unary RPCs.
+type Error struct {
+	Error   string `protobuf:"bytes,1,opt,name=error,proto3" json:"error,omitempty"`
+	Code    int32  `protobuf:"varint,2,opt,name=code,proto3" json:"code,omitempty"`
+	Message string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+}
+
+func (m *Error) Reset()                    { *m = Error{} }
+func (m *Error) String() string            { return proto.CompactTextString(m) }
+func (*Error) ProtoMessage()               {}
+func (*Error) Descriptor() ([]byte, []int) { return fileDescriptorRpc, []int{5} }
+
+func (m *Error) GetError() string {
+	if m != nil {
+		return m.Error
+	}
+	return ""
+}
+
+func (m *Error) GetCode() int32 {
+	if m != nil {
+		return m.Code
+	}
+	return 0
+}
+
+func (m *Error) GetMessage() string {
+	if m != nil {
+		return m.Message
+	}
+	return ""
+}
+
 func init() {
 	proto.RegisterType((*EmptyRequest)(nil), "serverpb.EmptyRequest")
 	proto.RegisterType((*VersionResponse)(nil), "serverpb.VersionResponse")
 	proto.RegisterType((*ServerStatus)(nil), "serverpb.ServerStatus")
 	proto.RegisterType((*ServerStatusResponse)(nil), "serverpb.ServerStatusResponse")
+	proto.RegisterType((*CallerStatusResponse)(nil), "serverpb.CallerStatusResponse")
+	proto.RegisterType((*Error)(nil), "serverpb.Error")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -131,6 +223,8 @@ type StatusClient interface {
 	Version(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*VersionResponse, error)
 	// Server returns the server status.
 	Server(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*ServerStatusResponse, error)
+	// Caller returns the caller status.
+	Caller(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*CallerStatusResponse, error)
 }
 
 type statusClient struct {
@@ -159,6 +253,15 @@ func (c *statusClient) Server(ctx context.Context, in *EmptyRequest, opts ...grp
 	return out, nil
 }
 
+func (c *statusClient) Caller(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*CallerStatusResponse, error) {
+	out := new(CallerStatusResponse)
+	err := grpc.Invoke(ctx, "/serverpb.Status/Caller", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Status service
 
 type StatusServer interface {
@@ -166,6 +269,8 @@ type StatusServer interface {
 	Version(context.Context, *EmptyRequest) (*VersionResponse, error)
 	// Server returns the server status.
 	Server(context.Context, *EmptyRequest) (*ServerStatusResponse, error)
+	// Caller returns the caller status.
+	Caller(context.Context, *EmptyRequest) (*CallerStatusResponse, error)
 }
 
 func RegisterStatusServer(s *grpc.Server, srv StatusServer) {
@@ -208,6 +313,24 @@ func _Status_Server_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Status_Caller_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StatusServer).Caller(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/serverpb.Status/Caller",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StatusServer).Caller(ctx, req.(*EmptyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Status_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "serverpb.Status",
 	HandlerType: (*StatusServer)(nil),
@@ -219,6 +342,10 @@ var _Status_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Server",
 			Handler:    _Status_Server_Handler,
+		},
+		{
+			MethodName: "Caller",
+			Handler:    _Status_Caller_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -282,17 +409,49 @@ func (m *ServerStatus) MarshalTo(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.Nodename) > 0 {
+	if len(m.Name) > 0 {
 		dAtA[i] = 0xa
+		i++
+		i = encodeVarintRpc(dAtA, i, uint64(len(m.Name)))
+		i += copy(dAtA[i:], m.Name)
+	}
+	if len(m.Nodename) > 0 {
+		dAtA[i] = 0x12
 		i++
 		i = encodeVarintRpc(dAtA, i, uint64(len(m.Nodename)))
 		i += copy(dAtA[i:], m.Nodename)
 	}
 	if len(m.Hostname) > 0 {
-		dAtA[i] = 0x12
+		dAtA[i] = 0x1a
 		i++
 		i = encodeVarintRpc(dAtA, i, uint64(len(m.Hostname)))
 		i += copy(dAtA[i:], m.Hostname)
+	}
+	if len(m.ListenURLs) > 0 {
+		for _, s := range m.ListenURLs {
+			dAtA[i] = 0x22
+			i++
+			l = len(s)
+			for l >= 1<<7 {
+				dAtA[i] = uint8(uint64(l)&0x7f | 0x80)
+				l >>= 7
+				i++
+			}
+			dAtA[i] = uint8(l)
+			i++
+			i += copy(dAtA[i:], s)
+		}
+	}
+	if m.StartedAt != 0 {
+		dAtA[i] = 0x28
+		i++
+		i = encodeVarintRpc(dAtA, i, uint64(m.StartedAt))
+	}
+	if len(m.Version) > 0 {
+		dAtA[i] = 0x32
+		i++
+		i = encodeVarintRpc(dAtA, i, uint64(len(m.Version)))
+		i += copy(dAtA[i:], m.Version)
 	}
 	return i, nil
 }
@@ -325,6 +484,65 @@ func (m *ServerStatusResponse) MarshalTo(dAtA []byte) (int, error) {
 	return i, nil
 }
 
+func (m *CallerStatusResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CallerStatusResponse) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if len(m.Role) > 0 {
+		dAtA[i] = 0xa
+		i++
+		i = encodeVarintRpc(dAtA, i, uint64(len(m.Role)))
+		i += copy(dAtA[i:], m.Role)
+	}
+	return i, nil
+}
+
+func (m *Error) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Error) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if len(m.Error) > 0 {
+		dAtA[i] = 0xa
+		i++
+		i = encodeVarintRpc(dAtA, i, uint64(len(m.Error)))
+		i += copy(dAtA[i:], m.Error)
+	}
+	if m.Code != 0 {
+		dAtA[i] = 0x10
+		i++
+		i = encodeVarintRpc(dAtA, i, uint64(m.Code))
+	}
+	if len(m.Message) > 0 {
+		dAtA[i] = 0x1a
+		i++
+		i = encodeVarintRpc(dAtA, i, uint64(len(m.Message)))
+		i += copy(dAtA[i:], m.Message)
+	}
+	return i, nil
+}
+
 func encodeVarintRpc(dAtA []byte, offset int, v uint64) int {
 	for v >= 1<<7 {
 		dAtA[offset] = uint8(v&0x7f | 0x80)
@@ -353,11 +571,28 @@ func (m *VersionResponse) Size() (n int) {
 func (m *ServerStatus) Size() (n int) {
 	var l int
 	_ = l
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovRpc(uint64(l))
+	}
 	l = len(m.Nodename)
 	if l > 0 {
 		n += 1 + l + sovRpc(uint64(l))
 	}
 	l = len(m.Hostname)
+	if l > 0 {
+		n += 1 + l + sovRpc(uint64(l))
+	}
+	if len(m.ListenURLs) > 0 {
+		for _, s := range m.ListenURLs {
+			l = len(s)
+			n += 1 + l + sovRpc(uint64(l))
+		}
+	}
+	if m.StartedAt != 0 {
+		n += 1 + sovRpc(uint64(m.StartedAt))
+	}
+	l = len(m.Version)
 	if l > 0 {
 		n += 1 + l + sovRpc(uint64(l))
 	}
@@ -369,6 +604,33 @@ func (m *ServerStatusResponse) Size() (n int) {
 	_ = l
 	if m.Status != nil {
 		l = m.Status.Size()
+		n += 1 + l + sovRpc(uint64(l))
+	}
+	return n
+}
+
+func (m *CallerStatusResponse) Size() (n int) {
+	var l int
+	_ = l
+	l = len(m.Role)
+	if l > 0 {
+		n += 1 + l + sovRpc(uint64(l))
+	}
+	return n
+}
+
+func (m *Error) Size() (n int) {
+	var l int
+	_ = l
+	l = len(m.Error)
+	if l > 0 {
+		n += 1 + l + sovRpc(uint64(l))
+	}
+	if m.Code != 0 {
+		n += 1 + sovRpc(uint64(m.Code))
+	}
+	l = len(m.Message)
+	if l > 0 {
 		n += 1 + l + sovRpc(uint64(l))
 	}
 	return n
@@ -547,6 +809,35 @@ func (m *ServerStatus) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRpc
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRpc
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Nodename", wireType)
 			}
 			var stringLen uint64
@@ -574,7 +865,7 @@ func (m *ServerStatus) Unmarshal(dAtA []byte) error {
 			}
 			m.Nodename = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 2:
+		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Hostname", wireType)
 			}
@@ -602,6 +893,83 @@ func (m *ServerStatus) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.Hostname = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ListenURLs", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRpc
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRpc
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ListenURLs = append(m.ListenURLs, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StartedAt", wireType)
+			}
+			m.StartedAt = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRpc
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.StartedAt |= (int64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Version", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRpc
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRpc
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Version = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -685,6 +1053,212 @@ func (m *ServerStatusResponse) Unmarshal(dAtA []byte) error {
 			if err := m.Status.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRpc(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRpc
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *CallerStatusResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRpc
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CallerStatusResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CallerStatusResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Role", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRpc
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRpc
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Role = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipRpc(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthRpc
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Error) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowRpc
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Error: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Error: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Error", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRpc
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRpc
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Error = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Code", wireType)
+			}
+			m.Code = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRpc
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Code |= (int32(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Message", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowRpc
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthRpc
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Message = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -815,24 +1389,32 @@ var (
 func init() { proto.RegisterFile("rpc.proto", fileDescriptorRpc) }
 
 var fileDescriptorRpc = []byte{
-	// 296 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x2c, 0x2a, 0x48, 0xd6,
-	0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x28, 0x4e, 0x2d, 0x2a, 0x4b, 0x2d, 0x2a, 0x48, 0x92,
-	0x12, 0x49, 0xcf, 0x4f, 0xcf, 0x07, 0x0b, 0xea, 0x83, 0x58, 0x10, 0x79, 0x29, 0x99, 0xf4, 0xfc,
-	0xfc, 0xf4, 0x9c, 0x54, 0xfd, 0xc4, 0x82, 0x4c, 0xfd, 0xc4, 0xbc, 0xbc, 0xfc, 0x92, 0xc4, 0x92,
-	0xcc, 0xfc, 0xbc, 0x62, 0x88, 0xac, 0x12, 0x1f, 0x17, 0x8f, 0x6b, 0x6e, 0x41, 0x49, 0x65, 0x50,
-	0x6a, 0x61, 0x69, 0x6a, 0x71, 0x89, 0x92, 0x36, 0x17, 0x7f, 0x58, 0x6a, 0x51, 0x71, 0x66, 0x7e,
-	0x5e, 0x50, 0x6a, 0x71, 0x41, 0x7e, 0x5e, 0x71, 0xaa, 0x90, 0x04, 0x17, 0x7b, 0x19, 0x44, 0x48,
-	0x82, 0x51, 0x81, 0x51, 0x83, 0x33, 0x08, 0xc6, 0x55, 0x72, 0xe3, 0xe2, 0x09, 0x06, 0x5b, 0x1e,
-	0x5c, 0x92, 0x58, 0x52, 0x5a, 0x2c, 0x24, 0xc5, 0xc5, 0x91, 0x97, 0x9f, 0x92, 0x9a, 0x97, 0x98,
-	0x9b, 0x0a, 0x55, 0x0a, 0xe7, 0x83, 0xe4, 0x32, 0xf2, 0x8b, 0x4b, 0xc0, 0x72, 0x4c, 0x10, 0x39,
-	0x18, 0x5f, 0xc9, 0x8d, 0x4b, 0x04, 0xd9, 0x1c, 0xb8, 0xcd, 0x7a, 0x5c, 0x6c, 0xc5, 0x60, 0x11,
-	0xb0, 0x69, 0xdc, 0x46, 0x62, 0x7a, 0x30, 0xbf, 0xea, 0xa1, 0xa8, 0x87, 0xaa, 0x32, 0xda, 0xcf,
-	0xc8, 0xc5, 0x06, 0x75, 0x4a, 0x04, 0x17, 0x3b, 0xd4, 0x1f, 0x42, 0x48, 0xba, 0x90, 0xbd, 0x2a,
-	0x25, 0x89, 0x10, 0x47, 0xf3, 0xb2, 0x92, 0x54, 0xd3, 0xe5, 0x27, 0x93, 0x99, 0x44, 0x84, 0x84,
-	0xf4, 0xcb, 0x0c, 0xf5, 0x21, 0x86, 0xeb, 0x43, 0x3d, 0x2d, 0x14, 0xcd, 0xc5, 0x06, 0xb1, 0x1c,
-	0xa7, 0xc1, 0x72, 0x38, 0x9c, 0x09, 0x33, 0x5d, 0x12, 0x6c, 0xba, 0xb0, 0x90, 0x20, 0x92, 0xe9,
-	0x10, 0x1d, 0x4e, 0x02, 0x27, 0x1e, 0xc9, 0x31, 0x5e, 0x78, 0x24, 0xc7, 0xf8, 0xe0, 0x91, 0x1c,
-	0xe3, 0x8c, 0xc7, 0x72, 0x0c, 0x49, 0x6c, 0xe0, 0x78, 0x32, 0x06, 0x04, 0x00, 0x00, 0xff, 0xff,
-	0xb7, 0x5f, 0x90, 0xc6, 0xf2, 0x01, 0x00, 0x00,
+	// 419 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x52, 0xcd, 0xca, 0xd3, 0x40,
+	0x14, 0x35, 0x6d, 0x13, 0x9b, 0x6b, 0xf1, 0x67, 0x0c, 0x92, 0x86, 0x12, 0x4a, 0x56, 0x45, 0x21,
+	0xc1, 0xfa, 0x04, 0x2a, 0x15, 0xc1, 0xd2, 0xc5, 0x14, 0x45, 0x70, 0x35, 0x6d, 0x87, 0x10, 0x48,
+	0x33, 0x71, 0x66, 0x5a, 0x70, 0xeb, 0x2b, 0xb8, 0x71, 0xe1, 0x53, 0xf8, 0x14, 0x2e, 0x05, 0x5f,
+	0x40, 0xaa, 0x0f, 0xf2, 0x31, 0x33, 0x49, 0x9a, 0x7e, 0x5f, 0x0b, 0xdf, 0xee, 0xde, 0x73, 0xee,
+	0x9c, 0x9c, 0x7b, 0x6e, 0xc0, 0xe5, 0xe5, 0x3a, 0x2e, 0x39, 0x93, 0x0c, 0xf5, 0x05, 0xe5, 0x7b,
+	0xca, 0xcb, 0x55, 0xe0, 0xa5, 0x2c, 0x65, 0x1a, 0x4c, 0x54, 0x65, 0xf8, 0x60, 0x94, 0x32, 0x96,
+	0xe6, 0x34, 0x21, 0x65, 0x96, 0x90, 0xa2, 0x60, 0x92, 0xc8, 0x8c, 0x15, 0xc2, 0xb0, 0xd1, 0x7d,
+	0x18, 0xcc, 0xb6, 0xa5, 0xfc, 0x82, 0xe9, 0xe7, 0x1d, 0x15, 0x32, 0x7a, 0x06, 0x0f, 0x3e, 0x50,
+	0x2e, 0x32, 0x56, 0x60, 0x2a, 0x4a, 0x56, 0x08, 0x8a, 0x7c, 0xb8, 0x5b, 0x41, 0xbe, 0x35, 0xb6,
+	0x26, 0x2e, 0xae, 0xdb, 0xe8, 0xa7, 0x05, 0x83, 0xa5, 0xfe, 0xfa, 0x52, 0x12, 0xb9, 0x13, 0x08,
+	0x41, 0x6f, 0x41, 0xb6, 0xb4, 0x9a, 0xd3, 0x35, 0x0a, 0xa0, 0xbf, 0x60, 0x1b, 0x5a, 0x28, 0xbc,
+	0xa3, 0xf1, 0xa6, 0x57, 0xdc, 0x5b, 0x26, 0xa4, 0xe6, 0xba, 0x86, 0xab, 0x7b, 0x14, 0x02, 0xcc,
+	0x33, 0x21, 0x69, 0xf1, 0x1e, 0xcf, 0x85, 0xdf, 0x1b, 0x77, 0x27, 0x2e, 0x6e, 0x21, 0x68, 0x04,
+	0xee, 0x52, 0x12, 0x2e, 0xe9, 0xe6, 0xa5, 0xf4, 0xed, 0xb1, 0x35, 0xe9, 0xe2, 0x23, 0xd0, 0x36,
+	0xed, 0x9c, 0x9a, 0x7e, 0x03, 0x5e, 0xdb, 0x73, 0xb3, 0x66, 0x0c, 0x8e, 0x41, 0xb4, 0xfb, 0x7b,
+	0xd3, 0x27, 0x71, 0x1d, 0x6c, 0x7c, 0x32, 0x5f, 0x4d, 0x45, 0x4f, 0xc1, 0x7b, 0x4d, 0xf2, 0xfc,
+	0x86, 0x0e, 0x82, 0x1e, 0x66, 0x79, 0x93, 0x81, 0xaa, 0xa3, 0x77, 0x60, 0xcf, 0x38, 0x67, 0x1c,
+	0x79, 0x60, 0x53, 0x55, 0x54, 0xac, 0x69, 0xd4, 0x93, 0x35, 0xdb, 0x98, 0x78, 0x6c, 0xac, 0x6b,
+	0xb5, 0xc0, 0x96, 0x0a, 0x41, 0xd2, 0x3a, 0x99, 0xba, 0x9d, 0xfe, 0xe8, 0xd4, 0x4e, 0xd1, 0xc7,
+	0x66, 0x4b, 0xd4, 0xb2, 0xdb, 0x3e, 0x68, 0x30, 0x3c, 0xe2, 0xd7, 0x0e, 0x1b, 0x05, 0x5f, 0xff,
+	0xfc, 0xff, 0xd6, 0xf1, 0x10, 0x4a, 0xf6, 0xcf, 0x13, 0xa1, 0x15, 0x93, 0x7d, 0x25, 0xf7, 0x09,
+	0x1c, 0xb3, 0xf5, 0x45, 0xe1, 0xf0, 0x42, 0x3e, 0xb5, 0xfa, 0x50, 0xab, 0x3f, 0x46, 0x8f, 0x5a,
+	0xea, 0xe6, 0x85, 0x12, 0x37, 0xd1, 0xdd, 0x46, 0xfc, 0x5c, 0xc8, 0x67, 0xc5, 0xd7, 0x7a, 0xf0,
+	0xd5, 0xc3, 0x5f, 0x87, 0xd0, 0xfa, 0x7d, 0x08, 0xad, 0xbf, 0x87, 0xd0, 0xfa, 0xfe, 0x2f, 0xbc,
+	0xb3, 0x72, 0xf4, 0xaf, 0xfe, 0xe2, 0x2a, 0x00, 0x00, 0xff, 0xff, 0xb1, 0x6f, 0xc5, 0xae, 0x35,
+	0x03, 0x00, 0x00,
 }

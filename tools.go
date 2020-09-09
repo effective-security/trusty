@@ -6,6 +6,9 @@
 package tools
 
 import (
+	_ "github.com/cloudflare/cfssl/cmd/cfssl"
+	_ "github.com/cloudflare/cfssl/cmd/cfssl-certinfo"
+	_ "github.com/cloudflare/cfssl/cmd/cfssljson"
 	_ "github.com/go-phorce/configen/cmd/configen"
 	_ "github.com/go-phorce/cov-report/cmd/cov-report"
 	_ "github.com/mattn/goreman"

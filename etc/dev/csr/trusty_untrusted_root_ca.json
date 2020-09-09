@@ -1,0 +1,18 @@
+{
+    "CN": "[TEST] Untrusted Root CA",
+    "key": {
+        "algo": "rsa",
+        "size": 4096
+    },
+    "names": [
+        {
+            "C": "US",
+            "L": "WA",
+            "O": "noorg"
+        }
+    ],
+    "ca": {
+        "pathlen": 3,
+        "expiry": "8760h"
+    }
+}

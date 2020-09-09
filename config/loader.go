@@ -1,13 +1,15 @@
 package config
 
-// Package config allows for the Raphty configuration to read from a separate config file.
+// Package config allows for the configuration to read from a separate config file.
 // It supports having different configurations for different instance based on host name.
 //
 // The implementation is primarily provided by the configen tool.
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -92,13 +94,13 @@ func GetConfigAbsFilename(file, projFolder string) (string, error) {
 	return filepath.Join(projFolder, file), nil
 }
 
-// LoadConfig will load the Raphty configuration from the named config file,
+// LoadConfig will load the configuration from the named config file,
 // apply any overrides, and resolve relative directory locations.
 func LoadConfig(configFile string) (*Configuration, error) {
 	return LoadConfigForHostName(configFile, "")
 }
 
-// LoadConfigForHostName will load the Raphty configuration from the named config file for specified host name,
+// LoadConfigForHostName will load the configuration from the named config file for specified host name,
 // apply any overrides, and resolve relative directory locations.
 func LoadConfigForHostName(configFile, hostnameOverride string) (*Configuration, error) {
 	f, err := DefaultFactory()
@@ -108,13 +110,13 @@ func LoadConfigForHostName(configFile, hostnameOverride string) (*Configuration,
 	return f.LoadConfigForHostName(configFile, hostnameOverride)
 }
 
-// LoadConfig will load the Raphty configuration from the named config file,
+// LoadConfig will load the configuration from the named config file,
 // apply any overrides, and resolve relative directory locations.
 func (f *Factory) LoadConfig(configFile string) (*Configuration, error) {
 	return f.LoadConfigForHostName(configFile, "")
 }
 
-// LoadConfigForHostName will load the Raphty configuration from the named config file for specified host name,
+// LoadConfigForHostName will load the configuration from the named config file for specified host name,
 // apply any overrides, and resolve relative directory locations.
 func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*Configuration, error) {
 	logger.Infof("src=LoadConfigForHostName, file=%s, hostname=%s", configFile, hostnameOverride)
@@ -298,4 +300,36 @@ func doSubstituteEnvVars(v reflect.Value, variables map[string]string, topLevel 
 			v.SetString(resolveEnvVars(v.String(), variables))
 		}
 	}
+}
+
+func (info *TLSInfo) String() string {
+	return fmt.Sprintf("cert=%s, key=%s, trusted-ca=%s, client-cert-auth=%v, crl-file=%s",
+		info.CertFile, info.KeyFile, info.TrustedCAFile, info.GetClientCertAuth(), info.CRLFile)
+}
+
+// Empty returns true if TLS info is empty
+func (info *TLSInfo) Empty() bool {
+	return info.CertFile == "" || info.KeyFile == ""
+}
+
+// ParseListenURLs constructs a list of listen peers URLs
+func (c *HTTPServer) ParseListenURLs() ([]*url.URL, error) {
+	return netutil.ParseURLs(c.ListenURLs)
+}
+
+// TODO: remove below for dolly compat
+
+// GetBindAddr returns the bind address
+func (c *HTTPServer) GetBindAddr() string {
+	return c.ListenURLs[0]
+}
+
+// GetServiceName returns the service name
+func (c *HTTPServer) GetServiceName() string {
+	return c.Name
+}
+
+// GetVIPName returns the VIP name
+func (c *HTTPServer) GetVIPName() string {
+	return ""
 }

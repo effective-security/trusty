@@ -11,6 +11,29 @@
     "application/json"
   ],
   "paths": {
+    "/v1/status/caller": {
+      "get": {
+        "summary": "Caller returns the caller status.",
+        "operationId": "Status_Caller",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serverpbCallerStatusResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
+          }
+        },
+        "tags": [
+          "Status"
+        ]
+      }
+    },
     "/v1/status/server": {
       "get": {
         "summary": "Server returns the server status.",
@@ -23,9 +46,9 @@
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/runtimeError"
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -46,9 +69,9 @@
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/runtimeError"
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -59,19 +82,7 @@
     }
   },
   "definitions": {
-    "protobufAny": {
-      "type": "object",
-      "properties": {
-        "type_url": {
-          "type": "string"
-        },
-        "value": {
-          "type": "string",
-          "format": "byte"
-        }
-      }
-    },
-    "runtimeError": {
+    "gatewayruntimeError": {
       "type": "object",
       "properties": {
         "error": {
@@ -92,33 +103,75 @@
         }
       }
     },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "type_url": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "serverpbCallerStatusResponse": {
+      "type": "object",
+      "properties": {
+        "Role": {
+          "type": "string",
+          "description": "Role of the caller."
+        }
+      }
+    },
     "serverpbServerStatus": {
       "type": "object",
       "properties": {
-        "nodename": {
+        "Name": {
           "type": "string",
-          "description": "nodename is the human-readable name of the cluster member."
+          "description": "Name of the server or application."
         },
-        "hostname": {
+        "Nodename": {
           "type": "string",
-          "description": "nodename is operating system's host name."
+          "description": "Nodename is the human-readable name of the cluster member,\nor empty for single host."
+        },
+        "Hostname": {
+          "type": "string",
+          "description": "Hostname is operating system's host name."
+        },
+        "ListenURLs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "ListenURLs is the list of URLs the service is listening on."
+        },
+        "StartedAt": {
+          "type": "string",
+          "format": "int64",
+          "description": "StartedAt is the Unix time when the server has started."
+        },
+        "Version": {
+          "type": "string",
+          "description": "Version is the server version."
         }
       }
     },
     "serverpbServerStatusResponse": {
       "type": "object",
       "properties": {
-        "status": {
-          "$ref": "#/definitions/serverpbServerStatus"
+        "Status": {
+          "$ref": "#/definitions/serverpbServerStatus",
+          "description": "Status of the server."
         }
       }
     },
     "serverpbVersionResponse": {
       "type": "object",
       "properties": {
-        "version": {
+        "Version": {
           "type": "string",
-          "description": "version is the server version."
+          "description": "Version is the server version."
         }
       }
     }
