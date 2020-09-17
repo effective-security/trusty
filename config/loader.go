@@ -316,20 +316,3 @@ func (info *TLSInfo) Empty() bool {
 func (c *HTTPServer) ParseListenURLs() ([]*url.URL, error) {
 	return netutil.ParseURLs(c.ListenURLs)
 }
-
-// TODO: remove below for dolly compat
-
-// GetBindAddr returns the bind address
-func (c *HTTPServer) GetBindAddr() string {
-	return c.ListenURLs[0]
-}
-
-// GetServiceName returns the service name
-func (c *HTTPServer) GetServiceName() string {
-	return c.Name
-}
-
-// GetVIPName returns the VIP name
-func (c *HTTPServer) GetVIPName() string {
-	return ""
-}

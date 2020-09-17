@@ -1,0 +1,5 @@
+{
+  "Service": "trusty-pod",
+  "Region" : "${REGISON_UPPERCASE}",
+  "Pod": "${NODENAME}"
+}

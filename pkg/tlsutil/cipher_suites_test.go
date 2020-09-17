@@ -15,28 +15,43 @@
 package tlsutil
 
 import (
+	"crypto/tls"
 	"go/importer"
-	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetCipherSuites(t *testing.T) {
 	pkg, err := importer.For("source", nil).Import("crypto/tls")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+
 	cm := make(map[string]uint16)
 	for _, s := range pkg.Scope().Names() {
 		if strings.HasPrefix(s, "TLS_RSA_") || strings.HasPrefix(s, "TLS_ECDHE_") {
 			v, ok := GetCipherSuite(s)
-			if !ok {
-				t.Fatalf("Go implements missing cipher suite %q (%v)", s, v)
-			}
+			require.True(t, ok, "Go implements missing cipher suite %q (%v)", s, v)
+
 			cm[s] = v
 		}
 	}
-	if !reflect.DeepEqual(cm, cipherSuites) {
-		t.Fatalf("found unmatched cipher suites %v (Go) != %v", cm, cipherSuites)
-	}
+	require.Equal(t, cipherSuites, cm)
+}
+
+func TestUpdateCipherSuites(t *testing.T) {
+	cfg := &tls.Config{}
+	assert.NoError(t, UpdateCipherSuites(cfg, []string{}))
+
+	err := UpdateCipherSuites(cfg, []string{"not_found"})
+	require.Error(t, err)
+	assert.Equal(t, "unexpected TLS cipher suite \"not_found\"", err.Error())
+
+	err = UpdateCipherSuites(cfg, []string{"TLS_RSA_WITH_RC4_128_SHA"})
+	assert.NoError(t, err)
+
+	err = UpdateCipherSuites(cfg, []string{"TLS_RSA_WITH_RC4_128_SHA"})
+	require.Error(t, err)
+	assert.Equal(t, "TLSInfo.CipherSuites is already specified (given [TLS_RSA_WITH_RC4_128_SHA])", err.Error())
 }

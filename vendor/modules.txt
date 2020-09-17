@@ -88,7 +88,7 @@ github.com/go-phorce/configen/version
 ## explicit
 github.com/go-phorce/cov-report/cmd/cov-report
 github.com/go-phorce/cov-report/version
-# github.com/go-phorce/dolly v0.4.1-0.20200724143148-1575d079079c
+# github.com/go-phorce/dolly v0.4.1-0.20200917154250-262ab747d445
 ## explicit
 github.com/go-phorce/dolly/algorithms/guid
 github.com/go-phorce/dolly/algorithms/math

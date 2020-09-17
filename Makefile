@@ -2,7 +2,7 @@ include .project/gomod-project.mk
 
 SHA := $(shell git rev-parse HEAD)
 
-export COVERAGE_EXCLUSIONS="vendor|tests|main.go"
+export COVERAGE_EXCLUSIONS="vendor|tests|main.go|rpc.pb.go|rpc.pb.gw.go"
 export TRUSTY_DIR=${PROJ_ROOT}
 export GO111MODULE=on
 BUILD_FLAGS=-mod=vendor
@@ -91,7 +91,7 @@ gen_test_certs:
         --root-ca-key /tmp/trusty/certs/trusty_untrusted_root_ca-key.pem \
         --root --ca1 --ca2 --bundle --peer
 	echo "*** generating test CAs"
-	rm /tmp/trusty/certs/$(PROJ_NAME)_dev_peer*
+	rm -f /tmp/trusty/certs/$(PROJ_NAME)_dev_peer*
 	$(PROJ_ROOT)/.project/gen_test_certs.sh \
 		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.json \
         --out-dir /tmp/trusty/certs \

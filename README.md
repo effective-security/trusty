@@ -50,3 +50,11 @@ Review coverage report:
 
     make proto
 
+## Local testing
+
+When runnning unit tests, the Unix sockets are used. 
+If the test fails, there can be `localhost:{port}` files left on the disk.
+To clean up use:
+    
+    find -name "localhost:*" -delete
+

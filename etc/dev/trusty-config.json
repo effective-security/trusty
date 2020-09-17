@@ -50,11 +50,10 @@
                 "/v1/certs",
                 "/v1/crl",
                 "/v1/ocsp",
-                "/serverpb.Status2"
+                "/serverpb.Status"
             ],
             "Allow": [
-                "/v1/ca:trusty",
-                "/serverpb.Status:trusty"
+                "/v1/ca:trusty"
             ],
             "LogAllowedAny": true,
             "LogAllowed": true,

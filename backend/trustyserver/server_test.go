@@ -6,9 +6,12 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/go-phorce/dolly/audit"
+	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/trusty/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/dig"
 )
 
 var (
@@ -21,7 +24,8 @@ func TestStartTrustyEmptyHTTP(t *testing.T) {
 		ListenURLs: []string{createURLs("http", ""), createURLs("unix", "localhost")},
 	}
 
-	srv, err := StartTrusty("1.0.0", cfg, nil, nil)
+	c := createContainer(nil, nil)
+	srv, err := StartTrusty("1.0.0", cfg, c, nil)
 	require.NoError(t, err)
 	require.NotNil(t, srv)
 	defer srv.Close()
@@ -41,7 +45,8 @@ func TestStartTrustyEmptyHTTPS(t *testing.T) {
 		},
 	}
 
-	srv, err := StartTrusty("1.0.0", cfg, nil, nil)
+	c := createContainer(nil, nil)
+	srv, err := StartTrusty("1.0.0", cfg, c, nil)
 	require.NoError(t, err)
 	require.NotNil(t, srv)
 	defer srv.Close()
@@ -57,4 +62,12 @@ func createURLs(scheme, host string) string {
 	}
 	next := atomic.AddInt32(&nextPort, 1)
 	return fmt.Sprintf("%s://%s:%d", scheme, host, next)
+}
+
+func createContainer(authz rest.Authz, auditor audit.Auditor) *dig.Container {
+	c := dig.New()
+	c.Provide(func() (rest.Authz, audit.Auditor) {
+		return authz, auditor
+	})
+	return c
 }
