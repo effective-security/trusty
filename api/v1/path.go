@@ -17,4 +17,19 @@ const (
 	// Verbs: GET
 	// Response: v1.ServerStatusResponse
 	PathForStatusServer = "/v1/status/server"
+
+	// PathForStatusNode returns `ALIVE` if the server is ready to server,
+	// or 503 Service Unavailable otherwise.
+	// This end-point can be used with Load Balancers
+	//
+	// Verbs: GET
+	// Response: string
+	// Content-Type: text/plain
+	PathForStatusNode = "/v1/status/node"
+
+	// PathForStatusCaller returns CallerStatusResponse.
+	//
+	// Verbs: GET
+	// Response: v1.CallerStatusResponse
+	PathForStatusCaller = "/v1/status/caller"
 )

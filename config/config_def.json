@@ -1,6 +1,6 @@
 {
     "Configuration" : {
-        "comment" : "Configuration contains the user configurable data for a Raphty node",
+        "comment" : "Configuration contains the user configurable data for the service",
         "Fields" : [
             { "name" : "Region",        "type" : "string",        "comment" : "Region specifies the Region / Datacenter where the instance is running" },
             { "name" : "Environment",   "type" : "string",        "comment" : "Environment specifies the environment where the instance is running: prod|stage|dev" },
@@ -8,12 +8,79 @@
             { "name" : "ClusterName",   "type" : "string",        "comment" : "ClusterName specifies the cluster name" },
             { "name" : "CryptoProv",    "type" : "CryptoProv",    "comment" : "CryptoProv specifies the configuration for crypto providers" },
             { "name" : "Audit",         "type" : "Logger",        "comment" : "Audit contains configuration for the audit logger" },
+            { "name" : "Authz",         "type" : "Authz",         "comment" : "Authz contains configuration for the API authorization layer"},
             { "name" : "Logger",        "type" : "Logger",        "comment" : "Logger contains configuration for the logger" },
             { "name" : "LogLevels",     "type" : "[]RepoLogLevel","comment" : "LogLevels specifies the log levels per package" },
-            { "name" : "TrustyClient",  "type" : "TrustyClient",  "comment" : "TrustyClient specifies configurations for the client to connect to the cluster"}
+            { "name" : "HealthServer",  "type" : "HTTPServer",    "comment" : "HealthServer specifies configurations for the health server"},
+            { "name" : "TrustyServer",  "type" : "HTTPServer",    "comment" : "TrustyServer specifies configurations for the trusty server"},
+            { "name" : "TrustyClient",  "type" : "TrustyClient",  "comment" : "TrustyClient specifies configurations for the client to connect to the cluster"},
+            { "name" : "VIPs",          "type" : "[]string",      "comment" : "VIPs is a list of the FQ name of the VIP to the cluster" }
         ]
     },
     "RelatedTypes" : {
+        "Authz" : {
+            "comment" : "Authz contains configuration for the authorization module",
+            "WithGetter" : true,
+            "Fields" : [
+                { "name" : "Allow",        "type" : "[]string", "comment" : "Allow will allow the specified roles access to this path and its children, in format: ${path}:${role},${role}"},
+                { "name" : "AllowAny",     "type" : "[]string", "comment" : "AllowAny will allow any authenticated request access to this path and its children"},
+                { "name" : "AllowAnyRole", "type" : "[]string", "comment" : "AllowAnyRole will allow any authenticated request that include a non empty role"},
+                { "name" : "LogAllowedAny","type" : "*bool",    "comment" : "LogAllowedAny specifies to log allowed access to Any role"},
+                { "name" : "LogAllowed",   "type" : "*bool",    "comment" : "LogAllowed specifies to log allowed access"},
+                { "name" : "LogDenied",    "type" : "*bool",    "comment" : "LogDenied specifies to log denied access"},
+                { "name" : "CertMapper",   "type" : "string",   "comment" : "CertMapper specifies location of the config file for certificate based identity." },
+                { "name" : "APIKeyMapper", "type" : "string",   "comment" : "APIKeyMapper specifies location of the config file for API-Key based identity." },
+                { "name" : "JWTMapper",    "type" : "string",   "comment" : "JWTMapper specifies location of the config file for JWT based identity." }
+            ]
+        },
+        "CORS" : {
+            "comment" : "CORS contains configuration for CORS.",
+            "WithGetter" : true,
+            "Fields" : [
+              { "name" : "Enabled",            "type" : "*bool",    "comment" : "Enabled specifies if the CORS is enabled." },
+              { "name" : "MaxAge",             "type" : "int",      "comment" : "MaxAge indicates how long (in seconds) the results of a preflight request can be cached." },
+              { "name" : "AllowedOrigins",     "type" : "[]string", "comment" : "AllowedOrigins is a list of origins a cross-domain request can be executed from." },
+              { "name" : "AllowedMethods",     "type" : "[]string", "comment" : "AllowedMethods is a list of methods the client is allowed to use with cross-domain requests." },
+              { "name" : "AllowedHeaders",     "type" : "[]string", "comment" : "AllowedHeaders is list of non simple headers the client is allowed to use with cross-domain requests." },
+              { "name" : "ExposedHeaders",     "type" : "[]string", "comment" : "ExposedHeaders indicates which headers are safe to expose to the API of a CORS API specification." },
+              { "name" : "AllowCredentials",   "type" : "*bool",    "comment" : "AllowCredentials indicates whether the request can include user credentials." },
+              { "name" : "OptionsPassthrough", "type" : "*bool",    "comment" : "OptionsPassthrough instructs preflight to let other potential next handlers to process the OPTIONS method." },
+              { "name" : "Debug",              "type" : "*bool",    "comment" : "Debug flag adds additional output to debug server side CORS issues." }
+            ]
+        },
+        "HTTPServer" : {
+            "comment" : "HTTPServer contains the configuration of the HTTP API Service",
+            "WithGetter" : true,
+            "Fields" : [
+              { "name" : "Name",             "type" : "string",  "comment" : "Name specifies name of the server" },
+              { "name" : "Disabled",         "type" : "*bool",   "comment" : "Disabled specifies if the service is disabled" },
+              { "name" : "ListenURLs",       "type" : "[]string","comment" : "ListenURLs is the list of URLs that the server will be listen on"},
+              { "name" : "ServerTLS",        "type" : "TLSInfo", "comment" : "ServerTLS provides TLS config for server"},
+              { "name" : "PackageLogger",    "type" : "string",  "comment" : "PackageLogger if set, specifies name of the package logger" },
+              { "name" : "AllowProfiling",   "type" : "*bool",   "comment" : "AllowProfiling if set, will allow for per request CPU/Memory profiling triggered by the URI QueryString" },
+              { "name" : "ProfilerDir",      "type" : "string",  "comment" : "ProfilerDir specifies the directories where per-request profile information is written, if not set will write to a TMP dir" },
+              { "name" : "Services",         "type" : "[]string","comment" : "Services is a list of services to enable for this HTTP Service"},
+              { "name" : "HeartbeatSecs",    "type" : "int",     "comment" : "HeartbeatSecs specifies heartbeat interval in seconds [5 secs is a minimum]"},
+              { "name" : "CORS",             "type" : "CORS",    "comment" : "CORS contains configuration for CORS." },
+              { "name" : "RequestTimeout",   "type" : "Duration","comment" : "RequestTimeout is the timeout for client requests to finish."},
+              { "name" : "KeepAliveMinTime", "type" : "Duration","comment" : "KeepAliveMinTime is the minimum interval that a client should wait before pinging server." },
+              { "name" : "KeepAliveInterval","type" : "Duration","comment" : "KeepAliveInterval is the frequency of server-to-client ping to check if a connection is alive." },
+              { "name" : "KeepAliveTimeout", "type" : "Duration","comment" : "KeepAliveTimeout is the additional duration of wait before closing a non-responsive connection, use 0 to disable." }
+            ]
+        },
+        "AutoGenCert" : {
+            "comment" : "AutoGenCert contains configuration info for the auto generated certificate",
+            "WithGetter" : true,
+            "Fields" : [
+                { "name" : "Disabled", "type" : "*bool",   "comment" : "Disabled specifies if the certificate disabled to use" },
+                { "name" : "CertFile", "type" : "string",  "comment" : "CertFile specifies location of the cert" },
+                { "name" : "KeyFile",  "type" : "string",  "comment" : "KeyFile specifies location of the key" },
+                { "name" : "Profile",  "type" : "string",  "comment" : "Profile specifies the certificate profile" },
+                { "name" : "Renewal",  "type" : "string",  "comment" : "Renewal specifies value in 165h00m00s format for renewal before expiration date" },
+                { "name" : "Schedule", "type" : "string",  "comment" : "Schedule specifies a schedule for renewal task in format documented in /pkg/tasks. If it is empty, then the default value is used." },
+                { "name" : "Hosts",    "type" : "[]string","comment" : "Hosts decribes the list of the hosts in the cluster [this is used when building the cert requests]"}
+            ]
+        },
         "TrustyClient" : {
             "comment" : "TrustyClient specifies configurations for the client to connect to the cluster",
             "WithGetter" : true,
@@ -21,7 +88,7 @@
                 { "name" : "Servers",   "type" : "[]string", "comment" : "Servers decribes the list of server URLs to contact"},
                 { "name" : "ClientTLS", "type" : "TLSInfo",  "comment" : "ClientTLS describes the TLS certs used to connect to the cluster"}
             ]
-        },        
+        },
         "RepoLogLevel" : {
             "comment" : "RepoLogLevel contains information about the log level per repo. Use * to set up global level.",
             "Fields" : [
@@ -46,6 +113,9 @@
                 { "name" : "CertFile",       "type" : "string",   "comment" : "CertFile specifies location of the cert" },
                 { "name" : "KeyFile",        "type" : "string",   "comment" : "KeyFile specifies location of the key" },
                 { "name" : "TrustedCAFile",  "type" : "string",   "comment" : "TrustedCAFile specifies location of the trusted Root file" },
+                { "name" : "CRLFile",        "type" : "string",   "comment" : "CRLFile specifies location of the CRL" },
+                { "name" : "OCSPFile",       "type" : "string",   "comment" : "OCSPFile specifies location of the OCSP response" },
+                { "name" : "CipherSuites",   "type" : "[]string", "comment" : "CipherSuites allows to speciy Cipher suites" },
                 { "name" : "ClientCertAuth", "type" : "*bool",    "comment" : "ClientCertAuth controls client auth" }
             ]
         },

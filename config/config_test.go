@@ -86,6 +86,16 @@ func Test_overrideBool(t *testing.T) {
 	require.Equal(t, d, o, "overrideBool should of overriden the value but didn't. value %v, expecting %v", d, o)
 }
 
+func Test_overrideDuration(t *testing.T) {
+	d := Duration(time.Second)
+	var zero Duration
+	overrideDuration(&d, &zero)
+	require.NotEqual(t, d, zero, "overrideDuration shouldn't have overriden the value as the override is the default/zero value. value now %v", d)
+	o := Duration(time.Minute)
+	overrideDuration(&d, &o)
+	require.Equal(t, d, o, "overrideDuration should of overriden the value but didn't. value %v, expecting %v", d, o)
+}
+
 func Test_overrideInt(t *testing.T) {
 	d := -42
 	var zero int
@@ -136,6 +146,225 @@ func Test_overrideStrings(t *testing.T) {
 	require.Equal(t, d, o, "overrideStrings should of overriden the value but didn't. value %v, expecting %v", d, o)
 }
 
+func TestAuthz_overrideFrom(t *testing.T) {
+	orig := Authz{
+		Allow:         []string{"a"},
+		AllowAny:      []string{"a"},
+		AllowAnyRole:  []string{"a"},
+		LogAllowedAny: &trueVal,
+		LogAllowed:    &trueVal,
+		LogDenied:     &trueVal,
+		CertMapper:    "one",
+		APIKeyMapper:  "one",
+		JWTMapper:     "one"}
+	dest := orig
+	var zero Authz
+	dest.overrideFrom(&zero)
+	require.Equal(t, dest, orig, "Authz.overrideFrom shouldn't have overriden the value as the override is the default/zero value. value now %#v", dest)
+	o := Authz{
+		Allow:         []string{"b", "b"},
+		AllowAny:      []string{"b", "b"},
+		AllowAnyRole:  []string{"b", "b"},
+		LogAllowedAny: &falseVal,
+		LogAllowed:    &falseVal,
+		LogDenied:     &falseVal,
+		CertMapper:    "two",
+		APIKeyMapper:  "two",
+		JWTMapper:     "two"}
+	dest.overrideFrom(&o)
+	require.Equal(t, dest, o, "Authz.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
+	o2 := Authz{
+		Allow: []string{"a"}}
+	dest.overrideFrom(&o2)
+	exp := o
+
+	exp.Allow = o2.Allow
+	require.Equal(t, dest, exp, "Authz.overrideFrom should have overriden the field Allow. value now %#v, expecting %#v", dest, exp)
+}
+
+func TestAuthz_Getters(t *testing.T) {
+	orig := Authz{
+		Allow:         []string{"a"},
+		AllowAny:      []string{"a"},
+		AllowAnyRole:  []string{"a"},
+		LogAllowedAny: &trueVal,
+		LogAllowed:    &trueVal,
+		LogDenied:     &trueVal,
+		CertMapper:    "one",
+		APIKeyMapper:  "one",
+		JWTMapper:     "one"}
+
+	gv0 := orig.GetAllow()
+	require.Equal(t, orig.Allow, gv0, "Authz.GetAllowCfg() does not match")
+
+	gv1 := orig.GetAllowAny()
+	require.Equal(t, orig.AllowAny, gv1, "Authz.GetAllowAnyCfg() does not match")
+
+	gv2 := orig.GetAllowAnyRole()
+	require.Equal(t, orig.AllowAnyRole, gv2, "Authz.GetAllowAnyRoleCfg() does not match")
+
+	gv3 := orig.GetLogAllowedAny()
+	require.Equal(t, orig.LogAllowedAny, &gv3, "Authz.GetLogAllowedAny() does not match")
+
+	gv4 := orig.GetLogAllowed()
+	require.Equal(t, orig.LogAllowed, &gv4, "Authz.GetLogAllowed() does not match")
+
+	gv5 := orig.GetLogDenied()
+	require.Equal(t, orig.LogDenied, &gv5, "Authz.GetLogDenied() does not match")
+
+	gv6 := orig.GetCertMapper()
+	require.Equal(t, orig.CertMapper, gv6, "Authz.GetCertMapperCfg() does not match")
+
+	gv7 := orig.GetAPIKeyMapper()
+	require.Equal(t, orig.APIKeyMapper, gv7, "Authz.GetAPIKeyMapperCfg() does not match")
+
+	gv8 := orig.GetJWTMapper()
+	require.Equal(t, orig.JWTMapper, gv8, "Authz.GetJWTMapperCfg() does not match")
+
+}
+
+func TestAutoGenCert_overrideFrom(t *testing.T) {
+	orig := AutoGenCert{
+		Disabled: &trueVal,
+		CertFile: "one",
+		KeyFile:  "one",
+		Profile:  "one",
+		Renewal:  "one",
+		Schedule: "one",
+		Hosts:    []string{"a"}}
+	dest := orig
+	var zero AutoGenCert
+	dest.overrideFrom(&zero)
+	require.Equal(t, dest, orig, "AutoGenCert.overrideFrom shouldn't have overriden the value as the override is the default/zero value. value now %#v", dest)
+	o := AutoGenCert{
+		Disabled: &falseVal,
+		CertFile: "two",
+		KeyFile:  "two",
+		Profile:  "two",
+		Renewal:  "two",
+		Schedule: "two",
+		Hosts:    []string{"b", "b"}}
+	dest.overrideFrom(&o)
+	require.Equal(t, dest, o, "AutoGenCert.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
+	o2 := AutoGenCert{
+		Disabled: &trueVal}
+	dest.overrideFrom(&o2)
+	exp := o
+
+	exp.Disabled = o2.Disabled
+	require.Equal(t, dest, exp, "AutoGenCert.overrideFrom should have overriden the field Disabled. value now %#v, expecting %#v", dest, exp)
+}
+
+func TestAutoGenCert_Getters(t *testing.T) {
+	orig := AutoGenCert{
+		Disabled: &trueVal,
+		CertFile: "one",
+		KeyFile:  "one",
+		Profile:  "one",
+		Renewal:  "one",
+		Schedule: "one",
+		Hosts:    []string{"a"}}
+
+	gv0 := orig.GetDisabled()
+	require.Equal(t, orig.Disabled, &gv0, "AutoGenCert.GetDisabled() does not match")
+
+	gv1 := orig.GetCertFile()
+	require.Equal(t, orig.CertFile, gv1, "AutoGenCert.GetCertFileCfg() does not match")
+
+	gv2 := orig.GetKeyFile()
+	require.Equal(t, orig.KeyFile, gv2, "AutoGenCert.GetKeyFileCfg() does not match")
+
+	gv3 := orig.GetProfile()
+	require.Equal(t, orig.Profile, gv3, "AutoGenCert.GetProfileCfg() does not match")
+
+	gv4 := orig.GetRenewal()
+	require.Equal(t, orig.Renewal, gv4, "AutoGenCert.GetRenewalCfg() does not match")
+
+	gv5 := orig.GetSchedule()
+	require.Equal(t, orig.Schedule, gv5, "AutoGenCert.GetScheduleCfg() does not match")
+
+	gv6 := orig.GetHosts()
+	require.Equal(t, orig.Hosts, gv6, "AutoGenCert.GetHostsCfg() does not match")
+
+}
+
+func TestCORS_overrideFrom(t *testing.T) {
+	orig := CORS{
+		Enabled:            &trueVal,
+		MaxAge:             -42,
+		AllowedOrigins:     []string{"a"},
+		AllowedMethods:     []string{"a"},
+		AllowedHeaders:     []string{"a"},
+		ExposedHeaders:     []string{"a"},
+		AllowCredentials:   &trueVal,
+		OptionsPassthrough: &trueVal,
+		Debug:              &trueVal}
+	dest := orig
+	var zero CORS
+	dest.overrideFrom(&zero)
+	require.Equal(t, dest, orig, "CORS.overrideFrom shouldn't have overriden the value as the override is the default/zero value. value now %#v", dest)
+	o := CORS{
+		Enabled:            &falseVal,
+		MaxAge:             42,
+		AllowedOrigins:     []string{"b", "b"},
+		AllowedMethods:     []string{"b", "b"},
+		AllowedHeaders:     []string{"b", "b"},
+		ExposedHeaders:     []string{"b", "b"},
+		AllowCredentials:   &falseVal,
+		OptionsPassthrough: &falseVal,
+		Debug:              &falseVal}
+	dest.overrideFrom(&o)
+	require.Equal(t, dest, o, "CORS.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
+	o2 := CORS{
+		Enabled: &trueVal}
+	dest.overrideFrom(&o2)
+	exp := o
+
+	exp.Enabled = o2.Enabled
+	require.Equal(t, dest, exp, "CORS.overrideFrom should have overriden the field Enabled. value now %#v, expecting %#v", dest, exp)
+}
+
+func TestCORS_Getters(t *testing.T) {
+	orig := CORS{
+		Enabled:            &trueVal,
+		MaxAge:             -42,
+		AllowedOrigins:     []string{"a"},
+		AllowedMethods:     []string{"a"},
+		AllowedHeaders:     []string{"a"},
+		ExposedHeaders:     []string{"a"},
+		AllowCredentials:   &trueVal,
+		OptionsPassthrough: &trueVal,
+		Debug:              &trueVal}
+
+	gv0 := orig.GetEnabled()
+	require.Equal(t, orig.Enabled, &gv0, "CORS.GetEnabled() does not match")
+
+	gv1 := orig.GetMaxAge()
+	require.Equal(t, orig.MaxAge, gv1, "CORS.GetMaxAgeCfg() does not match")
+
+	gv2 := orig.GetAllowedOrigins()
+	require.Equal(t, orig.AllowedOrigins, gv2, "CORS.GetAllowedOriginsCfg() does not match")
+
+	gv3 := orig.GetAllowedMethods()
+	require.Equal(t, orig.AllowedMethods, gv3, "CORS.GetAllowedMethodsCfg() does not match")
+
+	gv4 := orig.GetAllowedHeaders()
+	require.Equal(t, orig.AllowedHeaders, gv4, "CORS.GetAllowedHeadersCfg() does not match")
+
+	gv5 := orig.GetExposedHeaders()
+	require.Equal(t, orig.ExposedHeaders, gv5, "CORS.GetExposedHeadersCfg() does not match")
+
+	gv6 := orig.GetAllowCredentials()
+	require.Equal(t, orig.AllowCredentials, &gv6, "CORS.GetAllowCredentials() does not match")
+
+	gv7 := orig.GetOptionsPassthrough()
+	require.Equal(t, orig.OptionsPassthrough, &gv7, "CORS.GetOptionsPassthrough() does not match")
+
+	gv8 := orig.GetDebug()
+	require.Equal(t, orig.Debug, &gv8, "CORS.GetDebug() does not match")
+
+}
+
 func TestConfiguration_overrideFrom(t *testing.T) {
 	orig := Configuration{
 		Region:      "one",
@@ -149,6 +378,16 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 			Directory:  "one",
 			MaxAgeDays: -42,
 			MaxSizeMb:  -42},
+		Authz: Authz{
+			Allow:         []string{"a"},
+			AllowAny:      []string{"a"},
+			AllowAnyRole:  []string{"a"},
+			LogAllowedAny: &trueVal,
+			LogAllowed:    &trueVal,
+			LogDenied:     &trueVal,
+			CertMapper:    "one",
+			APIKeyMapper:  "one",
+			JWTMapper:     "one"},
 		Logger: Logger{
 			Directory:  "one",
 			MaxAgeDays: -42,
@@ -159,13 +398,79 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 				Package: "one",
 				Level:   "one"},
 		},
+		HealthServer: HTTPServer{
+			Name:       "one",
+			Disabled:   &trueVal,
+			ListenURLs: []string{"a"},
+			ServerTLS: TLSInfo{
+				CertFile:       "one",
+				KeyFile:        "one",
+				TrustedCAFile:  "one",
+				CRLFile:        "one",
+				OCSPFile:       "one",
+				CipherSuites:   []string{"a"},
+				ClientCertAuth: &trueVal},
+			PackageLogger:  "one",
+			AllowProfiling: &trueVal,
+			ProfilerDir:    "one",
+			Services:       []string{"a"},
+			HeartbeatSecs:  -42,
+			CORS: CORS{
+				Enabled:            &trueVal,
+				MaxAge:             -42,
+				AllowedOrigins:     []string{"a"},
+				AllowedMethods:     []string{"a"},
+				AllowedHeaders:     []string{"a"},
+				ExposedHeaders:     []string{"a"},
+				AllowCredentials:   &trueVal,
+				OptionsPassthrough: &trueVal,
+				Debug:              &trueVal},
+			RequestTimeout:    Duration(time.Second),
+			KeepAliveMinTime:  Duration(time.Second),
+			KeepAliveInterval: Duration(time.Second),
+			KeepAliveTimeout:  Duration(time.Second)},
+		TrustyServer: HTTPServer{
+			Name:       "one",
+			Disabled:   &trueVal,
+			ListenURLs: []string{"a"},
+			ServerTLS: TLSInfo{
+				CertFile:       "one",
+				KeyFile:        "one",
+				TrustedCAFile:  "one",
+				CRLFile:        "one",
+				OCSPFile:       "one",
+				CipherSuites:   []string{"a"},
+				ClientCertAuth: &trueVal},
+			PackageLogger:  "one",
+			AllowProfiling: &trueVal,
+			ProfilerDir:    "one",
+			Services:       []string{"a"},
+			HeartbeatSecs:  -42,
+			CORS: CORS{
+				Enabled:            &trueVal,
+				MaxAge:             -42,
+				AllowedOrigins:     []string{"a"},
+				AllowedMethods:     []string{"a"},
+				AllowedHeaders:     []string{"a"},
+				ExposedHeaders:     []string{"a"},
+				AllowCredentials:   &trueVal,
+				OptionsPassthrough: &trueVal,
+				Debug:              &trueVal},
+			RequestTimeout:    Duration(time.Second),
+			KeepAliveMinTime:  Duration(time.Second),
+			KeepAliveInterval: Duration(time.Second),
+			KeepAliveTimeout:  Duration(time.Second)},
 		TrustyClient: TrustyClient{
 			Servers: []string{"a"},
 			ClientTLS: TLSInfo{
 				CertFile:       "one",
 				KeyFile:        "one",
 				TrustedCAFile:  "one",
-				ClientCertAuth: &trueVal}}}
+				CRLFile:        "one",
+				OCSPFile:       "one",
+				CipherSuites:   []string{"a"},
+				ClientCertAuth: &trueVal}},
+		VIPs: []string{"a"}}
 	dest := orig
 	var zero Configuration
 	dest.overrideFrom(&zero)
@@ -182,6 +487,16 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 			Directory:  "two",
 			MaxAgeDays: 42,
 			MaxSizeMb:  42},
+		Authz: Authz{
+			Allow:         []string{"b", "b"},
+			AllowAny:      []string{"b", "b"},
+			AllowAnyRole:  []string{"b", "b"},
+			LogAllowedAny: &falseVal,
+			LogAllowed:    &falseVal,
+			LogDenied:     &falseVal,
+			CertMapper:    "two",
+			APIKeyMapper:  "two",
+			JWTMapper:     "two"},
 		Logger: Logger{
 			Directory:  "two",
 			MaxAgeDays: 42,
@@ -192,13 +507,79 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 				Package: "two",
 				Level:   "two"},
 		},
+		HealthServer: HTTPServer{
+			Name:       "two",
+			Disabled:   &falseVal,
+			ListenURLs: []string{"b", "b"},
+			ServerTLS: TLSInfo{
+				CertFile:       "two",
+				KeyFile:        "two",
+				TrustedCAFile:  "two",
+				CRLFile:        "two",
+				OCSPFile:       "two",
+				CipherSuites:   []string{"b", "b"},
+				ClientCertAuth: &falseVal},
+			PackageLogger:  "two",
+			AllowProfiling: &falseVal,
+			ProfilerDir:    "two",
+			Services:       []string{"b", "b"},
+			HeartbeatSecs:  42,
+			CORS: CORS{
+				Enabled:            &falseVal,
+				MaxAge:             42,
+				AllowedOrigins:     []string{"b", "b"},
+				AllowedMethods:     []string{"b", "b"},
+				AllowedHeaders:     []string{"b", "b"},
+				ExposedHeaders:     []string{"b", "b"},
+				AllowCredentials:   &falseVal,
+				OptionsPassthrough: &falseVal,
+				Debug:              &falseVal},
+			RequestTimeout:    Duration(time.Minute),
+			KeepAliveMinTime:  Duration(time.Minute),
+			KeepAliveInterval: Duration(time.Minute),
+			KeepAliveTimeout:  Duration(time.Minute)},
+		TrustyServer: HTTPServer{
+			Name:       "two",
+			Disabled:   &falseVal,
+			ListenURLs: []string{"b", "b"},
+			ServerTLS: TLSInfo{
+				CertFile:       "two",
+				KeyFile:        "two",
+				TrustedCAFile:  "two",
+				CRLFile:        "two",
+				OCSPFile:       "two",
+				CipherSuites:   []string{"b", "b"},
+				ClientCertAuth: &falseVal},
+			PackageLogger:  "two",
+			AllowProfiling: &falseVal,
+			ProfilerDir:    "two",
+			Services:       []string{"b", "b"},
+			HeartbeatSecs:  42,
+			CORS: CORS{
+				Enabled:            &falseVal,
+				MaxAge:             42,
+				AllowedOrigins:     []string{"b", "b"},
+				AllowedMethods:     []string{"b", "b"},
+				AllowedHeaders:     []string{"b", "b"},
+				ExposedHeaders:     []string{"b", "b"},
+				AllowCredentials:   &falseVal,
+				OptionsPassthrough: &falseVal,
+				Debug:              &falseVal},
+			RequestTimeout:    Duration(time.Minute),
+			KeepAliveMinTime:  Duration(time.Minute),
+			KeepAliveInterval: Duration(time.Minute),
+			KeepAliveTimeout:  Duration(time.Minute)},
 		TrustyClient: TrustyClient{
 			Servers: []string{"b", "b"},
 			ClientTLS: TLSInfo{
 				CertFile:       "two",
 				KeyFile:        "two",
 				TrustedCAFile:  "two",
-				ClientCertAuth: &falseVal}}}
+				CRLFile:        "two",
+				OCSPFile:       "two",
+				CipherSuites:   []string{"b", "b"},
+				ClientCertAuth: &falseVal}},
+		VIPs: []string{"b", "b"}}
 	dest.overrideFrom(&o)
 	require.Equal(t, dest, o, "Configuration.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
 	o2 := Configuration{
@@ -230,6 +611,161 @@ func TestCryptoProv_overrideFrom(t *testing.T) {
 
 	exp.Default = o2.Default
 	require.Equal(t, dest, exp, "CryptoProv.overrideFrom should have overriden the field Default. value now %#v, expecting %#v", dest, exp)
+}
+
+func TestHTTPServer_overrideFrom(t *testing.T) {
+	orig := HTTPServer{
+		Name:       "one",
+		Disabled:   &trueVal,
+		ListenURLs: []string{"a"},
+		ServerTLS: TLSInfo{
+			CertFile:       "one",
+			KeyFile:        "one",
+			TrustedCAFile:  "one",
+			CRLFile:        "one",
+			OCSPFile:       "one",
+			CipherSuites:   []string{"a"},
+			ClientCertAuth: &trueVal},
+		PackageLogger:  "one",
+		AllowProfiling: &trueVal,
+		ProfilerDir:    "one",
+		Services:       []string{"a"},
+		HeartbeatSecs:  -42,
+		CORS: CORS{
+			Enabled:            &trueVal,
+			MaxAge:             -42,
+			AllowedOrigins:     []string{"a"},
+			AllowedMethods:     []string{"a"},
+			AllowedHeaders:     []string{"a"},
+			ExposedHeaders:     []string{"a"},
+			AllowCredentials:   &trueVal,
+			OptionsPassthrough: &trueVal,
+			Debug:              &trueVal},
+		RequestTimeout:    Duration(time.Second),
+		KeepAliveMinTime:  Duration(time.Second),
+		KeepAliveInterval: Duration(time.Second),
+		KeepAliveTimeout:  Duration(time.Second)}
+	dest := orig
+	var zero HTTPServer
+	dest.overrideFrom(&zero)
+	require.Equal(t, dest, orig, "HTTPServer.overrideFrom shouldn't have overriden the value as the override is the default/zero value. value now %#v", dest)
+	o := HTTPServer{
+		Name:       "two",
+		Disabled:   &falseVal,
+		ListenURLs: []string{"b", "b"},
+		ServerTLS: TLSInfo{
+			CertFile:       "two",
+			KeyFile:        "two",
+			TrustedCAFile:  "two",
+			CRLFile:        "two",
+			OCSPFile:       "two",
+			CipherSuites:   []string{"b", "b"},
+			ClientCertAuth: &falseVal},
+		PackageLogger:  "two",
+		AllowProfiling: &falseVal,
+		ProfilerDir:    "two",
+		Services:       []string{"b", "b"},
+		HeartbeatSecs:  42,
+		CORS: CORS{
+			Enabled:            &falseVal,
+			MaxAge:             42,
+			AllowedOrigins:     []string{"b", "b"},
+			AllowedMethods:     []string{"b", "b"},
+			AllowedHeaders:     []string{"b", "b"},
+			ExposedHeaders:     []string{"b", "b"},
+			AllowCredentials:   &falseVal,
+			OptionsPassthrough: &falseVal,
+			Debug:              &falseVal},
+		RequestTimeout:    Duration(time.Minute),
+		KeepAliveMinTime:  Duration(time.Minute),
+		KeepAliveInterval: Duration(time.Minute),
+		KeepAliveTimeout:  Duration(time.Minute)}
+	dest.overrideFrom(&o)
+	require.Equal(t, dest, o, "HTTPServer.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
+	o2 := HTTPServer{
+		Name: "one"}
+	dest.overrideFrom(&o2)
+	exp := o
+
+	exp.Name = o2.Name
+	require.Equal(t, dest, exp, "HTTPServer.overrideFrom should have overriden the field Name. value now %#v, expecting %#v", dest, exp)
+}
+
+func TestHTTPServer_Getters(t *testing.T) {
+	orig := HTTPServer{
+		Name:       "one",
+		Disabled:   &trueVal,
+		ListenURLs: []string{"a"},
+		ServerTLS: TLSInfo{
+			CertFile:       "one",
+			KeyFile:        "one",
+			TrustedCAFile:  "one",
+			CRLFile:        "one",
+			OCSPFile:       "one",
+			CipherSuites:   []string{"a"},
+			ClientCertAuth: &trueVal},
+		PackageLogger:  "one",
+		AllowProfiling: &trueVal,
+		ProfilerDir:    "one",
+		Services:       []string{"a"},
+		HeartbeatSecs:  -42,
+		CORS: CORS{
+			Enabled:            &trueVal,
+			MaxAge:             -42,
+			AllowedOrigins:     []string{"a"},
+			AllowedMethods:     []string{"a"},
+			AllowedHeaders:     []string{"a"},
+			ExposedHeaders:     []string{"a"},
+			AllowCredentials:   &trueVal,
+			OptionsPassthrough: &trueVal,
+			Debug:              &trueVal},
+		RequestTimeout:    Duration(time.Second),
+		KeepAliveMinTime:  Duration(time.Second),
+		KeepAliveInterval: Duration(time.Second),
+		KeepAliveTimeout:  Duration(time.Second)}
+
+	gv0 := orig.GetName()
+	require.Equal(t, orig.Name, gv0, "HTTPServer.GetNameCfg() does not match")
+
+	gv1 := orig.GetDisabled()
+	require.Equal(t, orig.Disabled, &gv1, "HTTPServer.GetDisabled() does not match")
+
+	gv2 := orig.GetListenURLs()
+	require.Equal(t, orig.ListenURLs, gv2, "HTTPServer.GetListenURLsCfg() does not match")
+
+	gv3 := orig.GetServerTLSCfg()
+	require.Equal(t, orig.ServerTLS, *gv3, "HTTPServer.GetServerTLSCfg() does not match")
+
+	gv4 := orig.GetPackageLogger()
+	require.Equal(t, orig.PackageLogger, gv4, "HTTPServer.GetPackageLoggerCfg() does not match")
+
+	gv5 := orig.GetAllowProfiling()
+	require.Equal(t, orig.AllowProfiling, &gv5, "HTTPServer.GetAllowProfiling() does not match")
+
+	gv6 := orig.GetProfilerDir()
+	require.Equal(t, orig.ProfilerDir, gv6, "HTTPServer.GetProfilerDirCfg() does not match")
+
+	gv7 := orig.GetServices()
+	require.Equal(t, orig.Services, gv7, "HTTPServer.GetServicesCfg() does not match")
+
+	gv8 := orig.GetHeartbeatSecs()
+	require.Equal(t, orig.HeartbeatSecs, gv8, "HTTPServer.GetHeartbeatSecsCfg() does not match")
+
+	gv9 := orig.GetCORSCfg()
+	require.Equal(t, orig.CORS, *gv9, "HTTPServer.GetCORSCfg() does not match")
+
+	gv10 := orig.GetRequestTimeout()
+	require.Equal(t, orig.RequestTimeout.TimeDuration(), gv10, "HTTPServer.GetRequestTimeout() does not match")
+
+	gv11 := orig.GetKeepAliveMinTime()
+	require.Equal(t, orig.KeepAliveMinTime.TimeDuration(), gv11, "HTTPServer.GetKeepAliveMinTime() does not match")
+
+	gv12 := orig.GetKeepAliveInterval()
+	require.Equal(t, orig.KeepAliveInterval.TimeDuration(), gv12, "HTTPServer.GetKeepAliveInterval() does not match")
+
+	gv13 := orig.GetKeepAliveTimeout()
+	require.Equal(t, orig.KeepAliveTimeout.TimeDuration(), gv13, "HTTPServer.GetKeepAliveTimeout() does not match")
+
 }
 
 func TestLogger_overrideFrom(t *testing.T) {
@@ -337,6 +873,9 @@ func TestTLSInfo_overrideFrom(t *testing.T) {
 		CertFile:       "one",
 		KeyFile:        "one",
 		TrustedCAFile:  "one",
+		CRLFile:        "one",
+		OCSPFile:       "one",
+		CipherSuites:   []string{"a"},
 		ClientCertAuth: &trueVal}
 	dest := orig
 	var zero TLSInfo
@@ -346,6 +885,9 @@ func TestTLSInfo_overrideFrom(t *testing.T) {
 		CertFile:       "two",
 		KeyFile:        "two",
 		TrustedCAFile:  "two",
+		CRLFile:        "two",
+		OCSPFile:       "two",
+		CipherSuites:   []string{"b", "b"},
 		ClientCertAuth: &falseVal}
 	dest.overrideFrom(&o)
 	require.Equal(t, dest, o, "TLSInfo.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
@@ -363,6 +905,9 @@ func TestTLSInfo_Getters(t *testing.T) {
 		CertFile:       "one",
 		KeyFile:        "one",
 		TrustedCAFile:  "one",
+		CRLFile:        "one",
+		OCSPFile:       "one",
+		CipherSuites:   []string{"a"},
 		ClientCertAuth: &trueVal}
 
 	gv0 := orig.GetCertFile()
@@ -374,8 +919,17 @@ func TestTLSInfo_Getters(t *testing.T) {
 	gv2 := orig.GetTrustedCAFile()
 	require.Equal(t, orig.TrustedCAFile, gv2, "TLSInfo.GetTrustedCAFileCfg() does not match")
 
-	gv3 := orig.GetClientCertAuth()
-	require.Equal(t, orig.ClientCertAuth, &gv3, "TLSInfo.GetClientCertAuth() does not match")
+	gv3 := orig.GetCRLFile()
+	require.Equal(t, orig.CRLFile, gv3, "TLSInfo.GetCRLFileCfg() does not match")
+
+	gv4 := orig.GetOCSPFile()
+	require.Equal(t, orig.OCSPFile, gv4, "TLSInfo.GetOCSPFileCfg() does not match")
+
+	gv5 := orig.GetCipherSuites()
+	require.Equal(t, orig.CipherSuites, gv5, "TLSInfo.GetCipherSuitesCfg() does not match")
+
+	gv6 := orig.GetClientCertAuth()
+	require.Equal(t, orig.ClientCertAuth, &gv6, "TLSInfo.GetClientCertAuth() does not match")
 
 }
 
@@ -386,6 +940,9 @@ func TestTrustyClient_overrideFrom(t *testing.T) {
 			CertFile:       "one",
 			KeyFile:        "one",
 			TrustedCAFile:  "one",
+			CRLFile:        "one",
+			OCSPFile:       "one",
+			CipherSuites:   []string{"a"},
 			ClientCertAuth: &trueVal}}
 	dest := orig
 	var zero TrustyClient
@@ -397,6 +954,9 @@ func TestTrustyClient_overrideFrom(t *testing.T) {
 			CertFile:       "two",
 			KeyFile:        "two",
 			TrustedCAFile:  "two",
+			CRLFile:        "two",
+			OCSPFile:       "two",
+			CipherSuites:   []string{"b", "b"},
 			ClientCertAuth: &falseVal}}
 	dest.overrideFrom(&o)
 	require.Equal(t, dest, o, "TrustyClient.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
@@ -416,6 +976,9 @@ func TestTrustyClient_Getters(t *testing.T) {
 			CertFile:       "one",
 			KeyFile:        "one",
 			TrustedCAFile:  "one",
+			CRLFile:        "one",
+			OCSPFile:       "one",
+			CipherSuites:   []string{"a"},
 			ClientCertAuth: &trueVal}}
 
 	gv0 := orig.GetServers()
@@ -441,6 +1004,16 @@ func Test_LoadOverrides(t *testing.T) {
 				Directory:  "two",
 				MaxAgeDays: 42,
 				MaxSizeMb:  42},
+			Authz: Authz{
+				Allow:         []string{"b", "b"},
+				AllowAny:      []string{"b", "b"},
+				AllowAnyRole:  []string{"b", "b"},
+				LogAllowedAny: &falseVal,
+				LogAllowed:    &falseVal,
+				LogDenied:     &falseVal,
+				CertMapper:    "two",
+				APIKeyMapper:  "two",
+				JWTMapper:     "two"},
 			Logger: Logger{
 				Directory:  "two",
 				MaxAgeDays: 42,
@@ -451,13 +1024,79 @@ func Test_LoadOverrides(t *testing.T) {
 					Package: "two",
 					Level:   "two"},
 			},
+			HealthServer: HTTPServer{
+				Name:       "two",
+				Disabled:   &falseVal,
+				ListenURLs: []string{"b", "b"},
+				ServerTLS: TLSInfo{
+					CertFile:       "two",
+					KeyFile:        "two",
+					TrustedCAFile:  "two",
+					CRLFile:        "two",
+					OCSPFile:       "two",
+					CipherSuites:   []string{"b", "b"},
+					ClientCertAuth: &falseVal},
+				PackageLogger:  "two",
+				AllowProfiling: &falseVal,
+				ProfilerDir:    "two",
+				Services:       []string{"b", "b"},
+				HeartbeatSecs:  42,
+				CORS: CORS{
+					Enabled:            &falseVal,
+					MaxAge:             42,
+					AllowedOrigins:     []string{"b", "b"},
+					AllowedMethods:     []string{"b", "b"},
+					AllowedHeaders:     []string{"b", "b"},
+					ExposedHeaders:     []string{"b", "b"},
+					AllowCredentials:   &falseVal,
+					OptionsPassthrough: &falseVal,
+					Debug:              &falseVal},
+				RequestTimeout:    Duration(time.Minute),
+				KeepAliveMinTime:  Duration(time.Minute),
+				KeepAliveInterval: Duration(time.Minute),
+				KeepAliveTimeout:  Duration(time.Minute)},
+			TrustyServer: HTTPServer{
+				Name:       "two",
+				Disabled:   &falseVal,
+				ListenURLs: []string{"b", "b"},
+				ServerTLS: TLSInfo{
+					CertFile:       "two",
+					KeyFile:        "two",
+					TrustedCAFile:  "two",
+					CRLFile:        "two",
+					OCSPFile:       "two",
+					CipherSuites:   []string{"b", "b"},
+					ClientCertAuth: &falseVal},
+				PackageLogger:  "two",
+				AllowProfiling: &falseVal,
+				ProfilerDir:    "two",
+				Services:       []string{"b", "b"},
+				HeartbeatSecs:  42,
+				CORS: CORS{
+					Enabled:            &falseVal,
+					MaxAge:             42,
+					AllowedOrigins:     []string{"b", "b"},
+					AllowedMethods:     []string{"b", "b"},
+					AllowedHeaders:     []string{"b", "b"},
+					ExposedHeaders:     []string{"b", "b"},
+					AllowCredentials:   &falseVal,
+					OptionsPassthrough: &falseVal,
+					Debug:              &falseVal},
+				RequestTimeout:    Duration(time.Minute),
+				KeepAliveMinTime:  Duration(time.Minute),
+				KeepAliveInterval: Duration(time.Minute),
+				KeepAliveTimeout:  Duration(time.Minute)},
 			TrustyClient: TrustyClient{
 				Servers: []string{"b", "b"},
 				ClientTLS: TLSInfo{
 					CertFile:       "two",
 					KeyFile:        "two",
 					TrustedCAFile:  "two",
-					ClientCertAuth: &falseVal}}},
+					CRLFile:        "two",
+					OCSPFile:       "two",
+					CipherSuites:   []string{"b", "b"},
+					ClientCertAuth: &falseVal}},
+			VIPs: []string{"b", "b"}},
 		Hosts: map[string]string{"bob": "example2", "bob2": "missing"},
 		Overrides: map[string]Configuration{
 			"example2": {
@@ -472,6 +1111,16 @@ func Test_LoadOverrides(t *testing.T) {
 					Directory:  "three",
 					MaxAgeDays: 1234,
 					MaxSizeMb:  1234},
+				Authz: Authz{
+					Allow:         []string{"c", "c", "c"},
+					AllowAny:      []string{"c", "c", "c"},
+					AllowAnyRole:  []string{"c", "c", "c"},
+					LogAllowedAny: &trueVal,
+					LogAllowed:    &trueVal,
+					LogDenied:     &trueVal,
+					CertMapper:    "three",
+					APIKeyMapper:  "three",
+					JWTMapper:     "three"},
 				Logger: Logger{
 					Directory:  "three",
 					MaxAgeDays: 1234,
@@ -482,13 +1131,79 @@ func Test_LoadOverrides(t *testing.T) {
 						Package: "three",
 						Level:   "three"},
 				},
+				HealthServer: HTTPServer{
+					Name:       "three",
+					Disabled:   &trueVal,
+					ListenURLs: []string{"c", "c", "c"},
+					ServerTLS: TLSInfo{
+						CertFile:       "three",
+						KeyFile:        "three",
+						TrustedCAFile:  "three",
+						CRLFile:        "three",
+						OCSPFile:       "three",
+						CipherSuites:   []string{"c", "c", "c"},
+						ClientCertAuth: &trueVal},
+					PackageLogger:  "three",
+					AllowProfiling: &trueVal,
+					ProfilerDir:    "three",
+					Services:       []string{"c", "c", "c"},
+					HeartbeatSecs:  1234,
+					CORS: CORS{
+						Enabled:            &trueVal,
+						MaxAge:             1234,
+						AllowedOrigins:     []string{"c", "c", "c"},
+						AllowedMethods:     []string{"c", "c", "c"},
+						AllowedHeaders:     []string{"c", "c", "c"},
+						ExposedHeaders:     []string{"c", "c", "c"},
+						AllowCredentials:   &trueVal,
+						OptionsPassthrough: &trueVal,
+						Debug:              &trueVal},
+					RequestTimeout:    Duration(time.Hour),
+					KeepAliveMinTime:  Duration(time.Hour),
+					KeepAliveInterval: Duration(time.Hour),
+					KeepAliveTimeout:  Duration(time.Hour)},
+				TrustyServer: HTTPServer{
+					Name:       "three",
+					Disabled:   &trueVal,
+					ListenURLs: []string{"c", "c", "c"},
+					ServerTLS: TLSInfo{
+						CertFile:       "three",
+						KeyFile:        "three",
+						TrustedCAFile:  "three",
+						CRLFile:        "three",
+						OCSPFile:       "three",
+						CipherSuites:   []string{"c", "c", "c"},
+						ClientCertAuth: &trueVal},
+					PackageLogger:  "three",
+					AllowProfiling: &trueVal,
+					ProfilerDir:    "three",
+					Services:       []string{"c", "c", "c"},
+					HeartbeatSecs:  1234,
+					CORS: CORS{
+						Enabled:            &trueVal,
+						MaxAge:             1234,
+						AllowedOrigins:     []string{"c", "c", "c"},
+						AllowedMethods:     []string{"c", "c", "c"},
+						AllowedHeaders:     []string{"c", "c", "c"},
+						ExposedHeaders:     []string{"c", "c", "c"},
+						AllowCredentials:   &trueVal,
+						OptionsPassthrough: &trueVal,
+						Debug:              &trueVal},
+					RequestTimeout:    Duration(time.Hour),
+					KeepAliveMinTime:  Duration(time.Hour),
+					KeepAliveInterval: Duration(time.Hour),
+					KeepAliveTimeout:  Duration(time.Hour)},
 				TrustyClient: TrustyClient{
 					Servers: []string{"c", "c", "c"},
 					ClientTLS: TLSInfo{
 						CertFile:       "three",
 						KeyFile:        "three",
 						TrustedCAFile:  "three",
-						ClientCertAuth: &trueVal}}},
+						CRLFile:        "three",
+						OCSPFile:       "three",
+						CipherSuites:   []string{"c", "c", "c"},
+						ClientCertAuth: &trueVal}},
+				VIPs: []string{"c", "c", "c"}},
 		},
 	}
 	f, err := ioutil.TempFile("", "config")
@@ -560,6 +1275,16 @@ func Test_LoadCustomJSON(t *testing.T) {
 				Directory:  "two",
 				MaxAgeDays: 42,
 				MaxSizeMb:  42},
+			Authz: Authz{
+				Allow:         []string{"b", "b"},
+				AllowAny:      []string{"b", "b"},
+				AllowAnyRole:  []string{"b", "b"},
+				LogAllowedAny: &falseVal,
+				LogAllowed:    &falseVal,
+				LogDenied:     &falseVal,
+				CertMapper:    "two",
+				APIKeyMapper:  "two",
+				JWTMapper:     "two"},
 			Logger: Logger{
 				Directory:  "two",
 				MaxAgeDays: 42,
@@ -570,13 +1295,79 @@ func Test_LoadCustomJSON(t *testing.T) {
 					Package: "two",
 					Level:   "two"},
 			},
+			HealthServer: HTTPServer{
+				Name:       "two",
+				Disabled:   &falseVal,
+				ListenURLs: []string{"b", "b"},
+				ServerTLS: TLSInfo{
+					CertFile:       "two",
+					KeyFile:        "two",
+					TrustedCAFile:  "two",
+					CRLFile:        "two",
+					OCSPFile:       "two",
+					CipherSuites:   []string{"b", "b"},
+					ClientCertAuth: &falseVal},
+				PackageLogger:  "two",
+				AllowProfiling: &falseVal,
+				ProfilerDir:    "two",
+				Services:       []string{"b", "b"},
+				HeartbeatSecs:  42,
+				CORS: CORS{
+					Enabled:            &falseVal,
+					MaxAge:             42,
+					AllowedOrigins:     []string{"b", "b"},
+					AllowedMethods:     []string{"b", "b"},
+					AllowedHeaders:     []string{"b", "b"},
+					ExposedHeaders:     []string{"b", "b"},
+					AllowCredentials:   &falseVal,
+					OptionsPassthrough: &falseVal,
+					Debug:              &falseVal},
+				RequestTimeout:    Duration(time.Minute),
+				KeepAliveMinTime:  Duration(time.Minute),
+				KeepAliveInterval: Duration(time.Minute),
+				KeepAliveTimeout:  Duration(time.Minute)},
+			TrustyServer: HTTPServer{
+				Name:       "two",
+				Disabled:   &falseVal,
+				ListenURLs: []string{"b", "b"},
+				ServerTLS: TLSInfo{
+					CertFile:       "two",
+					KeyFile:        "two",
+					TrustedCAFile:  "two",
+					CRLFile:        "two",
+					OCSPFile:       "two",
+					CipherSuites:   []string{"b", "b"},
+					ClientCertAuth: &falseVal},
+				PackageLogger:  "two",
+				AllowProfiling: &falseVal,
+				ProfilerDir:    "two",
+				Services:       []string{"b", "b"},
+				HeartbeatSecs:  42,
+				CORS: CORS{
+					Enabled:            &falseVal,
+					MaxAge:             42,
+					AllowedOrigins:     []string{"b", "b"},
+					AllowedMethods:     []string{"b", "b"},
+					AllowedHeaders:     []string{"b", "b"},
+					ExposedHeaders:     []string{"b", "b"},
+					AllowCredentials:   &falseVal,
+					OptionsPassthrough: &falseVal,
+					Debug:              &falseVal},
+				RequestTimeout:    Duration(time.Minute),
+				KeepAliveMinTime:  Duration(time.Minute),
+				KeepAliveInterval: Duration(time.Minute),
+				KeepAliveTimeout:  Duration(time.Minute)},
 			TrustyClient: TrustyClient{
 				Servers: []string{"b", "b"},
 				ClientTLS: TLSInfo{
 					CertFile:       "two",
 					KeyFile:        "two",
 					TrustedCAFile:  "two",
-					ClientCertAuth: &falseVal}}},
+					CRLFile:        "two",
+					OCSPFile:       "two",
+					CipherSuites:   []string{"b", "b"},
+					ClientCertAuth: &falseVal}},
+			VIPs: []string{"b", "b"}},
 		Hosts: map[string]string{"bob": "${ENV}"},
 		Overrides: map[string]Configuration{
 			"${ENV}": {
@@ -591,6 +1382,16 @@ func Test_LoadCustomJSON(t *testing.T) {
 					Directory:  "three",
 					MaxAgeDays: 1234,
 					MaxSizeMb:  1234},
+				Authz: Authz{
+					Allow:         []string{"c", "c", "c"},
+					AllowAny:      []string{"c", "c", "c"},
+					AllowAnyRole:  []string{"c", "c", "c"},
+					LogAllowedAny: &trueVal,
+					LogAllowed:    &trueVal,
+					LogDenied:     &trueVal,
+					CertMapper:    "three",
+					APIKeyMapper:  "three",
+					JWTMapper:     "three"},
 				Logger: Logger{
 					Directory:  "three",
 					MaxAgeDays: 1234,
@@ -601,13 +1402,79 @@ func Test_LoadCustomJSON(t *testing.T) {
 						Package: "three",
 						Level:   "three"},
 				},
+				HealthServer: HTTPServer{
+					Name:       "three",
+					Disabled:   &trueVal,
+					ListenURLs: []string{"c", "c", "c"},
+					ServerTLS: TLSInfo{
+						CertFile:       "three",
+						KeyFile:        "three",
+						TrustedCAFile:  "three",
+						CRLFile:        "three",
+						OCSPFile:       "three",
+						CipherSuites:   []string{"c", "c", "c"},
+						ClientCertAuth: &trueVal},
+					PackageLogger:  "three",
+					AllowProfiling: &trueVal,
+					ProfilerDir:    "three",
+					Services:       []string{"c", "c", "c"},
+					HeartbeatSecs:  1234,
+					CORS: CORS{
+						Enabled:            &trueVal,
+						MaxAge:             1234,
+						AllowedOrigins:     []string{"c", "c", "c"},
+						AllowedMethods:     []string{"c", "c", "c"},
+						AllowedHeaders:     []string{"c", "c", "c"},
+						ExposedHeaders:     []string{"c", "c", "c"},
+						AllowCredentials:   &trueVal,
+						OptionsPassthrough: &trueVal,
+						Debug:              &trueVal},
+					RequestTimeout:    Duration(time.Hour),
+					KeepAliveMinTime:  Duration(time.Hour),
+					KeepAliveInterval: Duration(time.Hour),
+					KeepAliveTimeout:  Duration(time.Hour)},
+				TrustyServer: HTTPServer{
+					Name:       "three",
+					Disabled:   &trueVal,
+					ListenURLs: []string{"c", "c", "c"},
+					ServerTLS: TLSInfo{
+						CertFile:       "three",
+						KeyFile:        "three",
+						TrustedCAFile:  "three",
+						CRLFile:        "three",
+						OCSPFile:       "three",
+						CipherSuites:   []string{"c", "c", "c"},
+						ClientCertAuth: &trueVal},
+					PackageLogger:  "three",
+					AllowProfiling: &trueVal,
+					ProfilerDir:    "three",
+					Services:       []string{"c", "c", "c"},
+					HeartbeatSecs:  1234,
+					CORS: CORS{
+						Enabled:            &trueVal,
+						MaxAge:             1234,
+						AllowedOrigins:     []string{"c", "c", "c"},
+						AllowedMethods:     []string{"c", "c", "c"},
+						AllowedHeaders:     []string{"c", "c", "c"},
+						ExposedHeaders:     []string{"c", "c", "c"},
+						AllowCredentials:   &trueVal,
+						OptionsPassthrough: &trueVal,
+						Debug:              &trueVal},
+					RequestTimeout:    Duration(time.Hour),
+					KeepAliveMinTime:  Duration(time.Hour),
+					KeepAliveInterval: Duration(time.Hour),
+					KeepAliveTimeout:  Duration(time.Hour)},
 				TrustyClient: TrustyClient{
 					Servers: []string{"c", "c", "c"},
 					ClientTLS: TLSInfo{
 						CertFile:       "three",
 						KeyFile:        "three",
 						TrustedCAFile:  "three",
-						ClientCertAuth: &trueVal}}},
+						CRLFile:        "three",
+						OCSPFile:       "three",
+						CipherSuites:   []string{"c", "c", "c"},
+						ClientCertAuth: &trueVal}},
+				VIPs: []string{"c", "c", "c"}},
 		},
 	}
 	f, err := ioutil.TempFile("", "customjson")

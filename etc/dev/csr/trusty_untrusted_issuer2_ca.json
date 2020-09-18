@@ -1,0 +1,18 @@
+{
+    "CN": "[TEST] Untrusted  Level 2 CA",
+    "key": {
+        "algo": "rsa",
+        "size": 4096
+    },
+    "names": [
+        {
+            "C": "US",
+            "L": "WA",
+            "O": "noorg"
+        }
+    ],
+    "ca": {
+        "pathlen": 1,
+        "expiry": "8760h"
+    }
+}

@@ -66,7 +66,318 @@ func (d Duration) TimeDuration() time.Duration {
 	return time.Duration(d)
 }
 
-// Configuration contains the user configurable data for a Raphty node
+// Authz contains configuration for the authorization module
+type Authz struct {
+
+	// Allow will allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
+	Allow []string
+
+	// AllowAny will allow any authenticated request access to this path and its children
+	AllowAny []string
+
+	// AllowAnyRole will allow any authenticated request that include a non empty role
+	AllowAnyRole []string
+
+	// LogAllowedAny specifies to log allowed access to Any role
+	LogAllowedAny *bool
+
+	// LogAllowed specifies to log allowed access
+	LogAllowed *bool
+
+	// LogDenied specifies to log denied access
+	LogDenied *bool
+
+	// CertMapper specifies location of the config file for certificate based identity.
+	CertMapper string
+
+	// APIKeyMapper specifies location of the config file for API-Key based identity.
+	APIKeyMapper string
+
+	// JWTMapper specifies location of the config file for JWT based identity.
+	JWTMapper string
+}
+
+func (c *Authz) overrideFrom(o *Authz) {
+	overrideStrings(&c.Allow, &o.Allow)
+	overrideStrings(&c.AllowAny, &o.AllowAny)
+	overrideStrings(&c.AllowAnyRole, &o.AllowAnyRole)
+	overrideBool(&c.LogAllowedAny, &o.LogAllowedAny)
+	overrideBool(&c.LogAllowed, &o.LogAllowed)
+	overrideBool(&c.LogDenied, &o.LogDenied)
+	overrideString(&c.CertMapper, &o.CertMapper)
+	overrideString(&c.APIKeyMapper, &o.APIKeyMapper)
+	overrideString(&c.JWTMapper, &o.JWTMapper)
+
+}
+
+// AuthzConfig contains configuration for the authorization module
+type AuthzConfig interface {
+	// Allow will allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
+	GetAllow() []string
+	// AllowAny will allow any authenticated request access to this path and its children
+	GetAllowAny() []string
+	// AllowAnyRole will allow any authenticated request that include a non empty role
+	GetAllowAnyRole() []string
+	// LogAllowedAny specifies to log allowed access to Any role
+	GetLogAllowedAny() bool
+	// LogAllowed specifies to log allowed access
+	GetLogAllowed() bool
+	// LogDenied specifies to log denied access
+	GetLogDenied() bool
+	// CertMapper specifies location of the config file for certificate based identity.
+	GetCertMapper() string
+	// APIKeyMapper specifies location of the config file for API-Key based identity.
+	GetAPIKeyMapper() string
+	// JWTMapper specifies location of the config file for JWT based identity.
+	GetJWTMapper() string
+}
+
+// GetAllow will allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
+func (c *Authz) GetAllow() []string {
+	return c.Allow
+}
+
+// GetAllowAny will allow any authenticated request access to this path and its children
+func (c *Authz) GetAllowAny() []string {
+	return c.AllowAny
+}
+
+// GetAllowAnyRole will allow any authenticated request that include a non empty role
+func (c *Authz) GetAllowAnyRole() []string {
+	return c.AllowAnyRole
+}
+
+// GetLogAllowedAny specifies to log allowed access to Any role
+func (c *Authz) GetLogAllowedAny() bool {
+	return c.LogAllowedAny != nil && *c.LogAllowedAny
+}
+
+// GetLogAllowed specifies to log allowed access
+func (c *Authz) GetLogAllowed() bool {
+	return c.LogAllowed != nil && *c.LogAllowed
+}
+
+// GetLogDenied specifies to log denied access
+func (c *Authz) GetLogDenied() bool {
+	return c.LogDenied != nil && *c.LogDenied
+}
+
+// GetCertMapper specifies location of the config file for certificate based identity.
+func (c *Authz) GetCertMapper() string {
+	return c.CertMapper
+}
+
+// GetAPIKeyMapper specifies location of the config file for API-Key based identity.
+func (c *Authz) GetAPIKeyMapper() string {
+	return c.APIKeyMapper
+}
+
+// GetJWTMapper specifies location of the config file for JWT based identity.
+func (c *Authz) GetJWTMapper() string {
+	return c.JWTMapper
+}
+
+// AutoGenCert contains configuration info for the auto generated certificate
+type AutoGenCert struct {
+
+	// Disabled specifies if the certificate disabled to use
+	Disabled *bool
+
+	// CertFile specifies location of the cert
+	CertFile string
+
+	// KeyFile specifies location of the key
+	KeyFile string
+
+	// Profile specifies the certificate profile
+	Profile string
+
+	// Renewal specifies value in 165h00m00s format for renewal before expiration date
+	Renewal string
+
+	// Schedule specifies a schedule for renewal task in format documented in /pkg/tasks. If it is empty, then the default value is used.
+	Schedule string
+
+	// Hosts decribes the list of the hosts in the cluster [this is used when building the cert requests]
+	Hosts []string
+}
+
+func (c *AutoGenCert) overrideFrom(o *AutoGenCert) {
+	overrideBool(&c.Disabled, &o.Disabled)
+	overrideString(&c.CertFile, &o.CertFile)
+	overrideString(&c.KeyFile, &o.KeyFile)
+	overrideString(&c.Profile, &o.Profile)
+	overrideString(&c.Renewal, &o.Renewal)
+	overrideString(&c.Schedule, &o.Schedule)
+	overrideStrings(&c.Hosts, &o.Hosts)
+
+}
+
+// AutoGenCertConfig contains configuration info for the auto generated certificate
+type AutoGenCertConfig interface {
+	// Disabled specifies if the certificate disabled to use
+	GetDisabled() bool
+	// CertFile specifies location of the cert
+	GetCertFile() string
+	// KeyFile specifies location of the key
+	GetKeyFile() string
+	// Profile specifies the certificate profile
+	GetProfile() string
+	// Renewal specifies value in 165h00m00s format for renewal before expiration date
+	GetRenewal() string
+	// Schedule specifies a schedule for renewal task in format documented in /pkg/tasks. If it is empty, then the default value is used.
+	GetSchedule() string
+	// Hosts decribes the list of the hosts in the cluster [this is used when building the cert requests]
+	GetHosts() []string
+}
+
+// GetDisabled specifies if the certificate disabled to use
+func (c *AutoGenCert) GetDisabled() bool {
+	return c.Disabled != nil && *c.Disabled
+}
+
+// GetCertFile specifies location of the cert
+func (c *AutoGenCert) GetCertFile() string {
+	return c.CertFile
+}
+
+// GetKeyFile specifies location of the key
+func (c *AutoGenCert) GetKeyFile() string {
+	return c.KeyFile
+}
+
+// GetProfile specifies the certificate profile
+func (c *AutoGenCert) GetProfile() string {
+	return c.Profile
+}
+
+// GetRenewal specifies value in 165h00m00s format for renewal before expiration date
+func (c *AutoGenCert) GetRenewal() string {
+	return c.Renewal
+}
+
+// GetSchedule specifies a schedule for renewal task in format documented in /pkg/tasks. If it is empty, then the default value is used.
+func (c *AutoGenCert) GetSchedule() string {
+	return c.Schedule
+}
+
+// GetHosts decribes the list of the hosts in the cluster [this is used when building the cert requests]
+func (c *AutoGenCert) GetHosts() []string {
+	return c.Hosts
+}
+
+// CORS contains configuration for CORS.
+type CORS struct {
+
+	// Enabled specifies if the CORS is enabled.
+	Enabled *bool
+
+	// MaxAge indicates how long (in seconds) the results of a preflight request can be cached.
+	MaxAge int
+
+	// AllowedOrigins is a list of origins a cross-domain request can be executed from.
+	AllowedOrigins []string
+
+	// AllowedMethods is a list of methods the client is allowed to use with cross-domain requests.
+	AllowedMethods []string
+
+	// AllowedHeaders is list of non simple headers the client is allowed to use with cross-domain requests.
+	AllowedHeaders []string
+
+	// ExposedHeaders indicates which headers are safe to expose to the API of a CORS API specification.
+	ExposedHeaders []string
+
+	// AllowCredentials indicates whether the request can include user credentials.
+	AllowCredentials *bool
+
+	// OptionsPassthrough instructs preflight to let other potential next handlers to process the OPTIONS method.
+	OptionsPassthrough *bool
+
+	// Debug flag adds additional output to debug server side CORS issues.
+	Debug *bool
+}
+
+func (c *CORS) overrideFrom(o *CORS) {
+	overrideBool(&c.Enabled, &o.Enabled)
+	overrideInt(&c.MaxAge, &o.MaxAge)
+	overrideStrings(&c.AllowedOrigins, &o.AllowedOrigins)
+	overrideStrings(&c.AllowedMethods, &o.AllowedMethods)
+	overrideStrings(&c.AllowedHeaders, &o.AllowedHeaders)
+	overrideStrings(&c.ExposedHeaders, &o.ExposedHeaders)
+	overrideBool(&c.AllowCredentials, &o.AllowCredentials)
+	overrideBool(&c.OptionsPassthrough, &o.OptionsPassthrough)
+	overrideBool(&c.Debug, &o.Debug)
+
+}
+
+// CORSConfig contains configuration for CORSConfig.
+type CORSConfig interface {
+	// Enabled specifies if the CORS is enabled.
+	GetEnabled() bool
+	// MaxAge indicates how long (in seconds) the results of a preflight request can be cached.
+	GetMaxAge() int
+	// AllowedOrigins is a list of origins a cross-domain request can be executed from.
+	GetAllowedOrigins() []string
+	// AllowedMethods is a list of methods the client is allowed to use with cross-domain requests.
+	GetAllowedMethods() []string
+	// AllowedHeaders is list of non simple headers the client is allowed to use with cross-domain requests.
+	GetAllowedHeaders() []string
+	// ExposedHeaders indicates which headers are safe to expose to the API of a CORS API specification.
+	GetExposedHeaders() []string
+	// AllowCredentials indicates whether the request can include user credentials.
+	GetAllowCredentials() bool
+	// OptionsPassthrough instructs preflight to let other potential next handlers to process the OPTIONS method.
+	GetOptionsPassthrough() bool
+	// Debug flag adds additional output to debug server side CORS issues.
+	GetDebug() bool
+}
+
+// GetEnabled specifies if the CORS is enabled.
+func (c *CORS) GetEnabled() bool {
+	return c.Enabled != nil && *c.Enabled
+}
+
+// GetMaxAge indicates how long (in seconds) the results of a preflight request can be cached.
+func (c *CORS) GetMaxAge() int {
+	return c.MaxAge
+}
+
+// GetAllowedOrigins is a list of origins a cross-domain request can be executed from.
+func (c *CORS) GetAllowedOrigins() []string {
+	return c.AllowedOrigins
+}
+
+// GetAllowedMethods is a list of methods the client is allowed to use with cross-domain requests.
+func (c *CORS) GetAllowedMethods() []string {
+	return c.AllowedMethods
+}
+
+// GetAllowedHeaders is list of non simple headers the client is allowed to use with cross-domain requests.
+func (c *CORS) GetAllowedHeaders() []string {
+	return c.AllowedHeaders
+}
+
+// GetExposedHeaders indicates which headers are safe to expose to the API of a CORS API specification.
+func (c *CORS) GetExposedHeaders() []string {
+	return c.ExposedHeaders
+}
+
+// GetAllowCredentials indicates whether the request can include user credentials.
+func (c *CORS) GetAllowCredentials() bool {
+	return c.AllowCredentials != nil && *c.AllowCredentials
+}
+
+// GetOptionsPassthrough instructs preflight to let other potential next handlers to process the OPTIONS method.
+func (c *CORS) GetOptionsPassthrough() bool {
+	return c.OptionsPassthrough != nil && *c.OptionsPassthrough
+}
+
+// GetDebug flag adds additional output to debug server side CORS issues.
+func (c *CORS) GetDebug() bool {
+	return c.Debug != nil && *c.Debug
+}
+
+// Configuration contains the user configurable data for the service
 type Configuration struct {
 
 	// Region specifies the Region / Datacenter where the instance is running
@@ -87,14 +398,26 @@ type Configuration struct {
 	// Audit contains configuration for the audit logger
 	Audit Logger
 
+	// Authz contains configuration for the API authorization layer
+	Authz Authz
+
 	// Logger contains configuration for the logger
 	Logger Logger
 
 	// LogLevels specifies the log levels per package
 	LogLevels []RepoLogLevel
 
+	// HealthServer specifies configurations for the health server
+	HealthServer HTTPServer
+
+	// TrustyServer specifies configurations for the trusty server
+	TrustyServer HTTPServer
+
 	// TrustyClient specifies configurations for the client to connect to the cluster
 	TrustyClient TrustyClient
+
+	// VIPs is a list of the FQ name of the VIP to the cluster
+	VIPs []string
 }
 
 func (c *Configuration) overrideFrom(o *Configuration) {
@@ -104,9 +427,13 @@ func (c *Configuration) overrideFrom(o *Configuration) {
 	overrideString(&c.ClusterName, &o.ClusterName)
 	c.CryptoProv.overrideFrom(&o.CryptoProv)
 	c.Audit.overrideFrom(&o.Audit)
+	c.Authz.overrideFrom(&o.Authz)
 	c.Logger.overrideFrom(&o.Logger)
 	overrideRepoLogLevelSlice(&c.LogLevels, &o.LogLevels)
+	c.HealthServer.overrideFrom(&o.HealthServer)
+	c.TrustyServer.overrideFrom(&o.TrustyServer)
 	c.TrustyClient.overrideFrom(&o.TrustyClient)
+	overrideStrings(&c.VIPs, &o.VIPs)
 
 }
 
@@ -124,6 +451,172 @@ func (c *CryptoProv) overrideFrom(o *CryptoProv) {
 	overrideString(&c.Default, &o.Default)
 	overrideStrings(&c.Providers, &o.Providers)
 
+}
+
+// HTTPServer contains the configuration of the HTTP API Service
+type HTTPServer struct {
+
+	// Name specifies name of the server
+	Name string
+
+	// Disabled specifies if the service is disabled
+	Disabled *bool
+
+	// ListenURLs is the list of URLs that the server will be listen on
+	ListenURLs []string
+
+	// ServerTLS provides TLS config for server
+	ServerTLS TLSInfo
+
+	// PackageLogger if set, specifies name of the package logger
+	PackageLogger string
+
+	// AllowProfiling if set, will allow for per request CPU/Memory profiling triggered by the URI QueryString
+	AllowProfiling *bool
+
+	// ProfilerDir specifies the directories where per-request profile information is written, if not set will write to a TMP dir
+	ProfilerDir string
+
+	// Services is a list of services to enable for this HTTP Service
+	Services []string
+
+	// HeartbeatSecs specifies heartbeat interval in seconds [5 secs is a minimum]
+	HeartbeatSecs int
+
+	// CORS contains configuration for CORS.
+	CORS CORS
+
+	// RequestTimeout is the timeout for client requests to finish.
+	RequestTimeout Duration
+
+	// KeepAliveMinTime is the minimum interval that a client should wait before pinging server.
+	KeepAliveMinTime Duration
+
+	// KeepAliveInterval is the frequency of server-to-client ping to check if a connection is alive.
+	KeepAliveInterval Duration
+
+	// KeepAliveTimeout is the additional duration of wait before closing a non-responsive connection, use 0 to disable.
+	KeepAliveTimeout Duration
+}
+
+func (c *HTTPServer) overrideFrom(o *HTTPServer) {
+	overrideString(&c.Name, &o.Name)
+	overrideBool(&c.Disabled, &o.Disabled)
+	overrideStrings(&c.ListenURLs, &o.ListenURLs)
+	c.ServerTLS.overrideFrom(&o.ServerTLS)
+	overrideString(&c.PackageLogger, &o.PackageLogger)
+	overrideBool(&c.AllowProfiling, &o.AllowProfiling)
+	overrideString(&c.ProfilerDir, &o.ProfilerDir)
+	overrideStrings(&c.Services, &o.Services)
+	overrideInt(&c.HeartbeatSecs, &o.HeartbeatSecs)
+	c.CORS.overrideFrom(&o.CORS)
+	overrideDuration(&c.RequestTimeout, &o.RequestTimeout)
+	overrideDuration(&c.KeepAliveMinTime, &o.KeepAliveMinTime)
+	overrideDuration(&c.KeepAliveInterval, &o.KeepAliveInterval)
+	overrideDuration(&c.KeepAliveTimeout, &o.KeepAliveTimeout)
+
+}
+
+// HTTPServerConfig contains the configuration of the HTTP API Service
+type HTTPServerConfig interface {
+	// Name specifies name of the server
+	GetName() string
+	// Disabled specifies if the service is disabled
+	GetDisabled() bool
+	// ListenURLs is the list of URLs that the server will be listen on
+	GetListenURLs() []string
+	// ServerTLS provides TLS config for server
+	GetServerTLSCfg() *TLSInfo
+	// PackageLogger if set, specifies name of the package logger
+	GetPackageLogger() string
+	// AllowProfiling if set, will allow for per request CPU/Memory profiling triggered by the URI QueryString
+	GetAllowProfiling() bool
+	// ProfilerDir specifies the directories where per-request profile information is written, if not set will write to a TMP dir
+	GetProfilerDir() string
+	// Services is a list of services to enable for this HTTP Service
+	GetServices() []string
+	// HeartbeatSecs specifies heartbeat GetHeartbeatSecserval in seconds [5 secs is a minimum]
+	GetHeartbeatSecs() int
+	// GetCORSCfg contains configuration for GetCORSCfg.
+	GetCORSCfg() *CORS
+	// RequestTimeout is the timeout for client requests to finish.
+	GetRequestTimeout() time.Duration
+	// KeepAliveMinTime is the minimum interval that a client should wait before pinging server.
+	GetKeepAliveMinTime() time.Duration
+	// KeepAliveInterval is the frequency of server-to-client ping to check if a connection is alive.
+	GetKeepAliveInterval() time.Duration
+	// KeepAliveTimeout is the additional duration of wait before closing a non-responsive connection, use 0 to disable.
+	GetKeepAliveTimeout() time.Duration
+}
+
+// GetName specifies name of the server
+func (c *HTTPServer) GetName() string {
+	return c.Name
+}
+
+// GetDisabled specifies if the service is disabled
+func (c *HTTPServer) GetDisabled() bool {
+	return c.Disabled != nil && *c.Disabled
+}
+
+// GetListenURLs is the list of URLs that the server will be listen on
+func (c *HTTPServer) GetListenURLs() []string {
+	return c.ListenURLs
+}
+
+// GetServerTLSCfg provides TLS config for server
+func (c *HTTPServer) GetServerTLSCfg() *TLSInfo {
+	return &c.ServerTLS
+}
+
+// GetPackageLogger if set, specifies name of the package logger
+func (c *HTTPServer) GetPackageLogger() string {
+	return c.PackageLogger
+}
+
+// GetAllowProfiling if set, will allow for per request CPU/Memory profiling triggered by the URI QueryString
+func (c *HTTPServer) GetAllowProfiling() bool {
+	return c.AllowProfiling != nil && *c.AllowProfiling
+}
+
+// GetProfilerDir specifies the directories where per-request profile information is written, if not set will write to a TMP dir
+func (c *HTTPServer) GetProfilerDir() string {
+	return c.ProfilerDir
+}
+
+// GetServices is a list of services to enable for this HTTP Service
+func (c *HTTPServer) GetServices() []string {
+	return c.Services
+}
+
+// GetHeartbeatSecs specifies heartbeat interval in seconds [5 secs is a minimum]
+func (c *HTTPServer) GetHeartbeatSecs() int {
+	return c.HeartbeatSecs
+}
+
+// GetCORSCfg contains configuration for GetCORSCfg.
+func (c *HTTPServer) GetCORSCfg() *CORS {
+	return &c.CORS
+}
+
+// GetRequestTimeout is the timeout for client requests to finish.
+func (c *HTTPServer) GetRequestTimeout() time.Duration {
+	return c.RequestTimeout.TimeDuration()
+}
+
+// GetKeepAliveMinTime is the minimum interval that a client should wait before pinging server.
+func (c *HTTPServer) GetKeepAliveMinTime() time.Duration {
+	return c.KeepAliveMinTime.TimeDuration()
+}
+
+// GetKeepAliveInterval is the frequency of server-to-client ping to check if a connection is alive.
+func (c *HTTPServer) GetKeepAliveInterval() time.Duration {
+	return c.KeepAliveInterval.TimeDuration()
+}
+
+// GetKeepAliveTimeout is the additional duration of wait before closing a non-responsive connection, use 0 to disable.
+func (c *HTTPServer) GetKeepAliveTimeout() time.Duration {
+	return c.KeepAliveTimeout.TimeDuration()
 }
 
 // Logger contains information about the configuration of a logger/log rotation
@@ -237,6 +730,15 @@ type TLSInfo struct {
 	// TrustedCAFile specifies location of the trusted Root file
 	TrustedCAFile string
 
+	// CRLFile specifies location of the CRL
+	CRLFile string
+
+	// OCSPFile specifies location of the OCSP response
+	OCSPFile string
+
+	// CipherSuites allows to speciy Cipher suites
+	CipherSuites []string
+
 	// ClientCertAuth controls client auth
 	ClientCertAuth *bool
 }
@@ -245,6 +747,9 @@ func (c *TLSInfo) overrideFrom(o *TLSInfo) {
 	overrideString(&c.CertFile, &o.CertFile)
 	overrideString(&c.KeyFile, &o.KeyFile)
 	overrideString(&c.TrustedCAFile, &o.TrustedCAFile)
+	overrideString(&c.CRLFile, &o.CRLFile)
+	overrideString(&c.OCSPFile, &o.OCSPFile)
+	overrideStrings(&c.CipherSuites, &o.CipherSuites)
 	overrideBool(&c.ClientCertAuth, &o.ClientCertAuth)
 
 }
@@ -257,6 +762,12 @@ type TLSInfoConfig interface {
 	GetKeyFile() string
 	// TrustedCAFile specifies location of the trusted Root file
 	GetTrustedCAFile() string
+	// CRLFile specifies location of the CRL
+	GetCRLFile() string
+	// OCSPFile specifies location of the OCSP response
+	GetOCSPFile() string
+	// CipherSuites allows to speciy Cipher suites
+	GetCipherSuites() []string
 	// ClientCertAuth controls client auth
 	GetClientCertAuth() bool
 }
@@ -274,6 +785,21 @@ func (c *TLSInfo) GetKeyFile() string {
 // GetTrustedCAFile specifies location of the trusted Root file
 func (c *TLSInfo) GetTrustedCAFile() string {
 	return c.TrustedCAFile
+}
+
+// GetCRLFile specifies location of the CRL
+func (c *TLSInfo) GetCRLFile() string {
+	return c.CRLFile
+}
+
+// GetOCSPFile specifies location of the OCSP response
+func (c *TLSInfo) GetOCSPFile() string {
+	return c.OCSPFile
+}
+
+// GetCipherSuites allows to speciy Cipher suites
+func (c *TLSInfo) GetCipherSuites() []string {
+	return c.CipherSuites
 }
 
 // GetClientCertAuth controls client auth
@@ -317,6 +843,12 @@ func (c *TrustyClient) GetClientTLSCfg() *TLSInfo {
 
 func overrideBool(d, o **bool) {
 	if *o != nil {
+		*d = *o
+	}
+}
+
+func overrideDuration(d, o *Duration) {
+	if *o != 0 {
 		*d = *o
 	}
 }

@@ -2,7 +2,7 @@ include .project/gomod-project.mk
 
 SHA := $(shell git rev-parse HEAD)
 
-export COVERAGE_EXCLUSIONS="vendor|tests|main.go"
+export COVERAGE_EXCLUSIONS="vendor|tests|main.go|rpc.pb.go|rpc.pb.gw.go"
 export TRUSTY_DIR=${PROJ_ROOT}
 export GO111MODULE=on
 BUILD_FLAGS=-mod=vendor
@@ -13,7 +13,7 @@ BUILD_FLAGS=-mod=vendor
 
 default: help
 
-all: clean folders tools generate hsmconfig build
+all: clean folders tools generate hsmconfig build gen_test_certs
 
 #
 # clean produced files
@@ -36,6 +36,8 @@ tools:
 	go install github.com/go-phorce/configen/cmd/configen
 	go install github.com/mattn/goreman
 	go install github.com/mattn/goveralls
+	go install github.com/cloudflare/cfssl/cmd/cfssl
+	go install github.com/cloudflare/cfssl/cmd/cfssljson
 
 folders:
 	mkdir -p /tmp/trusty/softhsm/tokens \
@@ -76,3 +78,25 @@ hsmconfig:
         --generate-pin -s trusty_unittest \
         -o /tmp/trusty/softhsm/unittest_hsm.json \
 		--delete --list-slots --list-object
+
+gen_test_certs:
+	echo "*** Running gen_test_certs"
+	echo "*** generating untrusted CAs"
+	$(PROJ_ROOT)/.project/gen_test_certs.sh \
+		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.json \
+        --out-dir /tmp/trusty/certs \
+        --csr-dir $(PROJ_ROOT)/etc/dev/csr \
+        --prefix $(PROJ_NAME)_untrusted_ \
+        --root-ca /tmp/trusty/certs/trusty_untrusted_root_ca.pem \
+        --root-ca-key /tmp/trusty/certs/trusty_untrusted_root_ca-key.pem \
+        --root --ca1 --ca2 --bundle --peer
+	echo "*** generating test CAs"
+	rm -f /tmp/trusty/certs/$(PROJ_NAME)_dev_peer*
+	$(PROJ_ROOT)/.project/gen_test_certs.sh \
+		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.json \
+        --out-dir /tmp/trusty/certs \
+        --csr-dir $(PROJ_ROOT)/etc/dev/csr \
+        --prefix $(PROJ_NAME)_dev_ \
+        --root-ca /tmp/trusty/certs/trusty_dev_root_ca.pem \
+        --root-ca-key /tmp/trusty/certs/trusty_dev_root_ca-key.pem \
+        --root --ca1 --ca2  --bundle --peer

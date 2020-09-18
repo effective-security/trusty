@@ -22,23 +22,52 @@ service Status {
             get: "/v1/status/server"
       };
     }
+
+    // Caller returns the caller status.
+    rpc Caller(EmptyRequest) returns (CallerStatusResponse) {
+        option (google.api.http) = {
+            get: "/v1/status/caller"
+      };
+    }
 }
 
 message EmptyRequest {
 }
 
 message VersionResponse {
-    // version is the server version.
-    string version = 1;
+    // Version is the server version.
+    string Version = 1;
 }
 
 message ServerStatus {
-    // nodename is the human-readable name of the cluster member.
-    string nodename = 1;
-    // nodename is operating system's host name.
-    string hostname = 2;
+    // Name of the server or application.
+    string Name = 1;
+    // Nodename is the human-readable name of the cluster member,
+    // or empty for single host.
+    string Nodename = 2;
+    // Hostname is operating system's host name.
+    string Hostname = 3;
+    // ListenURLs is the list of URLs the service is listening on.
+    repeated string ListenURLs = 4;
+    // StartedAt is the Unix time when the server has started.
+    int64 StartedAt = 5;
+    // Version is the server version.
+    string Version = 6;
 }
 
 message ServerStatusResponse {
-    ServerStatus status = 1;
+    // Status of the server.
+    ServerStatus Status = 1;
+}
+
+message CallerStatusResponse {
+    // Role of the caller.
+    string Role = 1;
+}
+
+// Error is the generic error returned from unary RPCs.
+message Error {
+	string error = 1;
+	int32 code = 2;
+	string message = 3;
 }
