@@ -122,8 +122,9 @@
         "CryptoProv" : {
             "comment" : "CryptoProv specifies the configuration for crypto providers",
             "Fields" : [
-                { "name" : "Default",   "type" : "string",   "comment" : "Default specifies the location of the configuration file for default provider" },
-                { "name" : "Providers", "type" : "[]string", "comment" : "Providers specifies the list of locations of the configuration files" }
+                { "name" : "Default",             "type" : "string",   "comment" : "Default specifies the location of the configuration file for default provider" },
+                { "name" : "Providers",           "type" : "[]string", "comment" : "Providers specifies the list of locations of the configuration files" },
+                { "name" : "PKCS11Manufacturers", "type" : "[]string", "comment" : "PKCS11Manufacturers specifies the list of supported manufactures of PKCS11 tokens" }
             ]
         },
         "Metrics" : {

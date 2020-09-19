@@ -445,11 +445,15 @@ type CryptoProv struct {
 
 	// Providers specifies the list of locations of the configuration files
 	Providers []string
+
+	// PKCS11Manufacturers specifies the list of supported manufactures of PKCS11 tokens
+	PKCS11Manufacturers []string
 }
 
 func (c *CryptoProv) overrideFrom(o *CryptoProv) {
 	overrideString(&c.Default, &o.Default)
 	overrideStrings(&c.Providers, &o.Providers)
+	overrideStrings(&c.PKCS11Manufacturers, &o.PKCS11Manufacturers)
 
 }
 

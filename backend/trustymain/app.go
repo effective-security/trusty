@@ -143,9 +143,6 @@ func (a *App) Run(startedCh chan<- bool) error {
 	ver := version.Current().String()
 	logger.Infof("src=Run, hostname=%s, ip=%s, version=%s", hostname, ipaddr, ver)
 
-	cryptoprov.Register("SoftHSM", cryptoprov.Crypto11Loader)
-	cryptoprov.Register("Gemalto NV", cryptoprov.Crypto11Loader)
-
 	a.scheduler = tasks.NewScheduler()
 
 	err = a.initCPUProfiler(*a.flags.cpu)

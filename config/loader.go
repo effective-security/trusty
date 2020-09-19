@@ -19,6 +19,7 @@ import (
 	"github.com/go-phorce/dolly/fileutil/resolve"
 	"github.com/go-phorce/dolly/netutil"
 	"github.com/go-phorce/dolly/xlog"
+	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
 )
 
@@ -178,6 +179,10 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 
 	for _, ptr := range optionalFilesToResove {
 		*ptr, _ = resolve.File(*ptr, baseDir)
+	}
+
+	for _, m := range c.CryptoProv.PKCS11Manufacturers {
+		cryptoprov.Register(m, cryptoprov.Crypto11Loader)
 	}
 
 	return c, err

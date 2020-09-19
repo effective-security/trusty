@@ -372,8 +372,9 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 		ServiceName: "one",
 		ClusterName: "one",
 		CryptoProv: CryptoProv{
-			Default:   "one",
-			Providers: []string{"a"}},
+			Default:             "one",
+			Providers:           []string{"a"},
+			PKCS11Manufacturers: []string{"a"}},
 		Audit: Logger{
 			Directory:  "one",
 			MaxAgeDays: -42,
@@ -481,8 +482,9 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 		ServiceName: "two",
 		ClusterName: "two",
 		CryptoProv: CryptoProv{
-			Default:   "two",
-			Providers: []string{"b", "b"}},
+			Default:             "two",
+			Providers:           []string{"b", "b"},
+			PKCS11Manufacturers: []string{"b", "b"}},
 		Audit: Logger{
 			Directory:  "two",
 			MaxAgeDays: 42,
@@ -593,15 +595,17 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 
 func TestCryptoProv_overrideFrom(t *testing.T) {
 	orig := CryptoProv{
-		Default:   "one",
-		Providers: []string{"a"}}
+		Default:             "one",
+		Providers:           []string{"a"},
+		PKCS11Manufacturers: []string{"a"}}
 	dest := orig
 	var zero CryptoProv
 	dest.overrideFrom(&zero)
 	require.Equal(t, dest, orig, "CryptoProv.overrideFrom shouldn't have overriden the value as the override is the default/zero value. value now %#v", dest)
 	o := CryptoProv{
-		Default:   "two",
-		Providers: []string{"b", "b"}}
+		Default:             "two",
+		Providers:           []string{"b", "b"},
+		PKCS11Manufacturers: []string{"b", "b"}}
 	dest.overrideFrom(&o)
 	require.Equal(t, dest, o, "CryptoProv.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
 	o2 := CryptoProv{
@@ -998,8 +1002,9 @@ func Test_LoadOverrides(t *testing.T) {
 			ServiceName: "two",
 			ClusterName: "two",
 			CryptoProv: CryptoProv{
-				Default:   "two",
-				Providers: []string{"b", "b"}},
+				Default:             "two",
+				Providers:           []string{"b", "b"},
+				PKCS11Manufacturers: []string{"b", "b"}},
 			Audit: Logger{
 				Directory:  "two",
 				MaxAgeDays: 42,
@@ -1105,8 +1110,9 @@ func Test_LoadOverrides(t *testing.T) {
 				ServiceName: "three",
 				ClusterName: "three",
 				CryptoProv: CryptoProv{
-					Default:   "three",
-					Providers: []string{"c", "c", "c"}},
+					Default:             "three",
+					Providers:           []string{"c", "c", "c"},
+					PKCS11Manufacturers: []string{"c", "c", "c"}},
 				Audit: Logger{
 					Directory:  "three",
 					MaxAgeDays: 1234,
@@ -1269,8 +1275,9 @@ func Test_LoadCustomJSON(t *testing.T) {
 			ServiceName: "two",
 			ClusterName: "two",
 			CryptoProv: CryptoProv{
-				Default:   "two",
-				Providers: []string{"b", "b"}},
+				Default:             "two",
+				Providers:           []string{"b", "b"},
+				PKCS11Manufacturers: []string{"b", "b"}},
 			Audit: Logger{
 				Directory:  "two",
 				MaxAgeDays: 42,
@@ -1376,8 +1383,9 @@ func Test_LoadCustomJSON(t *testing.T) {
 				ServiceName: "three",
 				ClusterName: "three",
 				CryptoProv: CryptoProv{
-					Default:   "three",
-					Providers: []string{"c", "c", "c"}},
+					Default:             "three",
+					Providers:           []string{"c", "c", "c"},
+					PKCS11Manufacturers: []string{"c", "c", "c"}},
 				Audit: Logger{
 					Directory:  "three",
 					MaxAgeDays: 1234,
