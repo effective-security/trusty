@@ -14,7 +14,7 @@ Trusty is a Certification Authority.
 
 * `make all` initializes all dependencies, builds and tests.
 * `make proto` generates gRPC protobuf.
-* `make build` build the raphty executable
+* `make build` build the executable
 * `make gen_test_certs` generate test certificates
 * `make test` run the tests
 * `make testshort` runs the tests skipping the end-to-end tests and the code coverage reporting

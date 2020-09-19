@@ -10,7 +10,7 @@ import (
 	"github.com/juju/errors"
 )
 
-// Version shows raphty version
+// Version shows the service version
 func Version(c ctl.Control, _ interface{}) error {
 	cli := c.(*cli.Cli)
 	client := pb.NewStatusClient(cli.GrpcConnection())

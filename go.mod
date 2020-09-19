@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/cloudflare/cfssl v0.0.0-20181102015659-ea4033a214e7
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-phorce/configen v0.5.1-0.20200810213452-d4cce3de762c
 	github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba
 	github.com/go-phorce/dolly v0.4.1-0.20200917154250-262ab747d445
@@ -22,4 +23,5 @@ require (
 	google.golang.org/grpc v1.31.1
 	google.golang.org/grpc/examples v0.0.0-20200910201057-6591123024b3 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
+	gopkg.in/yaml.v2 v2.3.0
 )

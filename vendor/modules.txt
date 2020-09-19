@@ -80,6 +80,9 @@ github.com/cloudflare/cfssl/ubiquity
 github.com/daaku/go.zipexe
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
+# github.com/dgrijalva/jwt-go v3.2.0+incompatible
+## explicit
+github.com/dgrijalva/jwt-go
 # github.com/go-phorce/configen v0.5.1-0.20200810213452-d4cce3de762c
 ## explicit
 github.com/go-phorce/configen/cmd/configen
@@ -92,6 +95,7 @@ github.com/go-phorce/cov-report/version
 ## explicit
 github.com/go-phorce/dolly/algorithms/guid
 github.com/go-phorce/dolly/algorithms/math
+github.com/go-phorce/dolly/algorithms/slices
 github.com/go-phorce/dolly/audit
 github.com/go-phorce/dolly/audit/log
 github.com/go-phorce/dolly/ctl
@@ -404,6 +408,7 @@ gopkg.in/alecthomas/kingpin.v2
 # gopkg.in/natefinch/lumberjack.v2 v2.0.0-20170531160350-a96e63847dc3
 gopkg.in/natefinch/lumberjack.v2
 # gopkg.in/yaml.v2 v2.3.0
+## explicit
 gopkg.in/yaml.v2
 # gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 gopkg.in/yaml.v3
