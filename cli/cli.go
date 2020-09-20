@@ -250,6 +250,16 @@ func (cli *Cli) PopulateControl() error {
 	return nil
 }
 
+// WithGrpcConnection sets gRPC connection to the server
+func (cli *Cli) WithGrpcConnection(conn *grpc.ClientConn) *Cli {
+	if cli.conn != nil {
+		cli.conn.Close()
+		cli.conn = nil
+	}
+	cli.conn = conn
+	return cli
+}
+
 // GrpcConnection returns gRPC connection to the server
 func (cli *Cli) GrpcConnection() *grpc.ClientConn {
 	if cli == nil || cli.conn == nil {

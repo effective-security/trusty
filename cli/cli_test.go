@@ -137,6 +137,11 @@ func TestCLIEnsureGrpcConnection(t *testing.T) {
 
 	assert.Equal(t, ctl.RCOkay, cli.ReturnCode())
 	assert.Contains(t, out.String(), "connection: *grpc.ClientConn\n")
+
+	cli.WithGrpcConnection(nil)
+	require.Panics(t, func() {
+		cli.GrpcConnection()
+	})
 }
 
 func TestCLIWithServiceCfgNoDefault(t *testing.T) {
