@@ -1,0 +1,13 @@
+issuer: "trusty"
+audience: "trusty"
+kid: "1"
+keys:
+- id: "0"
+  seed: "kjshkfrjhqlkjewflkewhrhvwjevwnerwercwkermcw"
+- id: "1"
+  seed: "eworvcwbevcwvczshdcwevkjnsdfkjvnlstvbserbvw"
+default_role: trusty-client
+roles:
+  trusty-admin:
+  - denis@ekspand.com
+  - andrew@ekspand.com

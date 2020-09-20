@@ -18,12 +18,14 @@ import (
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/tasks"
 	"github.com/go-phorce/dolly/xhttp/authz"
+	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xlog/logrotate"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/go-phorce/trusty/backend/service/status"
 	"github.com/go-phorce/trusty/backend/trustyserver"
 	"github.com/go-phorce/trusty/config"
+	"github.com/go-phorce/trusty/pkg/roles"
 	"github.com/go-phorce/trusty/version"
 	"github.com/juju/errors"
 	"go.uber.org/dig"
@@ -336,6 +338,17 @@ func (a *App) injectDependencies() error {
 			if err != nil {
 				return nil, errors.Trace(err)
 			}
+		}
+		if cfg.Authz.JWTMapper != "" || cfg.Authz.CertMapper != "" {
+			p, err := roles.New(
+				cfg.Authz.JWTMapper,
+				cfg.Authz.CertMapper,
+			)
+			if err != nil {
+				return nil, errors.Trace(err)
+			}
+			identity.SetGlobalIdentityMapper(p.IdentityMapper)
+			//jwt = p.JwtMapper
 		}
 
 		return azp, nil

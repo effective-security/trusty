@@ -58,7 +58,7 @@ func Test_LoadConfig(t *testing.T) {
 
 func TestParseListenURLs(t *testing.T) {
 	cfg := &HTTPServer{
-		ListenURLs: []string{"https://raphty:2380"},
+		ListenURLs: []string{"https://trusty:2380"},
 	}
 
 	lp, err := cfg.ParseListenURLs()

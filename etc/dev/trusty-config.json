@@ -53,11 +53,12 @@
                 "/serverpb.Status"
             ],
             "Allow": [
-                "/v1/ca:trusty"
+                "/v1/ca:trusty-peer"
             ],
             "LogAllowedAny": true,
             "LogAllowed": true,
-            "LogDenied": true
+            "LogDenied": true,
+            "CertMapper": "cert-roles.yaml"
         },
         "LogLevels": [
             {

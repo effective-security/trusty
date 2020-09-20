@@ -157,6 +157,9 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 		&c.TrustyClient.ClientTLS.CertFile,
 		&c.TrustyClient.ClientTLS.KeyFile,
 		&c.TrustyClient.ClientTLS.TrustedCAFile,
+		&c.Authz.CertMapper,
+		&c.Authz.JWTMapper,
+		&c.Authz.APIKeyMapper,
 	}
 
 	for _, ptr := range dirsToResolve {
