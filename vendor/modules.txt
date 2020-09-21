@@ -108,6 +108,7 @@ github.com/go-phorce/dolly/rest
 github.com/go-phorce/dolly/rest/ready
 github.com/go-phorce/dolly/rest/tlsconfig
 github.com/go-phorce/dolly/tasks
+github.com/go-phorce/dolly/testify/servefiles
 github.com/go-phorce/dolly/xhttp
 github.com/go-phorce/dolly/xhttp/authz
 github.com/go-phorce/dolly/xhttp/header
@@ -217,6 +218,7 @@ github.com/soheilhy/cmux
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
+github.com/stretchr/testify/suite
 # github.com/ugorji/go v1.1.1
 github.com/ugorji/go/codec
 # go.uber.org/dig v1.10.0

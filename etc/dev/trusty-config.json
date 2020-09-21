@@ -92,6 +92,7 @@
             "MaxSizeMb": 10
         },
         "CryptoProv": {
+            "PKCS11Manufacturers": ["SoftHSM","Gemalto NV"],
             "Default": "/tmp/trusty/softhsm/unittest_hsm.json",
             "Providers": []
         },

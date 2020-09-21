@@ -4,7 +4,6 @@ package cli
 import (
 	"io"
 	"io/ioutil"
-	"net/url"
 	"os"
 
 	"github.com/go-phorce/dolly/ctl"
@@ -223,9 +222,6 @@ func (cli *Cli) EnsureCryptoProvider() error {
 		providers = cli.config.CryptoProv.Providers
 	}
 
-	// TODO: from config
-	cryptoprov.Register("SoftHSM", cryptoprov.Crypto11Loader)
-	cryptoprov.Register("Gemalto NV", cryptoprov.Crypto11Loader)
 	cli.crypto, err = cryptoprov.Load(defaultProvider, providers)
 	if err != nil {
 		return errors.Annotate(err, "unable to initialize crypto providers")
@@ -251,34 +247,17 @@ func (cli *Cli) PopulateControl() error {
 	} else {
 		xlog.SetGlobalLogLevel(xlog.CRITICAL)
 	}
-
-	server := cli.Server()
-	u, err := url.Parse(server)
-	if err != nil {
-		return errors.Annotatef(err, "invalid URL: %q", server)
-	}
-
-	if u.Scheme != "" &&
-		u.Scheme != "http" && u.Scheme != "https" &&
-		u.Scheme != "unix" && u.Scheme != "unixs" {
-		return errors.Errorf("unsupported URL scheme %q, use http:// or https://", u.Scheme)
-	}
-	/*
-		if u.Scheme == "" {
-			port := u.Port()
-			if port == "80" || port == "8080" || port == "8888" {
-				u.Scheme = "http"
-			} else {
-				u.Scheme = "https"
-			}
-		}
-	*/
-
-	// TODO: add support for unix:// scheme
-	server = u.Host
-	cli.flags.server = &server
-
 	return nil
+}
+
+// WithGrpcConnection sets gRPC connection to the server
+func (cli *Cli) WithGrpcConnection(conn *grpc.ClientConn) *Cli {
+	if cli.conn != nil {
+		cli.conn.Close()
+		cli.conn = nil
+	}
+	cli.conn = conn
+	return cli
 }
 
 // GrpcConnection returns gRPC connection to the server
@@ -311,6 +290,13 @@ func (cli *Cli) EnsureGrpcConnection() error {
 		}
 
 		cfg = cli.Config()
+		if cli.Server() == "" && len(cfg.TrustyClient.Servers) > 0 {
+			*cli.flags.server = cfg.TrustyClient.Servers[0]
+		}
+	}
+
+	if cli.Server() == "" {
+		return errors.New("use --server option")
 	}
 
 	if (tlsCert == "" || tlsKey == "") && cfg != nil {
