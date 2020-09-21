@@ -13,19 +13,14 @@ import (
 	"time"
 
 	"github.com/go-phorce/dolly/audit"
-	fauditor "github.com/go-phorce/dolly/audit/log"
 	"github.com/go-phorce/dolly/netutil"
-	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/tasks"
-	"github.com/go-phorce/dolly/xhttp/authz"
-	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xlog/logrotate"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/go-phorce/trusty/backend/service/status"
 	"github.com/go-phorce/trusty/backend/trustyserver"
 	"github.com/go-phorce/trusty/config"
-	"github.com/go-phorce/trusty/pkg/roles"
 	"github.com/go-phorce/trusty/version"
 	"github.com/juju/errors"
 	"go.uber.org/dig"
@@ -34,7 +29,12 @@ import (
 
 var logger = xlog.NewPackageLogger("github.com/go-phorce/trusty/backend", "trusty")
 
-var serviceFactories = map[string]trustyserver.ServiceFactory{
+const (
+	nullDevName = "/dev/null"
+)
+
+// ServiceFactories provides map of trustyserver.ServiceFactory
+var ServiceFactories = map[string]trustyserver.ServiceFactory{
 	status.ServiceName: status.Factory,
 }
 
@@ -54,22 +54,34 @@ type App struct {
 	closed    bool
 	lock      sync.RWMutex
 
-	args      []string
-	flags     *appFlags
-	cfg       *config.Configuration
-	auditor   audit.Auditor
-	crypto    *cryptoprov.Crypto
-	scheduler tasks.Scheduler
+	args             []string
+	flags            *appFlags
+	cfg              *config.Configuration
+	auditor          audit.Auditor
+	crypto           *cryptoprov.Crypto
+	scheduler        tasks.Scheduler
+	containerFactory ContainerFactoryFn
+	servers          map[string]*trustyserver.TrustyServer
 }
 
 // New returns new App
 func New(args []string) *App {
-	return &App{
-		container: dig.New(),
+	app := &App{
+		container: nil,
 		args:      args,
 		closers:   make([]io.Closer, 0, 8),
 		flags:     new(appFlags),
+		servers:   make(map[string]*trustyserver.TrustyServer),
 	}
+	f := NewContainerFactory(app)
+	return app.WithContainerFactory(f.CreateContainerWithDependencies)
+}
+
+// WithContainerFactory allows to specify an app container factory,
+// used mainly for testing purposess
+func (a *App) WithContainerFactory(f ContainerFactoryFn) *App {
+	a.containerFactory = f
+	return a
 }
 
 // WithSignal adds cusom signal channel
@@ -118,7 +130,7 @@ func (a *App) Close() error {
 // Run the application
 func (a *App) Run(startedCh chan<- bool) error {
 	if a.sigs == nil {
-		a.sigs = make(chan os.Signal, 2)
+		a.WithSignal(make(chan os.Signal, 2))
 	}
 
 	ipaddr, err := netutil.WaitForNetwork(30 * time.Second)
@@ -143,14 +155,12 @@ func (a *App) Run(startedCh chan<- bool) error {
 	ver := version.Current().String()
 	logger.Infof("src=Run, hostname=%s, ip=%s, version=%s", hostname, ipaddr, ver)
 
-	a.scheduler = tasks.NewScheduler()
-
 	err = a.initCPUProfiler(*a.flags.cpu)
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	err = a.injectDependencies()
+	a.container, err = a.containerFactory()
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -161,24 +171,16 @@ func (a *App) Run(startedCh chan<- bool) error {
 		return nil
 	}
 
-	servers := make([]*trustyserver.TrustyServer, 0, 2)
-
-	stopServers := func(servers []*trustyserver.TrustyServer) {
-		for _, running := range servers {
-			running.Close()
-		}
-	}
-
 	for _, svcCfg := range []*config.HTTPServer{&a.cfg.HealthServer, &a.cfg.TrustyServer} {
 		if svcCfg.GetDisabled() == false {
-			httpServer, err := trustyserver.StartTrusty(ver, svcCfg, a.container, serviceFactories)
+			httpServer, err := trustyserver.StartTrusty(ver, svcCfg, a.container, ServiceFactories)
 			if err != nil {
 				logger.Errorf("src=Run, reason=Start, service=%s, err=[%v]", svcCfg.Name, errors.ErrorStack(err))
 
-				stopServers(servers)
+				a.stopServers()
 				return errors.Trace(err)
 			}
-			servers = append(servers, httpServer)
+			a.servers[httpServer.Name()] = httpServer
 		} else {
 			logger.Infof("src=Run, reason=skip_disabled, service=%s", svcCfg.Name)
 		}
@@ -189,7 +191,9 @@ func (a *App) Run(startedCh chan<- bool) error {
 		startedCh <- true
 	}
 
-	a.scheduler.Start()
+	if a.scheduler != nil {
+		a.scheduler.Start()
+	}
 
 	// register for signals, and wait to be shutdown
 	signal.Notify(a.sigs, os.Interrupt, os.Kill, syscall.SIGTERM, syscall.SIGUSR2, syscall.SIGABRT)
@@ -198,8 +202,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 	sig := <-a.sigs
 	logger.Warningf("src=Run, status=shuting_down, sig=%v", sig)
 
-	a.scheduler.Stop()
-	stopServers(servers)
+	a.stopServers()
 
 	// let to stop
 	time.Sleep(time.Second * 3)
@@ -216,6 +219,15 @@ func (a *App) Run(startedCh chan<- bool) error {
 	}
 
 	return nil
+}
+
+func (a *App) stopServers() {
+	if a.scheduler != nil {
+		a.scheduler.Stop()
+	}
+	for _, running := range a.servers {
+		running.Close()
+	}
 }
 
 func (a *App) loadConfig() error {
@@ -245,7 +257,7 @@ func (a *App) loadConfig() error {
 
 func (a *App) initLogs() error {
 	cfg := a.cfg
-	if cfg.Logger.Directory != "" {
+	if cfg.Logger.Directory != "" && cfg.Logger.Directory != nullDevName {
 		var sink io.Writer
 		if *a.flags.isStderr {
 			sink = os.Stderr
@@ -286,7 +298,7 @@ func (a *App) initLogs() error {
 
 func (a *App) initCPUProfiler(file string) error {
 	// create CPU Profiler
-	if file != "" {
+	if file != "" && file != nullDevName {
 		cpuf, err := os.Create(file)
 		if err != nil {
 			return errors.Annotate(err, "unable to create CPU profile")
@@ -294,64 +306,7 @@ func (a *App) initCPUProfiler(file string) error {
 		logger.Infof("src=initCPUProfiler, status=starting_cpu_profiling, file=%q", file)
 
 		pprof.StartCPUProfile(cpuf)
-		a.OnClose(&cpuProfileCloser{})
-	}
-	return nil
-}
-
-func (a *App) injectDependencies() error {
-	a.container.Provide(func() (*config.Configuration, tasks.Scheduler) {
-		return a.cfg, a.scheduler
-	})
-
-	err := a.container.Provide(func(cfg *config.Configuration) (audit.Auditor, error) {
-		// create auditor
-		var err error
-		a.auditor, err = fauditor.New(a.cfg.ServiceName+".log", a.cfg.Audit.Directory, a.cfg.Audit.MaxAgeDays, a.cfg.Audit.MaxSizeMb)
-		if err != nil {
-			logger.Errorf("src=injectDependencies, reason=auditor, err=[%v]", errors.ErrorStack(err))
-			return nil, errors.Annotate(err, "failed to create Auditor")
-		}
-		a.OnClose(a.auditor)
-		return a.auditor, nil
-	})
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	err = a.container.Provide(func(cfg *config.Configuration) (rest.Authz, error) {
-		var azp rest.Authz
-		if len(cfg.Authz.Allow) > 0 ||
-			len(cfg.Authz.AllowAny) > 0 ||
-			len(cfg.Authz.AllowAnyRole) > 0 {
-			azp, err = authz.New(&authz.Config{
-				Allow:         cfg.Authz.Allow,
-				AllowAny:      cfg.Authz.AllowAny,
-				AllowAnyRole:  cfg.Authz.AllowAnyRole,
-				LogAllowedAny: cfg.Authz.GetLogAllowedAny(),
-				LogAllowed:    cfg.Authz.GetLogAllowed(),
-				LogDenied:     cfg.Authz.GetLogDenied(),
-			})
-			if err != nil {
-				return nil, errors.Trace(err)
-			}
-		}
-		if cfg.Authz.JWTMapper != "" || cfg.Authz.CertMapper != "" {
-			p, err := roles.New(
-				cfg.Authz.JWTMapper,
-				cfg.Authz.CertMapper,
-			)
-			if err != nil {
-				return nil, errors.Trace(err)
-			}
-			identity.SetGlobalIdentityMapper(p.IdentityMapper)
-			//jwt = p.JwtMapper
-		}
-
-		return azp, nil
-	})
-	if err != nil {
-		return errors.Trace(err)
+		a.OnClose(&cpuProfileCloser{file: file})
 	}
 	return nil
 }
