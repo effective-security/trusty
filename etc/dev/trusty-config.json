@@ -46,7 +46,7 @@
         },
         "Authz": {
             "AllowAny": [
-                "/v1/status",                
+                "/v1/status",
                 "/v1/certs",
                 "/v1/crl",
                 "/v1/ocsp",
@@ -92,13 +92,32 @@
             "MaxSizeMb": 10
         },
         "CryptoProv": {
-            "PKCS11Manufacturers": ["SoftHSM","Gemalto NV"],
+            "PKCS11Manufacturers": [
+                "SoftHSM",
+                "Gemalto NV"
+            ],
             "Default": "/tmp/trusty/softhsm/unittest_hsm.json",
             "Providers": []
         },
         "Metrics": {
             "Provider": "inmem",
             "Disabled": true
+        }
+    },
+    "hosts": {
+        "UNIT_TEST": "UNIT_TEST"
+    },
+    "overrides": {
+        "UNIT_TEST": {
+            "Metrics": {
+                "Disabled": false
+            },
+            "Logger": {
+                "Directory": "/dev/null"
+            },
+            "Audit": {
+                "Directory": "/dev/null"
+            }
         }
     }
 }

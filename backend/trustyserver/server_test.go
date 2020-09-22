@@ -55,10 +55,10 @@ func TestStartTrustyEmptyHTTPS(t *testing.T) {
 	assert.Equal(t, cfg.Name, srv.Name())
 }
 
-// getBindAddr returns random bind port
+// createURLs returns URL with a random port
 func createURLs(scheme, host string) string {
 	if nextPort == 0 {
-		nextPort = 17854 + int32(rand.Intn(5000))
+		nextPort = 27891 + int32(rand.Intn(5000))
 	}
 	next := atomic.AddInt32(&nextPort, 1)
 	return fmt.Sprintf("%s://%s:%d", scheme, host, next)
