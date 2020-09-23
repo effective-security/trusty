@@ -53,9 +53,10 @@ func (s *Service) Close() {
 // RegisterRoute adds the Status API endpoints to the overall URL router
 func (s *Service) RegisterRoute(r rest.Router) {
 	r.GET(v1.PathForStatusVersion, s.version())
-	r.GET(v1.PathForStatusServer, s.nodeStatus())
+	r.GET(v1.PathForStatusServer, s.serverStatus())
 	r.GET(v1.PathForStatusCaller, s.callerStatus())
-	r.GET(v1.PathForStatus, s.nodeStatus())
+	r.GET(v1.PathForStatus, s.serverStatus())
+	r.GET(v1.PathForStatusNode, s.nodeStatus())
 }
 
 // RegisterGRPC registers gRPC handler

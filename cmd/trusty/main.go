@@ -16,7 +16,7 @@ const (
 func main() {
 	rc := rcSuccess
 
-	app := trustymain.New(os.Args[1:])
+	app := trustymain.NewApp(os.Args[1:])
 
 	err := app.Run(nil)
 	if err != nil {

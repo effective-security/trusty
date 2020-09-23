@@ -98,8 +98,8 @@ func configureListeners(cfg *config.HTTPServer) (sctxs map[string]*serveCtx, err
 		// clean up on error
 		for _, sctx := range sctxs {
 			if sctx.listener != nil {
-				logger.Infof("src=configureListeners, reason=error, network=%s, address=%s, err=%q",
-					sctx.network, sctx.addr, err.Error())
+				logger.Infof("src=configureListeners, reason=error, server=%s, network=%s, address=%s, err=%q",
+					cfg.Name, sctx.network, sctx.addr, err.Error())
 				sctx.listener.Close()
 			}
 		}

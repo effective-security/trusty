@@ -37,14 +37,19 @@ func (s *Service) serverStatus() rest.Handle {
 
 func (s *Service) callerStatus() rest.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
+		callerCtx := identity.ForRequest(r)
+		role := callerCtx.Identity().Role()
+
 		res := &pb.CallerStatusResponse{
-			Role: "guest",
+			Role: role,
 		}
 
 		marshal.WriteJSON(w, r, res)
 	}
 }
 
+/*
 func (s *Service) serverServiceName() string {
 	return s.server.Name() + "_" + s.Name()
 }
+*/

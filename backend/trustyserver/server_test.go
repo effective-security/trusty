@@ -1,14 +1,13 @@
 package trustyserver
 
 import (
-	"fmt"
-	"math/rand"
-	"sync/atomic"
 	"testing"
 
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/rest"
+	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/go-phorce/trusty/config"
+	"github.com/go-phorce/trusty/tests/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/dig"
@@ -21,10 +20,10 @@ var (
 func TestStartTrustyEmptyHTTP(t *testing.T) {
 	cfg := &config.HTTPServer{
 		Name:       "EmptyTrusty",
-		ListenURLs: []string{createURLs("http", ""), createURLs("unix", "localhost")},
+		ListenURLs: []string{testutils.CreateURLs("http", ""), testutils.CreateURLs("unix", "localhost")},
 	}
 
-	c := createContainer(nil, nil)
+	c := createContainer(nil, nil, nil)
 	srv, err := StartTrusty("1.0.0", cfg, c, nil)
 	require.NoError(t, err)
 	require.NotNil(t, srv)
@@ -37,7 +36,7 @@ func TestStartTrustyEmptyHTTP(t *testing.T) {
 func TestStartTrustyEmptyHTTPS(t *testing.T) {
 	cfg := &config.HTTPServer{
 		Name:       "EmptyTrustyHTTPS",
-		ListenURLs: []string{createURLs("https", ""), createURLs("unixs", "localhost")},
+		ListenURLs: []string{testutils.CreateURLs("https", ""), testutils.CreateURLs("unixs", "localhost")},
 		ServerTLS: config.TLSInfo{
 			CertFile:      "/tmp/trusty/certs/trusty_dev_peer.pem",
 			KeyFile:       "/tmp/trusty/certs/trusty_dev_peer-key.pem",
@@ -45,7 +44,7 @@ func TestStartTrustyEmptyHTTPS(t *testing.T) {
 		},
 	}
 
-	c := createContainer(nil, nil)
+	c := createContainer(nil, nil, nil)
 	srv, err := StartTrusty("1.0.0", cfg, c, nil)
 	require.NoError(t, err)
 	require.NotNil(t, srv)
@@ -55,19 +54,11 @@ func TestStartTrustyEmptyHTTPS(t *testing.T) {
 	assert.Equal(t, cfg.Name, srv.Name())
 }
 
-// createURLs returns URL with a random port
-func createURLs(scheme, host string) string {
-	if nextPort == 0 {
-		nextPort = 27891 + int32(rand.Intn(5000))
-	}
-	next := atomic.AddInt32(&nextPort, 1)
-	return fmt.Sprintf("%s://%s:%d", scheme, host, next)
-}
-
-func createContainer(authz rest.Authz, auditor audit.Auditor) *dig.Container {
+// TODO: move to testutil.ContainerBuilder
+func createContainer(authz rest.Authz, auditor audit.Auditor, crypto *cryptoprov.Crypto) *dig.Container {
 	c := dig.New()
-	c.Provide(func() (rest.Authz, audit.Auditor) {
-		return authz, auditor
+	c.Provide(func() (rest.Authz, audit.Auditor, *cryptoprov.Crypto) {
+		return authz, auditor, crypto
 	})
 	return c
 }

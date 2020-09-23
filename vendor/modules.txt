@@ -115,6 +115,7 @@ github.com/go-phorce/dolly/xhttp/header
 github.com/go-phorce/dolly/xhttp/httperror
 github.com/go-phorce/dolly/xhttp/identity
 github.com/go-phorce/dolly/xhttp/marshal
+github.com/go-phorce/dolly/xhttp/retriable
 github.com/go-phorce/dolly/xlog
 github.com/go-phorce/dolly/xlog/logrotate
 github.com/go-phorce/dolly/xpki/armor
