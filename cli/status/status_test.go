@@ -80,3 +80,26 @@ func (s *testSuite) TestServer() {
 		s.HasText("{\n\t\"Status\": {\n\t\t\"ListenURLs\": [\n\t\t\t\"host1:123\"\n\t\t],\n\t\t\"Name\": \"mock\",\n\t\t\"Version\": \"1.2.3\"\n\t}\n}\n")
 	}
 }
+
+func (s *testSuite) TestCaller() {
+	expectedResponse := &serverpb.CallerStatusResponse{
+		Role: "test_role",
+	}
+
+	s.MockStatus = &mockpb.MockStatusServer{
+		Err:   nil,
+		Resps: []proto.Message{expectedResponse},
+	}
+	srv := s.SetupMockGRPC()
+	defer srv.Stop()
+
+	err := s.Run(status.Caller, nil)
+	s.Require().NoError(err)
+
+	if s.Cli.IsJSON() {
+		s.HasText("{\n\t\"Role\": \"test_role\"\n}\n")
+	} else {
+		// TODO
+		s.HasText("{\n\t\"Role\": \"test_role\"\n}\n")
+	}
+}

@@ -11,6 +11,7 @@ import (
 	"github.com/go-phorce/dolly/netutil"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xlog"
+	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/go-phorce/trusty/config"
 	"github.com/juju/errors"
 	"go.uber.org/dig"
@@ -61,6 +62,7 @@ type TrustyServer struct {
 
 	authz   rest.Authz
 	auditor audit.Auditor
+	crypto  *cryptoprov.Crypto
 }
 
 // StartTrusty returns running TrustyServer
@@ -91,9 +93,12 @@ func StartTrusty(
 		return nil, errors.Trace(err)
 	}
 
-	err = container.Invoke(func(authz rest.Authz, auditor audit.Auditor) error {
+	err = container.Invoke(func(authz rest.Authz,
+		auditor audit.Auditor,
+		crypto *cryptoprov.Crypto) error {
 		e.authz = authz
 		e.auditor = auditor
+		e.crypto = crypto
 		return nil
 	})
 	if err != nil {

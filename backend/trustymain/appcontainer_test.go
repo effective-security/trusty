@@ -20,7 +20,7 @@ const (
 )
 
 func TestNewContainerFactory(t *testing.T) {
-	output := path.Join(os.TempDir(), "trusty", guid.MustCreate())
+	output := path.Join(os.TempDir(), "tests", "trusty", guid.MustCreate())
 	os.MkdirAll(output, 0777)
 	defer os.Remove(output)
 
@@ -54,7 +54,7 @@ func TestNewContainerFactory(t *testing.T) {
 	for _, tc := range tcases {
 
 		t.Run(tc.name, func(t *testing.T) {
-			app := New([]string{"--dry-run"})
+			app := NewApp([]string{"--dry-run"})
 			app.cfg = tc.cfg
 
 			container, err := app.containerFactory()

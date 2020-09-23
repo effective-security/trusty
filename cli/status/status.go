@@ -43,3 +43,19 @@ func Server(c ctl.Control, _ interface{}) error {
 
 	return nil
 }
+
+// Caller shows the Caller status
+func Caller(c ctl.Control, _ interface{}) error {
+	cli := c.(*cli.Cli)
+	client := pb.NewStatusClient(cli.GrpcConnection())
+	res, err := client.Caller(context.Background(), &pb.EmptyRequest{})
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	// TODO: cli.IsJSON() else print.Status
+	ctl.WriteJSON(c.Writer(), res)
+	fmt.Fprint(c.Writer(), "\n")
+
+	return nil
+}

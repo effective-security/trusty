@@ -13,7 +13,7 @@ BUILD_FLAGS=-mod=vendor
 
 default: help
 
-all: clean folders tools generate hsmconfig build gen_test_certs
+all: clean folders tools generate hsmconfig build gen_test_certs test
 
 #
 # clean produced files

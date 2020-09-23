@@ -49,7 +49,7 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		cli.WithServiceCfg(),
 		cli.WithHsmCfg(),
 		cli.WithTLS(),
-		cli.WithServer(fmt.Sprintf("https://%s:7891", hostname)),
+		cli.WithServer(fmt.Sprintf("%s:7891", hostname)),
 	)
 	defer cli.Close()
 
@@ -62,6 +62,11 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		PreAction(cli.PopulateControl).
 		PreAction(cli.EnsureGrpcConnection).
 		Action(cli.RegisterAction(status.Version, nil))
+
+	app.Command("caller", "show the caller info").
+		PreAction(cli.PopulateControl).
+		PreAction(cli.EnsureGrpcConnection).
+		Action(cli.RegisterAction(status.Caller, nil))
 
 	cli.Parse(args)
 	return cli.ReturnCode()

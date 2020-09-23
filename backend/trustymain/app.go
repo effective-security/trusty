@@ -40,10 +40,14 @@ var ServiceFactories = map[string]trustyserver.ServiceFactory{
 
 // appFlags specifies application flags
 type appFlags struct {
-	cfgFile  *string
-	cpu      *string
-	isStderr *bool
-	dryRun   *bool
+	cfgFile     *string
+	cpu         *string
+	isStderr    *bool
+	dryRun      *bool
+	hsmCfg      *string
+	cryptoProvs *[]string
+	healthURLs  *[]string
+	clientURLs  *[]string
 }
 
 // App provides application container
@@ -64,8 +68,8 @@ type App struct {
 	servers          map[string]*trustyserver.TrustyServer
 }
 
-// New returns new App
-func New(args []string) *App {
+// NewApp returns new App
+func NewApp(args []string) *App {
 	app := &App{
 		container: nil,
 		args:      args,
@@ -127,6 +131,30 @@ func (a *App) Close() error {
 	return nil
 }
 
+// Container returns the current app container populater with dependencies
+func (a *App) Container() (*dig.Container, error) {
+	var err error
+	if a.container == nil {
+		a.container, err = a.containerFactory()
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+	}
+	return a.container, nil
+}
+
+// Configuration returns the current app configuration
+func (a *App) Configuration() (*config.Configuration, error) {
+	var err error
+	if a.cfg == nil {
+		err = a.loadConfig()
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+	}
+	return a.cfg, nil
+}
+
 // Run the application
 func (a *App) Run(startedCh chan<- bool) error {
 	if a.sigs == nil {
@@ -142,7 +170,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 		return errors.Annotate(err, "unable to resolve hostname")
 	}
 
-	err = a.loadConfig()
+	_, err = a.Configuration()
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -160,7 +188,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 		return errors.Trace(err)
 	}
 
-	a.container, err = a.containerFactory()
+	_, err = a.Container()
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -175,14 +203,14 @@ func (a *App) Run(startedCh chan<- bool) error {
 		if svcCfg.GetDisabled() == false {
 			httpServer, err := trustyserver.StartTrusty(ver, svcCfg, a.container, ServiceFactories)
 			if err != nil {
-				logger.Errorf("src=Run, reason=Start, service=%s, err=[%v]", svcCfg.Name, errors.ErrorStack(err))
+				logger.Errorf("src=Run, reason=Start, server=%s, err=[%v]", svcCfg.Name, errors.ErrorStack(err))
 
 				a.stopServers()
 				return errors.Trace(err)
 			}
 			a.servers[httpServer.Name()] = httpServer
 		} else {
-			logger.Infof("src=Run, reason=skip_disabled, service=%s", svcCfg.Name)
+			logger.Infof("src=Run, reason=skip_disabled, server=%s", svcCfg.Name)
 		}
 	}
 
@@ -241,6 +269,10 @@ func (a *App) loadConfig() error {
 	flags.cpu = app.Flag("cpu", "enable CPU profiling, specify a file to store CPU profiling info").String()
 	flags.isStderr = app.Flag("std", "output logs to stderr").Bool()
 	flags.dryRun = app.Flag("dry-run", "verify config etc, and do not start the service").Bool()
+	flags.hsmCfg = app.Flag("hsm-cfg", "location of the HSM configuration file").String()
+	flags.cryptoProvs = app.Flag("crypto-prov", "path to additional Crypto provider configurations").Strings()
+	flags.clientURLs = app.Flag("client-listen-url", "URL for the clients listening end-point").Strings()
+	flags.healthURLs = app.Flag("health-listen-url", "URL for the health listening end-point").Strings()
 
 	// Parse arguments
 	kp.MustParse(app.Parse(a.args))
@@ -251,6 +283,19 @@ func (a *App) loadConfig() error {
 	}
 	logger.Infof("src=loadConfig, status=loaded, cfg=%q", *flags.cfgFile)
 	a.cfg = cfg
+
+	if *flags.hsmCfg != "" {
+		cfg.CryptoProv.Default = *flags.hsmCfg
+	}
+	if len(*flags.cryptoProvs) > 0 {
+		cfg.CryptoProv.Providers = *flags.cryptoProvs
+	}
+	if len(*flags.clientURLs) > 0 {
+		cfg.TrustyServer.ListenURLs = *flags.clientURLs
+	}
+	if len(*flags.healthURLs) > 0 {
+		cfg.HealthServer.ListenURLs = *flags.healthURLs
+	}
 
 	return nil
 }
