@@ -14,6 +14,7 @@ import (
 	"github.com/go-phorce/dolly/testify/servefiles"
 	"github.com/go-phorce/trusty/api/v1/serverpb"
 	"github.com/go-phorce/trusty/cli"
+	"github.com/go-phorce/trusty/client"
 	"github.com/go-phorce/trusty/tests/mockpb"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc"
@@ -155,7 +156,7 @@ func (s *Suite) SetupSuite() {
 	s.Cli.PopulateControl()
 
 	if s.withFileServer {
-		err := s.Cli.EnsureGrpcConnection()
+		err := s.Cli.EnsureClient()
 		s.Require().NoError(err)
 	}
 }
@@ -178,12 +179,11 @@ func (s *Suite) SetupMockGRPC() *grpc.Server {
 	lis, err := net.Listen("tcp", addr)
 	s.Require().NoError(err)
 
-	go serv.Serve(lis)
-
-	conn, err := grpc.Dial(lis.Addr().String(), grpc.WithInsecure())
+	client, err := client.NewFromURL(lis.Addr().String())
 	s.Require().NoError(err)
+	s.Cli.WithClient(client)
 
-	s.Cli.WithGrpcConnection(conn)
+	go serv.Serve(lis)
 
 	return serv
 }

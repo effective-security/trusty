@@ -10,10 +10,9 @@ import (
 	"github.com/go-phorce/dolly/rest/tlsconfig"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
+	"github.com/go-phorce/trusty/client"
 	"github.com/go-phorce/trusty/config"
 	"github.com/juju/errors"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 var logger = xlog.NewPackageLogger("github.com/go-phorce/trusty", "cli")
@@ -107,8 +106,7 @@ type Cli struct {
 
 	config *config.Configuration
 	crypto *cryptoprov.Crypto
-	//client *client.Client
-	conn *grpc.ClientConn
+	client *client.Client
 }
 
 // New creates an instance of trusty CLI
@@ -130,9 +128,9 @@ func New(d *ctl.ControlDefinition, opts ...Option) *Cli {
 
 // Close allocated resources
 func (cli *Cli) Close() {
-	if cli.conn != nil {
-		cli.conn.Close()
-		cli.conn = nil
+	if cli.client != nil {
+		cli.client.Close()
+		cli.client = nil
 	}
 }
 
@@ -250,27 +248,27 @@ func (cli *Cli) PopulateControl() error {
 	return nil
 }
 
-// WithGrpcConnection sets gRPC connection to the server
-func (cli *Cli) WithGrpcConnection(conn *grpc.ClientConn) *Cli {
-	if cli.conn != nil {
-		cli.conn.Close()
-		cli.conn = nil
+// WithClient sets gRPC client
+func (cli *Cli) WithClient(c *client.Client) *Cli {
+	if cli.client != nil {
+		cli.client.Close()
+		cli.client = nil
 	}
-	cli.conn = conn
+	cli.client = c
 	return cli
 }
 
-// GrpcConnection returns gRPC connection to the server
-func (cli *Cli) GrpcConnection() *grpc.ClientConn {
-	if cli == nil || cli.conn == nil {
-		panic("use EnsureGrpcConnection() in App settings")
+// Client returns client instance with active gRPC connection
+func (cli *Cli) Client() *client.Client {
+	if cli == nil || cli.client == nil {
+		panic("use EnsureClient() in App settings")
 	}
-	return cli.conn
+	return cli.client
 }
 
-// EnsureGrpcConnection is pre-action to instantiate trusty client
-func (cli *Cli) EnsureGrpcConnection() error {
-	if cli.conn != nil {
+// EnsureClient is pre-action to instantiate trusty client
+func (cli *Cli) EnsureClient() error {
+	if cli.client != nil {
 		return nil
 	}
 
@@ -313,15 +311,17 @@ func (cli *Cli) EnsureGrpcConnection() error {
 		return errors.Annotate(err, "unable to build TLS configuration")
 	}
 
-	creds := credentials.NewTLS(tlscfg)
-	conn, err := grpc.Dial(cli.Server(), grpc.WithTransportCredentials(creds))
-	if err != nil {
-		return errors.Trace(err)
-	}
-
 	// TODO: add timeout options
 
-	cli.conn = conn
+	clientCfg := &client.Config{
+		Endpoints: []string{cli.Server()},
+		TLS:       tlscfg,
+	}
+
+	cli.client, err = client.New(clientCfg)
+	if err != nil {
+		return errors.Annotate(err, "unable to create client")
+	}
 	return nil
 }
 

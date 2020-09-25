@@ -23,8 +23,8 @@ func cmdAction(c ctl.Control, p interface{}) error {
 }
 
 func cmdClientAction(c ctl.Control, p interface{}) error {
-	conn := c.(*cli.Cli).GrpcConnection()
-	fmt.Fprintf(c.Writer(), "connection: %T\n", conn)
+	client := c.(*cli.Cli).Client()
+	fmt.Fprintf(c.Writer(), "client: %T\n", client)
 	return nil
 }
 
@@ -47,11 +47,11 @@ func TestCLIDefaultHost(t *testing.T) {
 		PreAction(cli.PopulateControl)
 
 	cmd.Command("client", "Test client").
-		PreAction(cli.EnsureGrpcConnection).
+		PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(cmdClientAction, nil))
 
 	assert.Panics(t, func() {
-		cli.GrpcConnection()
+		cli.Client()
 	})
 	assert.Panics(t, func() {
 		cli.CryptoProv()
@@ -65,7 +65,7 @@ func TestCLIDefaultHost(t *testing.T) {
 	assert.True(t, cli.Verbose())
 
 	assert.Equal(t, ctl.RCOkay, cli.ReturnCode(), "output: "+out.String())
-	assert.Contains(t, out.String(), "connection: *grpc.ClientConn\n")
+	assert.Contains(t, out.String(), "client: *client.Client\n")
 }
 
 func TestCLIDefaultHostWithPort(t *testing.T) {
@@ -88,7 +88,7 @@ func TestCLIDefaultHostWithPort(t *testing.T) {
 		PreAction(cli.PopulateControl)
 
 	cmd.Command("client", "Test client").
-		PreAction(cli.EnsureGrpcConnection).
+		PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(cmdClientAction, nil))
 
 	out.Reset()
@@ -97,10 +97,10 @@ func TestCLIDefaultHostWithPort(t *testing.T) {
 	assert.Equal(t, serverURL, cli.Server())
 
 	assert.Equal(t, ctl.RCOkay, cli.ReturnCode(), "output: "+out.String())
-	assert.Contains(t, out.String(), "connection: *grpc.ClientConn\n")
+	assert.Contains(t, out.String(), "client: *client.Client\n")
 }
 
-func TestCLIEnsureGrpcConnection(t *testing.T) {
+func TestCLIEnsureClient(t *testing.T) {
 	out := bytes.NewBuffer([]byte{})
 	app := ctl.NewApplication("cliapp", "test")
 	app.UsageWriter(out)
@@ -115,32 +115,32 @@ func TestCLIEnsureGrpcConnection(t *testing.T) {
 		PreAction(cli.PopulateControl)
 
 	cmd.Command("client", "Test client").
-		PreAction(cli.EnsureGrpcConnection).
+		PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(cmdClientAction, nil))
 
 	cert := "/tmp/trusty/certs/trusty_dev_peer.pem"
 	key := "/tmp/trusty/certs/trusty_dev_peer-key.pem"
 
 	require.Panics(t, func() {
-		cli.GrpcConnection()
+		cli.Client()
 	})
 
 	cli.Parse([]string{"cliapp", "-s", "localhost", "-c", cert, "-k", key, "cmd", "client"})
 
-	err := cli.EnsureGrpcConnection()
+	err := cli.EnsureClient()
 	require.NoError(t, err)
 
 	require.NotPanics(t, func() {
-		cli.GrpcConnection()
+		cli.Client()
 	})
-	require.NotNil(t, cli.GrpcConnection())
+	require.NotNil(t, cli.Client())
 
 	assert.Equal(t, ctl.RCOkay, cli.ReturnCode())
-	assert.Contains(t, out.String(), "connection: *grpc.ClientConn\n")
+	assert.Contains(t, out.String(), "client: *client.Client\n")
 
-	cli.WithGrpcConnection(nil)
+	cli.WithClient(nil)
 	require.Panics(t, func() {
-		cli.GrpcConnection()
+		cli.Client()
 	})
 }
 
@@ -160,7 +160,7 @@ func TestCLIWithServiceCfgNoDefault(t *testing.T) {
 		PreAction(cli.PopulateControl)
 
 	cmd.Command("client", "Test client").
-		PreAction(cli.EnsureGrpcConnection).
+		PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(cmdClientAction, nil))
 
 	out.Reset()
@@ -196,7 +196,7 @@ func TestCLIWithServiceCfg_NotFound(t *testing.T) {
 		PreAction(cli.PopulateControl)
 
 	cmd.Command("client", "Test client").
-		PreAction(cli.EnsureGrpcConnection).
+		PreAction(cli.EnsureClient).
 		PreAction(cli.EnsureServiceConfig).
 		Action(cli.RegisterAction(cmdClientAction, nil))
 
@@ -228,7 +228,7 @@ func TestCLIWithServiceCfg(t *testing.T) {
 		PreAction(cli.PopulateControl)
 
 	cmd.Command("client", "Test client").
-		PreAction(cli.EnsureGrpcConnection).
+		PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(cmdClientAction, nil))
 	out.Reset()
 
@@ -247,7 +247,7 @@ func TestCLIWithServiceCfg(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, ctl.RCOkay, cli.ReturnCode(), "output: "+out.String())
-	assert.Contains(t, out.String(), "connection: *grpc.ClientConn\n")
+	assert.Contains(t, out.String(), "client: *client.Client\n")
 }
 
 func TestCLIWithHsmCfg(t *testing.T) {
@@ -268,7 +268,7 @@ func TestCLIWithHsmCfg(t *testing.T) {
 		PreAction(cli.PopulateControl)
 
 	cmd.Command("client", "Test client").
-		PreAction(cli.EnsureGrpcConnection).
+		PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(cmdClientAction, nil))
 	out.Reset()
 
@@ -284,7 +284,7 @@ func TestCLIWithHsmCfg(t *testing.T) {
 	assert.NotNil(t, cli.CryptoProv())
 
 	assert.Equal(t, ctl.RCOkay, cli.ReturnCode())
-	assert.Contains(t, out.String(), "connection: *grpc.ClientConn\n")
+	assert.Contains(t, out.String(), "client: *client.Client\n")
 }
 
 func makeTestHandler(t *testing.T, expURI, responseBody string) http.Handler {
