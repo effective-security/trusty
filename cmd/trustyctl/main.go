@@ -55,17 +55,17 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 
 	app.Command("status", "show the server status").
 		PreAction(cli.PopulateControl).
-		PreAction(cli.EnsureGrpcConnection).
+		PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(status.Server, nil))
 
 	app.Command("version", "show the server version").
 		PreAction(cli.PopulateControl).
-		PreAction(cli.EnsureGrpcConnection).
+		PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(status.Version, nil))
 
 	app.Command("caller", "show the caller info").
 		PreAction(cli.PopulateControl).
-		PreAction(cli.EnsureGrpcConnection).
+		PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(status.Caller, nil))
 
 	cli.Parse(args)

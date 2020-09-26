@@ -29,7 +29,7 @@ func (s *Service) Server(_ context.Context, _ *pb.EmptyRequest) (*pb.ServerStatu
 // Caller returns the status of the caller.
 func (s *Service) Caller(ctx context.Context, _ *pb.EmptyRequest) (*pb.CallerStatusResponse, error) {
 	callerCtx := identity.FromContext(ctx)
-	role := "guest"
+	role := identity.GuestRoleName
 	if callerCtx != nil {
 		role = callerCtx.Identity().Role()
 	}

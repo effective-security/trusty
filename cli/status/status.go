@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/go-phorce/dolly/ctl"
-	pb "github.com/go-phorce/trusty/api/v1/serverpb"
 	"github.com/go-phorce/trusty/cli"
 	"github.com/juju/errors"
 )
@@ -13,8 +12,7 @@ import (
 // Version shows the service version
 func Version(c ctl.Control, _ interface{}) error {
 	cli := c.(*cli.Cli)
-	client := pb.NewStatusClient(cli.GrpcConnection())
-	res, err := client.Version(context.Background(), &pb.EmptyRequest{})
+	res, err := cli.Client().Status.Version(context.Background())
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -31,8 +29,7 @@ func Version(c ctl.Control, _ interface{}) error {
 // Server shows trusty server status
 func Server(c ctl.Control, _ interface{}) error {
 	cli := c.(*cli.Cli)
-	client := pb.NewStatusClient(cli.GrpcConnection())
-	res, err := client.Server(context.Background(), &pb.EmptyRequest{})
+	res, err := cli.Client().Status.Server(context.Background())
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -47,8 +44,7 @@ func Server(c ctl.Control, _ interface{}) error {
 // Caller shows the Caller status
 func Caller(c ctl.Control, _ interface{}) error {
 	cli := c.(*cli.Cli)
-	client := pb.NewStatusClient(cli.GrpcConnection())
-	res, err := client.Caller(context.Background(), &pb.EmptyRequest{})
+	res, err := cli.Client().Status.Caller(context.Background())
 	if err != nil {
 		return errors.Trace(err)
 	}

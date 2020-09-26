@@ -11,6 +11,7 @@ import (
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
+	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xhttp/retriable"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
@@ -18,6 +19,8 @@ import (
 	pb "github.com/go-phorce/trusty/api/v1/serverpb"
 	"github.com/go-phorce/trusty/backend/service/status"
 	"github.com/go-phorce/trusty/backend/trustyserver"
+	"github.com/go-phorce/trusty/backend/trustyserver/embed"
+	"github.com/go-phorce/trusty/client"
 	"github.com/go-phorce/trusty/config"
 	"github.com/go-phorce/trusty/tests/testutils"
 	"github.com/juju/errors"
@@ -28,6 +31,7 @@ import (
 
 var (
 	trustyServer *trustyserver.TrustyServer
+	trustyClient *client.Client
 
 	projFolder = "../../"
 	httpsAddr  = testutils.CreateURLs("https", "")
@@ -40,7 +44,7 @@ var serviceFactories = map[string]trustyserver.ServiceFactory{
 }
 
 func TestMain(m *testing.M) {
-
+	var err error
 	xlog.SetPackageLogLevel("github.com/go-phorce/dolly/xhttp", "retriable", xlog.DEBUG)
 
 	cfg := &config.HTTPServer{
@@ -55,16 +59,20 @@ func TestMain(m *testing.M) {
 	}
 
 	container := createContainer(nil, nil, nil)
-	srv, err := trustyserver.StartTrusty("1.0.0", cfg, container, serviceFactories)
-	if err != nil || srv == nil {
+	trustyServer, err = trustyserver.StartTrusty("1.0.0", cfg, container, serviceFactories)
+	if err != nil || trustyServer == nil {
 		panic(errors.Trace(err))
 	}
-	trustyServer = srv
+
+	// TODO: channel for <-trustyServer.ServerReady()
+	trustyClient = embed.NewClient(trustyServer)
+
 	// Run the tests
 	rc := m.Run()
 
 	// cleanup
-	srv.Close()
+	trustyClient.Close()
+	trustyServer.Close()
 
 	os.Exit(rc)
 }
@@ -87,6 +95,14 @@ func TestVersionHttp(t *testing.T) {
 
 	res := string(w.Body.Bytes())
 	assert.Equal(t, trustyServer.Version(), res)
+}
+
+func TestVersionGrpc(t *testing.T) {
+	res := new(pb.VersionResponse)
+	res, err := trustyClient.Status.Version(context.Background())
+	require.NoError(t, err)
+
+	assert.Equal(t, trustyServer.Version(), res.Version)
 }
 
 func TestNodeStatusHttp(t *testing.T) {
@@ -127,6 +143,16 @@ func TestServerStatusHttp(t *testing.T) {
 	assert.Equal(t, trustyServer.Version(), res.Status.Version)
 }
 
+func TestServerStatusGrpc(t *testing.T) {
+	res := new(pb.ServerStatusResponse)
+	res, err := trustyClient.Status.Server(context.Background())
+	require.NoError(t, err)
+
+	require.NotNil(t, res.Status)
+	assert.Equal(t, trustyServer.Name(), res.Status.Name)
+	assert.Equal(t, trustyServer.Version(), res.Status.Version)
+}
+
 func TestCallerStatusHttp(t *testing.T) {
 	res := new(pb.CallerStatusResponse)
 	client := retriable.New()
@@ -141,6 +167,15 @@ func TestCallerStatusHttp(t *testing.T) {
 	assert.Equal(t, http.StatusOK, sc)
 	assert.Contains(t, hdr.Get(header.ContentType), header.ApplicationJSON)
 	assert.NotEmpty(t, res.Role)
+}
+
+func TestCallerStatusGrpc(t *testing.T) {
+	res := new(pb.CallerStatusResponse)
+
+	res, err := trustyClient.Status.Caller(context.Background())
+	require.NoError(t, err)
+
+	assert.Equal(t, identity.GuestRoleName, res.Role)
 }
 
 // TODO: move to testutil.ContainerBuilder
