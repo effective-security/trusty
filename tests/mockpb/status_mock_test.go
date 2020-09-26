@@ -39,9 +39,8 @@ func TestMockVersion(t *testing.T) {
 
 func TestMockServer(t *testing.T) {
 	resp := &serverpb.ServerStatusResponse{}
-	withErr := &MockStatusServer{
-		Resps: []proto.Message{resp},
-	}
+	withErr := &MockStatusServer{}
+	withErr.SetResponse(resp)
 
 	ctx := context.Background()
 	r, err := withErr.Server(ctx, nil)

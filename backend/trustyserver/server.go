@@ -12,6 +12,7 @@ import (
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
+	pb "github.com/go-phorce/trusty/api/v1/serverpb"
 	"github.com/go-phorce/trusty/config"
 	"github.com/juju/errors"
 	"go.uber.org/dig"
@@ -43,6 +44,7 @@ type GRPCRegistrator interface {
 
 // TrustyServer contains a running trusty server and its listeners.
 type TrustyServer struct {
+	pb.StatusServer
 	Listeners []net.Listener
 
 	version  string
@@ -51,6 +53,7 @@ type TrustyServer struct {
 	// a map of contexts for the servers that serves client requests.
 	sctxs map[string]*serveCtx
 
+	di  *dig.Container
 	cfg config.HTTPServer
 
 	stopc     chan struct{}
@@ -133,6 +136,7 @@ func newTrusty(
 		ipaddr:   ipaddr,
 		hostname: hostname,
 		cfg:      *cfg,
+		di:       container,
 		services: make(map[string]Service),
 		//sctxs: make(map[string]*serveCtx),
 		stopc:     make(chan struct{}),
@@ -275,7 +279,14 @@ func (e *TrustyServer) Name() string {
 
 // AddService to the server
 func (e *TrustyServer) AddService(svc Service) {
+	logger.Noticef("src=AddService, server=%s, service=%s",
+		e.Name(), svc.Name())
+
 	e.services[svc.Name()] = svc
+
+	if statusSvc, ok := svc.(pb.StatusServer); ok {
+		e.StatusServer = statusSvc
+	}
 }
 
 // IsReady returns true when the server is ready to serve

@@ -20,6 +20,12 @@ type MockStatusServer struct {
 	Resps []proto.Message
 }
 
+// SetResponse sets a single response without errors
+func (m *MockStatusServer) SetResponse(r proto.Message) {
+	m.Err = nil
+	m.Resps = []proto.Message{r}
+}
+
 // Version returns the server version.
 func (m *MockStatusServer) Version(ctx context.Context, req *serverpb.EmptyRequest) (*serverpb.VersionResponse, error) {
 	//m.reqs = append(m.reqs, req)

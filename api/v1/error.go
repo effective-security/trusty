@@ -44,7 +44,8 @@ func Error(err error) error {
 		return nil
 	}
 	verr, ok := errStringToError[ErrorDesc(err)]
-	if !ok { // not gRPC error
+	if !ok {
+		// not gRPC error
 		return err
 	}
 	ev, ok := status.FromError(verr)

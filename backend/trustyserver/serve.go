@@ -267,6 +267,9 @@ func (sctx *serveCtx) serve(s *TrustyServer, errHandler func(error)) (err error)
 		sctx.cfg.Name, sctx.listener.Addr().String(), sctx.secure, sctx.insecure)
 
 	close(sctx.serversC)
+
+	// Serve starts multiplexing the listener.
+	// Serve blocks and perhaps should be invoked concurrently within a go routine.
 	return m.Serve()
 }
 

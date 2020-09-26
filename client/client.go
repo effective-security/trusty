@@ -110,10 +110,6 @@ func NewFromURLs(urls []string) (*Client, error) {
 
 // New creates a new trusty client from a given configuration.
 func New(cfg *Config) (*Client, error) {
-	if len(cfg.Endpoints) == 0 {
-		return nil, errors.New("trustyclient: no available endpoints")
-	}
-
 	return newClient(cfg)
 }
 

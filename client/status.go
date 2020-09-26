@@ -20,6 +20,13 @@ func NewStatus(conn *grpc.ClientConn, callOpts []grpc.CallOption) Status {
 	}
 }
 
+// NewStatusFromProxy returns instance of Status client
+func NewStatusFromProxy(proxy pb.StatusClient) Status {
+	return &statusClient{
+		remote: proxy,
+	}
+}
+
 var emptyReq = &pb.EmptyRequest{}
 
 // Version returns the server version.
