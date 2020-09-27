@@ -4,7 +4,7 @@ import (
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xlog"
 	v1 "github.com/go-phorce/trusty/api/v1"
-	pb "github.com/go-phorce/trusty/api/v1/serverpb"
+	pb "github.com/go-phorce/trusty/api/v1/trustypb"
 	"github.com/go-phorce/trusty/backend/trustyserver"
 	"google.golang.org/grpc"
 )

@@ -12,7 +12,7 @@ import (
 
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/testify/servefiles"
-	"github.com/go-phorce/trusty/api/v1/serverpb"
+	"github.com/go-phorce/trusty/api/v1/trustypb"
 	"github.com/go-phorce/trusty/cli"
 	"github.com/go-phorce/trusty/client"
 	"github.com/go-phorce/trusty/tests/mockpb"
@@ -173,7 +173,7 @@ var nextPort = int32(31234)
 // SetupMockGRPC for testing
 func (s *Suite) SetupMockGRPC() *grpc.Server {
 	serv := grpc.NewServer()
-	serverpb.RegisterStatusServer(serv, s.MockStatus)
+	trustypb.RegisterStatusServer(serv, s.MockStatus)
 
 	addr := fmt.Sprintf("localhost:%d", atomic.AddInt32(&nextPort, 1))
 	lis, err := net.Listen("tcp", addr)

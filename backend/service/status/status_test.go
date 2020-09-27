@@ -16,7 +16,7 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	v1 "github.com/go-phorce/trusty/api/v1"
-	pb "github.com/go-phorce/trusty/api/v1/serverpb"
+	pb "github.com/go-phorce/trusty/api/v1/trustypb"
 	"github.com/go-phorce/trusty/backend/service/status"
 	"github.com/go-phorce/trusty/backend/trustyserver"
 	"github.com/go-phorce/trusty/backend/trustyserver/embed"

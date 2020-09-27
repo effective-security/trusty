@@ -12,7 +12,7 @@ import (
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
-	pb "github.com/go-phorce/trusty/api/v1/serverpb"
+	pb "github.com/go-phorce/trusty/api/v1/trustypb"
 	"github.com/go-phorce/trusty/config"
 	"github.com/juju/errors"
 	"go.uber.org/dig"

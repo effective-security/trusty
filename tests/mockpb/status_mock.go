@@ -3,13 +3,13 @@ package mockpb
 import (
 	"context"
 
-	"github.com/go-phorce/trusty/api/v1/serverpb"
+	"github.com/go-phorce/trusty/api/v1/trustypb"
 	"github.com/gogo/protobuf/proto"
 )
 
 // MockStatusServer for testing
 type MockStatusServer struct {
-	serverpb.StatusServer
+	trustypb.StatusServer
 
 	Reqs []proto.Message
 
@@ -27,26 +27,26 @@ func (m *MockStatusServer) SetResponse(r proto.Message) {
 }
 
 // Version returns the server version.
-func (m *MockStatusServer) Version(ctx context.Context, req *serverpb.EmptyRequest) (*serverpb.VersionResponse, error) {
+func (m *MockStatusServer) Version(ctx context.Context, req *trustypb.EmptyRequest) (*trustypb.VersionResponse, error) {
 	//m.reqs = append(m.reqs, req)
 	if m.Err != nil {
 		return nil, m.Err
 	}
-	return m.Resps[0].(*serverpb.VersionResponse), nil
+	return m.Resps[0].(*trustypb.VersionResponse), nil
 }
 
 // Server returns the server statum.
-func (m *MockStatusServer) Server(ctx context.Context, req *serverpb.EmptyRequest) (*serverpb.ServerStatusResponse, error) {
+func (m *MockStatusServer) Server(ctx context.Context, req *trustypb.EmptyRequest) (*trustypb.ServerStatusResponse, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
-	return m.Resps[0].(*serverpb.ServerStatusResponse), nil
+	return m.Resps[0].(*trustypb.ServerStatusResponse), nil
 }
 
 // Caller returns the caller statum.
-func (m *MockStatusServer) Caller(ctx context.Context, req *serverpb.EmptyRequest) (*serverpb.CallerStatusResponse, error) {
+func (m *MockStatusServer) Caller(ctx context.Context, req *trustypb.EmptyRequest) (*trustypb.CallerStatusResponse, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
-	return m.Resps[0].(*serverpb.CallerStatusResponse), nil
+	return m.Resps[0].(*trustypb.CallerStatusResponse), nil
 }

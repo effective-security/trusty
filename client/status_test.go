@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	v1 "github.com/go-phorce/trusty/api/v1"
-	pb "github.com/go-phorce/trusty/api/v1/serverpb"
+	pb "github.com/go-phorce/trusty/api/v1/trustypb"
 	"github.com/go-phorce/trusty/client"
 	"github.com/go-phorce/trusty/client/proxy"
 	"github.com/go-phorce/trusty/tests/mockpb"

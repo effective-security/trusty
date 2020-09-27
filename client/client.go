@@ -7,7 +7,7 @@ import (
 	"time"
 
 	v1 "github.com/go-phorce/trusty/api/v1"
-	pb "github.com/go-phorce/trusty/api/v1/serverpb"
+	pb "github.com/go-phorce/trusty/api/v1/trustypb"
 	"github.com/juju/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

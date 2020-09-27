@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/go-phorce/dolly/xhttp/identity"
-	pb "github.com/go-phorce/trusty/api/v1/serverpb"
+	pb "github.com/go-phorce/trusty/api/v1/trustypb"
 )
 
 // Version returns the server version.
