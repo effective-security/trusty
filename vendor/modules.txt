@@ -183,6 +183,8 @@ github.com/lib/pq/scram
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.10
 github.com/mattn/go-isatty
+# github.com/mattn/go-runewidth v0.0.7
+github.com/mattn/go-runewidth
 # github.com/mattn/go-sqlite3 v1.14.0
 github.com/mattn/go-sqlite3
 # github.com/mattn/goreman v0.3.7
@@ -195,6 +197,9 @@ github.com/mattn/goveralls
 github.com/matttproud/golang_protobuf_extensions/pbutil
 # github.com/miekg/pkcs11 v0.0.0-20181023194645-95e2e42e3ece
 github.com/miekg/pkcs11
+# github.com/olekukonko/tablewriter v0.0.4
+## explicit
+github.com/olekukonko/tablewriter
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
 # github.com/prometheus/client_golang v1.1.0

@@ -18,7 +18,7 @@ func TestStatusServerToClient(t *testing.T) {
 	cli := StatusServerToClient(srv)
 	ctx := context.Background()
 
-	vexp := &pb.VersionResponse{Version: "1234"}
+	vexp := &pb.ServerVersion{Build: "1234", Runtime: "go1.15"}
 	srv.Resps = []proto.Message{vexp}
 	vres, err := cli.Version(ctx, emptyRequest)
 	require.NoError(t, err)
@@ -26,8 +26,9 @@ func TestStatusServerToClient(t *testing.T) {
 
 	sexp := &pb.ServerStatusResponse{
 		Status: &pb.ServerStatus{
-			Version: "12345",
+			Name: "test",
 		},
+		Version: vexp,
 	}
 	srv.Resps = []proto.Message{sexp}
 	sres, err := cli.Server(ctx, emptyRequest)
@@ -35,6 +36,8 @@ func TestStatusServerToClient(t *testing.T) {
 	assert.Equal(t, *sexp, *sres)
 
 	cexp := &pb.CallerStatusResponse{
+		ID:   "1234",
+		Name: "denis",
 		Role: "admin",
 	}
 	srv.Resps = []proto.Message{cexp}

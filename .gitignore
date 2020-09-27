@@ -1,7 +1,6 @@
 /.coverage
 /.rpm
 /.gopath
-/.gopath.proto
 /.vscode
 
 .DS_Store

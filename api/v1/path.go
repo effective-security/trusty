@@ -5,11 +5,11 @@ const (
 	// PathForStatus is base path for the Status service
 	PathForStatus = "/v1/status"
 
-	// PathForStatusVersion returns VersionResponse,
+	// PathForStatusVersion returns ServerVersion,
 	// that proviodes the version of the installed package.
 	//
 	// Verbs: GET
-	// Response: v1.VersionResponse
+	// Response: v1.ServerVersion
 	PathForStatusVersion = "/v1/status/version"
 
 	// PathForStatusServer returns ServerStatusResponse.

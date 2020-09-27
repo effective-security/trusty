@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/trusty/cli"
+	"github.com/go-phorce/trusty/pkg/print"
 	"github.com/juju/errors"
 )
 
@@ -21,7 +22,7 @@ func Version(c ctl.Control, _ interface{}) error {
 		ctl.WriteJSON(c.Writer(), res)
 		fmt.Fprint(c.Writer(), "\n")
 	} else {
-		fmt.Fprintf(c.Writer(), "%s\n", res.GetVersion())
+		print.ServerVersion(c.Writer(), res)
 	}
 	return nil
 }
@@ -34,9 +35,12 @@ func Server(c ctl.Control, _ interface{}) error {
 		return errors.Trace(err)
 	}
 
-	// TODO: cli.IsJSON() else print.Status
-	ctl.WriteJSON(c.Writer(), res)
-	fmt.Fprint(c.Writer(), "\n")
+	if cli.IsJSON() {
+		ctl.WriteJSON(c.Writer(), res)
+		fmt.Fprint(c.Writer(), "\n")
+	} else {
+		print.ServerStatusResponse(c.Writer(), res)
+	}
 
 	return nil
 }
@@ -49,9 +53,12 @@ func Caller(c ctl.Control, _ interface{}) error {
 		return errors.Trace(err)
 	}
 
-	// TODO: cli.IsJSON() else print.Status
-	ctl.WriteJSON(c.Writer(), res)
-	fmt.Fprint(c.Writer(), "\n")
+	if cli.IsJSON() {
+		ctl.WriteJSON(c.Writer(), res)
+		fmt.Fprint(c.Writer(), "\n")
+	} else {
+		print.CallerStatusResponse(c.Writer(), res)
+	}
 
 	return nil
 }

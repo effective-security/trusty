@@ -14,6 +14,7 @@ require (
 	github.com/juju/errors v0.0.0-20200330140219-3fe23663418f
 	github.com/mattn/goreman v0.3.7
 	github.com/mattn/goveralls v0.0.6
+	github.com/olekukonko/tablewriter v0.0.4
 	github.com/soheilhy/cmux v0.1.4
 	github.com/stretchr/testify v1.6.1
 	go.uber.org/dig v1.10.0

@@ -24,6 +24,7 @@ clean:
 	rm -rf \
 		./bin \
 		./.rpm \
+		./.gopath \
 		${COVPATH} \
 
 tools:

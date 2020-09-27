@@ -27,12 +27,12 @@ func (m *MockStatusServer) SetResponse(r proto.Message) {
 }
 
 // Version returns the server version.
-func (m *MockStatusServer) Version(ctx context.Context, req *trustypb.EmptyRequest) (*trustypb.VersionResponse, error) {
+func (m *MockStatusServer) Version(ctx context.Context, req *trustypb.EmptyRequest) (*trustypb.ServerVersion, error) {
 	//m.reqs = append(m.reqs, req)
 	if m.Err != nil {
 		return nil, m.Err
 	}
-	return m.Resps[0].(*trustypb.VersionResponse), nil
+	return m.Resps[0].(*trustypb.ServerVersion), nil
 }
 
 // Server returns the server statum.

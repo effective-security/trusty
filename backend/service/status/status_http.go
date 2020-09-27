@@ -2,12 +2,14 @@ package status
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xhttp/marshal"
-	pb "github.com/go-phorce/trusty/api/v1/trustypb"
+	"github.com/go-phorce/trusty/pkg/print"
+	"github.com/go-phorce/trusty/version"
 )
 
 var alive = []byte("ALIVE")
@@ -16,8 +18,15 @@ func (s *Service) version() rest.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
 		identity.ForRequest(r)
 
-		w.Header().Set(header.ContentType, header.TextPlain)
-		w.Write([]byte(s.server.Version()))
+		accept := r.Header.Get(header.Accept)
+		if accept == "" || strings.EqualFold(accept, header.ApplicationJSON) {
+			res, _ := s.Version(r.Context(), nil)
+			marshal.WriteJSON(w, r, res)
+		} else {
+			v := version.Current()
+			w.Header().Set(header.ContentType, header.TextPlain)
+			w.Write([]byte(v.Build))
+		}
 	}
 }
 
@@ -30,21 +39,28 @@ func (s *Service) nodeStatus() rest.Handle {
 
 func (s *Service) serverStatus() rest.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
-		res, _ := s.Server(nil, nil)
-		marshal.WriteJSON(w, r, res)
+		res, _ := s.Server(r.Context(), nil)
+
+		accept := r.Header.Get(header.Accept)
+		if accept == "" || strings.EqualFold(accept, header.ApplicationJSON) {
+			marshal.WriteJSON(w, r, res)
+		} else {
+			w.Header().Set(header.ContentType, header.TextPlain)
+			print.ServerStatusResponse(w, res)
+		}
 	}
 }
 
 func (s *Service) callerStatus() rest.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
-		callerCtx := identity.ForRequest(r)
-		role := callerCtx.Identity().Role()
-
-		res := &pb.CallerStatusResponse{
-			Role: role,
+		res, _ := s.Caller(r.Context(), nil)
+		accept := r.Header.Get(header.Accept)
+		if accept == "" || strings.EqualFold(accept, header.ApplicationJSON) {
+			marshal.WriteJSON(w, r, res)
+		} else {
+			w.Header().Set(header.ContentType, header.TextPlain)
+			print.CallerStatusResponse(w, res)
 		}
-
-		marshal.WriteJSON(w, r, res)
 	}
 }
 

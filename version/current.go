@@ -2,11 +2,16 @@ package version
 
 // GENERATED FILE DO NOT CHECK IN TO GIT!
 
+import (
+	"runtime"
+)
+
 var currentVersion = Info{
-	Major:  0,
-	Minor:  0,
-	Commit: 0,
-	Build:  "0.1.1",
+	Major:   0,
+	Minor:   0,
+	Commit:  0,
+	Runtime: runtime.Version(),
+	Build:   "0.1.1",
 }
 
 func init() {

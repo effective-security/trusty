@@ -17,7 +17,7 @@ func StatusServerToClient(srv pb.StatusServer) pb.StatusClient {
 }
 
 // Version returns the server version.
-func (s *statusSrv2C) Version(ctx context.Context, in *pb.EmptyRequest, opts ...grpc.CallOption) (*pb.VersionResponse, error) {
+func (s *statusSrv2C) Version(ctx context.Context, in *pb.EmptyRequest, opts ...grpc.CallOption) (*pb.ServerVersion, error) {
 	return s.srv.Version(ctx, in)
 }
 

@@ -32,4 +32,5 @@ func TestGoVersion(t *testing.T) {
 func TestVersion(t *testing.T) {
 	gv := version.Current()
 	assert.True(t, gv.Float() > 0)
+	assert.NotEmpty(t, gv.Runtime)
 }
