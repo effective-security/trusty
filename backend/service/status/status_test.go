@@ -39,6 +39,16 @@ var (
 	httpAddr   = testutils.CreateURLs("http", "")
 )
 
+var jsonContentHeaders = map[string]string{
+	header.Accept:      header.ApplicationJSON,
+	header.ContentType: header.ApplicationJSON,
+}
+
+var textContentHeaders = map[string]string{
+	header.Accept:      header.TextPlain,
+	header.ContentType: header.ApplicationJSON,
+}
+
 // serviceFactories provides map of trustyserver.ServiceFactory
 var serviceFactories = map[string]trustyserver.ServiceFactory{
 	status.ServiceName: status.Factory,
@@ -78,11 +88,13 @@ func TestMain(m *testing.M) {
 	os.Exit(rc)
 }
 
-func TestVersionHttp(t *testing.T) {
+func TestVersionHttpText(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	client := retriable.New()
-	hdr, _, err := client.Request(context.Background(),
+
+	ctx := retriable.WithHeaders(context.Background(), textContentHeaders)
+	hdr, _, err := client.Request(ctx,
 		http.MethodGet,
 		[]string{httpAddr},
 		v1.PathForStatusVersion,
@@ -92,10 +104,29 @@ func TestVersionHttp(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	assert.Contains(t, hdr.Get(header.ContentType), "text/plain")
-
+	assert.Contains(t, hdr.Get(header.ContentType), header.TextPlain)
 	res := string(w.Body.Bytes())
 	assert.Equal(t, version.Current().Build, res)
+}
+
+func TestVersionHttpJSON(t *testing.T) {
+	res := new(pb.ServerVersion)
+
+	client := retriable.New()
+	ctx := retriable.WithHeaders(context.Background(), jsonContentHeaders)
+	hdr, rc, err := client.Request(ctx,
+		http.MethodGet,
+		[]string{httpAddr},
+		v1.PathForStatusVersion,
+		nil,
+		res)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, rc)
+
+	assert.Contains(t, hdr.Get(header.ContentType), header.ApplicationJSON)
+	assert.Equal(t, version.Current().Build, res.Build)
+	assert.Equal(t, version.Current().Runtime, res.Runtime)
 }
 
 func TestVersionGrpc(t *testing.T) {
@@ -129,9 +160,28 @@ func TestNodeStatusHttp(t *testing.T) {
 }
 
 func TestServerStatusHttp(t *testing.T) {
+	w := httptest.NewRecorder()
+	client := retriable.New()
+	ctx := retriable.WithHeaders(context.Background(), textContentHeaders)
+
+	hdr, _, err := client.Request(ctx,
+		http.MethodGet,
+		[]string{httpAddr},
+		v1.PathForStatusServer,
+		nil,
+		w)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, hdr.Get(header.ContentType), header.TextPlain)
+}
+
+func TestServerStatusHttpJSON(t *testing.T) {
 	res := new(pb.ServerStatusResponse)
 	client := retriable.New()
-	hdr, sc, err := client.Request(context.Background(),
+	ctx := retriable.WithHeaders(context.Background(), jsonContentHeaders)
+
+	hdr, sc, err := client.Request(ctx,
 		http.MethodGet,
 		[]string{httpAddr},
 		v1.PathForStatusServer,
@@ -157,9 +207,28 @@ func TestServerStatusGrpc(t *testing.T) {
 }
 
 func TestCallerStatusHttp(t *testing.T) {
+	w := httptest.NewRecorder()
+	client := retriable.New()
+	ctx := retriable.WithHeaders(context.Background(), textContentHeaders)
+
+	hdr, _, err := client.Request(ctx,
+		http.MethodGet,
+		[]string{httpAddr},
+		v1.PathForStatusCaller,
+		nil,
+		w)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, hdr.Get(header.ContentType), header.TextPlain)
+}
+
+func TestCallerStatusHttpJSON(t *testing.T) {
 	res := new(pb.CallerStatusResponse)
 	client := retriable.New()
-	hdr, sc, err := client.Request(context.Background(),
+	ctx := retriable.WithHeaders(context.Background(), jsonContentHeaders)
+
+	hdr, sc, err := client.Request(ctx,
 		http.MethodGet,
 		[]string{httpAddr},
 		v1.PathForStatusCaller,

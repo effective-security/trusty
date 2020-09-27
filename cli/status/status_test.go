@@ -51,7 +51,7 @@ func (s *testSuite) TestVersion() {
 	if s.Cli.IsJSON() {
 		s.HasText("{\n\t\"Build\": \"1.2.3\",\n\t\"Runtime\": \"go1.15\"\n}\n")
 	} else {
-		s.HasText("1.2.3\n")
+		s.HasText("1.2.3")
 	}
 }
 
@@ -80,8 +80,13 @@ func (s *testSuite) TestServer() {
 	if s.Cli.IsJSON() {
 		s.HasText("{\n\t\"Status\": {\n\t\t\"ListenURLs\": [\n\t\t\t\"host1:123\"\n\t\t],\n\t\t\"Name\": \"mock\"\n\t},\n\t\"Version\": {\n\t\t\"Build\": \"1.2.3\",\n\t\t\"Runtime\": \"go1.15\"\n\t}\n}\n")
 	} else {
-		// TODO
-		s.HasText("{\n\t\"Status\": {\n\t\t\"ListenURLs\": [\n\t\t\t\"host1:123\"\n\t\t],\n\t\t\"Name\": \"mock\"\n\t},\n\t\"Version\": {\n\t\t\"Build\": \"1.2.3\",\n\t\t\"Runtime\": \"go1.15\"\n\t}\n}\n")
+		s.HasText("  Name        | mock ",
+			"  Node        |            ",
+			"  Host        |            ",
+			"  Listen URLs | host1:123  ",
+			"  Version     | 1.2.3      ",
+			"  Runtime     | go1.15     ",
+			"  Started     |")
 	}
 }
 
@@ -103,7 +108,6 @@ func (s *testSuite) TestCaller() {
 	if s.Cli.IsJSON() {
 		s.HasText("{\n\t\"Role\": \"test_role\"\n}\n")
 	} else {
-		// TODO
-		s.HasText("{\n\t\"Role\": \"test_role\"\n}\n")
+		s.HasText("  Name |            \n  ID   |            \n  Role | test_role  \n\n")
 	}
 }
