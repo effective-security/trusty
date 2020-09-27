@@ -19,7 +19,7 @@ if [[ $(protoc --version | cut -f2 -d' ') != "3.13.0" ]]; then
 fi
 
 # directories containing protos to be built
-DIRS="./api/v1/serverpb"
+DIRS="./api/v1/trustypb"
 
 # exact version of packages to build
 GOGO_PROTO_SHA="1adfc126b41513cc696b209667c8656ea7aac67c"
@@ -88,7 +88,7 @@ done
 
 # remove old swagger files so it's obvious whether the files fail to generate
 rm -rf Documentation/dev-guide/apispec/swagger/*json
-for pb in serverpb/rpc; do
+for pb in trustypb/rpc; do
 	protobase="api/v1/${pb}"
 	protoc -I. \
 	    -I"${GRPC_GATEWAY_ROOT}"/third_party/googleapis \

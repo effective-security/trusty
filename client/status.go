@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 
-	pb "github.com/go-phorce/trusty/api/v1/serverpb"
+	pb "github.com/go-phorce/trusty/api/v1/trustypb"
 	"google.golang.org/grpc"
 )
 

@@ -1,5 +1,5 @@
 syntax = "proto3";
-package serverpb;
+package trustypb;
 
 import "gogoproto/gogo.proto";
 // for grpc-gateway

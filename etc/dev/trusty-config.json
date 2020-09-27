@@ -50,7 +50,7 @@
                 "/v1/certs",
                 "/v1/crl",
                 "/v1/ocsp",
-                "/serverpb.Status"
+                "/trustypb.Status"
             ],
             "Allow": [
                 "/v1/ca:trusty-peer"

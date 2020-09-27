@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/go-phorce/trusty/api/v1/serverpb"
+	"github.com/go-phorce/trusty/api/v1/trustypb"
 	"github.com/go-phorce/trusty/client"
 	"github.com/go-phorce/trusty/tests/mockpb"
 	"github.com/stretchr/testify/assert"
@@ -24,7 +24,7 @@ var nextPort = int32(41234)
 
 func setupStatusMockGRPC(t *testing.T, m *mockpb.MockStatusServer) (*client.Client, *grpc.Server) {
 	serv := grpc.NewServer()
-	serverpb.RegisterStatusServer(serv, m)
+	trustypb.RegisterStatusServer(serv, m)
 
 	addr := fmt.Sprintf("localhost:%d", atomic.AddInt32(&nextPort, 1))
 	lis, err := net.Listen("tcp", addr)

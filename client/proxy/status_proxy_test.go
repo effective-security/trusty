@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	pb "github.com/go-phorce/trusty/api/v1/serverpb"
+	pb "github.com/go-phorce/trusty/api/v1/trustypb"
 	"github.com/go-phorce/trusty/tests/mockpb"
 	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/assert"

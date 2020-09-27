@@ -3,7 +3,7 @@ package status_test
 import (
 	"testing"
 
-	"github.com/go-phorce/trusty/api/v1/serverpb"
+	"github.com/go-phorce/trusty/api/v1/trustypb"
 	"github.com/go-phorce/trusty/cli/status"
 	"github.com/go-phorce/trusty/cli/testsuite"
 	"github.com/go-phorce/trusty/tests/mockpb"
@@ -33,7 +33,7 @@ func TestCtlSuiteWithJSON(t *testing.T) {
 }
 
 func (s *testSuite) TestVersion() {
-	expectedResponse := &serverpb.VersionResponse{
+	expectedResponse := &trustypb.VersionResponse{
 		Version: "1.2.3",
 	}
 
@@ -55,8 +55,8 @@ func (s *testSuite) TestVersion() {
 }
 
 func (s *testSuite) TestServer() {
-	expectedResponse := &serverpb.ServerStatusResponse{
-		Status: &serverpb.ServerStatus{
+	expectedResponse := &trustypb.ServerStatusResponse{
+		Status: &trustypb.ServerStatus{
 			Name:       "mock",
 			ListenURLs: []string{"host1:123"},
 			Version:    "1.2.3",
@@ -82,7 +82,7 @@ func (s *testSuite) TestServer() {
 }
 
 func (s *testSuite) TestCaller() {
-	expectedResponse := &serverpb.CallerStatusResponse{
+	expectedResponse := &trustypb.CallerStatusResponse{
 		Role: "test_role",
 	}
 

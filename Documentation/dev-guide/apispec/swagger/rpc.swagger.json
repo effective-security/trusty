@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "api/v1/serverpb/rpc.proto",
+    "title": "api/v1/trustypb/rpc.proto",
     "version": "version not set"
   },
   "consumes": [
@@ -19,7 +19,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/serverpbCallerStatusResponse"
+              "$ref": "#/definitions/trustypbCallerStatusResponse"
             }
           },
           "default": {
@@ -42,7 +42,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/serverpbServerStatusResponse"
+              "$ref": "#/definitions/trustypbServerStatusResponse"
             }
           },
           "default": {
@@ -65,7 +65,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/serverpbVersionResponse"
+              "$ref": "#/definitions/trustypbVersionResponse"
             }
           },
           "default": {
@@ -115,7 +115,7 @@
         }
       }
     },
-    "serverpbCallerStatusResponse": {
+    "trustypbCallerStatusResponse": {
       "type": "object",
       "properties": {
         "Role": {
@@ -124,7 +124,7 @@
         }
       }
     },
-    "serverpbServerStatus": {
+    "trustypbServerStatus": {
       "type": "object",
       "properties": {
         "Name": {
@@ -157,16 +157,16 @@
         }
       }
     },
-    "serverpbServerStatusResponse": {
+    "trustypbServerStatusResponse": {
       "type": "object",
       "properties": {
         "Status": {
-          "$ref": "#/definitions/serverpbServerStatus",
+          "$ref": "#/definitions/trustypbServerStatus",
           "description": "Status of the server."
         }
       }
     },
-    "serverpbVersionResponse": {
+    "trustypbVersionResponse": {
       "type": "object",
       "properties": {
         "Version": {
