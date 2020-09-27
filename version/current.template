@@ -2,10 +2,15 @@ package version
 
 // GENERATED FILE DO NOT CHECK IN TO GIT!
 
+import (
+    "runtime"
+)
+
 var currentVersion = Info{
 	Major: 0,
 	Minor: 0,
 	Commit: 0,
+    Runtime: runtime.Version(),
 	Build: "GIT_VERSION",
 }
 

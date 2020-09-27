@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"runtime"
 	"runtime/pprof"
 	"sync"
 	"syscall"
@@ -201,7 +200,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 
 	for _, svcCfg := range []*config.HTTPServer{&a.cfg.HealthServer, &a.cfg.TrustyServer} {
 		if svcCfg.GetDisabled() == false {
-			httpServer, err := trustyserver.StartTrusty(ver, svcCfg, a.container, ServiceFactories)
+			httpServer, err := trustyserver.StartTrusty(svcCfg, a.container, ServiceFactories)
 			if err != nil {
 				logger.Errorf("src=Run, reason=Start, server=%s, err=[%v]", svcCfg.Name, errors.ErrorStack(err))
 
@@ -335,8 +334,8 @@ func (a *App) initLogs() error {
 			logger.Infof("src=initLogs, logger=%q, level=%v", ll.Repo, l)
 		}
 	}
-	logger.Infof("src=initLogs, status=service_starting, version='%v', runtime='%v', args=%v, config=%q",
-		version.Current(), runtime.Version(), os.Args, *a.flags.cfgFile)
+	logger.Infof("src=initLogs, status=service_starting, version='%v', args=%v, config=%q",
+		version.Current(), os.Args, *a.flags.cfgFile)
 
 	return nil
 }

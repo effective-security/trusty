@@ -26,7 +26,7 @@ func TestMockErr(t *testing.T) {
 }
 
 func TestMockVersion(t *testing.T) {
-	resp := &trustypb.VersionResponse{}
+	resp := &trustypb.ServerVersion{}
 	withErr := &MockStatusServer{
 		Resps: []proto.Message{resp},
 	}

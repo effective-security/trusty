@@ -28,7 +28,7 @@ GRPC_GATEWAY_SHA="92583770e3f01b09a0d3e9bdf64321d8bebd48f2"
 # disable go mod
 export GO111MODULE=off
 # set up self-contained GOPATH for building
-export GOPATH=${PWD}/.gopath.proto
+export GOPATH=${PWD}/.gopath
 export GOBIN=${PWD}/bin
 export PATH="${GOBIN}:${PATH}"
 
@@ -41,8 +41,8 @@ function cleanup {
   rm -rf "${GOPATH}"
 }
 
-cleanup
-trap cleanup EXIT
+#cleanup
+#trap cleanup EXIT
 
 # Ensure we have the right version of protoc-gen-gogo by building it every time.
 # TODO(jonboulle): vendor this instead of `go get`ting it.

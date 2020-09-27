@@ -23,11 +23,11 @@ func TestInfo_ParseBuild(t *testing.T) {
 }
 
 func TestInfo_GreaterOrEqual(t *testing.T) {
-	v01 := Info{0, 1, 3, "", float32(0.1*1000000 + 3)}
-	v02 := Info{0, 2, 3, "", float32(0.2*1000000 + 3)}
-	v10 := Info{1, 0, 3, "", float32(1.0*1000000 + 3)}
-	v12 := Info{1, 2, 3, "", float32(1.2*1000000 + 3)}
-	v20 := Info{2, 0, 3, "", float32(2.0*1000000 + 3)}
+	v01 := Info{0, 1, 3, "", "go1.5", float32(0.1*1000000 + 3)}
+	v02 := Info{0, 2, 3, "", "go1.5", float32(0.2*1000000 + 3)}
+	v10 := Info{1, 0, 3, "", "go1.5", float32(1.0*1000000 + 3)}
+	v12 := Info{1, 2, 3, "", "go1.5", float32(1.2*1000000 + 3)}
+	v20 := Info{2, 0, 3, "", "go1.5", float32(2.0*1000000 + 3)}
 	f := func(v, other Info, expected bool) {
 		act := v.GreaterOrEqual(other)
 		if act != expected {

@@ -2,15 +2,17 @@ package version
 
 import (
 	"fmt"
+	"runtime"
 )
 
 // Info describes a version of an executable
 type Info struct {
-	Major  uint   `json:"major"`
-	Minor  uint   `json:"minor"`
-	Commit uint   `json:"commi"`
-	Build  string `json:"build"`
-	flt    float32
+	Major   uint   `json:"major"`
+	Minor   uint   `json:"minor"`
+	Commit  uint   `json:"commi"`
+	Build   string `json:"build"`
+	Runtime string `json:"runtime"`
+	flt     float32
 }
 
 // PopulateFromBuild will parse the major/minor values from the build string
@@ -23,6 +25,7 @@ func (v *Info) PopulateFromBuild() {
 	fmt.Sscanf(v.Build, "%d.%d.%d", &v.Major, &v.Minor, &v.Commit)
 	fmt.Sscanf(v.Build, "%f-", &v.flt)
 	v.flt = v.flt*1000000 + float32(v.Commit)
+	v.Runtime = runtime.Version()
 }
 
 func (v Info) String() string {

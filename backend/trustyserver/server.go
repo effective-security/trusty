@@ -47,7 +47,6 @@ type TrustyServer struct {
 	pb.StatusServer
 	Listeners []net.Listener
 
-	version  string
 	ipaddr   string
 	hostname string
 	// a map of contexts for the servers that serves client requests.
@@ -70,7 +69,6 @@ type TrustyServer struct {
 
 // StartTrusty returns running TrustyServer
 func StartTrusty(
-	version string,
 	cfg *config.HTTPServer,
 	container *dig.Container,
 	serviceFactories map[string]ServiceFactory,
@@ -91,7 +89,7 @@ func StartTrusty(
 		e = nil
 	}()
 
-	e, err = newTrusty(version, cfg, container, serviceFactories)
+	e, err = newTrusty(cfg, container, serviceFactories)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -117,7 +115,6 @@ func StartTrusty(
 }
 
 func newTrusty(
-	version string,
 	cfg *config.HTTPServer,
 	container *dig.Container,
 	serviceFactories map[string]ServiceFactory,
@@ -132,7 +129,6 @@ func newTrusty(
 	hostname, _ := os.Hostname()
 
 	e := &TrustyServer{
-		version:  version,
 		ipaddr:   ipaddr,
 		hostname: hostname,
 		cfg:      *cfg,
@@ -266,11 +262,6 @@ func stopServers(ctx context.Context, ss *servers) {
 
 // Err returns error channel
 func (e *TrustyServer) Err() <-chan error { return e.errc }
-
-// Version returns package version
-func (e *TrustyServer) Version() string {
-	return e.version
-}
 
 // Name returns server name
 func (e *TrustyServer) Name() string {

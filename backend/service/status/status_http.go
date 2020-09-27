@@ -8,6 +8,7 @@ import (
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	pb "github.com/go-phorce/trusty/api/v1/trustypb"
+	"github.com/go-phorce/trusty/version"
 )
 
 var alive = []byte("ALIVE")
@@ -16,8 +17,9 @@ func (s *Service) version() rest.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
 		identity.ForRequest(r)
 
+		v := version.Current()
 		w.Header().Set(header.ContentType, header.TextPlain)
-		w.Write([]byte(s.server.Version()))
+		w.Write([]byte(v.Build))
 	}
 }
 

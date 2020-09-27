@@ -22,7 +22,7 @@ func TestStatusWithNewCtxClient(t *testing.T) {
 	cli.Status = client.NewStatusFromProxy(proxy.StatusServerToClient(srv))
 	defer cli.Close()
 
-	vexp := &pb.VersionResponse{Version: "1234"}
+	vexp := &pb.ServerVersion{Build: "1234", Runtime: "go1.15"}
 	srv.Resps = []proto.Message{vexp}
 	vres, err := cli.Version(ctx)
 	require.NoError(t, err)
@@ -30,8 +30,9 @@ func TestStatusWithNewCtxClient(t *testing.T) {
 
 	sexp := &pb.ServerStatusResponse{
 		Status: &pb.ServerStatus{
-			Version: "12345",
+			Name: "test",
 		},
+		Version: vexp,
 	}
 	srv.Resps = []proto.Message{sexp}
 	sres, err := cli.Server(ctx)
@@ -39,6 +40,8 @@ func TestStatusWithNewCtxClient(t *testing.T) {
 	assert.Equal(t, *sexp, *sres)
 
 	cexp := &pb.CallerStatusResponse{
+		ID:   "1234",
+		Name: "denis",
 		Role: "admin",
 	}
 	srv.Resps = []proto.Message{cexp}
@@ -60,7 +63,7 @@ func TestStatusWithNewClientMock(t *testing.T) {
 	expErr := v1.ErrGRPCPermissionDenied
 
 	t.Run("Version", func(t *testing.T) {
-		vexp := &pb.VersionResponse{Version: "1234"}
+		vexp := &pb.ServerVersion{Build: "1234", Runtime: "go1.15"}
 		srv.SetResponse(vexp)
 		vres, err := cli.Version(ctx)
 		require.NoError(t, err)
@@ -75,7 +78,7 @@ func TestStatusWithNewClientMock(t *testing.T) {
 	t.Run("ServerStatus", func(t *testing.T) {
 		sexp := &pb.ServerStatusResponse{
 			Status: &pb.ServerStatus{
-				Version: "12345",
+				Name: "test",
 			},
 		}
 		srv.SetResponse(sexp)

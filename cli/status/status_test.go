@@ -33,8 +33,9 @@ func TestCtlSuiteWithJSON(t *testing.T) {
 }
 
 func (s *testSuite) TestVersion() {
-	expectedResponse := &trustypb.VersionResponse{
-		Version: "1.2.3",
+	expectedResponse := &trustypb.ServerVersion{
+		Build:   "1.2.3",
+		Runtime: "go1.15",
 	}
 
 	s.MockStatus = &mockpb.MockStatusServer{
@@ -48,7 +49,7 @@ func (s *testSuite) TestVersion() {
 	s.Require().NoError(err)
 
 	if s.Cli.IsJSON() {
-		s.HasText("{\n\t\"Version\": \"1.2.3\"\n}\n")
+		s.HasText("{\n\t\"Build\": \"1.2.3\",\n\t\"Runtime\": \"go1.15\"\n}\n")
 	} else {
 		s.HasText("1.2.3\n")
 	}
@@ -59,7 +60,10 @@ func (s *testSuite) TestServer() {
 		Status: &trustypb.ServerStatus{
 			Name:       "mock",
 			ListenURLs: []string{"host1:123"},
-			Version:    "1.2.3",
+		},
+		Version: &trustypb.ServerVersion{
+			Build:   "1.2.3",
+			Runtime: "go1.15",
 		},
 	}
 
@@ -74,10 +78,10 @@ func (s *testSuite) TestServer() {
 	s.Require().NoError(err)
 
 	if s.Cli.IsJSON() {
-		s.HasText("{\n\t\"Status\": {\n\t\t\"ListenURLs\": [\n\t\t\t\"host1:123\"\n\t\t],\n\t\t\"Name\": \"mock\",\n\t\t\"Version\": \"1.2.3\"\n\t}\n}\n")
+		s.HasText("{\n\t\"Status\": {\n\t\t\"ListenURLs\": [\n\t\t\t\"host1:123\"\n\t\t],\n\t\t\"Name\": \"mock\"\n\t},\n\t\"Version\": {\n\t\t\"Build\": \"1.2.3\",\n\t\t\"Runtime\": \"go1.15\"\n\t}\n}\n")
 	} else {
 		// TODO
-		s.HasText("{\n\t\"Status\": {\n\t\t\"ListenURLs\": [\n\t\t\t\"host1:123\"\n\t\t],\n\t\t\"Name\": \"mock\",\n\t\t\"Version\": \"1.2.3\"\n\t}\n}\n")
+		s.HasText("{\n\t\"Status\": {\n\t\t\"ListenURLs\": [\n\t\t\t\"host1:123\"\n\t\t],\n\t\t\"Name\": \"mock\"\n\t},\n\t\"Version\": {\n\t\t\"Build\": \"1.2.3\",\n\t\t\"Runtime\": \"go1.15\"\n\t}\n}\n")
 	}
 }
 

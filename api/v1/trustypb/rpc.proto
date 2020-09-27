@@ -10,7 +10,7 @@ option (gogoproto.unmarshaler_all) = true;
 
 service Status {
     // Version returns the server version.
-    rpc Version(EmptyRequest) returns (VersionResponse) {
+    rpc Version(EmptyRequest) returns (ServerVersion) {
         option (google.api.http) = {
             get: "/v1/status/version"
         };
@@ -34,9 +34,11 @@ service Status {
 message EmptyRequest {
 }
 
-message VersionResponse {
-    // Version is the server version.
-    string Version = 1;
+message ServerVersion {
+    // Build is the server build version.
+    string Build = 1;
+    // Runtime is the runtime version.
+    string Runtime = 2;
 }
 
 message ServerStatus {
@@ -51,18 +53,23 @@ message ServerStatus {
     repeated string ListenURLs = 4;
     // StartedAt is the Unix time when the server has started.
     int64 StartedAt = 5;
-    // Version is the server version.
-    string Version = 6;
 }
 
 message ServerStatusResponse {
     // Status of the server.
     ServerStatus Status = 1;
+
+    // Version of the server.
+    ServerVersion Version = 2;
 }
 
 message CallerStatusResponse {
+    // ID of the caller.
+    string ID = 1;
+    // Name of the caller.
+    string Name = 2;
     // Role of the caller.
-    string Role = 1;
+    string Role = 3;
 }
 
 // Error is the generic error returned from unary RPCs.

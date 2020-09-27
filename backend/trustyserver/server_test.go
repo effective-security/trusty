@@ -24,12 +24,11 @@ func TestStartTrustyEmptyHTTP(t *testing.T) {
 	}
 
 	c := createContainer(nil, nil, nil)
-	srv, err := StartTrusty("1.0.0", cfg, c, nil)
+	srv, err := StartTrusty(cfg, c, nil)
 	require.NoError(t, err)
 	require.NotNil(t, srv)
 	defer srv.Close()
 
-	assert.Equal(t, "1.0.0", srv.Version())
 	assert.Equal(t, cfg.Name, srv.Name())
 }
 
@@ -45,12 +44,11 @@ func TestStartTrustyEmptyHTTPS(t *testing.T) {
 	}
 
 	c := createContainer(nil, nil, nil)
-	srv, err := StartTrusty("1.0.0", cfg, c, nil)
+	srv, err := StartTrusty(cfg, c, nil)
 	require.NoError(t, err)
 	require.NotNil(t, srv)
 	defer srv.Close()
 
-	assert.Equal(t, "1.0.0", srv.Version())
 	assert.Equal(t, cfg.Name, srv.Name())
 }
 

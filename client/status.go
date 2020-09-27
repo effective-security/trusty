@@ -30,7 +30,7 @@ func NewStatusFromProxy(proxy pb.StatusClient) Status {
 var emptyReq = &pb.EmptyRequest{}
 
 // Version returns the server version.
-func (c *statusClient) Version(ctx context.Context) (*pb.VersionResponse, error) {
+func (c *statusClient) Version(ctx context.Context) (*pb.ServerVersion, error) {
 	return c.remote.Version(ctx, emptyReq, c.callOpts...)
 }
 
@@ -58,7 +58,7 @@ func RetryStatusClient(conn *grpc.ClientConn) pb.StatusClient {
 }
 
 // Version returns the server version.
-func (r *retryStatusClient) Version(ctx context.Context, in *pb.EmptyRequest, opts ...grpc.CallOption) (*pb.VersionResponse, error) {
+func (r *retryStatusClient) Version(ctx context.Context, in *pb.EmptyRequest, opts ...grpc.CallOption) (*pb.ServerVersion, error) {
 	return r.status.Version(ctx, in, opts...)
 }
 

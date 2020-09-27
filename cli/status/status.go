@@ -21,7 +21,7 @@ func Version(c ctl.Control, _ interface{}) error {
 		ctl.WriteJSON(c.Writer(), res)
 		fmt.Fprint(c.Writer(), "\n")
 	} else {
-		fmt.Fprintf(c.Writer(), "%s\n", res.GetVersion())
+		fmt.Fprintf(c.Writer(), "%s\n", res.GetBuild())
 	}
 	return nil
 }

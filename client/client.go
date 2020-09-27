@@ -63,7 +63,7 @@ var defaultCallOpts = []grpc.CallOption{
 // Status client interface
 type Status interface {
 	// Version returns the server version.
-	Version(ctx context.Context) (*pb.VersionResponse, error)
+	Version(ctx context.Context) (*pb.ServerVersion, error)
 	// Server returns the server status.
 	Server(ctx context.Context) (*pb.ServerStatusResponse, error)
 	// Caller returns the caller status.

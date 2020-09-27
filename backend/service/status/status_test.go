@@ -23,6 +23,7 @@ import (
 	"github.com/go-phorce/trusty/client"
 	"github.com/go-phorce/trusty/config"
 	"github.com/go-phorce/trusty/tests/testutils"
+	"github.com/go-phorce/trusty/version"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -59,7 +60,7 @@ func TestMain(m *testing.M) {
 	}
 
 	container := createContainer(nil, nil, nil)
-	trustyServer, err = trustyserver.StartTrusty("1.0.0", cfg, container, serviceFactories)
+	trustyServer, err = trustyserver.StartTrusty(cfg, container, serviceFactories)
 	if err != nil || trustyServer == nil {
 		panic(errors.Trace(err))
 	}
@@ -94,15 +95,17 @@ func TestVersionHttp(t *testing.T) {
 	assert.Contains(t, hdr.Get(header.ContentType), "text/plain")
 
 	res := string(w.Body.Bytes())
-	assert.Equal(t, trustyServer.Version(), res)
+	assert.Equal(t, version.Current().Build, res)
 }
 
 func TestVersionGrpc(t *testing.T) {
-	res := new(pb.VersionResponse)
+	res := new(pb.ServerVersion)
 	res, err := trustyClient.Status.Version(context.Background())
 	require.NoError(t, err)
 
-	assert.Equal(t, trustyServer.Version(), res.Version)
+	ver := version.Current()
+	assert.Equal(t, ver.Build, res.Build)
+	assert.Equal(t, ver.Runtime, res.Runtime)
 }
 
 func TestNodeStatusHttp(t *testing.T) {
@@ -140,7 +143,7 @@ func TestServerStatusHttp(t *testing.T) {
 	assert.Contains(t, hdr.Get(header.ContentType), header.ApplicationJSON)
 	require.NotNil(t, res.Status)
 	assert.Equal(t, trustyServer.Name(), res.Status.Name)
-	assert.Equal(t, trustyServer.Version(), res.Status.Version)
+	assert.Equal(t, version.Current().Build, res.Version.Build)
 }
 
 func TestServerStatusGrpc(t *testing.T) {
@@ -150,7 +153,7 @@ func TestServerStatusGrpc(t *testing.T) {
 
 	require.NotNil(t, res.Status)
 	assert.Equal(t, trustyServer.Name(), res.Status.Name)
-	assert.Equal(t, trustyServer.Version(), res.Status.Version)
+	assert.Equal(t, version.Current().Build, res.Version.Build)
 }
 
 func TestCallerStatusHttp(t *testing.T) {

@@ -65,7 +65,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/trustypbVersionResponse"
+              "$ref": "#/definitions/trustypbServerVersion"
             }
           },
           "default": {
@@ -118,6 +118,14 @@
     "trustypbCallerStatusResponse": {
       "type": "object",
       "properties": {
+        "ID": {
+          "type": "string",
+          "description": "ID of the caller."
+        },
+        "Name": {
+          "type": "string",
+          "description": "Name of the caller."
+        },
         "Role": {
           "type": "string",
           "description": "Role of the caller."
@@ -150,10 +158,6 @@
           "type": "string",
           "format": "int64",
           "description": "StartedAt is the Unix time when the server has started."
-        },
-        "Version": {
-          "type": "string",
-          "description": "Version is the server version."
         }
       }
     },
@@ -163,15 +167,23 @@
         "Status": {
           "$ref": "#/definitions/trustypbServerStatus",
           "description": "Status of the server."
+        },
+        "Version": {
+          "$ref": "#/definitions/trustypbServerVersion",
+          "description": "Version of the server."
         }
       }
     },
-    "trustypbVersionResponse": {
+    "trustypbServerVersion": {
       "type": "object",
       "properties": {
-        "Version": {
+        "Build": {
           "type": "string",
-          "description": "Version is the server version."
+          "description": "Build is the server build version."
+        },
+        "Runtime": {
+          "type": "string",
+          "description": "Runtime is the runtime version."
         }
       }
     }
