@@ -58,7 +58,7 @@
             "LogAllowedAny": true,
             "LogAllowed": true,
             "LogDenied": true,
-            "CertMapper": "cert-roles.yaml"
+            "CertMapper": "cert-roles.json"
         },
         "LogLevels": [
             {

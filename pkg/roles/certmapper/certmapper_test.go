@@ -23,29 +23,29 @@ var commonNamesToIdentities = map[string]string{
 }
 
 func Test_Config(t *testing.T) {
-	_, err := certmapper.Load("testdata/missing.yaml")
+	_, err := certmapper.Load("testdata/missing.json")
 	require.Error(t, err)
-	assert.Equal(t, "open testdata/missing.yaml: no such file or directory", err.Error())
+	assert.Equal(t, "open testdata/missing.json: no such file or directory", err.Error())
 
-	_, err = certmapper.Load("testdata/roles_corrupted.1.yaml")
+	_, err = certmapper.Load("testdata/roles_corrupted.1.json")
 	require.Error(t, err)
-	assert.Equal(t, `unable to unmarshal "testdata/roles_corrupted.1.yaml": yaml: line 2: mapping values are not allowed in this context`, err.Error())
+	assert.Equal(t, `unable to unmarshal "testdata/roles_corrupted.1.json": invalid character 'v' looking for beginning of value`, err.Error())
 
-	_, err = certmapper.Load("testdata/roles_corrupted.2.yaml")
+	_, err = certmapper.Load("testdata/roles_corrupted.2.json")
 	require.Error(t, err)
-	assert.Equal(t, `unable to unmarshal "testdata/roles_corrupted.2.yaml": yaml: line 4: could not find expected ':'`, err.Error())
+	assert.Equal(t, `unable to unmarshal "testdata/roles_corrupted.2.json": invalid character ',' after object key`, err.Error())
 
 	_, err = certmapper.Load("")
 	require.NoError(t, err)
 
-	cfg, err := certmapper.LoadConfig("testdata/roles.yaml")
+	cfg, err := certmapper.LoadConfig("testdata/roles.json")
 	require.NoError(t, err)
 	assert.Equal(t, 2, len(cfg.ValidOrganizations))
 	assert.Equal(t, 1, len(cfg.ValidIssuers))
 }
 
 func Test_identity(t *testing.T) {
-	cfg, err := certmapper.LoadConfig("testdata/roles.yaml")
+	cfg, err := certmapper.LoadConfig("testdata/roles.json")
 	require.NoError(t, err)
 
 	p, err := certmapper.New(cfg)
@@ -235,7 +235,7 @@ func Test_identity(t *testing.T) {
 }
 
 func Test_identity_mapper(t *testing.T) {
-	cfg, err := certmapper.LoadConfig("testdata/roles.yaml")
+	cfg, err := certmapper.LoadConfig("testdata/roles.json")
 	require.NoError(t, err)
 
 	p, err := certmapper.New(cfg)

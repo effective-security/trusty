@@ -37,7 +37,7 @@ func Test_Notfound(t *testing.T) {
 func Test_All(t *testing.T) {
 	p, err := roles.New(
 		"jwtmapper/testdata/roles.yaml",
-		"certmapper/testdata/roles.yaml")
+		"certmapper/testdata/roles.json")
 	require.NoError(t, err)
 
 	t.Run("trusty-client", func(t *testing.T) {
