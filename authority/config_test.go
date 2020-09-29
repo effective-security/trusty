@@ -65,7 +65,7 @@ func TestLoadConfig(t *testing.T) {
 	require.Error(t, err)
 	assert.Equal(t, "unable to read configuration file: open not_found: no such file or directory", err.Error())
 
-	cfg, err := authority.LoadConfig(projFolder + "etc/dev/ca-config.json")
+	cfg, err := authority.LoadConfig(projFolder + "etc/dev/ca-config.dev.json")
 	require.NoError(t, err)
 	require.NotEmpty(t, cfg.Profiles)
 	def := cfg.DefaultCertProfile()

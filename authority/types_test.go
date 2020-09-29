@@ -54,3 +54,35 @@ func TestDuration_JSONDecode(t *testing.T) {
 	f(`0`, 0)
 	f(`"1m5s"`, time.Second*65)
 }
+
+func TestOID_JSON(t *testing.T) {
+	f := func(d OID, exp string) {
+		bytes, err := json.Marshal(&d)
+		require.NoError(t, err)
+		require.Equal(t, exp, string(bytes))
+
+		var decoded OID
+		err = json.Unmarshal(bytes, &decoded)
+		require.NoError(t, err)
+
+		assert.Equal(t, d, decoded)
+	}
+	f(OID{1, 12, 1234}, `"1.12.1234"`)
+}
+
+func TestOID_JSONDecode(t *testing.T) {
+	tcases := []struct {
+		oid string
+		err string
+	}{
+		{"1.12.1234", "OID JSON string not wrapped in quotes: 1.12.1234"},
+		{"\"1.abc\"", "invalid OID: strconv.Atoi: parsing \"abc\": invalid syntax"},
+	}
+
+	oid := new(OID)
+	for _, tc := range tcases {
+		err := oid.UnmarshalJSON([]byte(tc.oid))
+		require.Error(t, err)
+		assert.Equal(t, tc.err, err.Error())
+	}
+}

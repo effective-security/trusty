@@ -54,6 +54,7 @@ func Test_LoadConfig(t *testing.T) {
 	testDirAbs("TrustyClient.ClientTLS.TrustedCAFile", c.TrustyClient.ClientTLS.TrustedCAFile)
 	testDirAbs("TrustyClient.ClientTLS.CertFile", c.TrustyClient.ClientTLS.CertFile)
 	testDirAbs("TrustyClient.ClientTLS.KeyFile", c.TrustyClient.ClientTLS.KeyFile)
+	testDirAbs("Authority.CAConfig", c.Authority.CAConfig)
 }
 
 func TestParseListenURLs(t *testing.T) {

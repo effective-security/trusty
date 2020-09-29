@@ -66,7 +66,7 @@ func (d Duration) TimeDuration() time.Duration {
 	return time.Duration(d)
 }
 
-// Authority contains configuration info for code signing PKI
+// Authority contains configuration info for CA
 type Authority struct {
 
 	// CAConfig specifies file location with CA configuration
@@ -94,7 +94,7 @@ func (c *Authority) overrideFrom(o *Authority) {
 
 }
 
-// AuthorityConfig contains configuration info for code signing PKI
+// AuthorityConfig contains configuration info for CA
 type AuthorityConfig interface {
 	// CAConfig specifies file location with CA configuration
 	GetCAConfig() string
@@ -482,6 +482,9 @@ type Configuration struct {
 
 	// VIPs is a list of the FQ name of the VIP to the cluster
 	VIPs []string
+
+	// Authority contains configuration info for CA
+	Authority Authority
 }
 
 func (c *Configuration) overrideFrom(o *Configuration) {
@@ -497,6 +500,7 @@ func (c *Configuration) overrideFrom(o *Configuration) {
 	overrideHTTPServerSlice(&c.HTTPServers, &o.HTTPServers)
 	c.TrustyClient.overrideFrom(&o.TrustyClient)
 	overrideStrings(&c.VIPs, &o.VIPs)
+	c.Authority.overrideFrom(&o.Authority)
 
 }
 
@@ -695,7 +699,7 @@ type Issuer struct {
 	// Label specifies Issuer's label
 	Label string
 
-	// Type specifies type: tls|codesign|timestamp|ocsp|
+	// Type specifies type: tls|codesign|timestamp|ocsp|spiffe
 	Type string
 
 	// CertFile specifies location of the cert
@@ -740,7 +744,7 @@ type IssuerConfig interface {
 	GetDisabled() bool
 	// Label specifies Issuer's label
 	GetLabel() string
-	// Type specifies type: tls|codesign|timestamp|ocsp|
+	// Type specifies type: tls|codesign|timestamp|ocsp|spiffe
 	GetType() string
 	// CertFile specifies location of the cert
 	GetCertFile() string
@@ -768,7 +772,7 @@ func (c *Issuer) GetLabel() string {
 	return c.Label
 }
 
-// GetType specifies type: tls|codesign|timestamp|ocsp|
+// GetType specifies type: tls|codesign|timestamp|ocsp|spiffe
 func (c *Issuer) GetType() string {
 	return c.Type
 }

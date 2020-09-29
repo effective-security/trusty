@@ -13,7 +13,8 @@
             { "name" : "LogLevels",     "type" : "[]RepoLogLevel","comment" : "LogLevels specifies the log levels per package" },
             { "name" : "HTTPServers",   "type" : "[]HTTPServer",  "comment" : "HTTPServers specifies a list of servers that expose HTTP or gRPC services"},
             { "name" : "TrustyClient",  "type" : "TrustyClient",  "comment" : "TrustyClient specifies configurations for the client to connect to the cluster"},
-            { "name" : "VIPs",          "type" : "[]string",      "comment" : "VIPs is a list of the FQ name of the VIP to the cluster" }
+            { "name" : "VIPs",          "type" : "[]string",      "comment" : "VIPs is a list of the FQ name of the VIP to the cluster" },
+            { "name" : "Authority",     "type" : "Authority",     "comment" : "Authority contains configuration info for CA" }
         ]
     },
     "RelatedTypes" : {
@@ -140,7 +141,7 @@
             "Fields" : [
                 { "name" : "Disabled",       "type" : "*bool",    "comment" : "Disabled specifies if the certificate disabled to use" },
                 { "name" : "Label",          "type" : "string",   "comment" : "Label specifies Issuer's label" },
-                { "name" : "Type",           "type" : "string",   "comment" : "Type specifies type: tls|codesign|timestamp|ocsp|" },
+                { "name" : "Type",           "type" : "string",   "comment" : "Type specifies type: tls|codesign|timestamp|ocsp|spiffe" },
                 { "name" : "CertFile",       "type" : "string",   "comment" : "CertFile specifies location of the cert" },
                 { "name" : "KeyFile",        "type" : "string",   "comment" : "KeyFile specifies location of the key" },
                 { "name" : "CABundleFile",   "type" : "string",   "comment" : "CABundleFile specifies location of the CA bundle file" },
@@ -151,7 +152,7 @@
             ]
         },
         "Authority" : {
-            "comment" : "Authority contains configuration info for code signing PKI",
+            "comment" : "Authority contains configuration info for CA",
             "WithGetter" : true,
             "Fields" : [
                 { "name" : "CAConfig",          "type" : "string",   "comment" : "CAConfig specifies file location with CA configuration" },

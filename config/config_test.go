@@ -639,7 +639,25 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 				OCSPFile:       "one",
 				CipherSuites:   []string{"a"},
 				ClientCertAuth: &trueVal}},
-		VIPs: []string{"a"}}
+		VIPs: []string{"a"},
+		Authority: Authority{
+			CAConfig:          "one",
+			DefaultCRLExpiry:  Duration(time.Second),
+			DefaultOCSPExpiry: Duration(time.Second),
+			DefaultCRLRenewal: Duration(time.Second),
+			Issuers: []Issuer{
+				{
+					Disabled:       &trueVal,
+					Label:          "one",
+					Type:           "one",
+					CertFile:       "one",
+					KeyFile:        "one",
+					CABundleFile:   "one",
+					RootBundleFile: "one",
+					CRLExpiry:      Duration(time.Second),
+					OCSPExpiry:     Duration(time.Second),
+					CRLRenewal:     Duration(time.Second)},
+			}}}
 	dest := orig
 	var zero Configuration
 	dest.overrideFrom(&zero)
@@ -720,7 +738,25 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 				OCSPFile:       "two",
 				CipherSuites:   []string{"b", "b"},
 				ClientCertAuth: &falseVal}},
-		VIPs: []string{"b", "b"}}
+		VIPs: []string{"b", "b"},
+		Authority: Authority{
+			CAConfig:          "two",
+			DefaultCRLExpiry:  Duration(time.Minute),
+			DefaultOCSPExpiry: Duration(time.Minute),
+			DefaultCRLRenewal: Duration(time.Minute),
+			Issuers: []Issuer{
+				{
+					Disabled:       &falseVal,
+					Label:          "two",
+					Type:           "two",
+					CertFile:       "two",
+					KeyFile:        "two",
+					CABundleFile:   "two",
+					RootBundleFile: "two",
+					CRLExpiry:      Duration(time.Minute),
+					OCSPExpiry:     Duration(time.Minute),
+					CRLRenewal:     Duration(time.Minute)},
+			}}}
 	dest.overrideFrom(&o)
 	require.Equal(t, dest, o, "Configuration.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
 	o2 := Configuration{
@@ -1294,7 +1330,25 @@ func Test_LoadOverrides(t *testing.T) {
 					OCSPFile:       "two",
 					CipherSuites:   []string{"b", "b"},
 					ClientCertAuth: &falseVal}},
-			VIPs: []string{"b", "b"}},
+			VIPs: []string{"b", "b"},
+			Authority: Authority{
+				CAConfig:          "two",
+				DefaultCRLExpiry:  Duration(time.Minute),
+				DefaultOCSPExpiry: Duration(time.Minute),
+				DefaultCRLRenewal: Duration(time.Minute),
+				Issuers: []Issuer{
+					{
+						Disabled:       &falseVal,
+						Label:          "two",
+						Type:           "two",
+						CertFile:       "two",
+						KeyFile:        "two",
+						CABundleFile:   "two",
+						RootBundleFile: "two",
+						CRLExpiry:      Duration(time.Minute),
+						OCSPExpiry:     Duration(time.Minute),
+						CRLRenewal:     Duration(time.Minute)},
+				}}},
 		Hosts: map[string]string{"bob": "example2", "bob2": "missing"},
 		Overrides: map[string]Configuration{
 			"example2": {
@@ -1373,7 +1427,25 @@ func Test_LoadOverrides(t *testing.T) {
 						OCSPFile:       "three",
 						CipherSuites:   []string{"c", "c", "c"},
 						ClientCertAuth: &trueVal}},
-				VIPs: []string{"c", "c", "c"}},
+				VIPs: []string{"c", "c", "c"},
+				Authority: Authority{
+					CAConfig:          "three",
+					DefaultCRLExpiry:  Duration(time.Hour),
+					DefaultOCSPExpiry: Duration(time.Hour),
+					DefaultCRLRenewal: Duration(time.Hour),
+					Issuers: []Issuer{
+						{
+							Disabled:       &trueVal,
+							Label:          "three",
+							Type:           "three",
+							CertFile:       "three",
+							KeyFile:        "three",
+							CABundleFile:   "three",
+							RootBundleFile: "three",
+							CRLExpiry:      Duration(time.Hour),
+							OCSPExpiry:     Duration(time.Hour),
+							CRLRenewal:     Duration(time.Hour)},
+					}}},
 		},
 	}
 	f, err := ioutil.TempFile("", "config")
@@ -1509,7 +1581,25 @@ func Test_LoadCustomJSON(t *testing.T) {
 					OCSPFile:       "two",
 					CipherSuites:   []string{"b", "b"},
 					ClientCertAuth: &falseVal}},
-			VIPs: []string{"b", "b"}},
+			VIPs: []string{"b", "b"},
+			Authority: Authority{
+				CAConfig:          "two",
+				DefaultCRLExpiry:  Duration(time.Minute),
+				DefaultOCSPExpiry: Duration(time.Minute),
+				DefaultCRLRenewal: Duration(time.Minute),
+				Issuers: []Issuer{
+					{
+						Disabled:       &falseVal,
+						Label:          "two",
+						Type:           "two",
+						CertFile:       "two",
+						KeyFile:        "two",
+						CABundleFile:   "two",
+						RootBundleFile: "two",
+						CRLExpiry:      Duration(time.Minute),
+						OCSPExpiry:     Duration(time.Minute),
+						CRLRenewal:     Duration(time.Minute)},
+				}}},
 		Hosts: map[string]string{"bob": "${ENV}"},
 		Overrides: map[string]Configuration{
 			"${ENV}": {
@@ -1588,7 +1678,25 @@ func Test_LoadCustomJSON(t *testing.T) {
 						OCSPFile:       "three",
 						CipherSuites:   []string{"c", "c", "c"},
 						ClientCertAuth: &trueVal}},
-				VIPs: []string{"c", "c", "c"}},
+				VIPs: []string{"c", "c", "c"},
+				Authority: Authority{
+					CAConfig:          "three",
+					DefaultCRLExpiry:  Duration(time.Hour),
+					DefaultOCSPExpiry: Duration(time.Hour),
+					DefaultCRLRenewal: Duration(time.Hour),
+					Issuers: []Issuer{
+						{
+							Disabled:       &trueVal,
+							Label:          "three",
+							Type:           "three",
+							CertFile:       "three",
+							KeyFile:        "three",
+							CABundleFile:   "three",
+							RootBundleFile: "three",
+							CRLExpiry:      Duration(time.Hour),
+							OCSPExpiry:     Duration(time.Hour),
+							CRLRenewal:     Duration(time.Hour)},
+					}}},
 		},
 	}
 	f, err := ioutil.TempFile("", "customjson")

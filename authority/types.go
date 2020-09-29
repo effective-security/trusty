@@ -83,6 +83,7 @@ func parseObjectIdentifier(oidString string) (oid asn1.ObjectIdentifier, err err
 	for i, intString := range segments {
 		oid[i], err = strconv.Atoi(intString)
 		if err != nil {
+			err = errors.Annotatef(err, "invalid OID")
 			return
 		}
 	}

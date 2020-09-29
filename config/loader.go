@@ -148,6 +148,7 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 
 	filesToResove := []*string{
 		&c.CryptoProv.Default,
+		&c.Authority.CAConfig,
 	}
 
 	for i := range c.CryptoProv.Providers {

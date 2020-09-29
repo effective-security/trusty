@@ -60,7 +60,7 @@
             "LogAllowedAny": true,
             "LogAllowed": true,
             "LogDenied": true,
-            "CertMapper": "cert-roles.json"
+            "CertMapper": "cert-roles.dev.json"
         },
         "LogLevels": [
             {
@@ -104,6 +104,22 @@
         "Metrics": {
             "Provider": "inmem",
             "Disabled": true
+        },
+        "Authority": {
+            "CAConfig"          : "ca-config.dev.json",
+            "DefaultCRLExpiry"  : "12h",
+            "DefaultCRLRenewal" : "1h",
+            "DefaultOCSPExpiry" : "30m",
+            "Issuers"           : [
+                {
+                    "Label"         : "TrustyCA",
+                    "Type"          : "trusty",
+                    "CertFile"      : "/tmp/trusty/certs/trusty_dev_issuer2_ca.pem",
+                    "KeyFile"       : "/tmp/trusty/certs/trusty_dev_issuer2_ca-key.pem",
+                    "CABundleFile"  : "/tmp/trusty/certs/trusty_dev_cabundle.pem",
+                    "RootBundleFile": "/tmp/trusty/certs/trusty_dev_root_ca.pem"
+                  }
+            ]
         }
     },
     "hosts": {
