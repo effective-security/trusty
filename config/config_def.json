@@ -11,8 +11,7 @@
             { "name" : "Authz",         "type" : "Authz",         "comment" : "Authz contains configuration for the API authorization layer"},
             { "name" : "Logger",        "type" : "Logger",        "comment" : "Logger contains configuration for the logger" },
             { "name" : "LogLevels",     "type" : "[]RepoLogLevel","comment" : "LogLevels specifies the log levels per package" },
-            { "name" : "HealthServer",  "type" : "HTTPServer",    "comment" : "HealthServer specifies configurations for the health server"},
-            { "name" : "TrustyServer",  "type" : "HTTPServer",    "comment" : "TrustyServer specifies configurations for the trusty server"},
+            { "name" : "HTTPServers",   "type" : "[]HTTPServer",  "comment" : "HTTPServers specifies a list of servers that expose HTTP or gRPC services"},
             { "name" : "TrustyClient",  "type" : "TrustyClient",  "comment" : "TrustyClient specifies configurations for the client to connect to the cluster"},
             { "name" : "VIPs",          "type" : "[]string",      "comment" : "VIPs is a list of the FQ name of the VIP to the cluster" }
         ]
@@ -133,6 +132,33 @@
             "Fields" : [
                 { "name" : "Disabled", "type" : "*bool",  "comment" : "Disabled specifies if the metrics provider is disabled" },
                 { "name" : "Provider", "type" : "string", "comment" : "Provider specifies the metrics provider: funnel|prometeus|inmem" }
+            ]
+        },
+        "Issuer" : {
+            "comment" : "Issuer contains configuration info for the issuing certificate",
+            "WithGetter" : true,
+            "Fields" : [
+                { "name" : "Disabled",       "type" : "*bool",    "comment" : "Disabled specifies if the certificate disabled to use" },
+                { "name" : "Label",          "type" : "string",   "comment" : "Label specifies Issuer's label" },
+                { "name" : "Type",           "type" : "string",   "comment" : "Type specifies type: tls|codesign|timestamp|ocsp|" },
+                { "name" : "CertFile",       "type" : "string",   "comment" : "CertFile specifies location of the cert" },
+                { "name" : "KeyFile",        "type" : "string",   "comment" : "KeyFile specifies location of the key" },
+                { "name" : "CABundleFile",   "type" : "string",   "comment" : "CABundleFile specifies location of the CA bundle file" },
+                { "name" : "RootBundleFile", "type" : "string",   "comment" : "RootBundleFile specifies location of the Trusted Root CA file" },
+                { "name" : "CRLExpiry",      "type" : "Duration", "comment" : "CRLExpiry specifies value in 72h format for duration of CRL next update time" },
+                { "name" : "OCSPExpiry",     "type" : "Duration", "comment" : "OCSPExpiry specifies value in 8h format for duration of OCSP next update time" },
+                { "name" : "CRLRenewal",     "type" : "Duration", "comment" : "CRLRenewal specifies value in 8h format for duration of CRL renewal before next update time" }
+            ]
+        },
+        "Authority" : {
+            "comment" : "Authority contains configuration info for code signing PKI",
+            "WithGetter" : true,
+            "Fields" : [
+                { "name" : "CAConfig",          "type" : "string",   "comment" : "CAConfig specifies file location with CA configuration" },
+                { "name" : "DefaultCRLExpiry",  "type" : "Duration", "comment" : "DefaultCRLExpiry specifies value in 72h format for duration of CRL next update time" },
+                { "name" : "DefaultOCSPExpiry", "type" : "Duration", "comment" : "DefaultOCSPExpiry specifies value in 8h format for duration of OCSP next update time" },
+                { "name" : "DefaultCRLRenewal", "type" : "Duration", "comment" : "DefaultCRLRenewal specifies value in 8h format for duration of CRL renewal before next update time" },
+                { "name" : "Issuers",           "type" : "[]Issuer", "comment" : "Issuers specifies the list of issuing authorities." }
             ]
         }
     }

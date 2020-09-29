@@ -4,36 +4,38 @@
         "Environment": "test",
         "ServiceName": "trusty",
         "ClusterName": "local",
-        "HealthServer": {
-            "Name": "Health",
-            "ListenURLs": [
-                "http://0.0.0.0:8080"
-            ],
-            "Services": [
-                "status"
-            ],
-            "HeartbeatSecs": 30,
-            "RequestTimeout": "3s"
-        },
-        "TrustyServer": {
-            "Name": "Trusty",
-            "ListenURLs": [
-                "https://0.0.0.0:7891"
-            ],
-            "ServerTLS": {
-                "CertFile": "/tmp/trusty/certs/trusty_dev_peer.pem",
-                "KeyFile": "/tmp/trusty/certs/trusty_dev_peer-key.pem",
-                "TrustedCAFile": "/tmp/trusty/certs/trusty_dev_root_ca.pem"
+        "HTTPServers": [
+            {
+                "Name": "Health",
+                "ListenURLs": [
+                    "http://0.0.0.0:8080"
+                ],
+                "Services": [
+                    "status"
+                ],
+                "HeartbeatSecs": 30,
+                "RequestTimeout": "3s"
             },
-            "Services": [
-                "status"
-            ],
-            "HeartbeatSecs": 30,
-            "RequestTimeout": "3s",
-            "KeepAliveMinTime": "60s",
-            "KeepAliveInterval": "30s",
-            "KeepAliveTimeout": "180s"
-        },
+            {
+                "Name": "Trusty",
+                "ListenURLs": [
+                    "https://0.0.0.0:7891"
+                ],
+                "ServerTLS": {
+                    "CertFile": "/tmp/trusty/certs/trusty_dev_peer.pem",
+                    "KeyFile": "/tmp/trusty/certs/trusty_dev_peer-key.pem",
+                    "TrustedCAFile": "/tmp/trusty/certs/trusty_dev_root_ca.pem"
+                },
+                "Services": [
+                    "status"
+                ],
+                "HeartbeatSecs": 30,
+                "RequestTimeout": "3s",
+                "KeepAliveMinTime": "60s",
+                "KeepAliveInterval": "30s",
+                "KeepAliveTimeout": "180s"
+            }
+        ],
         "TrustyClient": {
             "ClientTLS": {
                 "CertFile": "/tmp/trusty/certs/trusty_dev_peer.pem",

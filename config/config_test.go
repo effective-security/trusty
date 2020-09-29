@@ -96,6 +96,80 @@ func Test_overrideDuration(t *testing.T) {
 	require.Equal(t, d, o, "overrideDuration should of overriden the value but didn't. value %v, expecting %v", d, o)
 }
 
+func Test_overrideHTTPServerSlice(t *testing.T) {
+	d := []HTTPServer{
+		{
+			Name:       "one",
+			Disabled:   &trueVal,
+			ListenURLs: []string{"a"},
+			ServerTLS: TLSInfo{
+				CertFile:       "one",
+				KeyFile:        "one",
+				TrustedCAFile:  "one",
+				CRLFile:        "one",
+				OCSPFile:       "one",
+				CipherSuites:   []string{"a"},
+				ClientCertAuth: &trueVal},
+			PackageLogger:  "one",
+			AllowProfiling: &trueVal,
+			ProfilerDir:    "one",
+			Services:       []string{"a"},
+			HeartbeatSecs:  -42,
+			CORS: CORS{
+				Enabled:            &trueVal,
+				MaxAge:             -42,
+				AllowedOrigins:     []string{"a"},
+				AllowedMethods:     []string{"a"},
+				AllowedHeaders:     []string{"a"},
+				ExposedHeaders:     []string{"a"},
+				AllowCredentials:   &trueVal,
+				OptionsPassthrough: &trueVal,
+				Debug:              &trueVal},
+			RequestTimeout:    Duration(time.Second),
+			KeepAliveMinTime:  Duration(time.Second),
+			KeepAliveInterval: Duration(time.Second),
+			KeepAliveTimeout:  Duration(time.Second)},
+	}
+	var zero []HTTPServer
+	overrideHTTPServerSlice(&d, &zero)
+	require.NotEqual(t, d, zero, "overrideHTTPServerSlice shouldn't have overriden the value as the override is the default/zero value. value now %v", d)
+	o := []HTTPServer{
+		{
+			Name:       "two",
+			Disabled:   &falseVal,
+			ListenURLs: []string{"b", "b"},
+			ServerTLS: TLSInfo{
+				CertFile:       "two",
+				KeyFile:        "two",
+				TrustedCAFile:  "two",
+				CRLFile:        "two",
+				OCSPFile:       "two",
+				CipherSuites:   []string{"b", "b"},
+				ClientCertAuth: &falseVal},
+			PackageLogger:  "two",
+			AllowProfiling: &falseVal,
+			ProfilerDir:    "two",
+			Services:       []string{"b", "b"},
+			HeartbeatSecs:  42,
+			CORS: CORS{
+				Enabled:            &falseVal,
+				MaxAge:             42,
+				AllowedOrigins:     []string{"b", "b"},
+				AllowedMethods:     []string{"b", "b"},
+				AllowedHeaders:     []string{"b", "b"},
+				ExposedHeaders:     []string{"b", "b"},
+				AllowCredentials:   &falseVal,
+				OptionsPassthrough: &falseVal,
+				Debug:              &falseVal},
+			RequestTimeout:    Duration(time.Minute),
+			KeepAliveMinTime:  Duration(time.Minute),
+			KeepAliveInterval: Duration(time.Minute),
+			KeepAliveTimeout:  Duration(time.Minute)},
+	}
+	overrideHTTPServerSlice(&d, &o)
+	require.Equal(t, d, o, "overrideHTTPServerSlice should of overriden the value but didn't. value %v, expecting %v", d, o)
+}
+
 func Test_overrideInt(t *testing.T) {
 	d := -42
 	var zero int
@@ -104,6 +178,40 @@ func Test_overrideInt(t *testing.T) {
 	o := 42
 	overrideInt(&d, &o)
 	require.Equal(t, d, o, "overrideInt should of overriden the value but didn't. value %v, expecting %v", d, o)
+}
+
+func Test_overrideIssuerSlice(t *testing.T) {
+	d := []Issuer{
+		{
+			Disabled:       &trueVal,
+			Label:          "one",
+			Type:           "one",
+			CertFile:       "one",
+			KeyFile:        "one",
+			CABundleFile:   "one",
+			RootBundleFile: "one",
+			CRLExpiry:      Duration(time.Second),
+			OCSPExpiry:     Duration(time.Second),
+			CRLRenewal:     Duration(time.Second)},
+	}
+	var zero []Issuer
+	overrideIssuerSlice(&d, &zero)
+	require.NotEqual(t, d, zero, "overrideIssuerSlice shouldn't have overriden the value as the override is the default/zero value. value now %v", d)
+	o := []Issuer{
+		{
+			Disabled:       &falseVal,
+			Label:          "two",
+			Type:           "two",
+			CertFile:       "two",
+			KeyFile:        "two",
+			CABundleFile:   "two",
+			RootBundleFile: "two",
+			CRLExpiry:      Duration(time.Minute),
+			OCSPExpiry:     Duration(time.Minute),
+			CRLRenewal:     Duration(time.Minute)},
+	}
+	overrideIssuerSlice(&d, &o)
+	require.Equal(t, d, o, "overrideIssuerSlice should of overriden the value but didn't. value %v, expecting %v", d, o)
 }
 
 func Test_overrideRepoLogLevelSlice(t *testing.T) {
@@ -144,6 +252,95 @@ func Test_overrideStrings(t *testing.T) {
 	o := []string{"b", "b"}
 	overrideStrings(&d, &o)
 	require.Equal(t, d, o, "overrideStrings should of overriden the value but didn't. value %v, expecting %v", d, o)
+}
+
+func TestAuthority_overrideFrom(t *testing.T) {
+	orig := Authority{
+		CAConfig:          "one",
+		DefaultCRLExpiry:  Duration(time.Second),
+		DefaultOCSPExpiry: Duration(time.Second),
+		DefaultCRLRenewal: Duration(time.Second),
+		Issuers: []Issuer{
+			{
+				Disabled:       &trueVal,
+				Label:          "one",
+				Type:           "one",
+				CertFile:       "one",
+				KeyFile:        "one",
+				CABundleFile:   "one",
+				RootBundleFile: "one",
+				CRLExpiry:      Duration(time.Second),
+				OCSPExpiry:     Duration(time.Second),
+				CRLRenewal:     Duration(time.Second)},
+		}}
+	dest := orig
+	var zero Authority
+	dest.overrideFrom(&zero)
+	require.Equal(t, dest, orig, "Authority.overrideFrom shouldn't have overriden the value as the override is the default/zero value. value now %#v", dest)
+	o := Authority{
+		CAConfig:          "two",
+		DefaultCRLExpiry:  Duration(time.Minute),
+		DefaultOCSPExpiry: Duration(time.Minute),
+		DefaultCRLRenewal: Duration(time.Minute),
+		Issuers: []Issuer{
+			{
+				Disabled:       &falseVal,
+				Label:          "two",
+				Type:           "two",
+				CertFile:       "two",
+				KeyFile:        "two",
+				CABundleFile:   "two",
+				RootBundleFile: "two",
+				CRLExpiry:      Duration(time.Minute),
+				OCSPExpiry:     Duration(time.Minute),
+				CRLRenewal:     Duration(time.Minute)},
+		}}
+	dest.overrideFrom(&o)
+	require.Equal(t, dest, o, "Authority.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
+	o2 := Authority{
+		CAConfig: "one"}
+	dest.overrideFrom(&o2)
+	exp := o
+
+	exp.CAConfig = o2.CAConfig
+	require.Equal(t, dest, exp, "Authority.overrideFrom should have overriden the field CAConfig. value now %#v, expecting %#v", dest, exp)
+}
+
+func TestAuthority_Getters(t *testing.T) {
+	orig := Authority{
+		CAConfig:          "one",
+		DefaultCRLExpiry:  Duration(time.Second),
+		DefaultOCSPExpiry: Duration(time.Second),
+		DefaultCRLRenewal: Duration(time.Second),
+		Issuers: []Issuer{
+			{
+				Disabled:       &trueVal,
+				Label:          "one",
+				Type:           "one",
+				CertFile:       "one",
+				KeyFile:        "one",
+				CABundleFile:   "one",
+				RootBundleFile: "one",
+				CRLExpiry:      Duration(time.Second),
+				OCSPExpiry:     Duration(time.Second),
+				CRLRenewal:     Duration(time.Second)},
+		}}
+
+	gv0 := orig.GetCAConfig()
+	require.Equal(t, orig.CAConfig, gv0, "Authority.GetCAConfigCfg() does not match")
+
+	gv1 := orig.GetDefaultCRLExpiry()
+	require.Equal(t, orig.DefaultCRLExpiry.TimeDuration(), gv1, "Authority.GetDefaultCRLExpiry() does not match")
+
+	gv2 := orig.GetDefaultOCSPExpiry()
+	require.Equal(t, orig.DefaultOCSPExpiry.TimeDuration(), gv2, "Authority.GetDefaultOCSPExpiry() does not match")
+
+	gv3 := orig.GetDefaultCRLRenewal()
+	require.Equal(t, orig.DefaultCRLRenewal.TimeDuration(), gv3, "Authority.GetDefaultCRLRenewal() does not match")
+
+	gv4 := orig.GetIssuers()
+	require.Equal(t, orig.Issuers, gv4, "Authority.GetIssuersCfg() does not match")
+
 }
 
 func TestAuthz_overrideFrom(t *testing.T) {
@@ -399,68 +596,39 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 				Package: "one",
 				Level:   "one"},
 		},
-		HealthServer: HTTPServer{
-			Name:       "one",
-			Disabled:   &trueVal,
-			ListenURLs: []string{"a"},
-			ServerTLS: TLSInfo{
-				CertFile:       "one",
-				KeyFile:        "one",
-				TrustedCAFile:  "one",
-				CRLFile:        "one",
-				OCSPFile:       "one",
-				CipherSuites:   []string{"a"},
-				ClientCertAuth: &trueVal},
-			PackageLogger:  "one",
-			AllowProfiling: &trueVal,
-			ProfilerDir:    "one",
-			Services:       []string{"a"},
-			HeartbeatSecs:  -42,
-			CORS: CORS{
-				Enabled:            &trueVal,
-				MaxAge:             -42,
-				AllowedOrigins:     []string{"a"},
-				AllowedMethods:     []string{"a"},
-				AllowedHeaders:     []string{"a"},
-				ExposedHeaders:     []string{"a"},
-				AllowCredentials:   &trueVal,
-				OptionsPassthrough: &trueVal,
-				Debug:              &trueVal},
-			RequestTimeout:    Duration(time.Second),
-			KeepAliveMinTime:  Duration(time.Second),
-			KeepAliveInterval: Duration(time.Second),
-			KeepAliveTimeout:  Duration(time.Second)},
-		TrustyServer: HTTPServer{
-			Name:       "one",
-			Disabled:   &trueVal,
-			ListenURLs: []string{"a"},
-			ServerTLS: TLSInfo{
-				CertFile:       "one",
-				KeyFile:        "one",
-				TrustedCAFile:  "one",
-				CRLFile:        "one",
-				OCSPFile:       "one",
-				CipherSuites:   []string{"a"},
-				ClientCertAuth: &trueVal},
-			PackageLogger:  "one",
-			AllowProfiling: &trueVal,
-			ProfilerDir:    "one",
-			Services:       []string{"a"},
-			HeartbeatSecs:  -42,
-			CORS: CORS{
-				Enabled:            &trueVal,
-				MaxAge:             -42,
-				AllowedOrigins:     []string{"a"},
-				AllowedMethods:     []string{"a"},
-				AllowedHeaders:     []string{"a"},
-				ExposedHeaders:     []string{"a"},
-				AllowCredentials:   &trueVal,
-				OptionsPassthrough: &trueVal,
-				Debug:              &trueVal},
-			RequestTimeout:    Duration(time.Second),
-			KeepAliveMinTime:  Duration(time.Second),
-			KeepAliveInterval: Duration(time.Second),
-			KeepAliveTimeout:  Duration(time.Second)},
+		HTTPServers: []HTTPServer{
+			{
+				Name:       "one",
+				Disabled:   &trueVal,
+				ListenURLs: []string{"a"},
+				ServerTLS: TLSInfo{
+					CertFile:       "one",
+					KeyFile:        "one",
+					TrustedCAFile:  "one",
+					CRLFile:        "one",
+					OCSPFile:       "one",
+					CipherSuites:   []string{"a"},
+					ClientCertAuth: &trueVal},
+				PackageLogger:  "one",
+				AllowProfiling: &trueVal,
+				ProfilerDir:    "one",
+				Services:       []string{"a"},
+				HeartbeatSecs:  -42,
+				CORS: CORS{
+					Enabled:            &trueVal,
+					MaxAge:             -42,
+					AllowedOrigins:     []string{"a"},
+					AllowedMethods:     []string{"a"},
+					AllowedHeaders:     []string{"a"},
+					ExposedHeaders:     []string{"a"},
+					AllowCredentials:   &trueVal,
+					OptionsPassthrough: &trueVal,
+					Debug:              &trueVal},
+				RequestTimeout:    Duration(time.Second),
+				KeepAliveMinTime:  Duration(time.Second),
+				KeepAliveInterval: Duration(time.Second),
+				KeepAliveTimeout:  Duration(time.Second)},
+		},
 		TrustyClient: TrustyClient{
 			Servers: []string{"a"},
 			ClientTLS: TLSInfo{
@@ -509,68 +677,39 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 				Package: "two",
 				Level:   "two"},
 		},
-		HealthServer: HTTPServer{
-			Name:       "two",
-			Disabled:   &falseVal,
-			ListenURLs: []string{"b", "b"},
-			ServerTLS: TLSInfo{
-				CertFile:       "two",
-				KeyFile:        "two",
-				TrustedCAFile:  "two",
-				CRLFile:        "two",
-				OCSPFile:       "two",
-				CipherSuites:   []string{"b", "b"},
-				ClientCertAuth: &falseVal},
-			PackageLogger:  "two",
-			AllowProfiling: &falseVal,
-			ProfilerDir:    "two",
-			Services:       []string{"b", "b"},
-			HeartbeatSecs:  42,
-			CORS: CORS{
-				Enabled:            &falseVal,
-				MaxAge:             42,
-				AllowedOrigins:     []string{"b", "b"},
-				AllowedMethods:     []string{"b", "b"},
-				AllowedHeaders:     []string{"b", "b"},
-				ExposedHeaders:     []string{"b", "b"},
-				AllowCredentials:   &falseVal,
-				OptionsPassthrough: &falseVal,
-				Debug:              &falseVal},
-			RequestTimeout:    Duration(time.Minute),
-			KeepAliveMinTime:  Duration(time.Minute),
-			KeepAliveInterval: Duration(time.Minute),
-			KeepAliveTimeout:  Duration(time.Minute)},
-		TrustyServer: HTTPServer{
-			Name:       "two",
-			Disabled:   &falseVal,
-			ListenURLs: []string{"b", "b"},
-			ServerTLS: TLSInfo{
-				CertFile:       "two",
-				KeyFile:        "two",
-				TrustedCAFile:  "two",
-				CRLFile:        "two",
-				OCSPFile:       "two",
-				CipherSuites:   []string{"b", "b"},
-				ClientCertAuth: &falseVal},
-			PackageLogger:  "two",
-			AllowProfiling: &falseVal,
-			ProfilerDir:    "two",
-			Services:       []string{"b", "b"},
-			HeartbeatSecs:  42,
-			CORS: CORS{
-				Enabled:            &falseVal,
-				MaxAge:             42,
-				AllowedOrigins:     []string{"b", "b"},
-				AllowedMethods:     []string{"b", "b"},
-				AllowedHeaders:     []string{"b", "b"},
-				ExposedHeaders:     []string{"b", "b"},
-				AllowCredentials:   &falseVal,
-				OptionsPassthrough: &falseVal,
-				Debug:              &falseVal},
-			RequestTimeout:    Duration(time.Minute),
-			KeepAliveMinTime:  Duration(time.Minute),
-			KeepAliveInterval: Duration(time.Minute),
-			KeepAliveTimeout:  Duration(time.Minute)},
+		HTTPServers: []HTTPServer{
+			{
+				Name:       "two",
+				Disabled:   &falseVal,
+				ListenURLs: []string{"b", "b"},
+				ServerTLS: TLSInfo{
+					CertFile:       "two",
+					KeyFile:        "two",
+					TrustedCAFile:  "two",
+					CRLFile:        "two",
+					OCSPFile:       "two",
+					CipherSuites:   []string{"b", "b"},
+					ClientCertAuth: &falseVal},
+				PackageLogger:  "two",
+				AllowProfiling: &falseVal,
+				ProfilerDir:    "two",
+				Services:       []string{"b", "b"},
+				HeartbeatSecs:  42,
+				CORS: CORS{
+					Enabled:            &falseVal,
+					MaxAge:             42,
+					AllowedOrigins:     []string{"b", "b"},
+					AllowedMethods:     []string{"b", "b"},
+					AllowedHeaders:     []string{"b", "b"},
+					ExposedHeaders:     []string{"b", "b"},
+					AllowCredentials:   &falseVal,
+					OptionsPassthrough: &falseVal,
+					Debug:              &falseVal},
+				RequestTimeout:    Duration(time.Minute),
+				KeepAliveMinTime:  Duration(time.Minute),
+				KeepAliveInterval: Duration(time.Minute),
+				KeepAliveTimeout:  Duration(time.Minute)},
+		},
 		TrustyClient: TrustyClient{
 			Servers: []string{"b", "b"},
 			ClientTLS: TLSInfo{
@@ -769,6 +908,89 @@ func TestHTTPServer_Getters(t *testing.T) {
 
 	gv13 := orig.GetKeepAliveTimeout()
 	require.Equal(t, orig.KeepAliveTimeout.TimeDuration(), gv13, "HTTPServer.GetKeepAliveTimeout() does not match")
+
+}
+
+func TestIssuer_overrideFrom(t *testing.T) {
+	orig := Issuer{
+		Disabled:       &trueVal,
+		Label:          "one",
+		Type:           "one",
+		CertFile:       "one",
+		KeyFile:        "one",
+		CABundleFile:   "one",
+		RootBundleFile: "one",
+		CRLExpiry:      Duration(time.Second),
+		OCSPExpiry:     Duration(time.Second),
+		CRLRenewal:     Duration(time.Second)}
+	dest := orig
+	var zero Issuer
+	dest.overrideFrom(&zero)
+	require.Equal(t, dest, orig, "Issuer.overrideFrom shouldn't have overriden the value as the override is the default/zero value. value now %#v", dest)
+	o := Issuer{
+		Disabled:       &falseVal,
+		Label:          "two",
+		Type:           "two",
+		CertFile:       "two",
+		KeyFile:        "two",
+		CABundleFile:   "two",
+		RootBundleFile: "two",
+		CRLExpiry:      Duration(time.Minute),
+		OCSPExpiry:     Duration(time.Minute),
+		CRLRenewal:     Duration(time.Minute)}
+	dest.overrideFrom(&o)
+	require.Equal(t, dest, o, "Issuer.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
+	o2 := Issuer{
+		Disabled: &trueVal}
+	dest.overrideFrom(&o2)
+	exp := o
+
+	exp.Disabled = o2.Disabled
+	require.Equal(t, dest, exp, "Issuer.overrideFrom should have overriden the field Disabled. value now %#v, expecting %#v", dest, exp)
+}
+
+func TestIssuer_Getters(t *testing.T) {
+	orig := Issuer{
+		Disabled:       &trueVal,
+		Label:          "one",
+		Type:           "one",
+		CertFile:       "one",
+		KeyFile:        "one",
+		CABundleFile:   "one",
+		RootBundleFile: "one",
+		CRLExpiry:      Duration(time.Second),
+		OCSPExpiry:     Duration(time.Second),
+		CRLRenewal:     Duration(time.Second)}
+
+	gv0 := orig.GetDisabled()
+	require.Equal(t, orig.Disabled, &gv0, "Issuer.GetDisabled() does not match")
+
+	gv1 := orig.GetLabel()
+	require.Equal(t, orig.Label, gv1, "Issuer.GetLabelCfg() does not match")
+
+	gv2 := orig.GetType()
+	require.Equal(t, orig.Type, gv2, "Issuer.GetTypeCfg() does not match")
+
+	gv3 := orig.GetCertFile()
+	require.Equal(t, orig.CertFile, gv3, "Issuer.GetCertFileCfg() does not match")
+
+	gv4 := orig.GetKeyFile()
+	require.Equal(t, orig.KeyFile, gv4, "Issuer.GetKeyFileCfg() does not match")
+
+	gv5 := orig.GetCABundleFile()
+	require.Equal(t, orig.CABundleFile, gv5, "Issuer.GetCABundleFileCfg() does not match")
+
+	gv6 := orig.GetRootBundleFile()
+	require.Equal(t, orig.RootBundleFile, gv6, "Issuer.GetRootBundleFileCfg() does not match")
+
+	gv7 := orig.GetCRLExpiry()
+	require.Equal(t, orig.CRLExpiry.TimeDuration(), gv7, "Issuer.GetCRLExpiry() does not match")
+
+	gv8 := orig.GetOCSPExpiry()
+	require.Equal(t, orig.OCSPExpiry.TimeDuration(), gv8, "Issuer.GetOCSPExpiry() does not match")
+
+	gv9 := orig.GetCRLRenewal()
+	require.Equal(t, orig.CRLRenewal.TimeDuration(), gv9, "Issuer.GetCRLRenewal() does not match")
 
 }
 
@@ -1029,68 +1251,39 @@ func Test_LoadOverrides(t *testing.T) {
 					Package: "two",
 					Level:   "two"},
 			},
-			HealthServer: HTTPServer{
-				Name:       "two",
-				Disabled:   &falseVal,
-				ListenURLs: []string{"b", "b"},
-				ServerTLS: TLSInfo{
-					CertFile:       "two",
-					KeyFile:        "two",
-					TrustedCAFile:  "two",
-					CRLFile:        "two",
-					OCSPFile:       "two",
-					CipherSuites:   []string{"b", "b"},
-					ClientCertAuth: &falseVal},
-				PackageLogger:  "two",
-				AllowProfiling: &falseVal,
-				ProfilerDir:    "two",
-				Services:       []string{"b", "b"},
-				HeartbeatSecs:  42,
-				CORS: CORS{
-					Enabled:            &falseVal,
-					MaxAge:             42,
-					AllowedOrigins:     []string{"b", "b"},
-					AllowedMethods:     []string{"b", "b"},
-					AllowedHeaders:     []string{"b", "b"},
-					ExposedHeaders:     []string{"b", "b"},
-					AllowCredentials:   &falseVal,
-					OptionsPassthrough: &falseVal,
-					Debug:              &falseVal},
-				RequestTimeout:    Duration(time.Minute),
-				KeepAliveMinTime:  Duration(time.Minute),
-				KeepAliveInterval: Duration(time.Minute),
-				KeepAliveTimeout:  Duration(time.Minute)},
-			TrustyServer: HTTPServer{
-				Name:       "two",
-				Disabled:   &falseVal,
-				ListenURLs: []string{"b", "b"},
-				ServerTLS: TLSInfo{
-					CertFile:       "two",
-					KeyFile:        "two",
-					TrustedCAFile:  "two",
-					CRLFile:        "two",
-					OCSPFile:       "two",
-					CipherSuites:   []string{"b", "b"},
-					ClientCertAuth: &falseVal},
-				PackageLogger:  "two",
-				AllowProfiling: &falseVal,
-				ProfilerDir:    "two",
-				Services:       []string{"b", "b"},
-				HeartbeatSecs:  42,
-				CORS: CORS{
-					Enabled:            &falseVal,
-					MaxAge:             42,
-					AllowedOrigins:     []string{"b", "b"},
-					AllowedMethods:     []string{"b", "b"},
-					AllowedHeaders:     []string{"b", "b"},
-					ExposedHeaders:     []string{"b", "b"},
-					AllowCredentials:   &falseVal,
-					OptionsPassthrough: &falseVal,
-					Debug:              &falseVal},
-				RequestTimeout:    Duration(time.Minute),
-				KeepAliveMinTime:  Duration(time.Minute),
-				KeepAliveInterval: Duration(time.Minute),
-				KeepAliveTimeout:  Duration(time.Minute)},
+			HTTPServers: []HTTPServer{
+				{
+					Name:       "two",
+					Disabled:   &falseVal,
+					ListenURLs: []string{"b", "b"},
+					ServerTLS: TLSInfo{
+						CertFile:       "two",
+						KeyFile:        "two",
+						TrustedCAFile:  "two",
+						CRLFile:        "two",
+						OCSPFile:       "two",
+						CipherSuites:   []string{"b", "b"},
+						ClientCertAuth: &falseVal},
+					PackageLogger:  "two",
+					AllowProfiling: &falseVal,
+					ProfilerDir:    "two",
+					Services:       []string{"b", "b"},
+					HeartbeatSecs:  42,
+					CORS: CORS{
+						Enabled:            &falseVal,
+						MaxAge:             42,
+						AllowedOrigins:     []string{"b", "b"},
+						AllowedMethods:     []string{"b", "b"},
+						AllowedHeaders:     []string{"b", "b"},
+						ExposedHeaders:     []string{"b", "b"},
+						AllowCredentials:   &falseVal,
+						OptionsPassthrough: &falseVal,
+						Debug:              &falseVal},
+					RequestTimeout:    Duration(time.Minute),
+					KeepAliveMinTime:  Duration(time.Minute),
+					KeepAliveInterval: Duration(time.Minute),
+					KeepAliveTimeout:  Duration(time.Minute)},
+			},
 			TrustyClient: TrustyClient{
 				Servers: []string{"b", "b"},
 				ClientTLS: TLSInfo{
@@ -1137,68 +1330,39 @@ func Test_LoadOverrides(t *testing.T) {
 						Package: "three",
 						Level:   "three"},
 				},
-				HealthServer: HTTPServer{
-					Name:       "three",
-					Disabled:   &trueVal,
-					ListenURLs: []string{"c", "c", "c"},
-					ServerTLS: TLSInfo{
-						CertFile:       "three",
-						KeyFile:        "three",
-						TrustedCAFile:  "three",
-						CRLFile:        "three",
-						OCSPFile:       "three",
-						CipherSuites:   []string{"c", "c", "c"},
-						ClientCertAuth: &trueVal},
-					PackageLogger:  "three",
-					AllowProfiling: &trueVal,
-					ProfilerDir:    "three",
-					Services:       []string{"c", "c", "c"},
-					HeartbeatSecs:  1234,
-					CORS: CORS{
-						Enabled:            &trueVal,
-						MaxAge:             1234,
-						AllowedOrigins:     []string{"c", "c", "c"},
-						AllowedMethods:     []string{"c", "c", "c"},
-						AllowedHeaders:     []string{"c", "c", "c"},
-						ExposedHeaders:     []string{"c", "c", "c"},
-						AllowCredentials:   &trueVal,
-						OptionsPassthrough: &trueVal,
-						Debug:              &trueVal},
-					RequestTimeout:    Duration(time.Hour),
-					KeepAliveMinTime:  Duration(time.Hour),
-					KeepAliveInterval: Duration(time.Hour),
-					KeepAliveTimeout:  Duration(time.Hour)},
-				TrustyServer: HTTPServer{
-					Name:       "three",
-					Disabled:   &trueVal,
-					ListenURLs: []string{"c", "c", "c"},
-					ServerTLS: TLSInfo{
-						CertFile:       "three",
-						KeyFile:        "three",
-						TrustedCAFile:  "three",
-						CRLFile:        "three",
-						OCSPFile:       "three",
-						CipherSuites:   []string{"c", "c", "c"},
-						ClientCertAuth: &trueVal},
-					PackageLogger:  "three",
-					AllowProfiling: &trueVal,
-					ProfilerDir:    "three",
-					Services:       []string{"c", "c", "c"},
-					HeartbeatSecs:  1234,
-					CORS: CORS{
-						Enabled:            &trueVal,
-						MaxAge:             1234,
-						AllowedOrigins:     []string{"c", "c", "c"},
-						AllowedMethods:     []string{"c", "c", "c"},
-						AllowedHeaders:     []string{"c", "c", "c"},
-						ExposedHeaders:     []string{"c", "c", "c"},
-						AllowCredentials:   &trueVal,
-						OptionsPassthrough: &trueVal,
-						Debug:              &trueVal},
-					RequestTimeout:    Duration(time.Hour),
-					KeepAliveMinTime:  Duration(time.Hour),
-					KeepAliveInterval: Duration(time.Hour),
-					KeepAliveTimeout:  Duration(time.Hour)},
+				HTTPServers: []HTTPServer{
+					{
+						Name:       "three",
+						Disabled:   &trueVal,
+						ListenURLs: []string{"c", "c", "c"},
+						ServerTLS: TLSInfo{
+							CertFile:       "three",
+							KeyFile:        "three",
+							TrustedCAFile:  "three",
+							CRLFile:        "three",
+							OCSPFile:       "three",
+							CipherSuites:   []string{"c", "c", "c"},
+							ClientCertAuth: &trueVal},
+						PackageLogger:  "three",
+						AllowProfiling: &trueVal,
+						ProfilerDir:    "three",
+						Services:       []string{"c", "c", "c"},
+						HeartbeatSecs:  1234,
+						CORS: CORS{
+							Enabled:            &trueVal,
+							MaxAge:             1234,
+							AllowedOrigins:     []string{"c", "c", "c"},
+							AllowedMethods:     []string{"c", "c", "c"},
+							AllowedHeaders:     []string{"c", "c", "c"},
+							ExposedHeaders:     []string{"c", "c", "c"},
+							AllowCredentials:   &trueVal,
+							OptionsPassthrough: &trueVal,
+							Debug:              &trueVal},
+						RequestTimeout:    Duration(time.Hour),
+						KeepAliveMinTime:  Duration(time.Hour),
+						KeepAliveInterval: Duration(time.Hour),
+						KeepAliveTimeout:  Duration(time.Hour)},
+				},
 				TrustyClient: TrustyClient{
 					Servers: []string{"c", "c", "c"},
 					ClientTLS: TLSInfo{
@@ -1302,68 +1466,39 @@ func Test_LoadCustomJSON(t *testing.T) {
 					Package: "two",
 					Level:   "two"},
 			},
-			HealthServer: HTTPServer{
-				Name:       "two",
-				Disabled:   &falseVal,
-				ListenURLs: []string{"b", "b"},
-				ServerTLS: TLSInfo{
-					CertFile:       "two",
-					KeyFile:        "two",
-					TrustedCAFile:  "two",
-					CRLFile:        "two",
-					OCSPFile:       "two",
-					CipherSuites:   []string{"b", "b"},
-					ClientCertAuth: &falseVal},
-				PackageLogger:  "two",
-				AllowProfiling: &falseVal,
-				ProfilerDir:    "two",
-				Services:       []string{"b", "b"},
-				HeartbeatSecs:  42,
-				CORS: CORS{
-					Enabled:            &falseVal,
-					MaxAge:             42,
-					AllowedOrigins:     []string{"b", "b"},
-					AllowedMethods:     []string{"b", "b"},
-					AllowedHeaders:     []string{"b", "b"},
-					ExposedHeaders:     []string{"b", "b"},
-					AllowCredentials:   &falseVal,
-					OptionsPassthrough: &falseVal,
-					Debug:              &falseVal},
-				RequestTimeout:    Duration(time.Minute),
-				KeepAliveMinTime:  Duration(time.Minute),
-				KeepAliveInterval: Duration(time.Minute),
-				KeepAliveTimeout:  Duration(time.Minute)},
-			TrustyServer: HTTPServer{
-				Name:       "two",
-				Disabled:   &falseVal,
-				ListenURLs: []string{"b", "b"},
-				ServerTLS: TLSInfo{
-					CertFile:       "two",
-					KeyFile:        "two",
-					TrustedCAFile:  "two",
-					CRLFile:        "two",
-					OCSPFile:       "two",
-					CipherSuites:   []string{"b", "b"},
-					ClientCertAuth: &falseVal},
-				PackageLogger:  "two",
-				AllowProfiling: &falseVal,
-				ProfilerDir:    "two",
-				Services:       []string{"b", "b"},
-				HeartbeatSecs:  42,
-				CORS: CORS{
-					Enabled:            &falseVal,
-					MaxAge:             42,
-					AllowedOrigins:     []string{"b", "b"},
-					AllowedMethods:     []string{"b", "b"},
-					AllowedHeaders:     []string{"b", "b"},
-					ExposedHeaders:     []string{"b", "b"},
-					AllowCredentials:   &falseVal,
-					OptionsPassthrough: &falseVal,
-					Debug:              &falseVal},
-				RequestTimeout:    Duration(time.Minute),
-				KeepAliveMinTime:  Duration(time.Minute),
-				KeepAliveInterval: Duration(time.Minute),
-				KeepAliveTimeout:  Duration(time.Minute)},
+			HTTPServers: []HTTPServer{
+				{
+					Name:       "two",
+					Disabled:   &falseVal,
+					ListenURLs: []string{"b", "b"},
+					ServerTLS: TLSInfo{
+						CertFile:       "two",
+						KeyFile:        "two",
+						TrustedCAFile:  "two",
+						CRLFile:        "two",
+						OCSPFile:       "two",
+						CipherSuites:   []string{"b", "b"},
+						ClientCertAuth: &falseVal},
+					PackageLogger:  "two",
+					AllowProfiling: &falseVal,
+					ProfilerDir:    "two",
+					Services:       []string{"b", "b"},
+					HeartbeatSecs:  42,
+					CORS: CORS{
+						Enabled:            &falseVal,
+						MaxAge:             42,
+						AllowedOrigins:     []string{"b", "b"},
+						AllowedMethods:     []string{"b", "b"},
+						AllowedHeaders:     []string{"b", "b"},
+						ExposedHeaders:     []string{"b", "b"},
+						AllowCredentials:   &falseVal,
+						OptionsPassthrough: &falseVal,
+						Debug:              &falseVal},
+					RequestTimeout:    Duration(time.Minute),
+					KeepAliveMinTime:  Duration(time.Minute),
+					KeepAliveInterval: Duration(time.Minute),
+					KeepAliveTimeout:  Duration(time.Minute)},
+			},
 			TrustyClient: TrustyClient{
 				Servers: []string{"b", "b"},
 				ClientTLS: TLSInfo{
@@ -1410,68 +1545,39 @@ func Test_LoadCustomJSON(t *testing.T) {
 						Package: "three",
 						Level:   "three"},
 				},
-				HealthServer: HTTPServer{
-					Name:       "three",
-					Disabled:   &trueVal,
-					ListenURLs: []string{"c", "c", "c"},
-					ServerTLS: TLSInfo{
-						CertFile:       "three",
-						KeyFile:        "three",
-						TrustedCAFile:  "three",
-						CRLFile:        "three",
-						OCSPFile:       "three",
-						CipherSuites:   []string{"c", "c", "c"},
-						ClientCertAuth: &trueVal},
-					PackageLogger:  "three",
-					AllowProfiling: &trueVal,
-					ProfilerDir:    "three",
-					Services:       []string{"c", "c", "c"},
-					HeartbeatSecs:  1234,
-					CORS: CORS{
-						Enabled:            &trueVal,
-						MaxAge:             1234,
-						AllowedOrigins:     []string{"c", "c", "c"},
-						AllowedMethods:     []string{"c", "c", "c"},
-						AllowedHeaders:     []string{"c", "c", "c"},
-						ExposedHeaders:     []string{"c", "c", "c"},
-						AllowCredentials:   &trueVal,
-						OptionsPassthrough: &trueVal,
-						Debug:              &trueVal},
-					RequestTimeout:    Duration(time.Hour),
-					KeepAliveMinTime:  Duration(time.Hour),
-					KeepAliveInterval: Duration(time.Hour),
-					KeepAliveTimeout:  Duration(time.Hour)},
-				TrustyServer: HTTPServer{
-					Name:       "three",
-					Disabled:   &trueVal,
-					ListenURLs: []string{"c", "c", "c"},
-					ServerTLS: TLSInfo{
-						CertFile:       "three",
-						KeyFile:        "three",
-						TrustedCAFile:  "three",
-						CRLFile:        "three",
-						OCSPFile:       "three",
-						CipherSuites:   []string{"c", "c", "c"},
-						ClientCertAuth: &trueVal},
-					PackageLogger:  "three",
-					AllowProfiling: &trueVal,
-					ProfilerDir:    "three",
-					Services:       []string{"c", "c", "c"},
-					HeartbeatSecs:  1234,
-					CORS: CORS{
-						Enabled:            &trueVal,
-						MaxAge:             1234,
-						AllowedOrigins:     []string{"c", "c", "c"},
-						AllowedMethods:     []string{"c", "c", "c"},
-						AllowedHeaders:     []string{"c", "c", "c"},
-						ExposedHeaders:     []string{"c", "c", "c"},
-						AllowCredentials:   &trueVal,
-						OptionsPassthrough: &trueVal,
-						Debug:              &trueVal},
-					RequestTimeout:    Duration(time.Hour),
-					KeepAliveMinTime:  Duration(time.Hour),
-					KeepAliveInterval: Duration(time.Hour),
-					KeepAliveTimeout:  Duration(time.Hour)},
+				HTTPServers: []HTTPServer{
+					{
+						Name:       "three",
+						Disabled:   &trueVal,
+						ListenURLs: []string{"c", "c", "c"},
+						ServerTLS: TLSInfo{
+							CertFile:       "three",
+							KeyFile:        "three",
+							TrustedCAFile:  "three",
+							CRLFile:        "three",
+							OCSPFile:       "three",
+							CipherSuites:   []string{"c", "c", "c"},
+							ClientCertAuth: &trueVal},
+						PackageLogger:  "three",
+						AllowProfiling: &trueVal,
+						ProfilerDir:    "three",
+						Services:       []string{"c", "c", "c"},
+						HeartbeatSecs:  1234,
+						CORS: CORS{
+							Enabled:            &trueVal,
+							MaxAge:             1234,
+							AllowedOrigins:     []string{"c", "c", "c"},
+							AllowedMethods:     []string{"c", "c", "c"},
+							AllowedHeaders:     []string{"c", "c", "c"},
+							ExposedHeaders:     []string{"c", "c", "c"},
+							AllowCredentials:   &trueVal,
+							OptionsPassthrough: &trueVal,
+							Debug:              &trueVal},
+						RequestTimeout:    Duration(time.Hour),
+						KeepAliveMinTime:  Duration(time.Hour),
+						KeepAliveInterval: Duration(time.Hour),
+						KeepAliveTimeout:  Duration(time.Hour)},
+				},
 				TrustyClient: TrustyClient{
 					Servers: []string{"c", "c", "c"},
 					ClientTLS: TLSInfo{
