@@ -25,18 +25,18 @@ func Test_Empty(t *testing.T) {
 }
 
 func Test_Notfound(t *testing.T) {
-	_, err := roles.New("", "missing_roles.yaml")
+	_, err := roles.New("", "missing_roles.json")
 	require.Error(t, err)
-	assert.Equal(t, "failed to load cert mapper missing_roles.yaml: open missing_roles.yaml: no such file or directory", err.Error())
+	assert.Equal(t, "failed to load cert mapper missing_roles.json: open missing_roles.json: no such file or directory", err.Error())
 
-	_, err = roles.New("missing_roles.yaml", "")
+	_, err = roles.New("missing_roles.json", "")
 	require.Error(t, err)
-	assert.Equal(t, "failed to load JWT mapper: open missing_roles.yaml: no such file or directory", err.Error())
+	assert.Equal(t, "failed to load JWT mapper: open missing_roles.json: no such file or directory", err.Error())
 }
 
 func Test_All(t *testing.T) {
 	p, err := roles.New(
-		"jwtmapper/testdata/roles.yaml",
+		"jwtmapper/testdata/roles.json",
 		"certmapper/testdata/roles.json")
 	require.NoError(t, err)
 

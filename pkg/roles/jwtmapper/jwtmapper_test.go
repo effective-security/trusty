@@ -14,27 +14,27 @@ import (
 )
 
 func Test_Config(t *testing.T) {
-	_, err := jwtmapper.LoadConfig("testdata/missing.yaml")
+	_, err := jwtmapper.LoadConfig("testdata/missing.json")
 	require.Error(t, err)
-	assert.Equal(t, "open testdata/missing.yaml: no such file or directory", err.Error())
+	assert.Equal(t, "open testdata/missing.json: no such file or directory", err.Error())
 
-	_, err = jwtmapper.LoadConfig("testdata/roles_corrupted.1.yaml")
+	_, err = jwtmapper.LoadConfig("testdata/roles_corrupted.1.json")
 	require.Error(t, err)
-	assert.Equal(t, `unable to unmarshal "testdata/roles_corrupted.1.yaml": yaml: line 2: mapping values are not allowed in this context`, err.Error())
+	assert.Equal(t, `unable to unmarshal "testdata/roles_corrupted.1.json": invalid character 'v' looking for beginning of value`, err.Error())
 
-	_, err = jwtmapper.LoadConfig("testdata/roles_corrupted.2.yaml")
+	_, err = jwtmapper.LoadConfig("testdata/roles_corrupted.2.json")
 	require.Error(t, err)
-	assert.Equal(t, `unable to unmarshal "testdata/roles_corrupted.2.yaml": yaml: line 2: did not find expected key`, err.Error())
+	assert.Equal(t, `missing kid: "testdata/roles_corrupted.2.json"`, err.Error())
 
-	_, err = jwtmapper.LoadConfig("testdata/roles_no_kid.yaml")
+	_, err = jwtmapper.LoadConfig("testdata/roles_no_kid.json")
 	require.Error(t, err)
-	assert.Equal(t, `missing kid: "testdata/roles_no_kid.yaml"`, err.Error())
+	assert.Equal(t, `missing kid: "testdata/roles_no_kid.json"`, err.Error())
 
-	_, err = jwtmapper.LoadConfig("testdata/roles_no_keys.yaml")
+	_, err = jwtmapper.LoadConfig("testdata/roles_no_keys.json")
 	require.Error(t, err)
-	assert.Equal(t, `missing keys: "testdata/roles_no_keys.yaml"`, err.Error())
+	assert.Equal(t, `missing keys: "testdata/roles_no_keys.json"`, err.Error())
 
-	cfg, err := jwtmapper.LoadConfig("testdata/roles.yaml")
+	cfg, err := jwtmapper.LoadConfig("testdata/roles.json")
 	require.NoError(t, err)
 	require.NotNil(t, cfg)
 	assert.Equal(t, 2, len(cfg.Keys))
@@ -46,17 +46,17 @@ func Test_Config(t *testing.T) {
 }
 
 func Test_Load(t *testing.T) {
-	_, err := jwtmapper.Load("testdata/missing.yaml")
+	_, err := jwtmapper.Load("testdata/missing.json")
 	require.Error(t, err)
-	assert.Equal(t, "open testdata/missing.yaml: no such file or directory", err.Error())
+	assert.Equal(t, "open testdata/missing.json: no such file or directory", err.Error())
 
-	_, err = jwtmapper.Load("testdata/roles_corrupted.1.yaml")
-	require.Error(t, err)
-
-	_, err = jwtmapper.Load("testdata/roles_corrupted.2.yaml")
+	_, err = jwtmapper.Load("testdata/roles_corrupted.1.json")
 	require.Error(t, err)
 
-	m, err := jwtmapper.Load("testdata/roles.yaml")
+	_, err = jwtmapper.Load("testdata/roles_corrupted.2.json")
+	require.Error(t, err)
+
+	m, err := jwtmapper.Load("testdata/roles.json")
 	require.NoError(t, err)
 	id, key := m.CurrentKey()
 	assert.NotEmpty(t, id)
@@ -67,11 +67,11 @@ func Test_Load(t *testing.T) {
 }
 
 func Test_Sign(t *testing.T) {
-	p, err := jwtmapper.Load("testdata/roles.yaml")
+	p, err := jwtmapper.Load("testdata/roles.json")
 	require.NoError(t, err)
-	p1, err := jwtmapper.Load("testdata/roles.1.yaml")
+	p1, err := jwtmapper.Load("testdata/roles.1.json")
 	require.NoError(t, err)
-	p2, err := jwtmapper.Load("testdata/roles.2.yaml")
+	p2, err := jwtmapper.Load("testdata/roles.2.json")
 	require.NoError(t, err)
 
 	t.Run("default role", func(t *testing.T) {
@@ -151,7 +151,7 @@ func Test_Sign(t *testing.T) {
 }
 
 func Test_Verify(t *testing.T) {
-	p, err := jwtmapper.Load("testdata/roles.yaml")
+	p, err := jwtmapper.Load("testdata/roles.json")
 	require.NoError(t, err)
 
 	userInfo := &v1.UserInfo{

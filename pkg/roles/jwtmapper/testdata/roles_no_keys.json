@@ -1,0 +1,12 @@
+{
+  "issuer" : "trusty",
+  "audience" : "trusty",
+  "kid" : "1",
+  "default_role" : "trusty-client",
+  "roles" : {
+    "trusty-admin" : [
+      "denis@ekspand.com",
+      "andrew@ekspand.com"
+    ]
+  }
+}
