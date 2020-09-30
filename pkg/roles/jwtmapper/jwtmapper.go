@@ -1,6 +1,7 @@
 package jwtmapper
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -14,7 +15,6 @@ import (
 	"github.com/go-phorce/dolly/xpki/certutil"
 	v1 "github.com/go-phorce/trusty/api/v1"
 	"github.com/juju/errors"
-	yaml "gopkg.in/yaml.v2"
 )
 
 var logger = xlog.NewPackageLogger("github.com/go-phorce/trusty/pkg", "jwtmapper")
@@ -25,24 +25,24 @@ const ProviderName = "jwt"
 // Key for JWT signature
 type Key struct {
 	// ID of the key
-	ID   string `json:"id" yaml:"id"`
-	Seed string `json:"seed" yaml:"seed"`
+	ID   string `json:"id"`
+	Seed string `json:"seed"`
 }
 
 // Config provides OAuth2 configuration
 type Config struct {
 	// Audience specifies audience claim
-	Audience string `json:"audience" yaml:"audience"`
+	Audience string `json:"audience"`
 	// Issuer specifies issuer claim
-	Issuer string `json:"issuer" yaml:"issuer"`
+	Issuer string `json:"issuer"`
 	// KeyID specifies ID of the current key
-	KeyID string `json:"kid" yaml:"kid"`
+	KeyID string `json:"kid"`
 	// Keys specifies list of issuer's keys
-	Keys []*Key `json:"keys" yaml:"keys"`
+	Keys []*Key `json:"keys"`
 	// DefaultRole specifies default role name
-	DefaultRole string `json:"default_role" yaml:"default_role"`
+	DefaultRole string `json:"default_role"`
 	// RolesMap is a map of roles to list of users
-	RolesMap map[string][]string `json:"roles" yaml:"roles"`
+	RolesMap map[string][]string `json:"roles"`
 }
 
 // Provider of OAuth2 identity
@@ -61,13 +61,13 @@ func LoadConfig(file string) (*Config, error) {
 		return &Config{}, nil
 	}
 
-	yamlFile, err := ioutil.ReadFile(file)
+	jsonFile, err := ioutil.ReadFile(file)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
 	var config Config
-	err = yaml.Unmarshal(yamlFile, &config)
+	err = json.Unmarshal(jsonFile, &config)
 	if err != nil {
 		return nil, errors.Annotatef(err, "unable to unmarshal %q", file)
 	}
