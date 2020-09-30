@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/testify/servefiles"
+	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/go-phorce/trusty/api/v1/trustypb"
 	"github.com/go-phorce/trusty/cli"
 	"github.com/go-phorce/trusty/client"
@@ -56,6 +57,7 @@ func (s *Suite) WithFileServer() *Suite {
 
 // WithHSM specifies to use HSM provider
 func (s *Suite) WithHSM() *Suite {
+	cryptoprov.Register("SoftHSM", cryptoprov.Crypto11Loader)
 	s.withHSM = true
 	return s
 }

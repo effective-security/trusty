@@ -1,8 +1,8 @@
 {
     "CN": "[TEST] Trusty Root CA",
     "key": {
-        "algo": "rsa",
-        "size": 4096
+        "algo": "ecdsa",
+        "size": 384
     },
     "names": [
         {
