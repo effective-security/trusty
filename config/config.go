@@ -66,6 +66,73 @@ func (d Duration) TimeDuration() time.Duration {
 	return time.Duration(d)
 }
 
+// Authority contains configuration info for CA
+type Authority struct {
+
+	// CAConfig specifies file location with CA configuration
+	CAConfig string
+
+	// DefaultCRLExpiry specifies value in 72h format for duration of CRL next update time
+	DefaultCRLExpiry Duration
+
+	// DefaultOCSPExpiry specifies value in 8h format for duration of OCSP next update time
+	DefaultOCSPExpiry Duration
+
+	// DefaultCRLRenewal specifies value in 8h format for duration of CRL renewal before next update time
+	DefaultCRLRenewal Duration
+
+	// Issuers specifies the list of issuing authorities.
+	Issuers []Issuer
+}
+
+func (c *Authority) overrideFrom(o *Authority) {
+	overrideString(&c.CAConfig, &o.CAConfig)
+	overrideDuration(&c.DefaultCRLExpiry, &o.DefaultCRLExpiry)
+	overrideDuration(&c.DefaultOCSPExpiry, &o.DefaultOCSPExpiry)
+	overrideDuration(&c.DefaultCRLRenewal, &o.DefaultCRLRenewal)
+	overrideIssuerSlice(&c.Issuers, &o.Issuers)
+
+}
+
+// AuthorityConfig contains configuration info for CA
+type AuthorityConfig interface {
+	// CAConfig specifies file location with CA configuration
+	GetCAConfig() string
+	// DefaultCRLExpiry specifies value in 72h format for duration of CRL next update time
+	GetDefaultCRLExpiry() time.Duration
+	// DefaultOCSPExpiry specifies value in 8h format for duration of OCSP next update time
+	GetDefaultOCSPExpiry() time.Duration
+	// DefaultCRLRenewal specifies value in 8h format for duration of CRL renewal before next update time
+	GetDefaultCRLRenewal() time.Duration
+	// Issuers specifies the list of issuing authorities.
+	GetIssuers() []Issuer
+}
+
+// GetCAConfig specifies file location with CA configuration
+func (c *Authority) GetCAConfig() string {
+	return c.CAConfig
+}
+
+// GetDefaultCRLExpiry specifies value in 72h format for duration of CRL next update time
+func (c *Authority) GetDefaultCRLExpiry() time.Duration {
+	return c.DefaultCRLExpiry.TimeDuration()
+}
+
+// GetDefaultOCSPExpiry specifies value in 8h format for duration of OCSP next update time
+func (c *Authority) GetDefaultOCSPExpiry() time.Duration {
+	return c.DefaultOCSPExpiry.TimeDuration()
+}
+
+// GetDefaultCRLRenewal specifies value in 8h format for duration of CRL renewal before next update time
+func (c *Authority) GetDefaultCRLRenewal() time.Duration {
+	return c.DefaultCRLRenewal.TimeDuration()
+}
+
+// GetIssuers specifies the list of issuing authorities.
+func (c *Authority) GetIssuers() []Issuer {
+	return c.Issuers
+}
+
 // Authz contains configuration for the authorization module
 type Authz struct {
 
@@ -407,17 +474,17 @@ type Configuration struct {
 	// LogLevels specifies the log levels per package
 	LogLevels []RepoLogLevel
 
-	// HealthServer specifies configurations for the health server
-	HealthServer HTTPServer
-
-	// TrustyServer specifies configurations for the trusty server
-	TrustyServer HTTPServer
+	// HTTPServers specifies a list of servers that expose HTTP or gRPC services
+	HTTPServers []HTTPServer
 
 	// TrustyClient specifies configurations for the client to connect to the cluster
 	TrustyClient TrustyClient
 
 	// VIPs is a list of the FQ name of the VIP to the cluster
 	VIPs []string
+
+	// Authority contains configuration info for CA
+	Authority Authority
 }
 
 func (c *Configuration) overrideFrom(o *Configuration) {
@@ -430,10 +497,10 @@ func (c *Configuration) overrideFrom(o *Configuration) {
 	c.Authz.overrideFrom(&o.Authz)
 	c.Logger.overrideFrom(&o.Logger)
 	overrideRepoLogLevelSlice(&c.LogLevels, &o.LogLevels)
-	c.HealthServer.overrideFrom(&o.HealthServer)
-	c.TrustyServer.overrideFrom(&o.TrustyServer)
+	overrideHTTPServerSlice(&c.HTTPServers, &o.HTTPServers)
 	c.TrustyClient.overrideFrom(&o.TrustyClient)
 	overrideStrings(&c.VIPs, &o.VIPs)
+	c.Authority.overrideFrom(&o.Authority)
 
 }
 
@@ -621,6 +688,128 @@ func (c *HTTPServer) GetKeepAliveInterval() time.Duration {
 // GetKeepAliveTimeout is the additional duration of wait before closing a non-responsive connection, use 0 to disable.
 func (c *HTTPServer) GetKeepAliveTimeout() time.Duration {
 	return c.KeepAliveTimeout.TimeDuration()
+}
+
+// Issuer contains configuration info for the issuing certificate
+type Issuer struct {
+
+	// Disabled specifies if the certificate disabled to use
+	Disabled *bool
+
+	// Label specifies Issuer's label
+	Label string
+
+	// Type specifies type: tls|codesign|timestamp|ocsp|spiffe
+	Type string
+
+	// CertFile specifies location of the cert
+	CertFile string
+
+	// KeyFile specifies location of the key
+	KeyFile string
+
+	// CABundleFile specifies location of the CA bundle file
+	CABundleFile string
+
+	// RootBundleFile specifies location of the Trusted Root CA file
+	RootBundleFile string
+
+	// CRLExpiry specifies value in 72h format for duration of CRL next update time
+	CRLExpiry Duration
+
+	// OCSPExpiry specifies value in 8h format for duration of OCSP next update time
+	OCSPExpiry Duration
+
+	// CRLRenewal specifies value in 8h format for duration of CRL renewal before next update time
+	CRLRenewal Duration
+}
+
+func (c *Issuer) overrideFrom(o *Issuer) {
+	overrideBool(&c.Disabled, &o.Disabled)
+	overrideString(&c.Label, &o.Label)
+	overrideString(&c.Type, &o.Type)
+	overrideString(&c.CertFile, &o.CertFile)
+	overrideString(&c.KeyFile, &o.KeyFile)
+	overrideString(&c.CABundleFile, &o.CABundleFile)
+	overrideString(&c.RootBundleFile, &o.RootBundleFile)
+	overrideDuration(&c.CRLExpiry, &o.CRLExpiry)
+	overrideDuration(&c.OCSPExpiry, &o.OCSPExpiry)
+	overrideDuration(&c.CRLRenewal, &o.CRLRenewal)
+
+}
+
+// IssuerConfig contains configuration info for the issuing certificate
+type IssuerConfig interface {
+	// Disabled specifies if the certificate disabled to use
+	GetDisabled() bool
+	// Label specifies Issuer's label
+	GetLabel() string
+	// Type specifies type: tls|codesign|timestamp|ocsp|spiffe
+	GetType() string
+	// CertFile specifies location of the cert
+	GetCertFile() string
+	// KeyFile specifies location of the key
+	GetKeyFile() string
+	// CABundleFile specifies location of the CA bundle file
+	GetCABundleFile() string
+	// RootBundleFile specifies location of the Trusted Root CA file
+	GetRootBundleFile() string
+	// CRLExpiry specifies value in 72h format for duration of CRL next update time
+	GetCRLExpiry() time.Duration
+	// OCSPExpiry specifies value in 8h format for duration of OCSP next update time
+	GetOCSPExpiry() time.Duration
+	// CRLRenewal specifies value in 8h format for duration of CRL renewal before next update time
+	GetCRLRenewal() time.Duration
+}
+
+// GetDisabled specifies if the certificate disabled to use
+func (c *Issuer) GetDisabled() bool {
+	return c.Disabled != nil && *c.Disabled
+}
+
+// GetLabel specifies Issuer's label
+func (c *Issuer) GetLabel() string {
+	return c.Label
+}
+
+// GetType specifies type: tls|codesign|timestamp|ocsp|spiffe
+func (c *Issuer) GetType() string {
+	return c.Type
+}
+
+// GetCertFile specifies location of the cert
+func (c *Issuer) GetCertFile() string {
+	return c.CertFile
+}
+
+// GetKeyFile specifies location of the key
+func (c *Issuer) GetKeyFile() string {
+	return c.KeyFile
+}
+
+// GetCABundleFile specifies location of the CA bundle file
+func (c *Issuer) GetCABundleFile() string {
+	return c.CABundleFile
+}
+
+// GetRootBundleFile specifies location of the Trusted Root CA file
+func (c *Issuer) GetRootBundleFile() string {
+	return c.RootBundleFile
+}
+
+// GetCRLExpiry specifies value in 72h format for duration of CRL next update time
+func (c *Issuer) GetCRLExpiry() time.Duration {
+	return c.CRLExpiry.TimeDuration()
+}
+
+// GetOCSPExpiry specifies value in 8h format for duration of OCSP next update time
+func (c *Issuer) GetOCSPExpiry() time.Duration {
+	return c.OCSPExpiry.TimeDuration()
+}
+
+// GetCRLRenewal specifies value in 8h format for duration of CRL renewal before next update time
+func (c *Issuer) GetCRLRenewal() time.Duration {
+	return c.CRLRenewal.TimeDuration()
 }
 
 // Logger contains information about the configuration of a logger/log rotation
@@ -857,8 +1046,20 @@ func overrideDuration(d, o *Duration) {
 	}
 }
 
+func overrideHTTPServerSlice(d, o *[]HTTPServer) {
+	if len(*o) > 0 {
+		*d = *o
+	}
+}
+
 func overrideInt(d, o *int) {
 	if *o != 0 {
+		*d = *o
+	}
+}
+
+func overrideIssuerSlice(d, o *[]Issuer) {
+	if len(*o) > 0 {
 		*d = *o
 	}
 }

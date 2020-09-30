@@ -198,9 +198,9 @@ func (a *App) Run(startedCh chan<- bool) error {
 		return nil
 	}
 
-	for _, svcCfg := range []*config.HTTPServer{&a.cfg.HealthServer, &a.cfg.TrustyServer} {
+	for _, svcCfg := range a.cfg.HTTPServers {
 		if svcCfg.GetDisabled() == false {
-			httpServer, err := trustyserver.StartTrusty(svcCfg, a.container, ServiceFactories)
+			httpServer, err := trustyserver.StartTrusty(&svcCfg, a.container, ServiceFactories)
 			if err != nil {
 				logger.Errorf("src=Run, reason=Start, server=%s, err=[%v]", svcCfg.Name, errors.ErrorStack(err))
 
@@ -289,11 +289,22 @@ func (a *App) loadConfig() error {
 	if len(*flags.cryptoProvs) > 0 {
 		cfg.CryptoProv.Providers = *flags.cryptoProvs
 	}
-	if len(*flags.clientURLs) > 0 {
-		cfg.TrustyServer.ListenURLs = *flags.clientURLs
-	}
-	if len(*flags.healthURLs) > 0 {
-		cfg.HealthServer.ListenURLs = *flags.healthURLs
+
+	for i, httpCfg := range cfg.HTTPServers {
+		switch httpCfg.Name {
+		case "Health":
+			if len(*flags.healthURLs) > 0 {
+				cfg.HTTPServers[i].ListenURLs = *flags.healthURLs
+			}
+
+		case "Trusty":
+			if len(*flags.clientURLs) > 0 {
+				cfg.HTTPServers[i].ListenURLs = *flags.clientURLs
+			}
+
+		default:
+			return errors.Errorf("unknows server name in configuration: %s", httpCfg.Name)
+		}
 	}
 
 	return nil
