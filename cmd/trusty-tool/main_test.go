@@ -66,7 +66,7 @@ func (s *testSuite) SetupTest() {
 	cfg, err := filepath.Abs(projFolder + "etc/dev/" + config.ConfigFileName)
 	s.Require().NoError(err)
 
-	s.baseArgs = []string{"trustyctl", "-V", "-D", "--json", "--cfg", cfg}
+	s.baseArgs = []string{"trusty-tool", "-V", "-D", "--json", "--cfg", cfg}
 }
 
 func (s *testSuite) TearDownTest() {
@@ -80,4 +80,9 @@ func TestGoVersion(t *testing.T) {
 	v := version.Current()
 	assert.True(t, v.Float() > 0)
 	assert.NotEmpty(t, v.Runtime)
+}
+
+func (s *testSuite) TestCsrRoot() {
+	s.Equal(ctl.RCUsage, s.run("csr", "root"))
+	s.Equal(ctl.RCUsage, s.run("csr", "create-root"))
 }

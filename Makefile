@@ -68,7 +68,11 @@ build_trustyctl:
 	echo "*** Building trustyctl"
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/trustyctl ./cmd/trustyctl
 
-build: build_trusty build_trustyctl
+build_tool:
+	echo "*** Building tool"
+	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/trusty-tool ./cmd/trusty-tool
+
+build: build_trusty build_trustyctl build_tool
 	echo "Finished build"
 
 hsmconfig:

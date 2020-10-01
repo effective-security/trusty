@@ -24,5 +24,4 @@ require (
 	google.golang.org/grpc v1.31.1
 	google.golang.org/grpc/examples v0.0.0-20200910201057-6591123024b3 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
-	gopkg.in/yaml.v2 v2.3.0
 )
