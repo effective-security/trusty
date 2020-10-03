@@ -94,45 +94,6 @@ func (c *Authority) overrideFrom(o *Authority) {
 
 }
 
-// AuthorityConfig contains configuration info for CA
-type AuthorityConfig interface {
-	// CAConfig specifies file location with CA configuration
-	GetCAConfig() string
-	// DefaultCRLExpiry specifies value in 72h format for duration of CRL next update time
-	GetDefaultCRLExpiry() time.Duration
-	// DefaultOCSPExpiry specifies value in 8h format for duration of OCSP next update time
-	GetDefaultOCSPExpiry() time.Duration
-	// DefaultCRLRenewal specifies value in 8h format for duration of CRL renewal before next update time
-	GetDefaultCRLRenewal() time.Duration
-	// Issuers specifies the list of issuing authorities.
-	GetIssuers() []Issuer
-}
-
-// GetCAConfig specifies file location with CA configuration
-func (c *Authority) GetCAConfig() string {
-	return c.CAConfig
-}
-
-// GetDefaultCRLExpiry specifies value in 72h format for duration of CRL next update time
-func (c *Authority) GetDefaultCRLExpiry() time.Duration {
-	return c.DefaultCRLExpiry.TimeDuration()
-}
-
-// GetDefaultOCSPExpiry specifies value in 8h format for duration of OCSP next update time
-func (c *Authority) GetDefaultOCSPExpiry() time.Duration {
-	return c.DefaultOCSPExpiry.TimeDuration()
-}
-
-// GetDefaultCRLRenewal specifies value in 8h format for duration of CRL renewal before next update time
-func (c *Authority) GetDefaultCRLRenewal() time.Duration {
-	return c.DefaultCRLRenewal.TimeDuration()
-}
-
-// GetIssuers specifies the list of issuing authorities.
-func (c *Authority) GetIssuers() []Issuer {
-	return c.Issuers
-}
-
 // Authz contains configuration for the authorization module
 type Authz struct {
 

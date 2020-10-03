@@ -83,6 +83,5 @@ func TestGoVersion(t *testing.T) {
 }
 
 func (s *testSuite) TestCsrRoot() {
-	s.Equal(ctl.RCUsage, s.run("csr", "root"))
-	s.Equal(ctl.RCUsage, s.run("csr", "create-root"))
+	s.Equal(ctl.RCUsage, s.run("csr", "self-sign"))
 }

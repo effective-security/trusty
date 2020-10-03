@@ -2,16 +2,22 @@ package authority
 
 import (
 	"crypto"
+	"crypto/rand"
+	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"encoding/hex"
+	"encoding/pem"
+	"io"
 	"io/ioutil"
+	"math/big"
 	"strings"
 	"time"
 
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/go-phorce/trusty/config"
+	"github.com/go-phorce/trusty/pkg/csr"
 	"github.com/juju/errors"
 )
 
@@ -21,72 +27,85 @@ var (
 
 // Issuer of certificates
 type Issuer struct {
-	label          string
-	skid           string // Subject Key ID
-	rkid           string // Root Key ID
-	signer         crypto.Signer
-	bundle         *certutil.Bundle
-	crlNextUpdate  time.Duration
-	ocspNextUpdate time.Duration
-	crlURL         string
-	aiaURL         string
-	ocspURL        string
-	// caCerts contains PEM encoded certs for the issuer,
+	cfg        Config
+	label      string
+	skid       string // Subject Key ID
+	signer     crypto.Signer
+	sigAlgo    x509.SignatureAlgorithm
+	bundle     *certutil.Bundle
+	crlRenewal time.Duration
+	crlExpiry  time.Duration
+	ocspExpiry time.Duration
+	crlURL     string
+	aiaURL     string
+	ocspURL    string
+
+	// cabundlePEM contains PEM encoded certs for the issuer,
 	// this bundle includes Issuing cert itself and its parents.
-	caCerts string
+	cabundlePEM string
 
 	keyHash  map[crypto.Hash][]byte
 	nameHash map[crypto.Hash][]byte
 }
 
 // Bundle returns certificates bundle
-func (i *Issuer) Bundle() *certutil.Bundle {
-	return i.bundle
+func (ca *Issuer) Bundle() *certutil.Bundle {
+	return ca.bundle
 }
 
 // PEM returns PEM encoded certs for the issuer
-func (i *Issuer) PEM() string {
-	return i.caCerts
+func (ca *Issuer) PEM() string {
+	return ca.cabundlePEM
 }
 
 // CrlURL returns CRL DP URL
-func (i *Issuer) CrlURL() string {
-	return i.crlURL
+func (ca *Issuer) CrlURL() string {
+	return ca.crlURL
 }
 
 // OcspURL returns OCSP URL
-func (i *Issuer) OcspURL() string {
-	return i.ocspURL
+func (ca *Issuer) OcspURL() string {
+	return ca.ocspURL
 }
 
 // AiaURL returns AIA URL
-func (i *Issuer) AiaURL() string {
-	return i.aiaURL
+func (ca *Issuer) AiaURL() string {
+	return ca.aiaURL
 }
 
 // Label returns label of the issuer
-func (i *Issuer) Label() string {
-	return i.label
+func (ca *Issuer) Label() string {
+	return ca.label
 }
 
 // SubjectKID returns Subject Key ID
-func (i *Issuer) SubjectKID() string {
-	return i.skid
-}
-
-// RootKID returns Root Key ID
-func (i *Issuer) RootKID() string {
-	return i.rkid
+func (ca *Issuer) SubjectKID() string {
+	return ca.skid
 }
 
 // Signer returns crypto.Signer
-func (i *Issuer) Signer() crypto.Signer {
-	return i.signer
+func (ca *Issuer) Signer() crypto.Signer {
+	return ca.signer
 }
 
 // KeyHash returns key hash
-func (i *Issuer) KeyHash(h crypto.Hash) []byte {
-	return i.keyHash[h]
+func (ca *Issuer) KeyHash(h crypto.Hash) []byte {
+	return ca.keyHash[h]
+}
+
+// CrlRenewal is duration for CRL renewal interval
+func (ca *Issuer) CrlRenewal() time.Duration {
+	return ca.crlRenewal
+}
+
+// CrlExpiry is duration for CRL next update interval
+func (ca *Issuer) CrlExpiry() time.Duration {
+	return ca.crlExpiry
+}
+
+// OcspExpiry is duration for OCSP next update interval
+func (ca *Issuer) OcspExpiry() time.Duration {
+	return ca.ocspExpiry
 }
 
 // NewIssuer creates Issuer from provided configuration
@@ -119,6 +138,32 @@ func NewIssuer(cfg *config.Issuer, caCfg *Config, prov *cryptoprov.Crypto) (*Iss
 	if err != nil {
 		return nil, errors.Annotatef(err, "failed to load cert")
 	}
+	issuer, err := CreateIssuer(cfg.Label, caCfg, certBytes, intCAbytes, rootBytes, cryptoSigner)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	if cfg.CRLExpiry > 0 {
+		issuer.crlExpiry = cfg.CRLExpiry.TimeDuration()
+	}
+	if cfg.CRLRenewal > 0 {
+		issuer.crlRenewal = cfg.CRLRenewal.TimeDuration()
+	}
+	if cfg.OCSPExpiry > 0 {
+		issuer.ocspExpiry = cfg.OCSPExpiry.TimeDuration()
+	}
+
+	return issuer, nil
+}
+
+// CreateIssuer returns Issuer created directly from crypto.Signer,
+// this method is mostly used for testing
+func CreateIssuer(label string, caCfg *Config, certBytes, intCAbytes, rootBytes []byte, signer crypto.Signer) (*Issuer, error) {
+	cfg := *caCfg
+	err := cfg.Validate()
+	if err != nil {
+		return nil, errors.Annotate(err, "invalid gonfiguration")
+	}
 
 	bundle, status, err := certutil.VerifyBundleFromPEM(certBytes, intCAbytes, rootBytes)
 	if err != nil {
@@ -126,7 +171,7 @@ func NewIssuer(cfg *config.Issuer, caCfg *Config, prov *cryptoprov.Crypto) (*Iss
 	}
 	if status.IsUntrusted() {
 		return nil, errors.Annotatef(err, "bundle is invalid: label=%s, cn=%q, expiresAt=%q, expiringSKU=[%v], untrusted=[%v]",
-			cfg.Label,
+			label,
 			bundle.Subject.CommonName,
 			bundle.Expires.Format(time.RFC3339),
 			strings.Join(status.ExpiringSKIs, ","),
@@ -134,9 +179,9 @@ func NewIssuer(cfg *config.Issuer, caCfg *Config, prov *cryptoprov.Crypto) (*Iss
 		)
 	}
 
-	crl := strings.Replace(caCfg.DefaultCrlURL, "${ISSUER_ID}", bundle.SubjectID, -1)
-	aia := strings.Replace(caCfg.DefaultAiaURL, "${ISSUER_ID}", bundle.SubjectID, -1)
-	ocsp := strings.Replace(caCfg.DefaultOcspURL, "${ISSUER_ID}", bundle.SubjectID, -1)
+	crl := strings.Replace(caCfg.CrlURL, "${ISSUER_ID}", bundle.SubjectID, -1)
+	aia := strings.Replace(caCfg.AiaURL, "${ISSUER_ID}", bundle.SubjectID, -1)
+	ocsp := strings.Replace(caCfg.OcspURL, "${ISSUER_ID}", bundle.SubjectID, -1)
 
 	keyHash := make(map[crypto.Hash][]byte)
 	nameHash := make(map[crypto.Hash][]byte)
@@ -159,22 +204,296 @@ func NewIssuer(cfg *config.Issuer, caCfg *Config, prov *cryptoprov.Crypto) (*Iss
 		nameHash[h] = certutil.Digest(h, bundle.Cert.RawSubject)
 
 		logger.Infof("src=NewIssuer, label=%s, alg=%s, keyHash=%s, nameHash=%s",
-			cfg.Label, certutil.HashAlgoToStr(h), hex.EncodeToString(keyHash[h]), hex.EncodeToString(nameHash[h]))
+			label, certutil.HashAlgoToStr(h), hex.EncodeToString(keyHash[h]), hex.EncodeToString(nameHash[h]))
+	}
+
+	cabundlePEM := strings.TrimSpace(bundle.CertPEM)
+	if bundle.CACertsPEM != "" {
+		cabundlePEM = cabundlePEM + "\n" + strings.TrimSpace(bundle.CACertsPEM)
 	}
 
 	return &Issuer{
-		skid:           certutil.GetSubjectKeyID(bundle.Cert),
-		rkid:           certutil.GetSubjectKeyID(bundle.RootCert),
-		signer:         cryptoSigner,
-		bundle:         bundle,
-		label:          cfg.Label,
-		crlURL:         crl,
-		aiaURL:         aia,
-		ocspURL:        ocsp,
-		crlNextUpdate:  cfg.CRLExpiry.TimeDuration(),
-		ocspNextUpdate: cfg.OCSPExpiry.TimeDuration(),
-		caCerts:        strings.TrimSpace(bundle.CertPEM) + "\n" + strings.TrimSpace(bundle.CACertsPEM),
-		keyHash:        keyHash,
-		nameHash:       nameHash,
+		cfg:         cfg,
+		skid:        certutil.GetSubjectKeyID(bundle.Cert),
+		signer:      signer,
+		sigAlgo:     csr.DefaultSigAlgo(signer),
+		bundle:      bundle,
+		label:       label,
+		crlURL:      crl,
+		aiaURL:      aia,
+		ocspURL:     ocsp,
+		cabundlePEM: cabundlePEM,
+		keyHash:     keyHash,
+		nameHash:    nameHash,
 	}, nil
+}
+
+// Sign signs a new certificate based on the PEM-encoded
+// certificate request with the specified profile.
+func (ca *Issuer) Sign(req csr.SignRequest) (*x509.Certificate, []byte, error) {
+	profileName := req.Profile
+	if profileName == "" {
+		profileName = "default"
+	}
+	profile := ca.cfg.Profiles[profileName]
+	if profile == nil {
+		return nil, nil, errors.New("unsupported profile: " + profileName)
+	}
+
+	csrTemplate, err := csr.ParsePEM([]byte(req.Request))
+	if err != nil {
+		return nil, nil, errors.Trace(err)
+	}
+
+	csrTemplate.SignatureAlgorithm = ca.sigAlgo
+
+	// Copy out only the fields from the CSR authorized by policy.
+	safeTemplate := x509.Certificate{}
+	// If the profile contains no explicit whitelist, assume that all fields
+	// should be copied from the CSR.
+	if profile.AllowedCSRFields == nil {
+		safeTemplate = *csrTemplate
+	} else {
+		if profile.AllowedCSRFields.Subject {
+			safeTemplate.Subject = csrTemplate.Subject
+		}
+		if profile.AllowedCSRFields.DNSNames {
+			safeTemplate.DNSNames = csrTemplate.DNSNames
+		}
+		if profile.AllowedCSRFields.IPAddresses {
+			safeTemplate.IPAddresses = csrTemplate.IPAddresses
+		}
+		if profile.AllowedCSRFields.EmailAddresses {
+			safeTemplate.EmailAddresses = csrTemplate.EmailAddresses
+		}
+		safeTemplate.PublicKeyAlgorithm = csrTemplate.PublicKeyAlgorithm
+		safeTemplate.PublicKey = csrTemplate.PublicKey
+		safeTemplate.SignatureAlgorithm = csrTemplate.SignatureAlgorithm
+	}
+
+	/*
+		isSelfSign := ca.bundle == nil
+			if safeTemplate.IsCA {
+				if !profile.CAConstraint.IsCA {
+					return nil, nil, errors.New("the policy disallows issuing CA certificate")
+				}
+
+				if !isSelfSign {
+					caCert := ca.bundle.Cert
+					if caCert.MaxPathLen > 0 {
+						if safeTemplate.MaxPathLen >= caCert.MaxPathLen {
+							return nil, nil, errors.New("the issuer disallows CA MaxPathLen extending")
+						}
+					} else if caCert.MaxPathLen == 0 && caCert.MaxPathLenZero {
+						// signer has pathlen of 0, do not sign more intermediate CAs
+						return nil, nil, errors.New("the issuer disallows issuing CA certificate")
+					}
+				}
+			}
+	*/
+
+	csr.SetSAN(&safeTemplate, req.SAN)
+	safeTemplate.Subject = csr.PopulateName(req.Subject, safeTemplate.Subject)
+
+	// If there is a whitelist, ensure that both the Common Name, SAN DNSNames and Emails match
+	if profile.AllowedNamesRegex != nil && safeTemplate.Subject.CommonName != "" {
+		if !profile.AllowedNamesRegex.Match([]byte(safeTemplate.Subject.CommonName)) {
+			return nil, nil, errors.New("CN does not match allowed list: " + safeTemplate.Subject.CommonName)
+		}
+	}
+	if profile.AllowedDNSRegex != nil {
+		for _, name := range safeTemplate.DNSNames {
+			if !profile.AllowedDNSRegex.Match([]byte(name)) {
+				return nil, nil, errors.New("DNS Name does not match allowed list: " + name)
+			}
+		}
+	}
+	if profile.AllowedEmailRegex != nil {
+		for _, name := range safeTemplate.EmailAddresses {
+			if !profile.AllowedEmailRegex.Match([]byte(name)) {
+				return nil, nil, errors.New("Email does not match allowed list: " + name)
+			}
+		}
+	}
+
+	{
+		// RFC 5280 4.1.2.2:
+		// Certificate users MUST be able to handle serialNumber
+		// values up to 20 octets.  Conforming CAs MUST NOT use
+		// serialNumber values longer than 20 octets.
+		serialNumber := make([]byte, 20)
+		_, err = io.ReadFull(rand.Reader, serialNumber)
+		if err != nil {
+			return nil, nil, errors.Annotatef(err, "failed to generate serial number")
+		}
+
+		// SetBytes interprets buf as the bytes of a big-endian
+		// unsigned integer. The leading byte should be masked
+		// off to ensure it isn't negative.
+		serialNumber[0] &= 0x7F
+
+		safeTemplate.SerialNumber = new(big.Int).SetBytes(serialNumber)
+	}
+
+	if len(req.Extensions) > 0 {
+		for _, ext := range req.Extensions {
+			if !profile.IsAllowedExtention(ext.ID) {
+				return nil, nil, errors.New("extension not allowed: " + ext.ID.String())
+			}
+
+			rawValue, err := hex.DecodeString(ext.Value)
+			if err != nil {
+				return nil, nil, errors.Annotatef(err, "failed to decode extension")
+			}
+
+			safeTemplate.ExtraExtensions = append(safeTemplate.ExtraExtensions, pkix.Extension{
+				Id:       asn1.ObjectIdentifier(ext.ID),
+				Critical: ext.Critical,
+				Value:    rawValue,
+			})
+		}
+	}
+
+	err = ca.fillTemplate(&safeTemplate, profile, req.NotBefore, req.NotAfter)
+	if err != nil {
+		return nil, nil, errors.Annotatef(err, "failed to populate template")
+	}
+
+	var certTBS = safeTemplate
+
+	signedCertPEM, err := ca.sign(&certTBS)
+	if err != nil {
+		return nil, nil, errors.Trace(err)
+	}
+
+	crt, err := certutil.ParseFromPEM(signedCertPEM)
+	if err != nil {
+		return nil, nil, errors.Trace(err)
+	}
+
+	return crt, signedCertPEM, nil
+}
+
+func (ca *Issuer) sign(template *x509.Certificate) ([]byte, error) {
+	var caCert *x509.Certificate
+
+	if ca.bundle == nil {
+		// self-signed
+		if !template.IsCA {
+			return nil, errors.New("CA template is not specified")
+		}
+		template.DNSNames = nil
+		template.EmailAddresses = nil
+		template.URIs = nil
+		caCert = template
+	} else {
+		caCert = ca.bundle.Cert
+	}
+
+	derBytes, err := x509.CreateCertificate(rand.Reader, template, caCert, template.PublicKey, ca.signer)
+	if err != nil {
+		return nil, errors.Annotatef(err, "create certificate")
+	}
+
+	logger.Infof("src=sign, serial=%d, CN=%q",
+		template.SerialNumber, template.Subject.CommonName)
+
+	cert := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
+	return cert, nil
+}
+
+func (ca *Issuer) fillTemplate(template *x509.Certificate, profile *CertProfile, notBefore, notAfter time.Time) error {
+	ski, err := computeSKI(template)
+	if err != nil {
+		return err
+	}
+
+	/* for debugging
+	js, _ := json.Marshal(profile)
+	fmt.Printf("fillTemplate: %v, notBefore=%v, notAfter=%v", string(js),
+		notBefore.Format(time.RFC3339),
+		notAfter.Format(time.RFC3339))
+	*/
+
+	var (
+		eku    []x509.ExtKeyUsage
+		ku     x509.KeyUsage
+		expiry time.Duration = profile.Expiry.TimeDuration()
+	)
+
+	if expiry == 0 && notAfter.IsZero() {
+		return errors.Errorf("expiry is not set")
+	}
+
+	// The third value returned from Usages is a list of unknown key usages.
+	// This should be used when validating the profile at load, and isn't used
+	// here.
+	ku, eku, _ = profile.Usages()
+	if ku == 0 && len(eku) == 0 {
+		return errors.Errorf("invalid profile: no key usages")
+	}
+
+	if notBefore.IsZero() {
+		backdate := -1 * profile.Backdate.TimeDuration()
+		if backdate == 0 {
+			backdate = -5 * time.Minute
+		}
+		notBefore = time.Now().Round(time.Minute).Add(backdate)
+	}
+	if notAfter.IsZero() {
+		notAfter = notBefore.Add(expiry)
+	}
+	// TODO: ensure that time from CSR does no exceed allowed in profile
+	if template.NotBefore.IsZero() || template.NotBefore.Before(notBefore) {
+		template.NotBefore = notBefore.UTC()
+	}
+	if template.NotAfter.IsZero() || notAfter.Before(template.NotAfter) {
+		template.NotAfter = notAfter.UTC()
+	}
+	template.KeyUsage = ku
+	template.ExtKeyUsage = eku
+	template.BasicConstraintsValid = true
+	template.IsCA = profile.CAConstraint.IsCA
+	if template.IsCA {
+		template.MaxPathLen = profile.CAConstraint.MaxPathLen
+		if template.MaxPathLen == 0 {
+			template.MaxPathLenZero = profile.CAConstraint.MaxPathLenZero
+		}
+		template.DNSNames = nil
+		template.IPAddresses = nil
+		template.EmailAddresses = nil
+		template.URIs = nil
+	}
+	template.SubjectKeyId = ski
+
+	// TODO: check if profile allows OCSP and CRL
+
+	ocspURL := ca.OcspURL()
+	if ocspURL != "" {
+		template.OCSPServer = []string{ocspURL}
+	}
+	crlURL := ca.CrlURL()
+	if crlURL != "" {
+		template.CRLDistributionPoints = []string{crlURL}
+	}
+	issuerURL := ca.AiaURL()
+	if issuerURL != "" {
+		template.IssuingCertificateURL = []string{issuerURL}
+	}
+	if len(profile.Policies) != 0 {
+		err = addPolicies(template, profile.Policies)
+		if err != nil {
+			return errors.Annotatef(err, "invalid profile policies")
+		}
+	}
+	if profile.OCSPNoCheck {
+		ocspNoCheckExtension := pkix.Extension{
+			Id:       asn1.ObjectIdentifier{1, 3, 6, 1, 5, 5, 7, 48, 1, 5},
+			Critical: false,
+			Value:    []byte{0x05, 0x00},
+		}
+		template.ExtraExtensions = append(template.ExtraExtensions, ocspNoCheckExtension)
+	}
+
+	return nil
 }

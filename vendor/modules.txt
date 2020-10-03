@@ -122,7 +122,6 @@ github.com/go-phorce/dolly/xpki/armor
 github.com/go-phorce/dolly/xpki/certutil
 github.com/go-phorce/dolly/xpki/crypto11
 github.com/go-phorce/dolly/xpki/cryptoprov
-github.com/go-phorce/dolly/xpki/csrprov
 github.com/go-phorce/dolly/xpki/gpg
 # github.com/go-sql-driver/mysql v1.5.0
 github.com/go-sql-driver/mysql

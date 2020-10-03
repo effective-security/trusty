@@ -1,9 +1,10 @@
-package csrprov
+package csr
 
 import (
 	"crypto"
 	"crypto/elliptic"
 	"crypto/x509"
+	"strings"
 
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
@@ -26,10 +27,10 @@ type KeyPurpose int
 const (
 	// Undefined purpose of key
 	Undefined KeyPurpose = 0
-	// Signing specifies the purpose of key to be used in signing/verification operations
-	Signing KeyPurpose = 1
-	// Encryption specifies the purpose of key to be used in encryption/decryption operations
-	Encryption KeyPurpose = 2
+	// SigningKey specifies the purpose of key to be used in signing/verification operations
+	SigningKey KeyPurpose = 1
+	// EncryptionKey specifies the purpose of key to be used in encryption/decryption operations
+	EncryptionKey KeyPurpose = 2
 )
 
 // KeyRequest contains the algorithm and key size for a new private key.
@@ -80,8 +81,8 @@ func (kr *keyRequest) SigAlgo() x509.SignatureAlgorithm {
 // Generate generates a key as specified in the request. Currently,
 // only ECDSA and RSA are supported.
 func (kr *keyRequest) Generate() (crypto.PrivateKey, error) {
-	switch algo := kr.Algo(); algo {
-	case "rsa", "RSA":
+	switch algo := kr.Algo(); strings.ToUpper(algo) {
+	case "RSA":
 		err := validateRSAKeyPairInfoHandler(kr.Size())
 		if err != nil {
 			return nil, errors.Annotate(err, "validate RSA key")
@@ -91,7 +92,7 @@ func (kr *keyRequest) Generate() (crypto.PrivateKey, error) {
 			return nil, errors.Annotate(err, "generate RSA key")
 		}
 		return pk, nil
-	case "ecdsa", "ECDSA":
+	case "ECDSA":
 		err := validateECDSAKeyPairCurveInfoHandler(kr.Size())
 		if err != nil {
 			return nil, errors.Annotate(err, "validate ECDSA key")
@@ -145,7 +146,7 @@ func validateRSAKeyPairInfoHandler(size int) error {
 	if size < 2048 {
 		return errors.Errorf("RSA key is too weak: %d", size)
 	}
-	if size > 8192 {
+	if size > 4096 {
 		return errors.Errorf("RSA key size too large: %d", size)
 	}
 
@@ -164,8 +165,8 @@ func validateECDSAKeyPairCurveInfoHandler(size int) error {
 // SigAlgo returns signature algorithm for the given algorithm name and key size
 // TODO: use oid pkg
 func SigAlgo(algo string, size int) x509.SignatureAlgorithm {
-	switch algo {
-	case "rsa", "RSA":
+	switch strings.ToUpper(algo) {
+	case "RSA":
 		switch {
 		case size >= 4096:
 			return x509.SHA512WithRSA
@@ -176,7 +177,7 @@ func SigAlgo(algo string, size int) x509.SignatureAlgorithm {
 		default:
 			return x509.SHA1WithRSA
 		}
-	case "ecdsa", "ECDSA":
+	case "ECDSA":
 		switch size {
 		case CurveP521:
 			return x509.ECDSAWithSHA512

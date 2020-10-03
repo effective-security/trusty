@@ -1,4 +1,4 @@
-package authority
+package csr
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestDuration_String(t *testing.T) {
+func TestDurationString(t *testing.T) {
 	f := func(d time.Duration, exp string) {
 		actual := Duration(d).String()
 		require.Equal(t, exp, actual)
@@ -21,7 +21,7 @@ func TestDuration_String(t *testing.T) {
 	f(0, "0s")
 }
 
-func TestDuration_JSON(t *testing.T) {
+func TestDurationJSON(t *testing.T) {
 	f := func(d time.Duration, exp string) {
 		v := Duration(d)
 		bytes, err := json.Marshal(&v)
@@ -42,7 +42,7 @@ func TestDuration_JSON(t *testing.T) {
 	f(time.Millisecond*10, `"10ms"`)
 }
 
-func TestDuration_JSONDecode(t *testing.T) {
+func TestDurationJSONDecode(t *testing.T) {
 	f := func(j string, exp time.Duration) {
 		var act Duration
 		err := json.Unmarshal([]byte(j), &act)
@@ -55,7 +55,7 @@ func TestDuration_JSONDecode(t *testing.T) {
 	f(`"1m5s"`, time.Second*65)
 }
 
-func TestOID_JSON(t *testing.T) {
+func TestOIDJSON(t *testing.T) {
 	f := func(d OID, exp string) {
 		bytes, err := json.Marshal(&d)
 		require.NoError(t, err)
@@ -70,7 +70,7 @@ func TestOID_JSON(t *testing.T) {
 	f(OID{1, 12, 1234}, `"1.12.1234"`)
 }
 
-func TestOID_JSONDecode(t *testing.T) {
+func TestOIDJSONDecode(t *testing.T) {
 	tcases := []struct {
 		oid string
 		err string

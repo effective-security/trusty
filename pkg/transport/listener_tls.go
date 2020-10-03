@@ -17,11 +17,7 @@ package transport
 import (
 	"context"
 	"crypto/tls"
-	"crypto/x509"
-	"fmt"
-	"io/ioutil"
 	"net"
-	"strings"
 	"sync"
 
 	"github.com/juju/errors"
@@ -64,6 +60,7 @@ func newTLSListener(l net.Listener, tlsinfo *TLSInfo, check tlsCheckFunc) (net.L
 		hf = func(*tls.Conn, error) {}
 	}
 
+	/* TODO: implement CRL check, if needed
 	if len(tlsinfo.CRLFile) > 0 {
 		prevCheck := check
 		check = func(ctx context.Context, tlsConn *tls.Conn) error {
@@ -77,6 +74,7 @@ func newTLSListener(l net.Listener, tlsinfo *TLSInfo, check tlsCheckFunc) (net.L
 			return nil
 		}
 	}
+	*/
 
 	tlsl := &tlsListener{
 		Listener:         tls.NewListener(l, tlsCfg),
@@ -89,6 +87,12 @@ func newTLSListener(l net.Listener, tlsinfo *TLSInfo, check tlsCheckFunc) (net.L
 	return tlsl, nil
 }
 
+func (l *tlsListener) Close() error {
+	err := l.Listener.Close()
+	<-l.donec
+	return err
+}
+
 func (l *tlsListener) Accept() (net.Conn, error) {
 	select {
 	case conn := <-l.connc:
@@ -96,15 +100,6 @@ func (l *tlsListener) Accept() (net.Conn, error) {
 	case <-l.donec:
 		return nil, l.err
 	}
-}
-
-func checkSAN(ctx context.Context, tlsConn *tls.Conn) error {
-	st := tlsConn.ConnectionState()
-	if certs := st.PeerCertificates; len(certs) > 0 {
-		addr := tlsConn.RemoteAddr().String()
-		return checkCertSAN(ctx, certs[0], addr)
-	}
-	return nil
 }
 
 // acceptLoop launches each TLS handshake in a separate goroutine
@@ -170,6 +165,7 @@ func (l *tlsListener) acceptLoop() {
 	}
 }
 
+/*
 func checkCRL(crlPath string, cert []*x509.Certificate) error {
 	// TODO: cache
 	crlBytes, err := ioutil.ReadFile(crlPath)
@@ -189,6 +185,17 @@ func checkCRL(crlPath string, cert []*x509.Certificate) error {
 		if _, ok := revokedSerials[serial]; ok {
 			return errors.Errorf("transport: certificate serial %x revoked", serial)
 		}
+	}
+	return nil
+}
+*/
+
+/*
+func checkSAN(ctx context.Context, tlsConn *tls.Conn) error {
+	st := tlsConn.ConnectionState()
+	if certs := st.PeerCertificates; len(certs) > 0 {
+		addr := tlsConn.RemoteAddr().String()
+		return checkCertSAN(ctx, certs[0], addr)
 	}
 	return nil
 }
@@ -268,9 +275,4 @@ func isHostInDNS(ctx context.Context, host string, dnsNames []string) (ok bool, 
 	}
 	return false, err
 }
-
-func (l *tlsListener) Close() error {
-	err := l.Listener.Close()
-	<-l.donec
-	return err
-}
+*/

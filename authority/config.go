@@ -8,49 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-phorce/trusty/pkg/csr"
 	"github.com/juju/errors"
 )
-
-const (
-	// UserNoticeQualifierType defines id-qt-unotice
-	UserNoticeQualifierType = "id-qt-unotice"
-	// CpsQualifierType defines id-qt-cps
-	CpsQualifierType = "id-qt-cps"
-)
-
-// AllowedCSRFields provides booleans for fields in the CSR.
-// If a AllowedCSRFields is not present in a CertProfile,
-// all of these fields may be copied from the CSR into the signed certificate.
-// If a AllowedCSRFields *is* present in a CertProfile,
-// only those fields with a `true` value in the AllowedCSRFields may
-// be copied from the CSR to the signed certificate.
-// Note that some of these fields, like Subject, can be provided or
-// partially provided through the API.
-// Since API clients are expected to be trusted, but CSRs are not, fields
-// provided through the API are not subject to validation through this
-// mechanism.
-type AllowedCSRFields struct {
-	Subject        bool `json:"subject"`
-	DNSNames       bool `json:"dns"`
-	IPAddresses    bool `json:"ip"`
-	EmailAddresses bool `json:"email"`
-	URIs           bool `json:"uri"`
-}
-
-// CertificatePolicy represents the ASN.1 PolicyInformation structure from
-// https://tools.ietf.org/html/rfc3280.html#page-106.
-// Valid values of Type are "id-qt-unotice" and "id-qt-cps"
-type CertificatePolicy struct {
-	ID         OID                          `json:"oid"`
-	Qualifiers []CertificatePolicyQualifier `json:"qualifiers"`
-}
-
-// CertificatePolicyQualifier represents a single qualifier from an ASN.1
-// PolicyInformation structure.
-type CertificatePolicyQualifier struct {
-	Type  string `json:"type"`
-	Value string `json:"value"`
-}
 
 // CAConstraint specifies various CA constraints on the signed certificate.
 // CAConstraint would verify against (and override) the CA
@@ -68,48 +28,59 @@ type CertProfile struct {
 	// Usage provides a list key usages
 	Usage []string `json:"usages"`
 
-	// AiaURL specifies a template for AIA URL.
-	// The ${ISSUER_ID} variable will be replaced with a Subject Key Identifier of the issuer.
-	AiaURL string `json:"issuer_url"`
-	// OcspURL specifies a template for AIA URL.
-	// The ${ISSUER_ID} variable will be replaced with a Subject Key Identifier of the issuer.
-	OcspURL string `json:"ocsp_url"`
-	// CrlURL specifies a template for AIA URL.
-	// The ${ISSUER_ID} variable will be replaced with a Subject Key Identifier of the issuer.
-	CrlURL string `json:"crl_url"`
-
 	CAConstraint CAConstraint `json:"ca_constraint"`
 	OCSPNoCheck  bool         `json:"ocsp_no_check"`
 
-	Expiry   Duration `json:"expiry"`
-	Backdate Duration `json:"backdate"`
+	Expiry   csr.Duration `json:"expiry"`
+	Backdate csr.Duration `json:"backdate"`
 
-	AllowedExtensions []OID `json:"allowed_extensions"`
+	AllowedExtensions []csr.OID `json:"allowed_extensions"`
 
-	// AllowedNames specifies a RegExp to check for allowed names.
+	// AllowedCommonNames specifies a RegExp to check for allowed names.
 	// If not provided, then all names are allowed
-	AllowedNames string `json:"allowed_names"`
+	AllowedCommonNames string `json:"allowed_names"`
 
-	CTLogServers []string `json:"ct_log_servers"`
+	// AllowedDNS specifies a RegExp to check for allowed DNS.
+	// If not provided, then all names are allowed
+	AllowedDNS string `json:"allowed_dns"`
 
-	Policies []CertificatePolicy `json:"policies"`
+	// AllowedEmail specifies a RegExp to check for allowed email.
+	// If not provided, then all names are allowed
+	AllowedEmail string `json:"allowed_email"`
+
+	// AllowedFields provides booleans for fields in the CSR.
+	// If a AllowedFields is not present in a CertProfile,
+	// all of these fields may be copied from the CSR into the signed certificate.
+	// If a AllowedFields *is* present in a CertProfile,
+	// only those fields with a `true` value in the AllowedFields may
+	// be copied from the CSR to the signed certificate.
+	// Note that some of these fields, like Subject, can be provided or
+	// partially provided through the API.
+	// Since API clients are expected to be trusted, but CSRs are not, fields
+	// provided through the API are not subject to validation through this
+	// mechanism.
+	AllowedCSRFields *csr.AllowedFields `json:"allowed_fields"`
+
+	Policies []csr.CertificatePolicy `json:"policies"`
 
 	AllowedNamesRegex *regexp.Regexp `json:"-"`
+	AllowedDNSRegex   *regexp.Regexp `json:"-"`
+	AllowedEmailRegex *regexp.Regexp `json:"-"`
 }
 
 // Config provides configuration for Certification Authority
 type Config struct {
-	// DefaultAiaURL specifies a template for AIA URL.
+	// AiaURL specifies a template for AIA URL.
 	// The ${ISSUER_ID} variable will be replaced with a Subject Key Identifier of the issuer.
-	DefaultAiaURL string `json:"issuer_url"`
+	AiaURL string `json:"issuer_url"`
 
-	// DefaultOcspURL specifies a template for OCSP URL.
+	// OcspURL specifies a template for OCSP URL.
 	// The ${ISSUER_ID} variable will be replaced with a Subject Key Identifier of the issuer.
-	DefaultOcspURL string `json:"ocsp_url"`
+	OcspURL string `json:"ocsp_url"`
 
 	// DefaultOcspURL specifies a template for CRL URL.
 	// The ${ISSUER_ID} variable will be replaced with a Subject Key Identifier of the issuer.
-	DefaultCrlURL string `json:"crl_url"`
+	CrlURL string `json:"crl_url"`
 
 	Profiles map[string]*CertProfile `json:"profiles"`
 }
@@ -123,8 +94,8 @@ func DefaultCertProfile() *CertProfile {
 	return &CertProfile{
 		Description: "default profile with Server and Client auth",
 		Usage:       []string{"signing", "key encipherment", "server auth", "client auth"},
-		Expiry:      Duration(8760 * time.Hour),
-		Backdate:    Duration(10 * time.Minute),
+		Expiry:      csr.Duration(8760 * time.Hour),
+		Backdate:    csr.Duration(10 * time.Minute),
 	}
 }
 
@@ -186,21 +157,45 @@ func (p *CertProfile) Validate() error {
 	for _, policy := range p.Policies {
 		for _, qualifier := range policy.Qualifiers {
 			if qualifier.Type != "" &&
-				qualifier.Type != UserNoticeQualifierType &&
-				qualifier.Type != CpsQualifierType {
+				qualifier.Type != csr.UserNoticeQualifierType &&
+				qualifier.Type != csr.CpsQualifierType {
 				return errors.New("invalid policy qualifier type: " + qualifier.Type)
 			}
 		}
 	}
 
-	if p.AllowedNames != "" && p.AllowedNamesRegex == nil {
-		rule, err := regexp.Compile(p.AllowedNames)
+	if p.AllowedCommonNames != "" && p.AllowedNamesRegex == nil {
+		rule, err := regexp.Compile(p.AllowedCommonNames)
 		if err != nil {
-			return errors.Annotate(err, "failed to compile AllowedNames")
+			return errors.Annotate(err, "failed to compile AllowedCommonNames")
 		}
 		p.AllowedNamesRegex = rule
 	}
+	if p.AllowedDNS != "" && p.AllowedDNSRegex == nil {
+		rule, err := regexp.Compile(p.AllowedDNS)
+		if err != nil {
+			return errors.Annotate(err, "failed to compile AllowedDNS")
+		}
+		p.AllowedDNSRegex = rule
+	}
+	if p.AllowedEmail != "" && p.AllowedEmailRegex == nil {
+		rule, err := regexp.Compile(p.AllowedEmail)
+		if err != nil {
+			return errors.Annotate(err, "failed to compile AllowedEmail")
+		}
+		p.AllowedEmailRegex = rule
+	}
 	return nil
+}
+
+// IsAllowedExtention returns true of the extension is allowed
+func (p *CertProfile) IsAllowedExtention(oid csr.OID) bool {
+	for _, allowed := range p.AllowedExtensions {
+		if allowed.Equal(oid) {
+			return true
+		}
+	}
+	return false
 }
 
 // Validate returns an error if the configuration is invalid
@@ -221,9 +216,9 @@ func (c *Config) Validate() error {
 // The unknown uses are collected into a slice that is also returned.
 func (p *CertProfile) Usages() (ku x509.KeyUsage, eku []x509.ExtKeyUsage, unk []string) {
 	for _, keyUse := range p.Usage {
-		if kuse, ok := KeyUsage[keyUse]; ok {
+		if kuse, ok := csr.KeyUsage[keyUse]; ok {
 			ku |= kuse
-		} else if ekuse, ok := ExtKeyUsage[keyUse]; ok {
+		} else if ekuse, ok := csr.ExtKeyUsage[keyUse]; ok {
 			eku = append(eku, ekuse)
 		} else {
 			unk = append(unk, keyUse)

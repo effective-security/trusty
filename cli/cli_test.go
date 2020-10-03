@@ -281,7 +281,53 @@ func TestCLIWithHsmCfg(t *testing.T) {
 	err = cli.EnsureCryptoProvider()
 	require.NoError(t, err)
 
-	assert.NotNil(t, cli.CryptoProv())
+	prov, defCrypto := cli.CryptoProv()
+	assert.NotNil(t, prov)
+	assert.NotNil(t, defCrypto)
+
+	assert.Equal(t, ctl.RCOkay, cli.ReturnCode())
+	assert.Contains(t, out.String(), "client: *client.Client\n")
+}
+
+func TestCLIWithHsmAndPlainText(t *testing.T) {
+	out := bytes.NewBuffer([]byte{})
+	app := ctl.NewApplication("cliapp", "test").
+		UsageWriter(out).
+		Writer(out)
+
+	cli := cli.New(&ctl.ControlDefinition{
+		App:       app,
+		Output:    out,
+		ErrOutput: out,
+	}, cli.WithHsmCfg(), cli.WithServer(""))
+	cli.WithErrWriter(out)
+	defer cli.Close()
+
+	cmd := app.Command("cmd", "Test command").
+		PreAction(cli.PopulateControl)
+
+	cmd.Command("client", "Test client").
+		PreAction(cli.EnsureClient).
+		Action(cli.RegisterAction(cmdClientAction, nil))
+	out.Reset()
+
+	cli.Parse([]string{"cliapp",
+		"-s", "localhost",
+		"cmd", "client",
+		"--hsm-cfg", "/tmp/trusty/softhsm/unittest_hsm.json",
+		"--plain-key",
+	})
+
+	cli.WithCryptoProvider(nil)
+	err := cli.EnsureCryptoProvider()
+	require.NoError(t, err)
+	// second time
+	err = cli.EnsureCryptoProvider()
+	require.NoError(t, err)
+
+	prov, defCrypto := cli.CryptoProv()
+	assert.NotNil(t, prov)
+	assert.NotNil(t, defCrypto)
 
 	assert.Equal(t, ctl.RCOkay, cli.ReturnCode())
 	assert.Contains(t, out.String(), "client: *client.Client\n")
