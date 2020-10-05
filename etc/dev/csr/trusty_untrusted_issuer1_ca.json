@@ -10,9 +10,5 @@
             "L": "WA",
             "O": "noorg"
         }
-    ],
-    "ca": {
-        "pathlen": 2,
-        "expiry": "8760h"
-    }
+    ]
 }

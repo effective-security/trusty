@@ -12,6 +12,7 @@ import (
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/go-phorce/trusty/client"
 	"github.com/go-phorce/trusty/config"
+	"github.com/go-phorce/trusty/pkg/inmemcrypto"
 	"github.com/juju/errors"
 )
 
@@ -43,9 +44,9 @@ func WithServer(defaultServerURL string) Option {
 			serverFlag = serverFlag.Default(defaultServerURL)
 		}
 		c.flags.server = serverFlag.String()
-		c.flags.retries = app.Flag("retries", "Number of retries for connect failures").Default("0").Int()
-		c.flags.timeout = app.Flag("timeout", "Timeout in seconds").Default("6").Int()
-		c.flags.ctJSON = app.Flag("json", "Print responses as JSON").Bool()
+		c.flags.retries = app.Flag("retries", "number of retries for connect failures").Default("0").Int()
+		c.flags.timeout = app.Flag("timeout", "timeout in seconds").Default("6").Int()
+		c.flags.ctJSON = app.Flag("json", "print responses as JSON").Bool()
 	})
 }
 
@@ -53,23 +54,25 @@ func WithServer(defaultServerURL string) Option {
 func WithTLS() Option {
 	return optionFunc(func(c *Cli) {
 		app := c.App()
-		c.flags.certFile = app.Flag("tls-cert", "Client certificate for TLS connection").Short('c').String()
-		c.flags.keyFile = app.Flag("tls-key", "Key file for client certificate").Short('k').String()
-		c.flags.trustedCAFile = app.Flag("tls-trusted-ca", "Trusted CA certificate file for TLS connection").Short('r').Default("").String()
+		c.flags.certFile = app.Flag("tls-cert", "client certificate for TLS connection").Short('c').String()
+		c.flags.keyFile = app.Flag("tls-key", "key file for client certificate").Short('k').String()
+		c.flags.trustedCAFile = app.Flag("tls-trusted-ca", "trusted CA certificate file for TLS connection").Short('r').Default("").String()
 	})
 }
 
 // WithServiceCfg specifies to enable --cfg flag
 func WithServiceCfg() Option {
 	return optionFunc(func(c *Cli) {
-		c.flags.serviceConfig = c.App().Flag("cfg", "Configuration file").Default(config.ConfigFileName).String()
+		c.flags.serviceConfig = c.App().Flag("cfg", "trusty configuration file").Default(config.ConfigFileName).String()
 	})
 }
 
 // WithHsmCfg specifies to enable --hsm-cfg flag
 func WithHsmCfg() Option {
 	return optionFunc(func(c *Cli) {
-		c.flags.hsmConfig = c.App().Flag("hsm-cfg", "HSM provider configuration file").String()
+		app := c.App()
+		c.flags.hsmConfig = app.Flag("hsm-cfg", "HSM provider configuration file").String()
+		c.flags.plainKey = app.Flag("plain-key", "generate plain-text key, not in HSM").Bool()
 	})
 }
 
@@ -90,8 +93,7 @@ type Cli struct {
 		serviceConfig *string
 		// hsmConfig specifies HSM configuration file
 		hsmConfig *string
-		// with leader discovery
-		leader *bool
+		plainKey  *bool
 
 		certFile      *string
 		keyFile       *string
@@ -104,9 +106,10 @@ type Cli struct {
 		timeout *int
 	}
 
-	config *config.Configuration
-	crypto *cryptoprov.Crypto
-	client *client.Client
+	config            *config.Configuration
+	crypto            *cryptoprov.Crypto
+	defaultCryptoProv cryptoprov.Provider
+	client            *client.Client
 }
 
 // New creates an instance of trusty CLI
@@ -116,8 +119,8 @@ func New(d *ctl.ControlDefinition, opts ...Option) *Cli {
 		Ctl:             ctl.NewControl(d),
 	}
 
-	cli.flags.verbose = d.App.Flag("verbose", "Verbose output").Short('V').Bool()
-	cli.flags.debug = d.App.Flag("debug", "Redirect logs to stderr").Short('D').Bool()
+	cli.flags.verbose = d.App.Flag("verbose", "verbose output").Short('V').Bool()
+	cli.flags.debug = d.App.Flag("debug", "redirect logs to stderr").Short('D').Bool()
 
 	for _, opt := range opts {
 		opt.applyOption(cli)
@@ -158,11 +161,11 @@ func (cli *Cli) Config() *config.Configuration {
 }
 
 // CryptoProv returns crypto provider
-func (cli *Cli) CryptoProv() *cryptoprov.Crypto {
+func (cli *Cli) CryptoProv() (*cryptoprov.Crypto, cryptoprov.Provider) {
 	if cli == nil || cli.crypto == nil {
 		panic("use EnsureCryptoProvider() in App settings")
 	}
-	return cli.crypto
+	return cli.crypto, cli.defaultCryptoProv
 }
 
 // Server returns server URL
@@ -220,9 +223,17 @@ func (cli *Cli) EnsureCryptoProvider() error {
 		providers = cli.config.CryptoProv.Providers
 	}
 
+	cryptoprov.Register("SoftHSM", cryptoprov.Crypto11Loader)
+	cryptoprov.Register("PKCS11", cryptoprov.Crypto11Loader)
 	cli.crypto, err = cryptoprov.Load(defaultProvider, providers)
 	if err != nil {
 		return errors.Annotate(err, "unable to initialize crypto providers")
+	}
+
+	if cli.flags.plainKey != nil && *cli.flags.plainKey == true {
+		cli.defaultCryptoProv = inmemcrypto.NewProvider()
+	} else {
+		cli.defaultCryptoProv = cli.crypto.Default()
 	}
 
 	return nil

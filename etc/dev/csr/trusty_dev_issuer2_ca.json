@@ -10,9 +10,5 @@
             "L": "WA",
             "O": "trusty.com"
         }
-    ],
-    "ca": {
-        "pathlen": 1,
-        "expiry": "8760h"
-    }
+    ]
 }

@@ -5,7 +5,8 @@
 #   --out-dir {dir}     - specifies output folder
 #   --csr-dir {dir}     - specifies folder with CSR templates
 #   --prefix {prefix}   - specifies prefix for files, by default: ${PREFIX}
-#   --ca-config         - specifies CA configurationn file
+#   --hsm-confg         - specifies HSM provider file
+#   --ca-config         - specifies CA configuration file
 #   --root-ca {cert}    - specifies root CA certificate
 #   --root-ca-key {key} - specifies root CA key
 #   --root              - specifies if Root CA certificate and key should be generated
@@ -41,6 +42,11 @@ case $key in
     ;;
     -c|--ca-config)
     CA_CONFIG="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    --hsm-config)
+    HSM_CONFIG="$2"
     shift # past argument
     shift # past value
     ;;
@@ -100,6 +106,7 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 [ -z "$OUT_DIR" ] &&  echo "Specify --out-dir" && exit 1
 [ -z "$CSR_DIR" ] &&  echo "Specify --csr-dir" && exit 1
 [ -z "$CA_CONFIG" ] && echo "Specify --ca-config" && exit 1
+[ -z "$HSM_CONFIG" ] && echo "Specify --hsm-config" && exit 1
 [ -z "$PREFIX" ] && PREFIX=test_
 [ -z "$ROOT_CA_CERT" ] && ROOT_CA_CERT=${OUT_DIR}/${PREFIX}root_ca.pem
 [ -z "$ROOT_CA_KEY" ] && ROOT_CA_KEY=${OUT_DIR}/${PREFIX}root_ca-key.pem
@@ -109,6 +116,7 @@ HOSTNAME=`hostname`
 echo "OUT_DIR      = ${OUT_DIR}"
 echo "CSR_DIR      = ${CSR_DIR}"
 echo "CA_CONFIG    = ${CA_CONFIG}"
+echo "HSM_CONFIG   = ${HSM_CONFIG}"
 echo "PREFIX       = ${PREFIX}"
 echo "BUNDLE       = ${BUNDLE}"
 echo "FORCE        = ${FORCE}"
@@ -116,33 +124,39 @@ echo "ROOT_CA_CERT = $ROOT_CA_CERT"
 echo "ROOT_CA_KEY  = $ROOT_CA_KEY"
 
 if [[ "$ROOTCA" == "YES" && ("$FORCE" == "YES" || ! -f ${ROOT_CA_KEY}) ]]; then echo "*** generating ${ROOT_CA_CERT/.pem/''}"
-    cfssl genkey -initca -config=${CA_CONFIG} ${CSR_DIR}/${PREFIX}root_ca.json | cfssljson -bare ${ROOT_CA_CERT/.pem/''}
+    trusty-tool --hsm-cfg=${HSM_CONFIG} \
+        csr gencert --self-sign \
+        --ca-config=${CA_CONFIG} \
+        --profile=ROOT \
+        --csr-profile ${CSR_DIR}/${PREFIX}root_ca.json \
+        --key-label="${PREFIX}root_ca*" \
+        --out ${ROOT_CA_CERT/.pem/''}
 fi
 
 if [[ "$CA1" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}issuer1_ca-key.pem) ]]; then
     echo "*** generating CA1 cert"
-    cfssl genkey -initca \
-        -config=${CA_CONFIG} \
-        ${CSR_DIR}/${PREFIX}issuer1_ca.json | cfssljson -bare ${OUT_DIR}/${PREFIX}issuer1_ca
-
-    cfssl sign \
-        -config=${CA_CONFIG} \
-        -profile=L1_CA \
-        -ca ${ROOT_CA_CERT} \
-        -ca-key ${ROOT_CA_KEY} \
-        -csr ${OUT_DIR}/${PREFIX}issuer1_ca.csr | cfssljson -bare ${OUT_DIR}/${PREFIX}issuer1_ca
+    trusty-tool --hsm-cfg=${HSM_CONFIG} \
+        csr gencert \
+        --ca-config=${CA_CONFIG} \
+        --profile=L1_CA \
+        --csr-profile ${CSR_DIR}/${PREFIX}issuer1_ca.json \
+        --key-label="${PREFIX}issuer1_ca*" \
+        --ca-cert ${ROOT_CA_CERT} \
+        --ca-key ${ROOT_CA_KEY} \
+        --out ${OUT_DIR}/${PREFIX}issuer1_ca
 fi
 
 if [[ "$CA2" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem) ]]; then
     echo "*** generating CA2 cert"
-    cfssl genkey -initca -config=${CA_CONFIG} ${CSR_DIR}/${PREFIX}issuer2_ca.json | cfssljson -bare ${OUT_DIR}/${PREFIX}issuer2_ca
-
-    cfssl sign \
-        -config=${CA_CONFIG} \
-        -profile=L2_CA \
-        -ca ${OUT_DIR}/${PREFIX}issuer1_ca.pem \
-        -ca-key ${OUT_DIR}/${PREFIX}issuer1_ca-key.pem \
-        -csr ${OUT_DIR}/${PREFIX}issuer2_ca.csr | cfssljson -bare ${OUT_DIR}/${PREFIX}issuer2_ca
+    trusty-tool --hsm-cfg=${HSM_CONFIG} \
+        csr gencert \
+        --ca-config=${CA_CONFIG} \
+        --profile=L2_CA \
+        --csr-profile ${CSR_DIR}/${PREFIX}issuer2_ca.json \
+        --key-label="${PREFIX}issuer2_ca*" \
+        --ca-cert ${OUT_DIR}/${PREFIX}issuer1_ca.pem \
+        --ca-key ${OUT_DIR}/${PREFIX}issuer1_ca-key.pem \
+        --out ${OUT_DIR}/${PREFIX}issuer2_ca
 fi
 
 if [[ "$BUNDLE" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}cabundle.pem) ]]; then
@@ -153,46 +167,62 @@ fi
 
 if [[ "$ADMIN" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}admin-key.pem) ]]; then
     echo "*** generating admin cert"
-    cfssl gencert \
-        -config=${CA_CONFIG} \
-        -profile=client \
-        -ca ${OUT_DIR}/${PREFIX}issuer2_ca.pem \
-        -ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
-        ${CSR_DIR}/${PREFIX}admin.json | cfssljson -bare ${OUT_DIR}/${PREFIX}admin
+    trusty-tool --hsm-cfg=${HSM_CONFIG} \
+        csr gencert --plain-key \
+        --ca-config=${CA_CONFIG} \
+        --profile=client \
+        --ca-cert ${OUT_DIR}/${PREFIX}issuer2_ca.pem \
+        --ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
+        --csr-profile ${CSR_DIR}/${PREFIX}admin.json \
+        --key-label="${PREFIX}admin*" \
+        --out ${OUT_DIR}/${PREFIX}admin
+
         cat ${OUT_DIR}/${PREFIX}cabundle.pem >> ${OUT_DIR}/${PREFIX}admin.pem
 fi
 
 if [[ "$SERVER" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}server-key.pem) ]]; then
     echo "*** generating server cert"
-    cfssl gencert \
-        -config=${CA_CONFIG} \
-        -profile=server \
-        -ca ${OUT_DIR}/${PREFIX}issuer2_ca.pem \
-        -ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
-        -hostname=localhost,127.0.0.1,${HOSTNAME} \
-        ${CSR_DIR}/${PREFIX}server.json | cfssljson -bare ${OUT_DIR}/${PREFIX}server
+    trusty-tool --hsm-cfg=${HSM_CONFIG} \
+        csr gencert --plain-key \
+        --ca-config=${CA_CONFIG} \
+        --profile=server \
+        --ca-cert ${OUT_DIR}/${PREFIX}issuer2_ca.pem \
+        --ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
+        --csr-profile ${CSR_DIR}/${PREFIX}server.json \
+        --SAN=localhost,127.0.0.1,${HOSTNAME} \
+        --key-label="${PREFIX}server*" \
+        --out ${OUT_DIR}/${PREFIX}server
+
         cat ${OUT_DIR}/${PREFIX}cabundle.pem >> ${OUT_DIR}/${PREFIX}server.pem
 fi
 
 if [[ "$CLIENT" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}client-key.pem) ]]; then
     echo "*** generating client cert"
-    cfssl gencert \
-        -config=${CA_CONFIG} \
-        -profile=client \
-        -ca ${OUT_DIR}/${PREFIX}issuer2_ca.pem \
-        -ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
-        ${CSR_DIR}/${PREFIX}client.json | cfssljson -bare ${OUT_DIR}/${PREFIX}client
-        cat ${OUT_DIR}/${PREFIX}cabundle.pem >> ${OUT_DIR}/${PREFIX}client.pem
+    trusty-tool --hsm-cfg=${HSM_CONFIG} \
+        csr gencert --plain-key \
+        --ca-config=${CA_CONFIG} \
+        --profile=client \
+        --ca-cert ${OUT_DIR}/${PREFIX}issuer2_ca.pem \
+        --ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
+        --csr-profile ${CSR_DIR}/${PREFIX}client.json \
+        --key-label="${PREFIX}client*" \
+        --out ${OUT_DIR}/${PREFIX}client
+
+    cat ${OUT_DIR}/${PREFIX}cabundle.pem >> ${OUT_DIR}/${PREFIX}client.pem
 fi
 
 if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}peer-key.pem) ]]; then
     echo "*** generating peer cert"
-    cfssl gencert \
-        -config=${CA_CONFIG} \
-        -profile=peer \
-        -ca ${OUT_DIR}/${PREFIX}issuer2_ca.pem \
-        -ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
-        -hostname=localhost,127.0.0.1,${HOSTNAME} \
-        ${CSR_DIR}/${PREFIX}peer.json | cfssljson -bare ${OUT_DIR}/${PREFIX}peer
-        cat ${OUT_DIR}/${PREFIX}cabundle.pem >> ${OUT_DIR}/${PREFIX}peer.pem
+    trusty-tool --hsm-cfg=${HSM_CONFIG} \
+        csr gencert --plain-key \
+        --ca-config=${CA_CONFIG} \
+        --profile=peer \
+        --ca-cert ${OUT_DIR}/${PREFIX}issuer2_ca.pem \
+        --ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
+        --csr-profile ${CSR_DIR}/${PREFIX}peer.json \
+        --SAN=localhost,127.0.0.1,${HOSTNAME} \
+        --key-label="${PREFIX}peer*" \
+        --out ${OUT_DIR}/${PREFIX}peer
+
+    cat ${OUT_DIR}/${PREFIX}cabundle.pem >> ${OUT_DIR}/${PREFIX}peer.pem
 fi

@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/go-phorce/dolly/fileutil/resolve"
 	"github.com/go-phorce/dolly/netutil"
@@ -32,6 +33,15 @@ const (
 	ConfigFileName = "trusty-config.json"
 
 	envHostnameKey = "TRUSTY_HOSTNAME"
+)
+
+var (
+	// DefaultCRLRenewal specifies default duration for CRL renewal
+	DefaultCRLRenewal = 7 * 24 * time.Hour // 7 days
+	// DefaultCRLExpiry specifies default duration for CRL expiry
+	DefaultCRLExpiry = 30 * 24 * time.Hour // 30 days
+	// DefaultOCSPExpiry specifies default for OCSP expiry
+	DefaultOCSPExpiry = 1 * 24 * time.Hour // 1 day
 )
 
 // Factory is used to create Configuration instance
@@ -324,4 +334,28 @@ func (info *TLSInfo) Empty() bool {
 // ParseListenURLs constructs a list of listen peers URLs
 func (c *HTTPServer) ParseListenURLs() ([]*url.URL, error) {
 	return netutil.ParseURLs(c.ListenURLs)
+}
+
+// GetDefaultCRLExpiry specifies value in 72h format for duration of CRL next update time
+func (c *Authority) GetDefaultCRLExpiry() time.Duration {
+	if c.DefaultCRLExpiry > 0 {
+		return c.DefaultCRLExpiry.TimeDuration()
+	}
+	return DefaultCRLExpiry
+}
+
+// GetDefaultOCSPExpiry specifies value in 8h format for duration of OCSP next update time
+func (c *Authority) GetDefaultOCSPExpiry() time.Duration {
+	if c.DefaultOCSPExpiry > 0 {
+		return c.DefaultOCSPExpiry.TimeDuration()
+	}
+	return DefaultOCSPExpiry
+}
+
+// GetDefaultCRLRenewal specifies value in 8h format for duration of CRL renewal before next update time
+func (c *Authority) GetDefaultCRLRenewal() time.Duration {
+	if c.DefaultCRLRenewal > 0 {
+		return c.DefaultCRLRenewal.TimeDuration()
+	}
+	return DefaultCRLRenewal
 }

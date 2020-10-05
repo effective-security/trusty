@@ -153,7 +153,7 @@
         },
         "Authority" : {
             "comment" : "Authority contains configuration info for CA",
-            "WithGetter" : true,
+            "WithGetter" : false,
             "Fields" : [
                 { "name" : "CAConfig",          "type" : "string",   "comment" : "CAConfig specifies file location with CA configuration" },
                 { "name" : "DefaultCRLExpiry",  "type" : "Duration", "comment" : "DefaultCRLExpiry specifies value in 72h format for duration of CRL next update time" },

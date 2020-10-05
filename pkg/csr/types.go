@@ -1,4 +1,4 @@
-package authority
+package csr
 
 import (
 	"crypto/x509"
@@ -12,6 +12,25 @@ import (
 
 	"github.com/juju/errors"
 )
+
+const (
+	// UserNoticeQualifierType defines id-qt-unotice
+	UserNoticeQualifierType = "id-qt-unotice"
+	// CpsQualifierType defines id-qt-cps
+	CpsQualifierType = "id-qt-cps"
+
+	// OneYear duration
+	OneYear = Duration(8760 * time.Hour)
+)
+
+// BasicConstraintsOID specifies OID for BasicConstraints
+var BasicConstraintsOID = asn1.ObjectIdentifier{2, 5, 29, 19}
+
+// BasicConstraints CSR information RFC 5280, 4.2.1.9
+type BasicConstraints struct {
+	IsCA       bool `asn1:"optional"`
+	MaxPathLen int  `asn1:"optional,default:-1"`
+}
 
 // KeyUsage contains a mapping of string names to key usages.
 var KeyUsage = map[string]x509.KeyUsage{
@@ -48,6 +67,15 @@ var ExtKeyUsage = map[string]x509.ExtKeyUsage{
 // OID is the asn1's ObjectIdentifier, provide a custom
 // JSON marshal / unmarshal.
 type OID asn1.ObjectIdentifier
+
+// Equal reports whether oi and other represent the same identifier.
+func (oid OID) Equal(other OID) bool {
+	return asn1.ObjectIdentifier(oid).Equal(asn1.ObjectIdentifier(other))
+}
+
+func (oid OID) String() string {
+	return asn1.ObjectIdentifier(oid).String()
+}
 
 // UnmarshalJSON unmarshals a JSON string into an OID.
 func (oid *OID) UnmarshalJSON(data []byte) (err error) {

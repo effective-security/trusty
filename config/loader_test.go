@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
@@ -79,6 +80,23 @@ func TestTLSInfo(t *testing.T) {
 	}
 	assert.False(t, i.Empty())
 	assert.Equal(t, "cert=cert.pem, key=key.pem, trusted-ca=cacerts.pem, client-cert-auth=false, crl-file=123.crl", i.String())
+}
+
+func TestDefaultAuthority(t *testing.T) {
+	a := &Authority{}
+	assert.Equal(t, DefaultCRLExpiry, a.GetDefaultCRLExpiry())
+	assert.Equal(t, DefaultOCSPExpiry, a.GetDefaultOCSPExpiry())
+	assert.Equal(t, DefaultCRLRenewal, a.GetDefaultCRLRenewal())
+
+	d := Duration(1 * time.Hour)
+	a = &Authority{
+		DefaultCRLExpiry:  d,
+		DefaultOCSPExpiry: d,
+		DefaultCRLRenewal: d,
+	}
+	assert.Equal(t, time.Duration(d), a.GetDefaultCRLExpiry())
+	assert.Equal(t, time.Duration(d), a.GetDefaultOCSPExpiry())
+	assert.Equal(t, time.Duration(d), a.GetDefaultCRLRenewal())
 }
 
 type somecfg struct {

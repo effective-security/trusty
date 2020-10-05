@@ -306,43 +306,6 @@ func TestAuthority_overrideFrom(t *testing.T) {
 	require.Equal(t, dest, exp, "Authority.overrideFrom should have overriden the field CAConfig. value now %#v, expecting %#v", dest, exp)
 }
 
-func TestAuthority_Getters(t *testing.T) {
-	orig := Authority{
-		CAConfig:          "one",
-		DefaultCRLExpiry:  Duration(time.Second),
-		DefaultOCSPExpiry: Duration(time.Second),
-		DefaultCRLRenewal: Duration(time.Second),
-		Issuers: []Issuer{
-			{
-				Disabled:       &trueVal,
-				Label:          "one",
-				Type:           "one",
-				CertFile:       "one",
-				KeyFile:        "one",
-				CABundleFile:   "one",
-				RootBundleFile: "one",
-				CRLExpiry:      Duration(time.Second),
-				OCSPExpiry:     Duration(time.Second),
-				CRLRenewal:     Duration(time.Second)},
-		}}
-
-	gv0 := orig.GetCAConfig()
-	require.Equal(t, orig.CAConfig, gv0, "Authority.GetCAConfigCfg() does not match")
-
-	gv1 := orig.GetDefaultCRLExpiry()
-	require.Equal(t, orig.DefaultCRLExpiry.TimeDuration(), gv1, "Authority.GetDefaultCRLExpiry() does not match")
-
-	gv2 := orig.GetDefaultOCSPExpiry()
-	require.Equal(t, orig.DefaultOCSPExpiry.TimeDuration(), gv2, "Authority.GetDefaultOCSPExpiry() does not match")
-
-	gv3 := orig.GetDefaultCRLRenewal()
-	require.Equal(t, orig.DefaultCRLRenewal.TimeDuration(), gv3, "Authority.GetDefaultCRLRenewal() does not match")
-
-	gv4 := orig.GetIssuers()
-	require.Equal(t, orig.Issuers, gv4, "Authority.GetIssuersCfg() does not match")
-
-}
-
 func TestAuthz_overrideFrom(t *testing.T) {
 	orig := Authz{
 		Allow:         []string{"a"},

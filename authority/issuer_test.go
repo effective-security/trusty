@@ -10,9 +10,9 @@ import (
 
 func (s *testSuite) TestNewIssuer() {
 	caCfg := &authority.Config{
-		DefaultAiaURL:  "https://localhost/v1/certs/${ISSUER_ID}.crt",
-		DefaultOcspURL: "https://localhost/v1/ocsp",
-		DefaultCrlURL:  "https://localhost/v1/crl/${ISSUER_ID}.crl",
+		AiaURL:  "https://localhost/v1/certs/${ISSUER_ID}.crt",
+		OcspURL: "https://localhost/v1/ocsp",
+		CrlURL:  "https://localhost/v1/crl/${ISSUER_ID}.crl",
 	}
 	for _, cfg := range s.cfg.Authority.Issuers {
 		if cfg.GetDisabled() {
@@ -27,7 +27,6 @@ func (s *testSuite) TestNewIssuer() {
 		s.NotEmpty(issuer.PEM())
 		s.NotEmpty(issuer.OcspURL())
 		s.NotEmpty(issuer.Label())
-		s.NotEmpty(issuer.RootKID())
 		s.NotEmpty(issuer.KeyHash(crypto.SHA1))
 
 		s.Equal(issuer.CrlURL(), fmt.Sprintf("https://localhost/v1/crl/%s.crl", issuer.SubjectKID()))
@@ -39,9 +38,9 @@ func (s *testSuite) TestNewIssuer() {
 
 func (s *testSuite) TestNewIssuerErrors() {
 	caCfg := &authority.Config{
-		DefaultAiaURL:  "https://localhost/v1/certs/${ISSUER_ID}.crt",
-		DefaultOcspURL: "https://localhost/v1/ocsp",
-		DefaultCrlURL:  "https://localhost/v1/crl/${ISSUER_ID}.crl",
+		AiaURL:  "https://localhost/v1/certs/${ISSUER_ID}.crt",
+		OcspURL: "https://localhost/v1/ocsp",
+		CrlURL:  "https://localhost/v1/crl/${ISSUER_ID}.crl",
 	}
 
 	cfg := &config.Issuer{
