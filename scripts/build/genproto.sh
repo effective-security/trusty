@@ -88,9 +88,9 @@ done
 
 # remove old swagger files so it's obvious whether the files fail to generate
 rm -rf Documentation/dev-guide/apispec/swagger/*json
-for pb in trustypb/rpc; do
+for pb in trustypb/rpc trustypb/pkix; do
 	protobase="api/v1/${pb}"
-	protoc -I. \
+	protoc -I".:api/v1/trustypb" \
 	    -I"${GRPC_GATEWAY_ROOT}"/third_party/googleapis \
 	    -I"${GOGOPROTO_PATH}" \
 	    --grpc-gateway_out=logtostderr=true:. \
@@ -102,7 +102,8 @@ for pb in trustypb/rpc; do
 	gwfile="${protobase}.pb.gw.go"
 	sed -i.bak -E "s/package $pkg/package gw/g" ${gwfile}
 	# shellcheck disable=SC1117
-	sed -i.bak -E "s/protoReq /&$pkg\./g" ${gwfile}
+    sed -i.bak -E "s/protoReq /&$pkg\./g" ${gwfile}
+	sed -i.bak -E "s/trustypb\.trustypb\./trustypb\./g" ${gwfile}
 	sed -i.bak -E "s/, client /, client $pkg./g" ${gwfile}
 	sed -i.bak -E "s/Client /, client $pkg./g" ${gwfile}
 	sed -i.bak -E "s/[^(]*Client, runtime/${pkg}.&/" ${gwfile}
@@ -111,7 +112,8 @@ for pb in trustypb/rpc; do
 	# shellcheck disable=SC1117
 	sed -i.bak -E "s|import \(|& \"github.com/go-phorce/trusty/${pkgpath}\"|" ${gwfile}
 	mkdir -p  "${pkgpath}"/gw/
-	go fmt ${gwfile}
+    goimports -w ${gwfile}
+	gofmt -s -l -w ${gwfile}
 	mv ${gwfile} "${pkgpath}/gw/"
 	rm -f ${protobase}*.bak
 	swaggerName=$(basename ${pb})

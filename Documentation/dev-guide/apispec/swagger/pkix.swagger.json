@@ -1,0 +1,198 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "api/v1/trustypb/pkix.proto",
+    "version": "version not set"
+  },
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/ca/csr/create": {
+      "post": {
+        "summary": "CreateCertificate returns the certificate",
+        "operationId": "Authority_CreateCertificate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/trustypbCertificateBundle"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
+          }
+        },
+        "tags": [
+          "Authority"
+        ]
+      }
+    },
+    "/v1/ca/csr/profile_info": {
+      "post": {
+        "summary": "ProfileInfo returns the certificate profile info",
+        "operationId": "Authority_ProfileInfo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/trustypbCertProfileInfo"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
+          }
+        },
+        "tags": [
+          "Authority"
+        ]
+      }
+    },
+    "/v1/ca/issuers": {
+      "get": {
+        "summary": "CreateCertificate returns the certificate",
+        "operationId": "Authority_Issuers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/trustypbIssuersInfoResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
+          }
+        },
+        "tags": [
+          "Authority"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "gatewayruntimeError": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "type_url": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "trustypbCertProfileInfo": {
+      "type": "object",
+      "properties": {
+        "issuer": {
+          "type": "string"
+        },
+        "usage": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "expiry": {
+          "type": "string"
+        }
+      },
+      "title": "CertProfileInfo is the response for an Profile Info API request"
+    },
+    "trustypbCertificateBundle": {
+      "type": "object",
+      "properties": {
+        "certificate": {
+          "type": "string",
+          "title": "Certificate provides the certificate in PEM format"
+        },
+        "intermediates": {
+          "type": "string",
+          "title": "Intermediates provides the intermediate CA certificates bundle in PEM format"
+        },
+        "root": {
+          "type": "string",
+          "title": "Root provides the Root CA certifica in PEM format"
+        }
+      },
+      "title": "CertificateBundle provides certificate and its issuers"
+    },
+    "trustypbEncodingFormat": {
+      "type": "string",
+      "enum": [
+        "PEM",
+        "DER",
+        "PKCS7"
+      ],
+      "default": "PEM"
+    },
+    "trustypbIssuerInfo": {
+      "type": "object",
+      "properties": {
+        "certificate": {
+          "type": "string",
+          "title": "Certificate provides the certificate in PEM format"
+        },
+        "intermediates": {
+          "type": "string",
+          "title": "Intermediates provides the intermediate CA certificates bundle in PEM format"
+        },
+        "root": {
+          "type": "string",
+          "title": "Root provides the Root CA certifica in PEM format"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label specifies the Issuer's label"
+        }
+      },
+      "title": "IssuerInfo provides Issuer information"
+    },
+    "trustypbIssuersInfoResponse": {
+      "type": "object",
+      "properties": {
+        "issuers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/trustypbIssuerInfo"
+          }
+        }
+      },
+      "title": "IssuersInfoResponse provides response for Issuers Info request"
+    }
+  }
+}

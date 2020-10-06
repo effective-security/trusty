@@ -110,11 +110,16 @@ type SignRequest struct {
 // A CertificateRequest encapsulates the API interface to the
 // certificate request functionality.
 type CertificateRequest struct {
-	CN           string     `json:"CN" yaml:"CN"`
-	Names        []X509Name `json:"names" yaml:"names"`
-	SAN          []string   `json:"san" yaml:"san"`
-	KeyRequest   KeyRequest `json:"key,omitempty" yaml:"key,omitempty"`
-	SerialNumber string     `json:"serialnumber,omitempty" yaml:"serialnumber,omitempty"`
+	// CN of the Subject
+	CN string `json:"CN" yaml:"CN"`
+	// Names of the Subject
+	Names []X509Name `json:"names" yaml:"names"`
+	// SerialNumber of the Subject
+	SerialNumber string `json:"serialnumber,omitempty" yaml:"serialnumber,omitempty"`
+	// SAN is Subject Alt Names
+	SAN []string `json:"san" yaml:"san"`
+	// KeyRequest for generated key
+	KeyRequest KeyRequest `json:"key,omitempty" yaml:"key,omitempty"`
 }
 
 // Validate provides the default validation logic for certificate

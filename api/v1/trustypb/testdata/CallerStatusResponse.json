@@ -1,5 +1,5 @@
 {
-    "ID": "local",
-    "Name": "localhost",
-    "Role": "trusty-peer"
+    "id": "local",
+    "name": "localhost",
+    "role": "trusty-peer"
 }

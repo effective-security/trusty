@@ -36,40 +36,40 @@ message EmptyRequest {
 
 message ServerVersion {
     // Build is the server build version.
-    string Build = 1;
+    string build = 1;
     // Runtime is the runtime version.
-    string Runtime = 2;
+    string runtime = 2;
 }
 
 message ServerStatus {
     // Name of the server or application.
-    string Name = 1;
+    string name = 1;
     // Nodename is the human-readable name of the cluster member,
     // or empty for single host.
-    string Nodename = 2;
+    string nodename = 2;
     // Hostname is operating system's host name.
-    string Hostname = 3;
+    string hostname = 3;
     // ListenURLs is the list of URLs the service is listening on.
-    repeated string ListenURLs = 4;
+    repeated string listen_urls = 4;
     // StartedAt is the Unix time when the server has started.
-    int64 StartedAt = 5;
+    int64 started_at = 5;
 }
 
 message ServerStatusResponse {
     // Status of the server.
-    ServerStatus Status = 1;
+    ServerStatus status = 1;
 
     // Version of the server.
-    ServerVersion Version = 2;
+    ServerVersion version = 2;
 }
 
 message CallerStatusResponse {
     // ID of the caller.
-    string ID = 1;
+    string id = 1;
     // Name of the caller.
-    string Name = 2;
+    string name = 2;
     // Role of the caller.
-    string Role = 3;
+    string role = 3;
 }
 
 // Error is the generic error returned from unary RPCs.

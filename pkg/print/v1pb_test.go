@@ -35,7 +35,7 @@ func TestServerStatusResponse(t *testing.T) {
 	r := &trustypb.ServerStatusResponse{
 		Status: &trustypb.ServerStatus{
 			Hostname:   "dissoupov",
-			ListenURLs: []string{"https://0.0.0.0:7891"},
+			ListenUrls: []string{"https://0.0.0.0:7891"},
 			Name:       "Trusty",
 			Nodename:   "local",
 			StartedAt:  now.Unix(),
@@ -60,8 +60,8 @@ func TestServerStatusResponse(t *testing.T) {
 
 func TestCallerStatusResponse(t *testing.T) {
 	r := &trustypb.CallerStatusResponse{
+		Id:   "12341234-1234124",
 		Name: "local",
-		ID:   "12341234-1234124",
 		Role: "trustry",
 	}
 
