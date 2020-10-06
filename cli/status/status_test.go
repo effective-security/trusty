@@ -49,7 +49,7 @@ func (s *testSuite) TestVersion() {
 	s.Require().NoError(err)
 
 	if s.Cli.IsJSON() {
-		s.HasText("{\n\t\"Build\": \"1.2.3\",\n\t\"Runtime\": \"go1.15\"\n}\n")
+		s.HasText("{\n\t\"build\": \"1.2.3\",\n\t\"runtime\": \"go1.15\"\n}\n")
 	} else {
 		s.HasText("1.2.3")
 	}
@@ -59,7 +59,7 @@ func (s *testSuite) TestServer() {
 	expectedResponse := &trustypb.ServerStatusResponse{
 		Status: &trustypb.ServerStatus{
 			Name:       "mock",
-			ListenURLs: []string{"host1:123"},
+			ListenUrls: []string{"host1:123"},
 		},
 		Version: &trustypb.ServerVersion{
 			Build:   "1.2.3",
@@ -78,7 +78,7 @@ func (s *testSuite) TestServer() {
 	s.Require().NoError(err)
 
 	if s.Cli.IsJSON() {
-		s.HasText("{\n\t\"Status\": {\n\t\t\"ListenURLs\": [\n\t\t\t\"host1:123\"\n\t\t],\n\t\t\"Name\": \"mock\"\n\t},\n\t\"Version\": {\n\t\t\"Build\": \"1.2.3\",\n\t\t\"Runtime\": \"go1.15\"\n\t}\n}\n")
+		s.HasText("{\n\t\"status\": {\n\t\t\"listen_urls\": [\n\t\t\t\"host1:123\"\n\t\t],\n\t\t\"name\": \"mock\"\n\t},\n\t\"version\": {\n\t\t\"build\": \"1.2.3\",\n\t\t\"runtime\": \"go1.15\"\n\t}\n}\n")
 	} else {
 		s.HasText("  Name        | mock ",
 			"  Node        |            ",
@@ -106,7 +106,7 @@ func (s *testSuite) TestCaller() {
 	s.Require().NoError(err)
 
 	if s.Cli.IsJSON() {
-		s.HasText("{\n\t\"Role\": \"test_role\"\n}\n")
+		s.HasText("{\n\t\"role\": \"test_role\"\n}\n")
 	} else {
 		s.HasText("  Name |            \n  ID   |            \n  Role | test_role  \n\n")
 	}

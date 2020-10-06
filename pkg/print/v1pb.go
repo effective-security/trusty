@@ -24,7 +24,7 @@ func ServerStatusResponse(w io.Writer, r *trustypb.ServerStatusResponse) {
 	table.Append([]string{"Name", r.Status.Name})
 	table.Append([]string{"Node", r.Status.Nodename})
 	table.Append([]string{"Host", r.Status.Hostname})
-	table.Append([]string{"Listen URLs", strings.Join(r.Status.ListenURLs, ",")})
+	table.Append([]string{"Listen URLs", strings.Join(r.Status.ListenUrls, ",")})
 	table.Append([]string{"Version", r.Version.Build})
 	table.Append([]string{"Runtime", r.Version.Runtime})
 
@@ -43,7 +43,7 @@ func CallerStatusResponse(w io.Writer, r *trustypb.CallerStatusResponse) {
 	table.SetBorder(false)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
 	table.Append([]string{"Name", r.Name})
-	table.Append([]string{"ID", r.ID})
+	table.Append([]string{"ID", r.Id})
 	table.Append([]string{"Role", r.Role})
 	table.Render()
 	fmt.Fprintln(w)

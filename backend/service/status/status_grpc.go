@@ -24,7 +24,7 @@ func (s *Service) Server(_ context.Context, _ *pb.EmptyRequest) (*pb.ServerStatu
 		Status: &pb.ServerStatus{
 			Name:       s.server.Name(),
 			Hostname:   s.server.Hostname(),
-			ListenURLs: s.server.ListenURLs(),
+			ListenUrls: s.server.ListenURLs(),
 			StartedAt:  s.server.StartedAt().Unix(),
 		},
 		Version: &pb.ServerVersion{
@@ -48,7 +48,7 @@ func (s *Service) Caller(ctx context.Context, _ *pb.EmptyRequest) (*pb.CallerSta
 	}
 
 	res := &pb.CallerStatusResponse{
-		ID:   id,
+		Id:   id,
 		Name: name,
 		Role: role,
 	}

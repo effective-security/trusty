@@ -40,7 +40,7 @@ func TestStatusWithNewCtxClient(t *testing.T) {
 	assert.Equal(t, *sexp, *sres)
 
 	cexp := &pb.CallerStatusResponse{
-		ID:   "1234",
+		Id:   "1234",
 		Name: "denis",
 		Role: "admin",
 	}

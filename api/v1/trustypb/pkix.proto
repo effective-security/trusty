@@ -1,0 +1,112 @@
+syntax = "proto3";
+package trustypb;
+
+import "rpc.proto";
+import "gogoproto/gogo.proto";
+// for grpc-gateway
+import "google/api/annotations.proto";
+
+
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+
+service Authority {
+        // ProfileInfo returns the certificate profile info
+        rpc ProfileInfo(CertProfileInfoRequest) returns (CertProfileInfo) {
+            option (google.api.http) = {
+                post: "/v1/ca/csr/profile_info"
+            };
+        }
+
+        // CreateCertificate returns the certificate
+        rpc CreateCertificate(CreateCertificateRequest) returns (CertificateBundle) {
+            option (google.api.http) = {
+                post: "/v1/ca/csr/create"
+            };
+        }
+
+        // CreateCertificate returns the certificate
+        rpc Issuers(EmptyRequest) returns (IssuersInfoResponse) {
+            option (google.api.http) = {
+                get: "/v1/ca/issuers"
+            };
+        }
+}
+
+// X509Name specifies X509 Name
+message X509Name {
+    string country = 1;
+    string state = 2;
+    string locality = 3;
+    string organisation = 4;
+    string organisational_unit = 5;
+}
+
+// X509Subject specifies X509 Subject
+message X509Subject {
+    string cn = 1;
+    repeated X509Name names = 2;
+    string serial_number = 3;
+}
+
+message CertProfileInfoRequest {
+    string label = 1;
+    string profile = 2;
+}
+
+// CertProfileInfo is the response for an Profile Info API request
+message CertProfileInfo {
+    string issuer = 1;
+    repeated string usage = 2;
+    string expiry = 3;
+}
+
+// CertificateBundle provides certificate and its issuers
+message CertificateBundle {
+    // Certificate provides the certificate in PEM format
+    string certificate = 1;
+    // Intermediates provides the intermediate CA certificates bundle in PEM format
+    string intermediates = 2;
+    // Root provides the Root CA certifica in PEM format
+    string root = 3;
+}
+
+// IssuerInfo provides Issuer information
+message IssuerInfo {
+    // Certificate provides the certificate in PEM format
+    string certificate = 1;
+    // Intermediates provides the intermediate CA certificates bundle in PEM format
+    string intermediates = 2;
+    // Root provides the Root CA certifica in PEM format
+    string root = 3;
+    // Label specifies the Issuer's label
+    string label = 4;
+}
+
+// IssuersInfoResponse provides response for Issuers Info request
+message IssuersInfoResponse {
+    repeated IssuerInfo issuers = 1;
+}
+
+enum EncodingFormat {
+    PEM = 0; // default, PEM encoded
+    DER = 1;
+    PKCS7 = 2;
+}
+
+// CreateCertificateRequest specifies certificate request
+message CreateCertificateRequest {
+    // RequestFormat provides the certificate request format: CSR, CMS
+    EncodingFormat request_format = 1;
+    // Request provides the certificate request
+    string request = 2;
+    // Profile specifies the certificate profile: client, server, spiffe
+    string profile = 3;
+    // IssuerLabel specifies which Issuer to be appointed to sign the request
+    string issuer_label = 4;
+    // WithBundle specifies whether to include an "optimal" certificate bundle along with the certificate
+    bool with_bundle = 5;
+    // Token provides the authorization token for the request
+    string token = 6;
+}
+

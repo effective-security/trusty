@@ -118,15 +118,15 @@
     "trustypbCallerStatusResponse": {
       "type": "object",
       "properties": {
-        "ID": {
+        "id": {
           "type": "string",
           "description": "ID of the caller."
         },
-        "Name": {
+        "name": {
           "type": "string",
           "description": "Name of the caller."
         },
-        "Role": {
+        "role": {
           "type": "string",
           "description": "Role of the caller."
         }
@@ -135,26 +135,26 @@
     "trustypbServerStatus": {
       "type": "object",
       "properties": {
-        "Name": {
+        "name": {
           "type": "string",
           "description": "Name of the server or application."
         },
-        "Nodename": {
+        "nodename": {
           "type": "string",
           "description": "Nodename is the human-readable name of the cluster member,\nor empty for single host."
         },
-        "Hostname": {
+        "hostname": {
           "type": "string",
           "description": "Hostname is operating system's host name."
         },
-        "ListenURLs": {
+        "listen_urls": {
           "type": "array",
           "items": {
             "type": "string"
           },
           "description": "ListenURLs is the list of URLs the service is listening on."
         },
-        "StartedAt": {
+        "started_at": {
           "type": "string",
           "format": "int64",
           "description": "StartedAt is the Unix time when the server has started."
@@ -164,11 +164,11 @@
     "trustypbServerStatusResponse": {
       "type": "object",
       "properties": {
-        "Status": {
+        "status": {
           "$ref": "#/definitions/trustypbServerStatus",
           "description": "Status of the server."
         },
-        "Version": {
+        "version": {
           "$ref": "#/definitions/trustypbServerVersion",
           "description": "Version of the server."
         }
@@ -177,11 +177,11 @@
     "trustypbServerVersion": {
       "type": "object",
       "properties": {
-        "Build": {
+        "build": {
           "type": "string",
           "description": "Build is the server build version."
         },
-        "Runtime": {
+        "runtime": {
           "type": "string",
           "description": "Runtime is the runtime version."
         }

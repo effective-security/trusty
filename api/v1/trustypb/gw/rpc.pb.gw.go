@@ -9,9 +9,10 @@ It translates gRPC into RESTful JSON APIs.
 package gw
 
 import (
-	"github.com/go-phorce/trusty/api/v1/trustypb"
 	"io"
 	"net/http"
+
+	"github.com/go-phorce/trusty/api/v1/trustypb"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"

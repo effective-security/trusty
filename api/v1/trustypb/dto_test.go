@@ -24,14 +24,14 @@ func Test_Decode_ValidDTO(t *testing.T) {
 	expStatus := &trustypb.ServerStatusResponse{
 		Status: &trustypb.ServerStatus{
 			Hostname:   "dissoupov-ltl2",
-			ListenURLs: []string{"https://0.0.0.0:7891"},
+			ListenUrls: []string{"https://0.0.0.0:7891"},
 			Name:       "Trusty",
 			StartedAt:  1601216552,
 		},
 		Version: expVer,
 	}
 	expCaller := &trustypb.CallerStatusResponse{
-		ID:   "local",
+		Id:   "local",
 		Name: "localhost",
 		Role: "trusty-peer",
 	}
