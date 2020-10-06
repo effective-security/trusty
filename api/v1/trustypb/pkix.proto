@@ -35,30 +35,30 @@ service Authority {
 
 // X509Name specifies X509 Name
 message X509Name {
-	string country = 1;
-	string state = 2;
-	string locality = 3;
-	string organisation = 4;
-	string organisational_unit = 5;
+    string country = 1;
+    string state = 2;
+    string locality = 3;
+    string organisation = 4;
+    string organisational_unit = 5;
 }
 
 // X509Subject specifies X509 Subject
 message X509Subject {
-	string cn = 1;
-	repeated X509Name names = 2;
-	string serial_number = 3;
+    string cn = 1;
+    repeated X509Name names = 2;
+    string serial_number = 3;
 }
 
 message CertProfileInfoRequest {
-	string label = 1;
-	string profile = 2;
+    string label = 1;
+    string profile = 2;
 }
 
 // CertProfileInfo is the response for an Profile Info API request
 message CertProfileInfo {
-	string issuer = 1;
-	repeated string usage = 2;
-	string expiry = 3;
+    string issuer = 1;
+    repeated string usage = 2;
+    string expiry = 3;
 }
 
 // CertificateBundle provides certificate and its issuers
@@ -80,7 +80,7 @@ message IssuerInfo {
     // Root provides the Root CA certifica in PEM format
     string root = 3;
     // Label specifies the Issuer's label
-	string label = 4;
+    string label = 4;
 }
 
 // IssuersInfoResponse provides response for Issuers Info request
@@ -101,10 +101,10 @@ message CreateCertificateRequest {
     // Request provides the certificate request
     string request = 2;
     // Profile specifies the certificate profile: client, server, spiffe
-	string profile = 3;
-	// IssuerLabel specifies which Issuer to be appointed to sign the request
-	string issuer_label = 4;
-	// WithBundle specifies whether to include an "optimal" certificate bundle along with the certificate
+    string profile = 3;
+    // IssuerLabel specifies which Issuer to be appointed to sign the request
+    string issuer_label = 4;
+    // WithBundle specifies whether to include an "optimal" certificate bundle along with the certificate
     bool with_bundle = 5;
     // Token provides the authorization token for the request
     string token = 6;

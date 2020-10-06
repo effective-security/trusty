@@ -74,7 +74,7 @@ message CallerStatusResponse {
 
 // Error is the generic error returned from unary RPCs.
 message Error {
-	string error = 1;
-	int32 code = 2;
-	string message = 3;
+    string error = 1;
+    int32 code = 2;
+    string message = 3;
 }
