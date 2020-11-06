@@ -17,6 +17,7 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xlog/logrotate"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
+	"github.com/go-phorce/trusty/backend/service/ca"
 	"github.com/go-phorce/trusty/backend/service/status"
 	"github.com/go-phorce/trusty/backend/trustyserver"
 	"github.com/go-phorce/trusty/config"
@@ -35,6 +36,7 @@ const (
 // ServiceFactories provides map of trustyserver.ServiceFactory
 var ServiceFactories = map[string]trustyserver.ServiceFactory{
 	status.ServiceName: status.Factory,
+	ca.ServiceName:     ca.Factory,
 }
 
 // appFlags specifies application flags
@@ -77,11 +79,20 @@ func NewApp(args []string) *App {
 		servers:   make(map[string]*trustyserver.TrustyServer),
 	}
 	f := NewContainerFactory(app)
+
+	// use default Container Factory
 	return app.WithContainerFactory(f.CreateContainerWithDependencies)
 }
 
+// WithConfiguration allows to specify a custom configuration,
+// used mainly for testing purposes
+func (a *App) WithConfiguration(cfg *config.Configuration) *App {
+	a.cfg = cfg
+	return a
+}
+
 // WithContainerFactory allows to specify an app container factory,
-// used mainly for testing purposess
+// used mainly for testing purposes
 func (a *App) WithContainerFactory(f ContainerFactoryFn) *App {
 	a.containerFactory = f
 	return a
@@ -182,9 +193,11 @@ func (a *App) Run(startedCh chan<- bool) error {
 	ver := version.Current().String()
 	logger.Infof("src=Run, hostname=%s, ip=%s, version=%s", hostname, ipaddr, ver)
 
-	err = a.initCPUProfiler(*a.flags.cpu)
-	if err != nil {
-		return errors.Trace(err)
+	if a.flags.cpu != nil {
+		err = a.initCPUProfiler(*a.flags.cpu)
+		if err != nil {
+			return errors.Trace(err)
+		}
 	}
 
 	_, err = a.Container()
@@ -246,6 +259,11 @@ func (a *App) Run(startedCh chan<- bool) error {
 	}
 
 	return nil
+}
+
+// Server returns a running TrustyServer by name
+func (a *App) Server(name string) *trustyserver.TrustyServer {
+	return a.servers[name]
 }
 
 func (a *App) stopServers() {
@@ -345,8 +363,8 @@ func (a *App) initLogs() error {
 			logger.Infof("src=initLogs, logger=%q, level=%v", ll.Repo, l)
 		}
 	}
-	logger.Infof("src=initLogs, status=service_starting, version='%v', args=%v, config=%q",
-		version.Current(), os.Args, *a.flags.cfgFile)
+	logger.Infof("src=initLogs, status=service_starting, version='%v', args=%v",
+		version.Current(), os.Args)
 
 	return nil
 }

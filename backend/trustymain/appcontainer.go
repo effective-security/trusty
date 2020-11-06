@@ -10,6 +10,7 @@ import (
 	"github.com/go-phorce/dolly/xhttp/authz"
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
+	"github.com/go-phorce/trusty/authority"
 	"github.com/go-phorce/trusty/config"
 	"github.com/go-phorce/trusty/pkg/roles"
 	"github.com/juju/errors"
@@ -31,6 +32,9 @@ type ProvideAuthzFn func(cfg *config.Configuration) (rest.Authz, error)
 // ProvideCryptoFn defines Crypto provider
 type ProvideCryptoFn func(cfg *config.Configuration) (*cryptoprov.Crypto, error)
 
+// ProvideAuthorityFn defines Crypto provider
+type ProvideAuthorityFn func(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*authority.Authority, error)
+
 // CloseRegistrator provides interface to release resources on close
 type CloseRegistrator interface {
 	OnClose(closer io.Closer)
@@ -43,6 +47,7 @@ type ContainerFactory struct {
 	schedulerProvider ProvideSchedulerFn
 	authzProvider     ProvideAuthzFn
 	cryptoProvider    ProvideCryptoFn
+	authorityProvider ProvideAuthorityFn
 }
 
 // NewContainerFactory returns an instance of ContainerFactory
@@ -63,7 +68,8 @@ func NewContainerFactory(app *App) *ContainerFactory {
 		WithAuditorProvider(provideAuditor).
 		WithAuthzProvider(provideAuthz).
 		WithSchedulerProvider(defaultSchedulerProv).
-		WithCryptoProvider(provideCrypto)
+		WithCryptoProvider(provideCrypto).
+		WithAuthorityProvider(provideAuthority)
 }
 
 // WithAuthzProvider allows to specify custom Authz
@@ -87,6 +93,12 @@ func (f *ContainerFactory) WithSchedulerProvider(p ProvideSchedulerFn) *Containe
 // WithCryptoProvider allows to specify custom Crypto loader
 func (f *ContainerFactory) WithCryptoProvider(p ProvideCryptoFn) *ContainerFactory {
 	f.cryptoProvider = p
+	return f
+}
+
+// WithAuthorityProvider allows to specify custom Authority
+func (f *ContainerFactory) WithAuthorityProvider(p ProvideAuthorityFn) *ContainerFactory {
+	f.authorityProvider = p
 	return f
 }
 
@@ -114,6 +126,11 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 	}
 
 	err = container.Provide(f.cryptoProvider)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	err = container.Provide(f.authorityProvider)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -177,4 +194,12 @@ func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
 		return nil, errors.Trace(err)
 	}
 	return crypto, nil
+}
+
+func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*authority.Authority, error) {
+	ca, err := authority.NewAuthority(&cfg.Authority, crypto)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return ca, nil
 }

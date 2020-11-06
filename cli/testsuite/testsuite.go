@@ -35,7 +35,8 @@ type Suite struct {
 	// Cli is the current CLI
 	Cli *cli.Cli
 
-	MockStatus *mockpb.MockStatusServer
+	MockStatus    *mockpb.MockStatusServer
+	MockAuthority *mockpb.MockAuthorityServer
 
 	appFlags       []string
 	withGRPC       bool
@@ -176,6 +177,7 @@ var nextPort = int32(31234)
 func (s *Suite) SetupMockGRPC() *grpc.Server {
 	serv := grpc.NewServer()
 	trustypb.RegisterStatusServer(serv, s.MockStatus)
+	trustypb.RegisterAuthorityServer(serv, s.MockAuthority)
 
 	addr := fmt.Sprintf("localhost:%d", atomic.AddInt32(&nextPort, 1))
 	lis, err := net.Listen("tcp", addr)

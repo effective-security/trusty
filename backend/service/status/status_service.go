@@ -25,11 +25,9 @@ func Factory(server *trustyserver.TrustyServer) interface{} {
 		logger.Panic("status.Factory: invalid parameter")
 	}
 
-	return func( /*, datahub datahub.Datahub, cluster cluster.Cluster*/ ) {
+	return func() {
 		svc := &Service{
 			server: server,
-			//datahub: datahub,
-			//cluster: cluster,
 		}
 
 		server.AddService(svc)

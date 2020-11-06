@@ -25,7 +25,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/gatewayruntimeError"
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -48,7 +48,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/gatewayruntimeError"
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -71,7 +71,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/gatewayruntimeError"
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -82,12 +82,21 @@
     }
   },
   "definitions": {
-    "gatewayruntimeError": {
+    "protobufAny": {
       "type": "object",
       "properties": {
-        "error": {
+        "typeUrl": {
           "type": "string"
         },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
         "code": {
           "type": "integer",
           "format": "int32"
@@ -100,18 +109,6 @@
           "items": {
             "$ref": "#/definitions/protobufAny"
           }
-        }
-      }
-    },
-    "protobufAny": {
-      "type": "object",
-      "properties": {
-        "type_url": {
-          "type": "string"
-        },
-        "value": {
-          "type": "string",
-          "format": "byte"
         }
       }
     },
@@ -147,14 +144,14 @@
           "type": "string",
           "description": "Hostname is operating system's host name."
         },
-        "listen_urls": {
+        "listenUrls": {
           "type": "array",
           "items": {
             "type": "string"
           },
           "description": "ListenURLs is the list of URLs the service is listening on."
         },
-        "started_at": {
+        "startedAt": {
           "type": "string",
           "format": "int64",
           "description": "StartedAt is the Unix time when the server has started."

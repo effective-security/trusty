@@ -404,7 +404,7 @@ type AuthorityClient interface {
 	ProfileInfo(ctx context.Context, in *CertProfileInfoRequest, opts ...grpc.CallOption) (*CertProfileInfo, error)
 	// CreateCertificate returns the certificate
 	CreateCertificate(ctx context.Context, in *CreateCertificateRequest, opts ...grpc.CallOption) (*CertificateBundle, error)
-	// CreateCertificate returns the certificate
+	// Issuers returns the issuing CAs
 	Issuers(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*IssuersInfoResponse, error)
 }
 
@@ -450,7 +450,7 @@ type AuthorityServer interface {
 	ProfileInfo(context.Context, *CertProfileInfoRequest) (*CertProfileInfo, error)
 	// CreateCertificate returns the certificate
 	CreateCertificate(context.Context, *CreateCertificateRequest) (*CertificateBundle, error)
-	// CreateCertificate returns the certificate
+	// Issuers returns the issuing CAs
 	Issuers(context.Context, *EmptyRequest) (*IssuersInfoResponse, error)
 }
 

@@ -70,8 +70,19 @@ type Status interface {
 	Caller(ctx context.Context) (*pb.CallerStatusResponse, error)
 }
 
+// Authority client interface
+type Authority interface {
+	// ProfileInfo returns the certificate profile info
+	ProfileInfo(ctx context.Context, in *pb.CertProfileInfoRequest) (*pb.CertProfileInfo, error)
+	// CreateCertificate returns the certificate
+	CreateCertificate(ctx context.Context, in *pb.CreateCertificateRequest) (*pb.CertificateBundle, error)
+	// Issuers returns the issuing CAs
+	Issuers(ctx context.Context) (*pb.IssuersInfoResponse, error)
+}
+
 // Client provides and manages an trusty v1 client session.
 type Client struct {
+	Authority
 	Status
 
 	cfg      Config
@@ -169,6 +180,7 @@ func newClient(cfg *Config) (*Client, error) {
 	}
 
 	client.conn = conn
+	client.Authority = NewAuthority(conn, client.callOpts)
 	client.Status = NewStatus(conn, client.callOpts)
 	return client, nil
 }

@@ -9,8 +9,8 @@ require (
 	github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba
 	github.com/go-phorce/dolly v0.4.1-0.20200917154250-262ab747d445
 	github.com/gogo/protobuf v1.3.1
-	github.com/golang/protobuf v1.4.2
-	github.com/grpc-ecosystem/grpc-gateway v1.14.8
+	github.com/golang/protobuf v1.4.3
+	github.com/google/go-cmp v0.5.2 // indirect
 	github.com/juju/errors v0.0.0-20200330140219-3fe23663418f
 	github.com/mattn/goreman v0.3.7
 	github.com/mattn/goveralls v0.0.6
@@ -21,7 +21,8 @@ require (
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b
 	golang.org/x/net v0.0.0-20200904194848-62affa334b73
 	golang.org/x/tools v0.0.0-20200904185747-39188db58858
-	google.golang.org/grpc v1.31.1
+	google.golang.org/genproto v0.0.0-20201019141844-1ed22bb0c154 // indirect
+	google.golang.org/grpc v1.33.1
 	google.golang.org/grpc/examples v0.0.0-20200910201057-6591123024b3 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )

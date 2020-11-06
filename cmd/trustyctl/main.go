@@ -8,6 +8,7 @@ import (
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/trusty/cli"
+	"github.com/go-phorce/trusty/cli/ca"
 	"github.com/go-phorce/trusty/cli/status"
 	"github.com/go-phorce/trusty/version"
 )
@@ -67,6 +68,13 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		PreAction(cli.PopulateControl).
 		PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(status.Caller, nil))
+
+	cmdCA := app.Command("ca", "CA operations").
+		PreAction(cli.PopulateControl).
+		PreAction(cli.EnsureClient)
+
+	cmdCA.Command("issuers", "show the issuing CAs").
+		Action(cli.RegisterAction(ca.Issuers, nil))
 
 	cli.Parse(args)
 	return cli.ReturnCode()
