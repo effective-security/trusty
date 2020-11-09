@@ -27,7 +27,7 @@
                     "TrustedCAFile": "/tmp/trusty/certs/trusty_dev_root_ca.pem"
                 },
                 "Services": [
-                    "status"
+                    "status", "ca"
                 ],
                 "HeartbeatSecs": 30,
                 "RequestTimeout": "3s",
@@ -55,7 +55,8 @@
                 "/trustypb.Status"
             ],
             "Allow": [
-                "/v1/ca:trusty-peer"
+                "/v1/ca:trusty-peer",
+                "/trustypb.Authority:trusty-peer"
             ],
             "LogAllowedAny": true,
             "LogAllowed": true,

@@ -23,7 +23,7 @@ DIRS="./api/v1/trustypb"
 
 # exact version of packages to build
 GOGO_PROTO_SHA="1adfc126b41513cc696b209667c8656ea7aac67c"
-GRPC_GATEWAY_SHA="92583770e3f01b09a0d3e9bdf64321d8bebd48f2"
+GRPC_GATEWAY_SHA="v2.0.1"
 
 # disable go mod
 export GO111MODULE=off
@@ -55,7 +55,7 @@ popd
 
 # generate gateway code
 go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
-go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
+go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-openapiv2
 pushd "${GRPC_GATEWAY_ROOT}"
 	git reset --hard "${GRPC_GATEWAY_SHA}"
 	go install ./protoc-gen-grpc-gateway
@@ -94,7 +94,7 @@ for pb in trustypb/rpc trustypb/pkix; do
 	    -I"${GRPC_GATEWAY_ROOT}"/third_party/googleapis \
 	    -I"${GOGOPROTO_PATH}" \
 	    --grpc-gateway_out=logtostderr=true:. \
-	    --swagger_out=logtostderr=true:./Documentation/dev-guide/apispec/swagger/. \
+	    --openapiv2_out=logtostderr=true:./Documentation/dev-guide/apispec/swagger/. \
 	    ${protobase}.proto
 	# hack to move gw files around so client won't include them
 	pkgpath=$(dirname "${protobase}")
@@ -102,8 +102,10 @@ for pb in trustypb/rpc trustypb/pkix; do
 	gwfile="${protobase}.pb.gw.go"
 	sed -i.bak -E "s/package $pkg/package gw/g" ${gwfile}
 	# shellcheck disable=SC1117
-    sed -i.bak -E "s/protoReq /&$pkg\./g" ${gwfile}
+	sed -i.bak -E "s/protoReq /&$pkg\./g" ${gwfile}
 	sed -i.bak -E "s/trustypb\.trustypb\./trustypb\./g" ${gwfile}
+	sed -i.bak -E "s/ AuthorityServer/ trustypb\.AuthorityServer/g" ${gwfile}
+    sed -i.bak -E "s/ StatusServer/ trustypb\.StatusServer/g" ${gwfile}
 	sed -i.bak -E "s/, client /, client $pkg./g" ${gwfile}
 	sed -i.bak -E "s/Client /, client $pkg./g" ${gwfile}
 	sed -i.bak -E "s/[^(]*Client, runtime/${pkg}.&/" ${gwfile}

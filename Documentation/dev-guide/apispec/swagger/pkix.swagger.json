@@ -25,7 +25,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/gatewayruntimeError"
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -48,7 +48,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/gatewayruntimeError"
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -59,7 +59,7 @@
     },
     "/v1/ca/issuers": {
       "get": {
-        "summary": "CreateCertificate returns the certificate",
+        "summary": "Issuers returns the issuing CAs",
         "operationId": "Authority_Issuers",
         "responses": {
           "200": {
@@ -71,7 +71,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/gatewayruntimeError"
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -82,12 +82,21 @@
     }
   },
   "definitions": {
-    "gatewayruntimeError": {
+    "protobufAny": {
       "type": "object",
       "properties": {
-        "error": {
+        "typeUrl": {
           "type": "string"
         },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
         "code": {
           "type": "integer",
           "format": "int32"
@@ -100,18 +109,6 @@
           "items": {
             "$ref": "#/definitions/protobufAny"
           }
-        }
-      }
-    },
-    "protobufAny": {
-      "type": "object",
-      "properties": {
-        "type_url": {
-          "type": "string"
-        },
-        "value": {
-          "type": "string",
-          "format": "byte"
         }
       }
     },
