@@ -149,6 +149,7 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 	c.Environment = strings.ToLower(c.Environment)
 
 	variables := f.getVariableValues(c)
+	variables["${CONFIG_DIR}"] = baseDir
 	substituteEnvVars(&c, variables)
 
 	// Add to this list all configs that require folder resolution to absolute path

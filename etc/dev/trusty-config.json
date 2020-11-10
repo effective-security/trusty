@@ -124,6 +124,11 @@
                     "OCSPExpiry": "10m"
                 }
             ]
+        },
+        "SQL": {
+            "Driver": "postgres",
+            "DataSource": "file://${CONFIG_DIR}/sql-conn.txt",
+            "MigrationsDir": "${CONFIG_DIR}/../../scripts/sql/postgres/migrations"
         }
     },
     "hosts": {

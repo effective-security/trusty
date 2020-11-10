@@ -14,7 +14,8 @@
             { "name" : "HTTPServers",   "type" : "[]HTTPServer",  "comment" : "HTTPServers specifies a list of servers that expose HTTP or gRPC services"},
             { "name" : "TrustyClient",  "type" : "TrustyClient",  "comment" : "TrustyClient specifies configurations for the client to connect to the cluster"},
             { "name" : "VIPs",          "type" : "[]string",      "comment" : "VIPs is a list of the FQ name of the VIP to the cluster" },
-            { "name" : "Authority",     "type" : "Authority",     "comment" : "Authority contains configuration info for CA" }
+            { "name" : "Authority",     "type" : "Authority",     "comment" : "Authority contains configuration info for CA" },
+            { "name" : "SQL",           "type" : "SQL",           "comment" : "SQL specifies the configuration for SQL provider" }
         ]
     },
     "RelatedTypes" : {
@@ -161,6 +162,14 @@
                 { "name" : "DefaultCRLRenewal", "type" : "Duration", "comment" : "DefaultCRLRenewal specifies value in 8h format for duration of CRL renewal before next update time" },
                 { "name" : "Issuers",           "type" : "[]Issuer", "comment" : "Issuers specifies the list of issuing authorities." }
             ]
+        },
+        "SQL" : {
+            "Comment" : "SQL specifies the configuration for SQL provider.",
+            "Fields" : [
+                { "name" : "Driver",        "type" : "string", "comment" : "Driver specifies the driver name: postgres|mysql." },
+                { "name" : "DataSource",    "type" : "string", "comment" : "DataSource specifies the connection string. It can be prefixed with file:// or env:// to load the source from a file or environment variable." },
+                { "name" : "MigrationsDir", "type" : "string", "comment" : "MigrationsDir specifies the directory that contains migrations." }
+          ]
         }
     }
 }

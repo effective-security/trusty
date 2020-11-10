@@ -446,6 +446,9 @@ type Configuration struct {
 
 	// Authority contains configuration info for CA
 	Authority Authority
+
+	// SQL specifies the configuration for SQL provider
+	SQL SQL
 }
 
 func (c *Configuration) overrideFrom(o *Configuration) {
@@ -462,6 +465,7 @@ func (c *Configuration) overrideFrom(o *Configuration) {
 	c.TrustyClient.overrideFrom(&o.TrustyClient)
 	overrideStrings(&c.VIPs, &o.VIPs)
 	c.Authority.overrideFrom(&o.Authority)
+	c.SQL.overrideFrom(&o.SQL)
 
 }
 
@@ -869,6 +873,26 @@ func (c *RepoLogLevel) overrideFrom(o *RepoLogLevel) {
 	overrideString(&c.Repo, &o.Repo)
 	overrideString(&c.Package, &o.Package)
 	overrideString(&c.Level, &o.Level)
+
+}
+
+// SQL specifies the configuration for SQL provider.
+type SQL struct {
+
+	// Driver specifies the driver name: postgres|mysql.
+	Driver string
+
+	// DataSource specifies the connection string. It can be prefixed with file:// or env:// to load the source from a file or environment variable.
+	DataSource string
+
+	// MigrationsDir specifies the directory that contains migrations.
+	MigrationsDir string
+}
+
+func (c *SQL) overrideFrom(o *SQL) {
+	overrideString(&c.Driver, &o.Driver)
+	overrideString(&c.DataSource, &o.DataSource)
+	overrideString(&c.MigrationsDir, &o.MigrationsDir)
 
 }
 

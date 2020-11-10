@@ -2,6 +2,7 @@
 /.rpm
 /.gopath
 /.vscode
+bin/
 
 .DS_Store
 .vagrant/
@@ -11,5 +12,5 @@ debug
 debug.test
 coverage.out
 change_log.txt
+etc/dev/sql-conn.txt
 
-bin/
