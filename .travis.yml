@@ -37,4 +37,4 @@ before_script:
 # failing test, we want to see both. Configure golangci-lint with a
 # .golangci.yml file at the top level of your repo.
 script:
-  - make vars hsmconfig build gen_test_certs covtest coveralls
+  - make vars hsmconfig build gen_test_certs start-sql covtest coveralls

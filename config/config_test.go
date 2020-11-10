@@ -620,7 +620,11 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 					CRLExpiry:      Duration(time.Second),
 					OCSPExpiry:     Duration(time.Second),
 					CRLRenewal:     Duration(time.Second)},
-			}}}
+			}},
+		SQL: SQL{
+			Driver:        "one",
+			DataSource:    "one",
+			MigrationsDir: "one"}}
 	dest := orig
 	var zero Configuration
 	dest.overrideFrom(&zero)
@@ -719,7 +723,11 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 					CRLExpiry:      Duration(time.Minute),
 					OCSPExpiry:     Duration(time.Minute),
 					CRLRenewal:     Duration(time.Minute)},
-			}}}
+			}},
+		SQL: SQL{
+			Driver:        "two",
+			DataSource:    "two",
+			MigrationsDir: "two"}}
 	dest.overrideFrom(&o)
 	require.Equal(t, dest, o, "Configuration.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
 	o2 := Configuration{
@@ -1093,6 +1101,30 @@ func TestRepoLogLevel_overrideFrom(t *testing.T) {
 	require.Equal(t, dest, exp, "RepoLogLevel.overrideFrom should have overriden the field Repo. value now %#v, expecting %#v", dest, exp)
 }
 
+func TestSQL_overrideFrom(t *testing.T) {
+	orig := SQL{
+		Driver:        "one",
+		DataSource:    "one",
+		MigrationsDir: "one"}
+	dest := orig
+	var zero SQL
+	dest.overrideFrom(&zero)
+	require.Equal(t, dest, orig, "SQL.overrideFrom shouldn't have overriden the value as the override is the default/zero value. value now %#v", dest)
+	o := SQL{
+		Driver:        "two",
+		DataSource:    "two",
+		MigrationsDir: "two"}
+	dest.overrideFrom(&o)
+	require.Equal(t, dest, o, "SQL.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
+	o2 := SQL{
+		Driver: "one"}
+	dest.overrideFrom(&o2)
+	exp := o
+
+	exp.Driver = o2.Driver
+	require.Equal(t, dest, exp, "SQL.overrideFrom should have overriden the field Driver. value now %#v, expecting %#v", dest, exp)
+}
+
 func TestTLSInfo_overrideFrom(t *testing.T) {
 	orig := TLSInfo{
 		CertFile:       "one",
@@ -1311,7 +1343,11 @@ func Test_LoadOverrides(t *testing.T) {
 						CRLExpiry:      Duration(time.Minute),
 						OCSPExpiry:     Duration(time.Minute),
 						CRLRenewal:     Duration(time.Minute)},
-				}}},
+				}},
+			SQL: SQL{
+				Driver:        "two",
+				DataSource:    "two",
+				MigrationsDir: "two"}},
 		Hosts: map[string]string{"bob": "example2", "bob2": "missing"},
 		Overrides: map[string]Configuration{
 			"example2": {
@@ -1408,7 +1444,11 @@ func Test_LoadOverrides(t *testing.T) {
 							CRLExpiry:      Duration(time.Hour),
 							OCSPExpiry:     Duration(time.Hour),
 							CRLRenewal:     Duration(time.Hour)},
-					}}},
+					}},
+				SQL: SQL{
+					Driver:        "three",
+					DataSource:    "three",
+					MigrationsDir: "three"}},
 		},
 	}
 	f, err := ioutil.TempFile("", "config")
@@ -1562,7 +1602,11 @@ func Test_LoadCustomJSON(t *testing.T) {
 						CRLExpiry:      Duration(time.Minute),
 						OCSPExpiry:     Duration(time.Minute),
 						CRLRenewal:     Duration(time.Minute)},
-				}}},
+				}},
+			SQL: SQL{
+				Driver:        "two",
+				DataSource:    "two",
+				MigrationsDir: "two"}},
 		Hosts: map[string]string{"bob": "${ENV}"},
 		Overrides: map[string]Configuration{
 			"${ENV}": {
@@ -1659,7 +1703,11 @@ func Test_LoadCustomJSON(t *testing.T) {
 							CRLExpiry:      Duration(time.Hour),
 							OCSPExpiry:     Duration(time.Hour),
 							CRLRenewal:     Duration(time.Hour)},
-					}}},
+					}},
+				SQL: SQL{
+					Driver:        "three",
+					DataSource:    "three",
+					MigrationsDir: "three"}},
 		},
 	}
 	f, err := ioutil.TempFile("", "customjson")
