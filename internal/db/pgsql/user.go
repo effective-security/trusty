@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-phorce/trusty/internal/db/model"
+	"github.com/ekspand/trusty/internal/db/model"
 	"github.com/juju/errors"
 )
 

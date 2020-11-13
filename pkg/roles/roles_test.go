@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/ekspand/trusty/pkg/roles"
 	"github.com/go-phorce/dolly/xhttp/identity"
-	"github.com/go-phorce/trusty/pkg/roles"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

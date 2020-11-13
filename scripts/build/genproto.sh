@@ -112,7 +112,7 @@ for pb in trustypb/rpc trustypb/pkix; do
 	sed -i.bak -E "s/New[A-Za-z]*Client/${pkg}.&/" ${gwfile}
 	# darwin doesn't like newlines in sed...
 	# shellcheck disable=SC1117
-	sed -i.bak -E "s|import \(|& \"github.com/go-phorce/trusty/${pkgpath}\"|" ${gwfile}
+	sed -i.bak -E "s|import \(|& \"github.com/ekspand/trusty/${pkgpath}\"|" ${gwfile}
 	mkdir -p  "${pkgpath}"/gw/
     goimports -w ${gwfile}
 	gofmt -s -l -w ${gwfile}

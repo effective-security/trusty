@@ -75,17 +75,17 @@
                 "Level": "TRACE"
             },
             {
-                "Repo": "github.com/go-phorce/trusty",
+                "Repo": "github.com/ekspand/trusty",
                 "Package": "*",
                 "Level": "TRACE"
             },
             {
-                "Repo": "github.com/go-phorce/trusty/health",
+                "Repo": "github.com/ekspand/trusty/health",
                 "Package": "xhttp",
                 "Level": "ERROR"
             },
             {
-                "Repo": "github.com/go-phorce/trusty/backend/service",
+                "Repo": "github.com/ekspand/trusty/backend/service",
                 "Package": "*",
                 "Level": "DEBUG"
             },

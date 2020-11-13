@@ -6,9 +6,9 @@ import (
 	"io"
 	"io/ioutil"
 
+	"github.com/ekspand/trusty/cli"
+	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/go-phorce/dolly/ctl"
-	"github.com/go-phorce/trusty/cli"
-	"github.com/go-phorce/trusty/pkg/csr"
 	"github.com/juju/errors"
 )
 

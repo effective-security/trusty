@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/ekspand/trusty/cli"
 	"github.com/go-phorce/dolly/ctl"
-	"github.com/go-phorce/trusty/cli"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

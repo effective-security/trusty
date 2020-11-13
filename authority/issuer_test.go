@@ -4,8 +4,8 @@ import (
 	"crypto"
 	"fmt"
 
-	"github.com/go-phorce/trusty/authority"
-	"github.com/go-phorce/trusty/config"
+	"github.com/ekspand/trusty/authority"
+	"github.com/ekspand/trusty/config"
 )
 
 func (s *testSuite) TestNewIssuer() {

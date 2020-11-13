@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ekspand/trusty/cli"
+	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/ctl"
-	"github.com/go-phorce/trusty/cli"
-	"github.com/go-phorce/trusty/pkg/print"
 	"github.com/juju/errors"
 )
 

@@ -3,7 +3,7 @@ package testsuite_test
 import (
 	"testing"
 
-	"github.com/go-phorce/trusty/cli/testsuite"
+	"github.com/ekspand/trusty/cli/testsuite"
 	"github.com/stretchr/testify/suite"
 )
 

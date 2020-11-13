@@ -5,15 +5,15 @@ import (
 	"io"
 	"os"
 
+	"github.com/ekspand/trusty/cli"
+	"github.com/ekspand/trusty/cli/ca"
+	"github.com/ekspand/trusty/cli/status"
+	"github.com/ekspand/trusty/version"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/trusty/cli"
-	"github.com/go-phorce/trusty/cli/ca"
-	"github.com/go-phorce/trusty/cli/status"
-	"github.com/go-phorce/trusty/version"
 )
 
-var logger = xlog.NewPackageLogger("github.com/go-phorce/trusty/cmd", "trustyctl")
+var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/cmd", "trustyctl")
 
 const (
 	rcError   = 1

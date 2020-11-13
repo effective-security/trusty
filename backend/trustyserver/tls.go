@@ -3,9 +3,9 @@ package trustyserver
 import (
 	"crypto/x509"
 
+	"github.com/ekspand/trusty/config"
 	metricsutil "github.com/go-phorce/dolly/metrics/util"
 	"github.com/go-phorce/dolly/rest/tlsconfig"
-	"github.com/go-phorce/trusty/config"
 )
 
 // this task is to reload keypair (if required) and publish metrics

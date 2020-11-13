@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ekspand/trusty/pkg/tlsutil"
 	"github.com/go-phorce/dolly/rest/tlsconfig"
-	"github.com/go-phorce/trusty/pkg/tlsutil"
 	"github.com/juju/errors"
 )
 

@@ -4,7 +4,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/go-phorce/trusty/internal/db"
+	"github.com/ekspand/trusty/internal/db"
 	"github.com/sony/sonyflake"
 )
 

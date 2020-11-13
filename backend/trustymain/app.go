@@ -11,24 +11,24 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/ekspand/trusty/backend/service/auth"
+	"github.com/ekspand/trusty/backend/service/ca"
+	"github.com/ekspand/trusty/backend/service/status"
+	"github.com/ekspand/trusty/backend/trustyserver"
+	"github.com/ekspand/trusty/config"
+	"github.com/ekspand/trusty/version"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/netutil"
 	"github.com/go-phorce/dolly/tasks"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xlog/logrotate"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
-	"github.com/go-phorce/trusty/backend/service/auth"
-	"github.com/go-phorce/trusty/backend/service/ca"
-	"github.com/go-phorce/trusty/backend/service/status"
-	"github.com/go-phorce/trusty/backend/trustyserver"
-	"github.com/go-phorce/trusty/config"
-	"github.com/go-phorce/trusty/version"
 	"github.com/juju/errors"
 	"go.uber.org/dig"
 	kp "gopkg.in/alecthomas/kingpin.v2"
 )
 
-var logger = xlog.NewPackageLogger("github.com/go-phorce/trusty/backend", "trusty")
+var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend", "trusty")
 
 const (
 	nullDevName = "/dev/null"

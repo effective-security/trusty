@@ -3,9 +3,9 @@ package embed
 import (
 	"context"
 
-	"github.com/go-phorce/trusty/backend/trustyserver"
-	"github.com/go-phorce/trusty/client"
-	"github.com/go-phorce/trusty/client/proxy"
+	"github.com/ekspand/trusty/backend/trustyserver"
+	"github.com/ekspand/trusty/client"
+	"github.com/ekspand/trusty/client/proxy"
 )
 
 // NewClient returns client.Client for running TrustyServer

@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/ekspand/trusty/cli/csr"
+	"github.com/ekspand/trusty/cli/testsuite"
 	"github.com/go-phorce/dolly/algorithms/guid"
-	"github.com/go-phorce/trusty/cli/csr"
-	"github.com/go-phorce/trusty/cli/testsuite"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )

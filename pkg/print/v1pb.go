@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ekspand/trusty/api/v1/trustypb"
 	"github.com/go-phorce/dolly/xpki/certutil"
-	"github.com/go-phorce/trusty/api/v1/trustypb"
 	"github.com/olekukonko/tablewriter"
 )
 

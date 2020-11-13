@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ekspand/trusty/pkg/roles/certmapper"
 	"github.com/go-phorce/dolly/xpki/certutil"
-	"github.com/go-phorce/trusty/pkg/roles/certmapper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

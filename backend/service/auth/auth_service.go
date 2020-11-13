@@ -9,18 +9,18 @@ import (
 	"net/url"
 	"time"
 
+	v1 "github.com/ekspand/trusty/api/v1"
+	"github.com/ekspand/trusty/backend/trustyserver"
+	"github.com/ekspand/trusty/config"
+	"github.com/ekspand/trusty/internal/db"
+	"github.com/ekspand/trusty/internal/db/model"
+	"github.com/ekspand/trusty/pkg/oauth2client"
+	"github.com/ekspand/trusty/pkg/roles/jwtmapper"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/httperror"
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
-	v1 "github.com/go-phorce/trusty/api/v1"
-	"github.com/go-phorce/trusty/backend/trustyserver"
-	"github.com/go-phorce/trusty/config"
-	"github.com/go-phorce/trusty/internal/db"
-	"github.com/go-phorce/trusty/internal/db/model"
-	"github.com/go-phorce/trusty/pkg/oauth2client"
-	"github.com/go-phorce/trusty/pkg/roles/jwtmapper"
 	"github.com/google/go-github/github"
 	"github.com/juju/errors"
 	"golang.org/x/oauth2"
@@ -29,7 +29,7 @@ import (
 // ServiceName provides the Service Name for this package
 const ServiceName = "auth"
 
-var logger = xlog.NewPackageLogger("github.com/go-phorce/trusty/backend/service", "auth")
+var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", "auth")
 
 const (
 	evtTokenIssued    = "token_issued"

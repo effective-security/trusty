@@ -3,7 +3,7 @@ package ca
 import (
 	"context"
 
-	pb "github.com/go-phorce/trusty/api/v1/trustypb"
+	pb "github.com/ekspand/trusty/api/v1/trustypb"
 	"github.com/juju/errors"
 )
 

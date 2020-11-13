@@ -1,7 +1,7 @@
 package authority_test
 
 import (
-	"github.com/go-phorce/trusty/authority"
+	"github.com/ekspand/trusty/authority"
 )
 
 func (s *testSuite) TestNewSigner() {

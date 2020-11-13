@@ -26,7 +26,7 @@ import (
 
 //go:generate configen -c config_def.json -d .
 
-var logger = xlog.NewPackageLogger("github.com/go-phorce/trusty", "config")
+var logger = xlog.NewPackageLogger("github.com/ekspand/trusty", "config")
 
 const (
 	// ConfigFileName is default name for the configuration file

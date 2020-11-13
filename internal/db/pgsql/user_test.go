@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/go-phorce/trusty/internal/db/model"
+	"github.com/ekspand/trusty/internal/db/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

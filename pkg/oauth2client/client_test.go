@@ -3,7 +3,7 @@ package oauth2client_test
 import (
 	"testing"
 
-	"github.com/go-phorce/trusty/pkg/oauth2client"
+	"github.com/ekspand/trusty/pkg/oauth2client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

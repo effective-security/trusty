@@ -3,9 +3,9 @@ package status
 import (
 	"context"
 
+	pb "github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/version"
 	"github.com/go-phorce/dolly/xhttp/identity"
-	pb "github.com/go-phorce/trusty/api/v1/trustypb"
-	"github.com/go-phorce/trusty/version"
 )
 
 // Version returns the server version.

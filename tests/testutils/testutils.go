@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"sync/atomic"
 
+	"github.com/ekspand/trusty/config"
 	"github.com/go-phorce/dolly/algorithms/guid"
-	"github.com/go-phorce/trusty/config"
 )
 
 var (

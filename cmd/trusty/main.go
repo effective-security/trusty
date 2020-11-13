@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/go-phorce/trusty/backend/trustymain"
+	"github.com/ekspand/trusty/backend/trustymain"
 	"github.com/juju/errors"
 )
 

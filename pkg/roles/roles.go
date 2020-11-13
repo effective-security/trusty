@@ -3,14 +3,14 @@ package roles
 import (
 	"net/http"
 
+	"github.com/ekspand/trusty/pkg/roles/certmapper"
+	"github.com/ekspand/trusty/pkg/roles/jwtmapper"
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/trusty/pkg/roles/certmapper"
-	"github.com/go-phorce/trusty/pkg/roles/jwtmapper"
 	"github.com/juju/errors"
 )
 
-var logger = xlog.NewPackageLogger("github.com/go-phorce/trusty/pkg", "roles")
+var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "roles")
 
 const (
 	// TrustyAdmin defines rone name to the service admins
