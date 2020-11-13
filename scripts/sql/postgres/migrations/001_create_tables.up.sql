@@ -18,8 +18,12 @@ $$ language 'plpgsql';
 CREATE TABLE IF NOT EXISTS public.users
 (
     id bigint NOT NULL,
+    github_id bigint NULL,
+    login character varying(64) COLLATE pg_catalog."default" NOT NULL,
     name character varying(64) COLLATE pg_catalog."default" NOT NULL,
     email character varying(160) COLLATE pg_catalog."default" NOT NULL,
+    company character varying(64) COLLATE pg_catalog."default" NULL,
+    avatar_url character varying(256) COLLATE pg_catalog."default" NULL,
     login_count integer,
     last_login_at timestamp with time zone,
     CONSTRAINT users_pkey PRIMARY KEY (id)
@@ -36,11 +40,22 @@ CREATE UNIQUE INDEX IF NOT EXISTS unique_users_email
     (email COLLATE pg_catalog."default")
     ;
 
+CREATE UNIQUE INDEX IF NOT EXISTS unique_users_login
+    ON public.users USING btree
+    (login COLLATE pg_catalog."default")
+    ;
+
 SELECT create_constraint_if_not_exists(
     'public',
     'users',
     'unique_users_email',
     'ALTER TABLE public.users ADD CONSTRAINT unique_users_email UNIQUE USING INDEX unique_users_email;');
+
+SELECT create_constraint_if_not_exists(
+    'public',
+    'users',
+    'unique_users_login',
+    'ALTER TABLE public.users ADD CONSTRAINT unique_users_login UNIQUE USING INDEX unique_users_login;');
 
 CREATE TABLE IF NOT EXISTS public.certificates
 (

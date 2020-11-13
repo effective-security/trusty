@@ -31,7 +31,8 @@
                 { "name" : "LogDenied",    "type" : "*bool",    "comment" : "LogDenied specifies to log denied access"},
                 { "name" : "CertMapper",   "type" : "string",   "comment" : "CertMapper specifies location of the config file for certificate based identity." },
                 { "name" : "APIKeyMapper", "type" : "string",   "comment" : "APIKeyMapper specifies location of the config file for API-Key based identity." },
-                { "name" : "JWTMapper",    "type" : "string",   "comment" : "JWTMapper specifies location of the config file for JWT based identity." }
+                { "name" : "JWTMapper",    "type" : "string",   "comment" : "JWTMapper specifies location of the config file for JWT based identity." },
+                { "name" : "OAuthClient",  "type" : "string",   "comment" : "OAuthClient specifies the configuration file for OAuth client." }
             ]
         },
         "CORS" : {
@@ -86,6 +87,7 @@
             "comment" : "TrustyClient specifies configurations for the client to connect to the cluster",
             "WithGetter" : true,
             "Fields" : [
+                { "name" : "PublicURL", "type" : "string",   "comment" : "PublicURL provides the server URL for external clients"},
                 { "name" : "Servers",   "type" : "[]string", "comment" : "Servers decribes the list of server URLs to contact"},
                 { "name" : "ClientTLS", "type" : "TLSInfo",  "comment" : "ClientTLS describes the TLS certs used to connect to the cluster"}
             ]

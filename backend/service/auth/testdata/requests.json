@@ -1,0 +1,4 @@
+{
+    "/login/oauth/access_token" : {"file":"token"},
+    "/user" : {"file":"user"}
+}

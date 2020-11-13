@@ -9,7 +9,7 @@ import (
 )
 
 var idGenerator = sonyflake.NewSonyflake(sonyflake.Settings{
-	StartTime: time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC),
+	StartTime: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
 	MachineID: func() (uint16, error) {
 		return uint16(os.Getpid()), nil
 	},

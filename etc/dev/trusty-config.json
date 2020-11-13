@@ -27,7 +27,9 @@
                     "TrustedCAFile": "/tmp/trusty/certs/trusty_dev_root_ca.pem"
                 },
                 "Services": [
-                    "status", "ca"
+                    "auth",
+                    "status",
+                    "ca"
                 ],
                 "HeartbeatSecs": 30,
                 "RequestTimeout": "3s",
@@ -42,12 +44,14 @@
                 "KeyFile": "/tmp/trusty/certs/trusty_dev_peer-key.pem",
                 "TrustedCAFile": "/tmp/trusty/certs/trusty_dev_root_ca.pem"
             },
+            "PublicURL" : "https://localhost:7891",
             "Servers": [
                 "https://0.0.0.0:7891"
             ]
         },
         "Authz": {
             "AllowAny": [
+                "/v1/auth",
                 "/v1/status",
                 "/v1/certs",
                 "/v1/crl",
@@ -61,12 +65,14 @@
             "LogAllowedAny": true,
             "LogAllowed": true,
             "LogDenied": true,
-            "CertMapper": "cert-roles.dev.json"
+            "CertMapper": "cert-roles.dev.json",
+            "JWTMapper": "jwt-roles.dev.json",
+            "OAuthClient": "oauth-github.dev.json"
         },
         "LogLevels": [
             {
                 "Repo": "*",
-                "Level": "INFO"
+                "Level": "TRACE"
             },
             {
                 "Repo": "github.com/go-phorce/trusty",
@@ -77,6 +83,11 @@
                 "Repo": "github.com/go-phorce/trusty/health",
                 "Package": "xhttp",
                 "Level": "ERROR"
+            },
+            {
+                "Repo": "github.com/go-phorce/trusty/backend/service",
+                "Package": "*",
+                "Level": "DEBUG"
             },
             {
                 "Repo": "github.com/go-phorce/dolly",
@@ -128,7 +139,7 @@
         "SQL": {
             "Driver": "postgres",
             "DataSource": "file://${CONFIG_DIR}/sql-conn.txt",
-            "MigrationsDir": "${CONFIG_DIR}/../../scripts/sql/postgres/migrations"
+            "MigrationsDir": "../../scripts/sql/postgres/migrations"
         }
     },
     "hosts": {

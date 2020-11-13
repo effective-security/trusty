@@ -1,0 +1,9 @@
+v1
+-provider_id: "1234"
+-client_id: "client5678"
+-secret: "secret6789"
+-scopes:
+- "user"
+- "repo"
+auth_url: "https://github.com/login/oauth/authorize"
+token_url: "https://github.com/login/oauth/access_token"

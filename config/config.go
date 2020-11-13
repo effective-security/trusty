@@ -123,6 +123,9 @@ type Authz struct {
 
 	// JWTMapper specifies location of the config file for JWT based identity.
 	JWTMapper string
+
+	// OAuthClient specifies the configuration file for OAuth client.
+	OAuthClient string
 }
 
 func (c *Authz) overrideFrom(o *Authz) {
@@ -135,6 +138,7 @@ func (c *Authz) overrideFrom(o *Authz) {
 	overrideString(&c.CertMapper, &o.CertMapper)
 	overrideString(&c.APIKeyMapper, &o.APIKeyMapper)
 	overrideString(&c.JWTMapper, &o.JWTMapper)
+	overrideString(&c.OAuthClient, &o.OAuthClient)
 
 }
 
@@ -158,6 +162,8 @@ type AuthzConfig interface {
 	GetAPIKeyMapper() string
 	// JWTMapper specifies location of the config file for JWT based identity.
 	GetJWTMapper() string
+	// OAuthClient specifies the configuration file for OAuth client.
+	GetOAuthClient() string
 }
 
 // GetAllow will allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
@@ -203,6 +209,11 @@ func (c *Authz) GetAPIKeyMapper() string {
 // GetJWTMapper specifies location of the config file for JWT based identity.
 func (c *Authz) GetJWTMapper() string {
 	return c.JWTMapper
+}
+
+// GetOAuthClient specifies the configuration file for OAuth client.
+func (c *Authz) GetOAuthClient() string {
+	return c.OAuthClient
 }
 
 // AutoGenCert contains configuration info for the auto generated certificate
@@ -988,6 +999,9 @@ func (c *TLSInfo) GetClientCertAuth() bool {
 // TrustyClient specifies configurations for the client to connect to the cluster
 type TrustyClient struct {
 
+	// PublicURL provides the server URL for external clients
+	PublicURL string
+
 	// Servers decribes the list of server URLs to contact
 	Servers []string
 
@@ -996,6 +1010,7 @@ type TrustyClient struct {
 }
 
 func (c *TrustyClient) overrideFrom(o *TrustyClient) {
+	overrideString(&c.PublicURL, &o.PublicURL)
 	overrideStrings(&c.Servers, &o.Servers)
 	c.ClientTLS.overrideFrom(&o.ClientTLS)
 
@@ -1003,10 +1018,17 @@ func (c *TrustyClient) overrideFrom(o *TrustyClient) {
 
 // TrustyClientConfig specifies configurations for the client to connect to the cluster
 type TrustyClientConfig interface {
+	// PublicURL provides the server URL for external clients
+	GetPublicURL() string
 	// Servers decribes the list of server URLs to contact
 	GetServers() []string
 	// ClientTLS describes the TLS certs used to connect to the cluster
 	GetClientTLSCfg() *TLSInfo
+}
+
+// GetPublicURL provides the server URL for external clients
+func (c *TrustyClient) GetPublicURL() string {
+	return c.PublicURL
 }
 
 // GetServers decribes the list of server URLs to contact

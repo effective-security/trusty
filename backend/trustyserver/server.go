@@ -284,6 +284,11 @@ func (e *TrustyServer) AddService(svc Service) {
 	}
 }
 
+// Service returns service by name
+func (e *TrustyServer) Service(name string) Service {
+	return e.services[name]
+}
+
 // IsReady returns true when the server is ready to serve
 func (e *TrustyServer) IsReady() bool {
 	for _, ss := range e.services {

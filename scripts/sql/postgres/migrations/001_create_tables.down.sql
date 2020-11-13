@@ -2,6 +2,7 @@ BEGIN;
 
 DROP TABLE IF EXISTS public.users;
 DROP INDEX IF EXISTS unique_users_email;
+DROP INDEX IF EXISTS unique_users_login;
 
 DROP TABLE IF EXISTS public.certificates;
 DROP INDEX IF EXISTS idx_certificates_owner;

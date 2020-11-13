@@ -155,6 +155,7 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 	// Add to this list all configs that require folder resolution to absolute path
 	dirsToResolve := []*string{
 		&c.Audit.Directory,
+		&c.SQL.MigrationsDir,
 	}
 
 	filesToResove := []*string{
@@ -173,6 +174,8 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 		&c.Authz.CertMapper,
 		&c.Authz.JWTMapper,
 		&c.Authz.APIKeyMapper,
+		&c.Authz.OAuthClient,
+		&c.Authz.OAuthClient,
 	}
 
 	for _, ptr := range dirsToResolve {

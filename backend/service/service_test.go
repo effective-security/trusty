@@ -3,11 +3,15 @@ package service_test
 import (
 	"testing"
 
+	"github.com/go-phorce/trusty/backend/service/auth"
+	"github.com/go-phorce/trusty/backend/service/ca"
 	"github.com/go-phorce/trusty/backend/service/status"
 	"github.com/go-phorce/trusty/backend/trustyserver"
 )
 
 var serviceFactories = map[string]trustyserver.ServiceFactory{
+	auth.ServiceName:   auth.Factory,
+	ca.ServiceName:     ca.Factory,
 	status.ServiceName: status.Factory,
 }
 

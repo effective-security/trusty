@@ -7,6 +7,7 @@ import (
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/go-phorce/trusty/config"
+	"github.com/go-phorce/trusty/internal/db"
 	"github.com/go-phorce/trusty/tests/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -23,7 +24,7 @@ func TestStartTrustyEmptyHTTP(t *testing.T) {
 		ListenURLs: []string{testutils.CreateURLs("http", ""), testutils.CreateURLs("unix", "localhost")},
 	}
 
-	c := createContainer(nil, nil, nil)
+	c := createContainer(nil, nil, nil, nil)
 	srv, err := StartTrusty(cfg, c, nil)
 	require.NoError(t, err)
 	require.NotNil(t, srv)
@@ -43,7 +44,7 @@ func TestStartTrustyEmptyHTTPS(t *testing.T) {
 		},
 	}
 
-	c := createContainer(nil, nil, nil)
+	c := createContainer(nil, nil, nil, nil)
 	srv, err := StartTrusty(cfg, c, nil)
 	require.NoError(t, err)
 	require.NotNil(t, srv)
@@ -53,10 +54,10 @@ func TestStartTrustyEmptyHTTPS(t *testing.T) {
 }
 
 // TODO: move to testutil.ContainerBuilder
-func createContainer(authz rest.Authz, auditor audit.Auditor, crypto *cryptoprov.Crypto) *dig.Container {
+func createContainer(authz rest.Authz, auditor audit.Auditor, crypto *cryptoprov.Crypto, data db.Provider) *dig.Container {
 	c := dig.New()
-	c.Provide(func() (rest.Authz, audit.Auditor, *cryptoprov.Crypto) {
-		return authz, auditor, crypto
+	c.Provide(func() (rest.Authz, audit.Auditor, *cryptoprov.Crypto, db.Provider) {
+		return authz, auditor, crypto, data
 	})
 	return c
 }
