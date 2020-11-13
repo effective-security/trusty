@@ -33,3 +33,21 @@ const (
 	// Response: v1.CallerStatusResponse
 	PathForStatusCaller = "/v1/status/caller"
 )
+
+// Auth service API
+const (
+	// PathForAuth is base path for the Auth service
+	PathForAuth = "/v1/auth"
+
+	// PathForAuthURL returns Auth URL
+	//
+	// Verbs: GET
+	// Response: v1.AuthStsURLResponse
+	PathForAuthURL = "/v1/auth/url"
+
+	// PathForAuthGithub is base path for the Auth service
+	PathForAuthGithub = "/v1/auth/github"
+
+	// PathForAuthGithubCallback is auth callback for github
+	PathForAuthGithubCallback = "/v1/auth/github/callback"
+)

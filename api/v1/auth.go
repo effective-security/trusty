@@ -15,9 +15,13 @@ type AuthState struct {
 
 // UserInfo provides basic info about user
 type UserInfo struct {
-	ID    string `json:"user_id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	ID        string `json:"id"`
+	GithubID  string `json:"github_id"`
+	Login     string `json:"login"`
+	Name      string `json:"name"`
+	Email     string `json:"email"`
+	Company   string `json:"company"`
+	AvatarURL string `json:"avatar_url"`
 }
 
 // Authorization is returned to the client in token refresh response
@@ -25,8 +29,9 @@ type Authorization struct {
 	Version     string    `json:"version"`
 	DeviceID    string    `json:"device_id"`
 	UserID      string    `json:"user_id"`
+	Login       string    `json:"login"`
+	Name        string    `json:"name"`
 	Email       string    `json:"email"`
-	UserName    string    `json:"user_name"`
 	Role        string    `json:"role"`
 	TokenType   string    `json:"token_type"`
 	AccessToken string    `json:"access_token"`

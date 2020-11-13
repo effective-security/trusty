@@ -2,6 +2,7 @@ package trustymain
 
 import (
 	"io"
+	"time"
 
 	"github.com/go-phorce/dolly/audit"
 	fauditor "github.com/go-phorce/dolly/audit/log"
@@ -12,8 +13,12 @@ import (
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/go-phorce/trusty/authority"
 	"github.com/go-phorce/trusty/config"
+	"github.com/go-phorce/trusty/internal/db"
+	"github.com/go-phorce/trusty/pkg/oauth2client"
 	"github.com/go-phorce/trusty/pkg/roles"
+	"github.com/go-phorce/trusty/pkg/roles/jwtmapper"
 	"github.com/juju/errors"
+	"github.com/sony/sonyflake"
 	"go.uber.org/dig"
 )
 
@@ -27,13 +32,16 @@ type ProvideAuditorFn func(cfg *config.Configuration, r CloseRegistrator) (audit
 type ProvideSchedulerFn func() (tasks.Scheduler, error)
 
 // ProvideAuthzFn defines Authz provider
-type ProvideAuthzFn func(cfg *config.Configuration) (rest.Authz, error)
+type ProvideAuthzFn func(cfg *config.Configuration) (rest.Authz, *oauth2client.Client, *jwtmapper.Provider, error)
 
 // ProvideCryptoFn defines Crypto provider
 type ProvideCryptoFn func(cfg *config.Configuration) (*cryptoprov.Crypto, error)
 
 // ProvideAuthorityFn defines Crypto provider
 type ProvideAuthorityFn func(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*authority.Authority, error)
+
+// ProvideDbFn defines DB provider
+type ProvideDbFn func(cfg *config.Configuration) (db.Provider, error)
 
 // CloseRegistrator provides interface to release resources on close
 type CloseRegistrator interface {
@@ -48,6 +56,7 @@ type ContainerFactory struct {
 	authzProvider     ProvideAuthzFn
 	cryptoProvider    ProvideCryptoFn
 	authorityProvider ProvideAuthorityFn
+	dbProvider        ProvideDbFn
 }
 
 // NewContainerFactory returns an instance of ContainerFactory
@@ -69,7 +78,8 @@ func NewContainerFactory(app *App) *ContainerFactory {
 		WithAuthzProvider(provideAuthz).
 		WithSchedulerProvider(defaultSchedulerProv).
 		WithCryptoProvider(provideCrypto).
-		WithAuthorityProvider(provideAuthority)
+		WithAuthorityProvider(provideAuthority).
+		WithDbProvider(provideDB)
 }
 
 // WithAuthzProvider allows to specify custom Authz
@@ -81,6 +91,12 @@ func (f *ContainerFactory) WithAuthzProvider(p ProvideAuthzFn) *ContainerFactory
 // WithAuditorProvider allows to specify custom Auditor
 func (f *ContainerFactory) WithAuditorProvider(p ProvideAuditorFn) *ContainerFactory {
 	f.auditorProvider = p
+	return f
+}
+
+// WithDbProvider allows to specify custom DB provider
+func (f *ContainerFactory) WithDbProvider(p ProvideDbFn) *ContainerFactory {
+	f.dbProvider = p
 	return f
 }
 
@@ -135,6 +151,11 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 		return nil, errors.Trace(err)
 	}
 
+	err = container.Provide(f.dbProvider)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
 	return container, nil
 }
 
@@ -155,8 +176,10 @@ func provideAuditor(cfg *config.Configuration, r CloseRegistrator) (audit.Audito
 	return auditor, nil
 }
 
-func provideAuthz(cfg *config.Configuration) (rest.Authz, error) {
+func provideAuthz(cfg *config.Configuration) (rest.Authz, *oauth2client.Client, *jwtmapper.Provider, error) {
+	var oauth *oauth2client.Client
 	var azp rest.Authz
+	var jwt *jwtmapper.Provider
 	var err error
 	if len(cfg.Authz.Allow) > 0 ||
 		len(cfg.Authz.AllowAny) > 0 ||
@@ -170,7 +193,7 @@ func provideAuthz(cfg *config.Configuration) (rest.Authz, error) {
 			LogDenied:     cfg.Authz.GetLogDenied(),
 		})
 		if err != nil {
-			return nil, errors.Trace(err)
+			return nil, nil, nil, errors.Trace(err)
 		}
 	}
 	if cfg.Authz.JWTMapper != "" || cfg.Authz.CertMapper != "" {
@@ -179,13 +202,20 @@ func provideAuthz(cfg *config.Configuration) (rest.Authz, error) {
 			cfg.Authz.CertMapper,
 		)
 		if err != nil {
-			return nil, errors.Trace(err)
+			return nil, nil, nil, errors.Trace(err)
 		}
 		identity.SetGlobalIdentityMapper(p.IdentityMapper)
-		//jwt = p.JwtMapper
+		jwt = p.JwtMapper
 	}
 
-	return azp, nil
+	if cfg.Authz.OAuthClient != "" {
+		oauth, err = oauth2client.Load(cfg.Authz.OAuthClient)
+		if err != nil {
+			return nil, nil, nil, errors.Trace(err)
+		}
+	}
+
+	return azp, oauth, jwt, nil
 }
 
 func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
@@ -202,4 +232,21 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*au
 		return nil, errors.Trace(err)
 	}
 	return ca, nil
+}
+
+func provideDB(cfg *config.Configuration) (db.Provider, error) {
+	var idGenerator = sonyflake.NewSonyflake(sonyflake.Settings{
+		StartTime: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
+		/* TODO: machine ID from config
+		MachineID: func() (uint16, error) {
+			return uint16(os.Getpid()), nil
+		},
+		*/
+	})
+
+	d, err := db.New(cfg.SQL.Driver, cfg.SQL.DataSource, cfg.SQL.MigrationsDir, idGenerator.NextID)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return d, nil
 }

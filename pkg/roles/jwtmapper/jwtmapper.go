@@ -184,8 +184,9 @@ func (p *Provider) SignToken(userInfo *v1.UserInfo, deviceID string, expiry time
 		Version:     "v1.0",
 		DeviceID:    deviceID,
 		UserID:      userInfo.ID,
+		Login:       userInfo.Login,
 		Email:       userInfo.Email,
-		UserName:    userInfo.Name,
+		Name:        userInfo.Name,
 		Role:        p.userRole(claims),
 		TokenType:   "jwt",
 		AccessToken: tokenString,
@@ -265,7 +266,7 @@ func (p *Provider) IdentityMapper(r *http.Request) (identity.Identity, error) {
 
 // TrustyClaims for OAuth token
 type TrustyClaims struct {
-	UserInfo *v1.UserInfo `json:"sfu"` // user info from STS
+	UserInfo *v1.UserInfo `json:"trusty"` // user info from STS
 	DeviceID string       `json:"device_id"`
 	jwt.StandardClaims
 }

@@ -17,6 +17,7 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xlog/logrotate"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
+	"github.com/go-phorce/trusty/backend/service/auth"
 	"github.com/go-phorce/trusty/backend/service/ca"
 	"github.com/go-phorce/trusty/backend/service/status"
 	"github.com/go-phorce/trusty/backend/trustyserver"
@@ -35,8 +36,9 @@ const (
 
 // ServiceFactories provides map of trustyserver.ServiceFactory
 var ServiceFactories = map[string]trustyserver.ServiceFactory{
-	status.ServiceName: status.Factory,
+	auth.ServiceName:   auth.Factory,
 	ca.ServiceName:     ca.Factory,
+	status.ServiceName: status.Factory,
 }
 
 // appFlags specifies application flags

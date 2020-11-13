@@ -24,7 +24,6 @@ var (
 	trustyClient *client.Client
 
 	projFolder = "../../../"
-	httpAddr   = testutils.CreateURLs("http", "")
 )
 
 // serviceFactories provides map of trustyserver.ServiceFactory
@@ -42,6 +41,8 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		panic(errors.Trace(err))
 	}
+
+	httpAddr := testutils.CreateURLs("http", "")
 
 	for i, httpCfg := range cfg.HTTPServers {
 		switch httpCfg.Name {
@@ -80,7 +81,8 @@ func TestMain(m *testing.M) {
 	select {
 	case ret := <-startedCh:
 		if ret {
-			trustyClient = embed.NewClient(app.Server("Trusty"))
+			trustyServer = app.Server("Trusty")
+			trustyClient = embed.NewClient(trustyServer)
 
 			// Run the tests
 			rc = m.Run()

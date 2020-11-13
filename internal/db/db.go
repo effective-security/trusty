@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"os"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/go-phorce/dolly/fileutil"
 	"github.com/go-phorce/dolly/xlog"
+	"github.com/go-phorce/trusty/internal/db/model"
 	"github.com/go-phorce/trusty/internal/db/pgsql"
 	"github.com/golang-migrate/migrate"
 	"github.com/golang-migrate/migrate/database/postgres"
@@ -30,6 +32,7 @@ type IDGenerator interface {
 
 // UsersDb defines an interface for CRUD operations on Users and Teams
 type UsersDb interface {
+	LoginUser(ctx context.Context, user *model.User) (*model.User, error)
 }
 
 // Provider represents SQL client instance

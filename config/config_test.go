@@ -316,7 +316,8 @@ func TestAuthz_overrideFrom(t *testing.T) {
 		LogDenied:     &trueVal,
 		CertMapper:    "one",
 		APIKeyMapper:  "one",
-		JWTMapper:     "one"}
+		JWTMapper:     "one",
+		OAuthClient:   "one"}
 	dest := orig
 	var zero Authz
 	dest.overrideFrom(&zero)
@@ -330,7 +331,8 @@ func TestAuthz_overrideFrom(t *testing.T) {
 		LogDenied:     &falseVal,
 		CertMapper:    "two",
 		APIKeyMapper:  "two",
-		JWTMapper:     "two"}
+		JWTMapper:     "two",
+		OAuthClient:   "two"}
 	dest.overrideFrom(&o)
 	require.Equal(t, dest, o, "Authz.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
 	o2 := Authz{
@@ -352,7 +354,8 @@ func TestAuthz_Getters(t *testing.T) {
 		LogDenied:     &trueVal,
 		CertMapper:    "one",
 		APIKeyMapper:  "one",
-		JWTMapper:     "one"}
+		JWTMapper:     "one",
+		OAuthClient:   "one"}
 
 	gv0 := orig.GetAllow()
 	require.Equal(t, orig.Allow, gv0, "Authz.GetAllowCfg() does not match")
@@ -380,6 +383,9 @@ func TestAuthz_Getters(t *testing.T) {
 
 	gv8 := orig.GetJWTMapper()
 	require.Equal(t, orig.JWTMapper, gv8, "Authz.GetJWTMapperCfg() does not match")
+
+	gv9 := orig.GetOAuthClient()
+	require.Equal(t, orig.OAuthClient, gv9, "Authz.GetOAuthClientCfg() does not match")
 
 }
 
@@ -548,7 +554,8 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 			LogDenied:     &trueVal,
 			CertMapper:    "one",
 			APIKeyMapper:  "one",
-			JWTMapper:     "one"},
+			JWTMapper:     "one",
+			OAuthClient:   "one"},
 		Logger: Logger{
 			Directory:  "one",
 			MaxAgeDays: -42,
@@ -593,7 +600,8 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 				KeepAliveTimeout:  Duration(time.Second)},
 		},
 		TrustyClient: TrustyClient{
-			Servers: []string{"a"},
+			PublicURL: "one",
+			Servers:   []string{"a"},
 			ClientTLS: TLSInfo{
 				CertFile:       "one",
 				KeyFile:        "one",
@@ -651,7 +659,8 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 			LogDenied:     &falseVal,
 			CertMapper:    "two",
 			APIKeyMapper:  "two",
-			JWTMapper:     "two"},
+			JWTMapper:     "two",
+			OAuthClient:   "two"},
 		Logger: Logger{
 			Directory:  "two",
 			MaxAgeDays: 42,
@@ -696,7 +705,8 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 				KeepAliveTimeout:  Duration(time.Minute)},
 		},
 		TrustyClient: TrustyClient{
-			Servers: []string{"b", "b"},
+			PublicURL: "two",
+			Servers:   []string{"b", "b"},
 			ClientTLS: TLSInfo{
 				CertFile:       "two",
 				KeyFile:        "two",
@@ -1192,7 +1202,8 @@ func TestTLSInfo_Getters(t *testing.T) {
 
 func TestTrustyClient_overrideFrom(t *testing.T) {
 	orig := TrustyClient{
-		Servers: []string{"a"},
+		PublicURL: "one",
+		Servers:   []string{"a"},
 		ClientTLS: TLSInfo{
 			CertFile:       "one",
 			KeyFile:        "one",
@@ -1206,7 +1217,8 @@ func TestTrustyClient_overrideFrom(t *testing.T) {
 	dest.overrideFrom(&zero)
 	require.Equal(t, dest, orig, "TrustyClient.overrideFrom shouldn't have overriden the value as the override is the default/zero value. value now %#v", dest)
 	o := TrustyClient{
-		Servers: []string{"b", "b"},
+		PublicURL: "two",
+		Servers:   []string{"b", "b"},
 		ClientTLS: TLSInfo{
 			CertFile:       "two",
 			KeyFile:        "two",
@@ -1218,17 +1230,18 @@ func TestTrustyClient_overrideFrom(t *testing.T) {
 	dest.overrideFrom(&o)
 	require.Equal(t, dest, o, "TrustyClient.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
 	o2 := TrustyClient{
-		Servers: []string{"a"}}
+		PublicURL: "one"}
 	dest.overrideFrom(&o2)
 	exp := o
 
-	exp.Servers = o2.Servers
-	require.Equal(t, dest, exp, "TrustyClient.overrideFrom should have overriden the field Servers. value now %#v, expecting %#v", dest, exp)
+	exp.PublicURL = o2.PublicURL
+	require.Equal(t, dest, exp, "TrustyClient.overrideFrom should have overriden the field PublicURL. value now %#v, expecting %#v", dest, exp)
 }
 
 func TestTrustyClient_Getters(t *testing.T) {
 	orig := TrustyClient{
-		Servers: []string{"a"},
+		PublicURL: "one",
+		Servers:   []string{"a"},
 		ClientTLS: TLSInfo{
 			CertFile:       "one",
 			KeyFile:        "one",
@@ -1238,11 +1251,14 @@ func TestTrustyClient_Getters(t *testing.T) {
 			CipherSuites:   []string{"a"},
 			ClientCertAuth: &trueVal}}
 
-	gv0 := orig.GetServers()
-	require.Equal(t, orig.Servers, gv0, "TrustyClient.GetServersCfg() does not match")
+	gv0 := orig.GetPublicURL()
+	require.Equal(t, orig.PublicURL, gv0, "TrustyClient.GetPublicURLCfg() does not match")
 
-	gv1 := orig.GetClientTLSCfg()
-	require.Equal(t, orig.ClientTLS, *gv1, "TrustyClient.GetClientTLSCfg() does not match")
+	gv1 := orig.GetServers()
+	require.Equal(t, orig.Servers, gv1, "TrustyClient.GetServersCfg() does not match")
+
+	gv2 := orig.GetClientTLSCfg()
+	require.Equal(t, orig.ClientTLS, *gv2, "TrustyClient.GetClientTLSCfg() does not match")
 
 }
 
@@ -1271,7 +1287,8 @@ func Test_LoadOverrides(t *testing.T) {
 				LogDenied:     &falseVal,
 				CertMapper:    "two",
 				APIKeyMapper:  "two",
-				JWTMapper:     "two"},
+				JWTMapper:     "two",
+				OAuthClient:   "two"},
 			Logger: Logger{
 				Directory:  "two",
 				MaxAgeDays: 42,
@@ -1316,7 +1333,8 @@ func Test_LoadOverrides(t *testing.T) {
 					KeepAliveTimeout:  Duration(time.Minute)},
 			},
 			TrustyClient: TrustyClient{
-				Servers: []string{"b", "b"},
+				PublicURL: "two",
+				Servers:   []string{"b", "b"},
 				ClientTLS: TLSInfo{
 					CertFile:       "two",
 					KeyFile:        "two",
@@ -1372,7 +1390,8 @@ func Test_LoadOverrides(t *testing.T) {
 					LogDenied:     &trueVal,
 					CertMapper:    "three",
 					APIKeyMapper:  "three",
-					JWTMapper:     "three"},
+					JWTMapper:     "three",
+					OAuthClient:   "three"},
 				Logger: Logger{
 					Directory:  "three",
 					MaxAgeDays: 1234,
@@ -1417,7 +1436,8 @@ func Test_LoadOverrides(t *testing.T) {
 						KeepAliveTimeout:  Duration(time.Hour)},
 				},
 				TrustyClient: TrustyClient{
-					Servers: []string{"c", "c", "c"},
+					PublicURL: "three",
+					Servers:   []string{"c", "c", "c"},
 					ClientTLS: TLSInfo{
 						CertFile:       "three",
 						KeyFile:        "three",
@@ -1530,7 +1550,8 @@ func Test_LoadCustomJSON(t *testing.T) {
 				LogDenied:     &falseVal,
 				CertMapper:    "two",
 				APIKeyMapper:  "two",
-				JWTMapper:     "two"},
+				JWTMapper:     "two",
+				OAuthClient:   "two"},
 			Logger: Logger{
 				Directory:  "two",
 				MaxAgeDays: 42,
@@ -1575,7 +1596,8 @@ func Test_LoadCustomJSON(t *testing.T) {
 					KeepAliveTimeout:  Duration(time.Minute)},
 			},
 			TrustyClient: TrustyClient{
-				Servers: []string{"b", "b"},
+				PublicURL: "two",
+				Servers:   []string{"b", "b"},
 				ClientTLS: TLSInfo{
 					CertFile:       "two",
 					KeyFile:        "two",
@@ -1631,7 +1653,8 @@ func Test_LoadCustomJSON(t *testing.T) {
 					LogDenied:     &trueVal,
 					CertMapper:    "three",
 					APIKeyMapper:  "three",
-					JWTMapper:     "three"},
+					JWTMapper:     "three",
+					OAuthClient:   "three"},
 				Logger: Logger{
 					Directory:  "three",
 					MaxAgeDays: 1234,
@@ -1676,7 +1699,8 @@ func Test_LoadCustomJSON(t *testing.T) {
 						KeepAliveTimeout:  Duration(time.Hour)},
 				},
 				TrustyClient: TrustyClient{
-					Servers: []string{"c", "c", "c"},
+					PublicURL: "three",
+					Servers:   []string{"c", "c", "c"},
 					ClientTLS: TLSInfo{
 						CertFile:       "three",
 						KeyFile:        "three",
