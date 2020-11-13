@@ -3,10 +3,10 @@ package status_test
 import (
 	"testing"
 
-	"github.com/go-phorce/trusty/api/v1/trustypb"
-	"github.com/go-phorce/trusty/cli/status"
-	"github.com/go-phorce/trusty/cli/testsuite"
-	"github.com/go-phorce/trusty/tests/mockpb"
+	"github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/cli/status"
+	"github.com/ekspand/trusty/cli/testsuite"
+	"github.com/ekspand/trusty/tests/mockpb"
 	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/suite"
 )

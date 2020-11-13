@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-phorce/trusty/pkg/csr"
+	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/juju/errors"
 )
 

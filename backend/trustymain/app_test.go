@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ekspand/trusty/config"
+	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/algorithms/guid"
-	"github.com/go-phorce/trusty/config"
-	"github.com/go-phorce/trusty/tests/testutils"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

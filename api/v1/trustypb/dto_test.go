@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/go-phorce/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/api/v1/trustypb"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
+	v1 "github.com/ekspand/trusty/api/v1"
+	"github.com/ekspand/trusty/pkg/roles"
+	"github.com/ekspand/trusty/pkg/roles/jwtmapper"
 	"github.com/go-phorce/dolly/xhttp/header"
-	v1 "github.com/go-phorce/trusty/api/v1"
-	"github.com/go-phorce/trusty/pkg/roles"
-	"github.com/go-phorce/trusty/pkg/roles/jwtmapper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

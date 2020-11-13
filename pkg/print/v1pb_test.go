@@ -14,9 +14,9 @@ import (
 	"time"
 
 	"github.com/cloudflare/cfssl/helpers"
-	"github.com/go-phorce/trusty/api/v1/trustypb"
-	pb "github.com/go-phorce/trusty/api/v1/trustypb"
-	"github.com/go-phorce/trusty/pkg/print"
+	"github.com/ekspand/trusty/api/v1/trustypb"
+	pb "github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/pkg/print"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

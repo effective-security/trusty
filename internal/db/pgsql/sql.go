@@ -7,7 +7,7 @@ import (
 	"github.com/juju/errors"
 )
 
-var logger = xlog.NewPackageLogger("github.com/go-phorce/trusty/internal/db", "pgsql")
+var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/internal/db", "pgsql")
 
 const (
 	defaultLimitOfRows = 1000

@@ -4,12 +4,12 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/ekspand/trusty/pkg/print"
+	"github.com/ekspand/trusty/version"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xhttp/marshal"
-	"github.com/go-phorce/trusty/pkg/print"
-	"github.com/go-phorce/trusty/version"
 )
 
 var alive = []byte("ALIVE")

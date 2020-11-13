@@ -7,19 +7,19 @@ import (
 	"sync"
 	"time"
 
+	pb "github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/config"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/netutil"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
-	pb "github.com/go-phorce/trusty/api/v1/trustypb"
-	"github.com/go-phorce/trusty/config"
 	"github.com/juju/errors"
 	"go.uber.org/dig"
 	"google.golang.org/grpc"
 )
 
-var logger = xlog.NewPackageLogger("github.com/go-phorce/trusty/backend", "trustyserver")
+var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend", "trustyserver")
 
 // ServiceFactory is interface to create Services
 type ServiceFactory func(*TrustyServer) interface{}

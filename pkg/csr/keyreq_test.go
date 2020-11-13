@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/go-phorce/trusty/pkg/csr"
-	"github.com/go-phorce/trusty/pkg/inmemcrypto"
+	"github.com/ekspand/trusty/pkg/csr"
+	"github.com/ekspand/trusty/pkg/inmemcrypto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

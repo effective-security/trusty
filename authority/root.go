@@ -3,8 +3,8 @@ package authority
 import (
 	"crypto"
 
+	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
-	"github.com/go-phorce/trusty/pkg/csr"
 	"github.com/juju/errors"
 )
 

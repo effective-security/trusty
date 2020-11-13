@@ -15,7 +15,7 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-var logger = xlog.NewPackageLogger("github.com/go-phorce/trusty/pkg", "oauth2client")
+var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "oauth2client")
 
 // Config provides OAuth2 configuration
 type Config struct {

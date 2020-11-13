@@ -9,15 +9,15 @@ import (
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
-	v1 "github.com/go-phorce/trusty/api/v1"
 	"github.com/juju/errors"
 )
 
-var logger = xlog.NewPackageLogger("github.com/go-phorce/trusty/pkg", "jwtmapper")
+var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "jwtmapper")
 
 // ProviderName is identifier for role mapper provider
 const ProviderName = "jwt"

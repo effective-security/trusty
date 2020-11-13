@@ -16,7 +16,7 @@ import (
 	"github.com/juju/errors"
 )
 
-var logger = xlog.NewPackageLogger("github.com/go-phorce/trusty/pkg", "inmemcrypto")
+var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "inmemcrypto")
 
 // inMemProv stores keyID to signer mapping in memory.
 // Private keys are exportable.

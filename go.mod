@@ -1,4 +1,4 @@
-module github.com/go-phorce/trusty
+module github.com/ekspand/trusty
 
 go 1.15
 

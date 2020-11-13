@@ -10,13 +10,13 @@ import (
 	"strings"
 	"sync/atomic"
 
+	"github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/cli"
+	"github.com/ekspand/trusty/client"
+	"github.com/ekspand/trusty/tests/mockpb"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/testify/servefiles"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
-	"github.com/go-phorce/trusty/api/v1/trustypb"
-	"github.com/go-phorce/trusty/cli"
-	"github.com/go-phorce/trusty/client"
-	"github.com/go-phorce/trusty/tests/mockpb"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc"
 )

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-phorce/trusty/internal/db"
-	"github.com/go-phorce/trusty/tests/testutils"
+	"github.com/ekspand/trusty/internal/db"
+	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

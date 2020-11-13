@@ -7,10 +7,10 @@ import (
 	"os"
 	"strings"
 
+	"github.com/ekspand/trusty/internal/db/model"
+	"github.com/ekspand/trusty/internal/db/pgsql"
 	"github.com/go-phorce/dolly/fileutil"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/trusty/internal/db/model"
-	"github.com/go-phorce/trusty/internal/db/pgsql"
 	"github.com/golang-migrate/migrate"
 	"github.com/golang-migrate/migrate/database/postgres"
 	"github.com/juju/errors"
@@ -22,7 +22,7 @@ import (
 	_ "github.com/golang-migrate/migrate/source/file"
 )
 
-var logger = xlog.NewPackageLogger("github.com/go-phorce/trusty/internal", "db")
+var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/internal", "db")
 
 // IDGenerator defines an interface to generate unique ID accross the cluster
 type IDGenerator interface {

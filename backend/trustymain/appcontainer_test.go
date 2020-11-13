@@ -5,11 +5,11 @@ import (
 	"path"
 	"testing"
 
+	"github.com/ekspand/trusty/config"
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/tasks"
-	"github.com/go-phorce/trusty/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

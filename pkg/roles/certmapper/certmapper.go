@@ -17,7 +17,7 @@ import (
 // ProviderName is identifier for role mapper provider
 const ProviderName = "cert"
 
-var logger = xlog.NewPackageLogger("github.com/go-phorce/trusty/pkg", "certmapper")
+var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "certmapper")
 
 // Identity of the caller
 type Identity struct {

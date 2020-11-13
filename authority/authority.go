@@ -1,13 +1,13 @@
 package authority
 
 import (
+	"github.com/ekspand/trusty/config"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
-	"github.com/go-phorce/trusty/config"
 	"github.com/juju/errors"
 )
 
-var logger = xlog.NewPackageLogger("github.com/go-phorce/trusty", "authority")
+var logger = xlog.NewPackageLogger("github.com/ekspand/trusty", "authority")
 
 // Authority defines the CA
 type Authority struct {

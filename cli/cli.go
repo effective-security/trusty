@@ -6,17 +6,17 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/ekspand/trusty/client"
+	"github.com/ekspand/trusty/config"
+	"github.com/ekspand/trusty/pkg/inmemcrypto"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/rest/tlsconfig"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
-	"github.com/go-phorce/trusty/client"
-	"github.com/go-phorce/trusty/config"
-	"github.com/go-phorce/trusty/pkg/inmemcrypto"
 	"github.com/juju/errors"
 )
 
-var logger = xlog.NewPackageLogger("github.com/go-phorce/trusty", "cli")
+var logger = xlog.NewPackageLogger("github.com/ekspand/trusty", "cli")
 
 // ReturnCode is the type that your command returns, these map to standard process return codes
 type ReturnCode ctl.ReturnCode

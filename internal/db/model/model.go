@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"strconv"
 
-	v1 "github.com/go-phorce/trusty/api/v1"
+	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/juju/errors"
 )
 

@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ekspand/trusty/config"
+	"github.com/ekspand/trusty/pkg/transport"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/rest/ready"
 	"github.com/go-phorce/dolly/xhttp"
@@ -15,8 +17,6 @@ import (
 	"github.com/go-phorce/dolly/xhttp/httperror"
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xhttp/marshal"
-	"github.com/go-phorce/trusty/config"
-	"github.com/go-phorce/trusty/pkg/transport"
 	"github.com/juju/errors"
 	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"

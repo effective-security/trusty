@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
+	"github.com/ekspand/trusty/internal/db"
+	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/trusty/internal/db"
-	"github.com/go-phorce/trusty/tests/testutils"
 	"github.com/juju/errors"
 )
 
