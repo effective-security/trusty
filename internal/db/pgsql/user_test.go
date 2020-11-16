@@ -40,6 +40,14 @@ func Test_LoginUser(t *testing.T) {
 	assert.Equal(t, 2, user2.LoginCount)
 
 	assert.Equal(t, user.ID, user2.ID)
+
+	user3, err := provider.GetUser(ctx, user2.ID)
+	require.NoError(t, err)
+	require.NotNil(t, user3)
+	assert.Equal(t, name, user3.Name)
+	assert.Equal(t, login, user3.Login)
+	assert.Equal(t, email, user3.Email)
+	assert.Equal(t, 2, user3.LoginCount)
 	/*
 		list, err := provider.ListUsers(ctx, "", 100)
 		require.NoError(t, err)

@@ -32,7 +32,10 @@ type IDGenerator interface {
 
 // UsersDb defines an interface for CRUD operations on Users and Teams
 type UsersDb interface {
+	// LoginUser returns User
 	LoginUser(ctx context.Context, user *model.User) (*model.User, error)
+	// GetUser returns User
+	GetUser(ctx context.Context, id int64) (*model.User, error)
 }
 
 // Provider represents SQL client instance

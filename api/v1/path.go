@@ -45,6 +45,12 @@ const (
 	// Response: v1.AuthStsURLResponse
 	PathForAuthURL = "/v1/auth/url"
 
+	// PathForAuthTokenRefresh returns access token
+	//
+	// Verbs: GET
+	// Response: v1.AuthTokenRefreshResponse
+	PathForAuthTokenRefresh = "/v1/auth/token/refresh"
+
 	// PathForAuthGithub is base path for the Auth service
 	PathForAuthGithub = "/v1/auth/github"
 

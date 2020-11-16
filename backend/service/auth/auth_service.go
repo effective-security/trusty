@@ -17,7 +17,9 @@ import (
 	"github.com/ekspand/trusty/pkg/oauth2client"
 	"github.com/ekspand/trusty/pkg/roles/jwtmapper"
 	"github.com/go-phorce/dolly/rest"
+	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/httperror"
+	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
@@ -85,6 +87,7 @@ func (s *Service) Close() {
 func (s *Service) RegisterRoute(r rest.Router) {
 	r.GET(v1.PathForAuthURL, s.AuthURLHandler())
 	r.GET(v1.PathForAuthGithubCallback, s.GithubCallbackHandler())
+	r.GET(v1.PathForAuthTokenRefresh, s.RefreshHandler())
 }
 
 // OAuthConfig returns oauth2client.Config,
@@ -246,5 +249,56 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 		)
 
 		http.Redirect(w, r, redirect, http.StatusSeeOther)
+	}
+}
+
+// RefreshHandler  for token
+func (s *Service) RefreshHandler() rest.Handle {
+	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
+		ctx := identity.ForRequest(r)
+		deviceID := r.Header.Get(header.XDeviceID)
+		idn := ctx.Identity()
+
+		userInfo, ok := idn.UserInfo().(*v1.UserInfo)
+		if !ok {
+			marshal.WriteJSON(w, r, httperror.WithForbidden("failed to extract User Info from the token"))
+			return
+		}
+
+		userID, _ := model.ID(userInfo.ID)
+
+		user, err := s.db.GetUser(context.Background(), userID)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithForbidden("user ID %d not found: %s", userID, err.Error()).WithCause(err))
+			return
+		}
+
+		if user.Email != userInfo.Email {
+			marshal.WriteJSON(w, r, httperror.WithForbidden("email in the token %s does not match to registered %s", userInfo.Email, user.Email))
+			return
+		}
+
+		auth, err := s.jwt.SignToken(userInfo, deviceID, 60*time.Minute)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithUnexpected("failed to sign JWT: %s", err.Error()).WithCause(err))
+			return
+		}
+
+		s.server.Audit(
+			ServiceName,
+			evtTokenRefreshed,
+			userInfo.Email,
+			deviceID,
+			0,
+			fmt.Sprintf("ID=%s, GithubID=%s, email=%s, name=%q",
+				userInfo.ID, userInfo.GithubID, userInfo.Email, userInfo.Name),
+		)
+
+		res := &v1.AuthTokenRefreshResponse{
+			Authorization: auth,
+			Profile:       userInfo,
+		}
+
+		marshal.WriteJSON(w, r, res)
 	}
 }

@@ -102,3 +102,12 @@ func String(val *string) string {
 	}
 	return *val
 }
+
+// ID returns id from the string
+func ID(id string) (int64, error) {
+	i64, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return 0, errors.Trace(err)
+	}
+	return i64, nil
+}

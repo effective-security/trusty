@@ -46,3 +46,29 @@ func (p *Provider) LoginUser(ctx context.Context, user *model.User) (*model.User
 
 	return res, nil
 }
+
+// GetUser returns user
+func (p *Provider) GetUser(ctx context.Context, id int64) (*model.User, error) {
+	user := new(model.User)
+
+	err := p.db.QueryRowContext(ctx,
+		`SELECT id,github_id,login,name,email,company,avatar_url,login_count,last_login_at
+		FROM users
+		WHERE id=$1
+		;`, id,
+	).Scan(&user.ID,
+		&user.GithubID,
+		&user.Login,
+		&user.Name,
+		&user.Email,
+		&user.Company,
+		&user.AvatarURL,
+		&user.LoginCount,
+		&user.LastLoginAt,
+	)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	return user, nil
+}
