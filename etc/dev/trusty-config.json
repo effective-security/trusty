@@ -35,7 +35,30 @@
                 "RequestTimeout": "3s",
                 "KeepAliveMinTime": "60s",
                 "KeepAliveInterval": "30s",
-                "KeepAliveTimeout": "180s"
+                "KeepAliveTimeout": "180s",
+                "CORS": {
+                    "Enabled": true,
+                    "MaxAge": 600,
+                    "AllowCredentials": true,
+                    "AllowedOrigins": [
+                        "*"
+                    ],
+                    "AllowedMethods": [
+                        "HEAD",
+                        "OPTIONS",
+                        "GET",
+                        "POST",
+                        "DELETE"
+                    ],
+                    "AllowedHeaders": [
+                        "Accept",
+                        "Content-Type",
+                        "Content-Length",
+                        "Accept-Encoding",
+                        "Authorization",
+                        "X-Device-ID"
+                    ]
+                }
             }
         ],
         "TrustyClient": {
@@ -44,7 +67,7 @@
                 "KeyFile": "/tmp/trusty/certs/trusty_dev_peer-key.pem",
                 "TrustedCAFile": "/tmp/trusty/certs/trusty_dev_root_ca.pem"
             },
-            "PublicURL" : "https://localhost:7891",
+            "PublicURL": "https://localhost:7891",
             "Servers": [
                 "https://0.0.0.0:7891"
             ]

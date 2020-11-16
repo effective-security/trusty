@@ -3,6 +3,7 @@ package auth_test
 import (
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"strings"
 	"sync"
@@ -16,6 +17,7 @@ import (
 	"github.com/ekspand/trusty/backend/trustyserver"
 	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/testify/servefiles"
+	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
@@ -207,4 +209,43 @@ func Test_GithubCallbackHandler(t *testing.T) {
 		loc := w.Header().Get("Location")
 		assert.NotEmpty(t, loc)
 	})
+}
+
+func TestRefreshHandler(t *testing.T) {
+	service := trustyServer.Service(auth.ServiceName).(*auth.Service)
+	require.NotNil(t, service)
+
+	w := httptest.NewRecorder()
+	r, err := http.NewRequest(http.MethodGet, v1.PathForAuthGithubCallback+"?code=9298935ecf8777061ff2&state=eyJyZWRpcmVjdF91cmwiOiJodHRwczovL2xvY2FsaG9zdDo3ODkxL3YxL3N0YXR1cyIsImRldmljZV9pZCI6IjEyMzQifQ", nil)
+	require.NoError(t, err)
+
+	service.GithubCallbackHandler()(w, r, nil)
+	require.Equal(t, http.StatusSeeOther, w.Code)
+	loc := w.Header().Get("Location")
+	assert.NotEmpty(t, loc)
+
+	u, err := url.Parse(loc)
+	require.NoError(t, err)
+
+	code := u.Query()["code"]
+	require.NotEmpty(t, code)
+	require.NotEmpty(t, code[0])
+	device := u.Query()["device_id"]
+	require.NotEmpty(t, device)
+	require.NotEmpty(t, device[0])
+
+	w = httptest.NewRecorder()
+	r, err = http.NewRequest(http.MethodGet, v1.PathForAuthTokenRefresh, nil)
+	require.NoError(t, err)
+	r.Header.Set(header.Authorization, header.Bearer+" "+code[0])
+	r.Header.Set(header.XDeviceID, device[0])
+
+	service.RefreshHandler()(w, r, nil)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var res v1.AuthTokenRefreshResponse
+	require.NoError(t, marshal.Decode(w.Body, &res))
+	require.NotNil(t, res)
+	assert.NotNil(t, res.Authorization)
+	assert.NotNil(t, res.Profile)
 }

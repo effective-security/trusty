@@ -15,6 +15,7 @@ func TestPaths(t *testing.T) {
 	assert.Equal(t, "/v1/status/version", v1.PathForStatusVersion)
 
 	assert.Equal(t, "/v1/auth/url", v1.PathForAuthURL)
+	assert.Equal(t, "/v1/auth/token/refresh", v1.PathForAuthTokenRefresh)
 	assert.Equal(t, "/v1/auth/github", v1.PathForAuthGithub)
 	assert.Equal(t, "/v1/auth/github/callback", v1.PathForAuthGithubCallback)
 }

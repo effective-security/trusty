@@ -1,6 +1,7 @@
 package model_test
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -44,4 +45,53 @@ func TestUser(t *testing.T) {
 	assert.Equal(t, u.Email, dto.Email)
 	assert.Equal(t, u.Company, dto.Company)
 	assert.Equal(t, u.AvatarURL, dto.AvatarURL)
+}
+
+func TestNullInt64(t *testing.T) {
+	v := model.NullInt64(nil)
+	require.NotNil(t, v)
+	assert.False(t, v.Valid)
+
+	i := int64(10000)
+	v = model.NullInt64(&i)
+	require.NotNil(t, v)
+	assert.True(t, v.Valid)
+	assert.Equal(t, i, v.Int64)
+}
+
+func TestString(t *testing.T) {
+	v := model.String(nil)
+	assert.Empty(t, v)
+
+	s := "1234"
+	v = model.String(&s)
+	assert.Equal(t, s, v)
+}
+func TestID(t *testing.T) {
+	v, err := model.ID("")
+	require.Error(t, err)
+
+	v, err = model.ID("@123")
+	require.Error(t, err)
+
+	v, err = model.ID("1234567")
+	require.NoError(t, err)
+	assert.Equal(t, int64(1234567), v)
+}
+
+type validator struct {
+	valid bool
+}
+
+func (t validator) Validate() error {
+	if !t.valid {
+		return errors.New("invalid")
+	}
+	return nil
+}
+
+func TestValidate(t *testing.T) {
+	assert.Error(t, model.Validate(validator{false}))
+	assert.NoError(t, model.Validate(validator{true}))
+	assert.NoError(t, model.Validate(nil))
 }
