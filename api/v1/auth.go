@@ -15,13 +15,14 @@ type AuthState struct {
 
 // UserInfo provides basic info about user
 type UserInfo struct {
-	ID        string `json:"id"`
-	GithubID  string `json:"github_id"`
-	Login     string `json:"login"`
-	Name      string `json:"name"`
-	Email     string `json:"email"`
-	Company   string `json:"company"`
-	AvatarURL string `json:"avatar_url"`
+	ID         string `json:"id"`
+	ExternalID string `json:"extern_id"`
+	Provider   string `json:"provider"`
+	Login      string `json:"login"`
+	Name       string `json:"name"`
+	Email      string `json:"email"`
+	Company    string `json:"company"`
+	AvatarURL  string `json:"avatar_url"`
 }
 
 // Authorization is returned to the client in token refresh response

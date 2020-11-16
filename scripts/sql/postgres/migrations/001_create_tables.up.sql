@@ -18,15 +18,20 @@ $$ language 'plpgsql';
 CREATE TABLE IF NOT EXISTS public.users
 (
     id bigint NOT NULL,
-    github_id bigint NULL,
+    extern_id bigint NULL,
+    provider character varying(16) COLLATE pg_catalog."default" NOT NULL,
     login character varying(64) COLLATE pg_catalog."default" NOT NULL,
     name character varying(64) COLLATE pg_catalog."default" NOT NULL,
     email character varying(160) COLLATE pg_catalog."default" NOT NULL,
     company character varying(64) COLLATE pg_catalog."default" NULL,
     avatar_url character varying(256) COLLATE pg_catalog."default" NULL,
+    access_token text COLLATE pg_catalog."default" NULL,
+    refresh_token text COLLATE pg_catalog."default" NULL,
+    token_expires_at timestamp with time zone,
     login_count integer,
     last_login_at timestamp with time zone,
-    CONSTRAINT users_pkey PRIMARY KEY (id)
+    CONSTRAINT users_pkey PRIMARY KEY (id),
+    CONSTRAINT users_provider_id UNIQUE (extern_id, provider)
 )
 WITH (
     OIDS = FALSE
