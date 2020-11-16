@@ -31,21 +31,26 @@ func Validate(m interface{}) error {
 
 // User provides basic user information
 type User struct {
-	ID          int64         `db:"id"`
-	GithubID    sql.NullInt64 `db:"github_id"`
-	Login       string        `db:"login"`
-	Name        string        `db:"name"`
-	Email       string        `db:"email"`
-	Company     string        `db:"company"`
-	AvatarURL   string        `db:"avatar_url"`
-	LoginCount  int           `db:"login_count"`
-	LastLoginAt sql.NullTime  `db:"last_login_at"`
+	ID             int64         `db:"id"`
+	ExternalID     sql.NullInt64 `db:"extern_id"`
+	Provider       string        `db:"provider"`
+	Login          string        `db:"login"`
+	Name           string        `db:"name"`
+	Email          string        `db:"email"`
+	Company        string        `db:"company"`
+	AvatarURL      string        `db:"avatar_url"`
+	AccessToken    string        `db:"access_token"`
+	RefreshToken   string        `db:"refresh_token"`
+	TokenExpiresAt sql.NullTime  `db:"token_expires_at"`
+	LoginCount     int           `db:"login_count"`
+	LastLoginAt    sql.NullTime  `db:"last_login_at"`
 }
 
 // ToDto converts model to v1.User DTO
 func (u *User) ToDto() *v1.UserInfo {
 	user := &v1.UserInfo{
 		ID:        strconv.FormatUint(uint64(u.ID), 10),
+		Provider:  u.Provider,
 		Login:     u.Login,
 		Name:      u.Name,
 		Email:     u.Email,
@@ -54,8 +59,8 @@ func (u *User) ToDto() *v1.UserInfo {
 		//LoginCount: u.LoginCount,
 	}
 
-	if u.GithubID.Valid {
-		user.GithubID = strconv.FormatUint(uint64(u.GithubID.Int64), 10)
+	if u.ExternalID.Valid {
+		user.ExternalID = strconv.FormatUint(uint64(u.ExternalID.Int64), 10)
 	}
 
 	/*

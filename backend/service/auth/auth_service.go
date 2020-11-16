@@ -192,8 +192,9 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 			marshal.WriteJSON(w, r, httperror.WithForbidden("authorization failed: %s", err.Error()).WithCause(err))
 			return
 		}
-		//logger.Debugf("src=githubCallbackHandler, redirectURL=%q, deviceID=%s, token=[%+v]",
-		//	oauthStatus.RedirectURL, oauthStatus.DeviceID, *token)
+
+		logger.Debugf("src=githubCallbackHandler, redirectURL=%q, deviceID=%s, token=[%+v]",
+			oauthStatus.RedirectURL, oauthStatus.DeviceID, *token)
 
 		if !token.Valid() {
 			marshal.WriteJSON(w, r, httperror.WithForbidden("retreived invalid token"))
@@ -214,12 +215,15 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 		}
 
 		user := &model.User{
-			GithubID:  model.NullInt64(ghu.ID),
-			Login:     model.String(ghu.Login),
-			Name:      model.String(ghu.Name),
-			Email:     model.String(ghu.Email),
-			Company:   model.String(ghu.Company),
-			AvatarURL: model.String(ghu.AvatarURL),
+			ExternalID:   model.NullInt64(ghu.ID),
+			Provider:     "github",
+			Login:        model.String(ghu.Login),
+			Name:         model.String(ghu.Name),
+			Email:        model.String(ghu.Email),
+			Company:      model.String(ghu.Company),
+			AvatarURL:    model.String(ghu.AvatarURL),
+			AccessToken:  token.AccessToken,
+			RefreshToken: token.RefreshToken,
 		}
 
 		user, err = s.db.LoginUser(ctx, user)
@@ -244,8 +248,8 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 			user.Email,
 			oauthStatus.DeviceID,
 			0,
-			fmt.Sprintf("ID=%s, GithubID=%s, email=%s, name=%q",
-				dto.ID, dto.GithubID, dto.Email, dto.Name),
+			fmt.Sprintf("ID=%s, ExternalID=%s, email=%s, name=%q",
+				dto.ID, dto.ExternalID, dto.Email, dto.Name),
 		)
 
 		http.Redirect(w, r, redirect, http.StatusSeeOther)
@@ -278,7 +282,7 @@ func (s *Service) RefreshHandler() rest.Handle {
 			return
 		}
 
-		auth, err := s.jwt.SignToken(userInfo, deviceID, 60*time.Minute)
+		auth, err := s.jwt.SignToken(userInfo, deviceID, 8*60*time.Minute)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("failed to sign JWT: %s", err.Error()).WithCause(err))
 			return
@@ -290,8 +294,8 @@ func (s *Service) RefreshHandler() rest.Handle {
 			userInfo.Email,
 			deviceID,
 			0,
-			fmt.Sprintf("ID=%s, GithubID=%s, email=%s, name=%q",
-				userInfo.ID, userInfo.GithubID, userInfo.Email, userInfo.Name),
+			fmt.Sprintf("ID=%s, ExternalID=%s, email=%s, name=%q",
+				userInfo.ID, userInfo.ExternalID, userInfo.Email, userInfo.Name),
 		)
 
 		res := &v1.AuthTokenRefreshResponse{
