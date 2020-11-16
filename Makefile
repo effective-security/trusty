@@ -129,3 +129,7 @@ drop-sql:
 	docker pull ekspand/docker-centos7-postgres:latest
 	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 5432 -U postgres -a -f /scripts/pgsql/drop-trustydb.sql
 	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 5432 -U postgres -lqt
+
+coveralls-github:
+	echo "Running coveralls"
+	goveralls -v -coverprofile=coverage.out -service=github -package ./...

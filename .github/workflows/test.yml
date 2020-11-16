@@ -1,0 +1,27 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        go-version: [1.15.x]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go-version }}
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Install xmllint
+      run: sudo apt-get install softhsm2 opensc
+    - name: Prepare
+      run: make vars tools folders generate hsmconfig
+    - name: Test
+      env:
+        TRUSTY_GITHUB_CLIENT_SECRET: ${{ secrets.TRUSTY_GITHUB_CLIENT_SECRET }}
+        COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: make build gen_test_certs start-sql covtest coveralls-github
