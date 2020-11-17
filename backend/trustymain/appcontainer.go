@@ -32,7 +32,10 @@ type ProvideAuditorFn func(cfg *config.Configuration, r CloseRegistrator) (audit
 type ProvideSchedulerFn func() (tasks.Scheduler, error)
 
 // ProvideAuthzFn defines Authz provider
-type ProvideAuthzFn func(cfg *config.Configuration) (rest.Authz, *oauth2client.Client, *jwtmapper.Provider, error)
+type ProvideAuthzFn func(cfg *config.Configuration) (rest.Authz, *jwtmapper.Provider, error)
+
+// ProvideOAuthClientsFn defines OAuth clients provider
+type ProvideOAuthClientsFn func(cfg *config.Configuration) (*oauth2client.Provider, error)
 
 // ProvideCryptoFn defines Crypto provider
 type ProvideCryptoFn func(cfg *config.Configuration) (*cryptoprov.Crypto, error)
@@ -57,6 +60,7 @@ type ContainerFactory struct {
 	cryptoProvider    ProvideCryptoFn
 	authorityProvider ProvideAuthorityFn
 	dbProvider        ProvideDbFn
+	oauthProvider     ProvideOAuthClientsFn
 }
 
 // NewContainerFactory returns an instance of ContainerFactory
@@ -79,12 +83,19 @@ func NewContainerFactory(app *App) *ContainerFactory {
 		WithSchedulerProvider(defaultSchedulerProv).
 		WithCryptoProvider(provideCrypto).
 		WithAuthorityProvider(provideAuthority).
-		WithDbProvider(provideDB)
+		WithDbProvider(provideDB).
+		WithOAuthClientsProvider(provideOAuth)
 }
 
 // WithAuthzProvider allows to specify custom Authz
 func (f *ContainerFactory) WithAuthzProvider(p ProvideAuthzFn) *ContainerFactory {
 	f.authzProvider = p
+	return f
+}
+
+// WithOAuthClientsProvider allows to specify custom OAuth clients provider
+func (f *ContainerFactory) WithOAuthClientsProvider(p ProvideOAuthClientsFn) *ContainerFactory {
+	f.oauthProvider = p
 	return f
 }
 
@@ -141,6 +152,11 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 		return nil, errors.Trace(err)
 	}
 
+	err = container.Provide(f.oauthProvider)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
 	err = container.Provide(f.cryptoProvider)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -176,8 +192,7 @@ func provideAuditor(cfg *config.Configuration, r CloseRegistrator) (audit.Audito
 	return auditor, nil
 }
 
-func provideAuthz(cfg *config.Configuration) (rest.Authz, *oauth2client.Client, *jwtmapper.Provider, error) {
-	var oauth *oauth2client.Client
+func provideAuthz(cfg *config.Configuration) (rest.Authz, *jwtmapper.Provider, error) {
 	var azp rest.Authz
 	var jwt *jwtmapper.Provider
 	var err error
@@ -193,7 +208,7 @@ func provideAuthz(cfg *config.Configuration) (rest.Authz, *oauth2client.Client, 
 			LogDenied:     cfg.Authz.GetLogDenied(),
 		})
 		if err != nil {
-			return nil, nil, nil, errors.Trace(err)
+			return nil, nil, errors.Trace(err)
 		}
 	}
 	if cfg.Authz.JWTMapper != "" || cfg.Authz.CertMapper != "" {
@@ -202,20 +217,21 @@ func provideAuthz(cfg *config.Configuration) (rest.Authz, *oauth2client.Client, 
 			cfg.Authz.CertMapper,
 		)
 		if err != nil {
-			return nil, nil, nil, errors.Trace(err)
+			return nil, nil, errors.Trace(err)
 		}
 		identity.SetGlobalIdentityMapper(p.IdentityMapper)
 		jwt = p.JwtMapper
 	}
 
-	if cfg.Authz.OAuthClient != "" {
-		oauth, err = oauth2client.Load(cfg.Authz.OAuthClient)
-		if err != nil {
-			return nil, nil, nil, errors.Trace(err)
-		}
-	}
+	return azp, jwt, nil
+}
 
-	return azp, oauth, jwt, nil
+func provideOAuth(cfg *config.Configuration) (*oauth2client.Provider, error) {
+	p, err := oauth2client.NewProvider(cfg.OAuthClients)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return p, nil
 }
 
 func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {

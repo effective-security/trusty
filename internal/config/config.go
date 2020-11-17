@@ -123,9 +123,6 @@ type Authz struct {
 
 	// JWTMapper specifies location of the config file for JWT based identity.
 	JWTMapper string
-
-	// OAuthClient specifies the configuration file for OAuth client.
-	OAuthClient string
 }
 
 func (c *Authz) overrideFrom(o *Authz) {
@@ -138,7 +135,6 @@ func (c *Authz) overrideFrom(o *Authz) {
 	overrideString(&c.CertMapper, &o.CertMapper)
 	overrideString(&c.APIKeyMapper, &o.APIKeyMapper)
 	overrideString(&c.JWTMapper, &o.JWTMapper)
-	overrideString(&c.OAuthClient, &o.OAuthClient)
 
 }
 
@@ -162,8 +158,6 @@ type AuthzConfig interface {
 	GetAPIKeyMapper() string
 	// JWTMapper specifies location of the config file for JWT based identity.
 	GetJWTMapper() string
-	// OAuthClient specifies the configuration file for OAuth client.
-	GetOAuthClient() string
 }
 
 // GetAllow will allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
@@ -209,11 +203,6 @@ func (c *Authz) GetAPIKeyMapper() string {
 // GetJWTMapper specifies location of the config file for JWT based identity.
 func (c *Authz) GetJWTMapper() string {
 	return c.JWTMapper
-}
-
-// GetOAuthClient specifies the configuration file for OAuth client.
-func (c *Authz) GetOAuthClient() string {
-	return c.OAuthClient
 }
 
 // AutoGenCert contains configuration info for the auto generated certificate
@@ -455,6 +444,9 @@ type Configuration struct {
 	// VIPs is a list of the FQ name of the VIP to the cluster
 	VIPs []string
 
+	// OAuthClients specifies the configuration files for OAuth clients
+	OAuthClients []string
+
 	// Authority contains configuration info for CA
 	Authority Authority
 
@@ -475,6 +467,7 @@ func (c *Configuration) overrideFrom(o *Configuration) {
 	overrideHTTPServerSlice(&c.HTTPServers, &o.HTTPServers)
 	c.TrustyClient.overrideFrom(&o.TrustyClient)
 	overrideStrings(&c.VIPs, &o.VIPs)
+	overrideStrings(&c.OAuthClients, &o.OAuthClients)
 	c.Authority.overrideFrom(&o.Authority)
 	c.SQL.overrideFrom(&o.SQL)
 

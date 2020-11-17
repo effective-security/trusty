@@ -89,9 +89,11 @@
             "LogAllowed": true,
             "LogDenied": true,
             "CertMapper": "cert-roles.dev.json",
-            "JWTMapper": "jwt-roles.dev.json",
-            "OAuthClient": "oauth-github.dev.json"
+            "JWTMapper": "jwt-roles.dev.json"
         },
+        "OAuthClients": [
+            "oauth-github.dev.json"
+        ],
         "LogLevels": [
             {
                 "Repo": "*",

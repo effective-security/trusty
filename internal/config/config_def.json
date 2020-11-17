@@ -2,20 +2,21 @@
     "Configuration" : {
         "comment" : "Configuration contains the user configurable data for the service",
         "Fields" : [
-            { "name" : "Region",        "type" : "string",        "comment" : "Region specifies the Region / Datacenter where the instance is running" },
-            { "name" : "Environment",   "type" : "string",        "comment" : "Environment specifies the environment where the instance is running: prod|stage|dev" },
-            { "name" : "ServiceName",   "type" : "string",        "comment" : "ServiceName specifies the service name to be used in logs, metrics, etc" },
-            { "name" : "ClusterName",   "type" : "string",        "comment" : "ClusterName specifies the cluster name" },
-            { "name" : "CryptoProv",    "type" : "CryptoProv",    "comment" : "CryptoProv specifies the configuration for crypto providers" },
-            { "name" : "Audit",         "type" : "Logger",        "comment" : "Audit contains configuration for the audit logger" },
-            { "name" : "Authz",         "type" : "Authz",         "comment" : "Authz contains configuration for the API authorization layer"},
-            { "name" : "Logger",        "type" : "Logger",        "comment" : "Logger contains configuration for the logger" },
-            { "name" : "LogLevels",     "type" : "[]RepoLogLevel","comment" : "LogLevels specifies the log levels per package" },
-            { "name" : "HTTPServers",   "type" : "[]HTTPServer",  "comment" : "HTTPServers specifies a list of servers that expose HTTP or gRPC services"},
-            { "name" : "TrustyClient",  "type" : "TrustyClient",  "comment" : "TrustyClient specifies configurations for the client to connect to the cluster"},
-            { "name" : "VIPs",          "type" : "[]string",      "comment" : "VIPs is a list of the FQ name of the VIP to the cluster" },
-            { "name" : "Authority",     "type" : "Authority",     "comment" : "Authority contains configuration info for CA" },
-            { "name" : "SQL",           "type" : "SQL",           "comment" : "SQL specifies the configuration for SQL provider" }
+            { "name" : "Region",       "type" : "string",        "comment" : "Region specifies the Region / Datacenter where the instance is running" },
+            { "name" : "Environment",  "type" : "string",        "comment" : "Environment specifies the environment where the instance is running: prod|stage|dev" },
+            { "name" : "ServiceName",  "type" : "string",        "comment" : "ServiceName specifies the service name to be used in logs, metrics, etc" },
+            { "name" : "ClusterName",  "type" : "string",        "comment" : "ClusterName specifies the cluster name" },
+            { "name" : "CryptoProv",   "type" : "CryptoProv",    "comment" : "CryptoProv specifies the configuration for crypto providers" },
+            { "name" : "Audit",        "type" : "Logger",        "comment" : "Audit contains configuration for the audit logger" },
+            { "name" : "Authz",        "type" : "Authz",         "comment" : "Authz contains configuration for the API authorization layer"},
+            { "name" : "Logger",       "type" : "Logger",        "comment" : "Logger contains configuration for the logger" },
+            { "name" : "LogLevels",    "type" : "[]RepoLogLevel","comment" : "LogLevels specifies the log levels per package" },
+            { "name" : "HTTPServers",  "type" : "[]HTTPServer",  "comment" : "HTTPServers specifies a list of servers that expose HTTP or gRPC services"},
+            { "name" : "TrustyClient", "type" : "TrustyClient",  "comment" : "TrustyClient specifies configurations for the client to connect to the cluster"},
+            { "name" : "VIPs",         "type" : "[]string",      "comment" : "VIPs is a list of the FQ name of the VIP to the cluster" },
+            { "name" : "OAuthClients", "type" : "[]string",      "comment" : "OAuthClients specifies the configuration files for OAuth clients" },
+            { "name" : "Authority",    "type" : "Authority",     "comment" : "Authority contains configuration info for CA" },
+            { "name" : "SQL",          "type" : "SQL",           "comment" : "SQL specifies the configuration for SQL provider" }
         ]
     },
     "RelatedTypes" : {
@@ -31,8 +32,7 @@
                 { "name" : "LogDenied",    "type" : "*bool",    "comment" : "LogDenied specifies to log denied access"},
                 { "name" : "CertMapper",   "type" : "string",   "comment" : "CertMapper specifies location of the config file for certificate based identity." },
                 { "name" : "APIKeyMapper", "type" : "string",   "comment" : "APIKeyMapper specifies location of the config file for API-Key based identity." },
-                { "name" : "JWTMapper",    "type" : "string",   "comment" : "JWTMapper specifies location of the config file for JWT based identity." },
-                { "name" : "OAuthClient",  "type" : "string",   "comment" : "OAuthClient specifies the configuration file for OAuth client." }
+                { "name" : "JWTMapper",    "type" : "string",   "comment" : "JWTMapper specifies location of the config file for JWT based identity." }
             ]
         },
         "CORS" : {

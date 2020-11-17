@@ -153,7 +153,7 @@ func Test_GithubCallbackHandler(t *testing.T) {
 	server := servefiles.New(t)
 	server.SetBaseDirs("testdata")
 
-	o := service.OAuthConfig()
+	o := service.OAuthConfig("github")
 	o.AuthURL = strings.Replace(o.AuthURL, "https://github.com", server.URL(), 1)
 	o.TokenURL = strings.Replace(o.TokenURL, "https://github.com", server.URL(), 1)
 	service.GithubBaseURL = server.URL() + "/"

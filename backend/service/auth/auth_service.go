@@ -42,11 +42,11 @@ const (
 type Service struct {
 	GithubBaseURL string
 
-	server *trustyserver.TrustyServer
-	cfg    *config.Configuration
-	oauth  *oauth2client.Client
-	db     db.Provider
-	jwt    *jwtmapper.Provider
+	server    *trustyserver.TrustyServer
+	cfg       *config.Configuration
+	oauthProv *oauth2client.Provider
+	db        db.Provider
+	jwt       *jwtmapper.Provider
 }
 
 // Factory returns a factory of the service
@@ -55,13 +55,13 @@ func Factory(server *trustyserver.TrustyServer) interface{} {
 		logger.Panic("status.Factory: invalid parameter")
 	}
 
-	return func(cfg *config.Configuration, oauth *oauth2client.Client, db db.Provider, jwt *jwtmapper.Provider) error {
+	return func(cfg *config.Configuration, oauthProv *oauth2client.Provider, db db.Provider, jwt *jwtmapper.Provider) error {
 		svc := &Service{
-			server: server,
-			cfg:    cfg,
-			oauth:  oauth,
-			db:     db,
-			jwt:    jwt,
+			server:    server,
+			cfg:       cfg,
+			oauthProv: oauthProv,
+			db:        db,
+			jwt:       jwt,
 		}
 
 		server.AddService(svc)
@@ -92,8 +92,8 @@ func (s *Service) RegisterRoute(r rest.Router) {
 
 // OAuthConfig returns oauth2client.Config,
 // to be used in tests
-func (s *Service) OAuthConfig() *oauth2client.Config {
-	return s.oauth.Config()
+func (s *Service) OAuthConfig(provider string) *oauth2client.Config {
+	return s.oauthProv.Client(provider).Config()
 }
 
 // AuthURLHandler handles v1.PathForAuthURL
@@ -118,7 +118,7 @@ func (s *Service) AuthURLHandler() rest.Handle {
 		responseMode := oauth2.SetAuthURLParam("response_mode", "query")
 		oauth2ResponseType := oauth2.SetAuthURLParam("response_type", "code")
 
-		o := s.oauth.Config()
+		o := s.OAuthConfig("github")
 		conf := &oauth2.Config{
 			ClientID:     o.ClientID,
 			ClientSecret: o.ClientSecret,
@@ -171,7 +171,7 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 			return
 		}
 
-		o := s.oauth.Config()
+		o := s.OAuthConfig("github")
 		conf := &oauth2.Config{
 			ClientID:     o.ClientID,
 			ClientSecret: o.ClientSecret,
