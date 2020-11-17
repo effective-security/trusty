@@ -1,6 +1,6 @@
 # trusty
 
-[![Build Status](https://travis-ci.com/ekspand/trusty.svg?branch=master)](https://travis-ci.com/ekspand/trusty)
+![Build](https://github.com/ekspand/trusty/workflows/Build/badge.svg?branch=master)
 [![Coverage Status](https://coveralls.io/repos/github/ekspand/trusty/badge.svg?branch=master)](https://coveralls.io/github/ekspand/trusty?branch=master)
 
 Trusty is a Certification Authority.
