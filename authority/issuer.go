@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ekspand/trusty/config"
+	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"

@@ -3,7 +3,7 @@ package trustyserver
 import (
 	"crypto/x509"
 
-	"github.com/ekspand/trusty/config"
+	"github.com/ekspand/trusty/internal/config"
 	metricsutil "github.com/go-phorce/dolly/metrics/util"
 	"github.com/go-phorce/dolly/rest/tlsconfig"
 )

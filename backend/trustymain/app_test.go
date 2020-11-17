@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ekspand/trusty/config"
+	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/juju/errors"

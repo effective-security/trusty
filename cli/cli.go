@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/ekspand/trusty/client"
-	"github.com/ekspand/trusty/config"
+	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/inmemcrypto"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/rest/tlsconfig"

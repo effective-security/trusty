@@ -5,7 +5,7 @@ import (
 
 	"github.com/ekspand/trusty/authority"
 	"github.com/ekspand/trusty/cli"
-	"github.com/ekspand/trusty/config"
+	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/juju/errors"

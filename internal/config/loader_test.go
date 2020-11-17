@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const projFolder = "../"
+const projFolder = "../../"
 
 func Test_NewFactory(t *testing.T) {
 	f, err := NewFactory(nil, nil)

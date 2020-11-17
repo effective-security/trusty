@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/ekspand/trusty/authority"
-	"github.com/ekspand/trusty/config"
+	"github.com/ekspand/trusty/internal/config"
 )
 
 func (s *testSuite) TestNewIssuer() {
