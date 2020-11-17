@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/ekspand/trusty/internal/db/model"
 	"github.com/stretchr/testify/assert"
@@ -57,6 +58,18 @@ func TestNullInt64(t *testing.T) {
 	require.NotNil(t, v)
 	assert.True(t, v.Valid)
 	assert.Equal(t, i, v.Int64)
+}
+
+func NullTime(t *testing.T) {
+	v := model.NullTime(nil)
+	require.NotNil(t, v)
+	assert.False(t, v.Valid)
+
+	i := time.Now()
+	v = model.NullTime(&i)
+	require.NotNil(t, v)
+	assert.True(t, v.Valid)
+	assert.Equal(t, i, v.Time)
 }
 
 func TestString(t *testing.T) {

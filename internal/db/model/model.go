@@ -3,6 +3,7 @@ package model
 import (
 	"database/sql"
 	"strconv"
+	"time"
 
 	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/juju/errors"
@@ -98,6 +99,15 @@ func NullInt64(val *int64) sql.NullInt64 {
 	}
 
 	return sql.NullInt64{Int64: *val, Valid: true}
+}
+
+// NullTime from *time.Time
+func NullTime(val *time.Time) sql.NullTime {
+	if val == nil {
+		return sql.NullTime{Valid: false}
+	}
+
+	return sql.NullTime{Time: *val, Valid: true}
 }
 
 // String returns string

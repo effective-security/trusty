@@ -53,7 +53,7 @@ folders:
 
 version:
 	echo "*** building version"
-	gofmt -r '"GIT_VERSION" -> "$(GIT_VERSION)"' version/current.template > version/current.go
+	gofmt -r '"GIT_VERSION" -> "$(GIT_VERSION)"' internal/version/current.template > internal/version/current.go
 
 proto:
 	./scripts/build/genproto.sh

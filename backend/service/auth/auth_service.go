@@ -226,6 +226,10 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 			RefreshToken: token.RefreshToken,
 		}
 
+		if !token.Expiry.IsZero() {
+			user.TokenExpiresAt = model.NullTime(&token.Expiry)
+		}
+
 		user, err = s.db.LoginUser(ctx, user)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("failed to login user: %s", err.Error()).WithCause(err))

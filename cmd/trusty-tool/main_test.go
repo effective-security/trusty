@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/ekspand/trusty/config"
-	"github.com/ekspand/trusty/version"
+	"github.com/ekspand/trusty/internal/version"
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/stretchr/testify/assert"
