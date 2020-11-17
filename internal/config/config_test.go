@@ -316,8 +316,7 @@ func TestAuthz_overrideFrom(t *testing.T) {
 		LogDenied:     &trueVal,
 		CertMapper:    "one",
 		APIKeyMapper:  "one",
-		JWTMapper:     "one",
-		OAuthClient:   "one"}
+		JWTMapper:     "one"}
 	dest := orig
 	var zero Authz
 	dest.overrideFrom(&zero)
@@ -331,8 +330,7 @@ func TestAuthz_overrideFrom(t *testing.T) {
 		LogDenied:     &falseVal,
 		CertMapper:    "two",
 		APIKeyMapper:  "two",
-		JWTMapper:     "two",
-		OAuthClient:   "two"}
+		JWTMapper:     "two"}
 	dest.overrideFrom(&o)
 	require.Equal(t, dest, o, "Authz.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
 	o2 := Authz{
@@ -354,8 +352,7 @@ func TestAuthz_Getters(t *testing.T) {
 		LogDenied:     &trueVal,
 		CertMapper:    "one",
 		APIKeyMapper:  "one",
-		JWTMapper:     "one",
-		OAuthClient:   "one"}
+		JWTMapper:     "one"}
 
 	gv0 := orig.GetAllow()
 	require.Equal(t, orig.Allow, gv0, "Authz.GetAllowCfg() does not match")
@@ -383,9 +380,6 @@ func TestAuthz_Getters(t *testing.T) {
 
 	gv8 := orig.GetJWTMapper()
 	require.Equal(t, orig.JWTMapper, gv8, "Authz.GetJWTMapperCfg() does not match")
-
-	gv9 := orig.GetOAuthClient()
-	require.Equal(t, orig.OAuthClient, gv9, "Authz.GetOAuthClientCfg() does not match")
 
 }
 
@@ -554,8 +548,7 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 			LogDenied:     &trueVal,
 			CertMapper:    "one",
 			APIKeyMapper:  "one",
-			JWTMapper:     "one",
-			OAuthClient:   "one"},
+			JWTMapper:     "one"},
 		Logger: Logger{
 			Directory:  "one",
 			MaxAgeDays: -42,
@@ -610,7 +603,8 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 				OCSPFile:       "one",
 				CipherSuites:   []string{"a"},
 				ClientCertAuth: &trueVal}},
-		VIPs: []string{"a"},
+		VIPs:         []string{"a"},
+		OAuthClients: []string{"a"},
 		Authority: Authority{
 			CAConfig:          "one",
 			DefaultCRLExpiry:  Duration(time.Second),
@@ -659,8 +653,7 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 			LogDenied:     &falseVal,
 			CertMapper:    "two",
 			APIKeyMapper:  "two",
-			JWTMapper:     "two",
-			OAuthClient:   "two"},
+			JWTMapper:     "two"},
 		Logger: Logger{
 			Directory:  "two",
 			MaxAgeDays: 42,
@@ -715,7 +708,8 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 				OCSPFile:       "two",
 				CipherSuites:   []string{"b", "b"},
 				ClientCertAuth: &falseVal}},
-		VIPs: []string{"b", "b"},
+		VIPs:         []string{"b", "b"},
+		OAuthClients: []string{"b", "b"},
 		Authority: Authority{
 			CAConfig:          "two",
 			DefaultCRLExpiry:  Duration(time.Minute),
@@ -1287,8 +1281,7 @@ func Test_LoadOverrides(t *testing.T) {
 				LogDenied:     &falseVal,
 				CertMapper:    "two",
 				APIKeyMapper:  "two",
-				JWTMapper:     "two",
-				OAuthClient:   "two"},
+				JWTMapper:     "two"},
 			Logger: Logger{
 				Directory:  "two",
 				MaxAgeDays: 42,
@@ -1343,7 +1336,8 @@ func Test_LoadOverrides(t *testing.T) {
 					OCSPFile:       "two",
 					CipherSuites:   []string{"b", "b"},
 					ClientCertAuth: &falseVal}},
-			VIPs: []string{"b", "b"},
+			VIPs:         []string{"b", "b"},
+			OAuthClients: []string{"b", "b"},
 			Authority: Authority{
 				CAConfig:          "two",
 				DefaultCRLExpiry:  Duration(time.Minute),
@@ -1390,8 +1384,7 @@ func Test_LoadOverrides(t *testing.T) {
 					LogDenied:     &trueVal,
 					CertMapper:    "three",
 					APIKeyMapper:  "three",
-					JWTMapper:     "three",
-					OAuthClient:   "three"},
+					JWTMapper:     "three"},
 				Logger: Logger{
 					Directory:  "three",
 					MaxAgeDays: 1234,
@@ -1446,7 +1439,8 @@ func Test_LoadOverrides(t *testing.T) {
 						OCSPFile:       "three",
 						CipherSuites:   []string{"c", "c", "c"},
 						ClientCertAuth: &trueVal}},
-				VIPs: []string{"c", "c", "c"},
+				VIPs:         []string{"c", "c", "c"},
+				OAuthClients: []string{"c", "c", "c"},
 				Authority: Authority{
 					CAConfig:          "three",
 					DefaultCRLExpiry:  Duration(time.Hour),
@@ -1550,8 +1544,7 @@ func Test_LoadCustomJSON(t *testing.T) {
 				LogDenied:     &falseVal,
 				CertMapper:    "two",
 				APIKeyMapper:  "two",
-				JWTMapper:     "two",
-				OAuthClient:   "two"},
+				JWTMapper:     "two"},
 			Logger: Logger{
 				Directory:  "two",
 				MaxAgeDays: 42,
@@ -1606,7 +1599,8 @@ func Test_LoadCustomJSON(t *testing.T) {
 					OCSPFile:       "two",
 					CipherSuites:   []string{"b", "b"},
 					ClientCertAuth: &falseVal}},
-			VIPs: []string{"b", "b"},
+			VIPs:         []string{"b", "b"},
+			OAuthClients: []string{"b", "b"},
 			Authority: Authority{
 				CAConfig:          "two",
 				DefaultCRLExpiry:  Duration(time.Minute),
@@ -1653,8 +1647,7 @@ func Test_LoadCustomJSON(t *testing.T) {
 					LogDenied:     &trueVal,
 					CertMapper:    "three",
 					APIKeyMapper:  "three",
-					JWTMapper:     "three",
-					OAuthClient:   "three"},
+					JWTMapper:     "three"},
 				Logger: Logger{
 					Directory:  "three",
 					MaxAgeDays: 1234,
@@ -1709,7 +1702,8 @@ func Test_LoadCustomJSON(t *testing.T) {
 						OCSPFile:       "three",
 						CipherSuites:   []string{"c", "c", "c"},
 						ClientCertAuth: &trueVal}},
-				VIPs: []string{"c", "c", "c"},
+				VIPs:         []string{"c", "c", "c"},
+				OAuthClients: []string{"c", "c", "c"},
 				Authority: Authority{
 					CAConfig:          "three",
 					DefaultCRLExpiry:  Duration(time.Hour),

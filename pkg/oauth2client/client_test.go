@@ -72,6 +72,13 @@ func Test_Load(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestProvider(t *testing.T) {
+	p, err := oauth2client.NewProvider([]string{"testdata/oauth.json"})
+	require.NoError(t, err)
+
+	require.NotNil(t, p.Client("github"))
+}
+
 func Test_ParseRSAPublicKeyFromPEM(t *testing.T) {
 	_, err := oauth2client.ParseRSAPublicKeyFromPEM(nil)
 	require.Error(t, err)
