@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/ekspand/trusty/internal/version"
 	"github.com/ekspand/trusty/pkg/print"
-	"github.com/ekspand/trusty/version"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/identity"

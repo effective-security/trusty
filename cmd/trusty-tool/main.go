@@ -7,7 +7,7 @@ import (
 
 	"github.com/ekspand/trusty/cli"
 	"github.com/ekspand/trusty/cli/csr"
-	"github.com/ekspand/trusty/version"
+	"github.com/ekspand/trusty/internal/version"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/xlog"
 )
