@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ekspand/trusty/config"
+	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/version"
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/ctl"

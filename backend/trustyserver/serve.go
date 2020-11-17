@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ekspand/trusty/config"
+	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/transport"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/rest/ready"

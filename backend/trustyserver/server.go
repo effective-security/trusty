@@ -8,7 +8,7 @@ import (
 	"time"
 
 	pb "github.com/ekspand/trusty/api/v1/trustypb"
-	"github.com/ekspand/trusty/config"
+	"github.com/ekspand/trusty/internal/config"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/netutil"
 	"github.com/go-phorce/dolly/rest"

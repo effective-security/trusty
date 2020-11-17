@@ -1,7 +1,7 @@
 package authority
 
 import (
-	"github.com/ekspand/trusty/config"
+	"github.com/ekspand/trusty/internal/config"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"

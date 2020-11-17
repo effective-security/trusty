@@ -11,7 +11,7 @@ import (
 
 	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/backend/trustyserver"
-	"github.com/ekspand/trusty/config"
+	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/internal/db/model"
 	"github.com/ekspand/trusty/pkg/oauth2client"

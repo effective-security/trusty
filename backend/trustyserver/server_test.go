@@ -3,7 +3,7 @@ package trustyserver
 import (
 	"testing"
 
-	"github.com/ekspand/trusty/config"
+	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/audit"

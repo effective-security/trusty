@@ -14,7 +14,7 @@ import (
 	"github.com/ekspand/trusty/backend/trustyserver"
 	"github.com/ekspand/trusty/backend/trustyserver/embed"
 	"github.com/ekspand/trusty/client"
-	"github.com/ekspand/trusty/config"
+	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/version"
 	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/audit"
