@@ -57,3 +57,15 @@ const (
 	// PathForAuthGithubCallback is auth callback for github
 	PathForAuthGithubCallback = "/v1/auth/github/callback"
 )
+
+// Repos service API
+const (
+	// PathForGithub is base path for the Github service
+	PathForGithub = "/v1/github"
+
+	// PathForGithubRepos provides repos service
+	//
+	// Verbs: GET
+	// Response: v1.RepositoriesResponse
+	PathForGithubRepos = "/v1/github/repos"
+)

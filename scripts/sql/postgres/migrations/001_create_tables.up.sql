@@ -15,6 +15,9 @@ begin
 end;
 $$ language 'plpgsql';
 
+--
+-- USERS
+--
 CREATE TABLE IF NOT EXISTS public.users
 (
     id bigint NOT NULL,
@@ -62,6 +65,89 @@ SELECT create_constraint_if_not_exists(
     'unique_users_login',
     'ALTER TABLE public.users ADD CONSTRAINT unique_users_login UNIQUE USING INDEX unique_users_login;');
 
+--
+-- ORGANIZATIONS
+--
+CREATE TABLE IF NOT EXISTS public.orgs
+(
+    id bigint NOT NULL,
+    extern_id bigint NULL,
+    provider character varying(16) COLLATE pg_catalog."default" NOT NULL,
+    login character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    name character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    email character varying(160) COLLATE pg_catalog."default" NOT NULL,
+    company character varying(64) COLLATE pg_catalog."default" NULL,
+    avatar_url character varying(256) COLLATE pg_catalog."default" NULL,
+    type character varying(16) COLLATE pg_catalog."default" NOT NULL,
+    created_at timestamp with time zone,
+    updated_at timestamp with time zone,
+    CONSTRAINT orgs_pkey PRIMARY KEY (id),
+    CONSTRAINT orgs_provider_id UNIQUE (extern_id, provider)
+)
+WITH (
+    OIDS = FALSE
+);
+
+ALTER TABLE public.orgs
+    OWNER to postgres;
+
+CREATE UNIQUE INDEX IF NOT EXISTS unique_orgs_name
+    ON public.orgs USING btree
+    (name COLLATE pg_catalog."default")
+    ;
+
+CREATE UNIQUE INDEX IF NOT EXISTS unique_orgs_login
+    ON public.orgs USING btree
+    (login COLLATE pg_catalog."default")
+    ;
+
+SELECT create_constraint_if_not_exists(
+    'public',
+    'orgs',
+    'unique_orgs_name',
+    'ALTER TABLE public.orgs ADD CONSTRAINT unique_orgs_name UNIQUE USING INDEX unique_orgs_name;');
+
+SELECT create_constraint_if_not_exists(
+    'public',
+    'orgs',
+    'unique_orgs_login',
+    'ALTER TABLE public.orgs ADD CONSTRAINT unique_orgs_login UNIQUE USING INDEX unique_orgs_login;');
+
+--
+-- REPOS
+--
+CREATE TABLE IF NOT EXISTS public.repos
+(
+    id bigint NOT NULL,
+    org_id bigint NOT NULL,
+    extern_id bigint NULL,
+    provider character varying(16) COLLATE pg_catalog."default" NOT NULL,
+    name character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    email character varying(160) COLLATE pg_catalog."default" NOT NULL,
+    company character varying(64) COLLATE pg_catalog."default" NULL,
+    avatar_url character varying(256) COLLATE pg_catalog."default" NULL,
+    type character varying(16) COLLATE pg_catalog."default" NOT NULL,
+    created_at timestamp with time zone,
+    updated_at timestamp with time zone,
+    CONSTRAINT repos_pkey PRIMARY KEY (id),
+    CONSTRAINT repos_provider_id UNIQUE (extern_id, provider),
+    CONSTRAINT repos_org_name UNIQUE (org_id, name)
+)
+WITH (
+    OIDS = FALSE
+);
+
+ALTER TABLE public.repos
+    OWNER to postgres;
+
+CREATE INDEX IF NOT EXISTS idx_repos_orgid
+    ON public.repos USING btree
+    (org_id)
+    ;
+
+--
+-- CERTIFICATES
+--
 CREATE TABLE IF NOT EXISTS public.certificates
 (
     id bigint NOT NULL,
@@ -99,6 +185,9 @@ CREATE INDEX IF NOT EXISTS idx_certificates_notafter
     ON public.certificates USING btree
     (notafter);
 
+--
+-- REVOKED CERTIFICATES
+--
 CREATE TABLE IF NOT EXISTS public.revoked
 (
     id bigint NOT NULL,

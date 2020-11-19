@@ -48,6 +48,51 @@ func TestUser(t *testing.T) {
 	assert.Equal(t, u.AvatarURL, dto.AvatarURL)
 }
 
+func TestOrganization(t *testing.T) {
+	id := int64(1001)
+	u := &model.Organization{
+		ID:         1000,
+		ExternalID: model.NullInt64(&id),
+		Name:       "n1",
+		Login:      "l1",
+		Email:      "e1",
+		Company:    "c1",
+		AvatarURL:  "https://github.com/me",
+		Type:       "private",
+	}
+	dto := u.ToDto()
+	assert.Equal(t, "1000", dto.ID)
+	assert.Equal(t, "1001", dto.ExternalID)
+	assert.Equal(t, u.Login, dto.Login)
+	assert.Equal(t, u.Name, dto.Name)
+	assert.Equal(t, u.Email, dto.Email)
+	assert.Equal(t, u.Company, dto.Company)
+	assert.Equal(t, u.AvatarURL, dto.AvatarURL)
+	assert.Equal(t, u.Type, dto.Type)
+}
+
+func TestRepository(t *testing.T) {
+	id := int64(1001)
+	u := &model.Repository{
+		ID:         1000,
+		OrgID:      2000,
+		ExternalID: model.NullInt64(&id),
+		Name:       "n1",
+		Email:      "e1",
+		Company:    "c1",
+		AvatarURL:  "https://github.com/me",
+		Type:       "private",
+	}
+	dto := u.ToDto()
+	assert.Equal(t, "1000", dto.ID)
+	assert.Equal(t, "1001", dto.ExternalID)
+	assert.Equal(t, u.Type, dto.Type)
+	assert.Equal(t, u.Name, dto.Name)
+	assert.Equal(t, u.Email, dto.Email)
+	assert.Equal(t, u.Company, dto.Company)
+	assert.Equal(t, u.AvatarURL, dto.AvatarURL)
+}
+
 func TestNullInt64(t *testing.T) {
 	v := model.NullInt64(nil)
 	require.NotNil(t, v)
