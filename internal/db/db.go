@@ -38,9 +38,23 @@ type UsersDb interface {
 	GetUser(ctx context.Context, id int64) (*model.User, error)
 }
 
+// ReposDb defines an interface for CRUD operations on Repos
+type ReposDb interface {
+	// UpdateOrg inserts or updates Organization
+	UpdateOrg(ctx context.Context, org *model.Organization) (*model.Organization, error)
+	// GetOrg returns Organization
+	GetOrg(ctx context.Context, id int64) (*model.Organization, error)
+
+	// UpdateRepo inserts or updates Repository
+	UpdateRepo(ctx context.Context, repo *model.Repository) (*model.Repository, error)
+	// GetRepo returns Repository
+	GetRepo(ctx context.Context, id int64) (*model.Repository, error)
+}
+
 // Provider represents SQL client instance
 type Provider interface {
 	UsersDb
+	ReposDb
 
 	// DB returns underlying DB connection
 	DB() *sql.DB
