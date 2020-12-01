@@ -29,7 +29,8 @@
                 "Services": [
                     "auth",
                     "status",
-                    "ca"
+                    "ca",
+                    "workflow"
                 ],
                 "HeartbeatSecs": 30,
                 "RequestTimeout": "3s",
@@ -80,6 +81,9 @@
                 "/v1/crl",
                 "/v1/ocsp",
                 "/trustypb.Status"
+            ],
+            "AllowAnyRole": [
+              "/v1/wf"
             ],
             "Allow": [
                 "/v1/ca:trusty-peer",

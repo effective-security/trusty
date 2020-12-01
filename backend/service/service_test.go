@@ -6,13 +6,15 @@ import (
 	"github.com/ekspand/trusty/backend/service/auth"
 	"github.com/ekspand/trusty/backend/service/ca"
 	"github.com/ekspand/trusty/backend/service/status"
+	"github.com/ekspand/trusty/backend/service/workflow"
 	"github.com/ekspand/trusty/backend/trustyserver"
 )
 
 var serviceFactories = map[string]trustyserver.ServiceFactory{
-	auth.ServiceName:   auth.Factory,
-	ca.ServiceName:     ca.Factory,
-	status.ServiceName: status.Factory,
+	auth.ServiceName:     auth.Factory,
+	ca.ServiceName:       ca.Factory,
+	status.ServiceName:   status.Factory,
+	workflow.ServiceName: workflow.Factory,
 }
 
 func Test_invalidArgs(t *testing.T) {

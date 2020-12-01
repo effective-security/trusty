@@ -113,6 +113,10 @@ SELECT create_constraint_if_not_exists(
     'unique_orgs_login',
     'ALTER TABLE public.orgs ADD CONSTRAINT unique_orgs_login UNIQUE USING INDEX unique_orgs_login;');
 
+CREATE INDEX IF NOT EXISTS idx_orgs_provider
+    ON public.orgs USING btree
+    (provider);
+
 --
 -- REPOS
 --
@@ -144,6 +148,10 @@ CREATE INDEX IF NOT EXISTS idx_repos_orgid
     ON public.repos USING btree
     (org_id)
     ;
+
+CREATE INDEX IF NOT EXISTS idx_repos_provider
+    ON public.repos USING btree
+    (provider);
 
 --
 -- CERTIFICATES
