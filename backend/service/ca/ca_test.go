@@ -22,7 +22,9 @@ import (
 var (
 	trustyServer *trustyserver.TrustyServer
 	trustyClient *client.Client
+)
 
+const (
 	projFolder = "../../../"
 )
 

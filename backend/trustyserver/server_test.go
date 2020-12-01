@@ -15,10 +15,6 @@ import (
 	"go.uber.org/dig"
 )
 
-var (
-	nextPort = int32(0)
-)
-
 func TestStartTrustyEmptyHTTP(t *testing.T) {
 	cfg := &config.HTTPServer{
 		Name:       "EmptyTrusty",

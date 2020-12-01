@@ -58,14 +58,14 @@ const (
 	PathForAuthGithubCallback = "/v1/auth/github/callback"
 )
 
-// Repos service API
+// Workflow service API
 const (
-	// PathForGithub is base path for the Github service
-	PathForGithub = "/v1/github"
+	// PathForWorkflow is base path for the Workflow service
+	PathForWorkflow = "/v1/wf"
 
-	// PathForGithubRepos provides repos service
+	// PathForWorkflowRepos provides repos
 	//
 	// Verbs: GET
 	// Response: v1.RepositoriesResponse
-	PathForGithubRepos = "/v1/github/repos"
+	PathForWorkflowRepos = "/v1/wf/:provider/repos"
 )

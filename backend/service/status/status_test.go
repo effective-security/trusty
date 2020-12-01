@@ -33,10 +33,12 @@ import (
 var (
 	trustyServer *trustyserver.TrustyServer
 	trustyClient *client.Client
+	httpAddr     string
+	httpsAddr    string
+)
 
+const (
 	projFolder = "../../"
-	httpsAddr  = testutils.CreateURLs("https", "")
-	httpAddr   = testutils.CreateURLs("http", "")
 )
 
 var jsonContentHeaders = map[string]string{
@@ -57,6 +59,9 @@ var serviceFactories = map[string]trustyserver.ServiceFactory{
 func TestMain(m *testing.M) {
 	var err error
 	xlog.SetPackageLogLevel("github.com/go-phorce/dolly/xhttp", "retriable", xlog.DEBUG)
+
+	httpsAddr = testutils.CreateURLs("https", "")
+	httpAddr = testutils.CreateURLs("http", "")
 
 	cfg := &config.HTTPServer{
 		Name:       "StatusTest",

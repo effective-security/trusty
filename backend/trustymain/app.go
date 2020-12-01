@@ -14,6 +14,7 @@ import (
 	"github.com/ekspand/trusty/backend/service/auth"
 	"github.com/ekspand/trusty/backend/service/ca"
 	"github.com/ekspand/trusty/backend/service/status"
+	"github.com/ekspand/trusty/backend/service/workflow"
 	"github.com/ekspand/trusty/backend/trustyserver"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/version"
@@ -36,9 +37,10 @@ const (
 
 // ServiceFactories provides map of trustyserver.ServiceFactory
 var ServiceFactories = map[string]trustyserver.ServiceFactory{
-	auth.ServiceName:   auth.Factory,
-	ca.ServiceName:     ca.Factory,
-	status.ServiceName: status.Factory,
+	auth.ServiceName:     auth.Factory,
+	ca.ServiceName:       ca.Factory,
+	status.ServiceName:   status.Factory,
+	workflow.ServiceName: workflow.Factory,
 }
 
 // appFlags specifies application flags
