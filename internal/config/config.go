@@ -452,6 +452,9 @@ type Configuration struct {
 
 	// SQL specifies the configuration for SQL provider
 	SQL SQL
+
+	// Github specifies the configuration for Github client.
+	Github Github
 }
 
 func (c *Configuration) overrideFrom(o *Configuration) {
@@ -470,6 +473,7 @@ func (c *Configuration) overrideFrom(o *Configuration) {
 	overrideStrings(&c.OAuthClients, &o.OAuthClients)
 	c.Authority.overrideFrom(&o.Authority)
 	c.SQL.overrideFrom(&o.SQL)
+	c.Github.overrideFrom(&o.Github)
 
 }
 
@@ -490,6 +494,18 @@ func (c *CryptoProv) overrideFrom(o *CryptoProv) {
 	overrideString(&c.Default, &o.Default)
 	overrideStrings(&c.Providers, &o.Providers)
 	overrideStrings(&c.PKCS11Manufacturers, &o.PKCS11Manufacturers)
+
+}
+
+// Github specifies the configuration for Github client.
+type Github struct {
+
+	// BaseURL specifies the Github base URL.
+	BaseURL string
+}
+
+func (c *Github) overrideFrom(o *Github) {
+	overrideString(&c.BaseURL, &o.BaseURL)
 
 }
 

@@ -16,7 +16,8 @@
             { "name" : "VIPs",         "type" : "[]string",      "comment" : "VIPs is a list of the FQ name of the VIP to the cluster" },
             { "name" : "OAuthClients", "type" : "[]string",      "comment" : "OAuthClients specifies the configuration files for OAuth clients" },
             { "name" : "Authority",    "type" : "Authority",     "comment" : "Authority contains configuration info for CA" },
-            { "name" : "SQL",          "type" : "SQL",           "comment" : "SQL specifies the configuration for SQL provider" }
+            { "name" : "SQL",          "type" : "SQL",           "comment" : "SQL specifies the configuration for SQL provider" },
+            { "name" : "Github",       "type" : "Github",        "comment" : "Github specifies the configuration for Github client." }
         ]
     },
     "RelatedTypes" : {
@@ -171,6 +172,12 @@
                 { "name" : "Driver",        "type" : "string", "comment" : "Driver specifies the driver name: postgres|mysql." },
                 { "name" : "DataSource",    "type" : "string", "comment" : "DataSource specifies the connection string. It can be prefixed with file:// or env:// to load the source from a file or environment variable." },
                 { "name" : "MigrationsDir", "type" : "string", "comment" : "MigrationsDir specifies the directory that contains migrations." }
+          ]
+        },
+        "Github" : {
+            "Comment" : "Github specifies the configuration for Github client.",
+            "Fields" : [
+                { "name" : "BaseURL", "type" : "string", "comment" : "BaseURL specifies the Github base URL." }
           ]
         }
     }
