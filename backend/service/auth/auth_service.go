@@ -40,7 +40,7 @@ const (
 
 // Service defines the Status service
 type Service struct {
-	GithubBaseURL string
+	GithubBaseURL *url.URL
 
 	server    *trustyserver.TrustyServer
 	cfg       *config.Configuration
@@ -62,6 +62,14 @@ func Factory(server *trustyserver.TrustyServer) interface{} {
 			oauthProv: oauthProv,
 			db:        db,
 			jwt:       jwt,
+		}
+
+		if cfg.Github.BaseURL != "" {
+			u, err := url.Parse(cfg.Github.BaseURL)
+			if err != nil {
+				return errors.Trace(err)
+			}
+			svc.GithubBaseURL = u
 		}
 
 		server.AddService(svc)
@@ -202,10 +210,8 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 		}
 
 		client := github.NewClient(conf.Client(ctx, token))
-		if s.GithubBaseURL != "" {
-			if u, err := url.Parse(s.GithubBaseURL); err == nil {
-				client.BaseURL = u
-			}
+		if s.GithubBaseURL != nil {
+			client.BaseURL = s.GithubBaseURL
 		}
 
 		ghu, _, err := client.Users.Get(ctx, "")

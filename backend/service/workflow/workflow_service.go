@@ -1,6 +1,8 @@
 package workflow
 
 import (
+	"net/url"
+
 	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/backend/trustyserver"
 	"github.com/ekspand/trusty/internal/config"
@@ -8,6 +10,7 @@ import (
 	"github.com/ekspand/trusty/pkg/oauth2client"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xlog"
+	"github.com/juju/errors"
 )
 
 // ServiceName provides the Service Name for this package
@@ -17,7 +20,7 @@ var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", 
 
 // Service defines the Status service
 type Service struct {
-	GithubBaseURL string
+	GithubBaseURL *url.URL
 
 	server    *trustyserver.TrustyServer
 	cfg       *config.Configuration
@@ -37,6 +40,14 @@ func Factory(server *trustyserver.TrustyServer) interface{} {
 			cfg:       cfg,
 			oauthProv: oauthProv,
 			db:        db,
+		}
+
+		if cfg.Github.BaseURL != "" {
+			u, err := url.Parse(cfg.Github.BaseURL)
+			if err != nil {
+				return errors.Trace(err)
+			}
+			svc.GithubBaseURL = u
 		}
 
 		server.AddService(svc)

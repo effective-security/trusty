@@ -626,7 +626,9 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 		SQL: SQL{
 			Driver:        "one",
 			DataSource:    "one",
-			MigrationsDir: "one"}}
+			MigrationsDir: "one"},
+		Github: Github{
+			BaseURL: "one"}}
 	dest := orig
 	var zero Configuration
 	dest.overrideFrom(&zero)
@@ -731,7 +733,9 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 		SQL: SQL{
 			Driver:        "two",
 			DataSource:    "two",
-			MigrationsDir: "two"}}
+			MigrationsDir: "two"},
+		Github: Github{
+			BaseURL: "two"}}
 	dest.overrideFrom(&o)
 	require.Equal(t, dest, o, "Configuration.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
 	o2 := Configuration{
@@ -765,6 +769,26 @@ func TestCryptoProv_overrideFrom(t *testing.T) {
 
 	exp.Default = o2.Default
 	require.Equal(t, dest, exp, "CryptoProv.overrideFrom should have overriden the field Default. value now %#v, expecting %#v", dest, exp)
+}
+
+func TestGithub_overrideFrom(t *testing.T) {
+	orig := Github{
+		BaseURL: "one"}
+	dest := orig
+	var zero Github
+	dest.overrideFrom(&zero)
+	require.Equal(t, dest, orig, "Github.overrideFrom shouldn't have overriden the value as the override is the default/zero value. value now %#v", dest)
+	o := Github{
+		BaseURL: "two"}
+	dest.overrideFrom(&o)
+	require.Equal(t, dest, o, "Github.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
+	o2 := Github{
+		BaseURL: "one"}
+	dest.overrideFrom(&o2)
+	exp := o
+
+	exp.BaseURL = o2.BaseURL
+	require.Equal(t, dest, exp, "Github.overrideFrom should have overriden the field BaseURL. value now %#v, expecting %#v", dest, exp)
 }
 
 func TestHTTPServer_overrideFrom(t *testing.T) {
@@ -1359,7 +1383,9 @@ func Test_LoadOverrides(t *testing.T) {
 			SQL: SQL{
 				Driver:        "two",
 				DataSource:    "two",
-				MigrationsDir: "two"}},
+				MigrationsDir: "two"},
+			Github: Github{
+				BaseURL: "two"}},
 		Hosts: map[string]string{"bob": "example2", "bob2": "missing"},
 		Overrides: map[string]Configuration{
 			"example2": {
@@ -1462,7 +1488,9 @@ func Test_LoadOverrides(t *testing.T) {
 				SQL: SQL{
 					Driver:        "three",
 					DataSource:    "three",
-					MigrationsDir: "three"}},
+					MigrationsDir: "three"},
+				Github: Github{
+					BaseURL: "three"}},
 		},
 	}
 	f, err := ioutil.TempFile("", "config")
@@ -1622,7 +1650,9 @@ func Test_LoadCustomJSON(t *testing.T) {
 			SQL: SQL{
 				Driver:        "two",
 				DataSource:    "two",
-				MigrationsDir: "two"}},
+				MigrationsDir: "two"},
+			Github: Github{
+				BaseURL: "two"}},
 		Hosts: map[string]string{"bob": "${ENV}"},
 		Overrides: map[string]Configuration{
 			"${ENV}": {
@@ -1725,7 +1755,9 @@ func Test_LoadCustomJSON(t *testing.T) {
 				SQL: SQL{
 					Driver:        "three",
 					DataSource:    "three",
-					MigrationsDir: "three"}},
+					MigrationsDir: "three"},
+				Github: Github{
+					BaseURL: "three"}},
 		},
 	}
 	f, err := ioutil.TempFile("", "customjson")

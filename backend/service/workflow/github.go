@@ -2,7 +2,6 @@ package workflow
 
 import (
 	"net/http"
-	"net/url"
 
 	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/internal/db/model"
@@ -36,10 +35,8 @@ func (s *Service) SyncGithubRepos(ctx context.Context, w http.ResponseWriter, us
 	}
 
 	client := github.NewClient(conf.Client(ctx, token))
-	if s.GithubBaseURL != "" {
-		if u, err := url.Parse(s.GithubBaseURL); err == nil {
-			client.BaseURL = u
-		}
+	if s.GithubBaseURL != nil {
+		client.BaseURL = s.GithubBaseURL
 	}
 
 	list, _, err := client.Repositories.List(ctx, "", &github.RepositoryListOptions{

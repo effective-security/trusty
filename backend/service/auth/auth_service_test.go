@@ -158,7 +158,11 @@ func Test_GithubCallbackHandler(t *testing.T) {
 	o := service.OAuthConfig("github")
 	o.AuthURL = strings.Replace(o.AuthURL, "https://github.com", server.URL(), 1)
 	o.TokenURL = strings.Replace(o.TokenURL, "https://github.com", server.URL(), 1)
-	service.GithubBaseURL = server.URL() + "/"
+
+	u, err := url.Parse(server.URL() + "/")
+	require.NoError(t, err)
+
+	service.GithubBaseURL = u
 
 	t.Run("no_code", func(t *testing.T) {
 		w := httptest.NewRecorder()
