@@ -25,8 +25,8 @@ func TestMain(m *testing.M) {
 
 func TestGoVersion(t *testing.T) {
 	gv := runtime.Version()
-	vsCheck := strings.HasPrefix(gv, "go1.14") || strings.HasPrefix(gv, "go1.15")
-	assert.True(t, vsCheck, "should be built with go 1.14.+, got: %s", gv)
+	vsCheck := strings.HasPrefix(gv, "go1.15") || strings.HasPrefix(gv, "go1.16")
+	assert.True(t, vsCheck, "should be built with go 1.15.+, got: %s", gv)
 }
 
 func TestVersion(t *testing.T) {
