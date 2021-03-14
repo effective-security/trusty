@@ -166,10 +166,9 @@ CREATE TABLE IF NOT EXISTS public.certificates
     notbefore timestamp with time zone,
     notafter timestamp with time zone,
     subject character varying(260) COLLATE pg_catalog."default" NOT NULL,
+    issuer character varying(260) COLLATE pg_catalog."default" NOT NULL,
     pem text COLLATE pg_catalog."default" NOT NULL,
     profile character varying(32) COLLATE pg_catalog."default" NULL,
-    role character varying(32) COLLATE pg_catalog."default" NULL,
-    host character varying(160) COLLATE pg_catalog."default" NULL,
     CONSTRAINT certificates_pkey PRIMARY KEY (id),
     CONSTRAINT certificates_issuer_sn UNIQUE (ikid, sn)
 )
@@ -206,13 +205,11 @@ CREATE TABLE IF NOT EXISTS public.revoked
     notbefore timestamp with time zone,
     notafter timestamp with time zone,
     subject character varying(260) COLLATE pg_catalog."default" NOT NULL,
+    issuer character varying(260) COLLATE pg_catalog."default" NOT NULL,
     pem text COLLATE pg_catalog."default" NOT NULL,
     profile character varying(32) COLLATE pg_catalog."default" NULL,
-    role character varying(32) COLLATE pg_catalog."default" NULL,
-    host character varying(160) COLLATE pg_catalog."default" NULL,
     revoked_at timestamp with time zone,
-    reason character varying(254) COLLATE pg_catalog."default" NULL,
-    requestor character varying(160) COLLATE pg_catalog."default" NULL,
+    reason int NULL,
     CONSTRAINT revoked_pkey PRIMARY KEY (id),
     CONSTRAINT revoked_issuer_sn UNIQUE (ikid, sn)
 )
@@ -236,5 +233,34 @@ CREATE INDEX IF NOT EXISTS idx_revoked_notafter
     ON public.revoked USING btree
     (notafter);
 
+--
+-- Authorities
+--
+CREATE TABLE IF NOT EXISTS public.authorities
+(
+    id bigint NOT NULL,
+    skid character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    notbefore timestamp with time zone,
+    notafter timestamp with time zone,
+    subject character varying(260) COLLATE pg_catalog."default" NOT NULL,
+    trust int NOT NULL,
+    pem text COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT certificates_pkey PRIMARY KEY (id)
+)
+WITH (
+    OIDS = FALSE
+);
+
+CREATE INDEX IF NOT EXISTS idx_authorities_skid
+    ON public.certificates USING btree
+    (skid COLLATE pg_catalog."default");
+
+CREATE INDEX IF NOT EXISTS idx_authorities_notafter
+    ON public.certificates USING btree
+    (notafter);
+
+--
+--
+--
 COMMIT;
 

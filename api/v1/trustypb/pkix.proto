@@ -77,7 +77,7 @@ message IssuerInfo {
     string certificate = 1;
     // Intermediates provides the intermediate CA certificates bundle in PEM format
     string intermediates = 2;
-    // Root provides the Root CA certifica in PEM format
+    // Root provides the Root CA certificate in PEM format
     string root = 3;
     // Label specifies the Issuer's label
     string label = 4;

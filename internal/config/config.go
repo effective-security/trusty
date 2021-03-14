@@ -1005,6 +1005,18 @@ func (c *TLSInfo) GetClientCertAuth() bool {
 	return c.ClientCertAuth != nil && *c.ClientCertAuth
 }
 
+// Trusty specifies the configuration for Trusty.
+type Trusty struct {
+
+	// Roots specifies the list of Root Certs locations.
+	Roots []string
+}
+
+func (c *Trusty) overrideFrom(o *Trusty) {
+	overrideStrings(&c.Roots, &o.Roots)
+
+}
+
 // TrustyClient specifies configurations for the client to connect to the cluster
 type TrustyClient struct {
 

@@ -1218,6 +1218,26 @@ func TestTLSInfo_Getters(t *testing.T) {
 
 }
 
+func TestTrusty_overrideFrom(t *testing.T) {
+	orig := Trusty{
+		Roots: []string{"a"}}
+	dest := orig
+	var zero Trusty
+	dest.overrideFrom(&zero)
+	require.Equal(t, dest, orig, "Trusty.overrideFrom shouldn't have overriden the value as the override is the default/zero value. value now %#v", dest)
+	o := Trusty{
+		Roots: []string{"b", "b"}}
+	dest.overrideFrom(&o)
+	require.Equal(t, dest, o, "Trusty.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
+	o2 := Trusty{
+		Roots: []string{"a"}}
+	dest.overrideFrom(&o2)
+	exp := o
+
+	exp.Roots = o2.Roots
+	require.Equal(t, dest, exp, "Trusty.overrideFrom should have overriden the field Roots. value now %#v, expecting %#v", dest, exp)
+}
+
 func TestTrustyClient_overrideFrom(t *testing.T) {
 	orig := TrustyClient{
 		PublicURL: "one",
