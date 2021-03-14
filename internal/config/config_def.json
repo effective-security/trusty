@@ -179,6 +179,13 @@
             "Fields" : [
                 { "name" : "BaseURL", "type" : "string", "comment" : "BaseURL specifies the Github base URL." }
           ]
+        },
+        "Trusty" : {
+            "Comment" : "Trusty specifies the configuration for Trusty.",
+            "Fields" : [
+                { "name" : "PrivateRoots", "type" : "[]string", "comment" : "PrivateRoots specifies the list of private Root Certs files." },
+                { "name" : "PublicRoots", "type" : "[]string", "comment" : "PublicRoots specifies the list of public Root Certs files." }
+          ]
         }
     }
 }

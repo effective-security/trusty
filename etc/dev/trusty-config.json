@@ -169,6 +169,13 @@
             "Driver": "postgres",
             "DataSource": "file://${CONFIG_DIR}/sql-conn.txt",
             "MigrationsDir": "../../scripts/sql/postgres/migrations"
+        },
+        "Trusty": {
+            "PrivateRoots": [
+                "/tmp/trusty/certs/trusty_dev_root_ca.pem"
+            ],
+            "PublicRoots" :[
+            ]
         }
     },
     "hosts": {
