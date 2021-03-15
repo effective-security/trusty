@@ -38,23 +38,37 @@ type UsersDb interface {
 	GetUser(ctx context.Context, id int64) (*model.User, error)
 }
 
-// ReposDb defines an interface for CRUD operations on Repos
-type ReposDb interface {
+// OrgsDb defines an interface for CRUD operations on Orgs
+type OrgsDb interface {
 	// UpdateOrg inserts or updates Organization
 	UpdateOrg(ctx context.Context, org *model.Organization) (*model.Organization, error)
 	// GetOrg returns Organization
 	GetOrg(ctx context.Context, id int64) (*model.Organization, error)
+	// RemoveOrg deletes org and all its members
+	RemoveOrg(ctx context.Context, id int64) error
 
 	// UpdateRepo inserts or updates Repository
 	UpdateRepo(ctx context.Context, repo *model.Repository) (*model.Repository, error)
 	// GetRepo returns Repository
 	GetRepo(ctx context.Context, id int64) (*model.Repository, error)
+	// TODO: RemoveRepo
+
+	// AddOrgMember adds a user to Org
+	AddOrgMember(ctx context.Context, orgID, userID int64, role, membershipSource string) (*model.OrgMembership, error)
+	// GetOrgMembers returns list of membership info
+	GetOrgMembers(ctx context.Context, orgID int64) ([]*model.OrgMemberInfo, error)
+	// RemoveOrgMembers removes users from the org
+	RemoveOrgMembers(ctx context.Context, orgID int64, all bool) ([]*model.OrgMembership, error)
+	// RemoveOrgMember remove users from the org
+	RemoveOrgMember(ctx context.Context, orgID, memberID int64) (*model.OrgMembership, error)
+	// GetUserMemberships returns list of membership info
+	GetUserMemberships(ctx context.Context, userID int64) ([]*model.OrgMemberInfo, error)
 }
 
 // Provider represents SQL client instance
 type Provider interface {
 	UsersDb
-	ReposDb
+	OrgsDb
 
 	// DB returns underlying DB connection
 	DB() *sql.DB

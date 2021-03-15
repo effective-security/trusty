@@ -3,6 +3,7 @@ package oauth2client_test
 import (
 	"testing"
 
+	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/pkg/oauth2client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -34,7 +35,7 @@ func Test_Config(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, cfg)
 	assert.Equal(t, 2, len(cfg.Scopes))
-	assert.Equal(t, "github", cfg.ProviderID)
+	assert.Equal(t, v1.ProviderGithub, cfg.ProviderID)
 	assert.Equal(t, "123414", cfg.ClientID)
 	assert.Equal(t, "3456345634563", cfg.ClientSecret)
 	assert.Equal(t, "code", cfg.ResponseType)
@@ -76,7 +77,7 @@ func TestProvider(t *testing.T) {
 	p, err := oauth2client.NewProvider([]string{"testdata/oauth.json"})
 	require.NoError(t, err)
 
-	require.NotNil(t, p.Client("github"))
+	require.NotNil(t, p.Client(v1.ProviderGithub))
 }
 
 func Test_ParseRSAPublicKeyFromPEM(t *testing.T) {

@@ -63,9 +63,21 @@ const (
 	// PathForWorkflow is base path for the Workflow service
 	PathForWorkflow = "/v1/wf"
 
-	// PathForWorkflowRepos provides repos
+	// PathForWorkflowRepos provides repos for the user
 	//
 	// Verbs: GET
 	// Response: v1.RepositoriesResponse
 	PathForWorkflowRepos = "/v1/wf/:provider/repos"
+
+	// PathForWorkflowOrgs provides orgs the user
+	//
+	// Verbs: GET
+	// Response: v1.OrgsResponse
+	PathForWorkflowOrgs = "/v1/wf/:provider/orgs"
+
+	// PathForWorkflowSyncOrgs sync orgs the user
+	//
+	// Verbs: GET
+	// Response: v1.OrgsResponse
+	PathForWorkflowSyncOrgs = "/v1/wf/:provider/sync_orgs"
 )
