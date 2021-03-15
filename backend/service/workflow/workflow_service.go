@@ -72,6 +72,7 @@ func (s *Service) Close() {
 // RegisterRoute adds the Status API endpoints to the overall URL router
 func (s *Service) RegisterRoute(r rest.Router) {
 	r.GET(v1.PathForWorkflowRepos, s.GetReposHandler())
+	r.GET(v1.PathForWorkflowSyncOrgs, s.SyncOrgsHandler())
 }
 
 // OAuthConfig returns oauth2client.Config,

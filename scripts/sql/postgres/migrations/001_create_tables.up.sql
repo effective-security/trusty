@@ -71,18 +71,21 @@ SELECT create_constraint_if_not_exists(
 CREATE TABLE IF NOT EXISTS public.orgs
 (
     id bigint NOT NULL,
-    extern_id bigint NULL,
+    extern_id bigint NOT NULL,
     provider character varying(16) COLLATE pg_catalog."default" NOT NULL,
     login character varying(64) COLLATE pg_catalog."default" NOT NULL,
     name character varying(64) COLLATE pg_catalog."default" NOT NULL,
     email character varying(160) COLLATE pg_catalog."default" NOT NULL,
+    billing_email character varying(160) COLLATE pg_catalog."default" NOT NULL,
     company character varying(64) COLLATE pg_catalog."default" NULL,
+    location character varying(64) COLLATE pg_catalog."default" NULL,
     avatar_url character varying(256) COLLATE pg_catalog."default" NULL,
     type character varying(16) COLLATE pg_catalog."default" NOT NULL,
     created_at timestamp with time zone,
     updated_at timestamp with time zone,
     CONSTRAINT orgs_pkey PRIMARY KEY (id),
-    CONSTRAINT orgs_provider_id UNIQUE (extern_id, provider)
+    CONSTRAINT orgs_provider_extern_id UNIQUE (provider, extern_id),
+    CONSTRAINT orgs_provider_login UNIQUE (provider, login)
 )
 WITH (
     OIDS = FALSE
@@ -91,31 +94,39 @@ WITH (
 ALTER TABLE public.orgs
     OWNER to postgres;
 
-CREATE UNIQUE INDEX IF NOT EXISTS unique_orgs_name
-    ON public.orgs USING btree
-    (name COLLATE pg_catalog."default")
-    ;
-
-CREATE UNIQUE INDEX IF NOT EXISTS unique_orgs_login
-    ON public.orgs USING btree
-    (login COLLATE pg_catalog."default")
-    ;
-
-SELECT create_constraint_if_not_exists(
-    'public',
-    'orgs',
-    'unique_orgs_name',
-    'ALTER TABLE public.orgs ADD CONSTRAINT unique_orgs_name UNIQUE USING INDEX unique_orgs_name;');
-
-SELECT create_constraint_if_not_exists(
-    'public',
-    'orgs',
-    'unique_orgs_login',
-    'ALTER TABLE public.orgs ADD CONSTRAINT unique_orgs_login UNIQUE USING INDEX unique_orgs_login;');
-
 CREATE INDEX IF NOT EXISTS idx_orgs_provider
     ON public.orgs USING btree
     (provider);
+
+
+--
+-- Org Members
+--
+
+CREATE TABLE IF NOT EXISTS public.orgmembers
+(
+    id bigint NOT NULL,
+    org_id bigint NOT NULL REFERENCES public.orgs ON DELETE RESTRICT,
+    user_id bigint NOT NULL REFERENCES public.users ON DELETE RESTRICT,
+    role character varying(64) COLLATE pg_catalog."default",
+    source character varying(16) COLLATE pg_catalog."default",
+    CONSTRAINT orgmembers_pkey PRIMARY KEY (id),
+    CONSTRAINT membership UNIQUE (org_id, user_id)
+)
+WITH (
+    OIDS = FALSE
+);
+
+ALTER TABLE public.orgmembers
+    OWNER to postgres;
+
+CREATE INDEX IF NOT EXISTS idx_orgmembers_team_id
+    ON public.orgmembers USING btree
+    (org_id ASC NULLS LAST);
+
+CREATE INDEX IF NOT EXISTS idx_orgmembers_user_id
+    ON public.orgmembers USING btree
+    (user_id ASC NULLS LAST);
 
 --
 -- REPOS
@@ -167,7 +178,9 @@ CREATE TABLE IF NOT EXISTS public.certificates
     notafter timestamp with time zone,
     subject character varying(260) COLLATE pg_catalog."default" NOT NULL,
     issuer character varying(260) COLLATE pg_catalog."default" NOT NULL,
+    sha256 character varying(64) COLLATE pg_catalog."default" NOT NULL,
     pem text COLLATE pg_catalog."default" NOT NULL,
+    issuers text COLLATE pg_catalog."default" NULL,
     profile character varying(32) COLLATE pg_catalog."default" NULL,
     CONSTRAINT certificates_pkey PRIMARY KEY (id),
     CONSTRAINT certificates_issuer_sn UNIQUE (ikid, sn)
@@ -206,7 +219,9 @@ CREATE TABLE IF NOT EXISTS public.revoked
     notafter timestamp with time zone,
     subject character varying(260) COLLATE pg_catalog."default" NOT NULL,
     issuer character varying(260) COLLATE pg_catalog."default" NOT NULL,
+    sha256 character varying(64) COLLATE pg_catalog."default" NOT NULL,
     pem text COLLATE pg_catalog."default" NOT NULL,
+    issuers text COLLATE pg_catalog."default" NULL,
     profile character varying(32) COLLATE pg_catalog."default" NULL,
     revoked_at timestamp with time zone,
     reason int NULL,
@@ -239,24 +254,26 @@ CREATE INDEX IF NOT EXISTS idx_revoked_notafter
 CREATE TABLE IF NOT EXISTS public.authorities
 (
     id bigint NOT NULL,
+    owner_id bigint NOT NULL,
     skid character varying(64) COLLATE pg_catalog."default" NOT NULL,
     notbefore timestamp with time zone,
     notafter timestamp with time zone,
     subject character varying(260) COLLATE pg_catalog."default" NOT NULL,
+    sha256 character varying(64) COLLATE pg_catalog."default" NOT NULL,
     trust int NOT NULL,
     pem text COLLATE pg_catalog."default" NOT NULL,
-    CONSTRAINT certificates_pkey PRIMARY KEY (id)
+    CONSTRAINT authorities_pkey PRIMARY KEY (id)
 )
 WITH (
     OIDS = FALSE
 );
 
 CREATE INDEX IF NOT EXISTS idx_authorities_skid
-    ON public.certificates USING btree
+    ON public.authorities USING btree
     (skid COLLATE pg_catalog."default");
 
 CREATE INDEX IF NOT EXISTS idx_authorities_notafter
-    ON public.certificates USING btree
+    ON public.authorities USING btree
     (notafter);
 
 --

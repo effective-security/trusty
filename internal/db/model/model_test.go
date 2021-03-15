@@ -1,6 +1,7 @@
 package model_test
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"testing"
@@ -49,16 +50,17 @@ func TestUser(t *testing.T) {
 }
 
 func TestOrganization(t *testing.T) {
-	id := int64(1001)
 	u := &model.Organization{
-		ID:         1000,
-		ExternalID: model.NullInt64(&id),
-		Name:       "n1",
-		Login:      "l1",
-		Email:      "e1",
-		Company:    "c1",
-		AvatarURL:  "https://github.com/me",
-		Type:       "private",
+		ID:           1000,
+		ExternalID:   1001,
+		Name:         "n1",
+		Login:        "l1",
+		Email:        "e1",
+		BillingEmail: "b1",
+		Company:      "c1",
+		Location:     "wa",
+		AvatarURL:    "https://github.com/me",
+		Type:         "Organization",
 	}
 	dto := u.ToDto()
 	assert.Equal(t, "1000", dto.ID)
@@ -66,9 +68,51 @@ func TestOrganization(t *testing.T) {
 	assert.Equal(t, u.Login, dto.Login)
 	assert.Equal(t, u.Name, dto.Name)
 	assert.Equal(t, u.Email, dto.Email)
+	assert.Equal(t, u.BillingEmail, dto.BillingEmail)
 	assert.Equal(t, u.Company, dto.Company)
+	assert.Equal(t, u.Location, dto.Location)
 	assert.Equal(t, u.AvatarURL, dto.AvatarURL)
 	assert.Equal(t, u.Type, dto.Type)
+}
+
+func TestOrgMemberInfo(t *testing.T) {
+	u := &model.OrgMemberInfo{
+		MembershipID: 999,
+		OrgID:        1000,
+		OrgName:      "org_name",
+		UserID:       1001,
+		Name:         "name",
+		Email:        "email",
+		Role:         sql.NullString{String: "role", Valid: true},
+		Source:       sql.NullString{String: "source", Valid: true},
+	}
+	dto := u.ToDto()
+	assert.Equal(t, "999", dto.MembershipID)
+	assert.Equal(t, "1000", dto.OrgID)
+	assert.Equal(t, "1001", dto.UserID)
+	assert.Equal(t, "org_name", dto.OrgName)
+	assert.Equal(t, "name", dto.Name)
+	assert.Equal(t, "email", dto.Email)
+	assert.Equal(t, "role", dto.Role)
+	assert.Equal(t, "source", dto.Source)
+}
+
+func TestOrgMembership(t *testing.T) {
+	u := &model.OrgMembership{
+		ID:      999,
+		OrgID:   1000,
+		OrgName: "org_name",
+		UserID:  1001,
+		Role:    sql.NullString{String: "role", Valid: true},
+		Source:  sql.NullString{String: "source", Valid: true},
+	}
+	dto := u.ToDto()
+	assert.Equal(t, "999", dto.ID)
+	assert.Equal(t, "1000", dto.OrgID)
+	assert.Equal(t, "1001", dto.UserID)
+	assert.Equal(t, "org_name", dto.OrgName)
+	assert.Equal(t, "role", dto.Role)
+	assert.Equal(t, "source", dto.Source)
 }
 
 func TestRepository(t *testing.T) {
@@ -126,13 +170,13 @@ func TestString(t *testing.T) {
 	assert.Equal(t, s, v)
 }
 func TestID(t *testing.T) {
-	v, err := model.ID("")
+	_, err := model.ID("")
 	require.Error(t, err)
 
-	v, err = model.ID("@123")
+	_, err = model.ID("@123")
 	require.Error(t, err)
 
-	v, err = model.ID("1234567")
+	v, err := model.ID("1234567")
 	require.NoError(t, err)
 	assert.Equal(t, int64(1234567), v)
 }

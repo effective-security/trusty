@@ -126,7 +126,7 @@ func (s *Service) AuthURLHandler() rest.Handle {
 		responseMode := oauth2.SetAuthURLParam("response_mode", "query")
 		oauth2ResponseType := oauth2.SetAuthURLParam("response_type", "code")
 
-		o := s.OAuthConfig("github")
+		o := s.OAuthConfig(v1.ProviderGithub)
 		conf := &oauth2.Config{
 			ClientID:     o.ClientID,
 			ClientSecret: o.ClientSecret,
@@ -179,7 +179,7 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 			return
 		}
 
-		o := s.OAuthConfig("github")
+		o := s.OAuthConfig(v1.ProviderGithub)
 		conf := &oauth2.Config{
 			ClientID:     o.ClientID,
 			ClientSecret: o.ClientSecret,
@@ -222,7 +222,7 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 
 		user := &model.User{
 			ExternalID:   model.NullInt64(ghu.ID),
-			Provider:     "github",
+			Provider:     v1.ProviderGithub,
 			Login:        model.String(ghu.Login),
 			Name:         model.String(ghu.Name),
 			Email:        model.String(ghu.Email),
