@@ -39,3 +39,32 @@ func (s *Service) SyncOrgsHandler() rest.Handle {
 		}
 	}
 }
+
+// GetOrgsHandler returns user's orgs
+func (s *Service) GetOrgsHandler() rest.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
+		//provider := p.ByName("provider")
+		ctx := identity.ForRequest(r)
+		idn := ctx.Identity()
+
+		userInfo, ok := idn.UserInfo().(*v1.UserInfo)
+		if !ok {
+			marshal.WriteJSON(w, r, httperror.WithForbidden("failed to extract User Info from the token"))
+			return
+		}
+
+		userID, _ := model.ID(userInfo.ID)
+
+		orgs, err := s.db.GetUserOrgs(r.Context(), userID)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to fetch repos: %s", err.Error()).WithCause(err))
+			return
+		}
+
+		res := v1.OrgsResponse{
+			Orgs: model.ToOrganizationsDto(orgs),
+		}
+
+		marshal.WriteJSON(w, r, res)
+	}
+}

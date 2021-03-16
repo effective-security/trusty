@@ -24,13 +24,15 @@ func (p *Provider) UpdateOrg(ctx context.Context, org *model.Organization) (*mod
 	res := new(model.Organization)
 
 	err = p.db.QueryRowContext(ctx, `
-			INSERT INTO orgs(id,extern_id,provider,login,name,email,billing_email,company,location,avatar_url,type,created_at,updated_at)
-				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,$12,$13)
+			INSERT INTO orgs(id,extern_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at)
+				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,$12,$13,$14)
 			ON CONFLICT (provider,login)
 			DO UPDATE
-				SET name=$5,email=$6,billing_email=$7,company=$8,location=$9,avatar_url=$10,type=$11, updated_at=$13
-			RETURNING id,extern_id,provider,login,name,email,billing_email,company,location,avatar_url,type,created_at,updated_at
-			;`, id, org.ExternalID, org.Provider, org.Login, org.Name, org.Email, org.BillingEmail, org.Company, org.Location, org.AvatarURL, org.Type,
+				SET name=$5,email=$6,billing_email=$7,company=$8,location=$9,avatar_url=$10,html_url=$11,type=$12,created_at=$13,updated_at=$14
+			RETURNING id,extern_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at
+			;`, id, org.ExternalID, org.Provider, org.Login, org.Name, org.Email, org.BillingEmail, org.Company, org.Location,
+		org.AvatarURL, org.URL,
+		org.Type,
 		org.CreatedAt, org.UpdatedAt,
 	).Scan(&res.ID,
 		&res.ExternalID,
@@ -42,6 +44,7 @@ func (p *Provider) UpdateOrg(ctx context.Context, org *model.Organization) (*mod
 		&res.Company,
 		&res.Location,
 		&res.AvatarURL,
+		&res.URL,
 		&res.Type,
 		&res.CreatedAt,
 		&res.UpdatedAt,
@@ -58,7 +61,7 @@ func (p *Provider) GetOrg(ctx context.Context, id int64) (*model.Organization, e
 	res := new(model.Organization)
 
 	err := p.db.QueryRowContext(ctx,
-		`SELECT id,extern_id,provider,login,name,email,billing_email,company,location,avatar_url,type,created_at,updated_at
+		`SELECT id,extern_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at
 		FROM orgs
 		WHERE id=$1
 		;`, id,
@@ -72,6 +75,7 @@ func (p *Provider) GetOrg(ctx context.Context, id int64) (*model.Organization, e
 		&res.Company,
 		&res.Location,
 		&res.AvatarURL,
+		&res.URL,
 		&res.Type,
 		&res.CreatedAt,
 		&res.UpdatedAt,
@@ -359,6 +363,66 @@ func (p *Provider) GetUserMemberships(ctx context.Context, userID int64) ([]*mod
 		}
 
 		list = append(list, m)
+	}
+
+	return list, nil
+}
+
+// GetUserOrgs returns list of orgs
+func (p *Provider) GetUserOrgs(ctx context.Context, userID int64) ([]*model.Organization, error) {
+	q, err := p.db.QueryContext(ctx, `
+			SELECT
+				orgs.id,
+				orgs.extern_id,
+				orgs.provider,
+				orgs.login,
+				orgs.name,
+				orgs.email,
+				orgs.billing_email,
+				orgs.company,
+				orgs.location,
+				orgs.avatar_url,
+				orgs.html_url,
+				orgs.type,
+				orgs.created_at,
+				orgs.updated_at
+			FROM
+				orgmembers
+			LEFT JOIN users ON users.ID = orgmembers.user_id
+			LEFT JOIN orgs ON orgs.ID = orgmembers.org_id
+			WHERE orgmembers.user_id = $1
+			;
+			`, userID)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	defer q.Close()
+
+	list := make([]*model.Organization, 0, 100)
+
+	for q.Next() {
+		res := new(model.Organization)
+		err = q.Scan(
+			&res.ID,
+			&res.ExternalID,
+			&res.Provider,
+			&res.Login,
+			&res.Name,
+			&res.Email,
+			&res.BillingEmail,
+			&res.Company,
+			&res.Location,
+			&res.AvatarURL,
+			&res.URL,
+			&res.Type,
+			&res.CreatedAt,
+			&res.UpdatedAt,
+		)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+
+		list = append(list, res)
 	}
 
 	return list, nil
