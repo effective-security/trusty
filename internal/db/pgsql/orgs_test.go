@@ -172,6 +172,10 @@ func Test_Membership(t *testing.T) {
 	require.Equal(t, 1, len(list2))
 	assert.Equal(t, org.Name, list2[0].OrgName)
 
+	orgs, err := provider.GetUserOrgs(ctx, user1.ID)
+	require.NoError(t, err)
+	assert.Len(t, orgs, 1)
+
 	removed, err := provider.RemoveOrgMember(ctx, org.ID, user2.ID)
 	require.NoError(t, err)
 	assert.Equal(t, "user", removed.GetRole())

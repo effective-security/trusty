@@ -103,6 +103,7 @@ func (s *Service) SyncGithubOrgs(ctx context.Context, w http.ResponseWriter, use
 					Provider:     v1.ProviderGithub,
 					Login:        o.GetLogin(),
 					AvatarURL:    o.GetAvatarURL(),
+					URL:          o.GetHTMLURL(),
 					Name:         o.GetName(),
 					Email:        o.GetEmail(),
 					BillingEmail: o.GetBillingEmail(),

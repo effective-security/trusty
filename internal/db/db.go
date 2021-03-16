@@ -63,6 +63,8 @@ type OrgsDb interface {
 	RemoveOrgMember(ctx context.Context, orgID, memberID int64) (*model.OrgMembership, error)
 	// GetUserMemberships returns list of membership info
 	GetUserMemberships(ctx context.Context, userID int64) ([]*model.OrgMemberInfo, error)
+	// GetUserOrgs returns list of orgs
+	GetUserOrgs(ctx context.Context, userID int64) ([]*model.Organization, error)
 }
 
 // Provider represents SQL client instance

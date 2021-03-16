@@ -17,7 +17,7 @@ jobs:
           --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
           --header "Accept: application/vnd.github.v3+json" \
           https://api.github.com/repos/${{ github.repository }}
-  test:
+  UnitTest:
     strategy:
       matrix:
         go-version: [1.16.x]
@@ -34,7 +34,7 @@ jobs:
       run: sudo apt-get install softhsm2 opensc
     - name: Prepare
       run: make vars tools folders generate hsmconfig
-    - name: Test
+    - name: UnitTest
       env:
         TRUSTY_GITHUB_CLIENT_SECRET: ${{ secrets.TRUSTY_GITHUB_CLIENT_SECRET }}
         COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}

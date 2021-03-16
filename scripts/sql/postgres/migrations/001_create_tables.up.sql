@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS public.orgs
     company character varying(64) COLLATE pg_catalog."default" NULL,
     location character varying(64) COLLATE pg_catalog."default" NULL,
     avatar_url character varying(256) COLLATE pg_catalog."default" NULL,
+    html_url character varying(256) COLLATE pg_catalog."default" NULL,
     type character varying(16) COLLATE pg_catalog."default" NOT NULL,
     created_at timestamp with time zone,
     updated_at timestamp with time zone,

@@ -17,6 +17,7 @@ type Organization struct {
 	Provider     string    `json:"provider,omitempty"`
 	Login        string    `json:"login"`
 	AvatarURL    string    `json:"avatar_url,omitempty"`
+	URL          string    `json:"html_url,omitempty"`
 	Name         string    `json:"name"`
 	Email        string    `json:"email"`
 	BillingEmail string    `json:"billing_email,omitempty"`

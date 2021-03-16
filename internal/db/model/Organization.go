@@ -14,6 +14,7 @@ type Organization struct {
 	Provider     string    `db:"provider"`
 	Login        string    `db:"login"`
 	AvatarURL    string    `db:"avatar_url"`
+	URL          string    `db:"html_url"`
 	Name         string    `db:"name"`
 	Email        string    `db:"email"`
 	BillingEmail string    `db:"billing_email"`
@@ -37,10 +38,20 @@ func (u *Organization) ToDto() *v1.Organization {
 		Company:      u.Company,
 		Location:     u.Location,
 		AvatarURL:    u.AvatarURL,
+		URL:          u.URL,
 		Type:         u.Type,
 		CreatedAt:    u.CreatedAt,
 		UpdatedAt:    u.UpdatedAt,
 	}
 
 	return user
+}
+
+// ToOrganizationsDto returns Organizations
+func ToOrganizationsDto(list []*Organization) []v1.Organization {
+	res := make([]v1.Organization, len(list))
+	for i, org := range list {
+		res[i] = *org.ToDto()
+	}
+	return res
 }
