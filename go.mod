@@ -18,13 +18,14 @@ require (
 	github.com/golang/protobuf v1.5.1
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-querystring v1.0.0 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.3.0
+	github.com/hashicorp/go-uuid v1.0.1 // indirect
 	github.com/juju/errors v0.0.0-20200330140219-3fe23663418f
 	github.com/lib/pq v1.7.0
 	github.com/mattn/goreman v0.3.7
 	github.com/mattn/goveralls v0.0.6
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/opencontainers/go-digest v1.0.0 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/soheilhy/cmux v0.1.4
 	github.com/sony/sonyflake v1.0.0
 	github.com/stretchr/testify v1.7.0
@@ -34,10 +35,10 @@ require (
 	golang.org/x/net v0.0.0-20210316092652-d523dce5a7f4
 	golang.org/x/oauth2 v0.0.0-20210220000619-9bb904979d93
 	golang.org/x/tools v0.1.0
-	google.golang.org/genproto v0.0.0-20210325224202-eed09b1b5210
+	google.golang.org/genproto v0.0.0-20210325224202-eed09b1b5210 // indirect
 	google.golang.org/grpc v1.36.0
 	google.golang.org/grpc/examples v0.0.0-20200910201057-6591123024b3 // indirect
-	google.golang.org/protobuf v1.26.0
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/yaml.v2 v2.3.0
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
