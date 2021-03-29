@@ -6,7 +6,6 @@ import "gogoproto/gogo.proto";
 // for grpc-gateway
 import "google/api/annotations.proto";
 
-
 option (gogoproto.marshaler_all) = true;
 option (gogoproto.unmarshaler_all) = true;
 
@@ -110,3 +109,31 @@ message CreateCertificateRequest {
     string token = 6;
 }
 
+
+enum Trust {
+    Public = 0; // default
+    Private = 1;
+    Org = 2;
+}
+
+// Root provides X509 Root Cert information
+message RootCertificate  {
+    // ID of the certificate
+	int64 id = 1;
+    // OwnerID of the certificate, only used with Org scope
+	int64 owner_id = 2;
+    // Skid provides Subject Key Identifier
+	string skid = 3;
+    // Notbefore is the Unix time when the validity period starts
+	int64 notbefore = 4;
+    // Notafter is the Unix time when the validity period starts
+	int64 notafter = 5;
+    //Issuer name
+	string issuer = 6;
+    // SHA256 thnumbprint of the cert
+	string sha256 =7;
+    // Trust scope
+	Trust trust = 8;
+    // PEM encoded certificate
+	string pem =9;
+}

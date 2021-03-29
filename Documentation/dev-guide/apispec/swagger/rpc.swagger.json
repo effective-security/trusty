@@ -4,6 +4,11 @@
     "title": "api/v1/trustypb/rpc.proto",
     "version": "version not set"
   },
+  "tags": [
+    {
+      "name": "Status"
+    }
+  ],
   "consumes": [
     "application/json"
   ],

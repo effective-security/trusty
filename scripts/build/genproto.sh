@@ -13,8 +13,8 @@ if ! [[ "$0" =~ scripts/build/genproto.sh ]]; then
 	exit 255
 fi
 
-if [[ $(protoc --version | cut -f2 -d' ') != "3.13.0" ]]; then
-	echo "could not find protoc 3.13.0, is it installed + in PATH?"
+if [[ $(protoc --version | cut -f2 -d' ') != "3.15.5" ]]; then
+	echo "could not find protoc 3.15.5, is it installed + in PATH?"
 	exit 255
 fi
 
@@ -22,8 +22,8 @@ fi
 DIRS="./api/v1/trustypb"
 
 # exact version of packages to build
-GOGO_PROTO_SHA="1adfc126b41513cc696b209667c8656ea7aac67c"
-GRPC_GATEWAY_SHA="v2.0.1"
+GOGO_PROTO_SHA="v1.3.2"  #"1adfc126b41513cc696b209667c8656ea7aac67c"
+GRPC_GATEWAY_SHA="v2.3.0"
 
 # disable go mod
 export GO111MODULE=off
@@ -42,11 +42,12 @@ function cleanup {
 }
 
 #cleanup
-#trap cleanup EXIT
+trap cleanup EXIT
 
 # Ensure we have the right version of protoc-gen-gogo by building it every time.
 # TODO(jonboulle): vendor this instead of `go get`ting it.
 go get -u github.com/gogo/protobuf/{proto,protoc-gen-gogo,gogoproto}
+go get github.com/gogo/protobuf/types
 go get -u golang.org/x/tools/cmd/goimports
 pushd "${GOGOPROTO_ROOT}"
 	git reset --hard "${GOGO_PROTO_SHA}"
@@ -63,61 +64,80 @@ popd
 
 for dir in ${DIRS}; do
 	pushd "${dir}"
-   		protoc \
-           --gofast_out=plugins=grpc,import_prefix=trusty_grpc/:. \
-           -I=".:${GOGOPROTO_PATH}:${GRPC_GATEWAY_ROOT}/third_party/googleapis" \
-           ./*.proto
-
-		# shellcheck disable=SC1117
-		sed -i.bak -E 's/trusty_grpc\/(gogoproto|github\.com|golang\.org|google\.golang\.org)/\1/g' ./*.pb.go
-		# shellcheck disable=SC1117
-		sed -i.bak -E 's/trusty_grpc\/(errors|fmt|io)/\1/g' ./*.pb.go
-		# shellcheck disable=SC1117
-		sed -i.bak -E 's/import _ \"gogoproto\"//g' ./*.pb.go
-		# shellcheck disable=SC1117
-		sed -i.bak -E 's/import fmt \"fmt\"//g' ./*.pb.go
-		# shellcheck disable=SC1117
-		sed -i.bak -E 's/import _ \"trusty_grpc\/google\/api\"//g' ./*.pb.go
-		# shellcheck disable=SC1117
-		sed -i.bak -E 's/import _ \"google\.golang\.org\/genproto\/googleapis\/api\/annotations\"//g' ./*.pb.go
-		rm -f ./*.bak
+		protoc \
+			-I=. \
+			-I=${GOPATH}/src \
+			-I=${GOPATH}/src/github.com/googleapis/googleapis \
+			-I=${GOGOPROTO_PATH} \
+			--gofast_out=\
+Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types,\
+plugins=grpc:. \
+			./*.proto
 		goimports -w ./*.pb.go
-        gofmt -s -l -w ./*.pb.go
+		gofmt -s -l -w ./*.pb.go
 	popd
 done
+
+exit 0
+
+# TODO: replace github.com/golang/protobuf/proto with google.golang.org/...
 
 # remove old swagger files so it's obvious whether the files fail to generate
 rm -rf Documentation/dev-guide/apispec/swagger/*json
 for pb in trustypb/rpc trustypb/pkix; do
 	protobase="api/v1/${pb}"
-	protoc -I".:api/v1/trustypb" \
-	    -I"${GRPC_GATEWAY_ROOT}"/third_party/googleapis \
-	    -I"${GOGOPROTO_PATH}" \
-	    --grpc-gateway_out=logtostderr=true:. \
-	    --openapiv2_out=logtostderr=true:./Documentation/dev-guide/apispec/swagger/. \
-	    ${protobase}.proto
-	# hack to move gw files around so client won't include them
+	echo "making docs and gw on: ${protobase}"
+	echo "protobase=${protobase}"
 	pkgpath=$(dirname "${protobase}")
+	echo "pkgpath=${pkgpath}"
 	pkg=$(basename "${pkgpath}")
+	echo "pkg=${pkg}"
 	gwfile="${protobase}.pb.gw.go"
+	mkdir -p "${pkgpath}/gw/"
+	protoc \
+		-I=. \
+		-I=api/v1/trustypb \
+		-I=${GOPATH}/src \
+		-I=${GOPATH}/src/github.com/googleapis/googleapis \
+		-I=${GOGOPROTO_PATH} \
+		--grpc-gateway_out=\
+Mrpc.proto=github.com/ekspand/trusty/api/v1/trustypb,\
+Mapi/v1/trustypb/rpc.proto=github.com/ekspand/trusty/api/v1/trustypb,\
+Mpkix.proto=github.com/ekspand/trusty/api/v1/trustypb,\
+Mapi/v1/trustypb/pkix.proto=github.com/ekspand/trusty/api/v1/trustypb,\
+Mgoogle/protobuf/descriptor.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types,\
+logtostderr=true,paths=source_relative,standalone=true:. \
+		--openapiv2_out=\
+Mrpc.proto=github.com/ekspand/trusty/api/v1/trustypb,\
+Mapi/v1/trustypb/rpc.proto=github.com/ekspand/trusty/api/v1/trustypb,\
+Mpkix.proto=github.com/ekspand/trusty/api/v1/trustypb,\
+Mapi/v1/trustypb/pkix.proto=github.com/ekspand/trusty/api/v1/trustypb,\
+Mgoogle/protobuf/descriptor.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types,\
+logtostderr=true:./Documentation/dev-guide/apispec/swagger/. \
+		${protobase}.proto
+	# hack to move gw files around so client won't include them
 	sed -i.bak -E "s/package $pkg/package gw/g" ${gwfile}
-	# shellcheck disable=SC1117
-	sed -i.bak -E "s/protoReq /&$pkg\./g" ${gwfile}
-	sed -i.bak -E "s/trustypb\.trustypb\./trustypb\./g" ${gwfile}
-	sed -i.bak -E "s/ AuthorityServer/ trustypb\.AuthorityServer/g" ${gwfile}
-    sed -i.bak -E "s/ StatusServer/ trustypb\.StatusServer/g" ${gwfile}
-	sed -i.bak -E "s/, client /, client $pkg./g" ${gwfile}
-	sed -i.bak -E "s/Client /, client $pkg./g" ${gwfile}
-	sed -i.bak -E "s/[^(]*Client, runtime/${pkg}.&/" ${gwfile}
-	sed -i.bak -E "s/New[A-Za-z]*Client/${pkg}.&/" ${gwfile}
-	# darwin doesn't like newlines in sed...
-	# shellcheck disable=SC1117
-	sed -i.bak -E "s|import \(|& \"github.com/ekspand/trusty/${pkgpath}\"|" ${gwfile}
-	mkdir -p  "${pkgpath}"/gw/
-    goimports -w ${gwfile}
+    echo "goimports -w ${gwfile}"
+	goimports -w ${gwfile}
+    echo "gofmt -s -l -w ${gwfile}"
 	gofmt -s -l -w ${gwfile}
-	mv ${gwfile} "${pkgpath}/gw/"
-	rm -f ${protobase}*.bak
+    echo "mv ${gwfile} "${pkgpath}/gw/""
+	mv "${gwfile}" "${pkgpath}/gw/"
+	rm -rf "${gwfile}.bak"
 	swaggerName=$(basename ${pb})
 	mv	Documentation/dev-guide/apispec/swagger/${protobase}.swagger.json \
 		Documentation/dev-guide/apispec/swagger/"${swaggerName}".swagger.json

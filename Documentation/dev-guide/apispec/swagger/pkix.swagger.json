@@ -4,6 +4,11 @@
     "title": "api/v1/trustypb/pkix.proto",
     "version": "version not set"
   },
+  "tags": [
+    {
+      "name": "Authority"
+    }
+  ],
   "consumes": [
     "application/json"
   ],
@@ -170,7 +175,7 @@
         },
         "root": {
           "type": "string",
-          "title": "Root provides the Root CA certifica in PEM format"
+          "title": "Root provides the Root CA certificate in PEM format"
         },
         "label": {
           "type": "string",
