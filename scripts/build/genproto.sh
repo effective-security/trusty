@@ -22,7 +22,7 @@ fi
 DIRS="./api/v1/trustypb"
 
 # exact version of packages to build
-GOGO_PROTO_SHA="v1.3.2"  #"1adfc126b41513cc696b209667c8656ea7aac67c"
+GOGO_PROTO_SHA="v1.3.2"
 GRPC_GATEWAY_SHA="v2.3.0"
 
 # disable go mod
@@ -49,6 +49,7 @@ trap cleanup EXIT
 go get -u github.com/gogo/protobuf/{proto,protoc-gen-gogo,gogoproto}
 go get github.com/gogo/protobuf/types
 go get -u golang.org/x/tools/cmd/goimports
+go get github.com/gogo/googleapis/google/api
 pushd "${GOGOPROTO_ROOT}"
 	git reset --hard "${GOGO_PROTO_SHA}"
 	make install
@@ -67,7 +68,7 @@ for dir in ${DIRS}; do
 		protoc \
 			-I=. \
 			-I=${GOPATH}/src \
-			-I=${GOPATH}/src/github.com/googleapis/googleapis \
+			-I=${GOPATH}/src/github.com/gogo/googleapis \
 			-I=${GOGOPROTO_PATH} \
 			--gofast_out=\
 Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types,\
@@ -77,6 +78,8 @@ Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,\
 Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types,\
 plugins=grpc:. \
 			./*.proto
+		sed -i.bak -E 's/_ \"google\/api\"//g' ./*.pb.go
+        rm -f ./*.bak
 		goimports -w ./*.pb.go
 		gofmt -s -l -w ./*.pb.go
 	popd
@@ -102,7 +105,7 @@ for pb in trustypb/rpc trustypb/pkix; do
 		-I=. \
 		-I=api/v1/trustypb \
 		-I=${GOPATH}/src \
-		-I=${GOPATH}/src/github.com/googleapis/googleapis \
+		-I=${GOPATH}/src/github.com/gogo/googleapis \
 		-I=${GOGOPROTO_PATH} \
 		--grpc-gateway_out=\
 Mrpc.proto=github.com/ekspand/trusty/api/v1/trustypb,\
