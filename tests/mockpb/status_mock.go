@@ -9,7 +9,7 @@ import (
 
 // MockStatusServer for testing
 type MockStatusServer struct {
-	trustypb.StatusServer
+	trustypb.StatusServiceServer
 
 	Reqs []proto.Message
 

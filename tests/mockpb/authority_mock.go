@@ -9,7 +9,7 @@ import (
 
 // MockAuthorityServer for testing
 type MockAuthorityServer struct {
-	trustypb.AuthorityServer
+	trustypb.AuthorityServiceServer
 
 	Reqs []proto.Message
 

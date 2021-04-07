@@ -252,7 +252,7 @@ CREATE INDEX IF NOT EXISTS idx_revoked_notafter
 --
 -- Authorities
 --
-CREATE TABLE IF NOT EXISTS public.authorities
+CREATE TABLE IF NOT EXISTS public.roots
 (
     id bigint NOT NULL,
     owner_id bigint NOT NULL,
@@ -263,19 +263,37 @@ CREATE TABLE IF NOT EXISTS public.authorities
     sha256 character varying(64) COLLATE pg_catalog."default" NOT NULL,
     trust int NOT NULL,
     pem text COLLATE pg_catalog."default" NOT NULL,
-    CONSTRAINT authorities_pkey PRIMARY KEY (id)
+    CONSTRAINT roots_pkey PRIMARY KEY (id),
+    CONSTRAINT roots_skid UNIQUE (skid),
+    CONSTRAINT roots_sha256 UNIQUE (sha256)
 )
 WITH (
     OIDS = FALSE
 );
 
-CREATE INDEX IF NOT EXISTS idx_authorities_skid
-    ON public.authorities USING btree
+CREATE UNIQUE INDEX IF NOT EXISTS idx_roots_skid
+    ON public.roots USING btree
     (skid COLLATE pg_catalog."default");
 
-CREATE INDEX IF NOT EXISTS idx_authorities_notafter
-    ON public.authorities USING btree
+CREATE UNIQUE INDEX IF NOT EXISTS idx_roots_sha256
+    ON public.roots USING btree
+    (sha256 COLLATE pg_catalog."default");
+
+CREATE INDEX IF NOT EXISTS idx_roots_notafter
+    ON public.roots USING btree
     (notafter);
+
+SELECT create_constraint_if_not_exists(
+    'public',
+    'roots',
+    'unique_roots_skid',
+    'ALTER TABLE public.roots ADD CONSTRAINT unique_roots_skid UNIQUE USING INDEX idx_roots_skid;');
+
+SELECT create_constraint_if_not_exists(
+    'public',
+    'roots',
+    'unique_roots_sha256',
+    'ALTER TABLE public.roots ADD CONSTRAINT unique_roots_sha256 UNIQUE USING INDEX idx_roots_sha256;');
 
 --
 --

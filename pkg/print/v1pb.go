@@ -44,7 +44,7 @@ func CallerStatusResponse(w io.Writer, r *trustypb.CallerStatusResponse) {
 	table.SetBorder(false)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
 	table.Append([]string{"Name", r.Name})
-	table.Append([]string{"ID", r.Id})
+	table.Append([]string{"ID", r.ID})
 	table.Append([]string{"Role", r.Role})
 	table.Render()
 	fmt.Fprintln(w)

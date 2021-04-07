@@ -8,11 +8,11 @@ import (
 )
 
 type authoritySrv2C struct {
-	srv pb.AuthorityServer
+	srv pb.AuthorityServiceServer
 }
 
 // AuthorityServerToClient returns pb.AuthorityClient
-func AuthorityServerToClient(srv pb.AuthorityServer) pb.AuthorityClient {
+func AuthorityServerToClient(srv pb.AuthorityServiceServer) pb.AuthorityServiceClient {
 	return &authoritySrv2C{srv}
 }
 

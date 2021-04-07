@@ -13,4 +13,4 @@ debug.test
 coverage.out
 change_log.txt
 etc/dev/sql-conn.txt
-
+vendor/

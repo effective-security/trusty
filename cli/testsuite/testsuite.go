@@ -176,8 +176,8 @@ var nextPort = int32(31234)
 // SetupMockGRPC for testing
 func (s *Suite) SetupMockGRPC() *grpc.Server {
 	serv := grpc.NewServer()
-	trustypb.RegisterStatusServer(serv, s.MockStatus)
-	trustypb.RegisterAuthorityServer(serv, s.MockAuthority)
+	trustypb.RegisterStatusServiceServer(serv, s.MockStatus)
+	trustypb.RegisterAuthorityServiceServer(serv, s.MockAuthority)
 
 	addr := fmt.Sprintf("localhost:%d", atomic.AddInt32(&nextPort, 1))
 	lis, err := net.Listen("tcp", addr)

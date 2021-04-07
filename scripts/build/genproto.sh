@@ -42,7 +42,7 @@ function cleanup {
 }
 
 #cleanup
-trap cleanup EXIT
+#trap cleanup EXIT
 
 # Ensure we have the right version of protoc-gen-gogo by building it every time.
 # TODO(jonboulle): vendor this instead of `go get`ting it.

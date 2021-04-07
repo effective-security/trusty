@@ -67,10 +67,21 @@ type OrgsDb interface {
 	GetUserOrgs(ctx context.Context, userID int64) ([]*model.Organization, error)
 }
 
+// RaDb defines an interface for Registration Authority
+type RaDb interface {
+	// RegisterRootCertificate registers Root Cert
+	RegisterRootCertificate(ctx context.Context, crt *model.RootCertificate) (*model.RootCertificate, error)
+	// RemoveRootCertificate removes Root Cert
+	RemoveRootCertificate(ctx context.Context, id int64) error
+	// GetRootCertificates returns list of Root certs
+	GetRootCertificates(ctx context.Context, ownerID int64) ([]*model.RootCertificate, error)
+}
+
 // Provider represents SQL client instance
 type Provider interface {
 	UsersDb
 	OrgsDb
+	RaDb
 
 	// DB returns underlying DB connection
 	DB() *sql.DB
