@@ -8,11 +8,11 @@ import (
 )
 
 type statusSrv2C struct {
-	srv pb.StatusServer
+	srv pb.StatusServiceServer
 }
 
 // StatusServerToClient returns pb.StatusClient
-func StatusServerToClient(srv pb.StatusServer) pb.StatusClient {
+func StatusServerToClient(srv pb.StatusServiceServer) pb.StatusServiceClient {
 	return &statusSrv2C{srv}
 }
 

@@ -8,7 +8,7 @@ import (
 )
 
 type statusClient struct {
-	remote   pb.StatusClient
+	remote   pb.StatusServiceClient
 	callOpts []grpc.CallOption
 }
 
@@ -21,7 +21,7 @@ func NewStatus(conn *grpc.ClientConn, callOpts []grpc.CallOption) Status {
 }
 
 // NewStatusFromProxy returns instance of Status client
-func NewStatusFromProxy(proxy pb.StatusClient) Status {
+func NewStatusFromProxy(proxy pb.StatusServiceClient) Status {
 	return &statusClient{
 		remote: proxy,
 	}
@@ -45,15 +45,15 @@ func (c *statusClient) Caller(ctx context.Context) (*pb.CallerStatusResponse, er
 }
 
 type retryStatusClient struct {
-	status pb.StatusClient
+	status pb.StatusServiceClient
 }
 
 // TODO: implement retry for gRPC client interceptor
 
 // RetryStatusClient implements a StatusClient.
-func RetryStatusClient(conn *grpc.ClientConn) pb.StatusClient {
+func RetryStatusClient(conn *grpc.ClientConn) pb.StatusServiceClient {
 	return &retryStatusClient{
-		status: pb.NewStatusClient(conn),
+		status: pb.NewStatusServiceClient(conn),
 	}
 }
 

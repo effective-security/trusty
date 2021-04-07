@@ -24,7 +24,7 @@ var nextPort = int32(41234)
 
 func setupStatusMockGRPC(t *testing.T, m *mockpb.MockStatusServer) (*client.Client, *grpc.Server) {
 	serv := grpc.NewServer()
-	trustypb.RegisterStatusServer(serv, m)
+	trustypb.RegisterStatusServiceServer(serv, m)
 
 	addr := fmt.Sprintf("localhost:%d", atomic.AddInt32(&nextPort, 1))
 	lis, err := net.Listen("tcp", addr)

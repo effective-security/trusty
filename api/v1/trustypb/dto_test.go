@@ -31,7 +31,7 @@ func Test_Decode_ValidDTO(t *testing.T) {
 		Version: expVer,
 	}
 	expCaller := &trustypb.CallerStatusResponse{
-		Id:   "local",
+		ID:   "local",
 		Name: "localhost",
 		Role: "trusty-peer",
 	}

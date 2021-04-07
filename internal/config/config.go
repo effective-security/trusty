@@ -1008,12 +1008,16 @@ func (c *TLSInfo) GetClientCertAuth() bool {
 // Trusty specifies the configuration for Trusty.
 type Trusty struct {
 
-	// Roots specifies the list of Root Certs locations.
-	Roots []string
+	// PrivateRoots specifies the list of private Root Certs files.
+	PrivateRoots []string
+
+	// PublicRoots specifies the list of public Root Certs files.
+	PublicRoots []string
 }
 
 func (c *Trusty) overrideFrom(o *Trusty) {
-	overrideStrings(&c.Roots, &o.Roots)
+	overrideStrings(&c.PrivateRoots, &o.PrivateRoots)
+	overrideStrings(&c.PublicRoots, &o.PublicRoots)
 
 }
 

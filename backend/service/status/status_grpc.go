@@ -48,7 +48,7 @@ func (s *Service) Caller(ctx context.Context, _ *pb.EmptyRequest) (*pb.CallerSta
 	}
 
 	res := &pb.CallerStatusResponse{
-		Id:   id,
+		ID:   id,
 		Name: name,
 		Role: role,
 	}

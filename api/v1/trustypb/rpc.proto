@@ -8,7 +8,7 @@ import "google/api/annotations.proto";
 option (gogoproto.marshaler_all) = true;
 option (gogoproto.unmarshaler_all) = true;
 
-service Status {
+service StatusService {
     // Version returns the server version.
     rpc Version(EmptyRequest) returns (ServerVersion) {
         option (google.api.http) = {
@@ -65,7 +65,7 @@ message ServerStatusResponse {
 
 message CallerStatusResponse {
     // ID of the caller.
-    string id = 1;
+    string id = 1 [(gogoproto.customname)="ID"];
     // Name of the caller.
     string name = 2;
     // Role of the caller.

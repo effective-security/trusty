@@ -44,8 +44,8 @@ type GRPCRegistrator interface {
 
 // TrustyServer contains a running trusty server and its listeners.
 type TrustyServer struct {
-	pb.StatusServer
-	pb.AuthorityServer
+	pb.StatusServiceServer
+	pb.AuthorityServiceServer
 	Listeners []net.Listener
 
 	ipaddr   string
@@ -276,11 +276,11 @@ func (e *TrustyServer) AddService(svc Service) {
 
 	e.services[svc.Name()] = svc
 
-	if statusSvc, ok := svc.(pb.StatusServer); ok {
-		e.StatusServer = statusSvc
+	if statusSvc, ok := svc.(pb.StatusServiceServer); ok {
+		e.StatusServiceServer = statusSvc
 	}
-	if authoritySvc, ok := svc.(pb.AuthorityServer); ok {
-		e.AuthorityServer = authoritySvc
+	if authoritySvc, ok := svc.(pb.AuthorityServiceServer); ok {
+		e.AuthorityServiceServer = authoritySvc
 	}
 }
 

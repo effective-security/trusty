@@ -9,7 +9,7 @@ import "google/api/annotations.proto";
 option (gogoproto.marshaler_all) = true;
 option (gogoproto.unmarshaler_all) = true;
 
-service Authority {
+service AuthorityService {
         // ProfileInfo returns the certificate profile info
         rpc ProfileInfo(CertProfileInfoRequest) returns (CertProfileInfo) {
             option (google.api.http) = {
@@ -109,7 +109,6 @@ message CreateCertificateRequest {
     string token = 6;
 }
 
-
 enum Trust {
     Public = 0; // default
     Private = 1;
@@ -119,15 +118,15 @@ enum Trust {
 // Root provides X509 Root Cert information
 message RootCertificate  {
     // ID of the certificate
-	int64 id = 1;
+	int64 id = 1 [(gogoproto.customname)="ID"];
     // OwnerID of the certificate, only used with Org scope
-	int64 owner_id = 2;
+	int64 owner_id = 2 [(gogoproto.customname)="OwnerID"];
     // Skid provides Subject Key Identifier
-	string skid = 3;
+	string skid = 3 [(gogoproto.customname)="SKID"];
     // Notbefore is the Unix time when the validity period starts
-	int64 notbefore = 4;
+	int64 not_before = 4 [(gogoproto.customname)="NotBefore"];
     // Notafter is the Unix time when the validity period starts
-	int64 notafter = 5;
+	int64 not_after = 5 [(gogoproto.customname)="NotAfter"];
     //Issuer name
 	string issuer = 6;
     // SHA256 thnumbprint of the cert

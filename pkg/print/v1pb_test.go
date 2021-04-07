@@ -32,7 +32,7 @@ func TestPrintServerVersion(t *testing.T) {
 
 	print.ServerVersion(w, r)
 
-	out := string(w.Bytes())
+	out := w.String()
 	assert.Equal(t, "1.1.1 (go1.15.1)\n", out)
 }
 
@@ -59,7 +59,7 @@ func TestServerStatusResponse(t *testing.T) {
 
 	print.ServerStatusResponse(w, r)
 
-	out := string(w.Bytes())
+	out := w.String()
 	assert.Contains(t, out, "  Name        | Trusty ")
 	assert.Contains(t, out, "  Node        | local  ")
 	assert.Contains(t, out, "  Host        | dissoupov ")
@@ -72,7 +72,7 @@ func TestServerStatusResponse(t *testing.T) {
 
 func TestCallerStatusResponse(t *testing.T) {
 	r := &trustypb.CallerStatusResponse{
-		Id:   "12341234-1234124",
+		ID:   "12341234-1234124",
 		Name: "local",
 		Role: "trustry",
 	}
@@ -81,7 +81,7 @@ func TestCallerStatusResponse(t *testing.T) {
 
 	print.CallerStatusResponse(w, r)
 
-	out := string(w.Bytes())
+	out := w.String()
 	assert.Equal(t, "  Name | local             \n"+
 		"  ID   | 12341234-1234124  \n"+
 		"  Role | trustry           \n\n", out)
@@ -97,7 +97,7 @@ func Test_PrintCerts(t *testing.T) {
 	w := bytes.NewBuffer([]byte{})
 	print.Certificates(w, certs)
 
-	out := string(w.Bytes())
+	out := w.String()
 	assert.NotContains(t, out, "ERROR:")
 	assert.Contains(t, out, "ID: ")
 	assert.Contains(t, out, "Subject: ")
@@ -128,7 +128,7 @@ func Test_PrintCertsRequest(t *testing.T) {
 		w := bytes.NewBuffer([]byte{})
 		print.CertificateRequest(w, csrv)
 
-		out := string(w.Bytes())
+		out := w.String()
 		assert.NotContains(t, out, "ERROR:")
 		assert.Contains(t, out, "Subject: ")
 	}
@@ -157,7 +157,7 @@ func Test_CertificateList(t *testing.T) {
 
 	w := bytes.NewBuffer([]byte{})
 	print.CertificateList(w, res)
-	out := string(w.Bytes())
+	out := w.String()
 	assert.Contains(t, out, "Revoked:\n")
 }
 
@@ -178,7 +178,7 @@ func Test_OCSPResponse(t *testing.T) {
 
 	w := bytes.NewBuffer([]byte{})
 	print.OCSPResponse(w, res)
-	out := string(w.Bytes())
+	out := w.String()
 	assert.Contains(t, out, "Revocation reason: ")
 }
 
@@ -189,7 +189,7 @@ func Test_Issuers(t *testing.T) {
 
 	w := bytes.NewBuffer([]byte{})
 	print.Issuers(w, res.Issuers, true)
-	out := string(w.Bytes())
+	out := w.String()
 	assert.Contains(t, out, `Subject: C=US, L=WA, O=trusty.com, CN=[TEST] Trusty Level 2 CA
   ID: 0c2d74591b9418ea0dbeffabdc45ddc2d0854d07
   Issuer ID: 6aaa5b9679de083158dea410e90b5e9053b80fe9

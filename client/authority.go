@@ -8,11 +8,11 @@ import (
 )
 
 type authorityClient struct {
-	remote   pb.AuthorityClient
+	remote   pb.AuthorityServiceClient
 	callOpts []grpc.CallOption
 }
 
-// NewAuthority returns instance of Authority client
+// NewAuthority returns instance of AuthorityService client
 func NewAuthority(conn *grpc.ClientConn, callOpts []grpc.CallOption) Authority {
 	return &authorityClient{
 		remote:   RetryAuthorityClient(conn),
@@ -21,7 +21,7 @@ func NewAuthority(conn *grpc.ClientConn, callOpts []grpc.CallOption) Authority {
 }
 
 // NewAuthorityFromProxy returns instance of Authority client
-func NewAuthorityFromProxy(proxy pb.AuthorityClient) Authority {
+func NewAuthorityFromProxy(proxy pb.AuthorityServiceClient) Authority {
 	return &authorityClient{
 		remote: proxy,
 	}
@@ -43,15 +43,15 @@ func (c *authorityClient) Issuers(ctx context.Context) (*pb.IssuersInfoResponse,
 }
 
 type retryAuthorityClient struct {
-	authority pb.AuthorityClient
+	authority pb.AuthorityServiceClient
 }
 
 // TODO: implement retry for gRPC client interceptor
 
 // RetryAuthorityClient implements a AuthorityClient.
-func RetryAuthorityClient(conn *grpc.ClientConn) pb.AuthorityClient {
+func RetryAuthorityClient(conn *grpc.ClientConn) pb.AuthorityServiceClient {
 	return &retryAuthorityClient{
-		authority: pb.NewAuthorityClient(conn),
+		authority: pb.NewAuthorityServiceClient(conn),
 	}
 }
 
