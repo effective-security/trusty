@@ -140,3 +140,28 @@ func Issuers(w io.Writer, issuers []*trustypb.IssuerInfo, withPem bool) {
 	}
 	fmt.Fprintln(w)
 }
+
+// Roots prints list of RootCertificate
+func Roots(w io.Writer, roots []*trustypb.RootCertificate, withPem bool) {
+	now := time.Now()
+
+	for cnt, ci := range roots {
+		na := time.Unix(ci.NotAfter, 0).Local()
+		nb := time.Unix(ci.NotBefore, 0).Local()
+		issuedIn := now.Sub(na) / time.Minute * time.Minute
+		expiresIn := nb.Sub(now) / time.Minute * time.Minute
+
+		fmt.Fprintf(w, "==================================== %d ====================================\n", cnt+1)
+		fmt.Fprintf(w, "Subject: %s\n", ci.Subject)
+		fmt.Fprintf(w, "  ID: %d\n", ci.ID)
+		fmt.Fprintf(w, "  Org ID: %d\n", ci.OrgID)
+		fmt.Fprintf(w, "  SKID: %s\n", ci.SKID)
+		fmt.Fprintf(w, "  Thumbprint: %s\n", ci.Sha256)
+		fmt.Fprintf(w, "  Trust: %v\n", ci.Trust)
+		fmt.Fprintf(w, "  Issued: %s (%s ago)\n", nb.String(), issuedIn.String())
+		fmt.Fprintf(w, "  Expires: %s (in %s)\n", na.String(), expiresIn.String())
+		if withPem {
+			fmt.Fprintf(w, "\n%s\n", ci.Pem)
+		}
+	}
+}

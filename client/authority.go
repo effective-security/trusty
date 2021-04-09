@@ -13,7 +13,7 @@ type authorityClient struct {
 }
 
 // NewAuthority returns instance of AuthorityService client
-func NewAuthority(conn *grpc.ClientConn, callOpts []grpc.CallOption) Authority {
+func NewAuthority(conn *grpc.ClientConn, callOpts []grpc.CallOption) AuthorityService {
 	return &authorityClient{
 		remote:   RetryAuthorityClient(conn),
 		callOpts: callOpts,
@@ -21,7 +21,7 @@ func NewAuthority(conn *grpc.ClientConn, callOpts []grpc.CallOption) Authority {
 }
 
 // NewAuthorityFromProxy returns instance of Authority client
-func NewAuthorityFromProxy(proxy pb.AuthorityServiceClient) Authority {
+func NewAuthorityFromProxy(proxy pb.AuthorityServiceClient) AuthorityService {
 	return &authorityClient{
 		remote: proxy,
 	}

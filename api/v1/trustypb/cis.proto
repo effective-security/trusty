@@ -1,0 +1,90 @@
+syntax = "proto3";
+package trustypb;
+
+import "rpc.proto";
+import "gogoproto/gogo.proto";
+// for grpc-gateway
+import "google/api/annotations.proto";
+
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+
+service CertInfoService {
+    // Roots returns the root CAs
+    rpc Roots(GetRootsRequest) returns (RootsResponse) {
+        option (google.api.http) = {
+            get: "/v1/roots"
+        };
+    }
+}
+
+enum Trust {
+    Any = 0;  // default
+    Public = 1;
+    Private = 2;
+    Org = 3;
+}
+
+// Root provides X509 Root Cert information
+message RootCertificate  {
+    // ID of the certificate
+    int64 id = 1 [(gogoproto.customname)="ID"];
+    // OrgID of the certificate, only used with Org scope
+    int64 org_id = 2 [(gogoproto.customname)="OrgID"];
+    // Skid provides Subject Key Identifier
+    string skid = 3 [(gogoproto.customname)="SKID"];
+    // Notbefore is the Unix time when the validity period starts
+    int64 not_before = 4 [(gogoproto.customname)="NotBefore"];
+    // Notafter is the Unix time when the validity period starts
+    int64 not_after = 5 [(gogoproto.customname)="NotAfter"];
+    // Subject name
+    string subject = 6;
+    // SHA256 thnumbprint of the cert
+    string sha256 =7;
+    // Trust scope
+    Trust trust = 8;
+    // PEM encoded certificate
+    string pem =9;
+}
+
+// GetRootsRequest specifies root certs request
+message GetRootsRequest {
+    // OrgID of the certificate, only used with Org scope,
+    // or 0 for Public or Private scope.
+    int64 org_id = 1 [(gogoproto.customname)="OrgID", (gogoproto.nullable) = true];
+}
+
+// RootsResponse provides response for GetRootsRequest
+message RootsResponse {
+    repeated RootCertificate roots = 1;
+}
+
+// Certificate provides X509 Certificate information
+message Certificate  {
+    // ID of the certificate
+    int64 id = 1 [(gogoproto.customname)="ID"];
+    // OrgID of the certificate, only used with Org scope
+    int64 org_id = 2 [(gogoproto.customname)="OrgID"];
+    // SKID provides Subject Key Identifier
+    string skid = 3 [(gogoproto.customname)="SKID"];
+    // IKID provides Issuer Key Identifier
+    string ikid = 4 [(gogoproto.customname)="IKID"];
+    // SN provides Serial Number
+    string SN = 5 [(gogoproto.customname)="SN"];
+    // Notbefore is the Unix time when the validity period starts
+    int64 not_before = 6 [(gogoproto.customname)="NotBefore"];
+    // Notafter is the Unix time when the validity period starts
+    int64 not_after = 7 [(gogoproto.customname)="NotAfter"];
+    // Subject name
+    string subject = 8;
+    // Issuer name
+    string issuer = 9;
+    // SHA256 thnumbprint of the cert
+    string sha256 = 10;
+    // Profile of the certificate
+    string profile = 11;
+    // Pem encoded certificate
+    string pem = 12;
+    // IssuersPem provides PEM encoded issuers
+    string issuers_pem = 13;
+}

@@ -91,7 +91,7 @@ exit 0
 
 # remove old swagger files so it's obvious whether the files fail to generate
 rm -rf Documentation/dev-guide/apispec/swagger/*json
-for pb in trustypb/rpc trustypb/pkix; do
+for pb in trustypb/rpc trustypb/pkix trustypb/cis; do
 	protobase="api/v1/${pb}"
 	echo "making docs and gw on: ${protobase}"
 	echo "protobase=${protobase}"
@@ -108,6 +108,8 @@ for pb in trustypb/rpc trustypb/pkix; do
 		-I=${GOPATH}/src/github.com/gogo/googleapis \
 		-I=${GOGOPROTO_PATH} \
 		--grpc-gateway_out=\
+Mcis.proto=github.com/ekspand/trusty/api/v1/trustypb,\
+Mapi/v1/trustypb/cis.proto=github.com/ekspand/trusty/api/v1/trustypb,\
 Mrpc.proto=github.com/ekspand/trusty/api/v1/trustypb,\
 Mapi/v1/trustypb/rpc.proto=github.com/ekspand/trusty/api/v1/trustypb,\
 Mpkix.proto=github.com/ekspand/trusty/api/v1/trustypb,\
@@ -120,6 +122,8 @@ Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,\
 Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types,\
 logtostderr=true,paths=source_relative,standalone=true:. \
 		--openapiv2_out=\
+Mcis.proto=github.com/ekspand/trusty/api/v1/trustypb,\
+Mapi/v1/trustypb/cis.proto=github.com/ekspand/trusty/api/v1/trustypb,\
 Mrpc.proto=github.com/ekspand/trusty/api/v1/trustypb,\
 Mapi/v1/trustypb/rpc.proto=github.com/ekspand/trusty/api/v1/trustypb,\
 Mpkix.proto=github.com/ekspand/trusty/api/v1/trustypb,\

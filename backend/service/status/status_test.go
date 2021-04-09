@@ -136,7 +136,7 @@ func TestVersionHttpJSON(t *testing.T) {
 
 func TestVersionGrpc(t *testing.T) {
 	res := new(pb.ServerVersion)
-	res, err := trustyClient.Status.Version(context.Background())
+	res, err := trustyClient.StatusService.Version(context.Background())
 	require.NoError(t, err)
 
 	ver := version.Current()
@@ -203,7 +203,7 @@ func TestServerStatusHttpJSON(t *testing.T) {
 
 func TestServerStatusGrpc(t *testing.T) {
 	res := new(pb.ServerStatusResponse)
-	res, err := trustyClient.Status.Server(context.Background())
+	res, err := trustyClient.StatusService.Server(context.Background())
 	require.NoError(t, err)
 
 	require.NotNil(t, res.Status)
@@ -249,7 +249,7 @@ func TestCallerStatusHttpJSON(t *testing.T) {
 func TestCallerStatusGrpc(t *testing.T) {
 	res := new(pb.CallerStatusResponse)
 
-	res, err := trustyClient.Status.Caller(context.Background())
+	res, err := trustyClient.StatusService.Caller(context.Background())
 	require.NoError(t, err)
 
 	assert.Equal(t, identity.GuestRoleName, res.Role)

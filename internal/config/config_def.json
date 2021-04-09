@@ -17,7 +17,8 @@
             { "name" : "OAuthClients", "type" : "[]string",      "comment" : "OAuthClients specifies the configuration files for OAuth clients" },
             { "name" : "Authority",    "type" : "Authority",     "comment" : "Authority contains configuration info for CA" },
             { "name" : "SQL",          "type" : "SQL",           "comment" : "SQL specifies the configuration for SQL provider" },
-            { "name" : "Github",       "type" : "Github",        "comment" : "Github specifies the configuration for Github client." }
+            { "name" : "Github",       "type" : "Github",        "comment" : "Github specifies the configuration for Github client" },
+            { "name" : "Trusty",       "type" : "Trusty",        "comment" : "Trusty specifies the configuration for Trusty"}
         ]
     },
     "RelatedTypes" : {

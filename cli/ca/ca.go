@@ -13,7 +13,7 @@ import (
 // Issuers shows the Issuing CAs
 func Issuers(c ctl.Control, _ interface{}) error {
 	cli := c.(*cli.Cli)
-	res, err := cli.Client().Authority.Issuers(context.Background())
+	res, err := cli.Client().AuthorityService.Issuers(context.Background())
 	if err != nil {
 		return errors.Trace(err)
 	}

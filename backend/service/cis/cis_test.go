@@ -1,4 +1,4 @@
-package ca_test
+package cis_test
 
 import (
 	"context"
@@ -8,7 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ekspand/trusty/backend/service/ca"
+	"github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/backend/service/cis"
 	"github.com/ekspand/trusty/backend/trustymain"
 	"github.com/ekspand/trusty/backend/trustyserver"
 	"github.com/ekspand/trusty/backend/trustyserver/embed"
@@ -27,11 +28,6 @@ var (
 const (
 	projFolder = "../../../"
 )
-
-// serviceFactories provides map of trustyserver.ServiceFactory
-var serviceFactories = map[string]trustyserver.ServiceFactory{
-	ca.ServiceName: ca.Factory,
-}
 
 var trueVal = true
 
@@ -52,7 +48,7 @@ func TestMain(m *testing.M) {
 			cfg.HTTPServers[i].Disabled = &trueVal
 
 		case "Trusty":
-			cfg.HTTPServers[i].Services = []string{ca.ServiceName}
+			cfg.HTTPServers[i].Services = []string{cis.ServiceName}
 			cfg.HTTPServers[i].ListenURLs = []string{httpAddr}
 		}
 	}
@@ -105,18 +101,8 @@ func TestMain(m *testing.M) {
 	os.Exit(rc)
 }
 
-func TestIssuers(t *testing.T) {
-	res, err := trustyClient.AuthorityService.Issuers(context.Background())
+func TestRoots(t *testing.T) {
+	res, err := trustyClient.CertInfoService.Roots(context.Background(), &trustypb.GetRootsRequest{})
 	require.NoError(t, err)
-	assert.NotEmpty(t, res.Issuers)
-}
-
-func TestProfileInfo(t *testing.T) {
-	_, err := trustyClient.AuthorityService.ProfileInfo(context.Background(), nil)
-	require.Error(t, err)
-}
-
-func TestCreateCertificate(t *testing.T) {
-	_, err := trustyClient.AuthorityService.CreateCertificate(context.Background(), nil)
-	require.Error(t, err)
+	assert.NotEmpty(t, res.Roots)
 }

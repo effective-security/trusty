@@ -7,6 +7,7 @@ import (
 
 	"github.com/ekspand/trusty/cli"
 	"github.com/ekspand/trusty/cli/ca"
+	"github.com/ekspand/trusty/cli/cis"
 	"github.com/ekspand/trusty/cli/status"
 	"github.com/ekspand/trusty/internal/version"
 	"github.com/go-phorce/dolly/ctl"
@@ -69,12 +70,26 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(status.Caller, nil))
 
+	// ca: issuers
+
 	cmdCA := app.Command("ca", "CA operations").
 		PreAction(cli.PopulateControl).
 		PreAction(cli.EnsureClient)
 
 	cmdCA.Command("issuers", "show the issuing CAs").
 		Action(cli.RegisterAction(ca.Issuers, nil))
+
+	// cis: roots
+
+	cmdCIS := app.Command("cis", "CIS operations").
+		PreAction(cli.PopulateControl).
+		PreAction(cli.EnsureClient)
+
+	getRootsFlags := new(cis.GetRootsFlags)
+	rootsCmd := cmdCIS.Command("roots", "show the roots").
+		Action(cli.RegisterAction(cis.Roots, getRootsFlags))
+	getRootsFlags.OrgID = rootsCmd.Flag("org", "specifies an optional Org ID").Int64()
+	getRootsFlags.Pem = rootsCmd.Flag("pem", "specifies to print PEM").Bool()
 
 	cli.Parse(args)
 	return cli.ReturnCode()

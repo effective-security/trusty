@@ -171,7 +171,7 @@ CREATE INDEX IF NOT EXISTS idx_repos_provider
 CREATE TABLE IF NOT EXISTS public.certificates
 (
     id bigint NOT NULL,
-    owner_id bigint NOT NULL,
+    org_id bigint NOT NULL,
     skid character varying(64) COLLATE pg_catalog."default" NOT NULL,
     ikid character varying(64) COLLATE pg_catalog."default" NOT NULL,
     sn character varying(32) COLLATE pg_catalog."default" NOT NULL,
@@ -181,7 +181,7 @@ CREATE TABLE IF NOT EXISTS public.certificates
     issuer character varying(260) COLLATE pg_catalog."default" NOT NULL,
     sha256 character varying(64) COLLATE pg_catalog."default" NOT NULL,
     pem text COLLATE pg_catalog."default" NOT NULL,
-    issuers text COLLATE pg_catalog."default" NULL,
+    issuers_pem text COLLATE pg_catalog."default" NULL,
     profile character varying(32) COLLATE pg_catalog."default" NULL,
     CONSTRAINT certificates_pkey PRIMARY KEY (id),
     CONSTRAINT certificates_issuer_sn UNIQUE (ikid, sn)
@@ -190,9 +190,9 @@ WITH (
     OIDS = FALSE
 );
 
-CREATE INDEX IF NOT EXISTS idx_certificates_owner
+CREATE INDEX IF NOT EXISTS idx_certificates_org
     ON public.certificates USING btree
-    (owner_id);
+    (org_id);
 
 CREATE INDEX IF NOT EXISTS idx_certificates_skid
     ON public.certificates USING btree
@@ -212,7 +212,7 @@ CREATE INDEX IF NOT EXISTS idx_certificates_notafter
 CREATE TABLE IF NOT EXISTS public.revoked
 (
     id bigint NOT NULL,
-    owner_id bigint NOT NULL,
+    org_id bigint NOT NULL,
     skid character varying(64) COLLATE pg_catalog."default" NOT NULL,
     ikid character varying(64) COLLATE pg_catalog."default" NOT NULL,
     sn character varying(32) COLLATE pg_catalog."default" NOT NULL,
@@ -222,7 +222,7 @@ CREATE TABLE IF NOT EXISTS public.revoked
     issuer character varying(260) COLLATE pg_catalog."default" NOT NULL,
     sha256 character varying(64) COLLATE pg_catalog."default" NOT NULL,
     pem text COLLATE pg_catalog."default" NOT NULL,
-    issuers text COLLATE pg_catalog."default" NULL,
+    issuers_pem text COLLATE pg_catalog."default" NULL,
     profile character varying(32) COLLATE pg_catalog."default" NULL,
     revoked_at timestamp with time zone,
     reason int NULL,
@@ -233,9 +233,9 @@ WITH (
     OIDS = FALSE
 );
 
-CREATE INDEX IF NOT EXISTS idx_revoked_owner
+CREATE INDEX IF NOT EXISTS idx_revoked_org
     ON public.revoked USING btree
-    (owner_id);
+    (org_id);
 
 CREATE INDEX IF NOT EXISTS idx_revoked_skid
     ON public.revoked USING btree
@@ -255,7 +255,7 @@ CREATE INDEX IF NOT EXISTS idx_revoked_notafter
 CREATE TABLE IF NOT EXISTS public.roots
 (
     id bigint NOT NULL,
-    owner_id bigint NOT NULL,
+    org_id bigint NOT NULL,
     skid character varying(64) COLLATE pg_catalog."default" NOT NULL,
     notbefore timestamp with time zone,
     notafter timestamp with time zone,
@@ -270,6 +270,10 @@ CREATE TABLE IF NOT EXISTS public.roots
 WITH (
     OIDS = FALSE
 );
+
+CREATE INDEX IF NOT EXISTS idx_roots_org
+    ON public.roots USING btree
+    (org_id);
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_roots_skid
     ON public.roots USING btree

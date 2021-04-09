@@ -628,7 +628,10 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 			DataSource:    "one",
 			MigrationsDir: "one"},
 		Github: Github{
-			BaseURL: "one"}}
+			BaseURL: "one"},
+		Trusty: Trusty{
+			PrivateRoots: []string{"a"},
+			PublicRoots:  []string{"a"}}}
 	dest := orig
 	var zero Configuration
 	dest.overrideFrom(&zero)
@@ -735,7 +738,10 @@ func TestConfiguration_overrideFrom(t *testing.T) {
 			DataSource:    "two",
 			MigrationsDir: "two"},
 		Github: Github{
-			BaseURL: "two"}}
+			BaseURL: "two"},
+		Trusty: Trusty{
+			PrivateRoots: []string{"b", "b"},
+			PublicRoots:  []string{"b", "b"}}}
 	dest.overrideFrom(&o)
 	require.Equal(t, dest, o, "Configuration.overrideFrom should have overriden the value as the override. value now %#v, expecting %#v", dest, o)
 	o2 := Configuration{
@@ -1407,7 +1413,10 @@ func Test_LoadOverrides(t *testing.T) {
 				DataSource:    "two",
 				MigrationsDir: "two"},
 			Github: Github{
-				BaseURL: "two"}},
+				BaseURL: "two"},
+			Trusty: Trusty{
+				PrivateRoots: []string{"b", "b"},
+				PublicRoots:  []string{"b", "b"}}},
 		Hosts: map[string]string{"bob": "example2", "bob2": "missing"},
 		Overrides: map[string]Configuration{
 			"example2": {
@@ -1512,7 +1521,10 @@ func Test_LoadOverrides(t *testing.T) {
 					DataSource:    "three",
 					MigrationsDir: "three"},
 				Github: Github{
-					BaseURL: "three"}},
+					BaseURL: "three"},
+				Trusty: Trusty{
+					PrivateRoots: []string{"c", "c", "c"},
+					PublicRoots:  []string{"c", "c", "c"}}},
 		},
 	}
 	f, err := ioutil.TempFile("", "config")
@@ -1674,7 +1686,10 @@ func Test_LoadCustomJSON(t *testing.T) {
 				DataSource:    "two",
 				MigrationsDir: "two"},
 			Github: Github{
-				BaseURL: "two"}},
+				BaseURL: "two"},
+			Trusty: Trusty{
+				PrivateRoots: []string{"b", "b"},
+				PublicRoots:  []string{"b", "b"}}},
 		Hosts: map[string]string{"bob": "${ENV}"},
 		Overrides: map[string]Configuration{
 			"${ENV}": {
@@ -1779,7 +1794,10 @@ func Test_LoadCustomJSON(t *testing.T) {
 					DataSource:    "three",
 					MigrationsDir: "three"},
 				Github: Github{
-					BaseURL: "three"}},
+					BaseURL: "three"},
+				Trusty: Trusty{
+					PrivateRoots: []string{"c", "c", "c"},
+					PublicRoots:  []string{"c", "c", "c"}}},
 		},
 	}
 	f, err := ioutil.TempFile("", "customjson")

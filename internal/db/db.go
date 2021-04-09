@@ -73,11 +73,13 @@ type RaDb interface {
 	RegisterRootCertificate(ctx context.Context, crt *model.RootCertificate) (*model.RootCertificate, error)
 	// RemoveRootCertificate removes Root Cert
 	RemoveRootCertificate(ctx context.Context, id int64) error
-	// GetRootCertificates returns list of Root certs
-	GetRootCertificates(ctx context.Context, ownerID int64) ([]*model.RootCertificate, error)
+	// GetRootCertificatesForUser returns list of Root certs
+	GetRootCertificatesForUser(ctx context.Context, userID int64) (model.RootCertificates, error)
+	// GetRootCertificatesForUser returns list of Root certs
+	GetRootCertificatesForOrg(ctx context.Context, orgID int64) (model.RootCertificates, error)
 }
 
-// Provider represents SQL client instance
+// Provider reprOrgtsuserL client instance
 type Provider interface {
 	UsersDb
 	OrgsDb
