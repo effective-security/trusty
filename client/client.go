@@ -60,8 +60,8 @@ var defaultCallOpts = []grpc.CallOption{
 	defaultMaxCallRecvMsgSize,
 }
 
-// Status client interface
-type Status interface {
+// StatusService client interface
+type StatusService interface {
 	// Version returns the server version.
 	Version(ctx context.Context) (*pb.ServerVersion, error)
 	// Server returns the server status.
@@ -70,8 +70,8 @@ type Status interface {
 	Caller(ctx context.Context) (*pb.CallerStatusResponse, error)
 }
 
-// Authority client interface
-type Authority interface {
+// AuthorityService client interface
+type AuthorityService interface {
 	// ProfileInfo returns the certificate profile info
 	ProfileInfo(ctx context.Context, in *pb.CertProfileInfoRequest) (*pb.CertProfileInfo, error)
 	// CreateCertificate returns the certificate
@@ -80,10 +80,17 @@ type Authority interface {
 	Issuers(ctx context.Context) (*pb.IssuersInfoResponse, error)
 }
 
+// CertInfoService client interface
+type CertInfoService interface {
+	// Roots returns the root CAs
+	Roots(ctx context.Context, in *pb.GetRootsRequest) (*pb.RootsResponse, error)
+}
+
 // Client provides and manages an trusty v1 client session.
 type Client struct {
-	Authority
-	Status
+	AuthorityService
+	StatusService
+	CertInfoService
 
 	cfg      Config
 	conn     *grpc.ClientConn
@@ -180,8 +187,9 @@ func newClient(cfg *Config) (*Client, error) {
 	}
 
 	client.conn = conn
-	client.Authority = NewAuthority(conn, client.callOpts)
-	client.Status = NewStatus(conn, client.callOpts)
+	client.AuthorityService = NewAuthority(conn, client.callOpts)
+	client.StatusService = NewStatus(conn, client.callOpts)
+	client.CertInfoService = NewCertInfo(conn, client.callOpts)
 	return client, nil
 }
 

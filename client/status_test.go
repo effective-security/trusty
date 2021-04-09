@@ -19,7 +19,7 @@ func TestStatusWithNewCtxClient(t *testing.T) {
 	srv := &mockpb.MockStatusServer{}
 
 	cli := client.NewCtxClient(ctx)
-	cli.Status = client.NewStatusFromProxy(proxy.StatusServerToClient(srv))
+	cli.StatusService = client.NewStatusFromProxy(proxy.StatusServerToClient(srv))
 	defer cli.Close()
 
 	vexp := &pb.ServerVersion{Build: "1234", Runtime: "go1.15"}

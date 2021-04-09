@@ -13,7 +13,7 @@ import (
 // Version shows the service version
 func Version(c ctl.Control, _ interface{}) error {
 	cli := c.(*cli.Cli)
-	res, err := cli.Client().Status.Version(context.Background())
+	res, err := cli.Client().StatusService.Version(context.Background())
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -30,7 +30,7 @@ func Version(c ctl.Control, _ interface{}) error {
 // Server shows trusty server status
 func Server(c ctl.Control, _ interface{}) error {
 	cli := c.(*cli.Cli)
-	res, err := cli.Client().Status.Server(context.Background())
+	res, err := cli.Client().StatusService.Server(context.Background())
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -48,7 +48,7 @@ func Server(c ctl.Control, _ interface{}) error {
 // Caller shows the Caller status
 func Caller(c ctl.Control, _ interface{}) error {
 	cli := c.(*cli.Cli)
-	res, err := cli.Client().Status.Caller(context.Background())
+	res, err := cli.Client().StatusService.Caller(context.Background())
 	if err != nil {
 		return errors.Trace(err)
 	}

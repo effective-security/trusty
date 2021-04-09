@@ -12,7 +12,8 @@ import (
 func NewClient(s *trustyserver.TrustyServer) *client.Client {
 	c := client.NewCtxClient(context.Background())
 
-	c.Status = client.NewStatusFromProxy(proxy.StatusServerToClient(s.StatusServiceServer))
-	c.Authority = client.NewAuthorityFromProxy(proxy.AuthorityServerToClient(s.AuthorityServiceServer))
+	c.StatusService = client.NewStatusFromProxy(proxy.StatusServerToClient(s.StatusServiceServer))
+	c.AuthorityService = client.NewAuthorityFromProxy(proxy.AuthorityServerToClient(s.AuthorityServiceServer))
+	c.CertInfoService = client.NewCertInfoFromProxy(proxy.CertInfoServiceServerToClient(s.CertInfoServiceServer))
 	return c
 }

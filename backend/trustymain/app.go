@@ -13,6 +13,7 @@ import (
 
 	"github.com/ekspand/trusty/backend/service/auth"
 	"github.com/ekspand/trusty/backend/service/ca"
+	"github.com/ekspand/trusty/backend/service/cis"
 	"github.com/ekspand/trusty/backend/service/status"
 	"github.com/ekspand/trusty/backend/service/workflow"
 	"github.com/ekspand/trusty/backend/trustyserver"
@@ -39,6 +40,7 @@ const (
 var ServiceFactories = map[string]trustyserver.ServiceFactory{
 	auth.ServiceName:     auth.Factory,
 	ca.ServiceName:       ca.Factory,
+	cis.ServiceName:      cis.Factory,
 	status.ServiceName:   status.Factory,
 	workflow.ServiceName: workflow.Factory,
 }

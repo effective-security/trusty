@@ -46,6 +46,7 @@ type GRPCRegistrator interface {
 type TrustyServer struct {
 	pb.StatusServiceServer
 	pb.AuthorityServiceServer
+	pb.CertInfoServiceServer
 	Listeners []net.Listener
 
 	ipaddr   string
@@ -281,6 +282,9 @@ func (e *TrustyServer) AddService(svc Service) {
 	}
 	if authoritySvc, ok := svc.(pb.AuthorityServiceServer); ok {
 		e.AuthorityServiceServer = authoritySvc
+	}
+	if cisSvc, ok := svc.(pb.CertInfoServiceServer); ok {
+		e.CertInfoServiceServer = cisSvc
 	}
 }
 

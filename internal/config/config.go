@@ -453,8 +453,11 @@ type Configuration struct {
 	// SQL specifies the configuration for SQL provider
 	SQL SQL
 
-	// Github specifies the configuration for Github client.
+	// Github specifies the configuration for Github client
 	Github Github
+
+	// Trusty specifies the configuration for Trusty
+	Trusty Trusty
 }
 
 func (c *Configuration) overrideFrom(o *Configuration) {
@@ -474,6 +477,7 @@ func (c *Configuration) overrideFrom(o *Configuration) {
 	c.Authority.overrideFrom(&o.Authority)
 	c.SQL.overrideFrom(&o.SQL)
 	c.Github.overrideFrom(&o.Github)
+	c.Trusty.overrideFrom(&o.Trusty)
 
 }
 

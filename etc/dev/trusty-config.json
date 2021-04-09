@@ -30,6 +30,7 @@
                     "auth",
                     "status",
                     "ca",
+                    "cis",
                     "workflow"
                 ],
                 "HeartbeatSecs": 30,
@@ -80,14 +81,16 @@
                 "/v1/certs",
                 "/v1/crl",
                 "/v1/ocsp",
-                "/trustypb.Status"
+                "/v1/roots",
+                "/trustypb.CertInfoService",
+                "/trustypb.StatusService"
             ],
             "AllowAnyRole": [
               "/v1/wf"
             ],
             "Allow": [
                 "/v1/ca:trusty-peer",
-                "/trustypb.Authority:trusty-peer"
+                "/trustypb.AuthorityService:trusty-peer"
             ],
             "LogAllowedAny": true,
             "LogAllowed": true,

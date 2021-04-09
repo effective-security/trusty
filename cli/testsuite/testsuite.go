@@ -37,6 +37,7 @@ type Suite struct {
 
 	MockStatus    *mockpb.MockStatusServer
 	MockAuthority *mockpb.MockAuthorityServer
+	MockCertInfo  *mockpb.MockCertInfoServer
 
 	appFlags       []string
 	withGRPC       bool
@@ -178,6 +179,7 @@ func (s *Suite) SetupMockGRPC() *grpc.Server {
 	serv := grpc.NewServer()
 	trustypb.RegisterStatusServiceServer(serv, s.MockStatus)
 	trustypb.RegisterAuthorityServiceServer(serv, s.MockAuthority)
+	trustypb.RegisterCertInfoServiceServer(serv, s.MockCertInfo)
 
 	addr := fmt.Sprintf("localhost:%d", atomic.AddInt32(&nextPort, 1))
 	lis, err := net.Listen("tcp", addr)
