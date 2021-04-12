@@ -43,3 +43,13 @@ func (list RootCertificates) ToDTO() []*pb.RootCertificate {
 	}
 	return dto
 }
+
+// Find a cert by ID
+func (list RootCertificates) Find(id int64) *RootCertificate {
+	for _, m := range list {
+		if m.ID == id {
+			return m
+		}
+	}
+	return nil
+}

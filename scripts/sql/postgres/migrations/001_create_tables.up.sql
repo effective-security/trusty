@@ -184,6 +184,8 @@ CREATE TABLE IF NOT EXISTS public.certificates
     issuers_pem text COLLATE pg_catalog."default" NULL,
     profile character varying(32) COLLATE pg_catalog."default" NULL,
     CONSTRAINT certificates_pkey PRIMARY KEY (id),
+    CONSTRAINT certificates_skid UNIQUE (skid),
+    CONSTRAINT certificates_sha256 UNIQUE (sha256),
     CONSTRAINT certificates_issuer_sn UNIQUE (ikid, sn)
 )
 WITH (
@@ -194,10 +196,6 @@ CREATE INDEX IF NOT EXISTS idx_certificates_org
     ON public.certificates USING btree
     (org_id);
 
-CREATE INDEX IF NOT EXISTS idx_certificates_skid
-    ON public.certificates USING btree
-    (skid COLLATE pg_catalog."default");
-
 CREATE INDEX IF NOT EXISTS idx_certificates_ikid
     ON public.certificates USING btree
     (ikid COLLATE pg_catalog."default");
@@ -205,6 +203,26 @@ CREATE INDEX IF NOT EXISTS idx_certificates_ikid
 CREATE INDEX IF NOT EXISTS idx_certificates_notafter
     ON public.certificates USING btree
     (notafter);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_certificates_sha256
+    ON public.certificates USING btree
+    (sha256 COLLATE pg_catalog."default");
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_certificates_skid
+    ON public.certificates USING btree
+    (skid COLLATE pg_catalog."default");
+
+SELECT create_constraint_if_not_exists(
+    'public',
+    'certificates',
+    'unique_certificates_skid',
+    'ALTER TABLE public.certificates ADD CONSTRAINT unique_certificates_skid UNIQUE USING INDEX idx_certificates_skid;');
+
+SELECT create_constraint_if_not_exists(
+    'public',
+    'certificates',
+    'unique_certificates_sha256',
+    'ALTER TABLE public.certificates ADD CONSTRAINT unique_certificates_sha256 UNIQUE USING INDEX idx_certificates_sha256;');
 
 --
 -- REVOKED CERTIFICATES
@@ -227,19 +245,25 @@ CREATE TABLE IF NOT EXISTS public.revoked
     revoked_at timestamp with time zone,
     reason int NULL,
     CONSTRAINT revoked_pkey PRIMARY KEY (id),
+    CONSTRAINT revoked_skid UNIQUE (skid),
+    CONSTRAINT revoked_sha256 UNIQUE (sha256),
     CONSTRAINT revoked_issuer_sn UNIQUE (ikid, sn)
 )
 WITH (
     OIDS = FALSE
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_revoked_skid
+    ON public.revoked USING btree
+    (skid COLLATE pg_catalog."default");
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_revoked_sha256
+    ON public.revoked USING btree
+    (sha256 COLLATE pg_catalog."default");
+
 CREATE INDEX IF NOT EXISTS idx_revoked_org
     ON public.revoked USING btree
     (org_id);
-
-CREATE INDEX IF NOT EXISTS idx_revoked_skid
-    ON public.revoked USING btree
-    (skid COLLATE pg_catalog."default");
 
 CREATE INDEX IF NOT EXISTS idx_revoked_ikid
     ON public.revoked USING btree
@@ -248,6 +272,18 @@ CREATE INDEX IF NOT EXISTS idx_revoked_ikid
 CREATE INDEX IF NOT EXISTS idx_revoked_notafter
     ON public.revoked USING btree
     (notafter);
+
+SELECT create_constraint_if_not_exists(
+    'public',
+    'revoked',
+    'unique_revoked_skid',
+    'ALTER TABLE public.revoked ADD CONSTRAINT unique_revoked_skid UNIQUE USING INDEX idx_revoked_skid;');
+
+SELECT create_constraint_if_not_exists(
+    'public',
+    'revoked',
+    'unique_revoked_sha256',
+    'ALTER TABLE public.revoked ADD CONSTRAINT unique_revoked_sha256 UNIQUE USING INDEX idx_revoked_sha256;');
 
 --
 -- Authorities
