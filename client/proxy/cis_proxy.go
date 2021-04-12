@@ -17,6 +17,6 @@ func CertInfoServiceServerToClient(srv pb.CertInfoServiceServer) pb.CertInfoServ
 }
 
 // Roots returns the root CAs
-func (s *cisSrv2C) Roots(ctx context.Context, in *pb.GetRootsRequest, opts ...grpc.CallOption) (*pb.RootsResponse, error) {
+func (s *cisSrv2C) Roots(ctx context.Context, in *pb.EmptyRequest, opts ...grpc.CallOption) (*pb.RootsResponse, error) {
 	return s.srv.Roots(ctx, in)
 }

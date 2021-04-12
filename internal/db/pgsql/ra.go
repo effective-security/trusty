@@ -24,16 +24,15 @@ func (p *Provider) RegisterRootCertificate(ctx context.Context, crt *model.RootC
 	res := new(model.RootCertificate)
 
 	err = p.db.QueryRowContext(ctx, `
-			INSERT INTO roots(id,org_id,skid,notbefore,notafter,subject,sha256,trust,pem)
-				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)
+			INSERT INTO roots(id,skid,notbefore,notafter,subject,sha256,trust,pem)
+				VALUES($1, $2, $3, $4, $5, $6, $7, $8)
 			ON CONFLICT (skid)
 			DO UPDATE
-				SET org_id=$2,trust=$8
-			RETURNING id,org_id,skid,notbefore,notafter,subject,sha256,trust,pem
-			;`, id, crt.OrgID, crt.SKID, crt.NotBefore, crt.NotAfter, crt.Subject, crt.ThumbprintSha256,
+				SET trust=$7
+			RETURNING id,skid,notbefore,notafter,subject,sha256,trust,pem
+			;`, id, crt.SKID, crt.NotBefore, crt.NotAfter, crt.Subject, crt.ThumbprintSha256,
 		crt.Trust, crt.Pem,
 	).Scan(&res.ID,
-		&res.OrgID,
 		&res.SKID,
 		&res.NotBefore,
 		&res.NotAfter,
@@ -63,18 +62,16 @@ func (p *Provider) RemoveRootCertificate(ctx context.Context, id int64) error {
 	return nil
 }
 
-// GetRootCertificatesForUser returns list of Root certs
-func (p *Provider) GetRootCertificatesForUser(ctx context.Context, userID int64) (model.RootCertificates, error) {
+// GetRootCertificates returns list of Root certs
+func (p *Provider) GetRootCertificates(ctx context.Context) (model.RootCertificates, error) {
 
 	res, err := p.db.QueryContext(ctx, `
 		SELECT
-			roots.id,roots.org_id,roots.skid,roots.notbefore,roots.notafter,roots.subject,roots.sha256,roots.trust,roots.pem
+			id,skid,notbefore,notafter,subject,sha256,trust,pem
 		FROM
 			roots
-		LEFT JOIN orgmembers ON roots.org_id = orgmembers.org_id
-		WHERE orgmembers.user_id = $1
 		;
-		`, userID)
+		`)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -86,49 +83,6 @@ func (p *Provider) GetRootCertificatesForUser(ctx context.Context, userID int64)
 		r := new(model.RootCertificate)
 		err = res.Scan(
 			&r.ID,
-			&r.OrgID,
-			&r.SKID,
-			&r.NotBefore,
-			&r.NotAfter,
-			&r.Subject,
-			&r.ThumbprintSha256,
-			&r.Trust,
-			&r.Pem,
-		)
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
-		r.NotAfter = r.NotAfter.UTC()
-		r.NotBefore = r.NotBefore.UTC()
-		list = append(list, r)
-	}
-
-	return list, nil
-}
-
-// GetRootCertificatesForOrg returns list of Root certs
-func (p *Provider) GetRootCertificatesForOrg(ctx context.Context, orgID int64) (model.RootCertificates, error) {
-
-	res, err := p.db.QueryContext(ctx, `
-		SELECT
-			id,org_id,skid,notbefore,notafter,subject,sha256,trust,pem
-		FROM
-			roots
-		WHERE org_id = $1
-		;
-		`, orgID)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	defer res.Close()
-
-	list := make([]*model.RootCertificate, 0, 100)
-
-	for res.Next() {
-		r := new(model.RootCertificate)
-		err = res.Scan(
-			&r.ID,
-			&r.OrgID,
 			&r.SKID,
 			&r.NotBefore,
 			&r.NotAfter,

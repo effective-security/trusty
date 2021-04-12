@@ -88,7 +88,6 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	getRootsFlags := new(cis.GetRootsFlags)
 	rootsCmd := cmdCIS.Command("roots", "show the roots").
 		Action(cli.RegisterAction(cis.Roots, getRootsFlags))
-	getRootsFlags.OrgID = rootsCmd.Flag("org", "specifies an optional Org ID").Int64()
 	getRootsFlags.Pem = rootsCmd.Flag("pem", "specifies to print PEM").Bool()
 
 	cli.Parse(args)

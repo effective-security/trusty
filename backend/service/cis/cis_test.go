@@ -102,7 +102,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestRoots(t *testing.T) {
-	res, err := trustyClient.CertInfoService.Roots(context.Background(), &trustypb.GetRootsRequest{})
+	res, err := trustyClient.CertInfoService.Roots(context.Background(), &trustypb.EmptyRequest{})
 	require.NoError(t, err)
 	assert.NotEmpty(t, res.Roots)
 }

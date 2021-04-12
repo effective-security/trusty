@@ -27,7 +27,7 @@ func (m *MockCertInfoServer) SetResponse(r proto.Message) {
 }
 
 // Roots returns the root CAs
-func (m *MockCertInfoServer) Roots(context.Context, *trustypb.GetRootsRequest) (*trustypb.RootsResponse, error) {
+func (m *MockCertInfoServer) Roots(context.Context, *trustypb.EmptyRequest) (*trustypb.RootsResponse, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}

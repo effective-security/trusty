@@ -9,7 +9,6 @@ import (
 // RootCertificate provides X509 Root Certificate information
 type RootCertificate struct {
 	ID               int64     `db:"id"`
-	OrgID            int64     `db:"org_id"`
 	SKID             string    `db:"skid"`
 	NotBefore        time.Time `db:"notbefore"`
 	NotAfter         time.Time `db:"notafter"`
@@ -26,7 +25,6 @@ type RootCertificates []*RootCertificate
 func (r *RootCertificate) ToDTO() *pb.RootCertificate {
 	return &pb.RootCertificate{
 		ID:        r.ID,
-		OrgID:     r.OrgID,
 		SKID:      r.SKID,
 		NotBefore: r.NotBefore.Unix(),
 		NotAfter:  r.NotAfter.Unix(),

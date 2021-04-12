@@ -2,7 +2,7 @@ include .project/gomod-project.mk
 
 SHA := $(shell git rev-parse HEAD)
 
-export COVERAGE_EXCLUSIONS="vendor|tests|main.go|testsuite.go|rpc.pb.go|rpc.pb.gw.go|pkix.pb.go|pkix.pb.gw.go"
+export COVERAGE_EXCLUSIONS="vendor|tests|main.go|testsuite.go|rpc.pb.go|rpc.pb.gw.go|pkix.pb.go|pkix.pb.gw.go|cis.pb.go|cis.pb.gw.go"
 export TRUSTY_DIR=${PROJ_ROOT}
 export GO111MODULE=on
 BUILD_FLAGS=

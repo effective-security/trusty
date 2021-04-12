@@ -83,7 +83,7 @@ type AuthorityService interface {
 // CertInfoService client interface
 type CertInfoService interface {
 	// Roots returns the root CAs
-	Roots(ctx context.Context, in *pb.GetRootsRequest) (*pb.RootsResponse, error)
+	Roots(ctx context.Context, in *pb.EmptyRequest) (*pb.RootsResponse, error)
 }
 
 // Client provides and manages an trusty v1 client session.

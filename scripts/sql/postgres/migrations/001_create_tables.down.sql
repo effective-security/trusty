@@ -28,7 +28,6 @@ DROP INDEX IF EXISTS idx_revoked_notafter;
 DROP TABLE IF EXISTS public.roots;
 DROP INDEX IF EXISTS unique_roots_skid;
 DROP INDEX IF EXISTS unique_roots_sha256;
-DROP INDEX IF EXISTS idx_roots_org;
 DROP INDEX IF EXISTS idx_roots_skid;
 DROP INDEX IF EXISTS idx_roots_notafter;
 

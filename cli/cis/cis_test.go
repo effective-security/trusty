@@ -47,9 +47,8 @@ func (s *testSuite) TestRoots() {
 	srv := s.SetupMockGRPC()
 	defer srv.Stop()
 
-	orgID := int64(0)
 	pem := false
-	err = s.Run(cis.Roots, &cis.GetRootsFlags{OrgID: &orgID, Pem: &pem})
+	err = s.Run(cis.Roots, &cis.GetRootsFlags{Pem: &pem})
 	s.Require().NoError(err)
 
 	if s.Cli.IsJSON() {
@@ -71,7 +70,6 @@ func (s *testSuite) TestRoots() {
 		s.HasText(`==================================== 1 ====================================
 Subject: CN=[TEST] Trusty Root CA,O=trusty.com,L=WA,C=US
   ID: 67388264020967531
-  Org ID: 0
   SKID: d370d4e08045f92cb73f2325e8e8241fca72af90
   Thumbprint: f9c3c3f84c27726d533ebe42f352942c66f23090d81d8ae525db1e05cba4be11
   Trust: Private

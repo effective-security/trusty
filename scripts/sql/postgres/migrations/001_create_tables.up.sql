@@ -255,7 +255,6 @@ CREATE INDEX IF NOT EXISTS idx_revoked_notafter
 CREATE TABLE IF NOT EXISTS public.roots
 (
     id bigint NOT NULL,
-    org_id bigint NOT NULL,
     skid character varying(64) COLLATE pg_catalog."default" NOT NULL,
     notbefore timestamp with time zone,
     notafter timestamp with time zone,
@@ -270,10 +269,6 @@ CREATE TABLE IF NOT EXISTS public.roots
 WITH (
     OIDS = FALSE
 );
-
-CREATE INDEX IF NOT EXISTS idx_roots_org
-    ON public.roots USING btree
-    (org_id);
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_roots_skid
     ON public.roots USING btree
