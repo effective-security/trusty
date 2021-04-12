@@ -28,7 +28,7 @@ func NewCertInfoFromProxy(proxy pb.CertInfoServiceClient) CertInfoService {
 }
 
 // Roots returns the root CAs
-func (c *cisClient) Roots(ctx context.Context, in *pb.GetRootsRequest) (*pb.RootsResponse, error) {
+func (c *cisClient) Roots(ctx context.Context, in *pb.EmptyRequest) (*pb.RootsResponse, error) {
 	return c.remote.Roots(ctx, in, c.callOpts...)
 }
 
@@ -46,6 +46,6 @@ func RetryCertInfoClient(conn *grpc.ClientConn) pb.CertInfoServiceClient {
 }
 
 // Roots returns the root CAs
-func (c *retryCertInfoClient) Roots(ctx context.Context, in *pb.GetRootsRequest, opts ...grpc.CallOption) (*pb.RootsResponse, error) {
+func (c *retryCertInfoClient) Roots(ctx context.Context, in *pb.EmptyRequest, opts ...grpc.CallOption) (*pb.RootsResponse, error) {
 	return c.cis.Roots(ctx, in, opts...)
 }

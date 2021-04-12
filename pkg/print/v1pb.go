@@ -154,7 +154,6 @@ func Roots(w io.Writer, roots []*trustypb.RootCertificate, withPem bool) {
 		fmt.Fprintf(w, "==================================== %d ====================================\n", cnt+1)
 		fmt.Fprintf(w, "Subject: %s\n", ci.Subject)
 		fmt.Fprintf(w, "  ID: %d\n", ci.ID)
-		fmt.Fprintf(w, "  Org ID: %d\n", ci.OrgID)
 		fmt.Fprintf(w, "  SKID: %s\n", ci.SKID)
 		fmt.Fprintf(w, "  Thumbprint: %s\n", ci.Sha256)
 		fmt.Fprintf(w, "  Trust: %v\n", ci.Trust)

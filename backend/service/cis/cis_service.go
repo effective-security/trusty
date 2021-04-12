@@ -83,7 +83,6 @@ func (s *Service) registerRoots(ctx context.Context) {
 			return err
 		}
 		c := &model.RootCertificate{
-			OrgID:            0,
 			SKID:             hex.EncodeToString(crt.SubjectKeyId),
 			NotBefore:        crt.NotBefore.UTC(),
 			NotAfter:         crt.NotAfter.UTC(),

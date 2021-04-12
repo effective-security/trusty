@@ -11,7 +11,7 @@ option (gogoproto.unmarshaler_all) = true;
 
 service CertInfoService {
     // Roots returns the root CAs
-    rpc Roots(GetRootsRequest) returns (RootsResponse) {
+    rpc Roots(EmptyRequest) returns (RootsResponse) {
         option (google.api.http) = {
             get: "/v1/roots"
         };
@@ -22,36 +22,26 @@ enum Trust {
     Any = 0;  // default
     Public = 1;
     Private = 2;
-    Org = 3;
 }
 
 // Root provides X509 Root Cert information
 message RootCertificate  {
     // ID of the certificate
     int64 id = 1 [(gogoproto.customname)="ID"];
-    // OrgID of the certificate, only used with Org scope
-    int64 org_id = 2 [(gogoproto.customname)="OrgID"];
     // Skid provides Subject Key Identifier
-    string skid = 3 [(gogoproto.customname)="SKID"];
+    string skid = 2 [(gogoproto.customname)="SKID"];
     // Notbefore is the Unix time when the validity period starts
-    int64 not_before = 4 [(gogoproto.customname)="NotBefore"];
+    int64 not_before = 3 [(gogoproto.customname)="NotBefore"];
     // Notafter is the Unix time when the validity period starts
-    int64 not_after = 5 [(gogoproto.customname)="NotAfter"];
+    int64 not_after = 4 [(gogoproto.customname)="NotAfter"];
     // Subject name
-    string subject = 6;
+    string subject = 5;
     // SHA256 thnumbprint of the cert
-    string sha256 =7;
+    string sha256 =6;
     // Trust scope
-    Trust trust = 8;
+    Trust trust = 7;
     // PEM encoded certificate
-    string pem =9;
-}
-
-// GetRootsRequest specifies root certs request
-message GetRootsRequest {
-    // OrgID of the certificate, only used with Org scope,
-    // or 0 for Public or Private scope.
-    int64 org_id = 1 [(gogoproto.customname)="OrgID", (gogoproto.nullable) = true];
+    string pem =8;
 }
 
 // RootsResponse provides response for GetRootsRequest

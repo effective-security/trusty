@@ -13,8 +13,7 @@ import (
 
 // GetRootsFlags defines flags for Roots command
 type GetRootsFlags struct {
-	OrgID *int64
-	Pem   *bool
+	Pem *bool
 }
 
 // Roots shows the root CAs
@@ -22,9 +21,7 @@ func Roots(c ctl.Control, p interface{}) error {
 	flags := p.(*GetRootsFlags)
 
 	cli := c.(*cli.Cli)
-	res, err := cli.Client().CertInfoService.Roots(context.Background(), &trustypb.GetRootsRequest{
-		OrgID: *flags.OrgID,
-	})
+	res, err := cli.Client().CertInfoService.Roots(context.Background(), &trustypb.EmptyRequest{})
 	if err != nil {
 		return errors.Trace(err)
 	}
