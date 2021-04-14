@@ -16,6 +16,7 @@
 #   --client            - specifies if client certificate and key should be generated
 #   --peer              - specifies if peer certificate and key should be generated
 #   --bundle            - specifies if Int CA Bundle should be created
+#   --san               - specifies SAN for server and peer certs
 #   --force             - specifies to force issuing the cert even if it exists
 #
 
@@ -96,6 +97,11 @@ case $key in
     BUNDLE=YES
     shift # past argument
     ;;
+    --san)
+    SAN="$2"
+    shift # past argument
+    shift # past value
+    ;;    
     *)
     echo "invalid flag $key: use --help to see the option"
     exit 1
@@ -110,6 +116,7 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 [ -z "$PREFIX" ] && PREFIX=test_
 [ -z "$ROOT_CA_CERT" ] && ROOT_CA_CERT=${OUT_DIR}/${PREFIX}root_ca.pem
 [ -z "$ROOT_CA_KEY" ] && ROOT_CA_KEY=${OUT_DIR}/${PREFIX}root_ca-key.pem
+[ -z "$SAN" ] && SAN=127.0.0.1
 
 HOSTNAME=`hostname`
 
@@ -120,11 +127,13 @@ echo "HSM_CONFIG   = ${HSM_CONFIG}"
 echo "PREFIX       = ${PREFIX}"
 echo "BUNDLE       = ${BUNDLE}"
 echo "FORCE        = ${FORCE}"
+echo "SAN          = ${SAN}"
 echo "ROOT_CA_CERT = $ROOT_CA_CERT"
 echo "ROOT_CA_KEY  = $ROOT_CA_KEY"
 
 if [[ "$ROOTCA" == "YES" && ("$FORCE" == "YES" || ! -f ${ROOT_CA_KEY}) ]]; then echo "*** generating ${ROOT_CA_CERT/.pem/''}"
-    trusty-tool --hsm-cfg=${HSM_CONFIG} \
+    trusty-tool \
+        --hsm-cfg=${HSM_CONFIG} \
         csr gencert --self-sign \
         --ca-config=${CA_CONFIG} \
         --profile=ROOT \
@@ -135,7 +144,8 @@ fi
 
 if [[ "$CA1" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}issuer1_ca-key.pem) ]]; then
     echo "*** generating CA1 cert"
-    trusty-tool --hsm-cfg=${HSM_CONFIG} \
+    trusty-tool \
+        --hsm-cfg=${HSM_CONFIG} \
         csr gencert \
         --ca-config=${CA_CONFIG} \
         --profile=L1_CA \
@@ -148,7 +158,8 @@ fi
 
 if [[ "$CA2" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem) ]]; then
     echo "*** generating CA2 cert"
-    trusty-tool --hsm-cfg=${HSM_CONFIG} \
+    trusty-tool \
+        --hsm-cfg=${HSM_CONFIG} \
         csr gencert \
         --ca-config=${CA_CONFIG} \
         --profile=L2_CA \
@@ -167,7 +178,8 @@ fi
 
 if [[ "$ADMIN" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}admin-key.pem) ]]; then
     echo "*** generating admin cert"
-    trusty-tool --hsm-cfg=${HSM_CONFIG} \
+    trusty-tool \
+        --hsm-cfg=${HSM_CONFIG} \
         csr gencert --plain-key \
         --ca-config=${CA_CONFIG} \
         --profile=client \
@@ -182,14 +194,15 @@ fi
 
 if [[ "$SERVER" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}server-key.pem) ]]; then
     echo "*** generating server cert"
-    trusty-tool --hsm-cfg=${HSM_CONFIG} \
+    trusty-tool \
+        --hsm-cfg=${HSM_CONFIG} \
         csr gencert --plain-key \
         --ca-config=${CA_CONFIG} \
         --profile=server \
         --ca-cert ${OUT_DIR}/${PREFIX}issuer2_ca.pem \
         --ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
         --csr-profile ${CSR_DIR}/${PREFIX}server.json \
-        --SAN=localhost,127.0.0.1,${HOSTNAME} \
+        --SAN=localhost,${SAN},${HOSTNAME} \
         --key-label="${PREFIX}server*" \
         --out ${OUT_DIR}/${PREFIX}server
 
@@ -198,7 +211,8 @@ fi
 
 if [[ "$CLIENT" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}client-key.pem) ]]; then
     echo "*** generating client cert"
-    trusty-tool --hsm-cfg=${HSM_CONFIG} \
+    trusty-tool \
+        --hsm-cfg=${HSM_CONFIG} \
         csr gencert --plain-key \
         --ca-config=${CA_CONFIG} \
         --profile=client \
@@ -213,14 +227,15 @@ fi
 
 if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}peer-key.pem) ]]; then
     echo "*** generating peer cert"
-    trusty-tool --hsm-cfg=${HSM_CONFIG} \
+    trusty-tool \
+        --hsm-cfg=${HSM_CONFIG} \
         csr gencert --plain-key \
         --ca-config=${CA_CONFIG} \
         --profile=peer \
         --ca-cert ${OUT_DIR}/${PREFIX}issuer2_ca.pem \
         --ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
         --csr-profile ${CSR_DIR}/${PREFIX}peer.json \
-        --SAN=localhost,127.0.0.1,${HOSTNAME} \
+        --SAN=localhost,${SAN},${HOSTNAME} \
         --key-label="${PREFIX}peer*" \
         --out ${OUT_DIR}/${PREFIX}peer
 

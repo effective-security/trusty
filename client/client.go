@@ -3,11 +3,13 @@ package client
 import (
 	"context"
 	"math"
+	"strings"
 	"sync"
 	"time"
 
 	v1 "github.com/ekspand/trusty/api/v1"
 	pb "github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -15,6 +17,8 @@ import (
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/status"
 )
+
+var logger = xlog.NewPackageLogger("github.com/ekspand/trusty", "client")
 
 var (
 	// client-side handling retrying of request failures where data was not written to the wire or
@@ -202,16 +206,25 @@ func (c *Client) dial(target string, creds credentials.TransportCredentials, dop
 
 	opts = append(opts, c.cfg.DialOptions...)
 	dctx := c.ctx
+
 	if c.cfg.DialTimeout > 0 {
+		opts = append(opts, grpc.WithBlock())
+
 		var cancel context.CancelFunc
 		dctx, cancel = context.WithTimeout(c.ctx, c.cfg.DialTimeout)
-		defer cancel() // TODO: Is this right for cases where grpc.WithBlock() is not set on the dial options?
+		defer cancel()
 	}
+
+	target = strings.TrimPrefix(target, "https://")
+
+	logger.Debugf("scr=dial, target=%q, timeout=%v", target, c.cfg.DialTimeout)
 
 	conn, err := grpc.DialContext(dctx, target, opts...)
 	if err != nil {
 		return nil, err
 	}
+
+	logger.Debugf("scr=dial, target=%q, status=connecton_created", target)
 	return conn, nil
 }
 

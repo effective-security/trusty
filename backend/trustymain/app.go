@@ -47,14 +47,23 @@ var ServiceFactories = map[string]trustyserver.ServiceFactory{
 
 // appFlags specifies application flags
 type appFlags struct {
-	cfgFile     *string
-	cpu         *string
-	isStderr    *bool
-	dryRun      *bool
-	hsmCfg      *string
-	cryptoProvs *[]string
-	healthURLs  *[]string
-	clientURLs  *[]string
+	cfgFile             *string
+	cpu                 *string
+	isStderr            *bool
+	dryRun              *bool
+	hsmCfg              *string
+	cryptoProvs         *[]string
+	healthURLs          *[]string
+	clientURLs          *[]string
+	hostNames           *[]string
+	logsDir             *string
+	auditDir            *string
+	httpsCertFile       *string
+	httpsKeyFile        *string
+	httpsTrustedCAFile  *string
+	clientCertFile      *string
+	clientKeyFile       *string
+	clientTrustedCAFile *string
 }
 
 // App provides application container
@@ -296,6 +305,15 @@ func (a *App) loadConfig() error {
 	flags.cryptoProvs = app.Flag("crypto-prov", "path to additional Crypto provider configurations").Strings()
 	flags.clientURLs = app.Flag("client-listen-url", "URL for the clients listening end-point").Strings()
 	flags.healthURLs = app.Flag("health-listen-url", "URL for the health listening end-point").Strings()
+	flags.hostNames = app.Flag("host-name", "Set of host names to be used in CSR requests to obtaine a server certificate").Strings()
+	flags.logsDir = app.Flag("logs-dir", "Path to the logs folder.").String()
+	flags.auditDir = app.Flag("audit-dir", "Path to the audit folder.").String()
+	flags.httpsCertFile = app.Flag("https-server-cert", "Path to the server TLS cert file.").String()
+	flags.httpsKeyFile = app.Flag("https-server-key", "Path to the server TLS key file.").String()
+	flags.httpsTrustedCAFile = app.Flag("https-server-trustedca", "Path to the server TLS trusted CA file.").String()
+	flags.clientCertFile = app.Flag("client-cert", "Path to the client TLS cert file.").String()
+	flags.clientKeyFile = app.Flag("client-key", "Path to the client TLS key file.").String()
+	flags.clientTrustedCAFile = app.Flag("client-trustedca", "Path to the client TLS trusted CA file.").String()
 
 	// Parse arguments
 	kp.MustParse(app.Parse(a.args))
@@ -307,11 +325,26 @@ func (a *App) loadConfig() error {
 	logger.Infof("src=loadConfig, status=loaded, cfg=%q", *flags.cfgFile)
 	a.cfg = cfg
 
+	if *flags.logsDir != "" {
+		cfg.Logger.Directory = *flags.logsDir
+	}
+	if *flags.auditDir != "" {
+		cfg.Audit.Directory = *flags.auditDir
+	}
 	if *flags.hsmCfg != "" {
 		cfg.CryptoProv.Default = *flags.hsmCfg
 	}
 	if len(*flags.cryptoProvs) > 0 {
 		cfg.CryptoProv.Providers = *flags.cryptoProvs
+	}
+	if *flags.clientCertFile != "" {
+		cfg.TrustyClient.ClientTLS.CertFile = *flags.clientCertFile
+	}
+	if *flags.clientKeyFile != "" {
+		cfg.TrustyClient.ClientTLS.KeyFile = *flags.clientKeyFile
+	}
+	if *flags.clientTrustedCAFile != "" {
+		cfg.TrustyClient.ClientTLS.TrustedCAFile = *flags.clientTrustedCAFile
 	}
 
 	for i, httpCfg := range cfg.HTTPServers {
@@ -324,6 +357,15 @@ func (a *App) loadConfig() error {
 		case "Trusty":
 			if len(*flags.clientURLs) > 0 {
 				cfg.HTTPServers[i].ListenURLs = *flags.clientURLs
+			}
+			if *flags.httpsCertFile != "" {
+				cfg.HTTPServers[i].ServerTLS.CertFile = *flags.httpsCertFile
+			}
+			if *flags.httpsKeyFile != "" {
+				cfg.HTTPServers[i].ServerTLS.KeyFile = *flags.httpsKeyFile
+			}
+			if *flags.httpsTrustedCAFile != "" {
+				cfg.HTTPServers[i].ServerTLS.TrustedCAFile = *flags.httpsTrustedCAFile
 			}
 
 		default:

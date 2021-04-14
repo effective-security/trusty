@@ -151,14 +151,15 @@ func New(driverName, dataSourceName, migrationsDir string, nextID func() (uint64
 		return nil, errors.Trace(err)
 	}
 
+	ds = strings.Trim(ds, "\"")
 	db, err := sql.Open(driverName, ds)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.Annotatef(err, "unable to open DB: %s", driverName)
 	}
 
 	err = db.Ping()
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.Annotatef(err, "unable to ping DB: %s", driverName)
 	}
 
 	err = Migrate(migrationsDir, db)

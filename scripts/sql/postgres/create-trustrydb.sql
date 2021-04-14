@@ -4,8 +4,8 @@
 
 -- Database: trustydb
 SELECT
-    EXISTS(SELECT datname  FROM pg_catalog.pg_database WHERE datname = 'trustydb') as trustydb_exists;
-\gset
+    EXISTS(SELECT datname  FROM pg_catalog.pg_database WHERE datname = 'trustydb') as trustydb_exists \gset
+
 \if :trustydb_exists
 \echo 'trustydb already exists!'
 \q

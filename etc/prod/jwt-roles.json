@@ -1,0 +1,17 @@
+{
+    "issuer": "trusty",
+    "audience": "trusty",
+    "kid": "0",
+    "keys": [
+        {
+            "id": "0",
+            "seed": "glmfAFEfY2r3VzTocQ6e7Rip1Qac3uQA"
+        }
+    ],
+    "default_role": "trusty-client",
+    "roles": {
+        "trusty-admin": [
+            "denis@ekspand.com"
+        ]
+    }
+}

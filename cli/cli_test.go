@@ -3,8 +3,6 @@ package cli_test
 import (
 	"bytes"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
@@ -58,14 +56,14 @@ func TestCLIDefaultHost(t *testing.T) {
 	})
 
 	out.Reset()
-	cli.Parse([]string{"cliapp", "-D", "-V", "cmd", "client"})
+	cli.Parse([]string{"cliapp", "-D", "-V", "--timeout", "0", "cmd", "client"})
 
 	assert.Equal(t, hostname, cli.Server())
 	assert.False(t, cli.IsJSON())
 	assert.True(t, cli.Verbose())
 
 	assert.Equal(t, ctl.RCOkay, cli.ReturnCode(), "output: "+out.String())
-	assert.Contains(t, out.String(), "client: *client.Client\n")
+	assert.Contains(t, out.String(), "client: *client.Client")
 }
 
 func TestCLIDefaultHostWithPort(t *testing.T) {
@@ -93,11 +91,11 @@ func TestCLIDefaultHostWithPort(t *testing.T) {
 
 	out.Reset()
 
-	cli.Parse([]string{"cliapp", "cmd", "client"})
+	cli.Parse([]string{"cliapp", "-D", "-V", "--timeout", "0", "cmd", "client"})
 	assert.Equal(t, serverURL, cli.Server())
 
 	assert.Equal(t, ctl.RCOkay, cli.ReturnCode(), "output: "+out.String())
-	assert.Contains(t, out.String(), "client: *client.Client\n")
+	assert.Contains(t, out.String(), "client: *client.Client")
 }
 
 func TestCLIEnsureClient(t *testing.T) {
@@ -125,7 +123,7 @@ func TestCLIEnsureClient(t *testing.T) {
 		cli.Client()
 	})
 
-	cli.Parse([]string{"cliapp", "-s", "localhost", "-c", cert, "-k", key, "cmd", "client"})
+	cli.Parse([]string{"cliapp", "-D", "-V", "--timeout", "0", "-s", "localhost", "-c", cert, "-k", key, "cmd", "client"})
 
 	err := cli.EnsureClient()
 	require.NoError(t, err)
@@ -166,7 +164,7 @@ func TestCLIWithServiceCfgNoDefault(t *testing.T) {
 	out.Reset()
 	cli.WithWriter(out).WithErrWriter(out)
 
-	cli.Parse([]string{"cliapp", "cmd", "client"})
+	cli.Parse([]string{"cliapp", "-D", "-V", "--timeout", "0", "cmd", "client"})
 
 	assert.Panics(t, func() {
 		cli.Config()
@@ -201,7 +199,7 @@ func TestCLIWithServiceCfg_NotFound(t *testing.T) {
 		Action(cli.RegisterAction(cmdClientAction, nil))
 
 	out.Reset()
-	cli.Parse([]string{"cliapp", "-s", "http://local", "cmd", "client"})
+	cli.Parse([]string{"cliapp", "-D", "-V", "--timeout", "0", "-s", "http://local", "cmd", "client"})
 
 	assert.Panics(t, func() {
 		cli.Config()
@@ -235,7 +233,7 @@ func TestCLIWithServiceCfg(t *testing.T) {
 	cfg, err := filepath.Abs(filepath.Join(projFolder, "etc/dev/trusty-config.json"))
 	require.NoError(t, err)
 
-	cli.Parse([]string{"cliapp", "cmd", "client", "--cfg", cfg})
+	cli.Parse([]string{"cliapp", "-D", "-V", "--timeout", "0", "cmd", "client", "--cfg", cfg})
 
 	err = cli.EnsureServiceConfig()
 	require.NoError(t, err)
@@ -272,7 +270,7 @@ func TestCLIWithHsmCfg(t *testing.T) {
 		Action(cli.RegisterAction(cmdClientAction, nil))
 	out.Reset()
 
-	cli.Parse([]string{"cliapp", "-s", "localhost", "cmd", "client", "--hsm-cfg", "/tmp/trusty/softhsm/unittest_hsm.json"})
+	cli.Parse([]string{"cliapp", "-D", "-V", "--timeout", "0", "-s", "localhost", "cmd", "client", "--hsm-cfg", "/tmp/trusty/softhsm/unittest_hsm.json"})
 
 	cli.WithCryptoProvider(nil)
 	err := cli.EnsureCryptoProvider()
@@ -313,6 +311,8 @@ func TestCLIWithHsmAndPlainText(t *testing.T) {
 
 	cli.Parse([]string{"cliapp",
 		"-s", "localhost",
+		"-D", "-V",
+		"--timeout", "0",
 		"cmd", "client",
 		"--hsm-cfg", "/tmp/trusty/softhsm/unittest_hsm.json",
 		"--plain-key",
@@ -331,15 +331,6 @@ func TestCLIWithHsmAndPlainText(t *testing.T) {
 
 	assert.Equal(t, ctl.RCOkay, cli.ReturnCode())
 	assert.Contains(t, out.String(), "client: *client.Client\n")
-}
-
-func makeTestHandler(t *testing.T, expURI, responseBody string) http.Handler {
-	h := func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, expURI, r.RequestURI, "received wrong URI")
-		w.WriteHeader(http.StatusOK)
-		io.WriteString(w, responseBody)
-	}
-	return http.HandlerFunc(h)
 }
 
 func TestReadStdin(t *testing.T) {

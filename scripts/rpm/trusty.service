@@ -1,0 +1,18 @@
+[Unit]
+Description=Trusty service
+Wants=network.target
+After=network.target network-online.target
+Requires=network.target network-online.target
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+RestartSec=5s
+StartLimitInterval=30min
+StartLimitBurst=1000
+
+User=trusty
+ExecStart=/bin/sh -c '/opt/trusty/bin/trusty'
+
+[Install]
+WantedBy=multi-user.target
