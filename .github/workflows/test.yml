@@ -23,19 +23,60 @@ jobs:
         go-version: [1.16.x]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
+
     steps:
     - name: Install Go
       uses: actions/setup-go@v2
       with:
         go-version: ${{ matrix.go-version }}
+
     - name: Checkout code
       uses: actions/checkout@v2
+
     - name: Install softhsm2
       run: sudo apt-get install softhsm2 opensc
     - name: Prepare
       run: make vars tools folders generate hsmconfig
+
     - name: UnitTest
       env:
         TRUSTY_GITHUB_CLIENT_SECRET: ${{ secrets.TRUSTY_GITHUB_CLIENT_SECRET }}
+      run: make build gen_test_certs start-sql covtest
+
+    - name: RPM
+      run: make rpm_docker
+
+    - name: Upload RPM
+      if: ${{ github.ref == 'refs/heads/main' }} && github.event_name == 'pull_request'
+      uses: actions/upload-artifact@v2
+      with:
+        name: trusty-${{ github.ref }}.rpm
+        path: ${{ github.workspace }}/.rpm/dist/*.rpm
+        retention-days: 1
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Login to Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.CR_PAT }}
+
+    - name: Docker to GitHub Packages
+      id: docker_build
+      uses: docker/build-push-action@v2
+      with:
+        file: ./Dockerfile
+        context: .
+        tags: ghcr.io/${{ github.repository }}/trusty:${{ github.ref }}
+
+    - name: Image digest
+      run: echo ${{ steps.docker_build.outputs.digest }}
+
+    - name: coveralls
+      if: github.event_name == 'pull_request'
+      env:
         COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: make build gen_test_certs start-sql covtest coveralls-github
+      run: make coveralls-github
