@@ -58,3 +58,6 @@ To clean up use:
     
     find -name "localhost:*" -delete
 
+## Integration test
+
+    make docker docker-citest
