@@ -56,7 +56,7 @@ version:
 	gofmt -r '"GIT_VERSION" -> "$(GIT_VERSION)"' internal/version/current.template > internal/version/current.go
 
 proto:
-	./scripts/build/genproto.sh
+	./genproto.sh
 
 build_trusty:
 	echo "*** Building trusty"
@@ -71,11 +71,17 @@ build_tool:
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/trusty-tool ./cmd/trusty-tool
 
 build: build_trusty build_trustyctl build_tool
-	echo "Finished build"
+
+change_log:
+	echo "Recent changes:" > ./change_log.txt
+	git log -n 20 --pretty=oneline --abbrev-commit >> ./change_log.txt
+
+commit_version:
+	git add .; git commit -m "Updated version"
 
 hsmconfig:
 	echo "*** Running hsmconfig"
-	.project/config-softhsm.sh \
+	./scripts/build/config-softhsm.sh \
 		--tokens-dir /tmp/trusty/softhsm/tokens/ \
 		--pin-file /tmp/trusty/softhsm/trusty_unittest.txt \
 		--generate-pin -s trusty_unittest \
@@ -85,7 +91,7 @@ hsmconfig:
 gen_test_certs:
 	echo "*** Running gen_test_certs"
 	echo "*** generating untrusted CAs"
-	$(PROJ_ROOT)/.project/gen_test_certs.sh \
+	./scripts/build/gen_test_certs.sh \
 		--hsm-config /tmp/trusty/softhsm/unittest_hsm.json \
 		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.json \
 		--out-dir /tmp/trusty/certs \
@@ -96,7 +102,7 @@ gen_test_certs:
 		--root --ca1 --ca2 --bundle --peer --force
 	echo "*** generating test CAs"
 	rm -f /tmp/trusty/certs/$(PROJ_NAME)_dev_peer*
-	$(PROJ_ROOT)/.project/gen_test_certs.sh \
+	./scripts/build/gen_test_certs.sh \
 		--hsm-config /tmp/trusty/softhsm/unittest_hsm.json \
 		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.json \
 		--out-dir /tmp/trusty/certs \
@@ -133,3 +139,91 @@ drop-sql:
 coveralls-github:
 	echo "Running coveralls"
 	goveralls -v -coverprofile=coverage.out -service=github -package ./...
+
+preprpm: change_log
+	# this target assumes you've already done a build
+	echo "Preparing files for RPM"
+	rm -rf .rpm
+	mkdir -p .rpm/dist
+	mkdir -p .rpm/trusty/opt/trusty/bin/sql/postgres/migrations
+	mkdir -p .rpm/trusty/opt/trusty/etc/prod/csr
+	# bin
+	cp ./change_log.txt .rpm/trusty/opt/trusty/bin/
+	cp bin/trusty .rpm/trusty/opt/trusty/bin/
+	cp bin/trustyctl .rpm/trusty/opt/trusty/bin/
+	cp bin/trusty-tool .rpm/trusty/opt/trusty/bin/
+	cp ./scripts/build/*.sh .rpm/trusty/opt/trusty/bin/
+	cp -R scripts/sql/ .rpm/trusty/opt/trusty/bin/
+	# etc
+	cp etc/prod/*.json .rpm/trusty/opt/trusty/etc/prod/
+	# cp etc/prod/*.yaml .rpm/trusty/opt/trusty/etc/prod/
+	cp -R etc/prod/csr/ .rpm/trusty/opt/trusty/etc/prod/
+	# rpm
+	cp ./scripts/rpm/*.sh .rpm/
+	# systemd
+	mkdir -p .rpm/trusty/etc/systemd/system
+	cp scripts/rpm/trusty.service .rpm/trusty/etc/systemd/system
+
+rpm_local: preprpm
+	echo "Making RPM"
+	RPM_NAME=trusty
+	RPM_MAINTAINER=denis@ekspand.com
+	RPM_EPOCH=1
+	RPM_ITER=${COMMITS_COUNT:=.el7}
+	RPM_VERSION=${PROD_VERSION}
+	RPM_AFTER_INSTALL=./opt/trusty/bin/postinstall.systemd.sh
+	RPM_URL="https://github.com/ekspand/trusty"
+	RPM_SUMMARY="Trusy service"
+	./.rpm/mkrpm.sh \
+		-n trusty \
+		-m denis@ekspand.com \
+		--epoch 1 \
+		--version "${GIT_VERSION}" \
+		--iteration "el7" \
+		--after-install ./.rpm/mkrpm.sh \
+		--url "https://github.com/ekspand/trusty" \
+		--summary ${RPM_SUMMARY}
+
+rpm_systemd: preprpm
+	docker pull ekspand/docker-centos7-fpm:latest
+	docker run -d -it -v ${PROJ_DIR}/.rpm:/rpm --name centos7fpm ekspand/docker-centos7-fpm
+	docker exec centos7fpm ./mkrpm.sh \
+		-n trusty \
+		-m denis@ekspand.com \
+		--epoch 1 \
+		--version "${GIT_VERSION}" \
+		--iteration "el7" \
+		--after-install /rpm/postinstall.systemd.sh \
+		--url "https://github.com/ekspand/trusty" \
+		--summary "Trusy service"
+	docker stop centos7fpm
+	docker rm centos7fpm
+
+rpm_docker: preprpm
+	docker pull ekspand/docker-centos7-fpm:latest
+	docker run -d -it -v ${PROJ_DIR}/.rpm:/rpm --name centos7fpm ekspand/docker-centos7-fpm
+	docker exec centos7fpm ./mkrpm.sh \
+		-n trusty \
+		-m denis@ekspand.com \
+		--epoch 1 \
+		--version "${GIT_VERSION}-docker" \
+		--iteration "el7" \
+		--after-install /rpm/postinstall.sh \
+		--url "https://github.com/ekspand/trusty" \
+		--summary "Trusy service"
+	docker stop centos7fpm
+	docker rm centos7fpm
+
+docker: rpm_docker
+	docker build --no-cache -f Dockerfile -t ekspand/trusty .
+
+docker-compose:
+	docker-compose -f docker-compose.dev.yml up --abort-on-container-exit
+
+docker-push: docker
+	[ ! -z ${DOCKER_PASSWORD} ] && echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin || echo "skipping docker login"
+	docker push ekspand/trusty:latest
+	#[ ! -z ${DOCKER_NUMBER} ] && docker push ekspand/trusty:${DOCKER_NUMBER} || echo "skipping docker version, pushing latest only"
+
+docker-citest:
+	cd ./scripts/integration && ./setup.sh

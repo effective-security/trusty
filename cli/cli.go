@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/internal/config"
@@ -225,12 +226,20 @@ func (cli *Cli) EnsureCryptoProvider() error {
 
 	cryptoprov.Register("SoftHSM", cryptoprov.Crypto11Loader)
 	cryptoprov.Register("PKCS11", cryptoprov.Crypto11Loader)
-	cli.crypto, err = cryptoprov.Load(defaultProvider, providers)
-	if err != nil {
-		return errors.Annotate(err, "unable to initialize crypto providers")
+
+	if defaultProvider == "inmem" || defaultProvider == "plain" {
+		cli.crypto, err = cryptoprov.New(inmemcrypto.NewProvider(), nil)
+		if err != nil {
+			return errors.Annotate(err, "unable to initialize crypto providers")
+		}
+	} else {
+		cli.crypto, err = cryptoprov.Load(defaultProvider, providers)
+		if err != nil {
+			return errors.Annotate(err, "unable to initialize crypto providers")
+		}
 	}
 
-	if cli.flags.plainKey != nil && *cli.flags.plainKey == true {
+	if cli.flags.plainKey != nil && *cli.flags.plainKey {
 		cli.defaultCryptoProv = inmemcrypto.NewProvider()
 	} else {
 		cli.defaultCryptoProv = cli.crypto.Default()
@@ -322,11 +331,13 @@ func (cli *Cli) EnsureClient() error {
 		return errors.Annotate(err, "unable to build TLS configuration")
 	}
 
-	// TODO: add timeout options
-
+	timeout := time.Duration(*cli.flags.timeout) * time.Second
 	clientCfg := &client.Config{
-		Endpoints: []string{cli.Server()},
-		TLS:       tlscfg,
+		DialTimeout:          timeout,
+		DialKeepAliveTimeout: timeout,
+		DialKeepAliveTime:    timeout,
+		Endpoints:            []string{cli.Server()},
+		TLS:                  tlscfg,
 	}
 
 	cli.client, err = client.New(clientCfg)

@@ -1,0 +1,184 @@
+{
+    "defaults": {
+        "Region": "dev",
+        "Environment": "test",
+        "ServiceName": "trusty",
+        "ClusterName": "local",
+        "HTTPServers": [
+            {
+                "Name": "Health",
+                "ListenURLs": [
+                    "http://0.0.0.0:8080"
+                ],
+                "Services": [
+                    "status"
+                ],
+                "HeartbeatSecs": 30,
+                "RequestTimeout": "3s"
+            },
+            {
+                "Name": "Trusty",
+                "ListenURLs": [
+                    "https://0.0.0.0:7891"
+                ],
+                "ServerTLS": {
+                    "CertFile": "/var/trusty/certs/trusty_peer.pem",
+                    "KeyFile": "/var/trusty/certs/trusty_peer-key.pem",
+                    "TrustedCAFile": "/var/trusty/roots/trusty_root_ca.pem"
+                },
+                "Services": [
+                    "auth",
+                    "status",
+                    "ca",
+                    "cis",
+                    "workflow"
+                ],
+                "HeartbeatSecs": 30,
+                "RequestTimeout": "3s",
+                "KeepAliveMinTime": "60s",
+                "KeepAliveInterval": "30s",
+                "KeepAliveTimeout": "180s",
+                "CORS": {
+                    "Enabled": true,
+                    "MaxAge": 600,
+                    "AllowCredentials": true,
+                    "AllowedOrigins": [
+                        "*"
+                    ],
+                    "AllowedMethods": [
+                        "HEAD",
+                        "OPTIONS",
+                        "GET",
+                        "POST",
+                        "DELETE"
+                    ],
+                    "AllowedHeaders": [
+                        "Accept",
+                        "Content-Type",
+                        "Content-Length",
+                        "Accept-Encoding",
+                        "Authorization",
+                        "X-Device-ID"
+                    ]
+                }
+            }
+        ],
+        "TrustyClient": {
+            "ClientTLS": {
+                "CertFile": "/var/trusty/certs/trusty_peer.pem",
+                "KeyFile": "/var/trusty/certs/trusty_peer-key.pem",
+                "TrustedCAFile": "/var/trusty/roots/trusty_root_ca.pem"
+            },
+            "PublicURL": "https://localhost:7891",
+            "Servers": [
+                "https://localhost:7891"
+            ]
+        },
+        "Authz": {
+            "AllowAny": [
+                "/v1/auth",
+                "/v1/status",
+                "/v1/certs",
+                "/v1/crl",
+                "/v1/ocsp",
+                "/v1/roots",
+                "/trustypb.CertInfoService",
+                "/trustypb.StatusService"
+            ],
+            "AllowAnyRole": [
+              "/v1/wf"
+            ],
+            "Allow": [
+                "/v1/ca:trusty-peer",
+                "/trustypb.AuthorityService:trusty-peer"
+            ],
+            "LogAllowedAny": true,
+            "LogAllowed": true,
+            "LogDenied": true,
+            "CertMapper": "cert-roles.json",
+            "JWTMapper": "jwt-roles.json"
+        },
+        "OAuthClients": [
+            "/opt/trusty/etc/prod/oauth-github.json"
+        ],
+        "LogLevels": [
+            {
+                "Repo": "*",
+                "Level": "TRACE"
+            },
+            {
+                "Repo": "github.com/ekspand/trusty",
+                "Package": "*",
+                "Level": "TRACE"
+            },
+            {
+                "Repo": "github.com/ekspand/trusty/health",
+                "Package": "xhttp",
+                "Level": "ERROR"
+            },
+            {
+                "Repo": "github.com/ekspand/trusty/backend/service",
+                "Package": "*",
+                "Level": "DEBUG"
+            },
+            {
+                "Repo": "github.com/go-phorce/dolly",
+                "Package": "*",
+                "Level": "TRACE"
+            }
+        ],
+        "Logger": {
+            "Directory": "/var/trusty/logs",
+            "MaxAgeDays": 3,
+            "MaxSizeMb": 10
+        },
+        "Audit": {
+            "Directory": "/var/trusty/audit",
+            "MaxAgeDays": 7,
+            "MaxSizeMb": 10
+        },
+        "CryptoProv": {
+            "PKCS11Manufacturers": [
+                "SoftHSM",
+                "Gemalto NV"
+            ],
+            "Default": "/var/trusty/softhsm/unittest_hsm.json",
+            "Providers": []
+        },
+        "Metrics": {
+            "Provider": "inmem",
+            "Disabled": true
+        },
+        "Authority": {
+            "CAConfig": "ca-config.json",
+            "DefaultCRLExpiry": "12h",
+            "DefaultCRLRenewal": "1h",
+            "DefaultOCSPExpiry": "30m",
+            "Issuers": [
+                {
+                    "Label": "TrustyCA",
+                    "Type": "trusty",
+                    "CertFile": "/var/trusty/certs/trusty_issuer2_ca.pem",
+                    "KeyFile": "/var/trusty/certs/trusty_issuer2_ca-key.pem",
+                    "CABundleFile": "/var/trusty/certs/trusty_cabundle.pem",
+                    "RootBundleFile": "/var/trusty/roots/trusty_root_ca.pem",
+                    "CRLExpiry": "8h",
+                    "CRLRenewal": "1h",
+                    "OCSPExpiry": "10m"
+                }
+            ]
+        },
+        "SQL": {
+            "Driver": "postgres",
+            "DataSource": "env://TRUSTY_SQL_CONN",
+            "MigrationsDir": "/opt/trusty/bin/sql/postgres/migrations"
+        },
+        "Trusty": {
+            "PrivateRoots": [
+                "/var/trusty/roots/trusty_root_ca.pem"
+            ],
+            "PublicRoots" :[
+            ]
+        }
+    }
+}

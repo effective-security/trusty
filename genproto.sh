@@ -8,7 +8,7 @@
 #
 set -e
 
-if ! [[ "$0" =~ scripts/build/genproto.sh ]]; then
+if ! [[ "$0" =~ genproto.sh ]]; then
 	echo "must be run from repository root"
 	exit 255
 fi
