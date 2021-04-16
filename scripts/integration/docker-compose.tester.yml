@@ -37,7 +37,7 @@ services:
       - /start_postgres.sh
 
   trusty-node1:
-    image: ekspand/trusty:latest
+    image: ghcr.io/ekspand/trusty:${ITEST_IMAGE_TAG}
     domainname: node1.trusty.ca
     networks:
       trusty_private:
@@ -87,7 +87,7 @@ services:
         --health-listen-url=http://10.77.88.101:8080
         --client-listen-url=https://10.77.88.101:7891
   test-runner:
-    image: ekspand/trusty:latest
+    image: ghcr.io/ekspand/trusty:${ITEST_IMAGE_TAG}
     domainname: tester.trusty.ca
     networks:
       trusty_private:

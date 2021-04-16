@@ -1,4 +1,5 @@
 FROM centos:7
+LABEL org.opencontainers.image.source https://github.com/ekspand/trusty
 
 ENV TRUSTY_DIR=/opt/trusty
 ENV PATH=$PATH:/opt/trusty/bin
