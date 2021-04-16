@@ -215,7 +215,7 @@ rpm_docker: preprpm
 	docker rm centos7fpm
 
 docker: rpm_docker
-	docker build --no-cache -f Dockerfile -t ekspand/trusty .
+	docker build --no-cache -f Dockerfile -t ghcr.io/ekspand/trusty .
 
 docker-compose:
 	docker-compose -f docker-compose.dev.yml up --abort-on-container-exit

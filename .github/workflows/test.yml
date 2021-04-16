@@ -23,6 +23,8 @@ jobs:
         go-version: [1.16.x]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
+    env:
+      ITEST_IMAGE_TAG: rc-${{ github.event.number }}
 
     steps:
     - name: Install Go
@@ -46,11 +48,12 @@ jobs:
     - name: RPM
       run: make rpm_docker
 
+    # TODO: upload on release
     - name: Upload RPM
       if: ${{ github.ref == 'refs/heads/main' }} && github.event_name == 'pull_request'
       uses: actions/upload-artifact@v2
       with:
-        name: trusty-${{ github.event.number }}.rpm
+        name: trusty-${{ env.ITEST_IMAGE_TAG }}.rpm
         path: ${{ github.workspace }}/.rpm/dist/*.rpm
         retention-days: 1
 
@@ -64,16 +67,22 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.CR_PAT }}
 
-    - name: Docker to GitHub Packages
+    - name: Docker ITEST
       id: docker_build
       uses: docker/build-push-action@v2
       with:
         file: ./Dockerfile
         context: .
-        tags: ghcr.io/${{ github.repository }}/trusty:rc-${{ github.event.number }}
+        # DO NOT push on ITEST
+        # TODO: create push on Release
+        # push: true
+        tags: ghcr.io/${{ github.repository_owner }}/trusty:${{ env.ITEST_IMAGE_TAG }}
 
     - name: Image digest
       run: echo ${{ steps.docker_build.outputs.digest }}
+
+    - name: Integration Test
+      run: make docker-citest
 
     - name: coveralls
       if: github.event_name == 'pull_request'
