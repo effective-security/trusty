@@ -1,6 +1,6 @@
 name: Build
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
 
@@ -50,7 +50,7 @@ jobs:
       if: ${{ github.ref == 'refs/heads/main' }} && github.event_name == 'pull_request'
       uses: actions/upload-artifact@v2
       with:
-        name: trusty-${{ github.ref }}.rpm
+        name: trusty-${{ github.event.number }}.rpm
         path: ${{ github.workspace }}/.rpm/dist/*.rpm
         retention-days: 1
 
@@ -70,7 +70,7 @@ jobs:
       with:
         file: ./Dockerfile
         context: .
-        tags: ghcr.io/${{ github.repository }}/trusty:${{ github.ref }}
+        tags: ghcr.io/${{ github.repository }}/trusty:rc-${{ github.event.number }}
 
     - name: Image digest
       run: echo ${{ steps.docker_build.outputs.digest }}
