@@ -7,8 +7,15 @@ Trusty is a Certification Authority.
 
 ## Requirements
 
-1. GoLang 1.14+
-1. SoftHSM 2.5+
+1. GoLang 1.16+
+1. SoftHSM 2.6+
+
+To run or test locally, you need GitHub OAuth secret:
+
+```.sh
+export TRUSTY_GITHUB_CLIENT_ID=...
+export TRUSTY_GITHUB_CLIENT_SECRET=...
+```
 
 ## Build
 
