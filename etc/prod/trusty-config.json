@@ -151,9 +151,9 @@
         },
         "Authority": {
             "CAConfig": "ca-config.json",
-            "DefaultCRLExpiry": "12h",
-            "DefaultCRLRenewal": "1h",
-            "DefaultOCSPExpiry": "30m",
+            "DefaultCRLExpiry": "165h",
+            "DefaultCRLRenewal": "72h",
+            "DefaultOCSPExpiry": "24h",
             "Issuers": [
                 {
                     "Label": "TrustyCA",
@@ -162,9 +162,9 @@
                     "KeyFile": "/var/trusty/certs/trusty_issuer2_ca-key.pem",
                     "CABundleFile": "/var/trusty/certs/trusty_cabundle.pem",
                     "RootBundleFile": "/var/trusty/roots/trusty_root_ca.pem",
-                    "CRLExpiry": "8h",
-                    "CRLRenewal": "1h",
-                    "OCSPExpiry": "10m"
+                    "CRLExpiry": "165h",
+                    "CRLRenewal": "72h",
+                    "OCSPExpiry": "24h"
                 }
             ]
         },

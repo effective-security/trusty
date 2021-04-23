@@ -220,12 +220,18 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 			return
 		}
 
+		uemail := model.String(ghu.Email)
+		if uemail == "" {
+			marshal.WriteJSON(w, r, httperror.WithForbidden("please update your GitHub profile with valid email"))
+			return
+		}
+
 		user := &model.User{
 			ExternalID:   model.NullInt64(ghu.ID),
 			Provider:     v1.ProviderGithub,
 			Login:        model.String(ghu.Login),
 			Name:         model.String(ghu.Name),
-			Email:        model.String(ghu.Email),
+			Email:        uemail,
 			Company:      model.String(ghu.Company),
 			AvatarURL:    model.String(ghu.AvatarURL),
 			AccessToken:  token.AccessToken,
