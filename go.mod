@@ -23,6 +23,7 @@ require (
 	github.com/lib/pq v1.7.0
 	github.com/mattn/goreman v0.3.7
 	github.com/mattn/goveralls v0.0.6
+	github.com/miekg/pkcs11 v1.0.3 // indirect
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
