@@ -170,7 +170,7 @@
         },
         "SQL": {
             "Driver": "postgres",
-            "DataSource": "file://${CONFIG_DIR}/sql-conn.txt",
+            "DataSource": "file://${TRUSTY_CONFIG_DIR}/sql-conn.txt",
             "MigrationsDir": "../../scripts/sql/postgres/migrations"
         },
         "Trusty": {

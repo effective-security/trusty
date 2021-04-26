@@ -13,7 +13,7 @@ BUILD_FLAGS=
 
 default: help
 
-all: clean folders tools generate hsmconfig build gen_test_certs test
+all: clean folders tools generate hsmconfig build gen_test_certs start-sql test
 
 #
 # clean produced files
