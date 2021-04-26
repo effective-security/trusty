@@ -149,7 +149,9 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 	c.Environment = strings.ToLower(c.Environment)
 
 	variables := f.getVariableValues(c)
-	variables["${CONFIG_DIR}"] = baseDir
+	if variables["${TRUSTY_CONFIG_DIR}"] == "" {
+		variables["${TRUSTY_CONFIG_DIR}"] = baseDir
+	}
 	substituteEnvVars(&c, variables)
 
 	// Add to this list all configs that require folder resolution to absolute path
@@ -217,18 +219,18 @@ func (f *Factory) getVariableValues(config *Configuration) map[string]string {
 		"${ENVIRONMENT_UPPERCASE}": strings.ToUpper(config.Environment),
 	}
 
-	// TODO: support system wide ENV?
-	/*
-		for _, x := range os.Environ() {
-			kvp := strings.SplitN(x, "=", 2)
+	for _, x := range os.Environ() {
+		kvp := strings.SplitN(x, "=", 2)
 
-			formattedKey := fmt.Sprintf("${%v}", kvp[0])
-
+		env, val := kvp[0], kvp[1]
+		if strings.HasPrefix(env, "TRUSTY_") {
+			formattedKey := fmt.Sprintf("${%v}", env)
 			if _, ok := ret[formattedKey]; !ok {
-				ret[formattedKey] = kvp[1]
+				ret[formattedKey] = val
 			}
 		}
-	*/
+	}
+
 	return ret
 }
 
