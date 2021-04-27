@@ -2,6 +2,10 @@ include .project/gomod-project.mk
 
 SHA := $(shell git rev-parse HEAD)
 
+export AWS_ACCESS_KEY_ID=notusedbyemulator
+export AWS_SECRET_ACCESS_KEY=notusedbyemulator
+export AWS_DEFAULT_REGION=us-west-2
+
 export COVERAGE_EXCLUSIONS="vendor|tests|main.go|testsuite.go|rpc.pb.go|rpc.pb.gw.go|pkix.pb.go|pkix.pb.gw.go|cis.pb.go|cis.pb.gw.go"
 export TRUSTY_DIR=${PROJ_ROOT}
 export GO111MODULE=on
@@ -13,7 +17,7 @@ BUILD_FLAGS=
 
 default: help
 
-all: clean folders tools generate hsmconfig build gen_test_certs start-sql test
+all: clean folders tools generate hsmconfig build gen_test_certs start-local-kms start-sql test
 
 #
 # clean produced files
@@ -111,6 +115,21 @@ gen_test_certs:
 		--root-ca /tmp/trusty/certs/trusty_dev_root_ca.pem \
 		--root-ca-key /tmp/trusty/certs/trusty_dev_root_ca-key.pem \
 		--root --ca1 --ca2  --bundle --peer --force
+
+start-local-kms:
+	# Container state will be true (it's already running), false (exists but stopped), or missing (does not exist).
+	# Annoyingly, when there is no such container and Docker returns an error, it also writes a blank line to stdout.
+	# Hence the sed to trim whitespace.
+	LKMS_CONTAINER_STATE=$$(echo $$(docker inspect -f "{{.State.Running}}" trusty-unittest-local-kms 2>/dev/null || echo "missing") | sed -e 's/^[ \t]*//'); \
+	if [ "$$LKMS_CONTAINER_STATE" = "missing" ]; then \
+		docker pull nsmithuk/local-kms && \
+		docker run --network host \
+			-d -e 'PORT=4599' \
+			-p 4599:4599 \
+			--name trusty-unittest-local-kms \
+			nsmithuk/local-kms && \
+			sleep 1; \
+	elif [ "$$LKMS_CONTAINER_STATE" = "false" ]; then docker start trusty-unittest-local-kms && sleep 1; fi;
 
 start-sql:
 	# Container state will be true (it's already running), false (exists but stopped), or missing (does not exist).

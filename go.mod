@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/Microsoft/go-winio v0.4.15 // indirect
+	github.com/aws/aws-sdk-go v1.38.25
 	github.com/cloudflare/cfssl v0.0.0-20181102015659-ea4033a214e7
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/docker/distribution v2.7.1+incompatible // indirect
@@ -25,7 +26,6 @@ require (
 	github.com/mattn/goveralls v0.0.6
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/opencontainers/go-digest v1.0.0 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/soheilhy/cmux v0.1.4
 	github.com/sony/sonyflake v1.0.0
 	github.com/stretchr/testify v1.7.0

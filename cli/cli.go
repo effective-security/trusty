@@ -9,6 +9,7 @@ import (
 
 	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/internal/config"
+	"github.com/ekspand/trusty/pkg/awskmscrypto"
 	"github.com/ekspand/trusty/pkg/inmemcrypto"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/rest/tlsconfig"
@@ -226,6 +227,7 @@ func (cli *Cli) EnsureCryptoProvider() error {
 
 	cryptoprov.Register("SoftHSM", cryptoprov.Crypto11Loader)
 	cryptoprov.Register("PKCS11", cryptoprov.Crypto11Loader)
+	cryptoprov.Register("AWSKMS", awskmscrypto.KmsLoader)
 
 	if defaultProvider == "inmem" || defaultProvider == "plain" {
 		cli.crypto, err = cryptoprov.New(inmemcrypto.NewProvider(), nil)
