@@ -12,6 +12,19 @@ volumes:
   trusty-shared-certs:
 
 services:
+  local-kms:
+    image: nsmithuk/local-kms
+    domainname: trusty-kms.ekspand.com
+    networks:
+      trusty_private:
+        ipv4_address: 10.77.88.99
+        aliases:
+          - trusty-kms.ekspand.com
+    ports:
+      - "4599" # SQL
+    environment:
+      - PORT=4599
+
   trusty-sql:
     image: ekspand/docker-centos7-postgres:latest
     domainname: trusty-sql.ekspand.com
@@ -36,6 +49,7 @@ services:
       - -c
       - /start_postgres.sh
 
+  # NODE 1 on softhsm
   trusty-node1:
     image: ghcr.io/ekspand/trusty:${ITEST_IMAGE_TAG}
     domainname: node1.trusty.ca
@@ -44,6 +58,12 @@ services:
         ipv4_address: 10.77.88.101
         aliases:
           - node1.trusty.ca
+    depends_on:
+      - local-kms
+      - trusty-sql
+    links:
+      - local-kms
+      - trusty-sql
     volumes:
       - trusty-shared-certs:/var/trusty/roots
         # Mounts the volumes from build container to the container in test
@@ -86,6 +106,62 @@ services:
         --host-name=10.77.88.101
         --health-listen-url=http://10.77.88.101:8080
         --client-listen-url=https://10.77.88.101:7891
+
+  # NODE 2 on local-kms
+  trusty-node2:
+    image: ghcr.io/ekspand/trusty:${ITEST_IMAGE_TAG}
+    domainname: node2.trusty.ca
+    networks:
+      trusty_private:
+        ipv4_address: 10.77.88.102
+        aliases:
+          - node2.trusty.ca
+    depends_on:
+      - local-kms
+      - trusty-sql
+    links:
+      - local-kms
+      - trusty-sql
+    volumes:
+      - trusty-shared-certs:/var/trusty/roots
+        # Mounts the volumes from build container to the container in test
+        # docker-compose command runs with ./scripts/integration as CWD, 
+        # the source path in the volume definitions are relative to ./scripts/integration
+      - ./tests:/opt/trusty/tests
+    ports:
+      - "8080" # Public WebAPI
+      - "7891"
+    environment:
+      - AWS_ACCESS_KEY_ID=notusedbyemulator
+      - AWS_SECRET_ACCESS_KEY=notusedbyemulator
+      - AWS_DEFAULT_REGION=us-west-2
+      - TRUSTY_GITHUB_CLIENT_SECRET=not_used_in_test
+      - TRUSTY_SQL_CONN=host=10.77.88.100 port=5432 user=postgres password=postgres sslmode=disable dbname=trustydb
+    entrypoint:
+      - /bin/bash
+      - -c
+      - >-
+        /opt/trusty/bin/sql/postgres/wait_sql.sh 10.77.88.100 5432 postgres postgres echo "SQL is ready" &&
+        /opt/trusty/tests/if-root-exists.sh mkdir -p /tmp/trusty/certs &&
+        /opt/trusty/bin/gen_test_certs.sh
+        --hsm-config /opt/trusty/tests/aws-test-kms.json
+        --ca-config /opt/trusty/etc/prod/ca-config.bootstrap.json
+        --out-dir /var/trusty/certs
+        --csr-dir /opt/trusty/etc/prod/csr
+        --root-ca /var/trusty/roots/trusty_root_ca.pem
+        --root-ca-key /var/trusty/roots/trusty_root_ca-key.pem
+        --prefix trusty_
+        --san 10.77.88.102
+        --ca1 --ca2 --bundle --peer --force &&
+        /opt/trusty/bin/trusty --std
+        --hsm-cfg=/opt/trusty/tests/aws-test-kms.json
+        --cfg=/opt/trusty/etc/prod/trusty-config.json
+        --logs-dir=/var/trusty/logs
+        --audit-dir=/var/trusty/audit
+        --host-name=10.77.88.102
+        --health-listen-url=http://10.77.88.102:8080
+        --client-listen-url=https://10.77.88.102:7891
+
   test-runner:
     image: ghcr.io/ekspand/trusty:${ITEST_IMAGE_TAG}
     domainname: tester.trusty.ca
@@ -102,8 +178,10 @@ services:
       - ./tests:/opt/trusty/tests
     depends_on:
       - trusty-node1
+      - trusty-node2
     links:
       - trusty-node1
+      - trusty-node2
     entrypoint:
       - /bin/bash
       - -c

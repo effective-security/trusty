@@ -140,8 +140,7 @@
         "CryptoProv": {
             "PKCS11Manufacturers": [
                 "SoftHSM",
-                "Gemalto NV",
-                "AWSKMS"
+                "Gemalto NV"
             ],
             "Default": "/var/trusty/softhsm/unittest_hsm.json",
             "Providers": []
