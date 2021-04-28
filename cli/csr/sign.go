@@ -7,6 +7,7 @@ import (
 	"github.com/ekspand/trusty/cli"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/csr"
+	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/juju/errors"
 )
@@ -81,7 +82,7 @@ func Sign(c ctl.Control, p interface{}) error {
 	}
 
 	if *flags.Output == "" {
-		PrintCert(c.Writer(), nil, nil, certPEM)
+		print.CSRandCert(c.Writer(), nil, nil, certPEM)
 	} else {
 		err = SaveCert(*flags.Output, nil, nil, certPEM)
 		if err != nil {
