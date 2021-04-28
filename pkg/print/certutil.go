@@ -3,6 +3,7 @@ package print
 import (
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/json"
 	"fmt"
 	"io"
 	"time"
@@ -134,4 +135,23 @@ func OCSPResponse(w io.Writer, res *ocsp.Response) {
 	if res.Status == ocsp.Revoked {
 		fmt.Fprintf(w, "Revocation reason: %d\n", res.RevocationReason)
 	}
+}
+
+// CSRandCert outputs a cert, key and csr
+func CSRandCert(w io.Writer, key, csrBytes, cert []byte) {
+	out := map[string]string{}
+	if cert != nil {
+		out["cert"] = string(cert)
+	}
+
+	if key != nil {
+		out["key"] = string(key)
+	}
+
+	if csrBytes != nil {
+		out["csr"] = string(csrBytes)
+	}
+
+	jsonOut, _ := json.Marshal(out)
+	fmt.Fprintln(w, string(jsonOut))
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/ekspand/trusty/cli"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/csr"
+	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/juju/errors"
@@ -124,7 +125,7 @@ func GenCert(c ctl.Control, p interface{}) error {
 	}
 
 	if *flags.Output == "" {
-		PrintCert(c.Writer(), key, csrPEM, certPEM)
+		print.CSRandCert(c.Writer(), key, csrPEM, certPEM)
 	} else {
 		err = SaveCert(*flags.Output, key, csrPEM, certPEM)
 		if err != nil {

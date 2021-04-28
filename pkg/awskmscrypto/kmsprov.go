@@ -247,21 +247,26 @@ func (p *Provider) EnumKeys(slotID uint, prefix string, keyInfoFunc func(id, lab
 
 	resp, err := p.kmsClient.ListKeys(opts)
 	if err != nil {
-		return errors.Annotatef(err, "failed to list keys, prefix=%q", prefix)
+		return errors.Trace(err)
 	}
 
 	keys := resp.Keys
 	for _, k := range keys {
+		ki, err := p.kmsClient.DescribeKey(&kms.DescribeKeyInput{KeyId: k.KeyId})
+		if err != nil {
+			return errors.Annotatef(err, "failed to describe key, id=%s", *k.KeyId)
+		}
+		if aws.StringValue(ki.KeyMetadata.KeyState) == "PendingDeletion" {
+			continue
+		}
 
-		// TODO: describe seems to be expensive for AWS KMS
-
-		err := keyInfoFunc(
+		err = keyInfoFunc(
 			aws.StringValue(k.KeyId),
-			aws.StringValue(k.KeyArn),
-			"",
-			"",
-			"",
-			nil,
+			aws.StringValue(ki.KeyMetadata.Description),
+			aws.StringValue(ki.KeyMetadata.KeyUsage),
+			aws.StringValue(ki.KeyMetadata.Origin),
+			aws.StringValue(ki.KeyMetadata.KeyState),
+			ki.KeyMetadata.CreationDate,
 		)
 		if err != nil {
 			return errors.Trace(err)
@@ -304,8 +309,8 @@ func (p *Provider) KeyInfo(slotID uint, keyID string, includePublic bool, keyInf
 		keyID,
 		aws.StringValue(resp.KeyMetadata.Description),
 		aws.StringValue(resp.KeyMetadata.KeyUsage),
-		"private",
-		aws.StringValue(resp.KeyMetadata.Arn),
+		aws.StringValue(resp.KeyMetadata.Origin),
+		aws.StringValue(resp.KeyMetadata.KeyState),
 		pubKey,
 		nil,
 	)

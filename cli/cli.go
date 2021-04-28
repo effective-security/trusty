@@ -167,6 +167,9 @@ func (cli *Cli) CryptoProv() (*cryptoprov.Crypto, cryptoprov.Provider) {
 	if cli == nil || cli.crypto == nil {
 		panic("use EnsureCryptoProvider() in App settings")
 	}
+	if cli.defaultCryptoProv == nil {
+		cli.defaultCryptoProv = cli.crypto.Default()
+	}
 	return cli.crypto, cli.defaultCryptoProv
 }
 
@@ -253,6 +256,11 @@ func (cli *Cli) EnsureCryptoProvider() error {
 // WithCryptoProvider sets custom Crypto Provider
 func (cli *Cli) WithCryptoProvider(crypto *cryptoprov.Crypto) {
 	cli.crypto = crypto
+	if crypto != nil {
+		cli.defaultCryptoProv = cli.crypto.Default()
+	} else {
+		cli.defaultCryptoProv = nil
+	}
 }
 
 // PopulateControl is a pre-action for kingpin library to populate the

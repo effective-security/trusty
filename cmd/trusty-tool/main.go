@@ -7,6 +7,7 @@ import (
 
 	"github.com/ekspand/trusty/cli"
 	"github.com/ekspand/trusty/cli/csr"
+	"github.com/ekspand/trusty/cli/hsm"
 	"github.com/ekspand/trusty/internal/version"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/xlog"
@@ -87,6 +88,43 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	genCertFlags.KeyLabel = cmdGenCertCSR.Flag("key-label", "label for generated key").String()
 	genCertFlags.SAN = cmdGenCertCSR.Flag("SAN", "coma separated list of SAN to be added to certificate").String()
 	genCertFlags.Output = cmdGenCertCSR.Flag("out", "specifies the optional prefix for output files").String()
+
+	// hsm slots|lskey|rmkey|genkey
+	cmdHsm := app.Command("hsm", "Perform HSM operations").
+		PreAction(cli.PopulateControl).
+		PreAction(cli.EnsureCryptoProvider)
+
+	cmdHsm.Command("slots", "Show available slots list").Action(cli.RegisterAction(hsm.Slots, nil))
+
+	hsmLsKeyFlags := new(hsm.LsKeyFlags)
+	cmdHsmKeys := cmdHsm.Command("lskey", "Show keys list").Action(cli.RegisterAction(hsm.Keys, hsmLsKeyFlags))
+	hsmLsKeyFlags.Token = cmdHsmKeys.Flag("token", "slot token").String()
+	hsmLsKeyFlags.Serial = cmdHsmKeys.Flag("serial", "slot serial").String()
+	hsmLsKeyFlags.Prefix = cmdHsmKeys.Flag("prefix", "key label prefix").String()
+
+	hsmRmKeyFlags := new(hsm.RmKeyFlags)
+	cmdRmKey := cmdHsm.Command("rmkey", "Destroy key").Action(cli.RegisterAction(hsm.RmKey, hsmRmKeyFlags))
+	hsmRmKeyFlags.Token = cmdRmKey.Flag("token", "slot token").String()
+	hsmRmKeyFlags.Serial = cmdRmKey.Flag("serial", "slot serial").String()
+	hsmRmKeyFlags.ID = cmdRmKey.Flag("id", "key ID").String()
+	hsmRmKeyFlags.Prefix = cmdRmKey.Flag("prefix", "remove keys based on the specified label prefix").String()
+	hsmRmKeyFlags.Force = cmdRmKey.Flag("force", "do not ask for confirmation to remove keys").Bool()
+
+	hsmKeyInfoFlags := new(hsm.KeyInfoFlags)
+	cmdKeyInfo := cmdHsm.Command("keyinfo", "Get key info").Action(cli.RegisterAction(hsm.KeyInfo, hsmKeyInfoFlags))
+	hsmKeyInfoFlags.Token = cmdKeyInfo.Flag("token", "slot token").String()
+	hsmKeyInfoFlags.Serial = cmdKeyInfo.Flag("serial", "slot serial").String()
+	hsmKeyInfoFlags.ID = cmdKeyInfo.Flag("id", "key ID").Required().String()
+	hsmKeyInfoFlags.Public = cmdKeyInfo.Flag("public", "include public key").Bool()
+
+	hsmGenKeyFlags := new(hsm.GenKeyFlags)
+	cmdHsmGenKey := cmdHsm.Command("genkey", "Generate key").Action(cli.RegisterAction(hsm.GenKey, hsmGenKeyFlags))
+	hsmGenKeyFlags.Purpose = cmdHsmGenKey.Flag("purpose", "Key purpose: signing|encryption").Required().String()
+	hsmGenKeyFlags.Algo = cmdHsmGenKey.Flag("alg", "Key algorithm: ECDSA|RSA").Required().String()
+	hsmGenKeyFlags.Size = cmdHsmGenKey.Flag("size", "Key size in bits").Required().Int()
+	hsmGenKeyFlags.Label = cmdHsmGenKey.Flag("label", "Label for generated key").String()
+	hsmGenKeyFlags.Output = cmdHsmGenKey.Flag("output", "Optional output file name").String()
+	hsmGenKeyFlags.Force = cmdHsmGenKey.Flag("force", "Override output file if exists").Bool()
 
 	cli.Parse(args)
 	return cli.ReturnCode()

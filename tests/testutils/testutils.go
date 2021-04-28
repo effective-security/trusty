@@ -2,18 +2,15 @@ package testutils
 
 import (
 	"fmt"
-	"math/rand"
-	"os"
 	"path/filepath"
 	"sync/atomic"
 
 	"github.com/ekspand/trusty/internal/config"
-	"github.com/go-phorce/dolly/algorithms/guid"
 )
 
 var (
-	nextPort    = 17891 + int32(rand.Intn(5000))
-	testDirPath = filepath.Join(os.TempDir(), "tests", "trusty", guid.MustCreate())
+	nextPort = int32(17891)
+	//testDirPath = filepath.Join(os.TempDir(), "tests", "trusty", guid.MustCreate())
 )
 
 // CreateURLs returns URL with a random port

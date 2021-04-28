@@ -2,12 +2,11 @@ package csr
 
 import (
 	"encoding/json"
-	"fmt"
-	"io"
 	"io/ioutil"
 
 	"github.com/ekspand/trusty/cli"
 	"github.com/ekspand/trusty/pkg/csr"
+	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/juju/errors"
 )
@@ -56,7 +55,7 @@ func Create(c ctl.Control, p interface{}) error {
 	}
 
 	if *flags.Output == "" {
-		PrintCert(c.Writer(), key, csrPEM, nil)
+		print.CSRandCert(c.Writer(), key, csrPEM, nil)
 	} else {
 		err = SaveCert(*flags.Output, key, csrPEM, nil)
 		if err != nil {
@@ -65,26 +64,6 @@ func Create(c ctl.Control, p interface{}) error {
 	}
 
 	return nil
-}
-
-// PrintCert outputs a cert, key and csr
-// TODO: v1.BasicCertResponse
-func PrintCert(w io.Writer, key, csrBytes, cert []byte) {
-	out := map[string]string{}
-	if cert != nil {
-		out["cert"] = string(cert)
-	}
-
-	if key != nil {
-		out["key"] = string(key)
-	}
-
-	if csrBytes != nil {
-		out["csr"] = string(csrBytes)
-	}
-
-	jsonOut, _ := json.Marshal(out)
-	fmt.Fprintln(w, string(jsonOut))
 }
 
 // SaveCert to file
