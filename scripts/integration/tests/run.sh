@@ -25,5 +25,8 @@ echo "*** Running trusty intergation tests using flags: $TRUSTYCTL_FLAGS"
 echo "*** trusty: status test"
 source /opt/trusty/tests/test_status.sh || (echo "status test failed" && exit 1)
 
+echo "*** trusty: CIS test"
+source /opt/trusty/tests/test_cis.sh || (echo "CIS test failed" && exit 1)
+
 echo "*** trusty intergation tests succeeded"
 

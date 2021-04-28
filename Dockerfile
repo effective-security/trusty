@@ -1,19 +1,9 @@
-FROM centos:7
+FROM ghcr.io/ekspand/trusty-docker-base:latest
 LABEL org.opencontainers.image.source https://github.com/ekspand/trusty
 
 ENV TRUSTY_DIR=/opt/trusty
 ENV PATH=$PATH:/opt/trusty/bin
 RUN mkdir -p $TRUSTY_DIR/install
-
-RUN yum install -y https://yum.postgresql.org/11/redhat/rhel-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-
-RUN yum update -y && \
-    yum install -y ca-certificates \
-        which \
-        opensc \
-        softhsm \
-        postgresql11 \
-        libtool-ltdl-devel
 
 ADD ./.rpm/dist/*_docker-el7.x86_64.rpm $TRUSTY_DIR/install/
 RUN yum -y localinstall $(find $TRUSTY_DIR/install -name "*.rpm" | head -n 1)
