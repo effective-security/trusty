@@ -1,6 +1,6 @@
 name: Build
 
-on: [pull_request]
+on: [push,pull_request]
 
 jobs:
 
@@ -24,7 +24,7 @@ jobs:
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     env:
-      ITEST_IMAGE_TAG: rc-${{ github.event.number }}
+      ITEST_IMAGE_TAG: ${{github.event_name}}-${{ github.event.number }}
 
     steps:
     - name: Install Go
