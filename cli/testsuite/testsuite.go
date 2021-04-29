@@ -129,7 +129,7 @@ func (s *Suite) SetupSuite() {
 		ops = append(ops, cli.WithServer(""))
 	}
 	if s.withHSM {
-		ops = append(ops, cli.WithHsmCfg())
+		ops = append(ops, cli.WithHsmCfg(), cli.WithPlainKey())
 	}
 
 	if s.withFileServer {
