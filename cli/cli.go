@@ -74,6 +74,13 @@ func WithHsmCfg() Option {
 	return optionFunc(func(c *Cli) {
 		app := c.App()
 		c.flags.hsmConfig = app.Flag("hsm-cfg", "HSM provider configuration file").String()
+	})
+}
+
+// WithPlainKey specifies to enable --plain-key flag
+func WithPlainKey() Option {
+	return optionFunc(func(c *Cli) {
+		app := c.App()
 		c.flags.plainKey = app.Flag("plain-key", "generate plain-text key, not in HSM").Bool()
 	})
 }

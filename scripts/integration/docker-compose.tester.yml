@@ -182,6 +182,11 @@ services:
     links:
       - trusty-node1
       - trusty-node2
+    environment:
+      - AWS_ACCESS_KEY_ID=notusedbyemulator
+      - AWS_SECRET_ACCESS_KEY=notusedbyemulator
+      - AWS_DEFAULT_REGION=us-west-2
+      - TRUSTY_GITHUB_CLIENT_SECRET=not_used_in_test
     entrypoint:
       - /bin/bash
       - -c

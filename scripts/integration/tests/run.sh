@@ -22,8 +22,14 @@ ls /etc/pki/ca-trust/source/anchors/
 
 echo "*** Running trusty intergation tests using flags: $TRUSTYCTL_FLAGS"
 
+echo "*** trusty: tools test"
+source /opt/trusty/tests/test_tools.sh || (echo "tools test failed" && exit 1)
+
 echo "*** trusty: status test"
 source /opt/trusty/tests/test_status.sh || (echo "status test failed" && exit 1)
+
+echo "*** trusty: CA test"
+source /opt/trusty/tests/test_ca.sh || (echo "CA test failed" && exit 1)
 
 echo "*** trusty: CIS test"
 source /opt/trusty/tests/test_cis.sh || (echo "CIS test failed" && exit 1)

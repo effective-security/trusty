@@ -258,7 +258,7 @@ func TestCLIWithHsmCfg(t *testing.T) {
 		App:       app,
 		Output:    out,
 		ErrOutput: out,
-	}, cli.WithHsmCfg(), cli.WithServer(""))
+	}, cli.WithHsmCfg(), cli.WithPlainKey(), cli.WithServer(""))
 	cli.WithErrWriter(out)
 	defer cli.Close()
 
@@ -270,7 +270,7 @@ func TestCLIWithHsmCfg(t *testing.T) {
 		Action(cli.RegisterAction(cmdClientAction, nil))
 	out.Reset()
 
-	cli.Parse([]string{"cliapp", "-D", "-V", "--timeout", "0", "-s", "localhost", "cmd", "client", "--hsm-cfg", "/tmp/trusty/softhsm/unittest_hsm.json"})
+	cli.Parse([]string{"cliapp", "-D", "-V", "--timeout", "0", "-s", "localhost", "cmd", "client", "--plain-key", "--hsm-cfg", "/tmp/trusty/softhsm/unittest_hsm.json"})
 
 	cli.WithCryptoProvider(nil)
 	err := cli.EnsureCryptoProvider()
@@ -297,7 +297,7 @@ func TestCLIWithHsmAndPlainText(t *testing.T) {
 		App:       app,
 		Output:    out,
 		ErrOutput: out,
-	}, cli.WithHsmCfg(), cli.WithServer(""))
+	}, cli.WithHsmCfg(), cli.WithPlainKey(), cli.WithServer(""))
 	cli.WithErrWriter(out)
 	defer cli.Close()
 

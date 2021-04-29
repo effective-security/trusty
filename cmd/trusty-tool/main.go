@@ -41,7 +41,7 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 			App:    app,
 			Output: out,
 		},
-		cli.WithHsmCfg(),
+		cli.WithHsmCfg(), cli.WithPlainKey(),
 	)
 	defer cli.Close()
 
