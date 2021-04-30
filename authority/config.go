@@ -68,6 +68,15 @@ type CertProfile struct {
 	AllowedEmailRegex *regexp.Regexp `json:"-"`
 }
 
+// AllowedExtensionsStrings returns slice of strings
+func (p *CertProfile) AllowedExtensionsStrings() []string {
+	list := make([]string, len(p.AllowedExtensions))
+	for i, o := range p.AllowedExtensions {
+		list[i] = o.String()
+	}
+	return list
+}
+
 // Config provides configuration for Certification Authority
 type Config struct {
 	// AiaURL specifies a template for AIA URL.

@@ -58,7 +58,14 @@ func NewAuthority(cfg *config.Authority, crypto *cryptoprov.Crypto) (*Authority,
 			issuer.ocspExpiry = ocspNextUpdate
 		}
 		ca.issuers[isscfg.Label] = issuer
-		// TODO: profiles => issuerByProfile
+
+		for profile := range cacfg.Profiles {
+			if is := ca.issuersByProfile[profile]; is != nil {
+				return nil, errors.Errorf("profile %q is already registered by %q issuer", profile, is.Label())
+			}
+			ca.issuersByProfile[profile] = issuer
+		}
+
 	}
 
 	return ca, nil
@@ -71,6 +78,15 @@ func (s *Authority) GetIssuerByLabel(label string) (*Issuer, error) {
 		return issuer, nil
 	}
 	return nil, errors.Errorf("issuer not found: %s", label)
+}
+
+// GetIssuerByProfile by profile
+func (s *Authority) GetIssuerByProfile(profile string) (*Issuer, error) {
+	issuer, ok := s.issuersByProfile[profile]
+	if ok {
+		return issuer, nil
+	}
+	return nil, errors.Errorf("issuer not found for profile: %s", profile)
 }
 
 // Issuers returns a list of issuers

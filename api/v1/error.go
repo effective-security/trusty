@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"fmt"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -9,10 +11,12 @@ import (
 var (
 	ErrGRPCTimeout          = status.New(codes.Unavailable, "trustyserver: request timed out").Err()
 	ErrGRPCPermissionDenied = status.New(codes.PermissionDenied, "trustyserver: permission denied").Err()
+	ErrGRPCInvalidArgument  = status.New(codes.InvalidArgument, "trustyserver: invalid argument").Err()
 
 	errStringToError = map[string]error{
 		ErrorDesc(ErrGRPCTimeout):          ErrGRPCTimeout,
 		ErrorDesc(ErrGRPCPermissionDenied): ErrGRPCPermissionDenied,
+		ErrorDesc(ErrGRPCInvalidArgument):  ErrGRPCInvalidArgument,
 	}
 )
 
@@ -20,6 +24,7 @@ var (
 var (
 	ErrTimeout          = Error(ErrGRPCTimeout)
 	ErrPermissionDenied = Error(ErrGRPCPermissionDenied)
+	ErrInvalidArgument  = Error(ErrGRPCInvalidArgument)
 )
 
 // TrustyError defines gRPC server errors.
@@ -64,4 +69,12 @@ func ErrorDesc(err error) string {
 		return s.Message()
 	}
 	return err.Error()
+}
+
+// NewError returns new TrustyError
+func NewError(code codes.Code, msgFormat string, vals ...interface{}) error {
+	return TrustyError{
+		code: code,
+		desc: fmt.Sprintf(msgFormat, vals...),
+	}
 }

@@ -108,6 +108,11 @@ func (ca *Issuer) OcspExpiry() time.Duration {
 	return ca.ocspExpiry
 }
 
+// Profile returns CertProfile
+func (ca *Issuer) Profile(name string) *CertProfile {
+	return ca.cfg.Profiles[name]
+}
+
 // NewIssuer creates Issuer from provided configuration
 func NewIssuer(cfg *config.Issuer, caCfg *Config, prov *cryptoprov.Crypto) (*Issuer, error) {
 	// ensure that signer can be created before the key is generated

@@ -256,21 +256,303 @@ func (m *CertProfileInfoRequest) GetProfile() string {
 	return ""
 }
 
-// CertProfileInfo is the response for an Profile Info API request
-type CertProfileInfo struct {
-	Issuer               string   `protobuf:"bytes,1,opt,name=issuer,proto3" json:"issuer,omitempty"`
-	Usage                []string `protobuf:"bytes,2,rep,name=usage,proto3" json:"usage,omitempty"`
-	Expiry               string   `protobuf:"bytes,3,opt,name=expiry,proto3" json:"expiry,omitempty"`
+// CAConstraint specifies various CA constraints on the signed certificate.
+// CAConstraint would verify against (and override) the CA
+// extensions in the given CSR.
+type CAConstraint struct {
+	IsCa                 bool     `protobuf:"varint,1,opt,name=is_ca,json=isCa,proto3" json:"is_ca,omitempty"`
+	MaxPathLen           int32    `protobuf:"varint,2,opt,name=max_path_len,json=maxPathLen,proto3" json:"max_path_len,omitempty"`
+	MaxPathLenZero       int32    `protobuf:"varint,3,opt,name=max_path_len_zero,json=maxPathLenZero,proto3" json:"max_path_len_zero,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *CAConstraint) Reset()         { *m = CAConstraint{} }
+func (m *CAConstraint) String() string { return proto.CompactTextString(m) }
+func (*CAConstraint) ProtoMessage()    {}
+func (*CAConstraint) Descriptor() ([]byte, []int) {
+	return fileDescriptor_b687f69c61c1b2df, []int{3}
+}
+func (m *CAConstraint) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CAConstraint) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_CAConstraint.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *CAConstraint) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CAConstraint.Merge(m, src)
+}
+func (m *CAConstraint) XXX_Size() int {
+	return m.Size()
+}
+func (m *CAConstraint) XXX_DiscardUnknown() {
+	xxx_messageInfo_CAConstraint.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CAConstraint proto.InternalMessageInfo
+
+func (m *CAConstraint) GetIsCa() bool {
+	if m != nil {
+		return m.IsCa
+	}
+	return false
+}
+
+func (m *CAConstraint) GetMaxPathLen() int32 {
+	if m != nil {
+		return m.MaxPathLen
+	}
+	return 0
+}
+
+func (m *CAConstraint) GetMaxPathLenZero() int32 {
+	if m != nil {
+		return m.MaxPathLenZero
+	}
+	return 0
+}
+
+type CSRAllowedFields struct {
+	Subject              bool     `protobuf:"varint,1,opt,name=subject,proto3" json:"subject,omitempty"`
+	Dns                  bool     `protobuf:"varint,2,opt,name=dns,proto3" json:"dns,omitempty"`
+	Ip                   bool     `protobuf:"varint,3,opt,name=ip,proto3" json:"ip,omitempty"`
+	Email                bool     `protobuf:"varint,4,opt,name=email,proto3" json:"email,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *CSRAllowedFields) Reset()         { *m = CSRAllowedFields{} }
+func (m *CSRAllowedFields) String() string { return proto.CompactTextString(m) }
+func (*CSRAllowedFields) ProtoMessage()    {}
+func (*CSRAllowedFields) Descriptor() ([]byte, []int) {
+	return fileDescriptor_b687f69c61c1b2df, []int{4}
+}
+func (m *CSRAllowedFields) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CSRAllowedFields) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_CSRAllowedFields.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *CSRAllowedFields) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CSRAllowedFields.Merge(m, src)
+}
+func (m *CSRAllowedFields) XXX_Size() int {
+	return m.Size()
+}
+func (m *CSRAllowedFields) XXX_DiscardUnknown() {
+	xxx_messageInfo_CSRAllowedFields.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CSRAllowedFields proto.InternalMessageInfo
+
+func (m *CSRAllowedFields) GetSubject() bool {
+	if m != nil {
+		return m.Subject
+	}
+	return false
+}
+
+func (m *CSRAllowedFields) GetDns() bool {
+	if m != nil {
+		return m.Dns
+	}
+	return false
+}
+
+func (m *CSRAllowedFields) GetIp() bool {
+	if m != nil {
+		return m.Ip
+	}
+	return false
+}
+
+func (m *CSRAllowedFields) GetEmail() bool {
+	if m != nil {
+		return m.Email
+	}
+	return false
+}
+
+// CertProfile provides certificate profile
+type CertProfile struct {
+	Description string `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
+	// Usage provides a list key usages
+	Usages            []string      `protobuf:"bytes,2,rep,name=usages,proto3" json:"usages,omitempty"`
+	CAConstraint      *CAConstraint `protobuf:"bytes,3,opt,name=ca_constraint,json=caConstraint,proto3" json:"ca_constraint,omitempty"`
+	OCSPNoCheck       bool          `protobuf:"varint,4,opt,name=ocsp_no_check,json=ocspNoCheck,proto3" json:"ocsp_no_check,omitempty"`
+	Expiry            string        `protobuf:"bytes,5,opt,name=expiry,proto3" json:"expiry,omitempty"`
+	Backdate          string        `protobuf:"bytes,6,opt,name=backdate,proto3" json:"backdate,omitempty"`
+	AllowedExtensions []string      `protobuf:"bytes,7,rep,name=allowed_extensions,json=allowedExtensions,proto3" json:"allowed_extensions,omitempty"`
+	// AllowedCommonNames specifies a RegExp to check for allowed names.
+	// If not provided, then all names are allowed
+	AllowedCommonNames string `protobuf:"bytes,8,opt,name=allowed_names,json=allowedNames,proto3" json:"allowed_names,omitempty"`
+	// AllowedDNS specifies a RegExp to check for allowed DNS.
+	// If not provided, then all names are allowed
+	AllowedDns string `protobuf:"bytes,9,opt,name=allowed_dns,json=allowedDns,proto3" json:"allowed_dns,omitempty"`
+	// AllowedEmail specifies a RegExp to check for allowed email.
+	// If not provided, then all names are allowed
+	AllowedEmail string `protobuf:"bytes,10,opt,name=allowed_email,json=allowedEmail,proto3" json:"allowed_email,omitempty"`
+	// AllowedFields provides booleans for fields in the CSR.
+	// If a AllowedFields is not present in a CertProfile,
+	// all of these fields may be copied from the CSR into the signed certificate.
+	// If a AllowedFields *is* present in a CertProfile,
+	// only those fields with a `true` value in the AllowedFields may
+	// be copied from the CSR to the signed certificate.
+	// Note that some of these fields, like Subject, can be provided or
+	// partially provided through the API.
+	// Since API clients are expected to be trusted, but CSRs are not, fields
+	// provided through the API are not subject to validation through this
+	// mechanism.
+	AllowedFields        *CSRAllowedFields `protobuf:"bytes,11,opt,name=allowed_fields,json=allowedFields,proto3" json:"allowed_fields,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
+}
+
+func (m *CertProfile) Reset()         { *m = CertProfile{} }
+func (m *CertProfile) String() string { return proto.CompactTextString(m) }
+func (*CertProfile) ProtoMessage()    {}
+func (*CertProfile) Descriptor() ([]byte, []int) {
+	return fileDescriptor_b687f69c61c1b2df, []int{5}
+}
+func (m *CertProfile) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CertProfile) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_CertProfile.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *CertProfile) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CertProfile.Merge(m, src)
+}
+func (m *CertProfile) XXX_Size() int {
+	return m.Size()
+}
+func (m *CertProfile) XXX_DiscardUnknown() {
+	xxx_messageInfo_CertProfile.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CertProfile proto.InternalMessageInfo
+
+func (m *CertProfile) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *CertProfile) GetUsages() []string {
+	if m != nil {
+		return m.Usages
+	}
+	return nil
+}
+
+func (m *CertProfile) GetCAConstraint() *CAConstraint {
+	if m != nil {
+		return m.CAConstraint
+	}
+	return nil
+}
+
+func (m *CertProfile) GetOCSPNoCheck() bool {
+	if m != nil {
+		return m.OCSPNoCheck
+	}
+	return false
+}
+
+func (m *CertProfile) GetExpiry() string {
+	if m != nil {
+		return m.Expiry
+	}
+	return ""
+}
+
+func (m *CertProfile) GetBackdate() string {
+	if m != nil {
+		return m.Backdate
+	}
+	return ""
+}
+
+func (m *CertProfile) GetAllowedExtensions() []string {
+	if m != nil {
+		return m.AllowedExtensions
+	}
+	return nil
+}
+
+func (m *CertProfile) GetAllowedCommonNames() string {
+	if m != nil {
+		return m.AllowedCommonNames
+	}
+	return ""
+}
+
+func (m *CertProfile) GetAllowedDns() string {
+	if m != nil {
+		return m.AllowedDns
+	}
+	return ""
+}
+
+func (m *CertProfile) GetAllowedEmail() string {
+	if m != nil {
+		return m.AllowedEmail
+	}
+	return ""
+}
+
+func (m *CertProfile) GetAllowedFields() *CSRAllowedFields {
+	if m != nil {
+		return m.AllowedFields
+	}
+	return nil
+}
+
+// CertProfileInfo is the response for an Profile Info API request
+type CertProfileInfo struct {
+	Issuer               string       `protobuf:"bytes,1,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	Profile              *CertProfile `protobuf:"bytes,3,opt,name=profile,proto3" json:"profile,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
+	XXX_unrecognized     []byte       `json:"-"`
+	XXX_sizecache        int32        `json:"-"`
 }
 
 func (m *CertProfileInfo) Reset()         { *m = CertProfileInfo{} }
 func (m *CertProfileInfo) String() string { return proto.CompactTextString(m) }
 func (*CertProfileInfo) ProtoMessage()    {}
 func (*CertProfileInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_b687f69c61c1b2df, []int{3}
+	return fileDescriptor_b687f69c61c1b2df, []int{6}
 }
 func (m *CertProfileInfo) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -306,18 +588,11 @@ func (m *CertProfileInfo) GetIssuer() string {
 	return ""
 }
 
-func (m *CertProfileInfo) GetUsage() []string {
+func (m *CertProfileInfo) GetProfile() *CertProfile {
 	if m != nil {
-		return m.Usage
+		return m.Profile
 	}
 	return nil
-}
-
-func (m *CertProfileInfo) GetExpiry() string {
-	if m != nil {
-		return m.Expiry
-	}
-	return ""
 }
 
 // CertificateBundle provides certificate and its issuers
@@ -337,7 +612,7 @@ func (m *CertificateBundle) Reset()         { *m = CertificateBundle{} }
 func (m *CertificateBundle) String() string { return proto.CompactTextString(m) }
 func (*CertificateBundle) ProtoMessage()    {}
 func (*CertificateBundle) Descriptor() ([]byte, []int) {
-	return fileDescriptor_b687f69c61c1b2df, []int{4}
+	return fileDescriptor_b687f69c61c1b2df, []int{7}
 }
 func (m *CertificateBundle) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -406,7 +681,7 @@ func (m *IssuerInfo) Reset()         { *m = IssuerInfo{} }
 func (m *IssuerInfo) String() string { return proto.CompactTextString(m) }
 func (*IssuerInfo) ProtoMessage()    {}
 func (*IssuerInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_b687f69c61c1b2df, []int{5}
+	return fileDescriptor_b687f69c61c1b2df, []int{8}
 }
 func (m *IssuerInfo) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -475,7 +750,7 @@ func (m *IssuersInfoResponse) Reset()         { *m = IssuersInfoResponse{} }
 func (m *IssuersInfoResponse) String() string { return proto.CompactTextString(m) }
 func (*IssuersInfoResponse) ProtoMessage()    {}
 func (*IssuersInfoResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_b687f69c61c1b2df, []int{6}
+	return fileDescriptor_b687f69c61c1b2df, []int{9}
 }
 func (m *IssuersInfoResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -534,7 +809,7 @@ func (m *CreateCertificateRequest) Reset()         { *m = CreateCertificateReque
 func (m *CreateCertificateRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateCertificateRequest) ProtoMessage()    {}
 func (*CreateCertificateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_b687f69c61c1b2df, []int{7}
+	return fileDescriptor_b687f69c61c1b2df, []int{10}
 }
 func (m *CreateCertificateRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -610,6 +885,9 @@ func init() {
 	proto.RegisterType((*X509Name)(nil), "trustypb.X509Name")
 	proto.RegisterType((*X509Subject)(nil), "trustypb.X509Subject")
 	proto.RegisterType((*CertProfileInfoRequest)(nil), "trustypb.CertProfileInfoRequest")
+	proto.RegisterType((*CAConstraint)(nil), "trustypb.CAConstraint")
+	proto.RegisterType((*CSRAllowedFields)(nil), "trustypb.CSRAllowedFields")
+	proto.RegisterType((*CertProfile)(nil), "trustypb.CertProfile")
 	proto.RegisterType((*CertProfileInfo)(nil), "trustypb.CertProfileInfo")
 	proto.RegisterType((*CertificateBundle)(nil), "trustypb.CertificateBundle")
 	proto.RegisterType((*IssuerInfo)(nil), "trustypb.IssuerInfo")
@@ -620,53 +898,73 @@ func init() {
 func init() { proto.RegisterFile("pkix.proto", fileDescriptor_b687f69c61c1b2df) }
 
 var fileDescriptor_b687f69c61c1b2df = []byte{
-	// 722 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x54, 0xc1, 0x6e, 0xd3, 0x48,
-	0x18, 0xae, 0x93, 0xa6, 0x49, 0xfe, 0xb4, 0xd9, 0x74, 0x1a, 0x65, 0xdd, 0xec, 0x6e, 0x9a, 0xf5,
-	0xee, 0xa1, 0x5a, 0x69, 0xe3, 0xdd, 0x22, 0x84, 0x38, 0x21, 0x5a, 0x82, 0xa8, 0x80, 0xaa, 0x72,
-	0x85, 0xe8, 0x2d, 0x9a, 0xb8, 0x93, 0x74, 0xa8, 0x33, 0x63, 0x66, 0xc6, 0xa5, 0xb9, 0x70, 0xe0,
-	0x15, 0xb8, 0xf0, 0x0e, 0xbc, 0x08, 0xe2, 0x84, 0xc4, 0x0b, 0xa0, 0xc2, 0x85, 0xb7, 0x40, 0x9e,
-	0x19, 0x13, 0xbb, 0xa2, 0x47, 0x6e, 0xf3, 0x7d, 0xf3, 0xeb, 0xfb, 0xff, 0xf9, 0xfe, 0xcf, 0x06,
-	0x88, 0xcf, 0xe8, 0xc5, 0x20, 0x16, 0x5c, 0x71, 0x54, 0x53, 0x22, 0x91, 0x6a, 0x1e, 0x8f, 0xbb,
-	0x75, 0x11, 0x87, 0x86, 0xec, 0xb6, 0xa7, 0x7c, 0xca, 0xf5, 0xd1, 0x4f, 0x4f, 0x96, 0xfd, 0x7d,
-	0xca, 0xf9, 0x34, 0x22, 0x3e, 0x8e, 0xa9, 0x8f, 0x19, 0xe3, 0x0a, 0x2b, 0xca, 0x99, 0x34, 0xb7,
-	0xde, 0x5b, 0x07, 0x6a, 0xc7, 0x37, 0xff, 0xbb, 0x7d, 0x80, 0x67, 0x04, 0xb9, 0x50, 0x0d, 0x79,
-	0xc2, 0x94, 0x98, 0xbb, 0x4e, 0xdf, 0xd9, 0xae, 0x07, 0x19, 0x44, 0x6d, 0xa8, 0x48, 0x85, 0x15,
-	0x71, 0x4b, 0x9a, 0x37, 0x00, 0x75, 0xa1, 0x16, 0xf1, 0x10, 0x47, 0x54, 0xcd, 0xdd, 0xb2, 0xbe,
-	0xf8, 0x8e, 0x91, 0x07, 0xab, 0x5c, 0x4c, 0x31, 0xa3, 0x52, 0xf7, 0x73, 0x97, 0xf5, 0x7d, 0x81,
-	0x43, 0x3e, 0x6c, 0xe4, 0x31, 0x8e, 0x46, 0x09, 0xa3, 0xca, 0xad, 0xe8, 0x52, 0x54, 0xbc, 0x7a,
-	0xc2, 0xa8, 0xf2, 0x22, 0x68, 0xa4, 0xc3, 0x1e, 0x25, 0xe3, 0x67, 0x24, 0x54, 0xa8, 0x09, 0xa5,
-	0x90, 0xd9, 0x51, 0x4b, 0x21, 0x43, 0xdb, 0x50, 0x61, 0x78, 0x46, 0xa4, 0x5b, 0xea, 0x97, 0xb7,
-	0x1b, 0x3b, 0x68, 0x90, 0xb9, 0x34, 0xc8, 0x9e, 0x18, 0x98, 0x02, 0xf4, 0x17, 0xac, 0x49, 0x22,
-	0x28, 0x8e, 0x46, 0x2c, 0x99, 0x8d, 0x89, 0xb0, 0xe3, 0xaf, 0x1a, 0xf2, 0x40, 0x73, 0xde, 0x03,
-	0xe8, 0xec, 0x11, 0xa1, 0x0e, 0x05, 0x9f, 0xd0, 0x88, 0xec, 0xb3, 0x09, 0x0f, 0xc8, 0xf3, 0x84,
-	0x48, 0x95, 0xda, 0x11, 0xe1, 0x31, 0x89, 0x6c, 0x6f, 0x03, 0x52, 0xfb, 0x62, 0x53, 0x6b, 0x6d,
-	0xca, 0xa0, 0xf7, 0x14, 0x7e, 0xb9, 0xa2, 0x84, 0x3a, 0xb0, 0x42, 0xa5, 0x4c, 0x88, 0xb0, 0x1a,
-	0x16, 0xa5, 0xd2, 0x89, 0xc4, 0x53, 0xa2, 0xdf, 0x50, 0x0f, 0x0c, 0x48, 0xab, 0xc9, 0x45, 0x4c,
-	0x45, 0xe6, 0xb3, 0x45, 0x1e, 0x87, 0xf5, 0x54, 0x98, 0x4e, 0x68, 0x88, 0x15, 0xd9, 0x4d, 0xd8,
-	0x49, 0x44, 0x50, 0x1f, 0x1a, 0xe1, 0x82, 0xb4, 0xfa, 0x79, 0x0a, 0xfd, 0x0d, 0x6b, 0x94, 0x29,
-	0x22, 0x66, 0xe4, 0x84, 0x62, 0xa5, 0x0d, 0x4b, 0x6b, 0x8a, 0x24, 0x42, 0xb0, 0x2c, 0x38, 0x57,
-	0xb6, 0xa5, 0x3e, 0x7b, 0x2f, 0x01, 0xf6, 0xf5, 0xa0, 0xfa, 0x11, 0x3f, 0xb1, 0xd3, 0xc2, 0xe3,
-	0xe5, 0x9c, 0xc7, 0xde, 0x10, 0x36, 0x4c, 0x7f, 0x69, 0xf6, 0x21, 0x63, 0xce, 0x24, 0x41, 0x03,
-	0xa8, 0x1a, 0xff, 0xa4, 0xeb, 0xe8, 0xdd, 0xb7, 0x17, 0xbb, 0x5f, 0xcc, 0x1b, 0x64, 0x45, 0xde,
-	0x57, 0x07, 0xdc, 0x3d, 0x41, 0xb0, 0x22, 0x39, 0xfb, 0xb2, 0xed, 0xde, 0x81, 0xa6, 0x30, 0xc7,
-	0xd1, 0x84, 0x8b, 0x19, 0x56, 0xfa, 0x61, 0xcd, 0x1d, 0x77, 0xa1, 0x39, 0x64, 0x21, 0x3f, 0xa1,
-	0x6c, 0x7a, 0x5f, 0xdf, 0x07, 0x6b, 0xb6, 0xde, 0xc0, 0x34, 0x08, 0x96, 0xc8, 0x82, 0x60, 0x61,
-	0x3e, 0x22, 0xe5, 0x42, 0x44, 0xd0, 0x9f, 0xb0, 0x6a, 0x86, 0x1b, 0xe5, 0x5f, 0xdd, 0x30, 0xdc,
-	0x23, 0x9d, 0xaf, 0x2d, 0x68, 0xbc, 0xa0, 0xea, 0x74, 0x34, 0xd6, 0x6b, 0xd6, 0x9f, 0x49, 0x2d,
-	0x80, 0x94, 0xb2, 0x8b, 0x6f, 0x43, 0x45, 0xf1, 0x33, 0xc2, 0xdc, 0x15, 0x63, 0x99, 0x06, 0xff,
-	0xfc, 0x0b, 0xcd, 0xe2, 0xb8, 0xa8, 0x0a, 0xe5, 0xc3, 0xe1, 0xe3, 0xd6, 0x52, 0x7a, 0xb8, 0x37,
-	0x0c, 0x5a, 0x0e, 0xaa, 0x43, 0xe5, 0xf0, 0xe1, 0xde, 0xd1, 0xad, 0x56, 0x69, 0xe7, 0x7d, 0x09,
-	0x5a, 0x77, 0x13, 0x75, 0xca, 0x05, 0x55, 0xf3, 0x23, 0x22, 0xce, 0x69, 0x48, 0xd0, 0x19, 0x34,
-	0xf2, 0xe1, 0xed, 0x2f, 0x9c, 0xf8, 0xf1, 0x17, 0xd2, 0xdd, 0xbc, 0xb6, 0xc2, 0xdb, 0x7a, 0xf5,
-	0xf1, 0xcb, 0xeb, 0xd2, 0xa6, 0xf7, 0xab, 0x7f, 0xfe, 0xbf, 0x1f, 0x62, 0x3f, 0x94, 0xc2, 0xb7,
-	0x2e, 0x8c, 0x68, 0xaa, 0x9e, 0x86, 0xfa, 0xea, 0x6e, 0x90, 0x97, 0x13, 0xbc, 0x66, 0x71, 0xdd,
-	0xdf, 0x8a, 0x4d, 0x0b, 0x5f, 0x85, 0xb7, 0xa9, 0xdb, 0x6e, 0x78, 0xeb, 0xb9, 0xb6, 0xa1, 0x56,
-	0x42, 0xc7, 0x50, 0xb5, 0xa1, 0x42, 0x9d, 0xdc, 0x8e, 0x67, 0xb1, 0x9a, 0x67, 0xd2, 0x7f, 0x5c,
-	0xcd, 0x53, 0x21, 0x7f, 0x5e, 0x47, 0x8b, 0xb7, 0x50, 0xd3, 0x8a, 0xdb, 0x9c, 0xed, 0xb6, 0xde,
-	0x5d, 0xf6, 0x9c, 0x0f, 0x97, 0x3d, 0xe7, 0xd3, 0x65, 0xcf, 0x79, 0xf3, 0xb9, 0xb7, 0x34, 0x5e,
-	0xd1, 0xff, 0xdd, 0x1b, 0xdf, 0x02, 0x00, 0x00, 0xff, 0xff, 0x17, 0xf4, 0x36, 0xaf, 0xce, 0x05,
-	0x00, 0x00,
+	// 1054 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x56, 0xcf, 0x6e, 0x23, 0xc5,
+	0x13, 0x5e, 0xdb, 0x71, 0xe2, 0xd4, 0xd8, 0x5e, 0xa7, 0x93, 0x5f, 0x7e, 0x13, 0x03, 0x71, 0x18,
+	0x38, 0x04, 0xa4, 0x8d, 0x21, 0x2b, 0x84, 0x10, 0x07, 0x94, 0x78, 0xbd, 0x62, 0xc5, 0x6e, 0x88,
+	0x26, 0x42, 0x5a, 0xed, 0x65, 0xd4, 0x6e, 0x77, 0x9c, 0x26, 0x33, 0xdd, 0x43, 0x77, 0x7b, 0xd7,
+	0xe6, 0xc0, 0x81, 0x57, 0xe0, 0xc2, 0x3b, 0xf0, 0x22, 0x88, 0x13, 0x12, 0xf7, 0x08, 0x19, 0x2e,
+	0xdc, 0x79, 0x00, 0xd4, 0x7f, 0x26, 0x1e, 0x47, 0xec, 0x91, 0x5b, 0x7f, 0x5f, 0x97, 0xab, 0x6a,
+	0xbe, 0xfa, 0xba, 0x64, 0x80, 0xfc, 0x9a, 0xcd, 0x8e, 0x72, 0x29, 0xb4, 0x40, 0x0d, 0x2d, 0xa7,
+	0x4a, 0xcf, 0xf3, 0x51, 0x77, 0x53, 0xe6, 0xc4, 0x91, 0xdd, 0x9d, 0x89, 0x98, 0x08, 0x7b, 0xec,
+	0x9b, 0x93, 0x67, 0xdf, 0x9c, 0x08, 0x31, 0x49, 0x69, 0x1f, 0xe7, 0xac, 0x8f, 0x39, 0x17, 0x1a,
+	0x6b, 0x26, 0xb8, 0x72, 0xb7, 0xd1, 0x4f, 0x15, 0x68, 0x3c, 0xff, 0xe8, 0x83, 0x4f, 0xce, 0x70,
+	0x46, 0x51, 0x08, 0x1b, 0x44, 0x4c, 0xb9, 0x96, 0xf3, 0xb0, 0x72, 0x50, 0x39, 0xdc, 0x8c, 0x0b,
+	0x88, 0x76, 0xa0, 0xae, 0x34, 0xd6, 0x34, 0xac, 0x5a, 0xde, 0x01, 0xd4, 0x85, 0x46, 0x2a, 0x08,
+	0x4e, 0x99, 0x9e, 0x87, 0x35, 0x7b, 0x71, 0x8b, 0x51, 0x04, 0x4d, 0x21, 0x27, 0x98, 0x33, 0x65,
+	0xeb, 0x85, 0x6b, 0xf6, 0x7e, 0x85, 0x43, 0x7d, 0xd8, 0x2e, 0x63, 0x9c, 0x26, 0x53, 0xce, 0x74,
+	0x58, 0xb7, 0xa1, 0x68, 0xf5, 0xea, 0x2b, 0xce, 0x74, 0x94, 0x42, 0x60, 0x9a, 0xbd, 0x98, 0x8e,
+	0xbe, 0xa6, 0x44, 0xa3, 0x36, 0x54, 0x09, 0xf7, 0xad, 0x56, 0x09, 0x47, 0x87, 0x50, 0xe7, 0x38,
+	0xa3, 0x2a, 0xac, 0x1e, 0xd4, 0x0e, 0x83, 0x63, 0x74, 0x54, 0xa8, 0x74, 0x54, 0x7c, 0x62, 0xec,
+	0x02, 0xd0, 0x3b, 0xd0, 0x52, 0x54, 0x32, 0x9c, 0x26, 0x7c, 0x9a, 0x8d, 0xa8, 0xf4, 0xed, 0x37,
+	0x1d, 0x79, 0x66, 0xb9, 0xe8, 0x73, 0xd8, 0x1d, 0x50, 0xa9, 0xcf, 0xa5, 0xb8, 0x64, 0x29, 0x7d,
+	0xc2, 0x2f, 0x45, 0x4c, 0xbf, 0x99, 0x52, 0xa5, 0x8d, 0x1c, 0x29, 0x1e, 0xd1, 0xd4, 0xd7, 0x76,
+	0xc0, 0xc8, 0x97, 0xbb, 0x58, 0x2f, 0x53, 0x01, 0xa3, 0x1c, 0x9a, 0x83, 0x93, 0x81, 0xe0, 0x4a,
+	0x4b, 0xcc, 0xb8, 0x46, 0xdb, 0x50, 0x67, 0x2a, 0x21, 0xd8, 0xfe, 0xbe, 0x11, 0xaf, 0x31, 0x35,
+	0xc0, 0xe8, 0x00, 0x9a, 0x19, 0x9e, 0x25, 0x39, 0xd6, 0x57, 0x49, 0x4a, 0xb9, 0xcd, 0x51, 0x8f,
+	0x21, 0xc3, 0xb3, 0x73, 0xac, 0xaf, 0x9e, 0x52, 0x8e, 0xde, 0x83, 0xad, 0x72, 0x44, 0xf2, 0x2d,
+	0x95, 0xc2, 0x76, 0x5e, 0x8f, 0xdb, 0xcb, 0xb0, 0x17, 0x54, 0x8a, 0x68, 0x0c, 0x9d, 0xc1, 0x45,
+	0x7c, 0x92, 0xa6, 0xe2, 0x15, 0x1d, 0x3f, 0x66, 0x34, 0x1d, 0x2b, 0xd3, 0x9f, 0x72, 0xca, 0xf9,
+	0xba, 0x05, 0x44, 0x1d, 0xa8, 0x8d, 0xb9, 0xb2, 0x15, 0x1b, 0xb1, 0x39, 0x1a, 0x69, 0x59, 0x6e,
+	0x73, 0x37, 0xe2, 0x2a, 0xcb, 0xcd, 0x17, 0xd3, 0x0c, 0xb3, 0xd4, 0xce, 0xb1, 0x11, 0x3b, 0x10,
+	0xfd, 0x5d, 0x83, 0xa0, 0x24, 0x11, 0x3a, 0x80, 0x60, 0x4c, 0x15, 0x91, 0x2c, 0xb7, 0x33, 0x77,
+	0xea, 0x94, 0x29, 0xb4, 0x0b, 0xeb, 0x53, 0x85, 0x27, 0x7e, 0x46, 0x9b, 0xb1, 0x47, 0xe8, 0x19,
+	0xb4, 0x08, 0x4e, 0xc8, 0xad, 0x44, 0xb6, 0x74, 0x70, 0xbc, 0xbb, 0x1c, 0x61, 0x59, 0xc0, 0xd3,
+	0xce, 0xe2, 0xa6, 0xb7, 0x22, 0x69, 0xdc, 0x24, 0xb8, 0x24, 0xf0, 0x43, 0x68, 0x09, 0xa2, 0xf2,
+	0x84, 0x8b, 0x84, 0x5c, 0x51, 0x72, 0xed, 0xda, 0x3e, 0xbd, 0xbf, 0xb8, 0xe9, 0x05, 0x5f, 0x0e,
+	0x2e, 0xce, 0xcf, 0xc4, 0xc0, 0xd0, 0x71, 0x60, 0xa2, 0x3c, 0x30, 0xbd, 0xd1, 0x59, 0xce, 0xe4,
+	0xdc, 0x3b, 0xd0, 0x23, 0x63, 0xf3, 0x11, 0x26, 0xd7, 0x63, 0xe3, 0xff, 0x75, 0x67, 0xf3, 0x02,
+	0xa3, 0x07, 0x80, 0xb0, 0x13, 0x39, 0xa1, 0x33, 0x4d, 0xb9, 0x32, 0x6f, 0x2b, 0xdc, 0xb0, 0xdf,
+	0xb6, 0xe5, 0x6f, 0x86, 0xb7, 0x17, 0xe8, 0x53, 0x68, 0x15, 0xe1, 0xce, 0xa9, 0x0d, 0x93, 0xef,
+	0x74, 0x77, 0x71, 0xd3, 0x43, 0x7e, 0x58, 0x03, 0x91, 0x65, 0x82, 0x1b, 0xb3, 0xaa, 0xb8, 0xe9,
+	0x83, 0x2d, 0x42, 0x3d, 0x08, 0x8a, 0x1f, 0x9b, 0x69, 0x6d, 0xda, 0x56, 0xc0, 0x53, 0x8f, 0xb8,
+	0x75, 0xf5, 0x6d, 0x33, 0x76, 0x58, 0xe0, 0x5c, 0x5d, 0xf4, 0x61, 0x38, 0x74, 0x02, 0xed, 0x22,
+	0xe8, 0xd2, 0xfa, 0x22, 0x0c, 0xac, 0xd4, 0xdd, 0x92, 0xd4, 0x77, 0x9c, 0x13, 0x17, 0x69, 0x1d,
+	0x8c, 0x5e, 0xc0, 0xfd, 0x3b, 0x0f, 0xc3, 0x68, 0xc7, 0x94, 0x9a, 0x52, 0xe9, 0x87, 0xee, 0x11,
+	0xea, 0x2f, 0xdf, 0x84, 0x9b, 0xe8, 0xff, 0x4a, 0x65, 0x96, 0x39, 0x96, 0x4f, 0x45, 0xc0, 0x96,
+	0xe1, 0xd9, 0x25, 0x23, 0x58, 0xd3, 0xd3, 0x29, 0x1f, 0x3b, 0x5f, 0x91, 0x25, 0x59, 0xf8, 0xaa,
+	0x44, 0xa1, 0x77, 0xa1, 0xc5, 0xb8, 0xa6, 0x32, 0xa3, 0x63, 0x86, 0x35, 0x55, 0xfe, 0x05, 0xae,
+	0x92, 0x08, 0xc1, 0x9a, 0x14, 0x42, 0xfb, 0xd7, 0x6e, 0xcf, 0xd1, 0x77, 0x00, 0x4f, 0x6c, 0xaf,
+	0xf6, 0x3b, 0xfe, 0xc3, 0x4a, 0xcb, 0xad, 0xb1, 0x56, 0xda, 0x1a, 0xd1, 0x10, 0xb6, 0x5d, 0x7d,
+	0xe5, 0x36, 0x8c, 0xca, 0x05, 0x57, 0x14, 0x1d, 0xc1, 0x86, 0x93, 0x50, 0x85, 0x15, 0xbb, 0xcd,
+	0x76, 0x96, 0xc2, 0x2d, 0xfb, 0x8d, 0x8b, 0xa0, 0xe8, 0xaf, 0x0a, 0x84, 0x03, 0x49, 0xb1, 0xa6,
+	0x25, 0xf9, 0x8a, 0x7d, 0xf5, 0x19, 0xb4, 0xa5, 0x3b, 0x26, 0x97, 0x42, 0x66, 0xd8, 0x2d, 0x80,
+	0xf6, 0x71, 0xb8, 0xcc, 0x39, 0xe4, 0x44, 0x8c, 0x19, 0x9f, 0x3c, 0xb6, 0xf7, 0x71, 0xcb, 0xc7,
+	0x3b, 0x68, 0x56, 0x87, 0x27, 0x8a, 0xd5, 0xe6, 0x61, 0x79, 0xe9, 0xd5, 0x56, 0x96, 0x1e, 0x7a,
+	0x1b, 0x9a, 0xae, 0xb9, 0xa4, 0xfc, 0xd5, 0x81, 0xe3, 0x9e, 0xda, 0x8d, 0xd9, 0x83, 0xe0, 0x15,
+	0xd3, 0x57, 0xc9, 0xc8, 0x8e, 0xd9, 0x3e, 0xbb, 0x46, 0x0c, 0x86, 0xf2, 0x83, 0xdf, 0x81, 0xba,
+	0x16, 0xd7, 0x94, 0xfb, 0x77, 0xe7, 0xc0, 0xfb, 0x0f, 0xa0, 0xbd, 0xda, 0x2e, 0xda, 0x80, 0xda,
+	0xf9, 0xf0, 0x59, 0xe7, 0x9e, 0x39, 0x3c, 0x1a, 0xc6, 0x9d, 0x0a, 0xda, 0x84, 0xfa, 0xf9, 0x17,
+	0x83, 0x8b, 0x8f, 0x3b, 0xd5, 0xe3, 0x5f, 0xaa, 0xd0, 0x39, 0x99, 0xea, 0x2b, 0x21, 0x99, 0x9e,
+	0x5f, 0x50, 0xf9, 0x92, 0x11, 0x8a, 0xae, 0x21, 0x28, 0xfb, 0xf7, 0xe0, 0x5f, 0x6d, 0x59, 0xda,
+	0xf9, 0xdd, 0xbd, 0xd7, 0x46, 0x44, 0xbd, 0xef, 0x7f, 0xfb, 0xf3, 0x87, 0xea, 0x5e, 0xf4, 0xff,
+	0xfe, 0xcb, 0x0f, 0xfb, 0x04, 0xf7, 0x89, 0x92, 0x7d, 0xaf, 0x42, 0xc2, 0x4c, 0x76, 0x63, 0xea,
+	0xbb, 0xb3, 0x41, 0x51, 0x29, 0xe1, 0x6b, 0x06, 0xd7, 0x7d, 0x63, 0xb5, 0xe8, 0xca, 0xab, 0x88,
+	0xf6, 0x6c, 0xd9, 0xed, 0x68, 0xab, 0x54, 0x96, 0xd8, 0x4c, 0xe8, 0x39, 0x6c, 0x78, 0x53, 0xa1,
+	0xd2, 0x0a, 0x1d, 0x66, 0xb9, 0x9e, 0x17, 0xa9, 0xdf, 0xba, 0xeb, 0xa7, 0x15, 0xff, 0x45, 0xbb,
+	0x36, 0x79, 0x07, 0xb5, 0x7d, 0x72, 0xef, 0xb3, 0xd3, 0xce, 0xcf, 0x8b, 0xfd, 0xca, 0xaf, 0x8b,
+	0xfd, 0xca, 0xef, 0x8b, 0xfd, 0xca, 0x8f, 0x7f, 0xec, 0xdf, 0x1b, 0xad, 0xdb, 0x7f, 0x12, 0x0f,
+	0xff, 0x09, 0x00, 0x00, 0xff, 0xff, 0x26, 0x7a, 0x79, 0x49, 0xa0, 0x08, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -985,6 +1283,241 @@ func (m *CertProfileInfoRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 	return len(dAtA) - i, nil
 }
 
+func (m *CAConstraint) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CAConstraint) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CAConstraint) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.MaxPathLenZero != 0 {
+		i = encodeVarintPkix(dAtA, i, uint64(m.MaxPathLenZero))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.MaxPathLen != 0 {
+		i = encodeVarintPkix(dAtA, i, uint64(m.MaxPathLen))
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.IsCa {
+		i--
+		if m.IsCa {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *CSRAllowedFields) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CSRAllowedFields) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CSRAllowedFields) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Email {
+		i--
+		if m.Email {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.Ip {
+		i--
+		if m.Ip {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.Dns {
+		i--
+		if m.Dns {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.Subject {
+		i--
+		if m.Subject {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *CertProfile) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CertProfile) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CertProfile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.AllowedFields != nil {
+		{
+			size, err := m.AllowedFields.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPkix(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x5a
+	}
+	if len(m.AllowedEmail) > 0 {
+		i -= len(m.AllowedEmail)
+		copy(dAtA[i:], m.AllowedEmail)
+		i = encodeVarintPkix(dAtA, i, uint64(len(m.AllowedEmail)))
+		i--
+		dAtA[i] = 0x52
+	}
+	if len(m.AllowedDns) > 0 {
+		i -= len(m.AllowedDns)
+		copy(dAtA[i:], m.AllowedDns)
+		i = encodeVarintPkix(dAtA, i, uint64(len(m.AllowedDns)))
+		i--
+		dAtA[i] = 0x4a
+	}
+	if len(m.AllowedCommonNames) > 0 {
+		i -= len(m.AllowedCommonNames)
+		copy(dAtA[i:], m.AllowedCommonNames)
+		i = encodeVarintPkix(dAtA, i, uint64(len(m.AllowedCommonNames)))
+		i--
+		dAtA[i] = 0x42
+	}
+	if len(m.AllowedExtensions) > 0 {
+		for iNdEx := len(m.AllowedExtensions) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.AllowedExtensions[iNdEx])
+			copy(dAtA[i:], m.AllowedExtensions[iNdEx])
+			i = encodeVarintPkix(dAtA, i, uint64(len(m.AllowedExtensions[iNdEx])))
+			i--
+			dAtA[i] = 0x3a
+		}
+	}
+	if len(m.Backdate) > 0 {
+		i -= len(m.Backdate)
+		copy(dAtA[i:], m.Backdate)
+		i = encodeVarintPkix(dAtA, i, uint64(len(m.Backdate)))
+		i--
+		dAtA[i] = 0x32
+	}
+	if len(m.Expiry) > 0 {
+		i -= len(m.Expiry)
+		copy(dAtA[i:], m.Expiry)
+		i = encodeVarintPkix(dAtA, i, uint64(len(m.Expiry)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if m.OCSPNoCheck {
+		i--
+		if m.OCSPNoCheck {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.CAConstraint != nil {
+		{
+			size, err := m.CAConstraint.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPkix(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Usages) > 0 {
+		for iNdEx := len(m.Usages) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Usages[iNdEx])
+			copy(dAtA[i:], m.Usages[iNdEx])
+			i = encodeVarintPkix(dAtA, i, uint64(len(m.Usages[iNdEx])))
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if len(m.Description) > 0 {
+		i -= len(m.Description)
+		copy(dAtA[i:], m.Description)
+		i = encodeVarintPkix(dAtA, i, uint64(len(m.Description)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func (m *CertProfileInfo) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1009,21 +1542,17 @@ func (m *CertProfileInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i -= len(m.XXX_unrecognized)
 		copy(dAtA[i:], m.XXX_unrecognized)
 	}
-	if len(m.Expiry) > 0 {
-		i -= len(m.Expiry)
-		copy(dAtA[i:], m.Expiry)
-		i = encodeVarintPkix(dAtA, i, uint64(len(m.Expiry)))
+	if m.Profile != nil {
+		{
+			size, err := m.Profile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPkix(dAtA, i, uint64(size))
+		}
 		i--
 		dAtA[i] = 0x1a
-	}
-	if len(m.Usage) > 0 {
-		for iNdEx := len(m.Usage) - 1; iNdEx >= 0; iNdEx-- {
-			i -= len(m.Usage[iNdEx])
-			copy(dAtA[i:], m.Usage[iNdEx])
-			i = encodeVarintPkix(dAtA, i, uint64(len(m.Usage[iNdEx])))
-			i--
-			dAtA[i] = 0x12
-		}
 	}
 	if len(m.Issuer) > 0 {
 		i -= len(m.Issuer)
@@ -1338,6 +1867,110 @@ func (m *CertProfileInfoRequest) Size() (n int) {
 	return n
 }
 
+func (m *CAConstraint) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.IsCa {
+		n += 2
+	}
+	if m.MaxPathLen != 0 {
+		n += 1 + sovPkix(uint64(m.MaxPathLen))
+	}
+	if m.MaxPathLenZero != 0 {
+		n += 1 + sovPkix(uint64(m.MaxPathLenZero))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *CSRAllowedFields) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Subject {
+		n += 2
+	}
+	if m.Dns {
+		n += 2
+	}
+	if m.Ip {
+		n += 2
+	}
+	if m.Email {
+		n += 2
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *CertProfile) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Description)
+	if l > 0 {
+		n += 1 + l + sovPkix(uint64(l))
+	}
+	if len(m.Usages) > 0 {
+		for _, s := range m.Usages {
+			l = len(s)
+			n += 1 + l + sovPkix(uint64(l))
+		}
+	}
+	if m.CAConstraint != nil {
+		l = m.CAConstraint.Size()
+		n += 1 + l + sovPkix(uint64(l))
+	}
+	if m.OCSPNoCheck {
+		n += 2
+	}
+	l = len(m.Expiry)
+	if l > 0 {
+		n += 1 + l + sovPkix(uint64(l))
+	}
+	l = len(m.Backdate)
+	if l > 0 {
+		n += 1 + l + sovPkix(uint64(l))
+	}
+	if len(m.AllowedExtensions) > 0 {
+		for _, s := range m.AllowedExtensions {
+			l = len(s)
+			n += 1 + l + sovPkix(uint64(l))
+		}
+	}
+	l = len(m.AllowedCommonNames)
+	if l > 0 {
+		n += 1 + l + sovPkix(uint64(l))
+	}
+	l = len(m.AllowedDns)
+	if l > 0 {
+		n += 1 + l + sovPkix(uint64(l))
+	}
+	l = len(m.AllowedEmail)
+	if l > 0 {
+		n += 1 + l + sovPkix(uint64(l))
+	}
+	if m.AllowedFields != nil {
+		l = m.AllowedFields.Size()
+		n += 1 + l + sovPkix(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
 func (m *CertProfileInfo) Size() (n int) {
 	if m == nil {
 		return 0
@@ -1348,14 +1981,8 @@ func (m *CertProfileInfo) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovPkix(uint64(l))
 	}
-	if len(m.Usage) > 0 {
-		for _, s := range m.Usage {
-			l = len(s)
-			n += 1 + l + sovPkix(uint64(l))
-		}
-	}
-	l = len(m.Expiry)
-	if l > 0 {
+	if m.Profile != nil {
+		l = m.Profile.Size()
 		n += 1 + l + sovPkix(uint64(l))
 	}
 	if m.XXX_unrecognized != nil {
@@ -1949,6 +2576,645 @@ func (m *CertProfileInfoRequest) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *CAConstraint) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPkix
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CAConstraint: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CAConstraint: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IsCa", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPkix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.IsCa = bool(v != 0)
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MaxPathLen", wireType)
+			}
+			m.MaxPathLen = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPkix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.MaxPathLen |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MaxPathLenZero", wireType)
+			}
+			m.MaxPathLenZero = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPkix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.MaxPathLenZero |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPkix(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPkix
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *CSRAllowedFields) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPkix
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CSRAllowedFields: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CSRAllowedFields: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Subject", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPkix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Subject = bool(v != 0)
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Dns", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPkix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Dns = bool(v != 0)
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Ip", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPkix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Ip = bool(v != 0)
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Email", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPkix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Email = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPkix(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPkix
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *CertProfile) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPkix
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CertProfile: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CertProfile: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Description", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPkix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPkix
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPkix
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Description = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Usages", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPkix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPkix
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPkix
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Usages = append(m.Usages, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CAConstraint", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPkix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPkix
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPkix
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.CAConstraint == nil {
+				m.CAConstraint = &CAConstraint{}
+			}
+			if err := m.CAConstraint.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OCSPNoCheck", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPkix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.OCSPNoCheck = bool(v != 0)
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Expiry", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPkix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPkix
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPkix
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Expiry = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Backdate", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPkix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPkix
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPkix
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Backdate = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AllowedExtensions", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPkix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPkix
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPkix
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AllowedExtensions = append(m.AllowedExtensions, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AllowedCommonNames", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPkix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPkix
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPkix
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AllowedCommonNames = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AllowedDns", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPkix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPkix
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPkix
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AllowedDns = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 10:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AllowedEmail", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPkix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPkix
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPkix
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AllowedEmail = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 11:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AllowedFields", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPkix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPkix
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPkix
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.AllowedFields == nil {
+				m.AllowedFields = &CSRAllowedFields{}
+			}
+			if err := m.AllowedFields.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPkix(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPkix
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
 func (m *CertProfileInfo) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -2010,43 +3276,11 @@ func (m *CertProfileInfo) Unmarshal(dAtA []byte) error {
 			}
 			m.Issuer = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Usage", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowPkix
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthPkix
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthPkix
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Usage = append(m.Usage, string(dAtA[iNdEx:postIndex]))
-			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Expiry", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Profile", wireType)
 			}
-			var stringLen uint64
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowPkix
@@ -2056,23 +3290,27 @@ func (m *CertProfileInfo) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
+			if msglen < 0 {
 				return ErrInvalidLengthPkix
 			}
-			postIndex := iNdEx + intStringLen
+			postIndex := iNdEx + msglen
 			if postIndex < 0 {
 				return ErrInvalidLengthPkix
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Expiry = string(dAtA[iNdEx:postIndex])
+			if m.Profile == nil {
+				m.Profile = &CertProfile{}
+			}
+			if err := m.Profile.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

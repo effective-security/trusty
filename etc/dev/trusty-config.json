@@ -86,7 +86,9 @@
                 "/trustypb.StatusService"
             ],
             "AllowAnyRole": [
-              "/v1/wf"
+              "/v1/wf",
+              "/trustypb.AuthorityService/Issuers",
+              "/trustypb.AuthorityService/Roots"
             ],
             "Allow": [
                 "/v1/ca:trusty-peer",
