@@ -57,6 +57,46 @@ func (s *testSuite) TestIssuers() {
 	}
 }
 
+func (s *testSuite) TestProfile() {
+	expectedResponse := new(trustypb.CertProfileInfo)
+	err := loadJSON("testdata/server_profile.json", expectedResponse)
+	s.Require().NoError(err)
+
+	s.MockAuthority = &mockpb.MockAuthorityServer{
+		Err:   nil,
+		Resps: []proto.Message{expectedResponse},
+	}
+	srv := s.SetupMockGRPC()
+	defer srv.Stop()
+
+	profile := "server"
+	label := ""
+	err = s.Run(ca.Profile, &ca.GetProfileFlags{Profile: &profile, Label: &label})
+	s.Require().NoError(err)
+
+	s.Equal(`{
+	"issuer": "TrustyCA",
+	"profile": {
+		"allowed_extensions": [
+			"1.3.6.1.5.5.7.1.1"
+		],
+		"backdate": "30m0s",
+		"ca_constraint": {},
+		"description": "server TLS profile",
+		"expiry": "168h0m0s",
+		"usages": [
+			"signing",
+			"key encipherment",
+			"server auth",
+			"ipsec end system"
+		]
+	}
+}
+`,
+		s.Output())
+
+}
+
 func loadJSON(filename string, v interface{}) error {
 	cfr, err := os.Open(filename)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ekspand/trusty/api/v1/trustypb"
 	"github.com/ekspand/trusty/backend/service/ca"
 	"github.com/ekspand/trusty/backend/trustymain"
 	"github.com/ekspand/trusty/backend/trustyserver"
@@ -112,8 +113,28 @@ func TestIssuers(t *testing.T) {
 }
 
 func TestProfileInfo(t *testing.T) {
-	_, err := trustyClient.AuthorityService.ProfileInfo(context.Background(), nil)
-	require.Error(t, err)
+	tcases := []struct {
+		req *trustypb.CertProfileInfoRequest
+		err string
+	}{
+		{nil, "missing profile parameter"},
+		{&trustypb.CertProfileInfoRequest{}, "missing profile parameter"},
+		{&trustypb.CertProfileInfoRequest{Profile: "test_server"}, ""},
+		{&trustypb.CertProfileInfoRequest{Profile: "test_server", Label: "TrustyCA"}, ""},
+		{&trustypb.CertProfileInfoRequest{Profile: "test_server", Label: "trustyca"}, ""},
+		{&trustypb.CertProfileInfoRequest{Profile: "test_server", Label: "trusty"}, `profile "test_server" is served by TrustyCA issuer`},
+		{&trustypb.CertProfileInfoRequest{Profile: "xxx"}, "profile not found: xxx"},
+	}
+
+	for _, tc := range tcases {
+		_, err := trustyClient.AuthorityService.ProfileInfo(context.Background(), tc.req)
+		if tc.err != "" {
+			require.Error(t, err)
+			assert.Equal(t, tc.err, err.Error())
+		} else {
+			assert.NoError(t, err)
+		}
+	}
 }
 
 func TestCreateCertificate(t *testing.T) {

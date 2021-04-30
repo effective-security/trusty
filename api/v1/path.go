@@ -81,3 +81,33 @@ const (
 	// Response: v1.OrgsResponse
 	PathForWorkflowSyncOrgs = "/v1/wf/:provider/sync_orgs"
 )
+
+// CIS service API
+const (
+	// PathForCIS is base path for the CIS service
+	PathForCIS = "/v1/cis"
+
+	// PathForCISRoots provides Roots certificates
+	//
+	// Verbs: GET
+	// Response: RootsResponse
+	PathForCISRoots = "/v1/cis/roots"
+)
+
+// CA service API
+const (
+	// PathForCA is base path for the CA service
+	PathForCA = "/v1/ca"
+
+	// PathForCAIssuers provides Issuer certificates
+	//
+	// Verbs: GET
+	// Response: IssuersInfoResponse
+	PathForCAIssuers = "/v1/ca/issuers"
+
+	// PathForCAProfileInfo provides profile information
+	//
+	// Verbs: GET
+	// Response: CertProfileInfo
+	PathForCAProfileInfo = "/v1/ca/csr/profile_info"
+)

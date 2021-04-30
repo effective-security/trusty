@@ -6,6 +6,7 @@ import (
 
 	"github.com/ekspand/trusty/authority"
 	"github.com/ekspand/trusty/internal/config"
+	"github.com/ekspand/trusty/pkg/csr"
 )
 
 func (s *testSuite) TestNewIssuer() {
@@ -13,6 +14,18 @@ func (s *testSuite) TestNewIssuer() {
 		AiaURL:  "https://localhost/v1/certs/${ISSUER_ID}.crt",
 		OcspURL: "https://localhost/v1/ocsp",
 		CrlURL:  "https://localhost/v1/crl/${ISSUER_ID}.crl",
+		Profiles: map[string]*authority.CertProfile{
+			"client": {
+				Description: "test client",
+				Expiry:      csr.Duration(273649812736),
+				Usage: []string{
+					"signing",
+					"key encipherment",
+					"server auth",
+					"ipsec end system",
+				},
+			},
+		},
 	}
 	for _, cfg := range s.cfg.Authority.Issuers {
 		if cfg.GetDisabled() {
@@ -28,6 +41,8 @@ func (s *testSuite) TestNewIssuer() {
 		s.NotEmpty(issuer.OcspURL())
 		s.NotEmpty(issuer.Label())
 		s.NotEmpty(issuer.KeyHash(crypto.SHA1))
+		s.NotNil(issuer.Profile("client"))
+		s.Nil(issuer.Profile("notfound"))
 
 		s.Equal(issuer.CrlURL(), fmt.Sprintf("https://localhost/v1/crl/%s.crl", issuer.SubjectKID()))
 		s.Equal(issuer.AiaURL(), fmt.Sprintf("https://localhost/v1/certs/%s.crt", issuer.SubjectKID()))

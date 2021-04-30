@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ekspand/trusty/api/v1/trustypb"
 	"github.com/ekspand/trusty/cli"
 	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/ctl"
@@ -24,5 +25,29 @@ func Issuers(c ctl.Control, _ interface{}) error {
 	} else {
 		print.Issuers(c.Writer(), res.Issuers, true)
 	}
+	return nil
+}
+
+// GetProfileFlags defines flags for Profile command
+type GetProfileFlags struct {
+	Profile *string
+	Label   *string
+}
+
+// Profile shows the certifiate profile
+func Profile(c ctl.Control, p interface{}) error {
+	flags := p.(*GetProfileFlags)
+	cli := c.(*cli.Cli)
+	res, err := cli.Client().AuthorityService.ProfileInfo(context.Background(), &trustypb.CertProfileInfoRequest{
+		Profile: *flags.Profile,
+		Label:   *flags.Label,
+	})
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	ctl.WriteJSON(c.Writer(), res)
+	fmt.Fprint(c.Writer(), "\n")
+	// TODO: printer
 	return nil
 }

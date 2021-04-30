@@ -12,23 +12,9 @@
                 "key encipherment"
             ]
         },
-        "test_server": {
-            "description": "test server profile",
-            "expiry": "5m",
-            "backdate": "30m",
-            "usages": [
-                "signing",
-                "key encipherment",
-                "server auth",
-                "ipsec end system"
-            ],
-            "allowed_extensions": [
-                "1.3.6.1.5.5.7.1.1"
-            ]
-        },
-        "test_client": {
-            "description": "test client profile",
-            "expiry": "5m",
+        "client": {
+            "description": "client profile",
+            "expiry": "168h",
             "backdate": "30m",
             "usages": [
                 "signing",

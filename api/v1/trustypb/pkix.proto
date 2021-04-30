@@ -53,11 +53,70 @@ message CertProfileInfoRequest {
     string profile = 2;
 }
 
+// CAConstraint specifies various CA constraints on the signed certificate.
+// CAConstraint would verify against (and override) the CA
+// extensions in the given CSR.
+message CAConstraint {
+	bool is_ca = 1;
+	int32 max_path_len = 2;
+	int32 max_path_len_zero =3;
+}
+
+message CSRAllowedFields {
+	bool subject = 1;
+	bool dns = 2;
+	bool ip = 3;
+	bool email = 4;
+}
+
+// CertProfile provides certificate profile
+message CertProfile {
+	string description = 1;
+
+	// Usage provides a list key usages
+	repeated string usages = 2;
+
+	CAConstraint ca_constraint  = 3 [(gogoproto.customname)="CAConstraint"];
+	bool ocsp_no_check  = 4 [(gogoproto.customname)="OCSPNoCheck"];
+
+	string expiry = 5;
+	string backdate = 6;
+
+	repeated string allowed_extensions = 7;
+
+	// AllowedCommonNames specifies a RegExp to check for allowed names.
+	// If not provided, then all names are allowed
+	string allowed_names = 8 [(gogoproto.customname)="AllowedCommonNames"];
+
+	// AllowedDNS specifies a RegExp to check for allowed DNS.
+	// If not provided, then all names are allowed
+	string allowed_dns = 9;
+
+	// AllowedEmail specifies a RegExp to check for allowed email.
+	// If not provided, then all names are allowed
+	string allowed_email = 10;
+
+	// AllowedFields provides booleans for fields in the CSR.
+	// If a AllowedFields is not present in a CertProfile,
+	// all of these fields may be copied from the CSR into the signed certificate.
+	// If a AllowedFields *is* present in a CertProfile,
+	// only those fields with a `true` value in the AllowedFields may
+	// be copied from the CSR to the signed certificate.
+	// Note that some of these fields, like Subject, can be provided or
+	// partially provided through the API.
+	// Since API clients are expected to be trusted, but CSRs are not, fields
+	// provided through the API are not subject to validation through this
+	// mechanism.
+	CSRAllowedFields allowed_fields = 11;
+
+    // TODO
+	// Policies []csr.CertificatePolicy `json:"policies"`
+}
+
 // CertProfileInfo is the response for an Profile Info API request
 message CertProfileInfo {
     string issuer = 1;
-    repeated string usage = 2;
-    string expiry = 3;
+    CertProfile profile = 3;
 }
 
 // CertificateBundle provides certificate and its issuers

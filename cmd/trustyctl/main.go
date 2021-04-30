@@ -79,6 +79,12 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	cmdCA.Command("issuers", "show the issuing CAs").
 		Action(cli.RegisterAction(ca.Issuers, nil))
 
+	getProfileFlags := new(ca.GetProfileFlags)
+	profileCmd := cmdCA.Command("profile", "show the certificate profile").
+		Action(cli.RegisterAction(ca.Profile, getProfileFlags))
+	getProfileFlags.Profile = profileCmd.Flag("name", "profile name").Required().String()
+	getProfileFlags.Label = profileCmd.Flag("issuer", "issuer label").String()
+
 	// cis: roots
 
 	cmdCIS := app.Command("cis", "CIS operations").
