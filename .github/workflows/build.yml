@@ -83,7 +83,7 @@ jobs:
       run: make docker-citest
 
     - name: coveralls
-      if: github.event_name == 'pull_request'
+      # if: github.event_name == 'pull_request'
       env:
         COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: make coveralls-github
