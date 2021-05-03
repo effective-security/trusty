@@ -10,10 +10,10 @@ import (
 	"time"
 
 	v1 "github.com/ekspand/trusty/api/v1"
-	"github.com/ekspand/trusty/backend/trustyserver"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/internal/db/model"
+	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/pkg/oauth2client"
 	"github.com/ekspand/trusty/pkg/roles/jwtmapper"
 	"github.com/go-phorce/dolly/rest"
@@ -42,7 +42,7 @@ const (
 type Service struct {
 	GithubBaseURL *url.URL
 
-	server    *trustyserver.TrustyServer
+	server    *gserver.Server
 	cfg       *config.Configuration
 	oauthProv *oauth2client.Provider
 	db        db.Provider
@@ -50,7 +50,7 @@ type Service struct {
 }
 
 // Factory returns a factory of the service
-func Factory(server *trustyserver.TrustyServer) interface{} {
+func Factory(server *gserver.Server) interface{} {
 	if server == nil {
 		logger.Panic("status.Factory: invalid parameter")
 	}

@@ -14,7 +14,7 @@ import (
 	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/backend/service/auth"
 	"github.com/ekspand/trusty/backend/trustymain"
-	"github.com/ekspand/trusty/backend/trustyserver"
+	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/testify/servefiles"
 	"github.com/go-phorce/dolly/xhttp/header"
@@ -25,7 +25,7 @@ import (
 )
 
 var (
-	trustyServer *trustyserver.TrustyServer
+	trustyServer *gserver.Server
 )
 
 const (
@@ -33,7 +33,7 @@ const (
 )
 
 // serviceFactories provides map of trustyserver.ServiceFactory
-var serviceFactories = map[string]trustyserver.ServiceFactory{
+var serviceFactories = map[string]gserver.ServiceFactory{
 	auth.ServiceName: auth.Factory,
 }
 

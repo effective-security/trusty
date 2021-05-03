@@ -3,7 +3,7 @@ package status
 import (
 	v1 "github.com/ekspand/trusty/api/v1"
 	pb "github.com/ekspand/trusty/api/v1/trustypb"
-	"github.com/ekspand/trusty/backend/trustyserver"
+	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xlog"
 	"google.golang.org/grpc"
@@ -16,11 +16,11 @@ var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", 
 
 // Service defines the Status service
 type Service struct {
-	server *trustyserver.TrustyServer
+	server *gserver.Server
 }
 
 // Factory returns a factory of the service
-func Factory(server *trustyserver.TrustyServer) interface{} {
+func Factory(server *gserver.Server) interface{} {
 	if server == nil {
 		logger.Panic("status.Factory: invalid parameter")
 	}

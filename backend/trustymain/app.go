@@ -19,6 +19,7 @@ import (
 	"github.com/ekspand/trusty/backend/trustyserver"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/version"
+	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/netutil"
 	"github.com/go-phorce/dolly/tasks"
@@ -36,8 +37,8 @@ const (
 	nullDevName = "/dev/null"
 )
 
-// ServiceFactories provides map of trustyserver.ServiceFactory
-var ServiceFactories = map[string]trustyserver.ServiceFactory{
+// ServiceFactories provides map of gserver.ServiceFactory
+var ServiceFactories = map[string]gserver.ServiceFactory{
 	auth.ServiceName:     auth.Factory,
 	ca.ServiceName:       ca.Factory,
 	cis.ServiceName:      cis.Factory,
@@ -81,7 +82,7 @@ type App struct {
 	crypto           *cryptoprov.Crypto
 	scheduler        tasks.Scheduler
 	containerFactory ContainerFactoryFn
-	servers          map[string]*trustyserver.TrustyServer
+	servers          map[string]*gserver.Server
 }
 
 // NewApp returns new App
@@ -91,7 +92,7 @@ func NewApp(args []string) *App {
 		args:      args,
 		closers:   make([]io.Closer, 0, 8),
 		flags:     new(appFlags),
-		servers:   make(map[string]*trustyserver.TrustyServer),
+		servers:   make(map[string]*gserver.Server),
 	}
 	f := NewContainerFactory(app)
 
@@ -228,7 +229,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 
 	for _, svcCfg := range a.cfg.HTTPServers {
 		if svcCfg.GetDisabled() == false {
-			httpServer, err := trustyserver.StartTrusty(&svcCfg, a.container, ServiceFactories)
+			httpServer, err := gserver.Start(&svcCfg, a.container, ServiceFactories)
 			if err != nil {
 				logger.Errorf("src=Run, reason=Start, server=%s, err=[%v]", svcCfg.Name, errors.ErrorStack(err))
 
@@ -277,7 +278,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 }
 
 // Server returns a running TrustyServer by name
-func (a *App) Server(name string) *trustyserver.TrustyServer {
+func (a *App) Server(name string) *gserver.Server {
 	return a.servers[name]
 }
 

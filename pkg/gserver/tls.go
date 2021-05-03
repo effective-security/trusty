@@ -1,4 +1,4 @@
-package trustyserver
+package gserver
 
 import (
 	"crypto/x509"
