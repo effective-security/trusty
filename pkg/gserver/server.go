@@ -1,4 +1,4 @@
-package trustyserver
+package gserver
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	pb "github.com/ekspand/trusty/api/v1/trustypb"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/netutil"
@@ -19,10 +18,10 @@ import (
 	"google.golang.org/grpc"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend", "trustyserver")
+var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend", "gserver")
 
 // ServiceFactory is interface to create Services
-type ServiceFactory func(*TrustyServer) interface{}
+type ServiceFactory func(*Server) interface{}
 
 // Service provides a way for subservices to be registered so they get added to the http API.
 type Service interface {
@@ -42,11 +41,8 @@ type GRPCRegistrator interface {
 	RegisterGRPC(*grpc.Server)
 }
 
-// TrustyServer contains a running trusty server and its listeners.
-type TrustyServer struct {
-	pb.StatusServiceServer
-	pb.AuthorityServiceServer
-	pb.CertInfoServiceServer
+// Server contains a running trusty server and its listeners.
+type Server struct {
 	Listeners []net.Listener
 
 	ipaddr   string
@@ -69,12 +65,12 @@ type TrustyServer struct {
 	crypto  *cryptoprov.Crypto
 }
 
-// StartTrusty returns running TrustyServer
-func StartTrusty(
+// Start returns running Server
+func Start(
 	cfg *config.HTTPServer,
 	container *dig.Container,
 	serviceFactories map[string]ServiceFactory,
-) (e *TrustyServer, err error) {
+) (e *Server, err error) {
 	serving := false
 	defer func() {
 		// if no error, then do nothing
@@ -91,7 +87,7 @@ func StartTrusty(
 		e = nil
 	}()
 
-	e, err = newTrusty(cfg, container, serviceFactories)
+	e, err = newServer(cfg, container, serviceFactories)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -116,21 +112,21 @@ func StartTrusty(
 	return e, nil
 }
 
-func newTrusty(
+func newServer(
 	cfg *config.HTTPServer,
 	container *dig.Container,
 	serviceFactories map[string]ServiceFactory,
-) (*TrustyServer, error) {
+) (*Server, error) {
 	var err error
 
 	ipaddr, err := netutil.GetLocalIP()
 	if err != nil {
 		ipaddr = "127.0.0.1"
-		logger.Errorf("src=newTrusty, reason=unable_determine_ipaddr, use=%q, err=[%v]", ipaddr, errors.ErrorStack(err))
+		logger.Errorf("src=newServer, reason=unable_determine_ipaddr, use=%q, err=[%v]", ipaddr, errors.ErrorStack(err))
 	}
 	hostname, _ := os.Hostname()
 
-	e := &TrustyServer{
+	e := &Server{
 		ipaddr:   ipaddr,
 		hostname: hostname,
 		cfg:      *cfg,
@@ -148,12 +144,12 @@ func newTrusty(
 		}
 		err = container.Invoke(sf(e))
 		if err != nil {
-			return nil, errors.Annotatef(err, "src=newTrusty, reason=factory, server=%q, service=%s",
+			return nil, errors.Annotatef(err, "src=newServer, reason=factory, server=%q, service=%s",
 				cfg.Name, name)
 		}
 	}
 
-	logger.Tracef("src=newTrusty, status=configuring_listeners, server=%s", cfg.Name)
+	logger.Tracef("src=newServer, status=configuring_listeners, server=%s", cfg.Name)
 
 	e.sctxs, err = configureListeners(cfg)
 	if err != nil {
@@ -170,7 +166,7 @@ func newTrusty(
 	return e, nil
 }
 
-func (e *TrustyServer) serveClients() (err error) {
+func (e *Server) serveClients() (err error) {
 	// start client servers in each goroutine
 	for _, sctx := range e.sctxs {
 		go func(s *serveCtx) {
@@ -180,7 +176,7 @@ func (e *TrustyServer) serveClients() (err error) {
 	return nil
 }
 
-func (e *TrustyServer) errHandler(err error) {
+func (e *Server) errHandler(err error) {
 	if err != nil {
 		logger.Infof("src=errHandler, err=[%v]", errors.ErrorStack(err))
 	}
@@ -198,7 +194,7 @@ func (e *TrustyServer) errHandler(err error) {
 // Close gracefully shuts down all servers/listeners.
 // Client requests will be terminated with request timeout.
 // After timeout, enforce remaning requests be closed immediately.
-func (e *TrustyServer) Close() {
+func (e *Server) Close() {
 	logger.Infof("src=Close, server=%s", e.Name())
 	e.closeOnce.Do(func() { close(e.stopc) })
 
@@ -263,38 +259,28 @@ func stopServers(ctx context.Context, ss *servers) {
 }
 
 // Err returns error channel
-func (e *TrustyServer) Err() <-chan error { return e.errc }
+func (e *Server) Err() <-chan error { return e.errc }
 
 // Name returns server name
-func (e *TrustyServer) Name() string {
+func (e *Server) Name() string {
 	return e.cfg.Name
 }
 
 // AddService to the server
-func (e *TrustyServer) AddService(svc Service) {
+func (e *Server) AddService(svc Service) {
 	logger.Noticef("src=AddService, server=%s, service=%s",
 		e.Name(), svc.Name())
 
 	e.services[svc.Name()] = svc
-
-	if statusSvc, ok := svc.(pb.StatusServiceServer); ok {
-		e.StatusServiceServer = statusSvc
-	}
-	if authoritySvc, ok := svc.(pb.AuthorityServiceServer); ok {
-		e.AuthorityServiceServer = authoritySvc
-	}
-	if cisSvc, ok := svc.(pb.CertInfoServiceServer); ok {
-		e.CertInfoServiceServer = cisSvc
-	}
 }
 
 // Service returns service by name
-func (e *TrustyServer) Service(name string) Service {
+func (e *Server) Service(name string) Service {
 	return e.services[name]
 }
 
 // IsReady returns true when the server is ready to serve
-func (e *TrustyServer) IsReady() bool {
+func (e *Server) IsReady() bool {
 	for _, ss := range e.services {
 		if !ss.IsReady() {
 			return false
@@ -304,27 +290,27 @@ func (e *TrustyServer) IsReady() bool {
 }
 
 // StartedAt returns Time when the server has started
-func (e *TrustyServer) StartedAt() time.Time {
+func (e *Server) StartedAt() time.Time {
 	return e.startedAt
 }
 
 // ListenURLs is the list of URLs that the server listens on
-func (e *TrustyServer) ListenURLs() []string {
+func (e *Server) ListenURLs() []string {
 	return e.cfg.ListenURLs
 }
 
 // Hostname is the hostname
-func (e *TrustyServer) Hostname() string {
+func (e *Server) Hostname() string {
 	return e.hostname
 }
 
 // LocalIP is the local IP4
-func (e *TrustyServer) LocalIP() string {
+func (e *Server) LocalIP() string {
 	return e.ipaddr
 }
 
 // Audit create an audit event
-func (e *TrustyServer) Audit(
+func (e *Server) Audit(
 	source string,
 	eventType string,
 	identity string,

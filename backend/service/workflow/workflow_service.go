@@ -4,9 +4,9 @@ import (
 	"net/url"
 
 	v1 "github.com/ekspand/trusty/api/v1"
-	"github.com/ekspand/trusty/backend/trustyserver"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/db"
+	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/pkg/oauth2client"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xlog"
@@ -22,14 +22,14 @@ var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", 
 type Service struct {
 	GithubBaseURL *url.URL
 
-	server    *trustyserver.TrustyServer
+	server    *gserver.Server
 	cfg       *config.Configuration
 	oauthProv *oauth2client.Provider
 	db        db.Provider
 }
 
 // Factory returns a factory of the service
-func Factory(server *trustyserver.TrustyServer) interface{} {
+func Factory(server *gserver.Server) interface{} {
 	if server == nil {
 		logger.Panic("status.Factory: invalid parameter")
 	}

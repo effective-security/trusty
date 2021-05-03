@@ -11,9 +11,9 @@ import (
 	"github.com/ekspand/trusty/api/v1/trustypb"
 	"github.com/ekspand/trusty/backend/service/cis"
 	"github.com/ekspand/trusty/backend/trustymain"
-	"github.com/ekspand/trusty/backend/trustyserver"
 	"github.com/ekspand/trusty/backend/trustyserver/embed"
 	"github.com/ekspand/trusty/client"
+	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	trustyServer *trustyserver.TrustyServer
+	trustyServer *gserver.Server
 	trustyClient *client.Client
 )
 

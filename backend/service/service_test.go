@@ -7,10 +7,10 @@ import (
 	"github.com/ekspand/trusty/backend/service/ca"
 	"github.com/ekspand/trusty/backend/service/status"
 	"github.com/ekspand/trusty/backend/service/workflow"
-	"github.com/ekspand/trusty/backend/trustyserver"
+	"github.com/ekspand/trusty/pkg/gserver"
 )
 
-var serviceFactories = map[string]trustyserver.ServiceFactory{
+var serviceFactories = map[string]gserver.ServiceFactory{
 	auth.ServiceName:     auth.Factory,
 	ca.ServiceName:       ca.Factory,
 	status.ServiceName:   status.Factory,
@@ -23,7 +23,7 @@ func Test_invalidArgs(t *testing.T) {
 	}
 }
 
-func testInvalidServiceArgs(t *testing.T, f trustyserver.ServiceFactory) {
+func testInvalidServiceArgs(t *testing.T, f gserver.ServiceFactory) {
 	defer func() {
 		err := recover()
 		if err == nil {

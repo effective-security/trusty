@@ -11,11 +11,11 @@ import (
 	v1 "github.com/ekspand/trusty/api/v1"
 	pb "github.com/ekspand/trusty/api/v1/trustypb"
 	"github.com/ekspand/trusty/backend/service/status"
-	"github.com/ekspand/trusty/backend/trustyserver"
 	"github.com/ekspand/trusty/backend/trustyserver/embed"
 	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/version"
+	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/rest"
@@ -31,7 +31,7 @@ import (
 )
 
 var (
-	trustyServer *trustyserver.TrustyServer
+	trustyServer *gserver.Server
 	trustyClient *client.Client
 	httpAddr     string
 	httpsAddr    string
@@ -52,7 +52,7 @@ var textContentHeaders = map[string]string{
 }
 
 // serviceFactories provides map of trustyserver.ServiceFactory
-var serviceFactories = map[string]trustyserver.ServiceFactory{
+var serviceFactories = map[string]gserver.ServiceFactory{
 	status.ServiceName: status.Factory,
 }
 
@@ -75,7 +75,7 @@ func TestMain(m *testing.M) {
 	}
 
 	container := createContainer(nil, nil, nil)
-	trustyServer, err = trustyserver.StartTrusty(cfg, container, serviceFactories)
+	trustyServer, err = gserver.Start(cfg, container, serviceFactories)
 	if err != nil || trustyServer == nil {
 		panic(errors.Trace(err))
 	}

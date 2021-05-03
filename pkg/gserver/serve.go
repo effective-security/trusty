@@ -1,4 +1,4 @@
-package trustyserver
+package gserver
 
 import (
 	"context"
@@ -173,7 +173,7 @@ func configureListeners(cfg *config.HTTPServer) (sctxs map[string]*serveCtx, err
 // serve accepts incoming connections on the listener l,
 // creating a new service goroutine for each. The service goroutines
 // read requests and then call handler to reply to them.
-func (sctx *serveCtx) serve(s *TrustyServer, errHandler func(error)) (err error) {
+func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 	//<-s.ReadyNotify()
 
 	logger.Infof("src=serve, status=ready_to_serve, service=%s, network=%s, address=%q",
@@ -273,7 +273,7 @@ func (sctx *serveCtx) serve(s *TrustyServer, errHandler func(error)) (err error)
 	return m.Serve()
 }
 
-func configureHandlers(s *TrustyServer, handler http.Handler) http.Handler {
+func configureHandlers(s *Server, handler http.Handler) http.Handler {
 	var err error
 	// authz
 	if s.authz != nil {
@@ -297,7 +297,7 @@ func configureHandlers(s *TrustyServer, handler http.Handler) http.Handler {
 	return handler
 }
 
-func restRouter(s *TrustyServer) rest.Router {
+func restRouter(s *Server) rest.Router {
 	var router rest.Router
 	if s.cfg.CORS.GetEnabled() {
 		cors := &rest.CORSOptions{
@@ -328,7 +328,7 @@ func restRouter(s *TrustyServer) rest.Router {
 	return router
 }
 
-func grpcServer(s *TrustyServer, tls *tls.Config, gopts ...grpc.ServerOption) *grpc.Server {
+func grpcServer(s *Server, tls *tls.Config, gopts ...grpc.ServerOption) *grpc.Server {
 	var opts []grpc.ServerOption
 	//opts = append(opts, grpc.CustomCodec(&codec{}))
 	/*

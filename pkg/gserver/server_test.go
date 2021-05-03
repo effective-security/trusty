@@ -1,4 +1,4 @@
-package trustyserver
+package gserver
 
 import (
 	"testing"
@@ -22,7 +22,7 @@ func TestStartTrustyEmptyHTTP(t *testing.T) {
 	}
 
 	c := createContainer(nil, nil, nil, nil, nil)
-	srv, err := StartTrusty(cfg, c, nil)
+	srv, err := Start(cfg, c, nil)
 	require.NoError(t, err)
 	require.NotNil(t, srv)
 	defer srv.Close()
@@ -42,7 +42,7 @@ func TestStartTrustyEmptyHTTPS(t *testing.T) {
 	}
 
 	c := createContainer(nil, nil, nil, nil, nil)
-	srv, err := StartTrusty(cfg, c, nil)
+	srv, err := Start(cfg, c, nil)
 	require.NoError(t, err)
 	require.NotNil(t, srv)
 	defer srv.Close()
