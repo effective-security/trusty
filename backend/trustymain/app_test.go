@@ -38,8 +38,8 @@ func Test_App_NoConfig(t *testing.T) {
 
 	err := app.Run(nil)
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to load configuration \"trusty-config.json\"")
-	assert.Contains(t, err.Error(), "file \"trusty-config.json\" in [")
+	assert.Contains(t, err.Error(), "failed to load configuration \"trusty-config.yaml\"")
+	assert.Contains(t, err.Error(), "file \"trusty-config.yaml\" in [")
 }
 
 func Test_AppOnClose(t *testing.T) {
@@ -108,12 +108,12 @@ func Test_AppInitWithCfg(t *testing.T) {
 	require.NoError(t, err)
 
 	// logs to file
-	app.cfg.Logger.Directory = filepath.Join(testDirPath, "logs")
+	app.cfg.Logs.Directory = filepath.Join(testDirPath, "logs")
 	err = app.initLogs()
 	require.NoError(t, err)
 
 	// logs to std
-	app.cfg.Logger.Directory = ""
+	app.cfg.Logs.Directory = ""
 	err = app.initLogs()
 	require.NoError(t, err)
 

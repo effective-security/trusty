@@ -100,7 +100,7 @@ services:
         --ca1 --ca2 --bundle --peer --force &&
         /opt/trusty/bin/trusty --std
         --hsm-cfg=/tmp/trusty/softhsm/unittest_hsm.json
-        --cfg=/opt/trusty/etc/prod/trusty-config.json
+        --cfg=/opt/trusty/etc/prod/trusty-config.yaml
         --logs-dir=/var/trusty/logs
         --audit-dir=/var/trusty/audit
         --host-name=10.77.88.101
@@ -155,7 +155,7 @@ services:
         --ca1 --ca2 --bundle --peer --force &&
         /opt/trusty/bin/trusty --std
         --hsm-cfg=/opt/trusty/tests/aws-test-kms.json
-        --cfg=/opt/trusty/etc/prod/trusty-config.json
+        --cfg=/opt/trusty/etc/prod/trusty-config.yaml
         --logs-dir=/var/trusty/logs
         --audit-dir=/var/trusty/audit
         --host-name=10.77.88.102

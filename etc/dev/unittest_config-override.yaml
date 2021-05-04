@@ -1,0 +1,7 @@
+---
+metrics:
+  disabled: true
+logs:
+  directory: /dev/null
+audit:
+  directory: /dev/null

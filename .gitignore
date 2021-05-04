@@ -2,6 +2,7 @@
 /.rpm
 /.gopath
 /.vscode
+/.tmp
 bin/
 
 .DS_Store

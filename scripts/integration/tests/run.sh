@@ -12,7 +12,7 @@ export TRUSTY_SERVER_3=https://10.77.88.103:7891
 
 export TRUSTY_ROOT=/var/trusty/roots/trusty_root_ca.pem
 
-export TRUSTYCTL_FLAGS="-V -D --cfg /opt/trusty/etc/prod/trusty-config.json -r $TRUSTY_ROOT"
+export TRUSTYCTL_FLAGS="-V -D --cfg /opt/trusty/etc/prod/trusty-config.yaml -r $TRUSTY_ROOT"
 
 echo "Trusted anchors"
 cp $TRUSTY_ROOT /etc/pki/ca-trust/source/anchors/

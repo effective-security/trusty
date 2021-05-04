@@ -78,15 +78,15 @@ func configureListeners(cfg *config.HTTPServer) (sctxs map[string]*serveCtx, err
 	gopts := []grpc.ServerOption{}
 	if cfg.KeepAliveMinTime > 0 {
 		gopts = append(gopts, grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
-			MinTime:             cfg.KeepAliveMinTime.TimeDuration(),
+			MinTime:             cfg.KeepAliveMinTime,
 			PermitWithoutStream: false,
 		}))
 	}
 	if cfg.KeepAliveInterval > 0 &&
 		cfg.KeepAliveTimeout > 0 {
 		gopts = append(gopts, grpc.KeepaliveParams(keepalive.ServerParameters{
-			Time:    cfg.KeepAliveInterval.TimeDuration(),
-			Timeout: cfg.KeepAliveTimeout.TimeDuration(),
+			Time:    cfg.KeepAliveInterval,
+			Timeout: cfg.KeepAliveTimeout,
 		}))
 	}
 
@@ -284,7 +284,7 @@ func configureHandlers(s *Server, handler http.Handler) http.Handler {
 	}
 
 	// logging wrapper
-	handler = xhttp.NewRequestLogger(handler, s.Name(), serverExtraLogger, time.Millisecond, s.cfg.GetPackageLogger())
+	handler = xhttp.NewRequestLogger(handler, s.Name(), serverExtraLogger, time.Millisecond, s.cfg.PackageLogger)
 	// metrics wrapper
 	handler = xhttp.NewRequestMetrics(handler)
 

@@ -149,13 +149,13 @@ func NewIssuer(cfg *config.Issuer, caCfg *Config, prov *cryptoprov.Crypto) (*Iss
 	}
 
 	if cfg.CRLExpiry > 0 {
-		issuer.crlExpiry = cfg.CRLExpiry.TimeDuration()
+		issuer.crlExpiry = cfg.CRLExpiry
 	}
 	if cfg.CRLRenewal > 0 {
-		issuer.crlRenewal = cfg.CRLRenewal.TimeDuration()
+		issuer.crlRenewal = cfg.CRLRenewal
 	}
 	if cfg.OCSPExpiry > 0 {
-		issuer.ocspExpiry = cfg.OCSPExpiry.TimeDuration()
+		issuer.ocspExpiry = cfg.OCSPExpiry
 	}
 
 	return issuer, nil

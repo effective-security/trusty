@@ -204,18 +204,18 @@ func provideAuthz(cfg *config.Configuration) (rest.Authz, *jwtmapper.Provider, e
 			Allow:         cfg.Authz.Allow,
 			AllowAny:      cfg.Authz.AllowAny,
 			AllowAnyRole:  cfg.Authz.AllowAnyRole,
-			LogAllowedAny: cfg.Authz.GetLogAllowedAny(),
-			LogAllowed:    cfg.Authz.GetLogAllowed(),
-			LogDenied:     cfg.Authz.GetLogDenied(),
+			LogAllowedAny: cfg.Authz.LogAllowedAny,
+			LogAllowed:    cfg.Authz.LogAllowed,
+			LogDenied:     cfg.Authz.LogDenied,
 		})
 		if err != nil {
 			return nil, nil, errors.Trace(err)
 		}
 	}
-	if cfg.Authz.JWTMapper != "" || cfg.Authz.CertMapper != "" {
+	if cfg.Identity.JWTMapper != "" || cfg.Identity.CertMapper != "" {
 		p, err := roles.New(
-			cfg.Authz.JWTMapper,
-			cfg.Authz.CertMapper,
+			cfg.Identity.JWTMapper,
+			cfg.Identity.CertMapper,
 		)
 		if err != nil {
 			return nil, nil, errors.Trace(err)

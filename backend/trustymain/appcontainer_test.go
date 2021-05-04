@@ -32,9 +32,9 @@ func TestNewContainerFactory(t *testing.T) {
 		{
 			name: "no_logs",
 			cfg: &config.Configuration{
-				Authz:  config.Authz{AllowAny: []string{"/v1/status"}},
-				Logger: config.Logger{Directory: "/dev/null"},
-				Audit:  config.Logger{Directory: "/dev/null"},
+				Authz: config.Authz{AllowAny: []string{"/v1/status"}},
+				Logs:  config.Logger{Directory: "/dev/null"},
+				Audit: config.Logger{Directory: "/dev/null"},
 			},
 		},
 		{
@@ -45,8 +45,8 @@ func TestNewContainerFactory(t *testing.T) {
 						Disabled: &falseVal,
 					},
 				*/
-				Logger: config.Logger{Directory: output},
-				Audit:  config.Logger{Directory: output},
+				Logs:  config.Logger{Directory: output},
+				Audit: config.Logger{Directory: output},
 			},
 		},
 	}

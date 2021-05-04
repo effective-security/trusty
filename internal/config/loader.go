@@ -1,54 +1,40 @@
 package config
 
-// Package config allows for the configuration to read from a separate config file.
-// It supports having different configurations for different instance based on host name.
-//
-// The implementation is primarily provided by the configen tool.
-
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net/url"
 	"os"
 	"os/user"
 	"path/filepath"
 	"reflect"
 	"strings"
-	"time"
 
 	"github.com/go-phorce/dolly/fileutil/resolve"
 	"github.com/go-phorce/dolly/netutil"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
+	yamlcfg "go.uber.org/config"
+	"gopkg.in/yaml.v2"
 )
-
-//go:generate configen -c config_def.json -d .
 
 var logger = xlog.NewPackageLogger("github.com/ekspand/trusty", "config")
 
 const (
 	// ConfigFileName is default name for the configuration file
-	ConfigFileName = "trusty-config.json"
+	ConfigFileName = "trusty-config.yaml"
 
-	envHostnameKey = "TRUSTY_HOSTNAME"
-)
-
-var (
-	// DefaultCRLRenewal specifies default duration for CRL renewal
-	DefaultCRLRenewal = 7 * 24 * time.Hour // 7 days
-	// DefaultCRLExpiry specifies default duration for CRL expiry
-	DefaultCRLExpiry = 30 * 24 * time.Hour // 30 days
-	// DefaultOCSPExpiry specifies default for OCSP expiry
-	DefaultOCSPExpiry = 1 * 24 * time.Hour // 1 day
+	// EnvHostnameKey is the env name to look up for the config override by hostname.
+	// if it's set, then $(TRUSTY_HOSTNAME).$(ConfigFileName) will be added to override list
+	EnvHostnameKey = "TRUSTY_HOSTNAME"
 )
 
 // Factory is used to create Configuration instance
 type Factory struct {
-	nodeInfo   netutil.NodeInfo
-	searchDirs []string
-	user       *string
+	nodeInfo    netutil.NodeInfo
+	hostEnvName string
+	searchDirs  []string
+	user        *string
 }
 
 // DefaultFactory returns default configuration factory
@@ -73,17 +59,33 @@ func DefaultFactory() (*Factory, error) {
 	logger.Infof("src=DefaultFactory, searchDirs=[%s]", strings.Join(searchDirs, ","))
 
 	return &Factory{
-		searchDirs: searchDirs,
-		nodeInfo:   nodeInfo,
+		searchDirs:  searchDirs,
+		nodeInfo:    nodeInfo,
+		hostEnvName: EnvHostnameKey,
 	}, nil
 }
 
 // NewFactory returns new configuration factory
 func NewFactory(nodeInfo netutil.NodeInfo, searchDirs []string) (*Factory, error) {
+	var err error
+	if nodeInfo == nil {
+		nodeInfo, err = netutil.NewNodeInfo(nil)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+	}
+
 	return &Factory{
-		searchDirs: searchDirs,
-		nodeInfo:   nodeInfo,
+		searchDirs:  searchDirs,
+		nodeInfo:    nodeInfo,
+		hostEnvName: EnvHostnameKey,
 	}, nil
+}
+
+// WithEnvHostname allows to specify Env name for hostname
+func (f *Factory) WithEnvHostname(hostEnvName string) *Factory {
+	f.hostEnvName = hostEnvName
+	return f
 }
 
 // GetConfigAbsFilename returns absolute path for the configuration file
@@ -139,8 +141,7 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 
 	logger.Infof("src=LoadConfigForHostName, file=%s, baseDir=%s", configFile, baseDir)
 
-	//JSONLoader = f.loadJSONWithENV
-	c, err := Load(configFile, envHostnameKey, hostnameOverride)
+	c, err := f.load(configFile, hostnameOverride, baseDir)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -156,6 +157,7 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 
 	// Add to this list all configs that require folder resolution to absolute path
 	dirsToResolve := []*string{
+		&c.Logs.Directory,
 		&c.Audit.Directory,
 		&c.SQL.MigrationsDir,
 	}
@@ -173,9 +175,9 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 		&c.TrustyClient.ClientTLS.CertFile,
 		&c.TrustyClient.ClientTLS.KeyFile,
 		&c.TrustyClient.ClientTLS.TrustedCAFile,
-		&c.Authz.CertMapper,
-		&c.Authz.JWTMapper,
-		&c.Authz.APIKeyMapper,
+		&c.Identity.CertMapper,
+		&c.Identity.JWTMapper,
+		&c.Identity.APIKeyMapper,
 	}
 	for i := range c.CryptoProv.Providers {
 		optionalFilesToResove = append(optionalFilesToResove, &c.CryptoProv.Providers[i])
@@ -206,6 +208,67 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 	return c, err
 }
 
+// Hostmap provides overrides info
+type Hostmap struct {
+	// Override is a map of host name to file location
+	Override map[string]string
+}
+
+// Load will attempt to load the configuration from the supplied filename.
+// Overrides defined in the config file will be applied based on the hostname
+// the hostname used is dervied from [in order]
+//    1) the hostnameOverride parameter if not ""
+//    2) the value of the Environment variable in envKeyName, if not ""
+//    3) the OS supplied hostname
+func (f *Factory) load(configFilename, hostnameOverride, baseDir string) (*Configuration, error) {
+	var err error
+	ops := []yamlcfg.YAMLOption{yamlcfg.File(configFilename)}
+
+	// load hostmap schema
+	if hmapraw, err := ioutil.ReadFile(configFilename + ".hostmap"); err == nil {
+		var hmap Hostmap
+		err = yaml.Unmarshal(hmapraw, &hmap)
+		if err != nil {
+			return nil, errors.Annotatef(err, "failed to load hostmap file")
+		}
+
+		hn := hostnameOverride
+		if hn == "" {
+			if f.hostEnvName != "" {
+				hn = os.Getenv(f.hostEnvName)
+			}
+			if hn == "" {
+				hn, err = os.Hostname()
+				if err != nil {
+					logger.Errorf("src=Load, reason=hostname, err=[%v]", errors.Details(err))
+				}
+			}
+		}
+
+		if hn != "" && hmap.Override[hn] != "" {
+			override := hmap.Override[hn]
+			override, err = resolve.File(override, baseDir)
+			if err != nil {
+				return nil, errors.Annotatef(err, "failed to resolve file")
+			}
+			ops = append(ops, yamlcfg.File(override))
+		}
+	}
+
+	provider, err := yamlcfg.NewYAML(ops...)
+	if err != nil {
+		return nil, errors.Annotatef(err, "failed to load configuration")
+	}
+
+	c := new(Configuration)
+	err = provider.Get(yamlcfg.Root).Populate(c)
+	if err != nil {
+		return nil, errors.Annotatef(err, "failed to parse configuration")
+	}
+
+	return c, nil
+}
+
 func (f *Factory) getVariableValues(config *Configuration) map[string]string {
 	ret := map[string]string{
 		"${HOSTNAME}":              f.nodeInfo.HostName(),
@@ -232,20 +295,6 @@ func (f *Factory) getVariableValues(config *Configuration) map[string]string {
 	}
 
 	return ret
-}
-
-// LoadJSON returns JSON with replaced environment variables,
-// ${HOSTNAME}, ${NODENAME}, ${LOCALIP} etc
-func (f *Factory) LoadJSON(config *Configuration, filename string, v interface{}) error {
-	bytes, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return err
-	}
-
-	vars := f.getVariableValues(config)
-	val := resolveEnvVars(string(bytes), vars)
-
-	return json.NewDecoder(strings.NewReader(val)).Decode(v)
 }
 
 func (f *Factory) resolveConfigFile(configFile string) (absConfigFile, baseDir string, err error) {
@@ -312,6 +361,8 @@ func doSubstituteEnvVars(v reflect.Value, variables map[string]string, topLevel 
 		v = v.Elem()
 	}
 
+	//logger.Infof("src=doSubstituteEnvVars, type=%v, type=%v", v.Kind(), v.Type())
+
 	switch v.Kind() {
 	case reflect.Struct:
 		for i := 0; i < v.NumField(); i++ {
@@ -325,44 +376,7 @@ func doSubstituteEnvVars(v reflect.Value, variables map[string]string, topLevel 
 		if v.CanSet() {
 			v.SetString(resolveEnvVars(v.String(), variables))
 		}
+	default:
+		//logger.Warningf("src=doSubstituteEnvVars, kind=%v, type=%v", v.Kind(), v.Type())
 	}
-}
-
-func (info *TLSInfo) String() string {
-	return fmt.Sprintf("cert=%s, key=%s, trusted-ca=%s, client-cert-auth=%v, crl-file=%s",
-		info.CertFile, info.KeyFile, info.TrustedCAFile, info.GetClientCertAuth(), info.CRLFile)
-}
-
-// Empty returns true if TLS info is empty
-func (info *TLSInfo) Empty() bool {
-	return info.CertFile == "" || info.KeyFile == ""
-}
-
-// ParseListenURLs constructs a list of listen peers URLs
-func (c *HTTPServer) ParseListenURLs() ([]*url.URL, error) {
-	return netutil.ParseURLs(c.ListenURLs)
-}
-
-// GetDefaultCRLExpiry specifies value in 72h format for duration of CRL next update time
-func (c *Authority) GetDefaultCRLExpiry() time.Duration {
-	if c.DefaultCRLExpiry > 0 {
-		return c.DefaultCRLExpiry.TimeDuration()
-	}
-	return DefaultCRLExpiry
-}
-
-// GetDefaultOCSPExpiry specifies value in 8h format for duration of OCSP next update time
-func (c *Authority) GetDefaultOCSPExpiry() time.Duration {
-	if c.DefaultOCSPExpiry > 0 {
-		return c.DefaultOCSPExpiry.TimeDuration()
-	}
-	return DefaultOCSPExpiry
-}
-
-// GetDefaultCRLRenewal specifies value in 8h format for duration of CRL renewal before next update time
-func (c *Authority) GetDefaultCRLRenewal() time.Duration {
-	if c.DefaultCRLRenewal > 0 {
-		return c.DefaultCRLRenewal.TimeDuration()
-	}
-	return DefaultCRLRenewal
 }

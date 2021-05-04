@@ -175,7 +175,7 @@ preprpm: change_log
 	cp -R scripts/sql/ .rpm/trusty/opt/trusty/bin/
 	# etc
 	cp etc/prod/*.json .rpm/trusty/opt/trusty/etc/prod/
-	# cp etc/prod/*.yaml .rpm/trusty/opt/trusty/etc/prod/
+	cp etc/prod/*.yaml .rpm/trusty/opt/trusty/etc/prod/
 	cp -R etc/prod/csr/ .rpm/trusty/opt/trusty/etc/prod/
 	# rpm
 	cp ./scripts/rpm/*.sh .rpm/
