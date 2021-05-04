@@ -20,7 +20,11 @@ func Test_Config(t *testing.T) {
 
 	_, err = jwtmapper.LoadConfig("testdata/roles_corrupted.1.json")
 	require.Error(t, err)
-	assert.Equal(t, `unable to unmarshal "testdata/roles_corrupted.1.json": invalid character 'v' looking for beginning of value`, err.Error())
+	assert.Equal(t, `unable to unmarshal JSON: "testdata/roles_corrupted.1.json": invalid character 'v' looking for beginning of value`, err.Error())
+
+	_, err = jwtmapper.LoadConfig("testdata/roles_corrupted.yaml")
+	require.Error(t, err)
+	assert.Equal(t, `unable to unmarshal YAML: "testdata/roles_corrupted.yaml": yaml: line 4: did not find expected alphabetic or numeric character`, err.Error())
 
 	_, err = jwtmapper.LoadConfig("testdata/roles_corrupted.2.json")
 	require.Error(t, err)
@@ -59,6 +63,12 @@ func Test_Load(t *testing.T) {
 	m, err := jwtmapper.Load("testdata/roles.json")
 	require.NoError(t, err)
 	id, key := m.CurrentKey()
+	assert.NotEmpty(t, id)
+	assert.NotEmpty(t, key)
+
+	m, err = jwtmapper.Load("testdata/roles.yaml")
+	require.NoError(t, err)
+	id, key = m.CurrentKey()
 	assert.NotEmpty(t, id)
 	assert.NotEmpty(t, key)
 

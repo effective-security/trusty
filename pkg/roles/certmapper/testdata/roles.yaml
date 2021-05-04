@@ -1,0 +1,11 @@
+---
+valid_organizations:
+  - trusty.com
+  - Trusty RA
+valid_issuers:
+  - CN=[TEST] Trusty Root CA
+roles:
+  trusty-client:
+  - C=US, ST=wa, L=Kirkland, O=trusty.com, CN=ra-*.trusty.com
+  trusty-peer:
+  - C=US, ST=wa, L=Kirkland, O=trusty.com, CN=peer.trusty-*.trusty.com

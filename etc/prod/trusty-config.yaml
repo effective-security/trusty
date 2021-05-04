@@ -95,15 +95,15 @@ authz:
 # configuration for the Identity mappers
 identity:
   # location of the config file for certificate based identity
-  cert_mapper: cert-roles.json
+  cert_mapper: cert-roles.yaml
   # location of the config file for JWT based identity
-  jwt_mapper: jwt-roles.json
+  jwt_mapper: jwt-roles.yaml
   # location of the config file for API-Key based identity
   api_key_mapper:
 
 # the configuration files for OAuth clients    
 oauth_clients:
-  - oauth-github.json
+  - oauth-github.yaml
 
 authority:
   # specifies file location with CA configuration
