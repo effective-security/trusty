@@ -1,9 +1,0 @@
-{
-    "provider_id": "github",
-    "client_id": "098fc5daacdbf1412371",
-    "client_secret": "env://TRUSTY_GITHUB_CLIENT_SECRET",
-    "scopes": ["read:org", "read:user"],
-    "response_type": "code",
-    "auth_url": "https://github.com/login/oauth/authorize",
-    "token_url": "https://github.com/login/oauth/access_token"
-}

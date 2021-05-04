@@ -29,11 +29,15 @@ func Test_Config(t *testing.T) {
 
 	_, err = certmapper.Load("testdata/roles_corrupted.1.json")
 	require.Error(t, err)
-	assert.Equal(t, `unable to unmarshal "testdata/roles_corrupted.1.json": invalid character 'v' looking for beginning of value`, err.Error())
+	assert.Equal(t, `unable to unmarshal JSON: "testdata/roles_corrupted.1.json": invalid character 'v' looking for beginning of value`, err.Error())
 
 	_, err = certmapper.Load("testdata/roles_corrupted.2.json")
 	require.Error(t, err)
-	assert.Equal(t, `unable to unmarshal "testdata/roles_corrupted.2.json": invalid character ',' after object key`, err.Error())
+	assert.Equal(t, `unable to unmarshal JSON: "testdata/roles_corrupted.2.json": invalid character ',' after object key`, err.Error())
+
+	_, err = certmapper.Load("testdata/roles_corrupted.yaml")
+	require.Error(t, err)
+	assert.Equal(t, `unable to unmarshal YAML: "testdata/roles_corrupted.yaml": yaml: line 10: mapping values are not allowed in this context`, err.Error())
 
 	_, err = certmapper.Load("")
 	require.NoError(t, err)
@@ -42,10 +46,15 @@ func Test_Config(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 2, len(cfg.ValidOrganizations))
 	assert.Equal(t, 1, len(cfg.ValidIssuers))
+
+	cfg, err = certmapper.LoadConfig("testdata/roles.yaml")
+	require.NoError(t, err)
+	assert.Equal(t, 2, len(cfg.ValidOrganizations))
+	assert.Equal(t, 1, len(cfg.ValidIssuers))
 }
 
 func Test_identity(t *testing.T) {
-	cfg, err := certmapper.LoadConfig("testdata/roles.json")
+	cfg, err := certmapper.LoadConfig("testdata/roles.yaml")
 	require.NoError(t, err)
 
 	p, err := certmapper.New(cfg)

@@ -15,6 +15,7 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
+	"gopkg.in/yaml.v2"
 )
 
 var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "jwtmapper")
@@ -25,24 +26,24 @@ const ProviderName = "jwt"
 // Key for JWT signature
 type Key struct {
 	// ID of the key
-	ID   string `json:"id"`
-	Seed string `json:"seed"`
+	ID   string `json:"id" yaml:"id"`
+	Seed string `json:"seed" yaml:"seed"`
 }
 
 // Config provides OAuth2 configuration
 type Config struct {
 	// Audience specifies audience claim
-	Audience string `json:"audience"`
+	Audience string `json:"audience" yaml:"audience"`
 	// Issuer specifies issuer claim
-	Issuer string `json:"issuer"`
+	Issuer string `json:"issuer" yaml:"issuer"`
 	// KeyID specifies ID of the current key
-	KeyID string `json:"kid"`
+	KeyID string `json:"kid" yaml:"kid"`
 	// Keys specifies list of issuer's keys
-	Keys []*Key `json:"keys"`
+	Keys []*Key `json:"keys" yaml:"keys"`
 	// DefaultRole specifies default role name
-	DefaultRole string `json:"default_role"`
+	DefaultRole string `json:"default_role" yaml:"default_role"`
 	// RolesMap is a map of roles to list of users
-	RolesMap map[string][]string `json:"roles"`
+	RolesMap map[string][]string `json:"roles" yaml:"roles"`
 }
 
 // Provider of OAuth2 identity
@@ -61,15 +62,22 @@ func LoadConfig(file string) (*Config, error) {
 		return &Config{}, nil
 	}
 
-	jsonFile, err := ioutil.ReadFile(file)
+	raw, err := ioutil.ReadFile(file)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
 	var config Config
-	err = json.Unmarshal(jsonFile, &config)
-	if err != nil {
-		return nil, errors.Annotatef(err, "unable to unmarshal %q", file)
+	if strings.HasSuffix(file, ".json") {
+		err = json.Unmarshal(raw, &config)
+		if err != nil {
+			return nil, errors.Annotatef(err, "unable to unmarshal JSON: %q", file)
+		}
+	} else {
+		err = yaml.Unmarshal(raw, &config)
+		if err != nil {
+			return nil, errors.Annotatef(err, "unable to unmarshal YAML: %q", file)
+		}
 	}
 
 	if config.KeyID == "" {

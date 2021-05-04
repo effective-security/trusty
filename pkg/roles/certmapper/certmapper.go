@@ -12,6 +12,7 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
+	"gopkg.in/yaml.v2"
 )
 
 // ProviderName is identifier for role mapper provider
@@ -22,19 +23,19 @@ var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "certmapper"
 // Identity of the caller
 type Identity struct {
 	// Name of identity
-	Name string `json:"name"`
+	Name string `json:"name" yaml:"name"`
 	// Role of identity
-	Role string `json:"role"`
+	Role string `json:"role" yaml:"role"`
 }
 
 // Config provides mapping of Subject Names to Roles
 type Config struct {
 	// NamesMap is a map of role to X509 Subjects
-	NamesMap map[string][]string `json:"roles"`
+	NamesMap map[string][]string `json:"roles" yaml:"roles"`
 	// ValidOrganizations is a list of accepted Organization values from a cert.
-	ValidOrganizations []string `json:"valid_organizations"`
+	ValidOrganizations []string `json:"valid_organizations" yaml:"valid_organizations"`
 	// ValidIssuers is a list of accepted root Subject names
-	ValidIssuers []string `json:"valid_issuers"`
+	ValidIssuers []string `json:"valid_issuers" yaml:"valid_issuers"`
 }
 
 // Provider of Cert identity
@@ -51,17 +52,24 @@ func LoadConfig(file string) (*Config, error) {
 		return &Config{}, nil
 	}
 
-	jsonFile, err := ioutil.ReadFile(file)
+	raw, err := ioutil.ReadFile(file)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
 	var config Config
-	err = json.Unmarshal(jsonFile, &config)
-	if err != nil {
-		return nil, errors.Annotatef(err, "unable to unmarshal %q", file)
-	}
 
+	if strings.HasSuffix(file, ".json") {
+		err = json.Unmarshal(raw, &config)
+		if err != nil {
+			return nil, errors.Annotatef(err, "unable to unmarshal JSON: %q", file)
+		}
+	} else {
+		err = yaml.Unmarshal(raw, &config)
+		if err != nil {
+			return nil, errors.Annotatef(err, "unable to unmarshal YAML: %q", file)
+		}
+	}
 	return &config, nil
 }
 

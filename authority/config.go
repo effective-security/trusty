@@ -16,37 +16,37 @@ import (
 // CAConstraint would verify against (and override) the CA
 // extensions in the given CSR.
 type CAConstraint struct {
-	IsCA           bool `json:"is_ca"`
-	MaxPathLen     int  `json:"max_path_len"`
-	MaxPathLenZero bool `json:"max_path_len_zero"`
+	IsCA           bool `json:"is_ca" yaml:"is_ca"`
+	MaxPathLen     int  `json:"max_path_len" yaml:"max_path_len"`
+	MaxPathLenZero bool `json:"max_path_len_zero" yaml:"max_path_len_zero"`
 }
 
 // CertProfile provides certificate profile
 type CertProfile struct {
-	Description string `json:"description"`
+	Description string `json:"description" yaml:"description"`
 
 	// Usage provides a list key usages
-	Usage []string `json:"usages"`
+	Usage []string `json:"usages" yaml:"usages"`
 
-	CAConstraint CAConstraint `json:"ca_constraint"`
-	OCSPNoCheck  bool         `json:"ocsp_no_check"`
+	CAConstraint CAConstraint `json:"ca_constraint" yaml:"ca_constraint"`
+	OCSPNoCheck  bool         `json:"ocsp_no_check" yaml:"ocsp_no_check"`
 
-	Expiry   csr.Duration `json:"expiry"`
-	Backdate csr.Duration `json:"backdate"`
+	Expiry   csr.Duration `json:"expiry" yaml:"expiry"`
+	Backdate csr.Duration `json:"backdate" yaml:"backdate"`
 
-	AllowedExtensions []csr.OID `json:"allowed_extensions"`
+	AllowedExtensions []csr.OID `json:"allowed_extensions" yaml:"allowed_extensions"`
 
 	// AllowedCommonNames specifies a RegExp to check for allowed names.
 	// If not provided, then all names are allowed
-	AllowedCommonNames string `json:"allowed_names"`
+	AllowedCommonNames string `json:"allowed_names" yaml:"allowed_names"`
 
 	// AllowedDNS specifies a RegExp to check for allowed DNS.
 	// If not provided, then all names are allowed
-	AllowedDNS string `json:"allowed_dns"`
+	AllowedDNS string `json:"allowed_dns" yaml:"allowed_dns"`
 
 	// AllowedEmail specifies a RegExp to check for allowed email.
 	// If not provided, then all names are allowed
-	AllowedEmail string `json:"allowed_email"`
+	AllowedEmail string `json:"allowed_email" yaml:"allowed_email"`
 
 	// AllowedFields provides booleans for fields in the CSR.
 	// If a AllowedFields is not present in a CertProfile,
@@ -59,13 +59,13 @@ type CertProfile struct {
 	// Since API clients are expected to be trusted, but CSRs are not, fields
 	// provided through the API are not subject to validation through this
 	// mechanism.
-	AllowedCSRFields *csr.AllowedFields `json:"allowed_fields"`
+	AllowedCSRFields *csr.AllowedFields `json:"allowed_fields" yaml:"allowed_fields"`
 
-	Policies []csr.CertificatePolicy `json:"policies"`
+	Policies []csr.CertificatePolicy `json:"policies" yaml:"policies"`
 
-	AllowedNamesRegex *regexp.Regexp `json:"-"`
-	AllowedDNSRegex   *regexp.Regexp `json:"-"`
-	AllowedEmailRegex *regexp.Regexp `json:"-"`
+	AllowedNamesRegex *regexp.Regexp `json:"-" yaml:"-"`
+	AllowedDNSRegex   *regexp.Regexp `json:"-" yaml:"-"`
+	AllowedEmailRegex *regexp.Regexp `json:"-" yaml:"-"`
 }
 
 // AllowedExtensionsStrings returns slice of strings
@@ -81,17 +81,17 @@ func (p *CertProfile) AllowedExtensionsStrings() []string {
 type Config struct {
 	// AiaURL specifies a template for AIA URL.
 	// The ${ISSUER_ID} variable will be replaced with a Subject Key Identifier of the issuer.
-	AiaURL string `json:"issuer_url"`
+	AiaURL string `json:"issuer_url" yaml:"issuer_url"`
 
 	// OcspURL specifies a template for OCSP URL.
 	// The ${ISSUER_ID} variable will be replaced with a Subject Key Identifier of the issuer.
-	OcspURL string `json:"ocsp_url"`
+	OcspURL string `json:"ocsp_url" yaml:"ocsp_url"`
 
 	// DefaultOcspURL specifies a template for CRL URL.
 	// The ${ISSUER_ID} variable will be replaced with a Subject Key Identifier of the issuer.
-	CrlURL string `json:"crl_url"`
+	CrlURL string `json:"crl_url" yaml:"crl_url"`
 
-	Profiles map[string]*CertProfile `json:"profiles"`
+	Profiles map[string]*CertProfile `json:"profiles" yaml:"profiles"`
 }
 
 // DefaultCertProfile returns a default configuration
