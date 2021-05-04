@@ -2,6 +2,8 @@ package testutils
 
 import (
 	"fmt"
+	"math/rand"
+	"os"
 	"path/filepath"
 	"sync/atomic"
 
@@ -9,7 +11,7 @@ import (
 )
 
 var (
-	nextPort = int32(17891)
+	nextPort = int32(17891) + rand.Int31n(5000)
 	//testDirPath = filepath.Join(os.TempDir(), "tests", "trusty", guid.MustCreate())
 )
 
@@ -21,6 +23,9 @@ func CreateURLs(scheme, host string) string {
 
 // LoadConfig returns Configuration
 func LoadConfig(projFolder, hostname string) (*config.Configuration, error) {
+	if hostname != "" {
+		os.Setenv(config.EnvHostnameKey, hostname)
+	}
 	cfgPath, err := filepath.Abs(projFolder + "etc/dev/" + config.ConfigFileName)
 	if err != nil {
 		return nil, err

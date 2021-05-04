@@ -1,0 +1,194 @@
+---
+service: trusty-pod
+region : local
+cluster: ${NODENAME}
+
+# configuration for the logger
+logs:
+  # contains where to store the log files; if value is empty, them stderr is used for output
+  directory: /tmp/trusty/logs
+  # controls how old files are before deletion / rotation
+  max_age_days: 3
+  # contols how large a single log file can be before its rotated
+  max_size_mb: 10
+
+log_levels: 
+  -
+    repo: "*"
+    level: TRACE
+  -
+    repo: github.com/ekspand/trusty
+    package: "*"
+    level: TRACE
+  -
+    repo: github.com/ekspand/trusty/health
+    package: xhttp
+    level: ERROR
+  -  
+    repo: github.com/ekspand/trusty/backend/service
+    package: "*"
+    level: DEBUG
+  -
+    repo: github.com/go-phorce/dolly
+    package: "*"
+    level: TRACE
+
+# configuration for the audit logger
+audit:
+  directory: /tmp/trusty/audit
+  max_age_days: 14
+  max_size_mb: 10
+
+metrics:
+  # specifies if the metrics provider is disabled
+  disabled: true
+  # the metrics provider: prometeus|inmem
+  provider: inmem
+
+# configuration for crypto providers
+crypto_provider:
+  #  the location of the configuration file for default provider
+  default: /tmp/trusty/softhsm/unittest_hsm.json
+  # the list of locations of the configuration files
+  providers:
+  # the list of supported manufactures of PKCS11 tokens
+  pkcs11_manufacturers:
+    - SoftHSM
+    - Gemalto NV
+
+sql:
+  # the driver name: postgres|mysql
+  driver: postgres
+  # specifies the connection string. It can be prefixed with file:// or env:// to load the source from a file or environment variable.
+  data_source: file://${TRUSTY_CONFIG_DIR}/sql-conn.txt
+  # the directory that contains migrations.
+  migrations_dir: ../../../scripts/sql/postgres/migrations
+
+# configuration for the authorization module
+authz:
+  # allow any non-authenticated request access to this path and its children
+  allow_any:
+    - /v1/auth
+    - /v1/status
+    - /v1/certs
+    - /v1/crl
+    - /v1/ocsp
+    - /v1/roots
+    - /trustypb.CertInfoService
+    - /trustypb.StatusService
+  # allow any authenticated request that includes a non empty role
+  allow_any_role:
+    - /v1/wf
+    - /trustypb.AuthorityService/Issuers
+    - /trustypb.AuthorityService/Roots
+  # allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
+  allow:
+    - /v1/ca:trusty-peer
+    - /trustypb.AuthorityService:trusty-peer
+  # specifies to log allowed access to Any role
+  log_allowed_any: true
+  # specifies to log allowed access
+  log_allowed: true
+  # specifies to log denied access
+  log_denied: true
+
+# configuration for the Identity mappers
+identity:
+  # location of the config file for certificate based identity
+  cert_mapper: ../../../etc/dev/cert-roles.dev.json
+  # location of the config file for JWT based identity
+  jwt_mapper: ../../../etc/dev/jwt-roles.dev.json
+  # location of the config file for API-Key based identity
+  api_key_mapper:
+
+# the configuration files for OAuth clients    
+oauth_clients:
+  - ../../../etc/dev/oauth-github.dev.json
+
+authority:
+  # specifies file location with CA configuration
+  ca_config: ../../../etc/dev/ca-config.dev.json
+  # default value in 72h format for duration of CRL next update time
+  default_crl_expiry: 12h
+  # value in 8h format for duration of CRL renewal before next update time
+  default_crl_renewal: 1h
+  # value in 8h format for duration of OCSP next update time
+  default_ocsp_expiry: 30m
+  # the list of private Root Certs files.
+  private_roots:
+    - /tmp/trusty/certs/trusty_dev_root_ca.pem
+  # the list of public Root Certs files.
+  public_roots:
+  issuers:
+  -
+    # specifies Issuer's label
+    label: TrustyCA
+    # specifies type: tls|codesign|timestamp|ocsp|spiffe|trusty
+    type: trusty
+    cert: /tmp/trusty/certs/trusty_dev_issuer2_ca.pem
+    key: /tmp/trusty/certs/trusty_dev_issuer2_ca-key.pem
+    # location of the CA bundle file
+    ca_bundle: /tmp/trusty/certs/trusty_dev_cabundle.pem
+    # location of the Root CA file
+    root_bundle: /tmp/trusty/certs/trusty_dev_root_ca.pem
+    # value in 72h format for duration of CRL next update time
+    crl_expiry: 8h
+    # value in 8h format for duration of CRL renewal before next update time
+    crl_renewal: 1h
+    # value in 8h format for duration of OCSP next update time
+    ocsp_expiry: 10m
+
+servers:
+  - name: Health
+    listen_urls:
+      - http://0.0.0.0:8080
+    services:
+      - status
+    heartbeat_secs: 30
+    request_timeout: 3s
+  - name: Trusty
+    listen_urls:
+      - https://0.0.0.0:7891
+    server_tls:
+      cert: /tmp/trusty/certs/trusty_dev_peer.pem
+      key: /tmp/trusty/certs/trusty_dev_peer-key.pem
+      trusted_ca: /tmp/trusty/certs/trusty_dev_root_ca.pem
+    services:
+      - auth
+      - status
+      - ca
+      - cis
+      - workflow
+    heartbeat_secs: 30
+    request_timeout: 3s
+    keep_alive_min_time: 60s
+    keep_alive_interval: 30s
+    keep_alive_timeout: 180s
+    cors:
+      enabled: true
+      max_age: 600
+      allow_credentials: true
+      allowed_origins:
+        - "*"
+      allowed_methods:
+        - HEAD
+        - OPTIONS
+        - GET
+        - POST
+        - DELETE
+      allowed_headers:
+        - Accept
+        - Content-Type
+        - Content-Length
+        - Accept-Encoding
+        - Authorization
+         -X-Device-ID
+
+trusty_client: 
+  client_tls:
+    cert: /tmp/trusty/certs/trusty_dev_peer.pem
+    key: /tmp/trusty/certs/trusty_dev_peer-key.pem
+    trusted_ca: /tmp/trusty/certs/trusty_dev_root_ca.pem
+  public_url: https://localhost:7891
+  servers:
+    - https://0.0.0.0:7891

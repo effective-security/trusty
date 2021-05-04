@@ -201,7 +201,7 @@ func (e *Server) Close() {
 	// close client requests with request timeout
 	timeout := 3 * time.Second
 	if e.cfg.RequestTimeout != 0 {
-		timeout = e.cfg.RequestTimeout.TimeDuration()
+		timeout = e.cfg.RequestTimeout
 	}
 	for _, sctx := range e.sctxs {
 		for ss := range sctx.serversC {

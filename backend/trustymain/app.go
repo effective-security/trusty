@@ -327,7 +327,7 @@ func (a *App) loadConfig() error {
 	a.cfg = cfg
 
 	if *flags.logsDir != "" {
-		cfg.Logger.Directory = *flags.logsDir
+		cfg.Logs.Directory = *flags.logsDir
 	}
 	if *flags.auditDir != "" {
 		cfg.Audit.Directory = *flags.auditDir
@@ -379,9 +379,9 @@ func (a *App) loadConfig() error {
 
 func (a *App) initLogs() error {
 	cfg := a.cfg
-	if cfg.Logger.Directory != "" && cfg.Logger.Directory != nullDevName {
+	if cfg.Logs.Directory != "" && cfg.Logs.Directory != nullDevName {
 		var sink io.Writer
-		if *a.flags.isStderr {
+		if a.flags != nil && *a.flags.isStderr {
 			sink = os.Stderr
 			xlog.SetFormatter(xlog.NewColorFormatter(sink, true))
 		} else {
@@ -389,9 +389,9 @@ func (a *App) initLogs() error {
 			log.SetOutput(os.Stderr)
 		}
 
-		logRotate, err := logrotate.Initialize(cfg.Logger.Directory, cfg.ServiceName, cfg.Logger.MaxAgeDays, cfg.Logger.MaxSizeMb, true, sink)
+		logRotate, err := logrotate.Initialize(cfg.Logs.Directory, cfg.ServiceName, cfg.Logs.MaxAgeDays, cfg.Logs.MaxSizeMb, true, sink)
 		if err != nil {
-			logger.Errorf("src=initLogs, reason=logrotate, folder=%q, err=[%s]", cfg.Logger.Directory, errors.ErrorStack(err))
+			logger.Errorf("src=initLogs, reason=logrotate, folder=%q, err=[%s]", cfg.Logs.Directory, errors.ErrorStack(err))
 			return errors.Annotate(err, "failed to initialize log rotate")
 		}
 		a.OnClose(logRotate)

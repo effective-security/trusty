@@ -230,7 +230,7 @@ func TestCLIWithServiceCfg(t *testing.T) {
 		Action(cli.RegisterAction(cmdClientAction, nil))
 	out.Reset()
 
-	cfg, err := filepath.Abs(filepath.Join(projFolder, "etc/dev/trusty-config.json"))
+	cfg, err := filepath.Abs(filepath.Join(projFolder, "etc/dev/trusty-config.yaml"))
 	require.NoError(t, err)
 
 	cli.Parse([]string{"cliapp", "-D", "-V", "--timeout", "0", "cmd", "client", "--cfg", cfg})

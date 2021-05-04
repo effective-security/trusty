@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net"
 	"os"
 	"path/filepath"
@@ -139,7 +140,7 @@ func (s *Suite) SetupSuite() {
 	}
 
 	if s.withFileServer || s.withGRPC {
-		cfg, err := filepath.Abs(filepath.Join(projFolder, "etc/dev/trusty-config.json"))
+		cfg, err := filepath.Abs(filepath.Join(projFolder, "etc/dev/trusty-config.yaml"))
 		s.Require().NoError(err)
 
 		flags = append(flags, "-s", s.ServerURL, "--cfg", cfg)
@@ -172,7 +173,7 @@ func (s *Suite) TearDownSuite() {
 	}
 }
 
-var nextPort = int32(31234)
+var nextPort = int32(31234) + rand.Int31n(5000)
 
 // SetupMockGRPC for testing
 func (s *Suite) SetupMockGRPC() *grpc.Server {
