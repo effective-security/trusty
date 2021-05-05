@@ -91,6 +91,22 @@ func (oid *OID) UnmarshalJSON(data []byte) (err error) {
 	return
 }
 
+// UnmarshalYAML unmarshals a YAML string into an OID.
+func (oid *OID) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var buf string
+	err := unmarshal(&buf)
+	if err != nil {
+		return err
+	}
+
+	parsedOid, err := parseObjectIdentifier(buf)
+	if err != nil {
+		return err
+	}
+	*oid = OID(parsedOid)
+	return err
+}
+
 // MarshalJSON marshals an oid into a JSON string.
 func (oid OID) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%v"`, asn1.ObjectIdentifier(oid))), nil
@@ -134,6 +150,19 @@ func (d *Duration) UnmarshalJSON(b []byte) error {
 	}
 	i, err := json.Number(string(b)).Int64()
 	*d = Duration(time.Duration(i) * time.Second)
+	return err
+}
+
+// UnmarshalYAML handles decoding our custom json serialization for Durations
+func (d *Duration) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var buf string
+	err := unmarshal(&buf)
+	if err != nil {
+		return err
+	}
+
+	dir, err := time.ParseDuration(buf)
+	*d = Duration(dir)
 	return err
 }
 

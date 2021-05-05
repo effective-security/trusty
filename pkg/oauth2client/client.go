@@ -35,7 +35,7 @@ func LoadConfig(file string) (*Config, error) {
 	}
 
 	var config Config
-	if strings.Contains(file, ".json") {
+	if strings.HasSuffix(file, ".json") {
 		err = json.Unmarshal(b, &config)
 	} else {
 		err = yaml.Unmarshal(b, &config)

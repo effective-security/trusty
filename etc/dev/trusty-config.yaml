@@ -107,7 +107,7 @@ oauth_clients:
 
 authority:
   # specifies file location with CA configuration
-  ca_config: ca-config.dev.json
+  ca_config: ca-config.dev.yaml
   # default value in 72h format for duration of CRL next update time
   default_crl_expiry: 12h
   # value in 8h format for duration of CRL renewal before next update time

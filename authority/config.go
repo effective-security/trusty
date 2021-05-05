@@ -10,6 +10,7 @@ import (
 
 	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/juju/errors"
+	"gopkg.in/yaml.v2"
 )
 
 // CAConstraint specifies various CA constraints on the signed certificate.
@@ -120,13 +121,13 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, errors.Annotate(err, "unable to read configuration file")
 	}
 
-	return NewConfig(body)
-}
+	var cfg = new(Config)
+	if strings.HasSuffix(path, ".json") {
+		err = json.Unmarshal(body, cfg)
+	} else {
+		err = yaml.Unmarshal(body, cfg)
+	}
 
-// NewConfig creates the configuration from a byte slice.
-func NewConfig(config []byte) (*Config, error) {
-	var cfg = &Config{}
-	err := json.Unmarshal(config, &cfg)
 	if err != nil {
 		return nil, errors.Annotate(err, "failed to unmarshal configuration")
 	}
