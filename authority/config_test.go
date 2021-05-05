@@ -27,12 +27,6 @@ func TestDefaultCertProfile(t *testing.T) {
 	assert.False(t, def.IsAllowedExtention(csr.OID{1, 2, 3, 4, 5, 6, 7}))
 }
 
-func TestNewConfig(t *testing.T) {
-	_, err := authority.NewConfig([]byte("[]"))
-	require.Error(t, err)
-	assert.Equal(t, "failed to unmarshal configuration: json: cannot unmarshal array into Go value of type authority.Config", err.Error())
-}
-
 func TestLoadInvalidConfigFile(t *testing.T) {
 	tcases := []struct {
 		file string
@@ -69,13 +63,27 @@ func TestLoadConfig(t *testing.T) {
 	require.Error(t, err)
 	assert.Equal(t, "unable to read configuration file: open not_found: no such file or directory", err.Error())
 
-	cfg, err := authority.LoadConfig(projFolder + "etc/dev/ca-config.dev.json")
+	cfg, err := authority.LoadConfig("testdata/ca-config.dev.json")
 	require.NoError(t, err)
 	require.NotEmpty(t, cfg.Profiles)
 	def := cfg.DefaultCertProfile()
 	require.NotNil(t, def)
 	assert.Equal(t, time.Duration(30*time.Minute), def.Backdate.TimeDuration())
 	assert.Equal(t, time.Duration(168*time.Hour), def.Expiry.TimeDuration())
+
+	files := []string{
+		projFolder + "etc/dev/ca-config.dev.yaml",
+		projFolder + "etc/dev/ca-config.bootstrap.yaml",
+		"testdata/ca-config.dev.json",
+		"testdata/ca-config.bootstrap.json",
+		"testdata/ca-config.dev.yaml",
+		"testdata/ca-config.bootstrap.yaml",
+	}
+	for _, path := range files {
+		cfg, err := authority.LoadConfig(path)
+		require.NoError(t, err, "failed to parse: %s", path)
+		require.NotEmpty(t, cfg.Profiles)
+	}
 }
 
 func TestCertProfile(t *testing.T) {

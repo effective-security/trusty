@@ -26,7 +26,7 @@ echo "*** trusty tool: csr create"
         --key-label="ci_csrtest_issuer1_ca*"
 echo "*** trusty tool: csr gencert"
 /opt/trusty/bin/trusty-tool $TOOL_FLAGS csr gencert \
-        --ca-config /opt/trusty/etc/prod/ca-config.bootstrap.json \
+        --ca-config /opt/trusty/etc/prod/ca-config.bootstrap.yaml \
         --profile=L1_CA \
         --csr-profile=/opt/trusty/etc/prod/csr/trusty_issuer1_ca.json \
         --key-label="ci_test_issuer1_ca*" \

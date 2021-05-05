@@ -31,51 +31,51 @@ type Signer interface {
 // provided through the API are not subject to validation through this
 // mechanism.
 type AllowedFields struct {
-	Subject        bool `json:"subject"`
-	DNSNames       bool `json:"dns"`
-	IPAddresses    bool `json:"ip"`
-	EmailAddresses bool `json:"email"`
+	Subject        bool `json:"subject" yaml:"subject"`
+	DNSNames       bool `json:"dns" yaml:"dns"`
+	IPAddresses    bool `json:"ip" yaml:"ip"`
+	EmailAddresses bool `json:"email" yaml:"email"`
 }
 
 // CertificatePolicy represents the ASN.1 PolicyInformation structure from
 // https://tools.ietf.org/html/rfc3280.html#page-106.
 // Valid values of Type are "id-qt-unotice" and "id-qt-cps"
 type CertificatePolicy struct {
-	ID         OID                          `json:"oid"`
-	Qualifiers []CertificatePolicyQualifier `json:"qualifiers"`
+	ID         OID                          `json:"oid" yaml:"oid"`
+	Qualifiers []CertificatePolicyQualifier `json:"qualifiers" yaml:"qualifiers"`
 }
 
 // CertificatePolicyQualifier represents a single qualifier from an ASN.1
 // PolicyInformation structure.
 type CertificatePolicyQualifier struct {
-	Type  string `json:"type"`
-	Value string `json:"value"`
+	Type  string `json:"type" yaml:"type"`
+	Value string `json:"value" yaml:"value"`
 }
 
 // X509Name contains the SubjectInfo fields.
 type X509Name struct {
-	C            string // Country
-	ST           string // State
-	L            string // Locality
-	O            string // OrganisationName
-	OU           string // OrganisationalUnitName
-	SerialNumber string
+	C            string `json:"c" yaml:"c"`   // Country
+	ST           string `json:"st" yaml:"st"` // State
+	L            string `json:"l" yaml:"l"`   // Locality
+	O            string `json:"o" yaml:"o"`   // OrganisationName
+	OU           string `json:"ou" yaml:"ou"` // OrganisationalUnitName
+	SerialNumber string `json:"serialnumber" yaml:"serialnumber"`
 }
 
 // X509Subject contains the information that should be used to override the
 // subject information when signing a certificate.
 type X509Subject struct {
-	CN           string
-	Names        []X509Name `json:"names"`
-	SerialNumber string
+	CN           string     `json:"CN" yaml:"CN"`
+	Names        []X509Name `json:"names" yaml:"names"`
+	SerialNumber string     `json:"serialnumber" yaml:"serialnumber"`
 }
 
 // X509Extension represents a raw extension to be included in the certificate.  The
 // "value" field must be hex encoded.
 type X509Extension struct {
-	ID       OID    `json:"id"`
-	Critical bool   `json:"critical"`
-	Value    string `json:"value"`
+	ID       OID    `json:"id" yaml:"id"`
+	Critical bool   `json:"critical" yaml:"critical"`
+	Value    string `json:"value" yaml:"value"`
 }
 
 // SignRequest stores a signature request, which contains the SAN,
@@ -86,12 +86,12 @@ type X509Extension struct {
 // Extensions requested in the CSR are ignored, except for those processed by
 // CreateCSR (mainly subjectAltName).
 type SignRequest struct {
-	SAN        []string        `json:"san"`
-	Request    string          `json:"certificate_request"`
-	Subject    *X509Subject    `json:"subject,omitempty"`
-	Profile    string          `json:"profile"`
-	Serial     *big.Int        `json:"serial,omitempty"`
-	Extensions []X509Extension `json:"extensions,omitempty"`
+	SAN        []string        `json:"san" yaml:"san"`
+	Request    string          `json:"certificate_request" yaml:"certificate_request"`
+	Subject    *X509Subject    `json:"subject,omitempty" yaml:"subject,omitempty"`
+	Profile    string          `json:"profile" yaml:"profile"`
+	Serial     *big.Int        `json:"serialnumber,omitempty" yaml:"serialnumber,omitempty"`
+	Extensions []X509Extension `json:"extensions,omitempty" yaml:"extensions,omitempty"`
 
 	// TODO: label, if supported
 	//Label      string          `json:"label"`
@@ -100,11 +100,11 @@ type SignRequest struct {
 	// for canonicalization) as the value of the notBefore field of the
 	// certificate. In particular no backdating adjustment will be made
 	// when NotBefore is provided.
-	NotBefore time.Time `json:"-"`
+	NotBefore time.Time `json:"-" yaml:"-"`
 	// If provided, NotAfter will be used without modification (except
 	// for canonicalization) as the value of the notAfter field of the
 	// certificate.
-	NotAfter time.Time `json:"-"`
+	NotAfter time.Time `json:"-" yaml:"-"`
 }
 
 // A CertificateRequest encapsulates the API interface to the

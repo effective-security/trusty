@@ -97,7 +97,7 @@ gen_test_certs:
 	echo "*** generating untrusted CAs"
 	./scripts/build/gen_test_certs.sh \
 		--hsm-config /tmp/trusty/softhsm/unittest_hsm.json \
-		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.json \
+		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.yaml \
 		--out-dir /tmp/trusty/certs \
 		--csr-dir $(PROJ_ROOT)/etc/dev/csr \
 		--prefix $(PROJ_NAME)_untrusted_ \
@@ -108,7 +108,7 @@ gen_test_certs:
 	rm -f /tmp/trusty/certs/$(PROJ_NAME)_dev_peer*
 	./scripts/build/gen_test_certs.sh \
 		--hsm-config /tmp/trusty/softhsm/unittest_hsm.json \
-		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.json \
+		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.yaml \
 		--out-dir /tmp/trusty/certs \
 		--csr-dir $(PROJ_ROOT)/etc/dev/csr \
 		--prefix $(PROJ_NAME)_dev_ \
@@ -174,7 +174,7 @@ preprpm: change_log
 	cp ./scripts/build/*.sh .rpm/trusty/opt/trusty/bin/
 	cp -R scripts/sql/ .rpm/trusty/opt/trusty/bin/
 	# etc
-	cp etc/prod/*.json .rpm/trusty/opt/trusty/etc/prod/
+	# cp etc/prod/*.json .rpm/trusty/opt/trusty/etc/prod/
 	cp etc/prod/*.yaml .rpm/trusty/opt/trusty/etc/prod/
 	cp -R etc/prod/csr/ .rpm/trusty/opt/trusty/etc/prod/
 	# rpm

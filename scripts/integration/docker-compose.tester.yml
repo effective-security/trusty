@@ -90,7 +90,7 @@ services:
         --delete --list-slots --list-object &&
         /opt/trusty/bin/gen_test_certs.sh
         --hsm-config /tmp/trusty/softhsm/unittest_hsm.json
-        --ca-config /opt/trusty/etc/prod/ca-config.bootstrap.json
+        --ca-config /opt/trusty/etc/prod/ca-config.bootstrap.yaml
         --out-dir /var/trusty/certs
         --csr-dir /opt/trusty/etc/prod/csr
         --root-ca /var/trusty/roots/trusty_root_ca.pem
@@ -145,7 +145,7 @@ services:
         /opt/trusty/tests/if-root-exists.sh mkdir -p /tmp/trusty/certs &&
         /opt/trusty/bin/gen_test_certs.sh
         --hsm-config /opt/trusty/tests/aws-test-kms.json
-        --ca-config /opt/trusty/etc/prod/ca-config.bootstrap.json
+        --ca-config /opt/trusty/etc/prod/ca-config.bootstrap.yaml
         --out-dir /var/trusty/certs
         --csr-dir /opt/trusty/etc/prod/csr
         --root-ca /var/trusty/roots/trusty_root_ca.pem
@@ -201,7 +201,7 @@ services:
         --delete --list-slots --list-object &&
         /opt/trusty/bin/gen_test_certs.sh
         --hsm-config inmem
-        --ca-config /opt/trusty/etc/prod/ca-config.bootstrap.json
+        --ca-config /opt/trusty/etc/prod/ca-config.bootstrap.yaml
         --out-dir /var/trusty/certs
         --csr-dir /opt/trusty/etc/prod/csr
         --root-ca /var/trusty/roots/trusty_root_ca.pem
