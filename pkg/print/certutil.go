@@ -23,8 +23,8 @@ func Certificates(w io.Writer, list []*x509.Certificate) {
 // Certificate prints cert details
 func Certificate(w io.Writer, crt *x509.Certificate) {
 	now := time.Now()
-	issuedIn := now.Sub(crt.NotBefore) / time.Minute * time.Minute
-	expiresIn := crt.NotAfter.Sub(now) / time.Minute * time.Minute
+	issuedIn := now.Sub(crt.NotBefore.Local()) / time.Minute * time.Minute
+	expiresIn := crt.NotAfter.Local().Sub(now) / time.Minute * time.Minute
 
 	fmt.Fprintf(w, "ID: %s\n", certutil.GetSubjectID(crt))
 	fmt.Fprintf(w, "Subject: %s\n", certutil.NameToString(&crt.Subject))

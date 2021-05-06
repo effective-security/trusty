@@ -8,7 +8,6 @@ import (
 
 	"github.com/ekspand/trusty/authority"
 	"github.com/ekspand/trusty/cli"
-	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/algorithms/guid"
@@ -47,7 +46,7 @@ func GenCert(c ctl.Control, p interface{}) error {
 		return errors.Errorf("unsupported command for this crypto provider")
 	}
 
-	isscfg := &config.Issuer{}
+	isscfg := &authority.IssuerConfig{}
 
 	if flags.SelfSign != nil && *flags.SelfSign {
 		if *flags.CACert != "" || *flags.CAKey != "" {
@@ -87,6 +86,8 @@ func GenCert(c ctl.Control, p interface{}) error {
 		return errors.Annotate(err, "invalid ca-config")
 	}
 
+	isscfg.Profiles = cacfg.Profiles
+
 	var key, csrPEM, certPEM []byte
 
 	if flags.SelfSign != nil && *flags.SelfSign {
@@ -97,7 +98,7 @@ func GenCert(c ctl.Control, p interface{}) error {
 			return errors.Trace(err)
 		}
 	} else {
-		issuer, err := authority.NewIssuer(isscfg, cacfg, cryptoprov)
+		issuer, err := authority.NewIssuer(isscfg, cryptoprov)
 		if err != nil {
 			return errors.Annotate(err, "create issuer")
 		}
@@ -129,7 +130,7 @@ func GenCert(c ctl.Control, p interface{}) error {
 	} else {
 		err = SaveCert(*flags.Output, key, csrPEM, certPEM)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.Annotatef(err, "unable to save generated files")
 		}
 	}
 

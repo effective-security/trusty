@@ -39,8 +39,11 @@ type Configuration struct {
 	// Identity contains configuration for the identity mapper
 	Identity Identity `json:"identity" yaml:"identity"`
 
-	// Authority contains configuration info for CA
-	Authority Authority `json:"authority" yaml:"authority"`
+	// Authority specifies configuration file for CA
+	Authority string `json:"authority" yaml:"authority"`
+
+	// RegistrationAuthority contains configuration info for RA
+	RegistrationAuthority *RegistrationAuthority `json:"ra" yaml:"ra"`
 
 	// HTTPServers specifies a list of servers that expose HTTP or gRPC services
 	HTTPServers []HTTPServer `json:"servers" yaml:"servers"`

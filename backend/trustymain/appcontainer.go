@@ -248,7 +248,11 @@ func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
 }
 
 func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*authority.Authority, error) {
-	ca, err := authority.NewAuthority(&cfg.Authority, crypto)
+	caCfg, err := authority.LoadConfig(cfg.Authority)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	ca, err := authority.NewAuthority(caCfg, crypto)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

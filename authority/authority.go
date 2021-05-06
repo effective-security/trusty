@@ -1,7 +1,6 @@
 package authority
 
 import (
-	"github.com/ekspand/trusty/internal/config"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
@@ -14,58 +13,69 @@ type Authority struct {
 	issuers          map[string]*Issuer // label => Issuer
 	issuersByProfile map[string]*Issuer // cert profile => Issuer
 
-	caConfig Config
 	// Crypto holds providers for HSM, SoftHSM, KMS, etc.
 	crypto *cryptoprov.Crypto
 }
 
 // NewAuthority returns new instance of Authority
-func NewAuthority(cfg *config.Authority, crypto *cryptoprov.Crypto) (*Authority, error) {
-	// Load ca-config
-	cacfg, err := LoadConfig(cfg.CAConfig)
-	if err != nil {
-		return nil, errors.Annotate(err, "failed to load ca-config")
+func NewAuthority(cfg *Config, crypto *cryptoprov.Crypto) (*Authority, error) {
+	if cfg.Authority == nil {
+		return nil, errors.New("missing Authority configuration")
 	}
 
 	ca := &Authority{
-		caConfig:         *cacfg,
 		crypto:           crypto,
 		issuers:          make(map[string]*Issuer),
 		issuersByProfile: make(map[string]*Issuer),
 	}
 
-	ocspNextUpdate := cfg.GetDefaultOCSPExpiry()
-	crlNextUpdate := cfg.GetDefaultCRLExpiry()
-	crlRenewal := cfg.GetDefaultCRLRenewal()
+	ocspNextUpdate := cfg.Authority.DefaultAIA.GetOCSPExpiry()
+	crlNextUpdate := cfg.Authority.DefaultAIA.GetCRLExpiry()
+	crlRenewal := cfg.Authority.DefaultAIA.GetCRLRenewal()
 
-	for _, isscfg := range cfg.Issuers {
+	for _, isscfg := range cfg.Authority.Issuers {
 		if isscfg.GetDisabled() {
 			logger.Infof("src=NewAuthority, reason=disabled, issuer=%s", isscfg.Label)
 			continue
 		}
 
-		issuer, err := NewIssuer(&isscfg, cacfg, crypto)
+		ccfg := isscfg.Copy()
+		if ccfg.AIA == nil {
+			ccfg.AIA = cfg.Authority.DefaultAIA.Copy()
+		}
+		if ccfg.AIA.CRLRenewal == 0 {
+			ccfg.AIA.CRLRenewal = crlRenewal
+		}
+		if ccfg.AIA.CRLExpiry == 0 {
+			ccfg.AIA.CRLExpiry = crlNextUpdate
+		}
+		if ccfg.AIA.OCSPExpiry == 0 {
+			ccfg.AIA.OCSPExpiry = ocspNextUpdate
+		}
+		if ccfg.AIA.CrlURL == "" {
+			ccfg.AIA.CrlURL = cfg.Authority.DefaultAIA.CrlURL
+		}
+		if ccfg.AIA.OcspURL == "" {
+			ccfg.AIA.OcspURL = cfg.Authority.DefaultAIA.OcspURL
+		}
+		if ccfg.AIA.AiaURL == "" {
+			ccfg.AIA.AiaURL = cfg.Authority.DefaultAIA.AiaURL
+		}
+		issuer, err := NewIssuer(ccfg, crypto)
 		if err != nil {
 			return nil, errors.Annotatef(err, "unable to create issuer: %q", isscfg.Label)
 		}
-		if issuer.crlRenewal == 0 {
-			issuer.crlRenewal = crlRenewal
-		}
-		if issuer.crlExpiry == 0 {
-			issuer.crlExpiry = crlNextUpdate
-		}
-		if issuer.ocspExpiry == 0 {
-			issuer.ocspExpiry = ocspNextUpdate
-		}
+
 		ca.issuers[isscfg.Label] = issuer
 
-		for profile := range cacfg.Profiles {
-			if is := ca.issuersByProfile[profile]; is != nil {
-				return nil, errors.Errorf("profile %q is already registered by %q issuer", profile, is.Label())
-			}
-			ca.issuersByProfile[profile] = issuer
+		for profileName := range isscfg.Profiles {
+			/*
+				if is := ca.issuersByProfile[profileName]; is != nil {
+					return nil, errors.Errorf("profile %q is already registered by %q issuer", profileName, is.Label())
+				}
+			*/
+			ca.issuersByProfile[profileName] = issuer
 		}
-
 	}
 
 	return ca, nil

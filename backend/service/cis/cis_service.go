@@ -99,13 +99,13 @@ func (s *Service) registerRoots(ctx context.Context) {
 		return nil
 	}
 
-	for _, r := range s.cfg.Authority.PrivateRoots {
+	for _, r := range s.cfg.RegistrationAuthority.PrivateRoots {
 		err := registerCert(pb.Trust_Private, r)
 		if err != nil {
 			logger.Errorf("src=registerRoots, err=[%v]", errors.ErrorStack(err))
 		}
 	}
-	for _, r := range s.cfg.Authority.PublicRoots {
+	for _, r := range s.cfg.RegistrationAuthority.PublicRoots {
 		err := registerCert(pb.Trust_Public, r)
 		if err != nil {
 			logger.Errorf("src=registerRoots, err=[%v]", errors.ErrorStack(err))

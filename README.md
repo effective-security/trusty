@@ -69,3 +69,29 @@ To clean up use:
 
     make docker docker-citest
 
+## Debug
+
+Add the launch configuration to .vscode/launch.json:
+
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Server",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "remotePath": "",
+            "port": 2345,
+            "host": "127.0.0.1",
+            "program": "${workspaceRoot}/cmd/trusty",
+            "env": {},
+            "args": [
+                "--std",
+                "--cfg",
+                "${workspaceRoot}/etc/dev/trusty-config.yaml"
+            ],
+            "showLog": true
+        }
+    ]
+}

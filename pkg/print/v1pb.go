@@ -68,8 +68,8 @@ func Issuers(w io.Writer, issuers []*trustypb.IssuerInfo, withPem bool) {
 			continue
 		}
 
-		issuedIn := now.Sub(bundle.Cert.NotBefore) / time.Minute * time.Minute
-		expiresIn := bundle.Cert.NotAfter.Sub(now) / time.Minute * time.Minute
+		issuedIn := now.Sub(bundle.Cert.NotBefore.Local()) / time.Minute * time.Minute
+		expiresIn := bundle.Cert.NotAfter.Local().Sub(now) / time.Minute * time.Minute
 
 		fmt.Fprintf(w, "Subject: %s\n", certutil.NameToString(&bundle.Cert.Subject))
 		fmt.Fprintf(w, "  ID: %s\n", bundle.SubjectID)
@@ -148,8 +148,8 @@ func Roots(w io.Writer, roots []*trustypb.RootCertificate, withPem bool) {
 	for cnt, ci := range roots {
 		na := time.Unix(ci.NotAfter, 0).Local()
 		nb := time.Unix(ci.NotBefore, 0).Local()
-		issuedIn := now.Sub(na) / time.Minute * time.Minute
-		expiresIn := nb.Sub(now) / time.Minute * time.Minute
+		issuedIn := now.Sub(nb) / time.Minute * time.Minute
+		expiresIn := na.Sub(now) / time.Minute * time.Minute
 
 		fmt.Fprintf(w, "==================================== %d ====================================\n", cnt+1)
 		fmt.Fprintf(w, "Subject: %s\n", ci.Subject)

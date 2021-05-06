@@ -13,8 +13,10 @@ import (
 const projFolder = "../"
 
 func TestDefaultCertProfile(t *testing.T) {
-	def := authority.DefaultCertProfile()
+	def := authority.DefaultCertProfile().Copy()
 	require.NotNil(t, def)
+
+	def.AllowedExtensions = []csr.OID{{1, 2, 3, 4, 5, 6, 8}}
 	assert.Equal(t, time.Duration(10*time.Minute), def.Backdate.TimeDuration())
 	assert.Equal(t, time.Duration(8760*time.Hour), def.Expiry.TimeDuration())
 	assert.Equal(t, "default profile with Server and Client auth", def.Description)
@@ -25,6 +27,8 @@ func TestDefaultCertProfile(t *testing.T) {
 	assert.Contains(t, def.Usage, "client auth")
 	assert.NoError(t, def.Validate())
 	assert.False(t, def.IsAllowedExtention(csr.OID{1, 2, 3, 4, 5, 6, 7}))
+	assert.True(t, def.IsAllowedExtention(csr.OID{1, 2, 3, 4, 5, 6, 8}))
+	assert.NotEmpty(t, def.AllowedExtensionsStrings())
 }
 
 func TestLoadInvalidConfigFile(t *testing.T) {
@@ -66,6 +70,10 @@ func TestLoadConfig(t *testing.T) {
 	cfg, err := authority.LoadConfig("testdata/ca-config.dev.json")
 	require.NoError(t, err)
 	require.NotEmpty(t, cfg.Profiles)
+
+	cfg2 := cfg.Copy()
+	assert.Equal(t, cfg, cfg2)
+
 	def := cfg.DefaultCertProfile()
 	require.NotNil(t, def)
 	assert.Equal(t, time.Duration(30*time.Minute), def.Backdate.TimeDuration())
@@ -101,4 +109,84 @@ func TestCertProfile(t *testing.T) {
 	assert.NoError(t, p.Validate())
 	assert.True(t, p.IsAllowedExtention(csr.OID{1, 1000, 1, 3}))
 	assert.False(t, p.IsAllowedExtention(csr.OID{1, 1000, 1, 3, 1}))
+}
+
+func TestDefaultAuthority(t *testing.T) {
+	a := &authority.CAConfig{}
+	assert.Equal(t, authority.DefaultCRLExpiry, a.DefaultAIA.GetCRLExpiry())
+	assert.Equal(t, authority.DefaultOCSPExpiry, a.DefaultAIA.GetOCSPExpiry())
+	assert.Equal(t, authority.DefaultCRLRenewal, a.DefaultAIA.GetCRLRenewal())
+
+	d := 1 * time.Hour
+	a = &authority.CAConfig{
+		DefaultAIA: &authority.AIAConfig{
+			CRLExpiry:  d,
+			OCSPExpiry: d,
+			CRLRenewal: d,
+		},
+	}
+	assert.Equal(t, time.Duration(d), a.DefaultAIA.GetCRLExpiry())
+	assert.Equal(t, time.Duration(d), a.DefaultAIA.GetOCSPExpiry())
+	assert.Equal(t, time.Duration(d), a.DefaultAIA.GetCRLRenewal())
+}
+
+func TestProfilePolicyIsAllowed(t *testing.T) {
+	emptyPolicy := &authority.CertProfile{}
+	policy1 := &authority.CertProfile{
+		IssuerLabel:  "issuer1",
+		AllowedRoles: []string{"allowed1"},
+		DeniedRoles:  []string{"denied1"},
+	}
+	policy2 := &authority.CertProfile{
+		IssuerLabel:  "issuer2",
+		AllowedRoles: []string{"*"},
+		DeniedRoles:  []string{"denied1"},
+	}
+	policy3 := &authority.CertProfile{
+		IssuerLabel:  "issuer3",
+		AllowedRoles: []string{"*"},
+		DeniedRoles:  []string{"*"},
+	}
+
+	tcases := []struct {
+		policy  *authority.CertProfile
+		role    string
+		allowed bool
+	}{
+		{
+			policy:  emptyPolicy,
+			role:    "roles1",
+			allowed: true,
+		},
+		{
+			policy:  emptyPolicy,
+			role:    "",
+			allowed: true,
+		},
+		{
+			policy:  policy1,
+			role:    "allowed1",
+			allowed: true,
+		},
+		{
+			policy:  policy1,
+			role:    "denied1",
+			allowed: false,
+		},
+		{
+			policy:  policy2,
+			role:    "any",
+			allowed: true,
+		},
+		{
+			policy:  policy3,
+			role:    "any",
+			allowed: false,
+		},
+	}
+
+	for _, tc := range tcases {
+		assert.Equal(t, tc.allowed, tc.policy.IsAllowed(tc.role), "[%s] %s: Allowed->%v, Denied->%v",
+			tc.policy.IssuerLabel, tc.role, tc.policy.AllowedRoles, tc.policy.DeniedRoles)
+	}
 }

@@ -52,34 +52,37 @@ func TestAuthority(t *testing.T) {
 }
 
 func (s *testSuite) TestNewAuthority() {
-	_, err := authority.NewAuthority(&s.cfg.Authority, s.crypto)
-	s.Require().NoError(err)
-
 	//
 	// Test empty config
 	//
-	cfg := &config.Authority{}
-	_, err = authority.NewAuthority(cfg, s.crypto)
+	cfg := &authority.Config{}
+	_, err := authority.NewAuthority(cfg, s.crypto)
 	s.Require().Error(err)
-	s.Equal("failed to load ca-config: invalid path", err.Error())
+	s.Equal("missing Authority configuration", err.Error())
+
+	cfg, err = authority.LoadConfig(projFolder + "/etc/dev/ca-config.dev.yaml")
+	s.Require().NoError(err)
 
 	//
 	// Test 0 default durations
 	//
-	cfg2 := s.cfg.Authority
-	cfg2.DefaultCRLExpiry = 0
-	cfg2.DefaultOCSPExpiry = 0
-	cfg2.DefaultCRLRenewal = 0
+	cfg2 := cfg.Copy()
+	s.Require().Equal(*cfg, *cfg2)
 
-	_, err = authority.NewAuthority(&cfg2, s.crypto)
+	cfg2.Authority.DefaultAIA = &authority.AIAConfig{
+		CRLExpiry:  0,
+		OCSPExpiry: 0,
+		CRLRenewal: 0,
+	}
+
+	_, err = authority.NewAuthority(cfg2, s.crypto)
 	s.Require().NoError(err)
 
 	//
 	// Test invalid Issuer files
 	//
-	cfg3 := s.cfg.Authority
-	cfg3.DefaultCRLExpiry = 0
-	cfg3.Issuers = []config.Issuer{
+	cfg3 := cfg.Copy()
+	cfg3.Authority.Issuers = []authority.IssuerConfig{
 		{
 			Label:    "disabled",
 			Disabled: &trueVal,
@@ -90,37 +93,47 @@ func (s *testSuite) TestNewAuthority() {
 		},
 	}
 
-	_, err = authority.NewAuthority(&cfg3, s.crypto)
+	_, err = authority.NewAuthority(cfg3, s.crypto)
 	s.Require().Error(err)
 	s.Equal("unable to create issuer: \"badkey\": unable to create signer: load key file: open not_found: no such file or directory", err.Error())
 
 	//
 	// test default Expiry and Renewal from Authority config
 	//
-	cfg4 := s.cfg.Authority
-	for i := range cfg4.Issuers {
-		cfg4.Issuers[i].CRLExpiry = 0
-		cfg4.Issuers[i].CRLRenewal = 0
-		cfg4.Issuers[i].OCSPExpiry = 0
+	cfg4 := cfg.Copy()
+	for i := range cfg4.Authority.Issuers {
+		cfg4.Authority.Issuers[i].AIA = &authority.AIAConfig{}
 	}
 
-	a, err := authority.NewAuthority(&cfg4, s.crypto)
+	a, err := authority.NewAuthority(cfg4, s.crypto)
 	s.Require().NoError(err)
 	issuers := a.Issuers()
-	s.Equal(len(cfg4.Issuers), len(issuers))
+	s.Equal(len(cfg4.Authority.Issuers), len(issuers))
 
 	for _, issuer := range issuers {
-		s.Equal(cfg4.GetDefaultCRLRenewal(), issuer.CrlRenewal())
-		s.Equal(cfg4.GetDefaultCRLExpiry(), issuer.CrlExpiry())
-		s.Equal(cfg4.GetDefaultOCSPExpiry(), issuer.OcspExpiry())
+		s.Equal(cfg4.Authority.DefaultAIA.GetCRLRenewal(), issuer.CrlRenewal())
+		s.Equal(cfg4.Authority.DefaultAIA.GetCRLExpiry(), issuer.CrlExpiry())
+		s.Equal(cfg4.Authority.DefaultAIA.GetOCSPExpiry(), issuer.OcspExpiry())
+		s.NotContains(issuer.AiaURL(), "${ISSUER_ID}")
+		s.NotContains(issuer.CrlURL(), "${ISSUER_ID}")
+		s.NotContains(issuer.OcspURL(), "${ISSUER_ID}")
 
 		i, err := a.GetIssuerByLabel(issuer.Label())
 		s.NoError(err)
 		s.NotNil(i)
+
+		for name := range cfg.Profiles {
+			_, err = a.GetIssuerByProfile(name)
+			s.NoError(err)
+		}
 	}
 	_, err = a.GetIssuerByLabel("wrong")
 	s.Error(err)
 	s.Equal("issuer not found: wrong", err.Error())
+
+	_, err = a.GetIssuerByProfile("wrong_profile")
+	s.Error(err)
+	s.Equal("issuer not found for profile: wrong_profile", err.Error())
 }
 
 func loadConfig() (*config.Configuration, error) {
@@ -148,10 +161,13 @@ func (s *testSuite) TestIssuerSign() {
 	rootSigner, err := authority.NewSignerFromPEM(s.crypto, rootKey)
 	s.Require().NoError(err)
 
-	caCfg := &authority.Config{
-		AiaURL:  "https://localhost/v1/certs/${ISSUER_ID}.crt",
-		OcspURL: "https://localhost/v1/ocsp",
-		CrlURL:  "https://localhost/v1/crl/${ISSUER_ID}.crl",
+	cfg := &authority.IssuerConfig{
+		AIA: &authority.AIAConfig{
+			AiaURL:  "https://localhost/v1/certs/${ISSUER_ID}.crt",
+			OcspURL: "https://localhost/v1/ocsp",
+			CrlURL:  "https://localhost/v1/crl/${ISSUER_ID}.crl",
+		},
+		Label: "TrustyRoot",
 		Profiles: map[string]*authority.CertProfile{
 			"L1": {
 				Usage:       []string{"cert sign", "crl sign"},
@@ -220,11 +236,18 @@ func (s *testSuite) TestIssuerSign() {
 					Subject:  true,
 					DNSNames: true,
 				},
+				AllowedExtensions: []csr.OID{
+					{1, 2, 3},
+				},
 			},
 		},
 	}
 
-	rootCA, err := authority.CreateIssuer("TrustyRoot", caCfg, rootPEM, nil, nil, rootSigner)
+	for name, profile := range cfg.Profiles {
+		s.NoError(profile.Validate(), "failed to validate %s profile", name)
+	}
+
+	rootCA, err := authority.CreateIssuer(cfg, rootPEM, nil, nil, rootSigner)
 	s.Require().NoError(err)
 
 	s.Run("default", func() {
@@ -239,6 +262,12 @@ func (s *testSuite) TestIssuerSign() {
 
 		sreq := csr.SignRequest{
 			Request: string(csrPEM),
+			Extensions: []csr.X509Extension{
+				{
+					ID:    csr.OID{1, 2, 3},
+					Value: "0500",
+				},
+			},
 		}
 
 		crt, _, err := rootCA.Sign(sreq)

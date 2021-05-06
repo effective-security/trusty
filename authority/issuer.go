@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
@@ -27,7 +26,7 @@ var (
 
 // Issuer of certificates
 type Issuer struct {
-	cfg        Config
+	cfg        IssuerConfig
 	label      string
 	skid       string // Subject Key ID
 	signer     crypto.Signer
@@ -114,7 +113,7 @@ func (ca *Issuer) Profile(name string) *CertProfile {
 }
 
 // NewIssuer creates Issuer from provided configuration
-func NewIssuer(cfg *config.Issuer, caCfg *Config, prov *cryptoprov.Crypto) (*Issuer, error) {
+func NewIssuer(cfg *IssuerConfig, prov *cryptoprov.Crypto) (*Issuer, error) {
 	// ensure that signer can be created before the key is generated
 	cryptoSigner, err := NewSignerFromFromFile(
 		prov,
@@ -143,19 +142,9 @@ func NewIssuer(cfg *config.Issuer, caCfg *Config, prov *cryptoprov.Crypto) (*Iss
 	if err != nil {
 		return nil, errors.Annotatef(err, "failed to load cert")
 	}
-	issuer, err := CreateIssuer(cfg.Label, caCfg, certBytes, intCAbytes, rootBytes, cryptoSigner)
+	issuer, err := CreateIssuer(cfg, certBytes, intCAbytes, rootBytes, cryptoSigner)
 	if err != nil {
 		return nil, errors.Trace(err)
-	}
-
-	if cfg.CRLExpiry > 0 {
-		issuer.crlExpiry = cfg.CRLExpiry
-	}
-	if cfg.CRLRenewal > 0 {
-		issuer.crlRenewal = cfg.CRLRenewal
-	}
-	if cfg.OCSPExpiry > 0 {
-		issuer.ocspExpiry = cfg.OCSPExpiry
 	}
 
 	return issuer, nil
@@ -163,13 +152,8 @@ func NewIssuer(cfg *config.Issuer, caCfg *Config, prov *cryptoprov.Crypto) (*Iss
 
 // CreateIssuer returns Issuer created directly from crypto.Signer,
 // this method is mostly used for testing
-func CreateIssuer(label string, caCfg *Config, certBytes, intCAbytes, rootBytes []byte, signer crypto.Signer) (*Issuer, error) {
-	cfg := *caCfg
-	err := cfg.Validate()
-	if err != nil {
-		return nil, errors.Annotate(err, "invalid gonfiguration")
-	}
-
+func CreateIssuer(cfg *IssuerConfig, certBytes, intCAbytes, rootBytes []byte, signer crypto.Signer) (*Issuer, error) {
+	label := cfg.Label
 	bundle, status, err := certutil.VerifyBundleFromPEM(certBytes, intCAbytes, rootBytes)
 	if err != nil {
 		return nil, errors.Annotate(err, "failed to create signing CA cert bundle")
@@ -184,9 +168,16 @@ func CreateIssuer(label string, caCfg *Config, certBytes, intCAbytes, rootBytes 
 		)
 	}
 
-	crl := strings.Replace(caCfg.CrlURL, "${ISSUER_ID}", bundle.SubjectID, -1)
-	aia := strings.Replace(caCfg.AiaURL, "${ISSUER_ID}", bundle.SubjectID, -1)
-	ocsp := strings.Replace(caCfg.OcspURL, "${ISSUER_ID}", bundle.SubjectID, -1)
+	var crlRenewal, crlExpiry, ocspExpiry time.Duration
+	var crl, aia, ocsp string
+	if cfg.AIA != nil {
+		crl = strings.Replace(cfg.AIA.CrlURL, "${ISSUER_ID}", bundle.SubjectID, -1)
+		aia = strings.Replace(cfg.AIA.AiaURL, "${ISSUER_ID}", bundle.SubjectID, -1)
+		ocsp = strings.Replace(cfg.AIA.OcspURL, "${ISSUER_ID}", bundle.SubjectID, -1)
+		crlRenewal = cfg.AIA.CRLRenewal
+		crlExpiry = cfg.AIA.CRLExpiry
+		ocspExpiry = cfg.AIA.OCSPExpiry
+	}
 
 	keyHash := make(map[crypto.Hash][]byte)
 	nameHash := make(map[crypto.Hash][]byte)
@@ -218,7 +209,7 @@ func CreateIssuer(label string, caCfg *Config, certBytes, intCAbytes, rootBytes 
 	}
 
 	return &Issuer{
-		cfg:         cfg,
+		cfg:         *cfg,
 		skid:        certutil.GetSubjectKeyID(bundle.Cert),
 		signer:      signer,
 		sigAlgo:     csr.DefaultSigAlgo(signer),
@@ -230,6 +221,9 @@ func CreateIssuer(label string, caCfg *Config, certBytes, intCAbytes, rootBytes 
 		cabundlePEM: cabundlePEM,
 		keyHash:     keyHash,
 		nameHash:    nameHash,
+		crlRenewal:  crlRenewal,
+		crlExpiry:   crlExpiry,
+		ocspExpiry:  ocspExpiry,
 	}, nil
 }
 

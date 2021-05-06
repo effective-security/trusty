@@ -20,6 +20,7 @@ require (
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/hashicorp/go-uuid v1.0.1 // indirect
+	github.com/jinzhu/copier v0.3.0 // indirect
 	github.com/juju/errors v0.0.0-20200330140219-3fe23663418f
 	github.com/lib/pq v1.7.0
 	github.com/mattn/goreman v0.3.7

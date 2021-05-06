@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
@@ -58,7 +57,7 @@ func Test_LoadConfig(t *testing.T) {
 	testDirAbs("TrustyClient.ClientTLS.TrustedCAFile", c.TrustyClient.ClientTLS.TrustedCAFile)
 	testDirAbs("TrustyClient.ClientTLS.CertFile", c.TrustyClient.ClientTLS.CertFile)
 	testDirAbs("TrustyClient.ClientTLS.KeyFile", c.TrustyClient.ClientTLS.KeyFile)
-	testDirAbs("Authority.CAConfig", c.Authority.CAConfig)
+	testDirAbs("Authority", c.Authority)
 }
 
 func TestParseListenURLs(t *testing.T) {
@@ -83,23 +82,6 @@ func TestTLSInfo(t *testing.T) {
 	}
 	assert.False(t, i.Empty())
 	assert.Equal(t, "cert=cert.pem, key=key.pem, trusted-ca=cacerts.pem, client-cert-auth=false, crl-file=123.crl", i.String())
-}
-
-func TestDefaultAuthority(t *testing.T) {
-	a := &Authority{}
-	assert.Equal(t, DefaultCRLExpiry, a.GetDefaultCRLExpiry())
-	assert.Equal(t, DefaultOCSPExpiry, a.GetDefaultOCSPExpiry())
-	assert.Equal(t, DefaultCRLRenewal, a.GetDefaultCRLRenewal())
-
-	d := 1 * time.Hour
-	a = &Authority{
-		DefaultCRLExpiry:  d,
-		DefaultOCSPExpiry: d,
-		DefaultCRLRenewal: d,
-	}
-	assert.Equal(t, time.Duration(d), a.GetDefaultCRLExpiry())
-	assert.Equal(t, time.Duration(d), a.GetDefaultOCSPExpiry())
-	assert.Equal(t, time.Duration(d), a.GetDefaultCRLRenewal())
 }
 
 func Test_LoadYAML(t *testing.T) {
@@ -148,8 +130,7 @@ func Test_LoadYAMLOverride(t *testing.T) {
 	assert.Contains(t, c.SQL.DataSource, "internal/config/testdata/sql-conn.txt")    // should be resolved
 	assert.NotEqual(t, "../../scripts/sql/postgres/migrations", c.SQL.MigrationsDir) // should be resolved
 
-	require.NotEmpty(t, c.Authority.Issuers)
-	assert.False(t, c.Authority.Issuers[0].GetDisabled())
+	require.NotEmpty(t, c.Authority)
 
 	require.NotEmpty(t, c.HTTPServers)
 	assert.False(t, c.HTTPServers[0].GetDisabled())

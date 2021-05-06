@@ -5,34 +5,21 @@ import (
 	"fmt"
 
 	"github.com/ekspand/trusty/authority"
-	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/pkg/csr"
 )
 
 func (s *testSuite) TestNewIssuer() {
-	caCfg := &authority.Config{
-		AiaURL:  "https://localhost/v1/certs/${ISSUER_ID}.crt",
-		OcspURL: "https://localhost/v1/ocsp",
-		CrlURL:  "https://localhost/v1/crl/${ISSUER_ID}.crl",
-		Profiles: map[string]*authority.CertProfile{
-			"client": {
-				Description: "test client",
-				Expiry:      csr.Duration(273649812736),
-				Usage: []string{
-					"signing",
-					"key encipherment",
-					"server auth",
-					"ipsec end system",
-				},
-			},
-		},
-	}
-	for _, cfg := range s.cfg.Authority.Issuers {
-		if cfg.GetDisabled() {
+
+	cfg, err := authority.LoadConfig(projFolder + "/etc/dev/ca-config.dev.yaml")
+	s.Require().NoError(err)
+	s.Require().NotNil(cfg.Authority)
+	s.NotNil(cfg.Authority.DefaultAIA)
+
+	for _, isscfg := range cfg.Authority.Issuers {
+		if isscfg.GetDisabled() {
 			continue
 		}
 
-		issuer, err := authority.NewIssuer(&cfg, caCfg, s.crypto)
+		issuer, err := authority.NewIssuer(&isscfg, s.crypto)
 		s.Require().NoError(err)
 
 		s.NotNil(issuer.Bundle())
@@ -44,52 +31,53 @@ func (s *testSuite) TestNewIssuer() {
 		s.NotNil(issuer.Profile("client"))
 		s.Nil(issuer.Profile("notfound"))
 
-		s.Equal(issuer.CrlURL(), fmt.Sprintf("https://localhost/v1/crl/%s.crl", issuer.SubjectKID()))
-		s.Equal(issuer.AiaURL(), fmt.Sprintf("https://localhost/v1/certs/%s.crt", issuer.SubjectKID()))
+		s.Equal(fmt.Sprintf("http://localhost:8080/v1/crl/%s.crl", issuer.SubjectKID()), issuer.CrlURL())
+		s.Equal(fmt.Sprintf("http://localhost:8080/v1/certs/%s.crt", issuer.SubjectKID()), issuer.AiaURL())
 		//s.NotNil(issuer.AIAExtension("server"))
 		//s.Nil(issuer.AIAExtension("not_supported"))
 	}
 }
 
 func (s *testSuite) TestNewIssuerErrors() {
-	caCfg := &authority.Config{
+
+	aia := &authority.AIAConfig{
 		AiaURL:  "https://localhost/v1/certs/${ISSUER_ID}.crt",
 		OcspURL: "https://localhost/v1/ocsp",
 		CrlURL:  "https://localhost/v1/crl/${ISSUER_ID}.crl",
 	}
-
-	cfg := &config.Issuer{
+	cfg := &authority.IssuerConfig{
 		KeyFile: "not_found",
+		AIA:     aia,
 	}
-	_, err := authority.NewIssuer(cfg, caCfg, s.crypto)
+	_, err := authority.NewIssuer(cfg, s.crypto)
 	s.Require().Error(err)
 	s.Equal("unable to create signer: load key file: open not_found: no such file or directory", err.Error())
 
-	cfg = &config.Issuer{
+	cfg = &authority.IssuerConfig{
 		KeyFile:  ca2KeyFile,
 		CertFile: "not_found",
 	}
-	_, err = authority.NewIssuer(cfg, caCfg, s.crypto)
+	_, err = authority.NewIssuer(cfg, s.crypto)
 	s.Require().Error(err)
 	s.Equal("failed to load cert: open not_found: no such file or directory", err.Error())
 
-	cfg = &config.Issuer{
+	cfg = &authority.IssuerConfig{
 		CertFile:       ca2CertFile,
 		KeyFile:        ca2KeyFile,
 		CABundleFile:   caBundleFile,
 		RootBundleFile: "not_found",
 	}
-	_, err = authority.NewIssuer(cfg, caCfg, s.crypto)
+	_, err = authority.NewIssuer(cfg, s.crypto)
 	s.Require().Error(err)
 	s.Equal("failed to load root-bundle: open not_found: no such file or directory", err.Error())
 
-	cfg = &config.Issuer{
+	cfg = &authority.IssuerConfig{
 		CertFile:       ca2CertFile,
 		KeyFile:        ca2KeyFile,
 		CABundleFile:   "not_found",
 		RootBundleFile: rootBundleFile,
 	}
-	_, err = authority.NewIssuer(cfg, caCfg, s.crypto)
+	_, err = authority.NewIssuer(cfg, s.crypto)
 	s.Require().Error(err)
 	s.Equal("failed to load ca-bundle: open not_found: no such file or directory", err.Error())
 }

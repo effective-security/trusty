@@ -1,7 +1,32 @@
 ---
-issuer_url: http://localhost:8080/v1/certs/${ISSUER_ID}.crt
-crl_url: http://localhost:8080/v1/crl/${ISSUER_ID}.crl
-ocsp_url: http://localhost:8080/v1/ocsp
+authority:
+  default_aia: 
+    issuer_url: http://localhost:8080/v1/certs/${ISSUER_ID}.crt
+    crl_url: http://localhost:8080/v1/crl/${ISSUER_ID}.crl
+    ocsp_url: http://localhost:8080/v1/ocsp
+    # value in 72h format for duration of CRL next update time
+    crl_expiry: 12h
+    # value in 8h format for duration of CRL renewal before next update time
+    crl_renewal: 1h
+    # value in 8h format for duration of OCSP next update time
+    ocsp_expiry: 30m
+  issuers:
+  -
+    # specifies Issuer's label
+    label: TrustyCA
+    # specifies type: tls|codesign|timestamp|ocsp|spiffe|trusty
+    type: trusty
+    cert: /tmp/trusty/certs/trusty_dev_issuer2_ca.pem
+    key: /tmp/trusty/certs/trusty_dev_issuer2_ca-key.pem
+    # location of the CA bundle file
+    ca_bundle: /tmp/trusty/certs/trusty_dev_cabundle.pem
+    # location of the Root CA file
+    root_bundle: /tmp/trusty/certs/trusty_dev_root_ca.pem
+    aia: #empty
+      issuer_url:
+      crl_url:
+      ocsp_url:
+
 profiles:
 
   default:
