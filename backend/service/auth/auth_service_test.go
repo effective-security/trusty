@@ -51,12 +51,11 @@ func TestMain(m *testing.M) {
 	httpAddr := testutils.CreateURLs("http", "")
 	for i, httpCfg := range cfg.HTTPServers {
 		switch httpCfg.Name {
-		case "Health":
-			cfg.HTTPServers[i].Disabled = &trueVal
-
-		case "Trusty":
+		case "Trusty-WFE":
 			cfg.HTTPServers[i].Services = []string{auth.ServiceName}
 			cfg.HTTPServers[i].ListenURLs = []string{httpAddr}
+		default:
+			cfg.HTTPServers[i].Disabled = &trueVal
 		}
 	}
 
@@ -86,7 +85,10 @@ func TestMain(m *testing.M) {
 	select {
 	case ret := <-startedCh:
 		if ret {
-			trustyServer = app.Server("Trusty")
+			trustyServer = app.Server("Trusty-WFE")
+			if trustyServer == nil {
+				panic("Trusty-WFE not found!")
+			}
 
 			// Run the tests
 			rc = m.Run()
