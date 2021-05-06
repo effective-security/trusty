@@ -116,15 +116,16 @@ ra:
 
 
 servers:
-  - name: Health
+  - name: Trusty-CIS
     listen_urls:
       - http://0.0.0.0:8080
     services:
       - status
+      - cis
     heartbeat_secs: 30
     request_timeout: 3s
 
-  - name: Trusty
+  - name: Trusty-WFE
     listen_urls:
       - https://0.0.0.0:7891
     server_tls:
@@ -134,8 +135,6 @@ servers:
     services:
       - auth
       - status
-      - ca
-      - cis
       - workflow
     heartbeat_secs: 30
     request_timeout: 3s
@@ -161,6 +160,22 @@ servers:
         - Accept-Encoding
         - Authorization
          -X-Device-ID
+
+  - name: Trusty-CA
+    listen_urls:
+      - https://0.0.0.0:7892
+    server_tls:
+      cert: /var/trusty/certs/trusty_peer.pem
+      key: /var/trusty/certs/trusty_peer-key.pem
+      trusted_ca: /var/trusty/roots/trusty_root_ca.pem
+    services:
+      - status
+      - ca
+    heartbeat_secs: 30
+    request_timeout: 3s
+    keep_alive_min_time: 60s
+    keep_alive_interval: 30s
+    keep_alive_timeout: 180s
 
 trusty_client: 
   client_tls:

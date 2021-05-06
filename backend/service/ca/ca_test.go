@@ -49,12 +49,12 @@ func TestMain(m *testing.M) {
 
 	for i, httpCfg := range cfg.HTTPServers {
 		switch httpCfg.Name {
-		case "Health":
-			cfg.HTTPServers[i].Disabled = &trueVal
-
-		case "Trusty":
+		case "Trusty-CA":
 			cfg.HTTPServers[i].Services = []string{ca.ServiceName}
 			cfg.HTTPServers[i].ListenURLs = []string{httpAddr}
+		default:
+			cfg.HTTPServers[i].Disabled = &trueVal
+
 		}
 	}
 
@@ -84,7 +84,10 @@ func TestMain(m *testing.M) {
 	select {
 	case ret := <-startedCh:
 		if ret {
-			trustyServer = app.Server("Trusty")
+			trustyServer = app.Server("Trusty-CA")
+			if trustyServer == nil {
+				panic("Trusty-CA not found!")
+			}
 			trustyClient = embed.NewClient(trustyServer)
 
 			// Run the tests

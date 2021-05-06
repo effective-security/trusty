@@ -180,7 +180,7 @@ func newClient(cfg *Config) (*Client, error) {
 	dialEndpoint := cfg.Endpoints[0]
 
 	var creds credentials.TransportCredentials
-	if cfg.TLS != nil {
+	if cfg.TLS != nil && !strings.HasSuffix(dialEndpoint, ":8080") {
 		creds = credentials.NewTLS(cfg.TLS)
 	}
 
@@ -216,6 +216,7 @@ func (c *Client) dial(target string, creds credentials.TransportCredentials, dop
 	}
 
 	target = strings.TrimPrefix(target, "https://")
+	target = strings.TrimPrefix(target, "http://")
 
 	logger.Debugf("scr=dial, target=%q, timeout=%v", target, c.cfg.DialTimeout)
 

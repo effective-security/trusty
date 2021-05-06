@@ -73,6 +73,7 @@ To clean up use:
 
 Add the launch configuration to .vscode/launch.json:
 
+```.json
 {
     "version": "0.2.0",
     "configurations": [
@@ -95,3 +96,4 @@ Add the launch configuration to .vscode/launch.json:
         }
     ]
 }
+```

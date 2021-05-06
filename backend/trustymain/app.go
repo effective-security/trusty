@@ -350,12 +350,12 @@ func (a *App) loadConfig() error {
 
 	for i, httpCfg := range cfg.HTTPServers {
 		switch httpCfg.Name {
-		case "Health":
+		case "Trusty-CIS":
 			if len(*flags.healthURLs) > 0 {
 				cfg.HTTPServers[i].ListenURLs = *flags.healthURLs
 			}
 
-		case "Trusty":
+		case "Trusty-WFE":
 			if len(*flags.clientURLs) > 0 {
 				cfg.HTTPServers[i].ListenURLs = *flags.clientURLs
 			}
@@ -368,7 +368,8 @@ func (a *App) loadConfig() error {
 			if *flags.httpsTrustedCAFile != "" {
 				cfg.HTTPServers[i].ServerTLS.TrustedCAFile = *flags.httpsTrustedCAFile
 			}
-
+		case "Trusty-CA", "Trusty-RA", "Trusty-SA":
+		// TODO:
 		default:
 			return errors.Errorf("unknows server name in configuration: %s", httpCfg.Name)
 		}
