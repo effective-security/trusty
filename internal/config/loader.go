@@ -163,11 +163,19 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 	}
 
 	filesToResove := []*string{
-		&c.Authority.CAConfig,
+		&c.Authority,
 	}
 
 	for i := range c.OAuthClients {
 		filesToResove = append(filesToResove, &c.OAuthClients[i])
+	}
+	if c.RegistrationAuthority != nil {
+		for i := range c.RegistrationAuthority.PrivateRoots {
+			filesToResove = append(filesToResove, &c.RegistrationAuthority.PrivateRoots[i])
+		}
+		for i := range c.RegistrationAuthority.PublicRoots {
+			filesToResove = append(filesToResove, &c.RegistrationAuthority.PublicRoots[i])
+		}
 	}
 
 	optionalFilesToResove := []*string{

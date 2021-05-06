@@ -1,7 +1,4 @@
 {
-    "issuer_url": "http://localhost:8080/v1/certs/${ISSUER_ID}.crt",
-    "crl_url": "http://localhost:8080/v1/crl/${ISSUER_ID}.crl",
-    "ocsp_url": "http://localhost:8080/v1/ocsp",
     "profiles": {
         "default": {
             "expiry": "168h",

@@ -16,6 +16,12 @@ func NewRoot(profile string, cfg *Config, provider cryptoprov.Provider, req *csr
 		return
 	}
 
+	err = cfg.Validate()
+	if err != nil {
+		err = errors.Annotate(err, "invalid configuration")
+		return
+	}
+
 	var (
 		gkey  crypto.PrivateKey
 		keyID string
@@ -42,14 +48,14 @@ func NewRoot(profile string, cfg *Config, provider cryptoprov.Provider, req *csr
 	}
 
 	issuer := &Issuer{
-		cfg:     *cfg,
+		cfg: IssuerConfig{
+			Profiles: cfg.Profiles,
+		},
 		signer:  signer,
 		sigAlgo: csr.DefaultSigAlgo(signer),
 	}
-	err = issuer.cfg.Validate()
-	if err != nil {
-		err = errors.Annotate(err, "invalid configuration")
-		return
+	if cfg.Authority != nil {
+		issuer.cfg.AIA = cfg.Authority.DefaultAIA
 	}
 
 	sreq := csr.SignRequest{

@@ -105,38 +105,7 @@ identity:
 oauth_clients:
   - ../../../etc/dev/oauth-github.dev.yaml
 
-authority:
-  # specifies file location with CA configuration
-  ca_config: ../../../etc/dev/ca-config.dev.yaml
-  # default value in 72h format for duration of CRL next update time
-  default_crl_expiry: 12h
-  # value in 8h format for duration of CRL renewal before next update time
-  default_crl_renewal: 1h
-  # value in 8h format for duration of OCSP next update time
-  default_ocsp_expiry: 30m
-  # the list of private Root Certs files.
-  private_roots:
-    - /tmp/trusty/certs/trusty_dev_root_ca.pem
-  # the list of public Root Certs files.
-  public_roots:
-  issuers:
-  -
-    # specifies Issuer's label
-    label: TrustyCA
-    # specifies type: tls|codesign|timestamp|ocsp|spiffe|trusty
-    type: trusty
-    cert: /tmp/trusty/certs/trusty_dev_issuer2_ca.pem
-    key: /tmp/trusty/certs/trusty_dev_issuer2_ca-key.pem
-    # location of the CA bundle file
-    ca_bundle: /tmp/trusty/certs/trusty_dev_cabundle.pem
-    # location of the Root CA file
-    root_bundle: /tmp/trusty/certs/trusty_dev_root_ca.pem
-    # value in 72h format for duration of CRL next update time
-    crl_expiry: 8h
-    # value in 8h format for duration of CRL renewal before next update time
-    crl_renewal: 1h
-    # value in 8h format for duration of OCSP next update time
-    ocsp_expiry: 10m
+authority: ../../../etc/dev/ca-config.dev.yaml
 
 servers:
   - name: Health
