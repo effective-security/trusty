@@ -37,12 +37,6 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		ErrorWriter(errout).
 		Version(fmt.Sprintf("trustyctl %v", version.Current().String()))
 
-	hostname, err := os.Hostname()
-	if err != nil {
-		fmt.Fprintf(out, "Unable to determine hostname: %v\n", err)
-		hostname = "localhost"
-	}
-
 	cli := cli.New(
 		&ctl.ControlDefinition{
 			App:    app,
@@ -51,30 +45,26 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		cli.WithServiceCfg(),
 		cli.WithHsmCfg(),
 		cli.WithTLS(),
-		cli.WithServer(fmt.Sprintf("%s:7891", hostname)),
+		cli.WithServer(""),
 	)
 	defer cli.Close()
 
 	app.Command("status", "show the server status").
 		PreAction(cli.PopulateControl).
-		PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(status.Server, nil))
 
 	app.Command("version", "show the server version").
 		PreAction(cli.PopulateControl).
-		PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(status.Version, nil))
 
 	app.Command("caller", "show the caller info").
 		PreAction(cli.PopulateControl).
-		PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(status.Caller, nil))
 
 	// ca: issuers
 
 	cmdCA := app.Command("ca", "CA operations").
-		PreAction(cli.PopulateControl).
-		PreAction(cli.EnsureClient)
+		PreAction(cli.PopulateControl)
 
 	cmdCA.Command("issuers", "show the issuing CAs").
 		Action(cli.RegisterAction(ca.Issuers, nil))
@@ -88,8 +78,7 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	// cis: roots
 
 	cmdCIS := app.Command("cis", "CIS operations").
-		PreAction(cli.PopulateControl).
-		PreAction(cli.EnsureClient)
+		PreAction(cli.PopulateControl)
 
 	getRootsFlags := new(cis.GetRootsFlags)
 	rootsCmd := cmdCIS.Command("roots", "show the roots").

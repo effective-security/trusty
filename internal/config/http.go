@@ -10,18 +10,20 @@ import (
 
 // HTTPServer contains the configuration of the HTTP API Service
 type HTTPServer struct {
-
-	// Name specifies name of the server
-	Name string `json:"name,omitempty" yaml:"name,omitempty"`
+	// Description provides description of the server
+	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 
 	// Disabled specifies if the service is disabled
 	Disabled *bool `json:"disabled,omitempty" yaml:"disabled,omitempty"`
 
+	// ClientURL is the public URL exposed to clients
+	ClientURL string `json:"client_url" yaml:"client_url"`
+
 	// ListenURLs is the list of URLs that the server will be listen on
-	ListenURLs []string `json:"listen_urls,omitempty" yaml:"listen_urls,omitempty"`
+	ListenURLs []string `json:"listen_urls" yaml:"listen_urls"`
 
 	// ServerTLS provides TLS config for server
-	ServerTLS TLSInfo `json:"server_tls,omitempty" yaml:"server_tls,omitempty"`
+	ServerTLS *TLSInfo `json:"server_tls,omitempty" yaml:"server_tls,omitempty"`
 
 	// PackageLogger if set, specifies name of the package logger
 	PackageLogger string `json:"logger,omitempty" yaml:"logger,omitempty"`
@@ -33,25 +35,31 @@ type HTTPServer struct {
 	ProfilerDir string `json:"profile_dir,omitempty" yaml:"profile_dir,omitempty"`
 
 	// Services is a list of services to enable for this HTTP Service
-	Services []string `json:"services,omitempty" yaml:"services,omitempty"`
+	Services []string `json:"services" yaml:"services"`
 
 	// HeartbeatSecs specifies heartbeat interval in seconds [5 secs is a minimum]
-	HeartbeatSecs int `json:"heartbeat_secs,omitempty" yaml:"heartbeat_secs,omitempty"`
+	HeartbeatSecs int `json:"heartbeat_secs" yaml:"heartbeat_secs"`
 
 	// CORS contains configuration for CORS.
 	CORS *CORS `json:"cors,omitempty" yaml:"cors,omitempty"`
 
-	// RequestTimeout is the timeout for client requests to finish.
-	RequestTimeout time.Duration `json:"request_timeout,omitempty" yaml:"request_timeout,omitempty"`
+	// Timeout settings
+	Timeout struct {
+		// Request is the timeout for client requests to finish.
+		Request time.Duration `json:"request,omitempty" yaml:"request,omitempty"`
+	} `json:"timeout" yaml:"timeout"`
 
-	// KeepAliveMinTime is the minimum interval that a client should wait before pinging server.
-	KeepAliveMinTime time.Duration `json:"keep_alive_min_time,omitempty" yaml:"keep_alive_min_time,omitempty"`
+	// KeepAlive settings
+	KeepAlive struct {
+		// MinTime is the minimum interval that a client should wait before pinging server.
+		MinTime time.Duration `json:"min_time,omitempty" yaml:"min_time,omitempty"`
 
-	// KeepAliveInterval is the frequency of server-to-client ping to check if a connection is alive.
-	KeepAliveInterval time.Duration `json:"keep_alive_interval,omitempty" yaml:"keep_alive_interval,omitempty"`
+		// Interval is the frequency of server-to-client ping to check if a connection is alive.
+		Interval time.Duration `json:"interval,omitempty" yaml:"interval,omitempty"`
 
-	// KeepAliveTimeout is the additional duration of wait before closing a non-responsive connection, use 0 to disable.
-	KeepAliveTimeout time.Duration `json:"keep_alive_timeout,omitempty" yaml:"keep_alive_timeout,omitempty"`
+		// Timeout is the additional duration of wait before closing a non-responsive connection, use 0 to disable.
+		Timeout time.Duration `json:"timeout,omitempty" yaml:"timeout,omitempty"`
+	} `json:"keep_alive" yaml:"keep_alive"`
 }
 
 // TLSInfo contains configuration info for the TLS
@@ -80,17 +88,12 @@ type TLSInfo struct {
 }
 
 // TrustyClient specifies configurations for the client to connect to the cluster
-// TODO: refactor
 type TrustyClient struct {
-
-	// PublicURL provides the server URL for external clients
-	PublicURL string `json:"public_url,omitempty" yaml:"public_url,omitempty"`
-
-	// Servers decribes the list of server URLs to contact
-	Servers []string `json:"servers,omitempty" yaml:"servers,omitempty"`
-
 	// ClientTLS describes the TLS certs used to connect to the cluster
 	ClientTLS TLSInfo `json:"client_tls,omitempty" yaml:"client_tls,omitempty"`
+
+	// ServerURL specifies URLs for each server
+	ServerURL map[string]string `json:"server_url,omitempty" yaml:"server_url,omitempty"`
 }
 
 // CORS contains configuration for CORS.
@@ -136,7 +139,7 @@ func (c *HTTPServer) ParseListenURLs() ([]*url.URL, error) {
 
 // Empty returns true if TLS info is empty
 func (info *TLSInfo) Empty() bool {
-	return info.CertFile == "" || info.KeyFile == ""
+	return info == nil || info.CertFile == "" || info.KeyFile == ""
 }
 
 // GetClientCertAuth controls client auth

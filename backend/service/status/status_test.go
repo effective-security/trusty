@@ -11,8 +11,8 @@ import (
 	v1 "github.com/ekspand/trusty/api/v1"
 	pb "github.com/ekspand/trusty/api/v1/trustypb"
 	"github.com/ekspand/trusty/backend/service/status"
-	"github.com/ekspand/trusty/backend/trustyserver/embed"
 	"github.com/ekspand/trusty/client"
+	"github.com/ekspand/trusty/client/embed"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/version"
 	"github.com/ekspand/trusty/pkg/gserver"
@@ -64,9 +64,8 @@ func TestMain(m *testing.M) {
 	httpAddr = testutils.CreateURLs("http", "")
 
 	cfg := &config.HTTPServer{
-		Name:       "StatusTest",
 		ListenURLs: []string{httpsAddr, httpAddr},
-		ServerTLS: config.TLSInfo{
+		ServerTLS: &config.TLSInfo{
 			CertFile:      "/tmp/trusty/certs/trusty_dev_peer.pem",
 			KeyFile:       "/tmp/trusty/certs/trusty_dev_peer-key.pem",
 			TrustedCAFile: "/tmp/trusty/certs/trusty_dev_root_ca.pem",
@@ -75,7 +74,7 @@ func TestMain(m *testing.M) {
 	}
 
 	container := createContainer(nil, nil, nil)
-	trustyServer, err = gserver.Start(cfg, container, serviceFactories)
+	trustyServer, err = gserver.Start("StatusTest", cfg, container, serviceFactories)
 	if err != nil || trustyServer == nil {
 		panic(errors.Trace(err))
 	}

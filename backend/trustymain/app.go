@@ -11,12 +11,12 @@ import (
 	"syscall"
 	"time"
 
+	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/backend/service/auth"
 	"github.com/ekspand/trusty/backend/service/ca"
 	"github.com/ekspand/trusty/backend/service/cis"
 	"github.com/ekspand/trusty/backend/service/status"
 	"github.com/ekspand/trusty/backend/service/workflow"
-	"github.com/ekspand/trusty/backend/trustyserver"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/version"
 	"github.com/ekspand/trusty/pkg/gserver"
@@ -54,8 +54,11 @@ type appFlags struct {
 	dryRun              *bool
 	hsmCfg              *string
 	cryptoProvs         *[]string
-	healthURLs          *[]string
-	clientURLs          *[]string
+	cisURLs             *[]string
+	wfeURLs             *[]string
+	caURLs              *[]string
+	saURLs              *[]string
+	raURLs              *[]string
 	hostNames           *[]string
 	logsDir             *string
 	auditDir            *string
@@ -138,7 +141,7 @@ func (a *App) Close() error {
 	defer a.lock.Unlock()
 
 	if a.closed {
-		return errors.Trace(trustyserver.ErrAlreadyClosed)
+		return errors.Trace(v1.ErrAlreadyClosed)
 	}
 
 	a.closed = true
@@ -227,18 +230,18 @@ func (a *App) Run(startedCh chan<- bool) error {
 		return nil
 	}
 
-	for _, svcCfg := range a.cfg.HTTPServers {
+	for name, svcCfg := range a.cfg.HTTPServers {
 		if svcCfg.GetDisabled() == false {
-			httpServer, err := gserver.Start(&svcCfg, a.container, ServiceFactories)
+			httpServer, err := gserver.Start(name, svcCfg, a.container, ServiceFactories)
 			if err != nil {
-				logger.Errorf("src=Run, reason=Start, server=%s, err=[%v]", svcCfg.Name, errors.ErrorStack(err))
+				logger.Errorf("src=Run, reason=Start, server=%s, err=[%v]", name, errors.ErrorStack(err))
 
 				a.stopServers()
 				return errors.Trace(err)
 			}
 			a.servers[httpServer.Name()] = httpServer
 		} else {
-			logger.Infof("src=Run, reason=skip_disabled, server=%s", svcCfg.Name)
+			logger.Infof("src=Run, reason=skip_disabled, server=%s", name)
 		}
 	}
 
@@ -304,14 +307,21 @@ func (a *App) loadConfig() error {
 	flags.dryRun = app.Flag("dry-run", "verify config etc, and do not start the service").Bool()
 	flags.hsmCfg = app.Flag("hsm-cfg", "location of the HSM configuration file").String()
 	flags.cryptoProvs = app.Flag("crypto-prov", "path to additional Crypto provider configurations").Strings()
-	flags.clientURLs = app.Flag("client-listen-url", "URL for the clients listening end-point").Strings()
-	flags.healthURLs = app.Flag("health-listen-url", "URL for the health listening end-point").Strings()
+
+	flags.cisURLs = app.Flag("cis-listen-url", "URL for the CIS listening end-point").Strings()
+	flags.wfeURLs = app.Flag("wfe-listen-url", "URL for the WFE listening end-point").Strings()
+	flags.caURLs = app.Flag("ca-listen-url", "URL for the CA listening end-point").Strings()
+	flags.raURLs = app.Flag("ra-listen-url", "URL for the RA listening end-point").Strings()
+	flags.saURLs = app.Flag("sa-listen-url", "URL for the Storage listening end-point").Strings()
+
 	flags.hostNames = app.Flag("host-name", "Set of host names to be used in CSR requests to obtaine a server certificate").Strings()
 	flags.logsDir = app.Flag("logs-dir", "Path to the logs folder.").String()
 	flags.auditDir = app.Flag("audit-dir", "Path to the audit folder.").String()
+
 	flags.httpsCertFile = app.Flag("https-server-cert", "Path to the server TLS cert file.").String()
 	flags.httpsKeyFile = app.Flag("https-server-key", "Path to the server TLS key file.").String()
 	flags.httpsTrustedCAFile = app.Flag("https-server-trustedca", "Path to the server TLS trusted CA file.").String()
+
 	flags.clientCertFile = app.Flag("client-cert", "Path to the client TLS cert file.").String()
 	flags.clientKeyFile = app.Flag("client-key", "Path to the client TLS key file.").String()
 	flags.clientTrustedCAFile = app.Flag("client-trustedca", "Path to the client TLS trusted CA file.").String()
@@ -348,30 +358,43 @@ func (a *App) loadConfig() error {
 		cfg.TrustyClient.ClientTLS.TrustedCAFile = *flags.clientTrustedCAFile
 	}
 
-	for i, httpCfg := range cfg.HTTPServers {
-		switch httpCfg.Name {
-		case "Trusty-CIS":
-			if len(*flags.healthURLs) > 0 {
-				cfg.HTTPServers[i].ListenURLs = *flags.healthURLs
-			}
-
-		case "Trusty-WFE":
-			if len(*flags.clientURLs) > 0 {
-				cfg.HTTPServers[i].ListenURLs = *flags.clientURLs
-			}
+	for name, httpCfg := range cfg.HTTPServers {
+		if httpCfg.ServerTLS != nil {
 			if *flags.httpsCertFile != "" {
-				cfg.HTTPServers[i].ServerTLS.CertFile = *flags.httpsCertFile
+				httpCfg.ServerTLS.CertFile = *flags.httpsCertFile
 			}
 			if *flags.httpsKeyFile != "" {
-				cfg.HTTPServers[i].ServerTLS.KeyFile = *flags.httpsKeyFile
+				httpCfg.ServerTLS.KeyFile = *flags.httpsKeyFile
 			}
 			if *flags.httpsTrustedCAFile != "" {
-				cfg.HTTPServers[i].ServerTLS.TrustedCAFile = *flags.httpsTrustedCAFile
+				httpCfg.ServerTLS.TrustedCAFile = *flags.httpsTrustedCAFile
 			}
-		case "Trusty-CA", "Trusty-RA", "Trusty-SA":
-		// TODO:
+		}
+
+		switch name {
+		case config.CISServerName:
+			if len(*flags.cisURLs) > 0 {
+				httpCfg.ListenURLs = *flags.cisURLs
+			}
+
+		case config.WFEServerName:
+			if len(*flags.wfeURLs) > 0 {
+				httpCfg.ListenURLs = *flags.wfeURLs
+			}
+		case config.CAServerName:
+			if len(*flags.caURLs) > 0 {
+				httpCfg.ListenURLs = *flags.caURLs
+			}
+		case config.RAServerName:
+			if len(*flags.raURLs) > 0 {
+				httpCfg.ListenURLs = *flags.raURLs
+			}
+		case config.SAServerName:
+			if len(*flags.saURLs) > 0 {
+				httpCfg.ListenURLs = *flags.saURLs
+			}
 		default:
-			return errors.Errorf("unknows server name in configuration: %s", httpCfg.Name)
+			return errors.Errorf("unknows server name in configuration: %s", name)
 		}
 	}
 

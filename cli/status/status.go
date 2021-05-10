@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/ekspand/trusty/cli"
+	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/juju/errors"
@@ -13,7 +14,13 @@ import (
 // Version shows the service version
 func Version(c ctl.Control, _ interface{}) error {
 	cli := c.(*cli.Cli)
-	res, err := cli.Client().StatusService.Version(context.Background())
+	client, err := cli.Client(config.WFEServerName)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	defer client.Close()
+
+	res, err := client.StatusService.Version(context.Background())
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -30,7 +37,13 @@ func Version(c ctl.Control, _ interface{}) error {
 // Server shows trusty server status
 func Server(c ctl.Control, _ interface{}) error {
 	cli := c.(*cli.Cli)
-	res, err := cli.Client().StatusService.Server(context.Background())
+	client, err := cli.Client(config.WFEServerName)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	defer client.Close()
+
+	res, err := client.StatusService.Server(context.Background())
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -48,7 +61,13 @@ func Server(c ctl.Control, _ interface{}) error {
 // Caller shows the Caller status
 func Caller(c ctl.Control, _ interface{}) error {
 	cli := c.(*cli.Cli)
-	res, err := cli.Client().StatusService.Caller(context.Background())
+	client, err := cli.Client(config.WFEServerName)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	defer client.Close()
+
+	res, err := client.StatusService.Caller(context.Background())
 	if err != nil {
 		return errors.Trace(err)
 	}

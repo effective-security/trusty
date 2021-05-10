@@ -1,4 +1,4 @@
-package trustyserver
+package events
 
 const (
 	// EvtSourceCluster specifies source for Cluster

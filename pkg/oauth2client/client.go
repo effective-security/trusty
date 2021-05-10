@@ -56,6 +56,10 @@ func Load(cfgfile string) (*Client, error) {
 		return nil, errors.Trace(err)
 	}
 
+	cfg.ClientID, err = fileutil.LoadConfigWithSchema(cfg.ClientID)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
 	cfg.ClientSecret, err = fileutil.LoadConfigWithSchema(cfg.ClientSecret)
 	if err != nil {
 		return nil, errors.Trace(err)

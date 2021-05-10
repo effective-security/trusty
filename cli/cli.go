@@ -2,9 +2,11 @@
 package cli
 
 import (
+	"crypto/tls"
 	"io"
 	"io/ioutil"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/ekspand/trusty/client"
@@ -118,7 +120,6 @@ type Cli struct {
 	config            *config.Configuration
 	crypto            *cryptoprov.Crypto
 	defaultCryptoProv cryptoprov.Provider
-	client            *client.Client
 }
 
 // New creates an instance of trusty CLI
@@ -140,10 +141,6 @@ func New(d *ctl.ControlDefinition, opts ...Option) *Cli {
 
 // Close allocated resources
 func (cli *Cli) Close() {
-	if cli.client != nil {
-		cli.client.Close()
-		cli.client = nil
-	}
 }
 
 // Verbose specifies if verbose output is enabled
@@ -285,67 +282,56 @@ func (cli *Cli) PopulateControl() error {
 	return nil
 }
 
-// WithClient sets gRPC client
-func (cli *Cli) WithClient(c *client.Client) *Cli {
-	if cli.client != nil {
-		cli.client.Close()
-		cli.client = nil
-	}
-	cli.client = c
+// WithServer sets Server address
+func (cli *Cli) WithServer(s string) *Cli {
+	*cli.flags.server = s
 	return cli
 }
 
-// Client returns client instance with active gRPC connection
-func (cli *Cli) Client() *client.Client {
-	if cli == nil || cli.client == nil {
-		panic("use EnsureClient() in App settings")
-	}
-	return cli.client
-}
-
-// EnsureClient is pre-action to instantiate trusty client
-func (cli *Cli) EnsureClient() error {
-	if cli.client != nil {
-		return nil
-	}
-
-	var tlsCert, tlsKey, tlsCA string
-	if cli.flags.certFile != nil && *cli.flags.certFile != "" {
-		tlsCert = *cli.flags.certFile
-		tlsKey = *cli.flags.keyFile
-		tlsCA = *cli.flags.trustedCAFile
-	}
+// Client returns client for specied service
+func (cli *Cli) Client(svc string) (*client.Client, error) {
+	var err error
+	var tlscfg *tls.Config
 
 	var cfg *config.Configuration
 
 	if cli.flags.serviceConfig != nil && *cli.flags.serviceConfig != "" {
 		err := cli.EnsureServiceConfig()
 		if err != nil {
-			return errors.Trace(err)
+			return nil, errors.Trace(err)
 		}
 
 		cfg = cli.Config()
-		if cli.Server() == "" && len(cfg.TrustyClient.Servers) > 0 {
-			*cli.flags.server = cfg.TrustyClient.Servers[0]
+		if cli.Server() == "" && cfg.TrustyClient.ServerURL[svc] != "" {
+			*cli.flags.server = cfg.TrustyClient.ServerURL[svc]
 		}
 	}
 
-	if cli.Server() == "" {
-		return errors.New("use --server option")
+	host := cli.Server()
+	if host == "" {
+		return nil, errors.New("use --server option")
 	}
 
-	if (tlsCert == "" || tlsKey == "") && cfg != nil {
-		tlsCert = cfg.TrustyClient.ClientTLS.CertFile
-		tlsKey = cfg.TrustyClient.ClientTLS.KeyFile
-		tlsCA = cfg.TrustyClient.ClientTLS.TrustedCAFile
-	}
+	if strings.HasPrefix(host, "https://") {
+		var tlsCert, tlsKey, tlsCA string
+		if cli.flags.certFile != nil && *cli.flags.certFile != "" {
+			tlsCert = *cli.flags.certFile
+			tlsKey = *cli.flags.keyFile
+			tlsCA = *cli.flags.trustedCAFile
+		}
 
-	tlscfg, err := tlsconfig.NewClientTLSFromFiles(
-		tlsCert,
-		tlsKey,
-		tlsCA)
-	if err != nil {
-		return errors.Annotate(err, "unable to build TLS configuration")
+		if (tlsCert == "" || tlsKey == "") && cfg != nil {
+			tlsCert = cfg.TrustyClient.ClientTLS.CertFile
+			tlsKey = cfg.TrustyClient.ClientTLS.KeyFile
+			tlsCA = cfg.TrustyClient.ClientTLS.TrustedCAFile
+		}
+		tlscfg, err = tlsconfig.NewClientTLSFromFiles(
+			tlsCert,
+			tlsKey,
+			tlsCA)
+		if err != nil {
+			return nil, errors.Annotate(err, "unable to build TLS configuration")
+		}
 	}
 
 	timeout := time.Duration(*cli.flags.timeout) * time.Second
@@ -353,15 +339,15 @@ func (cli *Cli) EnsureClient() error {
 		DialTimeout:          timeout,
 		DialKeepAliveTimeout: timeout,
 		DialKeepAliveTime:    timeout,
-		Endpoints:            []string{cli.Server()},
+		Endpoints:            []string{host},
 		TLS:                  tlscfg,
 	}
 
-	cli.client, err = client.New(clientCfg)
+	client, err := client.New(clientCfg)
 	if err != nil {
-		return errors.Annotate(err, "unable to create client")
+		return nil, errors.Annotate(err, "unable to create client")
 	}
-	return nil
+	return client, nil
 }
 
 // ReadStdin reads from stdin if the file is "-"

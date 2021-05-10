@@ -11,8 +11,8 @@ import (
 	"github.com/ekspand/trusty/api/v1/trustypb"
 	"github.com/ekspand/trusty/backend/service/cis"
 	"github.com/ekspand/trusty/backend/trustymain"
-	"github.com/ekspand/trusty/backend/trustyserver/embed"
 	"github.com/ekspand/trusty/client"
+	"github.com/ekspand/trusty/client/embed"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/juju/errors"
@@ -42,14 +42,14 @@ func TestMain(m *testing.M) {
 
 	httpAddr := testutils.CreateURLs("http", "")
 
-	for i, httpCfg := range cfg.HTTPServers {
-		switch httpCfg.Name {
-		case "Trusty-CIS":
-			cfg.HTTPServers[i].Services = []string{cis.ServiceName}
-			cfg.HTTPServers[i].ListenURLs = []string{httpAddr}
+	for name, httpCfg := range cfg.HTTPServers {
+		switch name {
+		case cis.ServiceName:
+			httpCfg.Services = []string{cis.ServiceName}
+			httpCfg.ListenURLs = []string{httpAddr}
 
 		default:
-			cfg.HTTPServers[i].Disabled = &trueVal
+			httpCfg.Disabled = &trueVal
 		}
 	}
 
@@ -79,9 +79,9 @@ func TestMain(m *testing.M) {
 	select {
 	case ret := <-startedCh:
 		if ret {
-			trustyServer = app.Server("Trusty-CIS")
+			trustyServer = app.Server(cis.ServiceName)
 			if trustyServer == nil {
-				panic("Trusty-CIS not found!")
+				panic("cis not found!")
 			}
 			trustyClient = embed.NewClient(trustyServer)
 

@@ -55,7 +55,7 @@ func configureListeners(cfg *config.HTTPServer) (sctxs map[string]*serveCtx, err
 
 	var tlsInfo *transport.TLSInfo
 	if !cfg.ServerTLS.Empty() {
-		from := &cfg.ServerTLS
+		from := cfg.ServerTLS
 		clientauthType := tls.VerifyClientCertIfGiven
 		if from.GetClientCertAuth() {
 			clientauthType = tls.RequireAndVerifyClientCert
@@ -76,17 +76,17 @@ func configureListeners(cfg *config.HTTPServer) (sctxs map[string]*serveCtx, err
 	}
 
 	gopts := []grpc.ServerOption{}
-	if cfg.KeepAliveMinTime > 0 {
+	if cfg.KeepAlive.MinTime > 0 {
 		gopts = append(gopts, grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
-			MinTime:             cfg.KeepAliveMinTime,
+			MinTime:             cfg.KeepAlive.MinTime,
 			PermitWithoutStream: false,
 		}))
 	}
-	if cfg.KeepAliveInterval > 0 &&
-		cfg.KeepAliveTimeout > 0 {
+	if cfg.KeepAlive.Interval > 0 &&
+		cfg.KeepAlive.Timeout > 0 {
 		gopts = append(gopts, grpc.KeepaliveParams(keepalive.ServerParameters{
-			Time:    cfg.KeepAliveInterval,
-			Timeout: cfg.KeepAliveTimeout,
+			Time:    cfg.KeepAlive.Interval,
+			Timeout: cfg.KeepAlive.Timeout,
 		}))
 	}
 
@@ -98,8 +98,8 @@ func configureListeners(cfg *config.HTTPServer) (sctxs map[string]*serveCtx, err
 		// clean up on error
 		for _, sctx := range sctxs {
 			if sctx.listener != nil {
-				logger.Infof("src=configureListeners, reason=error, server=%s, network=%s, address=%s, err=%q",
-					cfg.Name, sctx.network, sctx.addr, err.Error())
+				logger.Infof("src=configureListeners, reason=error, network=%s, address=%s, err=%q",
+					sctx.network, sctx.addr, err.Error())
 				sctx.listener.Close()
 			}
 		}
@@ -177,7 +177,7 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 	//<-s.ReadyNotify()
 
 	logger.Infof("src=serve, status=ready_to_serve, service=%s, network=%s, address=%q",
-		sctx.cfg.Name, sctx.network, sctx.addr)
+		s.Name(), sctx.network, sctx.addr)
 
 	var gsSecure *grpc.Server
 	var gsInsecure *grpc.Server
@@ -223,7 +223,7 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 
 		sctx.serversC <- &servers{grpc: gsInsecure, http: srvhttp}
 
-		logger.Warningf("src=serve, reason=insecure, service=%s, address=%q", sctx.cfg.Name, sctx.addr)
+		logger.Warningf("src=serve, reason=insecure, service=%s, address=%q", s.Name(), sctx.addr)
 	}
 
 	if sctx.secure {
@@ -264,7 +264,7 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 	}
 
 	logger.Infof("src=serve, status=serving, service=%s, address=%s, secure=%t, insecure=%t",
-		sctx.cfg.Name, sctx.listener.Addr().String(), sctx.secure, sctx.insecure)
+		s.Name(), sctx.listener.Addr().String(), sctx.secure, sctx.insecure)
 
 	close(sctx.serversC)
 

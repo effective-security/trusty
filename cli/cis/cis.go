@@ -21,7 +21,13 @@ func Roots(c ctl.Control, p interface{}) error {
 	flags := p.(*GetRootsFlags)
 
 	cli := c.(*cli.Cli)
-	res, err := cli.Client().CertInfoService.Roots(context.Background(), &trustypb.EmptyRequest{})
+	client, err := cli.Client("cis")
+	if err != nil {
+		return errors.Trace(err)
+	}
+	defer client.Close()
+
+	res, err := client.CertInfoService.Roots(context.Background(), &trustypb.EmptyRequest{})
 	if err != nil {
 		return errors.Trace(err)
 	}

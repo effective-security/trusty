@@ -132,10 +132,18 @@ func Test_LoadYAMLOverride(t *testing.T) {
 
 	require.NotEmpty(t, c.Authority)
 
+	cis := c.HTTPServers[CISServerName]
+	require.NotNil(t, cis)
+	assert.False(t, cis.GetDisabled())
+	assert.False(t, cis.CORS.GetEnabled())
+	assert.False(t, cis.CORS.GetDebug())
 	require.NotEmpty(t, c.HTTPServers)
-	assert.False(t, c.HTTPServers[0].GetDisabled())
-	assert.False(t, c.HTTPServers[0].CORS.GetEnabled())
-	assert.False(t, c.HTTPServers[0].CORS.GetDebug())
+
+	wfe := c.HTTPServers[WFEServerName]
+	require.NotNil(t, wfe)
+	assert.False(t, wfe.GetDisabled())
+	assert.True(t, wfe.CORS.GetEnabled())
+	assert.False(t, wfe.CORS.GetDebug())
 
 	assert.True(t, c.Metrics.GetDisabled())
 }

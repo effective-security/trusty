@@ -130,7 +130,7 @@ func (s *Service) AuthURLHandler() rest.Handle {
 		conf := &oauth2.Config{
 			ClientID:     o.ClientID,
 			ClientSecret: o.ClientSecret,
-			RedirectURL:  s.cfg.TrustyClient.PublicURL + v1.PathForAuthGithubCallback,
+			RedirectURL:  s.cfg.TrustyClient.ServerURL[config.WFEServerName] + v1.PathForAuthGithubCallback,
 			Scopes:       o.Scopes,
 			Endpoint: oauth2.Endpoint{
 				AuthURL:  o.AuthURL,
@@ -183,7 +183,7 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 		conf := &oauth2.Config{
 			ClientID:     o.ClientID,
 			ClientSecret: o.ClientSecret,
-			RedirectURL:  s.cfg.TrustyClient.PublicURL + v1.PathForAuthGithubCallback,
+			RedirectURL:  s.cfg.TrustyClient.ServerURL[config.WFEServerName] + v1.PathForAuthGithubCallback,
 			Scopes:       o.Scopes,
 			Endpoint: oauth2.Endpoint{
 				AuthURL:  o.AuthURL,
