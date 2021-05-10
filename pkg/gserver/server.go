@@ -50,8 +50,9 @@ type Server struct {
 	// a map of contexts for the servers that serves client requests.
 	sctxs map[string]*serveCtx
 
-	di  *dig.Container
-	cfg config.HTTPServer
+	di   *dig.Container
+	name string
+	cfg  config.HTTPServer
 
 	stopc     chan struct{}
 	errc      chan error
@@ -67,6 +68,7 @@ type Server struct {
 
 // Start returns running Server
 func Start(
+	name string,
 	cfg *config.HTTPServer,
 	container *dig.Container,
 	serviceFactories map[string]ServiceFactory,
@@ -87,7 +89,7 @@ func Start(
 		e = nil
 	}()
 
-	e, err = newServer(cfg, container, serviceFactories)
+	e, err = newServer(name, cfg, container, serviceFactories)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -113,6 +115,7 @@ func Start(
 }
 
 func newServer(
+	name string,
 	cfg *config.HTTPServer,
 	container *dig.Container,
 	serviceFactories map[string]ServiceFactory,
@@ -129,6 +132,7 @@ func newServer(
 	e := &Server{
 		ipaddr:   ipaddr,
 		hostname: hostname,
+		name:     name,
 		cfg:      *cfg,
 		di:       container,
 		services: make(map[string]Service),
@@ -137,19 +141,19 @@ func newServer(
 		startedAt: time.Now(),
 	}
 
-	for _, name := range cfg.Services {
-		sf := serviceFactories[name]
+	for _, svc := range cfg.Services {
+		sf := serviceFactories[svc]
 		if sf == nil {
-			return nil, errors.Errorf("service factory is not registered: %q", name)
+			return nil, errors.Errorf("service factory is not registered: %q", svc)
 		}
 		err = container.Invoke(sf(e))
 		if err != nil {
 			return nil, errors.Annotatef(err, "src=newServer, reason=factory, server=%q, service=%s",
-				cfg.Name, name)
+				name, svc)
 		}
 	}
 
-	logger.Tracef("src=newServer, status=configuring_listeners, server=%s", cfg.Name)
+	logger.Tracef("src=newServer, status=configuring_listeners, server=%s", name)
 
 	e.sctxs, err = configureListeners(cfg)
 	if err != nil {
@@ -200,8 +204,8 @@ func (e *Server) Close() {
 
 	// close client requests with request timeout
 	timeout := 3 * time.Second
-	if e.cfg.RequestTimeout != 0 {
-		timeout = e.cfg.RequestTimeout
+	if e.cfg.Timeout.Request != 0 {
+		timeout = e.cfg.Timeout.Request
 	}
 	for _, sctx := range e.sctxs {
 		for ss := range sctx.serversC {
@@ -263,7 +267,7 @@ func (e *Server) Err() <-chan error { return e.errc }
 
 // Name returns server name
 func (e *Server) Name() string {
-	return e.cfg.Name
+	return e.name
 }
 
 // AddService to the server

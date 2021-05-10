@@ -6,6 +6,7 @@ import (
 
 	"github.com/ekspand/trusty/api/v1/trustypb"
 	"github.com/ekspand/trusty/cli"
+	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/juju/errors"
@@ -14,7 +15,14 @@ import (
 // Issuers shows the Issuing CAs
 func Issuers(c ctl.Control, _ interface{}) error {
 	cli := c.(*cli.Cli)
-	res, err := cli.Client().AuthorityService.Issuers(context.Background())
+
+	client, err := cli.Client(config.CAServerName)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	defer client.Close()
+
+	res, err := client.AuthorityService.Issuers(context.Background())
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -38,7 +46,13 @@ type GetProfileFlags struct {
 func Profile(c ctl.Control, p interface{}) error {
 	flags := p.(*GetProfileFlags)
 	cli := c.(*cli.Cli)
-	res, err := cli.Client().AuthorityService.ProfileInfo(context.Background(), &trustypb.CertProfileInfoRequest{
+	client, err := cli.Client(config.CAServerName)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	defer client.Close()
+
+	res, err := client.AuthorityService.ProfileInfo(context.Background(), &trustypb.CertProfileInfoRequest{
 		Profile: *flags.Profile,
 		Label:   *flags.Label,
 	})

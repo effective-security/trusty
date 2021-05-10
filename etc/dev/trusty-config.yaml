@@ -115,18 +115,23 @@ ra:
   public_roots:
 
 servers:
-  - name: Trusty-CIS
+  cis:
+    description: Certificate Information Service allows unauthenticated calls to AIA, OCSP and Certificates end-points
     listen_urls:
       - http://0.0.0.0:8080
+    client_url: http://localhost:8080
     services:
       - status
       - cis
     heartbeat_secs: 30
-    request_timeout: 3s
+    timeout:
+      request: 3s
 
-  - name: Trusty-WFE
+  wfe:
+    description: Web Front End
     listen_urls:
       - https://0.0.0.0:7891
+    client_url: https://localhost:7891
     server_tls:
       cert: /tmp/trusty/certs/trusty_dev_peer.pem
       key: /tmp/trusty/certs/trusty_dev_peer-key.pem
@@ -136,10 +141,12 @@ servers:
       - status
       - workflow
     heartbeat_secs: 30
-    request_timeout: 3s
-    keep_alive_min_time: 60s
-    keep_alive_interval: 30s
-    keep_alive_timeout: 180s
+    timeout:
+      request: 3s
+    keep_alive:
+      min_time: 60s
+      interval: 30s
+      timeout: 180s
     cors:
       enabled: true
       max_age: 600
@@ -158,11 +165,17 @@ servers:
         - Content-Length
         - Accept-Encoding
         - Authorization
-         -X-Device-ID
+        - User-Agent
+        - Referer
+        - X-Device-ID
+        - sec-ch-ua
+        - sec-ch-ua-mobile
 
-  - name: Trusty-CA
+  ca:
+    description: Certification Authority
     listen_urls:
       - https://0.0.0.0:7892
+    client_url: https://localhost:7892
     server_tls:
       cert: /tmp/trusty/certs/trusty_dev_peer.pem
       key: /tmp/trusty/certs/trusty_dev_peer-key.pem
@@ -171,16 +184,21 @@ servers:
       - status
       - ca
     heartbeat_secs: 30
-    request_timeout: 3s
-    keep_alive_min_time: 60s
-    keep_alive_interval: 30s
-    keep_alive_timeout: 180s
+    timeout:
+      request: 3s
+    keep_alive:
+      min_time: 60s
+      interval: 30s
+      timeout: 180s
 
 trusty_client: 
   client_tls:
     cert: /tmp/trusty/certs/trusty_dev_peer.pem
     key: /tmp/trusty/certs/trusty_dev_peer-key.pem
     trusted_ca: /tmp/trusty/certs/trusty_dev_root_ca.pem
-  public_url: https://localhost:7891
-  servers:
-    - https://0.0.0.0:7891
+  server_url:
+    cis: http://localhost:8080
+    wfe: https://localhost:7891
+    ca: https://localhost:7892
+    ra: https://localhost:7893
+

@@ -76,6 +76,7 @@ services:
       - "7892" # CA
       - "7893"
     environment:
+      - TRUSTY_GITHUB_CLIENT_ID=not_used_in_test
       - TRUSTY_GITHUB_CLIENT_SECRET=not_used_in_test
       - TRUSTY_SQL_CONN=host=10.77.88.100 port=5432 user=postgres password=postgres sslmode=disable dbname=trustydb
     entrypoint:
@@ -106,8 +107,11 @@ services:
         --logs-dir=/var/trusty/logs
         --audit-dir=/var/trusty/audit
         --host-name=10.77.88.101
-        --health-listen-url=http://10.77.88.101:8080
-        --client-listen-url=https://10.77.88.101:7891
+        --cis-listen-url=http://10.77.88.101:8080
+        --wfe-listen-url=https://10.77.88.101:7891
+        --ca-listen-url=https://10.77.88.101:7892
+        --ra-listen-url=https://10.77.88.101:7893
+        --sa-listen-url=https://10.77.88.101:7894
 
   # NODE 2 on local-kms
   trusty-node2:
@@ -139,6 +143,7 @@ services:
       - AWS_ACCESS_KEY_ID=notusedbyemulator
       - AWS_SECRET_ACCESS_KEY=notusedbyemulator
       - AWS_DEFAULT_REGION=us-west-2
+      - TRUSTY_GITHUB_CLIENT_ID=not_used_in_test
       - TRUSTY_GITHUB_CLIENT_SECRET=not_used_in_test
       - TRUSTY_SQL_CONN=host=10.77.88.100 port=5432 user=postgres password=postgres sslmode=disable dbname=trustydb
     entrypoint:
@@ -163,9 +168,11 @@ services:
         --logs-dir=/var/trusty/logs
         --audit-dir=/var/trusty/audit
         --host-name=10.77.88.102
-        --health-listen-url=http://10.77.88.102:8080
-        --client-listen-url=https://10.77.88.102:7891
-
+        --cis-listen-url=http://10.77.88.102:8080
+        --wfe-listen-url=https://10.77.88.102:7891
+        --ca-listen-url=https://10.77.88.102:7892
+        --ra-listen-url=https://10.77.88.102:7893
+        --sa-listen-url=https://10.77.88.102:7894
   test-runner:
     image: ghcr.io/ekspand/trusty:${ITEST_IMAGE_TAG}
     domainname: tester.trusty.ca
@@ -190,6 +197,7 @@ services:
       - AWS_ACCESS_KEY_ID=notusedbyemulator
       - AWS_SECRET_ACCESS_KEY=notusedbyemulator
       - AWS_DEFAULT_REGION=us-west-2
+      - TRUSTY_GITHUB_CLIENT_ID=not_used_in_test
       - TRUSTY_GITHUB_CLIENT_SECRET=not_used_in_test
     entrypoint:
       - /bin/bash

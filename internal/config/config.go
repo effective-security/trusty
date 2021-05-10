@@ -1,5 +1,18 @@
 package config
 
+const (
+	// WFEServerName specifies server name for Web Front End
+	WFEServerName = "wfe"
+	// CISServerName specifies server name for Certificate Information
+	CISServerName = "cis"
+	// CAServerName specifies server name for Certification Authority
+	CAServerName = "ca"
+	// RAServerName specifies server name for Registration Authority
+	RAServerName = "ra"
+	// SAServerName specifies server name for Storage Authority
+	SAServerName = "sa"
+)
+
 // Configuration contains the user configurable data for the service
 type Configuration struct {
 
@@ -46,7 +59,7 @@ type Configuration struct {
 	RegistrationAuthority *RegistrationAuthority `json:"ra" yaml:"ra"`
 
 	// HTTPServers specifies a list of servers that expose HTTP or gRPC services
-	HTTPServers []HTTPServer `json:"servers" yaml:"servers"`
+	HTTPServers map[string]*HTTPServer `json:"servers" yaml:"servers"`
 
 	// TODO: refactor
 	// TrustyClient specifies configurations for the client to connect to the cluster

@@ -10,10 +10,11 @@ import (
 	"path/filepath"
 	"strings"
 	"sync/atomic"
+	"time"
 
 	"github.com/ekspand/trusty/api/v1/trustypb"
 	"github.com/ekspand/trusty/cli"
-	"github.com/ekspand/trusty/client"
+	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/tests/mockpb"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/testify/servefiles"
@@ -161,9 +162,11 @@ func (s *Suite) SetupSuite() {
 	s.Cli.PopulateControl()
 
 	if s.withFileServer {
-		err := s.Cli.EnsureClient()
+		c, err := s.Cli.Client(config.WFEServerName)
 		s.Require().NoError(err)
+		c.Close()
 	}
+
 }
 
 // TearDownSuite to clean up resources
@@ -173,7 +176,7 @@ func (s *Suite) TearDownSuite() {
 	}
 }
 
-var nextPort = int32(31234) + rand.Int31n(5000)
+var nextPort = int32(51234) + rand.Int31n(5000)
 
 // SetupMockGRPC for testing
 func (s *Suite) SetupMockGRPC() *grpc.Server {
@@ -182,15 +185,27 @@ func (s *Suite) SetupMockGRPC() *grpc.Server {
 	trustypb.RegisterAuthorityServiceServer(serv, s.MockAuthority)
 	trustypb.RegisterCertInfoServiceServer(serv, s.MockCertInfo)
 
-	addr := fmt.Sprintf("localhost:%d", atomic.AddInt32(&nextPort, 1))
-	lis, err := net.Listen("tcp", addr)
+	var lis net.Listener
+	var err error
+
+	for i := 0; i < 5; i++ {
+		addr := fmt.Sprintf("localhost:%d", atomic.AddInt32(&nextPort, 1))
+		s.T().Logf("%s: starting on %s", s.T().Name(), addr)
+
+		lis, err = net.Listen("tcp", addr)
+		if err == nil {
+			break
+		}
+		s.T().Logf("ERROR: %s: starting on %s, err=%v", s.T().Name(), addr, err)
+	}
 	s.Require().NoError(err)
 
-	client, err := client.NewFromURL(lis.Addr().String())
-	s.Require().NoError(err)
-	s.Cli.WithClient(client)
+	server := lis.Addr().String()
+	s.Cli.WithServer(server)
 
 	go serv.Serve(lis)
 
+	// allow to start
+	time.Sleep(1 * time.Second)
 	return serv
 }

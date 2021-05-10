@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/ekspand/trusty/cli"
+	"github.com/ekspand/trusty/internal/config"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -21,7 +22,11 @@ func cmdAction(c ctl.Control, p interface{}) error {
 }
 
 func cmdClientAction(c ctl.Control, p interface{}) error {
-	client := c.(*cli.Cli).Client()
+	client, err := c.(*cli.Cli).Client(config.WFEServerName)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
 	fmt.Fprintf(c.Writer(), "client: %T\n", client)
 	return nil
 }
@@ -45,12 +50,14 @@ func TestCLIDefaultHost(t *testing.T) {
 		PreAction(cli.PopulateControl)
 
 	cmd.Command("client", "Test client").
-		PreAction(cli.EnsureClient).
+		//PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(cmdClientAction, nil))
 
-	assert.Panics(t, func() {
-		cli.Client()
-	})
+		/*
+			assert.Panics(t, func() {
+				cli.Client()
+			})
+		*/
 	assert.Panics(t, func() {
 		cli.CryptoProv()
 	})
@@ -86,7 +93,6 @@ func TestCLIDefaultHostWithPort(t *testing.T) {
 		PreAction(cli.PopulateControl)
 
 	cmd.Command("client", "Test client").
-		PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(cmdClientAction, nil))
 
 	out.Reset()
@@ -113,33 +119,36 @@ func TestCLIEnsureClient(t *testing.T) {
 		PreAction(cli.PopulateControl)
 
 	cmd.Command("client", "Test client").
-		PreAction(cli.EnsureClient).
+		//PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(cmdClientAction, nil))
 
 	cert := "/tmp/trusty/certs/trusty_dev_peer.pem"
 	key := "/tmp/trusty/certs/trusty_dev_peer-key.pem"
 
-	require.Panics(t, func() {
-		cli.Client()
-	})
+	/*
+		require.Panics(t, func() {
+			cli.Client()
+		})
+	*/
 
 	cli.Parse([]string{"cliapp", "-D", "-V", "--timeout", "0", "-s", "localhost", "-c", cert, "-k", key, "cmd", "client"})
-
-	err := cli.EnsureClient()
-	require.NoError(t, err)
-
-	require.NotPanics(t, func() {
-		cli.Client()
-	})
-	require.NotNil(t, cli.Client())
-
 	assert.Equal(t, ctl.RCOkay, cli.ReturnCode())
 	assert.Contains(t, out.String(), "client: *client.Client\n")
+	/*
+		err := cli.EnsureClient()
+		require.NoError(t, err)
 
-	cli.WithClient(nil)
-	require.Panics(t, func() {
-		cli.Client()
-	})
+		require.NotPanics(t, func() {
+			cli.Client()
+		})
+		require.NotNil(t, cli.Client())
+
+
+		cli.WithClient(nil)
+		require.Panics(t, func() {
+			cli.Client()
+		})
+	*/
 }
 
 func TestCLIWithServiceCfgNoDefault(t *testing.T) {
@@ -158,13 +167,13 @@ func TestCLIWithServiceCfgNoDefault(t *testing.T) {
 		PreAction(cli.PopulateControl)
 
 	cmd.Command("client", "Test client").
-		PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(cmdClientAction, nil))
 
 	out.Reset()
 	cli.WithWriter(out).WithErrWriter(out)
 
 	cli.Parse([]string{"cliapp", "-D", "-V", "--timeout", "0", "cmd", "client"})
+	assert.Contains(t, out.String(), "ERROR: use --server option\n")
 
 	assert.Panics(t, func() {
 		cli.Config()
@@ -173,7 +182,6 @@ func TestCLIWithServiceCfgNoDefault(t *testing.T) {
 	err := cli.EnsureServiceConfig()
 	require.Error(t, err)
 
-	assert.Contains(t, out.String(), "ERROR: use --server option\n")
 }
 
 func TestCLIWithServiceCfg_NotFound(t *testing.T) {
@@ -194,7 +202,6 @@ func TestCLIWithServiceCfg_NotFound(t *testing.T) {
 		PreAction(cli.PopulateControl)
 
 	cmd.Command("client", "Test client").
-		PreAction(cli.EnsureClient).
 		PreAction(cli.EnsureServiceConfig).
 		Action(cli.RegisterAction(cmdClientAction, nil))
 
@@ -226,7 +233,6 @@ func TestCLIWithServiceCfg(t *testing.T) {
 		PreAction(cli.PopulateControl)
 
 	cmd.Command("client", "Test client").
-		PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(cmdClientAction, nil))
 	out.Reset()
 
@@ -266,7 +272,6 @@ func TestCLIWithHsmCfg(t *testing.T) {
 		PreAction(cli.PopulateControl)
 
 	cmd.Command("client", "Test client").
-		PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(cmdClientAction, nil))
 	out.Reset()
 
@@ -305,7 +310,6 @@ func TestCLIWithHsmAndPlainText(t *testing.T) {
 		PreAction(cli.PopulateControl)
 
 	cmd.Command("client", "Test client").
-		PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(cmdClientAction, nil))
 	out.Reset()
 

@@ -17,24 +17,22 @@ import (
 
 func TestStartTrustyEmptyHTTP(t *testing.T) {
 	cfg := &config.HTTPServer{
-		Name:       "EmptyTrusty",
 		ListenURLs: []string{testutils.CreateURLs("http", ""), testutils.CreateURLs("unix", "localhost")},
 	}
 
 	c := createContainer(nil, nil, nil, nil, nil)
-	srv, err := Start(cfg, c, nil)
+	srv, err := Start("EmptyTrusty", cfg, c, nil)
 	require.NoError(t, err)
 	require.NotNil(t, srv)
 	defer srv.Close()
 
-	assert.Equal(t, cfg.Name, srv.Name())
+	assert.Equal(t, "EmptyTrusty", srv.Name())
 }
 
 func TestStartTrustyEmptyHTTPS(t *testing.T) {
 	cfg := &config.HTTPServer{
-		Name:       "EmptyTrustyHTTPS",
 		ListenURLs: []string{testutils.CreateURLs("https", ""), testutils.CreateURLs("unixs", "localhost")},
-		ServerTLS: config.TLSInfo{
+		ServerTLS: &config.TLSInfo{
 			CertFile:      "/tmp/trusty/certs/trusty_dev_peer.pem",
 			KeyFile:       "/tmp/trusty/certs/trusty_dev_peer-key.pem",
 			TrustedCAFile: "/tmp/trusty/certs/trusty_dev_root_ca.pem",
@@ -42,12 +40,12 @@ func TestStartTrustyEmptyHTTPS(t *testing.T) {
 	}
 
 	c := createContainer(nil, nil, nil, nil, nil)
-	srv, err := Start(cfg, c, nil)
+	srv, err := Start("EmptyTrustyHTTPS", cfg, c, nil)
 	require.NoError(t, err)
 	require.NotNil(t, srv)
 	defer srv.Close()
 
-	assert.Equal(t, cfg.Name, srv.Name())
+	assert.Equal(t, "EmptyTrustyHTTPS", srv.Name())
 }
 
 // TODO: move to testutil.ContainerBuilder

@@ -14,6 +14,7 @@ import (
 	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/backend/service/auth"
 	"github.com/ekspand/trusty/backend/trustymain"
+	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/testify/servefiles"
@@ -49,13 +50,14 @@ func TestMain(m *testing.M) {
 	}
 
 	httpAddr := testutils.CreateURLs("http", "")
-	for i, httpCfg := range cfg.HTTPServers {
-		switch httpCfg.Name {
-		case "Trusty-WFE":
-			cfg.HTTPServers[i].Services = []string{auth.ServiceName}
-			cfg.HTTPServers[i].ListenURLs = []string{httpAddr}
+	for name, httpCfg := range cfg.HTTPServers {
+		switch name {
+		case config.WFEServerName:
+			httpCfg.Services = []string{auth.ServiceName}
+			httpCfg.ListenURLs = []string{httpAddr}
 		default:
-			cfg.HTTPServers[i].Disabled = &trueVal
+			// disable other servers
+			httpCfg.Disabled = &trueVal
 		}
 	}
 
@@ -85,9 +87,9 @@ func TestMain(m *testing.M) {
 	select {
 	case ret := <-startedCh:
 		if ret {
-			trustyServer = app.Server("Trusty-WFE")
+			trustyServer = app.Server(config.WFEServerName)
 			if trustyServer == nil {
-				panic("Trusty-WFE not found!")
+				panic("wfe not found!")
 			}
 
 			// Run the tests

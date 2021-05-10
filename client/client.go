@@ -218,7 +218,7 @@ func (c *Client) dial(target string, creds credentials.TransportCredentials, dop
 	target = strings.TrimPrefix(target, "https://")
 	target = strings.TrimPrefix(target, "http://")
 
-	logger.Debugf("scr=dial, target=%q, timeout=%v", target, c.cfg.DialTimeout)
+	logger.Debugf("scr=dial, target=%q, with_timeout=%v", target, c.cfg.DialTimeout)
 
 	conn, err := grpc.DialContext(dctx, target, opts...)
 	if err != nil {

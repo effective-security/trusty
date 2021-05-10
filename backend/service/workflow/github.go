@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	v1 "github.com/ekspand/trusty/api/v1"
+	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/db/model"
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/google/go-github/github"
@@ -19,7 +20,7 @@ func (s *Service) githubClient(ctx context.Context, user *model.User) *github.Cl
 	conf := &oauth2.Config{
 		ClientID:     o.ClientID,
 		ClientSecret: o.ClientSecret,
-		RedirectURL:  s.cfg.TrustyClient.PublicURL + v1.PathForAuthGithubCallback,
+		RedirectURL:  s.cfg.TrustyClient.ServerURL[config.WFEServerName] + v1.PathForAuthGithubCallback,
 		Scopes:       o.Scopes,
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  o.AuthURL,
