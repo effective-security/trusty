@@ -16,7 +16,7 @@ func TestCertificateRequestValidate(t *testing.T) {
 		err string
 	}{
 		{
-			r:   &csr.CertificateRequest{CN: "ekspand.com"},
+			r:   &csr.CertificateRequest{CommonName: "ekspand.com"},
 			err: "",
 		},
 		{
@@ -48,7 +48,7 @@ func TestCertificateRequestValidate(t *testing.T) {
 
 func TestCertificateRequestName(t *testing.T) {
 	r := &csr.CertificateRequest{
-		CN:           "ekspand.com",
+		CommonName:   "ekspand.com",
 		SerialNumber: "1234",
 		Names: []csr.X509Name{
 			{
@@ -65,7 +65,7 @@ func TestCertificateRequestName(t *testing.T) {
 
 func TestX509SubjectName(t *testing.T) {
 	r := &csr.X509Subject{
-		CN:           "ekspand.com",
+		CommonName:   "ekspand.com",
 		SerialNumber: "1234",
 		Names: []csr.X509Name{
 			{
@@ -82,7 +82,7 @@ func TestX509SubjectName(t *testing.T) {
 
 func TestPopulateName(t *testing.T) {
 	req := &csr.CertificateRequest{
-		CN:           "ekspand.com",
+		CommonName:   "ekspand.com",
 		SerialNumber: "1234",
 		Names: []csr.X509Name{
 			{

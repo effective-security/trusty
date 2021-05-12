@@ -297,7 +297,7 @@ func (ca *Issuer) Sign(req csr.SignRequest) (*x509.Certificate, []byte, error) {
 	// If there is a whitelist, ensure that both the Common Name, SAN DNSNames and Emails match
 	if profile.AllowedNamesRegex != nil && safeTemplate.Subject.CommonName != "" {
 		if !profile.AllowedNamesRegex.Match([]byte(safeTemplate.Subject.CommonName)) {
-			return nil, nil, errors.New("CN does not match allowed list: " + safeTemplate.Subject.CommonName)
+			return nil, nil, errors.New("CommonName does not match allowed list: " + safeTemplate.Subject.CommonName)
 		}
 	}
 	if profile.AllowedDNSRegex != nil {

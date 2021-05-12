@@ -4,6 +4,7 @@ import (
 	"time"
 
 	pb "github.com/ekspand/trusty/api/v1/trustypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // RootCertificate provides X509 Root Certificate information
@@ -24,10 +25,10 @@ type RootCertificates []*RootCertificate
 // ToDTO returns DTO
 func (r *RootCertificate) ToDTO() *pb.RootCertificate {
 	return &pb.RootCertificate{
-		ID:        r.ID,
-		SKID:      r.SKID,
-		NotBefore: r.NotBefore.Unix(),
-		NotAfter:  r.NotAfter.Unix(),
+		Id:        r.ID,
+		Skid:      r.SKID,
+		NotBefore: timestamppb.New(r.NotBefore),
+		NotAfter:  timestamppb.New(r.NotAfter),
 		Subject:   r.Subject,
 		Sha256:    r.ThumbprintSha256,
 		Trust:     pb.Trust(r.Trust),

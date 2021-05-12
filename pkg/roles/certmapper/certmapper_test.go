@@ -153,7 +153,7 @@ func Test_identity(t *testing.T) {
 	notAllowedSubjects = append(notAllowedSubjects, pkix.Name{
 		CommonName:   "ops0-trusty0-1-amazon.net",
 		Organization: []string{"trusty.com"},
-		Country:      []string{"CN"},
+		Country:      []string{"US"},
 		Province:     []string{"wa"},
 		Locality:     []string{"Kirkland"},
 	})
@@ -210,8 +210,7 @@ func Test_identity(t *testing.T) {
 	for _, subj := range allowedSubjects {
 		t.Run("regex_subject_allow", func(t *testing.T) {
 			r, _ := http.NewRequest(http.MethodGet, "/", nil)
-			var pkxname pkix.Name
-			pkxname = pkix.Name{
+			pkxname := pkix.Name{
 				CommonName:         subj.CommonName,
 				Organization:       subj.Organization,
 				OrganizationalUnit: subj.OrganizationalUnit,

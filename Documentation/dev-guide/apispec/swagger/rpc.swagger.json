@@ -6,7 +6,7 @@
   },
   "tags": [
     {
-      "name": "Status"
+      "name": "StatusService"
     }
   ],
   "consumes": [
@@ -19,7 +19,7 @@
     "/v1/status/caller": {
       "get": {
         "summary": "Caller returns the caller status.",
-        "operationId": "Status_Caller",
+        "operationId": "StatusService_Caller",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -35,14 +35,14 @@
           }
         },
         "tags": [
-          "Status"
+          "StatusService"
         ]
       }
     },
     "/v1/status/server": {
       "get": {
         "summary": "Server returns the server status.",
-        "operationId": "Status_Server",
+        "operationId": "StatusService_Server",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -58,14 +58,14 @@
           }
         },
         "tags": [
-          "Status"
+          "StatusService"
         ]
       }
     },
     "/v1/status/version": {
       "get": {
         "summary": "Version returns the server version.",
-        "operationId": "Status_Version",
+        "operationId": "StatusService_Version",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -81,7 +81,7 @@
           }
         },
         "tags": [
-          "Status"
+          "StatusService"
         ]
       }
     }
@@ -122,7 +122,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "ID of the caller."
+          "description": "Id of the caller."
         },
         "name": {
           "type": "string",
@@ -158,8 +158,8 @@
         },
         "startedAt": {
           "type": "string",
-          "format": "int64",
-          "description": "StartedAt is the Unix time when the server has started."
+          "format": "date-time",
+          "description": "StartedAt is the time when the server has started."
         }
       }
     },

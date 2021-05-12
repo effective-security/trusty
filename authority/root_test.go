@@ -32,7 +32,7 @@ func (s *testSuite) TestNewRoot() {
 	crypto := s.crypto.Default()
 	kr := csr.NewKeyRequest(crypto, "TestNewRoot"+guid.MustCreate(), "ECDSA", 384, csr.SigningKey)
 	req := csr.CertificateRequest{
-		CN:         "[TEST] Trusty Root CA",
+		CommonName: "[TEST] Trusty Root CA",
 		KeyRequest: kr,
 	}
 
@@ -41,8 +41,8 @@ func (s *testSuite) TestNewRoot() {
 
 	crt, err := certutil.ParseFromPEM(certPEM)
 	s.Require().NoError(err)
-	s.Equal(req.CN, crt.Subject.CommonName)
-	s.Equal(req.CN, crt.Issuer.CommonName)
+	s.Equal(req.CommonName, crt.Subject.CommonName)
+	s.Equal(req.CommonName, crt.Issuer.CommonName)
 	s.True(crt.IsCA)
 	s.True(crt.BasicConstraintsValid)
 	s.Equal(-1, crt.MaxPathLen)
@@ -54,7 +54,7 @@ func (s *testSuite) TestNewRoot() {
 func TestNewRootEx(t *testing.T) {
 	csrCA := `
 	{
-		"CN": "[TEST] Dolly Root CA",
+		"common_name": "[TEST] Dolly Root CA",
 		"names": [
 			{
 				"C": "US",

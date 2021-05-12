@@ -1,13 +1,12 @@
 syntax = "proto3";
 package trustypb;
 
+option go_package = "github.com/ekspand/trusty/api/v1/trustypb";
+
 import "rpc.proto";
-import "gogoproto/gogo.proto";
+// import "google/protobuf/timestamp.proto";
 // for grpc-gateway
 import "google/api/annotations.proto";
-
-option (gogoproto.marshaler_all) = true;
-option (gogoproto.unmarshaler_all) = true;
 
 service AuthorityService {
         // ProfileInfo returns the certificate profile info
@@ -43,7 +42,7 @@ message X509Name {
 
 // X509Subject specifies X509 Subject
 message X509Subject {
-    string cn = 1;
+    string common_name = 1;
     repeated X509Name names = 2;
     string serial_number = 3;
 }
@@ -76,19 +75,19 @@ message CertProfile {
 	// Usage provides a list key usages
 	repeated string usages = 2;
 
-	CAConstraint ca_constraint  = 3 [(gogoproto.customname)="CAConstraint"];
-	bool ocsp_no_check  = 4 [(gogoproto.customname)="OCSPNoCheck"];
+	CAConstraint ca_constraint  = 3;
+	bool ocsp_no_check  = 4;
 
 	string expiry = 5;
 	string backdate = 6;
 
 	repeated string allowed_extensions = 7;
 
-	// AllowedCommonNames specifies a RegExp to check for allowed names.
+	// AllowedNames specifies a RegExp to check for allowed names.
 	// If not provided, then all names are allowed
-	string allowed_names = 8 [(gogoproto.customname)="AllowedCommonNames"];
+	string allowed_names = 8;
 
-	// AllowedDNS specifies a RegExp to check for allowed DNS.
+	// AllowedDns specifies a RegExp to check for allowed DNS.
 	// If not provided, then all names are allowed
 	string allowed_dns = 9;
 

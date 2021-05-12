@@ -125,7 +125,7 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 			DO UPDATE
 				SET org_id=$2,issuers_pem=$12
 			RETURNING id,org_id,skid,ikid,sn,notbefore,notafter,subject,issuer,sha256,pem,issuers_pem,profile
-			;`, id, crt.OrgID, crt.SKID, crt.IKID, crt.SN,
+			;`, id, crt.OrgID, crt.SKID, crt.IKID, crt.SerialNumber,
 		crt.NotBefore, crt.NotAfter,
 		crt.Subject, crt.Issuer,
 		crt.ThumbprintSha256,
@@ -135,7 +135,7 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 		&res.OrgID,
 		&res.SKID,
 		&res.IKID,
-		&res.SN,
+		&res.SerialNumber,
 		&res.NotBefore,
 		&res.NotAfter,
 		&res.Subject,
@@ -198,7 +198,7 @@ func (p *Provider) GetCertificatesForUser(ctx context.Context, userID int64) (mo
 			&r.OrgID,
 			&r.SKID,
 			&r.IKID,
-			&r.SN,
+			&r.SerialNumber,
 			&r.NotBefore,
 			&r.NotAfter,
 			&r.Subject,
@@ -244,7 +244,7 @@ func (p *Provider) GetCertificatesForOrg(ctx context.Context, orgID int64) (mode
 			&r.OrgID,
 			&r.SKID,
 			&r.IKID,
-			&r.SN,
+			&r.SerialNumber,
 			&r.NotBefore,
 			&r.NotAfter,
 			&r.Subject,

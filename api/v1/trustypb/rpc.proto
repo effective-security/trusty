@@ -1,12 +1,11 @@
 syntax = "proto3";
 package trustypb;
 
-import "gogoproto/gogo.proto";
+option go_package = "github.com/ekspand/trusty/api/v1/trustypb";
+
+import "google/protobuf/timestamp.proto";
 // for grpc-gateway
 import "google/api/annotations.proto";
-
-option (gogoproto.marshaler_all) = true;
-option (gogoproto.unmarshaler_all) = true;
 
 service StatusService {
     // Version returns the server version.
@@ -51,8 +50,8 @@ message ServerStatus {
     string hostname = 3;
     // ListenURLs is the list of URLs the service is listening on.
     repeated string listen_urls = 4;
-    // StartedAt is the Unix time when the server has started.
-    int64 started_at = 5;
+    // StartedAt is the time when the server has started.
+    google.protobuf.Timestamp started_at = 5;
 }
 
 message ServerStatusResponse {
@@ -64,8 +63,8 @@ message ServerStatusResponse {
 }
 
 message CallerStatusResponse {
-    // ID of the caller.
-    string id = 1 [(gogoproto.customname)="ID"];
+    // Id of the caller.
+    string id = 1;
     // Name of the caller.
     string name = 2;
     // Role of the caller.

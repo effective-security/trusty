@@ -3,7 +3,7 @@
         "localhost",
         "127.0.0.1"
     ],
-    "CN": "localhost",
+    "common_name": "localhost",
     "key": {
         "algo": "rsa",
         "size": 2048

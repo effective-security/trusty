@@ -1,5 +1,5 @@
 {
-    "CN": "Untrusted trusty-peer",
+    "common_name": "Untrusted trusty-peer",
     "key": {
         "algo": "rsa",
         "size": 2048

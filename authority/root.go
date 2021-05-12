@@ -63,8 +63,8 @@ func NewRoot(profile string, cfg *Config, provider cryptoprov.Provider, req *csr
 		Request: string(csrPEM),
 		Profile: profile,
 		Subject: &csr.X509Subject{
-			CN:    req.CN,
-			Names: req.Names,
+			CommonName: req.CommonName,
+			Names:      req.Names,
 		},
 	}
 

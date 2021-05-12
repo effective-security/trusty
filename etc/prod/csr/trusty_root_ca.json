@@ -1,5 +1,5 @@
 {
-    "CN": "Trusty Root CA",
+    "common_name": "Trusty Root CA",
     "key": {
         "algo": "ecdsa",
         "size": 384
