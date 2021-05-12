@@ -88,7 +88,7 @@ func TestRegisterCertificate(t *testing.T) {
 		OrgID:            org.ID,
 		SKID:             guid.MustCreate(),
 		IKID:             guid.MustCreate(),
-		SN:               certutil.RandomString(10),
+		SerialNumber:     certutil.RandomString(10),
 		Subject:          "subj",
 		Issuer:           "iss",
 		NotBefore:        time.Now().Add(-time.Hour).UTC(),
@@ -107,7 +107,7 @@ func TestRegisterCertificate(t *testing.T) {
 	assert.Equal(t, rc.OrgID, r.OrgID)
 	assert.Equal(t, rc.SKID, r.SKID)
 	assert.Equal(t, rc.IKID, r.IKID)
-	assert.Equal(t, rc.SN, r.SN)
+	assert.Equal(t, rc.SerialNumber, r.SerialNumber)
 	assert.Equal(t, rc.Subject, r.Subject)
 	assert.Equal(t, rc.Issuer, r.Issuer)
 	assert.Equal(t, rc.ThumbprintSha256, r.ThumbprintSha256)

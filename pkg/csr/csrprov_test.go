@@ -99,7 +99,7 @@ func TestCreateRequestAndExportKey(t *testing.T) {
 		},
 		{
 			name:   "no key",
-			req:    &csr.CertificateRequest{CN: "localhost"},
+			req:    &csr.CertificateRequest{CommonName: "localhost"},
 			experr: "process request: invalid key request",
 		},
 		{

@@ -37,16 +37,16 @@ func (s *Service) ProfileInfo(ctx context.Context, req *pb.CertProfileInfoReques
 	res := &pb.CertProfileInfo{
 		Issuer: ca.Label(),
 		Profile: &pb.CertProfile{
-			Description:        profile.Description,
-			Usages:             profile.Usage,
-			CAConstraint:       &pb.CAConstraint{},
-			OCSPNoCheck:        profile.OCSPNoCheck,
-			Expiry:             profile.Expiry.String(),
-			Backdate:           profile.Backdate.String(),
-			AllowedExtensions:  profile.AllowedExtensionsStrings(),
-			AllowedCommonNames: profile.AllowedCommonNames,
-			AllowedDns:         profile.AllowedDNS,
-			AllowedEmail:       profile.AllowedDNS,
+			Description:       profile.Description,
+			Usages:            profile.Usage,
+			CaConstraint:      &pb.CAConstraint{},
+			OcspNoCheck:       profile.OCSPNoCheck,
+			Expiry:            profile.Expiry.String(),
+			Backdate:          profile.Backdate.String(),
+			AllowedExtensions: profile.AllowedExtensionsStrings(),
+			AllowedNames:      profile.AllowedNames,
+			AllowedDns:        profile.AllowedDNS,
+			AllowedEmail:      profile.AllowedEmail,
 		},
 	}
 

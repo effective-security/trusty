@@ -1,11 +1,14 @@
 {
-    "status": {
-            "hostname": "dissoupov-ltl2",
+        "status": {
+            "hostname": "dissoupov",
             "listen_urls": [
                     "https://0.0.0.0:7891"
             ],
             "name": "Trusty",
-            "started_at": 1601216552
+            "started_at": {
+                    "nanos": 827047031,
+                    "seconds": 1620736448
+            }
     },
     "version": {
         "build": "1.1.1",

@@ -1,5 +1,5 @@
 {
-    "CN": "[TEST] Untrusted  Level 2 CA",
+    "common_name": "[TEST] Untrusted  Level 2 CA",
     "key": {
         "algo": "rsa",
         "size": 4096

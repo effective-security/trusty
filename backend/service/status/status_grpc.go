@@ -6,6 +6,7 @@ import (
 	pb "github.com/ekspand/trusty/api/v1/trustypb"
 	"github.com/ekspand/trusty/internal/version"
 	"github.com/go-phorce/dolly/xhttp/identity"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Version returns the server version.
@@ -25,7 +26,7 @@ func (s *Service) Server(_ context.Context, _ *pb.EmptyRequest) (*pb.ServerStatu
 			Name:       s.server.Name(),
 			Hostname:   s.server.Hostname(),
 			ListenUrls: s.server.ListenURLs(),
-			StartedAt:  s.server.StartedAt().Unix(),
+			StartedAt:  timestamppb.New(s.server.StartedAt()),
 		},
 		Version: &pb.ServerVersion{
 			Build:   v.Build,
@@ -48,7 +49,7 @@ func (s *Service) Caller(ctx context.Context, _ *pb.EmptyRequest) (*pb.CallerSta
 	}
 
 	res := &pb.CallerStatusResponse{
-		ID:   id,
+		Id:   id,
 		Name: name,
 		Role: role,
 	}

@@ -21,6 +21,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/ocsp"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func TestPrintServerVersion(t *testing.T) {
@@ -50,7 +51,7 @@ func TestServerStatusResponse(t *testing.T) {
 			ListenUrls: []string{"https://0.0.0.0:7891"},
 			Name:       "Trusty",
 			Nodename:   "local",
-			StartedAt:  now.Unix(),
+			StartedAt:  timestamppb.New(now),
 		},
 		Version: ver,
 	}
@@ -72,7 +73,7 @@ func TestServerStatusResponse(t *testing.T) {
 
 func TestCallerStatusResponse(t *testing.T) {
 	r := &trustypb.CallerStatusResponse{
-		ID:   "12341234-1234124",
+		Id:   "12341234-1234124",
 		Name: "local",
 		Role: "trustry",
 	}

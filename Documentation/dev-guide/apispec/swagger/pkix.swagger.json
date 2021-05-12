@@ -6,7 +6,7 @@
   },
   "tags": [
     {
-      "name": "Authority"
+      "name": "AuthorityService"
     }
   ],
   "consumes": [
@@ -19,7 +19,7 @@
     "/v1/ca/csr/create": {
       "post": {
         "summary": "CreateCertificate returns the certificate",
-        "operationId": "Authority_CreateCertificate",
+        "operationId": "AuthorityService_CreateCertificate",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -35,14 +35,14 @@
           }
         },
         "tags": [
-          "Authority"
+          "AuthorityService"
         ]
       }
     },
     "/v1/ca/csr/profile_info": {
       "post": {
         "summary": "ProfileInfo returns the certificate profile info",
-        "operationId": "Authority_ProfileInfo",
+        "operationId": "AuthorityService_ProfileInfo",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -58,14 +58,14 @@
           }
         },
         "tags": [
-          "Authority"
+          "AuthorityService"
         ]
       }
     },
     "/v1/ca/issuers": {
       "get": {
         "summary": "Issuers returns the issuing CAs",
-        "operationId": "Authority_Issuers",
+        "operationId": "AuthorityService_Issuers",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -81,7 +81,7 @@
           }
         },
         "tags": [
-          "Authority"
+          "AuthorityService"
         ]
       }
     }
@@ -117,20 +117,98 @@
         }
       }
     },
+    "trustypbCAConstraint": {
+      "type": "object",
+      "properties": {
+        "isCa": {
+          "type": "boolean"
+        },
+        "maxPathLen": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "maxPathLenZero": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "description": "CAConstraint specifies various CA constraints on the signed certificate.\nCAConstraint would verify against (and override) the CA\nextensions in the given CSR."
+    },
+    "trustypbCSRAllowedFields": {
+      "type": "object",
+      "properties": {
+        "subject": {
+          "type": "boolean"
+        },
+        "dns": {
+          "type": "boolean"
+        },
+        "ip": {
+          "type": "boolean"
+        },
+        "email": {
+          "type": "boolean"
+        }
+      }
+    },
+    "trustypbCertProfile": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "usages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Usage provides a list key usages"
+        },
+        "caConstraint": {
+          "$ref": "#/definitions/trustypbCAConstraint"
+        },
+        "ocspNoCheck": {
+          "type": "boolean"
+        },
+        "expiry": {
+          "type": "string"
+        },
+        "backdate": {
+          "type": "string"
+        },
+        "allowedExtensions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowedNames": {
+          "type": "string",
+          "title": "AllowedNames specifies a RegExp to check for allowed names.\nIf not provided, then all names are allowed"
+        },
+        "allowedDns": {
+          "type": "string",
+          "title": "AllowedDns specifies a RegExp to check for allowed DNS.\nIf not provided, then all names are allowed"
+        },
+        "allowedEmail": {
+          "type": "string",
+          "title": "AllowedEmail specifies a RegExp to check for allowed email.\nIf not provided, then all names are allowed"
+        },
+        "allowedFields": {
+          "$ref": "#/definitions/trustypbCSRAllowedFields",
+          "description": "AllowedFields provides booleans for fields in the CSR.\nIf a AllowedFields is not present in a CertProfile,\nall of these fields may be copied from the CSR into the signed certificate.\nIf a AllowedFields *is* present in a CertProfile,\nonly those fields with a `true` value in the AllowedFields may\nbe copied from the CSR to the signed certificate.\nNote that some of these fields, like Subject, can be provided or\npartially provided through the API.\nSince API clients are expected to be trusted, but CSRs are not, fields\nprovided through the API are not subject to validation through this\nmechanism."
+        }
+      },
+      "title": "CertProfile provides certificate profile"
+    },
     "trustypbCertProfileInfo": {
       "type": "object",
       "properties": {
         "issuer": {
           "type": "string"
         },
-        "usage": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "expiry": {
-          "type": "string"
+        "profile": {
+          "$ref": "#/definitions/trustypbCertProfile"
         }
       },
       "title": "CertProfileInfo is the response for an Profile Info API request"

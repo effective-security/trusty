@@ -152,7 +152,7 @@ func (s *testSuite) TestIssuerSign() {
 	crypto := s.crypto.Default()
 	kr := csr.NewKeyRequest(crypto, "TestNewRoot"+guid.MustCreate(), "ECDSA", 256, csr.SigningKey)
 	rootReq := csr.CertificateRequest{
-		CN:         "[TEST] Trusty Root CA",
+		CommonName: "[TEST] Trusty Root CA",
 		KeyRequest: kr,
 	}
 	rootPEM, _, rootKey, err := authority.NewRoot("ROOT", rootCfg, crypto, &rootReq)
@@ -200,9 +200,9 @@ func (s *testSuite) TestIssuerSign() {
 					MaxPathLen:     0,
 					MaxPathLenZero: true,
 				},
-				AllowedCommonNames: "^[Tt]rusty CA$",
-				AllowedDNS:         "^trusty\\.com$",
-				AllowedEmail:       "^ca@trusty\\.com$",
+				AllowedNames: "^[Tt]rusty CA$",
+				AllowedDNS:   "^trusty\\.com$",
+				AllowedEmail: "^ca@trusty\\.com$",
 				AllowedCSRFields: &csr.AllowedFields{
 					Subject:        true,
 					DNSNames:       true,
@@ -211,12 +211,12 @@ func (s *testSuite) TestIssuerSign() {
 				},
 			},
 			"RestrictedServer": {
-				Usage:              []string{"server auth", "signing", "key encipherment"},
-				Expiry:             1 * csr.OneYear,
-				Backdate:           0,
-				AllowedCommonNames: "trusty.com",
-				AllowedDNS:         "^(www\\.)?trusty\\.com$",
-				AllowedEmail:       "^ca@trusty\\.com$",
+				Usage:        []string{"server auth", "signing", "key encipherment"},
+				Expiry:       1 * csr.OneYear,
+				Backdate:     0,
+				AllowedNames: "trusty.com",
+				AllowedDNS:   "^(www\\.)?trusty\\.com$",
+				AllowedEmail: "^ca@trusty\\.com$",
 				AllowedCSRFields: &csr.AllowedFields{
 					Subject:        true,
 					DNSNames:       true,
@@ -228,10 +228,10 @@ func (s *testSuite) TestIssuerSign() {
 				},
 			},
 			"default": {
-				Usage:              []string{"server auth", "signing", "key encipherment"},
-				Expiry:             1 * csr.OneYear,
-				Backdate:           0,
-				AllowedCommonNames: "trusty.com",
+				Usage:        []string{"server auth", "signing", "key encipherment"},
+				Expiry:       1 * csr.OneYear,
+				Backdate:     0,
+				AllowedNames: "trusty.com",
 				AllowedCSRFields: &csr.AllowedFields{
 					Subject:  true,
 					DNSNames: true,
@@ -252,7 +252,7 @@ func (s *testSuite) TestIssuerSign() {
 
 	s.Run("default", func() {
 		req := csr.CertificateRequest{
-			CN:         "trusty.com",
+			CommonName: "trusty.com",
 			SAN:        []string{"www.trusty.com", "127.0.0.1", "server@trusty.com"},
 			KeyRequest: kr,
 		}
@@ -272,8 +272,8 @@ func (s *testSuite) TestIssuerSign() {
 
 		crt, _, err := rootCA.Sign(sreq)
 		s.Require().NoError(err)
-		s.Equal(req.CN, crt.Subject.CommonName)
-		s.Equal(rootReq.CN, crt.Issuer.CommonName)
+		s.Equal(req.CommonName, crt.Subject.CommonName)
+		s.Equal(rootReq.CommonName, crt.Issuer.CommonName)
 		s.False(crt.IsCA)
 		s.Equal(-1, crt.MaxPathLen)
 
@@ -286,7 +286,7 @@ func (s *testSuite) TestIssuerSign() {
 
 	s.Run("Valid L1", func() {
 		caReq := csr.CertificateRequest{
-			CN:         "[TEST] Trusty Level 1 CA",
+			CommonName: "[TEST] Trusty Level 1 CA",
 			KeyRequest: kr,
 		}
 
@@ -298,21 +298,21 @@ func (s *testSuite) TestIssuerSign() {
 			Request: string(caCsrPEM),
 			Profile: "L1",
 			Subject: &csr.X509Subject{
-				CN: "Test L1 CA",
+				CommonName: "Test L1 CA",
 			},
 		}
 
 		caCrt, _, err := rootCA.Sign(sreq)
 		s.Require().NoError(err)
-		s.Equal(sreq.Subject.CN, caCrt.Subject.CommonName)
-		s.Equal(rootReq.CN, caCrt.Issuer.CommonName)
+		s.Equal(sreq.Subject.CommonName, caCrt.Subject.CommonName)
+		s.Equal(rootReq.CommonName, caCrt.Issuer.CommonName)
 		s.True(caCrt.IsCA)
 		s.Equal(1, caCrt.MaxPathLen)
 	})
 
 	s.Run("RestrictedCA/NotAllowedCN", func() {
 		caReq := csr.CertificateRequest{
-			CN:         "[TEST] Trusty Level 2 CA",
+			CommonName: "[TEST] Trusty Level 2 CA",
 			KeyRequest: kr,
 			SAN:        []string{"ca@trusty.com", "trusty.com", "127.0.0.1"},
 			Names: []csr.X509Name{
@@ -333,12 +333,12 @@ func (s *testSuite) TestIssuerSign() {
 
 		_, _, err = rootCA.Sign(sreq)
 		s.Require().Error(err)
-		s.Equal("CN does not match allowed list: [TEST] Trusty Level 2 CA", err.Error())
+		s.Equal("CommonName does not match allowed list: [TEST] Trusty Level 2 CA", err.Error())
 	})
 
 	s.Run("RestrictedCA/NotAllowedDNS", func() {
 		caReq := csr.CertificateRequest{
-			CN:         "trusty CA",
+			CommonName: "trusty CA",
 			KeyRequest: kr,
 			SAN:        []string{"ca@trustry.com", "trustyca.com", "127.0.0.1"},
 			Names: []csr.X509Name{
@@ -364,7 +364,7 @@ func (s *testSuite) TestIssuerSign() {
 
 	s.Run("RestrictedCA/NotAllowedEmail", func() {
 		caReq := csr.CertificateRequest{
-			CN:         "trusty CA",
+			CommonName: "trusty CA",
 			KeyRequest: kr,
 			SAN:        []string{"rootca@trusty.com", "trusty.com", "127.0.0.1"},
 			Names: []csr.X509Name{
@@ -390,7 +390,7 @@ func (s *testSuite) TestIssuerSign() {
 
 	s.Run("RestrictedCA/Valid", func() {
 		caReq := csr.CertificateRequest{
-			CN:         "trusty CA",
+			CommonName: "trusty CA",
 			KeyRequest: kr,
 			SAN:        []string{"ca@trusty.com", "trusty.com", "127.0.0.1"},
 			Names: []csr.X509Name{
@@ -411,8 +411,8 @@ func (s *testSuite) TestIssuerSign() {
 
 		caCrt, _, err := rootCA.Sign(sreq)
 		s.Require().NoError(err)
-		s.Equal(caReq.CN, caCrt.Subject.CommonName)
-		s.Equal(rootReq.CN, caCrt.Issuer.CommonName)
+		s.Equal(caReq.CommonName, caCrt.Subject.CommonName)
+		s.Equal(rootReq.CommonName, caCrt.Issuer.CommonName)
 		s.True(caCrt.IsCA)
 		s.Equal(0, caCrt.MaxPathLen)
 		s.True(caCrt.MaxPathLenZero)
@@ -424,7 +424,7 @@ func (s *testSuite) TestIssuerSign() {
 
 	s.Run("RestrictedServer/Valid", func() {
 		req := csr.CertificateRequest{
-			CN:         "trusty.com",
+			CommonName: "trusty.com",
 			KeyRequest: kr,
 			SAN:        []string{"ca@trusty.com", "www.trusty.com", "127.0.0.1"},
 			Names: []csr.X509Name{
@@ -445,8 +445,8 @@ func (s *testSuite) TestIssuerSign() {
 
 		crt, _, err := rootCA.Sign(sreq)
 		s.Require().NoError(err)
-		s.Equal(req.CN, crt.Subject.CommonName)
-		s.Equal(rootReq.CN, crt.Issuer.CommonName)
+		s.Equal(req.CommonName, crt.Subject.CommonName)
+		s.Equal(rootReq.CommonName, crt.Issuer.CommonName)
 		s.False(crt.IsCA)
 		s.Contains(crt.DNSNames, "www.trusty.com")
 		s.Contains(crt.EmailAddresses, "ca@trusty.com")

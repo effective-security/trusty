@@ -22,7 +22,7 @@ func TestStatusServerToClient(t *testing.T) {
 	srv.Resps = []proto.Message{vexp}
 	vres, err := cli.Version(ctx, emptyRequest)
 	require.NoError(t, err)
-	assert.Equal(t, *vexp, *vres)
+	assert.Equal(t, vexp.String(), vres.String())
 
 	sexp := &pb.ServerStatusResponse{
 		Status: &pb.ServerStatus{
@@ -33,15 +33,15 @@ func TestStatusServerToClient(t *testing.T) {
 	srv.Resps = []proto.Message{sexp}
 	sres, err := cli.Server(ctx, emptyRequest)
 	require.NoError(t, err)
-	assert.Equal(t, *sexp, *sres)
+	assert.Equal(t, sexp.String(), sres.String())
 
 	cexp := &pb.CallerStatusResponse{
-		ID:   "1234",
+		Id:   "1234",
 		Name: "denis",
 		Role: "admin",
 	}
 	srv.Resps = []proto.Message{cexp}
 	cres, err := cli.Caller(ctx, emptyRequest)
 	require.NoError(t, err)
-	assert.Equal(t, *cexp, *cres)
+	assert.Equal(t, cexp.String(), cres.String())
 }

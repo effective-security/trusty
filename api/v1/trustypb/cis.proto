@@ -1,13 +1,12 @@
 syntax = "proto3";
 package trustypb;
 
+option go_package = "github.com/ekspand/trusty/api/v1/trustypb";
+
 import "rpc.proto";
-import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
 // for grpc-gateway
 import "google/api/annotations.proto";
-
-option (gogoproto.marshaler_all) = true;
-option (gogoproto.unmarshaler_all) = true;
 
 service CertInfoService {
     // Roots returns the root CAs
@@ -26,14 +25,14 @@ enum Trust {
 
 // Root provides X509 Root Cert information
 message RootCertificate  {
-    // ID of the certificate
-    int64 id = 1 [(gogoproto.customname)="ID"];
+    // Id of the certificate
+    int64 id = 1;
     // Skid provides Subject Key Identifier
-    string skid = 2 [(gogoproto.customname)="SKID"];
-    // Notbefore is the Unix time when the validity period starts
-    int64 not_before = 3 [(gogoproto.customname)="NotBefore"];
-    // Notafter is the Unix time when the validity period starts
-    int64 not_after = 4 [(gogoproto.customname)="NotAfter"];
+    string skid = 2;
+    // NotBefore is the time when the validity period starts
+    google.protobuf.Timestamp not_before = 3;
+    // NotAfter is the time when the validity period starts
+    google.protobuf.Timestamp not_after = 4;
     // Subject name
     string subject = 5;
     // SHA256 thnumbprint of the cert
@@ -51,20 +50,20 @@ message RootsResponse {
 
 // Certificate provides X509 Certificate information
 message Certificate  {
-    // ID of the certificate
-    int64 id = 1 [(gogoproto.customname)="ID"];
-    // OrgID of the certificate, only used with Org scope
-    int64 org_id = 2 [(gogoproto.customname)="OrgID"];
-    // SKID provides Subject Key Identifier
-    string skid = 3 [(gogoproto.customname)="SKID"];
-    // IKID provides Issuer Key Identifier
-    string ikid = 4 [(gogoproto.customname)="IKID"];
-    // SN provides Serial Number
-    string SN = 5 [(gogoproto.customname)="SN"];
-    // Notbefore is the Unix time when the validity period starts
-    int64 not_before = 6 [(gogoproto.customname)="NotBefore"];
-    // Notafter is the Unix time when the validity period starts
-    int64 not_after = 7 [(gogoproto.customname)="NotAfter"];
+    // Id of the certificate
+    int64 id = 1;
+    // OrgId of the certificate, only used with Org scope
+    int64 org_id = 2;
+    // Skid provides Subject Key Identifier
+    string skid = 3;
+    // Ikid provides Issuer Key Identifier
+    string ikid = 4;
+    // SerialNumber provides Serial Number
+    string serial_number = 5;
+    // NotBefore is the time when the validity period starts
+    google.protobuf.Timestamp not_before = 6;
+    // NotAfter is the time when the validity period starts
+    google.protobuf.Timestamp not_after = 7;
     // Subject name
     string subject = 8;
     // Issuer name

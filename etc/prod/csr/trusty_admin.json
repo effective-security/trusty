@@ -1,5 +1,5 @@
 {
-    "CN": "trusty-admin",
+    "common_name": "trusty-admin",
     "key": {
         "algo": "rsa",
         "size": 2048

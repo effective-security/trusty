@@ -4,6 +4,7 @@ import (
 	"time"
 
 	pb "github.com/ekspand/trusty/api/v1/trustypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Certificate provides X509 Cert information
@@ -12,7 +13,7 @@ type Certificate struct {
 	OrgID            int64     `db:"org_id"`
 	SKID             string    `db:"skid"`
 	IKID             string    `db:"ikid"`
-	SN               string    `db:"sn"`
+	SerialNumber     string    `db:"sn"`
 	NotBefore        time.Time `db:"notbefore"`
 	NotAfter         time.Time `db:"notafter"`
 	Subject          string    `db:"subject"`
@@ -29,19 +30,19 @@ type Certificates []*Certificate
 // ToDTO returns DTO
 func (r *Certificate) ToDTO() *pb.Certificate {
 	return &pb.Certificate{
-		ID:         r.ID,
-		OrgID:      r.OrgID,
-		SKID:       r.SKID,
-		IKID:       r.IKID,
-		SN:         r.SN,
-		NotBefore:  r.NotBefore.Unix(),
-		NotAfter:   r.NotAfter.Unix(),
-		Subject:    r.Subject,
-		Issuer:     r.Issuer,
-		Sha256:     r.ThumbprintSha256,
-		Profile:    r.Profile,
-		Pem:        r.Pem,
-		IssuersPem: r.IssuersPem,
+		Id:           r.ID,
+		OrgId:        r.OrgID,
+		Skid:         r.SKID,
+		Ikid:         r.IKID,
+		SerialNumber: r.SerialNumber,
+		NotBefore:    timestamppb.New(r.NotBefore),
+		NotAfter:     timestamppb.New(r.NotAfter),
+		Subject:      r.Subject,
+		Issuer:       r.Issuer,
+		Sha256:       r.ThumbprintSha256,
+		Profile:      r.Profile,
+		Pem:          r.Pem,
+		IssuersPem:   r.IssuersPem,
 	}
 }
 

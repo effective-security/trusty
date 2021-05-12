@@ -38,9 +38,11 @@ tools:
 	go install golang.org/x/tools/cmd/guru
 	go install golang.org/x/lint/golint
 	go install github.com/go-phorce/cov-report/cmd/cov-report
-	go install github.com/go-phorce/configen/cmd/configen
 	go install github.com/mattn/goreman
 	go install github.com/mattn/goveralls
+	go install golang.org/x/tools/cmd/goimports
+	# go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
+	# go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
 
 folders:
 	mkdir -p /tmp/trusty/softhsm/tokens \

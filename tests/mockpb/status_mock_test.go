@@ -34,7 +34,7 @@ func TestMockVersion(t *testing.T) {
 	ctx := context.Background()
 	r, err := withErr.Version(ctx, nil)
 	require.NoError(t, err)
-	assert.Equal(t, *resp, *r)
+	assert.Equal(t, resp.String(), r.String())
 }
 
 func TestMockServer(t *testing.T) {
@@ -45,7 +45,7 @@ func TestMockServer(t *testing.T) {
 	ctx := context.Background()
 	r, err := withErr.Server(ctx, nil)
 	require.NoError(t, err)
-	assert.Equal(t, *resp, *r)
+	assert.Equal(t, resp.String(), r.String())
 }
 
 func TestMockCaller(t *testing.T) {
@@ -57,5 +57,5 @@ func TestMockCaller(t *testing.T) {
 	ctx := context.Background()
 	r, err := withErr.Caller(ctx, nil)
 	require.NoError(t, err)
-	assert.Equal(t, *resp, *r)
+	assert.Equal(t, resp.String(), r.String())
 }

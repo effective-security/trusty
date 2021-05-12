@@ -59,15 +59,15 @@ type X509Name struct {
 	L            string `json:"l" yaml:"l"`   // Locality
 	O            string `json:"o" yaml:"o"`   // OrganisationName
 	OU           string `json:"ou" yaml:"ou"` // OrganisationalUnitName
-	SerialNumber string `json:"serialnumber" yaml:"serialnumber"`
+	SerialNumber string `json:"serial_number" yaml:"serial_number"`
 }
 
 // X509Subject contains the information that should be used to override the
 // subject information when signing a certificate.
 type X509Subject struct {
-	CN           string     `json:"CN" yaml:"CN"`
+	CommonName   string     `json:"common_name" yaml:"common_name"`
 	Names        []X509Name `json:"names" yaml:"names"`
-	SerialNumber string     `json:"serialnumber" yaml:"serialnumber"`
+	SerialNumber string     `json:"serial_number" yaml:"serial_number"`
 }
 
 // X509Extension represents a raw extension to be included in the certificate.  The
@@ -86,12 +86,12 @@ type X509Extension struct {
 // Extensions requested in the CSR are ignored, except for those processed by
 // CreateCSR (mainly subjectAltName).
 type SignRequest struct {
-	SAN        []string        `json:"san" yaml:"san"`
-	Request    string          `json:"certificate_request" yaml:"certificate_request"`
-	Subject    *X509Subject    `json:"subject,omitempty" yaml:"subject,omitempty"`
-	Profile    string          `json:"profile" yaml:"profile"`
-	Serial     *big.Int        `json:"serialnumber,omitempty" yaml:"serialnumber,omitempty"`
-	Extensions []X509Extension `json:"extensions,omitempty" yaml:"extensions,omitempty"`
+	SAN          []string        `json:"san" yaml:"san"`
+	Request      string          `json:"certificate_request" yaml:"certificate_request"`
+	Subject      *X509Subject    `json:"subject,omitempty" yaml:"subject,omitempty"`
+	Profile      string          `json:"profile" yaml:"profile"`
+	SerialNumber *big.Int        `json:"serial_number,omitempty" yaml:"serial_number,omitempty"`
+	Extensions   []X509Extension `json:"extensions,omitempty" yaml:"extensions,omitempty"`
 
 	// TODO: label, if supported
 	//Label      string          `json:"label"`
@@ -110,12 +110,12 @@ type SignRequest struct {
 // A CertificateRequest encapsulates the API interface to the
 // certificate request functionality.
 type CertificateRequest struct {
-	// CN of the Subject
-	CN string `json:"CN" yaml:"CN"`
+	// CommonName of the Subject
+	CommonName string `json:"common_name" yaml:"common_name"`
 	// Names of the Subject
 	Names []X509Name `json:"names" yaml:"names"`
 	// SerialNumber of the Subject
-	SerialNumber string `json:"serialnumber,omitempty" yaml:"serialnumber,omitempty"`
+	SerialNumber string `json:"serial_number,omitempty" yaml:"serial_number,omitempty"`
 	// SAN is Subject Alt Names
 	SAN []string `json:"san" yaml:"san"`
 	// KeyRequest for generated key
@@ -126,7 +126,7 @@ type CertificateRequest struct {
 // authority certificates. The only requirement here is that the
 // certificate have a non-empty subject field.
 func (r *CertificateRequest) Validate() error {
-	if r.CN != "" {
+	if r.CommonName != "" {
 		return nil
 	}
 
@@ -146,7 +146,7 @@ func (r *CertificateRequest) Validate() error {
 // Name returns the PKIX name for the request.
 func (r *CertificateRequest) Name() pkix.Name {
 	name := pkix.Name{
-		CommonName:   r.CN,
+		CommonName:   r.CommonName,
 		SerialNumber: r.SerialNumber,
 	}
 
@@ -246,7 +246,7 @@ type subjectPublicKeyInfo struct {
 // Name returns the PKIX name for the subject.
 func (s *X509Subject) Name() pkix.Name {
 	var name pkix.Name
-	name.CommonName = s.CN
+	name.CommonName = s.CommonName
 	name.SerialNumber = s.SerialNumber
 	for _, n := range s.Names {
 		appendIf(n.C, &name.Country)

@@ -40,7 +40,7 @@ func (c *Provider) NewSigningCertificateRequest(
 ) *CertificateRequest {
 	return &CertificateRequest{
 		KeyRequest: c.NewKeyRequest(keyLabel, algo, keySize, SigningKey),
-		CN:         CN,
+		CommonName: CN,
 		Names:      names,
 		SAN:        san,
 	}

@@ -169,9 +169,9 @@ type CertProfile struct {
 
 	AllowedExtensions []csr.OID `json:"allowed_extensions" yaml:"allowed_extensions"`
 
-	// AllowedCommonNames specifies a RegExp to check for allowed names.
+	// AllowedNames specifies a RegExp to check for allowed names.
 	// If not provided, then all names are allowed
-	AllowedCommonNames string `json:"allowed_names" yaml:"allowed_names"`
+	AllowedNames string `json:"allowed_names" yaml:"allowed_names"`
 
 	// AllowedDNS specifies a RegExp to check for allowed DNS.
 	// If not provided, then all names are allowed
@@ -357,10 +357,10 @@ func (p *CertProfile) Validate() error {
 		}
 	}
 
-	if p.AllowedCommonNames != "" && p.AllowedNamesRegex == nil {
-		rule, err := regexp.Compile(p.AllowedCommonNames)
+	if p.AllowedNames != "" && p.AllowedNamesRegex == nil {
+		rule, err := regexp.Compile(p.AllowedNames)
 		if err != nil {
-			return errors.Annotate(err, "failed to compile AllowedCommonNames")
+			return errors.Annotate(err, "failed to compile AllowedNames")
 		}
 		p.AllowedNamesRegex = rule
 	}

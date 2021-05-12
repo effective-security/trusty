@@ -29,7 +29,7 @@ func ServerStatusResponse(w io.Writer, r *trustypb.ServerStatusResponse) {
 	table.Append([]string{"Version", r.Version.Build})
 	table.Append([]string{"Runtime", r.Version.Runtime})
 
-	startedAt := time.Unix(r.Status.StartedAt, 0)
+	startedAt := r.Status.StartedAt.AsTime().Local()
 	uptime := time.Now().Sub(startedAt) / time.Second * time.Second
 	table.Append([]string{"Started", startedAt.Format(time.RFC3339)})
 	table.Append([]string{"Uptime", uptime.String()})
@@ -44,7 +44,7 @@ func CallerStatusResponse(w io.Writer, r *trustypb.CallerStatusResponse) {
 	table.SetBorder(false)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
 	table.Append([]string{"Name", r.Name})
-	table.Append([]string{"ID", r.ID})
+	table.Append([]string{"ID", r.Id})
 	table.Append([]string{"Role", r.Role})
 	table.Render()
 	fmt.Fprintln(w)
@@ -146,15 +146,15 @@ func Roots(w io.Writer, roots []*trustypb.RootCertificate, withPem bool) {
 	now := time.Now()
 
 	for cnt, ci := range roots {
-		na := time.Unix(ci.NotAfter, 0).Local()
-		nb := time.Unix(ci.NotBefore, 0).Local()
+		na := ci.NotAfter.AsTime().Local()
+		nb := ci.NotBefore.AsTime().Local()
 		issuedIn := now.Sub(nb) / time.Minute * time.Minute
 		expiresIn := na.Sub(now) / time.Minute * time.Minute
 
 		fmt.Fprintf(w, "==================================== %d ====================================\n", cnt+1)
 		fmt.Fprintf(w, "Subject: %s\n", ci.Subject)
-		fmt.Fprintf(w, "  ID: %d\n", ci.ID)
-		fmt.Fprintf(w, "  SKID: %s\n", ci.SKID)
+		fmt.Fprintf(w, "  ID: %d\n", ci.Id)
+		fmt.Fprintf(w, "  SKID: %s\n", ci.Skid)
 		fmt.Fprintf(w, "  Thumbprint: %s\n", ci.Sha256)
 		fmt.Fprintf(w, "  Trust: %v\n", ci.Trust)
 		fmt.Fprintf(w, "  Issued: %s (%s ago)\n", nb.String(), issuedIn.String())

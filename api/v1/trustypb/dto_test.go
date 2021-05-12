@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/ekspand/trusty/api/v1/trustypb"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func Test_Decode_ValidDTO(t *testing.T) {
@@ -23,15 +25,15 @@ func Test_Decode_ValidDTO(t *testing.T) {
 
 	expStatus := &trustypb.ServerStatusResponse{
 		Status: &trustypb.ServerStatus{
-			Hostname:   "dissoupov-ltl2",
+			Hostname:   "dissoupov",
 			ListenUrls: []string{"https://0.0.0.0:7891"},
 			Name:       "Trusty",
-			StartedAt:  1601216552,
+			StartedAt:  timestamppb.New(time.Unix(1620736448, 827047031)),
 		},
 		Version: expVer,
 	}
 	expCaller := &trustypb.CallerStatusResponse{
-		ID:   "local",
+		Id:   "local",
 		Name: "localhost",
 		Role: "trusty-peer",
 	}
