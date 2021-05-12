@@ -32,9 +32,9 @@ func (c *authorityClient) ProfileInfo(ctx context.Context, in *pb.CertProfileInf
 	return c.remote.ProfileInfo(ctx, in, c.callOpts...)
 }
 
-// CreateCertificate returns the certificate
-func (c *authorityClient) CreateCertificate(ctx context.Context, in *pb.CreateCertificateRequest) (*pb.CertificateBundle, error) {
-	return c.remote.CreateCertificate(ctx, in, c.callOpts...)
+// SignCertificate returns the certificate
+func (c *authorityClient) SignCertificate(ctx context.Context, in *pb.SignCertificateRequest) (*pb.CertificateBundle, error) {
+	return c.remote.SignCertificate(ctx, in, c.callOpts...)
 }
 
 // Issuers returns the issuing CAs
@@ -60,9 +60,9 @@ func (c *retryAuthorityClient) ProfileInfo(ctx context.Context, in *pb.CertProfi
 	return c.authority.ProfileInfo(ctx, in, opts...)
 }
 
-// CreateCertificate returns the certificate
-func (c *retryAuthorityClient) CreateCertificate(ctx context.Context, in *pb.CreateCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateBundle, error) {
-	return c.authority.CreateCertificate(ctx, in, opts...)
+// SignCertificate returns the certificate
+func (c *retryAuthorityClient) SignCertificate(ctx context.Context, in *pb.SignCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateBundle, error) {
+	return c.authority.SignCertificate(ctx, in, opts...)
 }
 
 // Issuers returns the issuing CAs

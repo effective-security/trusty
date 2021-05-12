@@ -370,6 +370,8 @@ func (ca *Issuer) Sign(req csr.SignRequest) (*x509.Certificate, []byte, error) {
 		return nil, nil, errors.Trace(err)
 	}
 
+	// TODO: register issued cert
+
 	return crt, signedCertPEM, nil
 }
 

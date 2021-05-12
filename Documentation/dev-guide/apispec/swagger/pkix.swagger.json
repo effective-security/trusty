@@ -18,8 +18,8 @@
   "paths": {
     "/v1/ca/csr/create": {
       "post": {
-        "summary": "CreateCertificate returns the certificate",
-        "operationId": "AuthorityService_CreateCertificate",
+        "summary": "SignCertificate returns the certificate",
+        "operationId": "AuthorityService_SignCertificate",
         "responses": {
           "200": {
             "description": "A successful response.",

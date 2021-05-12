@@ -141,6 +141,6 @@ func TestProfileInfo(t *testing.T) {
 }
 
 func TestCreateCertificate(t *testing.T) {
-	_, err := trustyClient.AuthorityService.CreateCertificate(context.Background(), nil)
+	_, err := trustyClient.AuthorityService.SignCertificate(context.Background(), nil)
 	require.Error(t, err)
 }

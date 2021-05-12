@@ -78,8 +78,8 @@ type StatusService interface {
 type AuthorityService interface {
 	// ProfileInfo returns the certificate profile info
 	ProfileInfo(ctx context.Context, in *pb.CertProfileInfoRequest) (*pb.CertProfileInfo, error)
-	// CreateCertificate returns the certificate
-	CreateCertificate(ctx context.Context, in *pb.CreateCertificateRequest) (*pb.CertificateBundle, error)
+	// SignCertificate returns the certificate
+	SignCertificate(ctx context.Context, in *pb.SignCertificateRequest) (*pb.CertificateBundle, error)
 	// Issuers returns the issuing CAs
 	Issuers(ctx context.Context) (*pb.IssuersInfoResponse, error)
 }
