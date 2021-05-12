@@ -62,8 +62,8 @@ func (s *Service) ProfileInfo(ctx context.Context, req *pb.CertProfileInfoReques
 	return res, nil
 }
 
-// CreateCertificate returns the certificate
-func (s *Service) CreateCertificate(context.Context, *pb.CreateCertificateRequest) (*pb.CertificateBundle, error) {
+// SignCertificate returns the certificate
+func (s *Service) SignCertificate(context.Context, *pb.SignCertificateRequest) (*pb.CertificateBundle, error) {
 	return nil, errors.Errorf("not implemented")
 }
 

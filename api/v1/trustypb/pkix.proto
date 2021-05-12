@@ -16,8 +16,8 @@ service AuthorityService {
             };
         }
 
-        // CreateCertificate returns the certificate
-        rpc CreateCertificate(CreateCertificateRequest) returns (CertificateBundle) {
+        // SignCertificate returns the certificate
+        rpc SignCertificate(SignCertificateRequest) returns (CertificateBundle) {
             option (google.api.http) = {
                 post: "/v1/ca/csr/create"
             };
@@ -151,8 +151,8 @@ enum EncodingFormat {
     PKCS7 = 2;
 }
 
-// CreateCertificateRequest specifies certificate request
-message CreateCertificateRequest {
+// SignCertificateRequest specifies certificate request
+message SignCertificateRequest {
     // RequestFormat provides the certificate request format: CSR, CMS
     EncodingFormat request_format = 1;
     // Request provides the certificate request

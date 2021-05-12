@@ -34,8 +34,8 @@ func (m *MockAuthorityServer) ProfileInfo(context.Context, *trustypb.CertProfile
 	return m.Resps[0].(*trustypb.CertProfileInfo), nil
 }
 
-// CreateCertificate returns the certificate
-func (m *MockAuthorityServer) CreateCertificate(context.Context, *trustypb.CreateCertificateRequest) (*trustypb.CertificateBundle, error) {
+// SignCertificate returns the certificate
+func (m *MockAuthorityServer) SignCertificate(context.Context, *trustypb.SignCertificateRequest) (*trustypb.CertificateBundle, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}

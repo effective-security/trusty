@@ -21,9 +21,9 @@ func (s *authoritySrv2C) ProfileInfo(ctx context.Context, in *pb.CertProfileInfo
 	return s.srv.ProfileInfo(ctx, in)
 }
 
-// CreateCertificate returns the certificate
-func (s *authoritySrv2C) CreateCertificate(ctx context.Context, in *pb.CreateCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateBundle, error) {
-	return s.srv.CreateCertificate(ctx, in)
+// SignCertificate returns the certificate
+func (s *authoritySrv2C) SignCertificate(ctx context.Context, in *pb.SignCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateBundle, error) {
+	return s.srv.SignCertificate(ctx, in)
 }
 
 // Issuers returns the issuing CAs
