@@ -259,3 +259,15 @@ func TestRefreshHandler(t *testing.T) {
 	assert.NotNil(t, res.Authorization)
 	assert.NotNil(t, res.Profile)
 }
+
+func TestAuthDoneHandler(t *testing.T) {
+	service := trustyServer.Service(auth.ServiceName).(*auth.Service)
+	require.NotNil(t, service)
+
+	w := httptest.NewRecorder()
+	r, err := http.NewRequest(http.MethodGet, v1.PathForAuthDone+"?code=9298935ecf8777061ff2&state=eyJyZWRpcmVjdF91cmwiOiJodHRwczovL2xvY2FsaG9zdDo3ODkxL3YxL3N0YXR1cyIsImRldmljZV9pZCI6IjEyMzQifQ", nil)
+	require.NoError(t, err)
+
+	service.AuthDoneHandler()(w, r, nil)
+	require.Equal(t, http.StatusOK, w.Code)
+}

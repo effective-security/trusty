@@ -254,9 +254,11 @@ func (p *Provider) IdentityMapper(r *http.Request) (identity.Identity, error) {
 	}
 
 	if claims, ok := token.Claims.(*TrustyClaims); ok && token.Valid {
+		/* TODO: restore after trustyctl passes the header
 		if claims.DeviceID != deviceID {
 			return nil, errors.Errorf("invalid deviceID: %s", deviceID)
 		}
+		*/
 		if claims.Issuer != p.issuer {
 			return nil, errors.Errorf("invalid issuer: %s", claims.Issuer)
 		}
