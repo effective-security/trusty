@@ -60,9 +60,6 @@ type HTTPServer struct {
 		// Timeout is the additional duration of wait before closing a non-responsive connection, use 0 to disable.
 		Timeout time.Duration `json:"timeout,omitempty" yaml:"timeout,omitempty"`
 	} `json:"keep_alive" yaml:"keep_alive"`
-
-	// EnableGRPCGateway specifies if GW is enabled
-	EnableGRPCGateway bool `json:"enable_grpc_gateway" yaml:"enable_grpc_gateway"`
 }
 
 // TLSInfo contains configuration info for the TLS

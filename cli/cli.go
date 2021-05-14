@@ -12,12 +12,14 @@ import (
 	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/awskmscrypto"
+	"github.com/ekspand/trusty/pkg/credentials"
 	"github.com/ekspand/trusty/pkg/inmemcrypto"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/rest/tlsconfig"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
+	"google.golang.org/grpc"
 )
 
 var logger = xlog.NewPackageLogger("github.com/ekspand/trusty", "cli")
@@ -288,6 +290,14 @@ func (cli *Cli) WithServer(s string) *Cli {
 	return cli
 }
 
+// TLSCAFile returns --trusted-ca option value
+func (cli *Cli) TLSCAFile() string {
+	if cli.flags.trustedCAFile != nil {
+		return *cli.flags.trustedCAFile
+	}
+	return ""
+}
+
 // Client returns client for specied service
 func (cli *Cli) Client(svc string) (*client.Client, error) {
 	var err error
@@ -314,10 +324,12 @@ func (cli *Cli) Client(svc string) (*client.Client, error) {
 
 	if strings.HasPrefix(host, "https://") {
 		var tlsCert, tlsKey, tlsCA string
+		if cli.flags.trustedCAFile != nil {
+			tlsCA = *cli.flags.trustedCAFile
+		}
 		if cli.flags.certFile != nil && *cli.flags.certFile != "" {
 			tlsCert = *cli.flags.certFile
 			tlsKey = *cli.flags.keyFile
-			tlsCA = *cli.flags.trustedCAFile
 		}
 
 		if (tlsCert == "" || tlsKey == "") && cfg != nil {
@@ -343,6 +355,15 @@ func (cli *Cli) Client(svc string) (*client.Client, error) {
 		TLS:                  tlscfg,
 	}
 
+	if tlscfg != nil {
+		// grpc: the credentials require transport level security
+		tk := os.Getenv("TRUSTY_AUTH_TOKEN")
+		if tk != "" {
+			logger.Debugf("src=Client, token=TRUSTY_AUTH_TOKEN")
+			perGRPC := credentials.NewOauthAccess(tk)
+			clientCfg.DialOptions = append(clientCfg.DialOptions, grpc.WithPerRPCCredentials(perGRPC))
+		}
+	}
 	client, err := client.New(clientCfg)
 	if err != nil {
 		return nil, errors.Annotate(err, "unable to create client")

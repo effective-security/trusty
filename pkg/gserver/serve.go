@@ -3,15 +3,12 @@ package gserver
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
 	"net"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/ekspand/trusty/api/v1/trustypb/gw"
 	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/pkg/credentials"
 	"github.com/ekspand/trusty/pkg/transport"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/rest/ready"
@@ -20,7 +17,6 @@ import (
 	"github.com/go-phorce/dolly/xhttp/httperror"
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xhttp/marshal"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/juju/errors"
 	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
@@ -185,7 +181,6 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 
 	var gsSecure *grpc.Server
 	var gsInsecure *grpc.Server
-	var gwmux *runtime.ServeMux
 
 	defer func() {
 		if err == nil {
@@ -209,14 +204,16 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 		go func() { errHandler(gsInsecure.Serve(grpcL)) }()
 
 		handler := router.Handler()
-		if sctx.cfg.EnableGRPCGateway {
-			gwmux, err = sctx.registerGateway([]grpc.DialOption{grpc.WithInsecure()})
-			if err != nil {
-				return err
+		/*
+			var gwmux *runtime.ServeMux
+			if sctx.cfg.EnableGRPCGateway {
+				gwmux, err = sctx.registerGateway([]grpc.DialOption{grpc.WithInsecure()})
+				if err != nil {
+					return err
+				}
+				handler = sctx.createMux(gwmux, handler)
 			}
-			handler = sctx.createMux(gwmux, handler)
-		}
-
+		*/
 		handler = configureHandlers(s, handler)
 		srvhttp := &http.Server{
 			Handler: handler,
@@ -236,23 +233,24 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 		// mux between http and grpc
 		handler = grpcHandlerFunc(gsSecure, handler)
 
-		if sctx.cfg.EnableGRPCGateway {
-			dtls := sctx.tlsInfo.Config().Clone()
-			// trust local server
-			dtls.InsecureSkipVerify = true
+		/*
+			if sctx.cfg.EnableGRPCGateway {
+				dtls := sctx.tlsInfo.Config().Clone()
+				// trust local server
+				dtls.InsecureSkipVerify = true
 
-			// TODO: FIX the creds, as Identity will be of the server
-			bundle := credentials.NewBundle(credentials.Config{TLSConfig: dtls})
-			opts := []grpc.DialOption{grpc.WithTransportCredentials(bundle.TransportCredentials())}
-			//creds := credentials.NewTLS(dtls)
-			//opts := []grpc.DialOption{grpc.WithTransportCredentials(creds)}
-			gwmux, err = sctx.registerGateway(opts)
-			if err != nil {
-				return err
+				// TODO: FIX the creds, as Identity will be of the server
+				bundle := credentials.NewBundle(credentials.Config{TLSConfig: dtls})
+				opts := []grpc.DialOption{grpc.WithTransportCredentials(bundle.TransportCredentials())}
+				//creds := credentials.NewTLS(dtls)
+				//opts := []grpc.DialOption{grpc.WithTransportCredentials(creds)}
+				gwmux, err = sctx.registerGateway(opts)
+				if err != nil {
+					return err
+				}
+				handler = sctx.createMux(gwmux, handler)
 			}
-			handler = sctx.createMux(gwmux, handler)
-		}
-
+		*/
 		grpcL, err := transport.NewTLSListener(m.Match(cmux.Any()), sctx.tlsInfo)
 		if err != nil {
 			return err
@@ -280,6 +278,7 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 	return m.Serve()
 }
 
+/* TODO: move to a separate end-point
 type registerHandlerFunc func(context.Context, *runtime.ServeMux, *grpc.ClientConn) error
 
 func (sctx *serveCtx) registerGateway(opts []grpc.DialOption) (*runtime.ServeMux, error) {
@@ -295,7 +294,21 @@ func (sctx *serveCtx) registerGateway(opts []grpc.DialOption) (*runtime.ServeMux
 	if err != nil {
 		return nil, err
 	}
-	gwmux := runtime.NewServeMux()
+	gwmux := runtime.NewServeMux(runtime.WithMetadata(
+		func(crx context.Context, r *http.Request) metadata.MD {
+			callerCtx := identity.FromContext(r.Context())
+			if callerCtx != nil {
+				identity.AddToContext(crx, callerCtx)
+				caller := callerCtx.Identity()
+				return metadata.Pairs(
+					"trusty-gwid-userid", caller.UserID(),
+					"trusty-gwid-name", caller.Name(),
+					"trusty-gwid-role", caller.Role(),
+				)
+			}
+
+			return nil
+		}))
 
 	// TODO: refactor for factories
 	handlers := []registerHandlerFunc{
@@ -323,29 +336,10 @@ func (sctx *serveCtx) registerGateway(opts []grpc.DialOption) (*runtime.ServeMux
 
 func (sctx *serveCtx) createMux(gwmux *runtime.ServeMux, handler http.Handler) *http.ServeMux {
 	httpmux := http.NewServeMux()
-	/*
-		for path, h := range sctx.userHandlers {
-			httpmux.Handle(path, h)
-		}
-	*/
-
 	if gwmux != nil {
 		httpmux.Handle(
 			"/v1gw/",
 			gwmux,
-			/*
-				wsproxy.WebsocketProxy(
-					gwmux,
-					wsproxy.WithRequestMutator(
-						// Default to the POST method for streams
-						func(_ *http.Request, outgoing *http.Request) *http.Request {
-							outgoing.Method = "POST"
-							return outgoing
-						},
-					),
-					wsproxy.WithMaxRespBodyBufferSize(0x7fffffff),
-				),
-			*/
 		)
 	}
 	if handler != nil {
@@ -353,6 +347,7 @@ func (sctx *serveCtx) createMux(gwmux *runtime.ServeMux, handler http.Handler) *
 	}
 	return httpmux
 }
+*/
 
 func configureHandlers(s *Server, handler http.Handler) http.Handler {
 	var err error

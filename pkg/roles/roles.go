@@ -13,12 +13,14 @@ import (
 var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "roles")
 
 const (
-	// TrustyAdmin defines rone name to the service admins
+	// TrustyAdmin defines role name to the service admins
 	TrustyAdmin = "trusty-admin"
-	// TrustyClient defines rone name to the service clients
+	// TrustyClient defines role name to the service clients
 	TrustyClient = "trusty-client"
-	// TrustyPeer defines rone name to the service peers
+	// TrustyPeer defines role name to the service peers
 	TrustyPeer = "trusty-peer"
+	// GuestRoleName defines role name for an unauthenticated user
+	GuestRoleName = "guest"
 )
 
 // IdentityProvider interface to extract identity from requests

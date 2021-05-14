@@ -96,6 +96,7 @@ func (s *Service) RegisterRoute(r rest.Router) {
 	r.GET(v1.PathForAuthURL, s.AuthURLHandler())
 	r.GET(v1.PathForAuthGithubCallback, s.GithubCallbackHandler())
 	r.GET(v1.PathForAuthTokenRefresh, s.RefreshHandler())
+	r.GET(v1.PathForAuthDone, s.AuthDoneHandler())
 }
 
 // OAuthConfig returns oauth2client.Config,
@@ -248,9 +249,17 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 			return
 		}
 
-		// initial token is valid for 1 min, the client has to refresh it
 		dto := user.ToDto()
-		auth, err := s.jwt.SignToken(dto, oauthStatus.DeviceID, time.Minute)
+		// initial token is valid for 1 min, the client has to refresh it
+		validFor := time.Minute
+		if oauthStatus.DeviceID == s.server.Hostname() {
+			// on the same host where the server is running on, allow for 8 hours
+			validFor = 8 * 60 * time.Minute
+			logger.Noticef("src=githubCallbackHandler, device=%s, email=%s, token_valid_for=%v",
+				oauthStatus.DeviceID, uemail, validFor)
+		}
+
+		auth, err := s.jwt.SignToken(dto, oauthStatus.DeviceID, validFor)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("failed to sign JWT: %s", err.Error()).WithCause(err))
 			return
@@ -320,5 +329,19 @@ func (s *Service) RefreshHandler() rest.Handle {
 		}
 
 		marshal.WriteJSON(w, r, res)
+	}
+}
+
+// AuthDoneHandler handles v1.PathForAuthDone
+func (s *Service) AuthDoneHandler() rest.Handle {
+	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
+		code, ok := r.URL.Query()["code"]
+		if !ok || len(code) != 1 || code[0] == "" {
+			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("missing code parameter"))
+			return
+		}
+
+		w.Header().Set(header.ContentType, header.TextPlain)
+		fmt.Fprintf(w, "Authenticated!\n\nexport TRUSTY_AUTH_TOKEN=%s\n", code[0])
 	}
 }

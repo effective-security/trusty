@@ -45,6 +45,12 @@ const (
 	// Response: v1.AuthStsURLResponse
 	PathForAuthURL = "/v1/auth/url"
 
+	// PathForAuthDone receives authenticated code and prints it
+	//
+	// Verbs: GET
+	// Response: v1.PathForAuthDone
+	PathForAuthDone = "/v1/auth/done"
+
 	// PathForAuthTokenRefresh returns access token
 	//
 	// Verbs: GET
