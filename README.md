@@ -9,6 +9,13 @@ Trusty is a Certification Authority.
 
 1. GoLang 1.16+
 1. SoftHSM 2.6+
+1. protoc
+
+```.sh
+	echo "curl -L https://github.com/google/protobuf/releases/download/v3.6.1/protoc-3.6.1-linux-x86_64.zip -o /tmp/protoc.zip"
+	echo "unzip /tmp/protoc.zip -d /usr/local/protoc"
+	echo "export PATH=$PATH:/usr/local/protoc/bin"
+```
 
 To run or test locally, you need GitHub OAuth secret:
 
@@ -97,3 +104,9 @@ Add the launch configuration to .vscode/launch.json:
     ]
 }
 ```
+
+## Docker
+
+You need to login to ghcr.io
+See more for details:
+https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry

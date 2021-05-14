@@ -16,7 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/v1/cis/roots": {
+    "/v1gw/cis/roots": {
       "get": {
         "summary": "Roots returns the root CAs",
         "operationId": "CertInfoService_Roots",

@@ -11,21 +11,21 @@ service StatusService {
     // Version returns the server version.
     rpc Version(EmptyRequest) returns (ServerVersion) {
         option (google.api.http) = {
-            get: "/v1/status/version"
+            get: "/v1gw/status/version"
         };
     }
 
     // Server returns the server status.
     rpc Server(EmptyRequest) returns (ServerStatusResponse) {
         option (google.api.http) = {
-            get: "/v1/status/server"
+            get: "/v1gw/status/server"
       };
     }
 
     // Caller returns the caller status.
     rpc Caller(EmptyRequest) returns (CallerStatusResponse) {
         option (google.api.http) = {
-            get: "/v1/status/caller"
+            get: "/v1gw/status/caller"
       };
     }
 }

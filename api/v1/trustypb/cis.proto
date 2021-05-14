@@ -12,7 +12,7 @@ service CertInfoService {
     // Roots returns the root CAs
     rpc Roots(EmptyRequest) returns (RootsResponse) {
         option (google.api.http) = {
-            get: "/v1/cis/roots"
+            get: "/v1gw/cis/roots"
         };
     }
 }

@@ -16,7 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/v1/ca/csr/create": {
+    "/v1gw/ca/csr/create": {
       "post": {
         "summary": "SignCertificate returns the certificate",
         "operationId": "AuthorityService_SignCertificate",
@@ -39,7 +39,7 @@
         ]
       }
     },
-    "/v1/ca/csr/profile_info": {
+    "/v1gw/ca/csr/profile_info": {
       "post": {
         "summary": "ProfileInfo returns the certificate profile info",
         "operationId": "AuthorityService_ProfileInfo",
@@ -62,7 +62,7 @@
         ]
       }
     },
-    "/v1/ca/issuers": {
+    "/v1gw/ca/issuers": {
       "get": {
         "summary": "Issuers returns the issuing CAs",
         "operationId": "AuthorityService_Issuers",

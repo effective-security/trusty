@@ -16,7 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/v1/status/caller": {
+    "/v1gw/status/caller": {
       "get": {
         "summary": "Caller returns the caller status.",
         "operationId": "StatusService_Caller",
@@ -39,7 +39,7 @@
         ]
       }
     },
-    "/v1/status/server": {
+    "/v1gw/status/server": {
       "get": {
         "summary": "Server returns the server status.",
         "operationId": "StatusService_Server",
@@ -62,7 +62,7 @@
         ]
       }
     },
-    "/v1/status/version": {
+    "/v1gw/status/version": {
       "get": {
         "summary": "Version returns the server version.",
         "operationId": "StatusService_Version",

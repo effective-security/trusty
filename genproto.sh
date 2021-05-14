@@ -12,6 +12,11 @@ fi
 
 if [[ $(protoc --version | cut -f2 -d' ') != "3.6.1" ]]; then
 	echo "could not find protoc 3.6.1, is it installed + in PATH?"
+	echo "to install:"
+	echo ""
+	echo "curl -L https://github.com/google/protobuf/releases/download/v3.6.1/protoc-3.6.1-linux-x86_64.zip -o /tmp/protoc.zip"
+	echo "unzip /tmp/protoc.zip -d /usr/local/protoc"
+	echo "export PATH=$PATH:/usr/local/protoc/bin"
 	exit 255
 fi
 
@@ -38,8 +43,8 @@ function cleanup {
 #cleanup
 #trap cleanup EXIT
 
-go get github.com/golang/protobuf/ptypes
-go get -u golang.org/x/tools/cmd/goimports
+go get github.com/golang/protobuf/{proto,ptypes,protoc-gen-go}
+go get golang.org/x/tools/cmd/goimports
 go get github.com/gogo/googleapis/google/api
 # generate gateway code
 go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
@@ -60,6 +65,8 @@ Mgoogle/protobuf/empty.proto=github.com/golang/protobuf/ptypes/empty,\
 Mgoogle/protobuf/struct.proto=github.com/golang/protobuf/ptypes/struct,\
 Mgoogle/protobuf/duration.proto=github.com/golang/protobuf/ptypes/duration,\
 Mgoogle/protobuf/timestamp.proto=github.com/golang/protobuf/ptypes/timestamp,\
+Mgoogle/api/annotations.proto=github.com/gogo/googleapis/google/api,\
+Mgoogle/api/http.proto=github.com/gogo/googleapis/google/api,\
 paths=source_relative,\
 plugins=grpc:. \
 			./*.proto
