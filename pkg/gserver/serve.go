@@ -3,12 +3,15 @@ package gserver
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/ekspand/trusty/api/v1/trustypb/gw"
 	"github.com/ekspand/trusty/internal/config"
+	"github.com/ekspand/trusty/pkg/credentials"
 	"github.com/ekspand/trusty/pkg/transport"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/rest/ready"
@@ -17,6 +20,7 @@ import (
 	"github.com/go-phorce/dolly/xhttp/httperror"
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xhttp/marshal"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/juju/errors"
 	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
@@ -181,6 +185,7 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 
 	var gsSecure *grpc.Server
 	var gsInsecure *grpc.Server
+	var gwmux *runtime.ServeMux
 
 	defer func() {
 		if err == nil {
@@ -203,17 +208,16 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 		grpcL := m.Match(cmux.HTTP2())
 		go func() { errHandler(gsInsecure.Serve(grpcL)) }()
 
-		/*
-			var gwmux *gw.ServeMux
-			if sctx.cfg.EnableGRPCGateway {
-				gwmux, err = sctx.registerGateway([]grpc.DialOption{grpc.WithInsecure()})
-				if err != nil {
-					return err
-				}
+		handler := router.Handler()
+		if sctx.cfg.EnableGRPCGateway {
+			gwmux, err = sctx.registerGateway([]grpc.DialOption{grpc.WithInsecure()})
+			if err != nil {
+				return err
 			}
-		*/
+			handler = sctx.createMux(gwmux, handler)
+		}
 
-		handler := configureHandlers(s, router.Handler())
+		handler = configureHandlers(s, handler)
 		srvhttp := &http.Server{
 			Handler: handler,
 			//ErrorLog: logger, // do not log user error
@@ -232,26 +236,29 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 		// mux between http and grpc
 		handler = grpcHandlerFunc(gsSecure, handler)
 
-		handler = configureHandlers(s, handler)
+		if sctx.cfg.EnableGRPCGateway {
+			dtls := sctx.tlsInfo.Config().Clone()
+			// trust local server
+			dtls.InsecureSkipVerify = true
 
-		/*
-			var gwmux *gw.ServeMux
-			if sctx.cfg.EnableGRPCGateway {
-				dtls := tlscfg.Clone()
-				// trust local server
-				dtls.InsecureSkipVerify = true
-				bundle := credentials.NewBundle(credentials.Config{TLSConfig: dtls})
-				opts := []grpc.DialOption{grpc.WithTransportCredentials(bundle.TransportCredentials())}
-				gwmux, err = sctx.registerGateway(opts)
-				if err != nil {
-					return err
-				}
+			// TODO: FIX the creds, as Identity will be of the server
+			bundle := credentials.NewBundle(credentials.Config{TLSConfig: dtls})
+			opts := []grpc.DialOption{grpc.WithTransportCredentials(bundle.TransportCredentials())}
+			//creds := credentials.NewTLS(dtls)
+			//opts := []grpc.DialOption{grpc.WithTransportCredentials(creds)}
+			gwmux, err = sctx.registerGateway(opts)
+			if err != nil {
+				return err
 			}
-		*/
+			handler = sctx.createMux(gwmux, handler)
+		}
+
 		grpcL, err := transport.NewTLSListener(m.Match(cmux.Any()), sctx.tlsInfo)
 		if err != nil {
 			return err
 		}
+
+		handler = configureHandlers(s, handler)
 
 		srv := &http.Server{
 			Handler:   handler,
@@ -271,6 +278,80 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 	// Serve starts multiplexing the listener.
 	// Serve blocks and perhaps should be invoked concurrently within a go routine.
 	return m.Serve()
+}
+
+type registerHandlerFunc func(context.Context, *runtime.ServeMux, *grpc.ClientConn) error
+
+func (sctx *serveCtx) registerGateway(opts []grpc.DialOption) (*runtime.ServeMux, error) {
+	ctx := sctx.ctx
+
+	addr := sctx.addr
+	if network := sctx.network; network == "unix" {
+		// explicitly define unix network for gRPC socket support
+		addr = fmt.Sprintf("%s://%s", network, addr)
+	}
+
+	conn, err := grpc.DialContext(ctx, addr, opts...)
+	if err != nil {
+		return nil, err
+	}
+	gwmux := runtime.NewServeMux()
+
+	// TODO: refactor for factories
+	handlers := []registerHandlerFunc{
+		gw.RegisterAuthorityServiceHandler,
+		gw.RegisterCertInfoServiceHandler,
+		gw.RegisterStatusServiceHandler,
+	}
+	for _, h := range handlers {
+		if err := h(ctx, gwmux, conn); err != nil {
+			return nil, err
+		}
+	}
+	go func() {
+		<-ctx.Done()
+		if cerr := conn.Close(); cerr != nil {
+			logger.Warningf("src=registerGateway, address=%s, err=[%v]",
+				sctx.listener.Addr().String(),
+				cerr,
+			)
+		}
+	}()
+
+	return gwmux, nil
+}
+
+func (sctx *serveCtx) createMux(gwmux *runtime.ServeMux, handler http.Handler) *http.ServeMux {
+	httpmux := http.NewServeMux()
+	/*
+		for path, h := range sctx.userHandlers {
+			httpmux.Handle(path, h)
+		}
+	*/
+
+	if gwmux != nil {
+		httpmux.Handle(
+			"/v1gw/",
+			gwmux,
+			/*
+				wsproxy.WebsocketProxy(
+					gwmux,
+					wsproxy.WithRequestMutator(
+						// Default to the POST method for streams
+						func(_ *http.Request, outgoing *http.Request) *http.Request {
+							outgoing.Method = "POST"
+							return outgoing
+						},
+					),
+					wsproxy.WithMaxRespBodyBufferSize(0x7fffffff),
+				),
+			*/
+		)
+	}
+	if handler != nil {
+		httpmux.Handle("/", handler)
+	}
+	return httpmux
 }
 
 func configureHandlers(s *Server, handler http.Handler) http.Handler {

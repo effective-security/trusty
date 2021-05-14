@@ -123,6 +123,7 @@ servers:
     services:
       - status
       - cis
+    enable_grpc_gateway: false
     heartbeat_secs: 30
     timeout:
       request: 3s
@@ -140,6 +141,7 @@ servers:
       - auth
       - status
       - workflow
+    enable_grpc_gateway: false
     heartbeat_secs: 30
     timeout:
       request: 3s
@@ -183,6 +185,7 @@ servers:
     services:
       - status
       - ca
+    enable_grpc_gateway: false
     heartbeat_secs: 30
     timeout:
       request: 3s

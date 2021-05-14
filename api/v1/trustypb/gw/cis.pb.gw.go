@@ -144,7 +144,7 @@ func RegisterCertInfoServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 }
 
 var (
-	pattern_CertInfoService_Roots_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "cis", "roots"}, ""))
+	pattern_CertInfoService_Roots_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1gw", "cis", "roots"}, ""))
 )
 
 var (

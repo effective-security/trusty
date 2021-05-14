@@ -266,11 +266,11 @@ func RegisterStatusServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 }
 
 var (
-	pattern_StatusService_Version_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "status", "version"}, ""))
+	pattern_StatusService_Version_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1gw", "status", "version"}, ""))
 
-	pattern_StatusService_Server_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "status", "server"}, ""))
+	pattern_StatusService_Server_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1gw", "status", "server"}, ""))
 
-	pattern_StatusService_Caller_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "status", "caller"}, ""))
+	pattern_StatusService_Caller_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1gw", "status", "caller"}, ""))
 )
 
 var (
