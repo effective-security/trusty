@@ -219,6 +219,7 @@ sometests:
 
 covtest: fmt vet lint
 	echo "Running covtest"
+	rm -rf ${COVPATH}
 	$(call go_test_cover,${PROJ_DIR},${BUILD_FLAGS},${TEST_RACEFLAG},${TEST_GORACEOPTIONS},.,${COVERAGE_EXCLUSIONS})
 
 # Runs integration tests as well

@@ -16,6 +16,7 @@ import (
 	"github.com/ekspand/trusty/backend/service/ca"
 	"github.com/ekspand/trusty/backend/service/cis"
 	"github.com/ekspand/trusty/backend/service/status"
+	"github.com/ekspand/trusty/backend/service/swagger"
 	"github.com/ekspand/trusty/backend/service/workflow"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/version"
@@ -44,6 +45,7 @@ var ServiceFactories = map[string]gserver.ServiceFactory{
 	cis.ServiceName:      cis.Factory,
 	status.ServiceName:   status.Factory,
 	workflow.ServiceName: workflow.Factory,
+	swagger.ServiceName:  swagger.Factory,
 }
 
 // appFlags specifies application flags

@@ -68,6 +68,8 @@ sql:
 authz:
   # allow any non-authenticated request access to this path and its children
   allow_any:
+    - /favicon.ico
+    - /v1/swagger
     - /v1/auth
     - /v1/status
     - /v1/certs
@@ -123,31 +125,16 @@ servers:
     services:
       - status
       - cis
+      - swagger
     heartbeat_secs: 30
     timeout:
       request: 3s
-
-  wfe:
-    description: Web Front End
-    listen_urls:
-      - https://0.0.0.0:7891
-    client_url: https://localhost:7891
-    server_tls:
-      cert: /tmp/trusty/certs/trusty_dev_peer.pem
-      key: /tmp/trusty/certs/trusty_dev_peer-key.pem
-      trusted_ca: /tmp/trusty/certs/trusty_dev_root_ca.pem
-    services:
-      - auth
-      - status
-      - workflow
-    heartbeat_secs: 30
-    timeout:
-      request: 3s
-    keep_alive:
-      min_time: 60s
-      interval: 30s
-      timeout: 180s
-    cors:
+    swagger:
+      enabled: true
+      files:
+        cis: "${TRUSTY_CONFIG_DIR}/../../Documentation/dev-guide/apispec/swagger/cis.swagger.json"
+        status: "${TRUSTY_CONFIG_DIR}/../../Documentation/dev-guide/apispec/swagger/status.swagger.json"
+    cors: &cors
       enabled: true
       max_age: 600
       allow_credentials: true
@@ -171,18 +158,19 @@ servers:
         - sec-ch-ua
         - sec-ch-ua-mobile
 
-  ca:
-    description: Certification Authority
+  wfe:
+    description: Web Front End
     listen_urls:
-      - https://0.0.0.0:7892
-    client_url: https://localhost:7892
-    server_tls:
+      - https://0.0.0.0:7891
+    client_url: https://localhost:7891
+    server_tls: &server_tls
       cert: /tmp/trusty/certs/trusty_dev_peer.pem
       key: /tmp/trusty/certs/trusty_dev_peer-key.pem
       trusted_ca: /tmp/trusty/certs/trusty_dev_root_ca.pem
     services:
+      - auth
       - status
-      - ca
+      - workflow
     heartbeat_secs: 30
     timeout:
       request: 3s
@@ -190,6 +178,31 @@ servers:
       min_time: 60s
       interval: 30s
       timeout: 180s
+    cors: *cors
+
+  ca:
+    description: Certification Authority
+    listen_urls:
+      - https://0.0.0.0:7892
+    client_url: https://localhost:7892
+    server_tls: *server_tls
+    services:
+      - status
+      - ca
+      - swagger
+    heartbeat_secs: 30
+    timeout:
+      request: 3s
+    keep_alive:
+      min_time: 60s
+      interval: 30s
+      timeout: 180s
+    swagger:
+      enabled: true
+      files:
+        ca: "${TRUSTY_CONFIG_DIR}/../../Documentation/dev-guide/apispec/swagger/ca.swagger.json"
+        status: "${TRUSTY_CONFIG_DIR}/../../Documentation/dev-guide/apispec/swagger/status.swagger.json"
+    cors: *cors
 
 trusty_client: 
   client_tls:
@@ -201,4 +214,3 @@ trusty_client:
     wfe: https://localhost:7891
     ca: https://localhost:7892
     ra: https://localhost:7893
-

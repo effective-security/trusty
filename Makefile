@@ -6,7 +6,7 @@ export AWS_ACCESS_KEY_ID=notusedbyemulator
 export AWS_SECRET_ACCESS_KEY=notusedbyemulator
 export AWS_DEFAULT_REGION=us-west-2
 
-export COVERAGE_EXCLUSIONS="vendor|tests|main.go|testsuite.go|status.pb.go|status.pb.gw.go|ca.pb.go|ca.pb.gw.go|cis.pb.go|cis.pb.gw.go"
+export COVERAGE_EXCLUSIONS="vendor|tests|api/v1/pb/gw|main.go|testsuite.go|status.pb.go|status.pb.gw.go|ca.pb.go|ca.pb.gw.go|cis.pb.go|cis.pb.gw.go"
 export TRUSTY_DIR=${PROJ_ROOT}
 export GO111MODULE=on
 BUILD_FLAGS=
@@ -175,6 +175,7 @@ preprpm: change_log
 	cp bin/trusty-tool .rpm/trusty/opt/trusty/bin/
 	cp ./scripts/build/*.sh .rpm/trusty/opt/trusty/bin/
 	cp -R scripts/sql/ .rpm/trusty/opt/trusty/bin/
+	cp -R ./Documentation .rpm/trusty/opt/trusty/
 	# etc
 	# cp etc/prod/*.json .rpm/trusty/opt/trusty/etc/prod/
 	cp etc/prod/*.yaml .rpm/trusty/opt/trusty/etc/prod/
@@ -249,10 +250,16 @@ docker-push: docker
 docker-citest:
 	cd ./scripts/integration && ./setup.sh
 
-docker-swag:
-	# docker pull swaggerapi/swagger-ui
-	docker run -p 8080:8080 \
+start-swagger:
+	CONTAINER_STATE=$$(echo $$(docker inspect -f "{{.State.Running}}" trusty-swagger 2>/dev/null || echo "missing") | sed -e 's/^[ \t]*//'); \
+	if [ "$$CONTAINER_STATE" = "missing" ]; then \
+		docker pull swaggerapi/swagger-ui && \
+		docker run \
+		-d -p 8080:8080 \
 		--network host \
-		-e SWAGGER_JSON=/swagger/status.swagger.json \
+		-e URLS="[ { url: \"http://localhost:7880/v1/swagger/status\", name: \"StatusService\" }, { url: \"http://localhost:7880/v1/swagger/cis\", name: \"CISService\" }, { url: \"https://localhost:7892/v1/swagger/ca\", name: \"AuthorityService\" } ]" \
 		-v ${PROJ_DIR}/Documentation/dev-guide/apispec/swagger:/swagger \
-		swaggerapi/swagger-ui
+		swaggerapi/swagger-ui ; \
+	elif [ "$$CONTAINER_STATE" = "false" ]; then docker start trusty-swagger; fi;
+
+	

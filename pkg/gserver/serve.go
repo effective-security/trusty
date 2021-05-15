@@ -376,6 +376,7 @@ func configureHandlers(s *Server, handler http.Handler) http.Handler {
 func restRouter(s *Server) rest.Router {
 	var router rest.Router
 	if s.cfg.CORS.GetEnabled() {
+		logger.Noticef("src=restRouter, server=%s, CORS=enabled", s.name)
 		cors := &rest.CORSOptions{
 			AllowedOrigins: s.cfg.CORS.AllowedOrigins,
 			AllowedMethods: s.cfg.CORS.AllowedMethods,

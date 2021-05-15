@@ -13,6 +13,7 @@ func TestPaths(t *testing.T) {
 	assert.Equal(t, "/v1/status/server", v1.PathForStatusServer)
 	assert.Equal(t, "/v1/status/node", v1.PathForStatusNode)
 	assert.Equal(t, "/v1/status/version", v1.PathForStatusVersion)
+	assert.Equal(t, "/v1/swagger/:service", v1.PathForSwagger)
 
 	assert.Equal(t, "/v1/auth/url", v1.PathForAuthURL)
 	assert.Equal(t, "/v1/auth/token/refresh", v1.PathForAuthTokenRefresh)

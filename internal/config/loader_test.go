@@ -43,21 +43,24 @@ func Test_LoadConfig(t *testing.T) {
 	cfgFile, err := GetConfigAbsFilename("etc/dev/"+ConfigFileName, projFolder)
 	require.NoError(t, err, "unable to determine config file")
 
-	_, err = LoadConfig(cfgFile)
-	require.NoError(t, err, "failed to load config: %v", cfgFile)
-
 	c, err := LoadConfig(cfgFile)
 	require.NoError(t, err, "failed to load config: %v", cfgFile)
 
 	testDirAbs := func(name, dir string) {
 		if dir != "" {
-			assert.True(t, filepath.IsAbs(dir), "dir %q should be an absoluite path", name)
+			assert.True(t, filepath.IsAbs(dir), "dir %q should be an absoluite path, have: %s", name, dir)
 		}
 	}
 	testDirAbs("TrustyClient.ClientTLS.TrustedCAFile", c.TrustyClient.ClientTLS.TrustedCAFile)
 	testDirAbs("TrustyClient.ClientTLS.CertFile", c.TrustyClient.ClientTLS.CertFile)
 	testDirAbs("TrustyClient.ClientTLS.KeyFile", c.TrustyClient.ClientTLS.KeyFile)
 	testDirAbs("Authority", c.Authority)
+
+	cis := c.HTTPServers["cis"]
+	require.NotNil(t, cis)
+	require.NotNil(t, cis.CORS)
+	require.NotEmpty(t, cis.Swagger.Files)
+	testDirAbs("cis.swagger", cis.Swagger.Files["cis"])
 }
 
 func TestParseListenURLs(t *testing.T) {
@@ -135,7 +138,7 @@ func Test_LoadYAMLOverride(t *testing.T) {
 	cis := c.HTTPServers[CISServerName]
 	require.NotNil(t, cis)
 	assert.False(t, cis.GetDisabled())
-	assert.False(t, cis.CORS.GetEnabled())
+	assert.True(t, cis.CORS.GetEnabled())
 	assert.False(t, cis.CORS.GetDebug())
 	require.NotEmpty(t, c.HTTPServers)
 

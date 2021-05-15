@@ -85,7 +85,7 @@ type CryptoProv struct {
 	PKCS11Manufacturers []string `json:"pkcs11_manufacturers,omitempty" yaml:"pkcs11_manufacturers,omitempty"`
 }
 
-// Github specifies the configuration for Github client.
+// Github specifies the configuration for Github client
 type Github struct {
 	// BaseURL specifies the Github base URL.
 	BaseURL string `json:"base_url" yaml:"base_url"`
