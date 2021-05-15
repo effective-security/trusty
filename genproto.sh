@@ -21,7 +21,7 @@ if [[ $(protoc --version | cut -f2 -d' ') != "3.6.1" ]]; then
 fi
 
 # directories containing protos to be built
-DIRS="./api/v1/trustypb"
+DIRS="./api/v1/pb"
 
 # exact version of packages to build
 GRPC_GATEWAY_SHA="v2.4.0"
@@ -79,7 +79,7 @@ done
 
 # remove old swagger files so it's obvious whether the files fail to generate
 rm -rf Documentation/dev-guide/apispec/swagger/*json
-for pb in trustypb/rpc trustypb/pkix trustypb/cis; do
+for pb in pb/status pb/ca pb/cis; do
 	protobase="api/v1/${pb}"
 	echo "making docs and gw on: ${protobase}"
 	echo "protobase=${protobase}"
@@ -91,7 +91,7 @@ for pb in trustypb/rpc trustypb/pkix trustypb/cis; do
 	mkdir -p "${pkgpath}/gw/"
 	protoc \
 		-I=. \
-		-I=api/v1/trustypb \
+		-I=api/v1/pb \
 		-I=${GOPATH}/src \
 		-I=${GOPATH}/src/github.com/gogo/googleapis \
 		-I=${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway \

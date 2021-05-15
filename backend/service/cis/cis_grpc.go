@@ -3,7 +3,7 @@ package cis
 import (
 	"context"
 
-	pb "github.com/ekspand/trusty/api/v1/trustypb"
+	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/juju/errors"
 )
 

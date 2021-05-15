@@ -7,18 +7,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/olekukonko/tablewriter"
 )
 
 // ServerVersion prints ServerVersion
-func ServerVersion(w io.Writer, r *trustypb.ServerVersion) {
+func ServerVersion(w io.Writer, r *pb.ServerVersion) {
 	fmt.Fprintf(w, "%s (%s)\n", r.Build, r.Runtime)
 }
 
-// ServerStatusResponse prints trustypb.ServerStatusResponse
-func ServerStatusResponse(w io.Writer, r *trustypb.ServerStatusResponse) {
+// ServerStatusResponse prints pb.ServerStatusResponse
+func ServerStatusResponse(w io.Writer, r *pb.ServerStatusResponse) {
 	table := tablewriter.NewWriter(w)
 	table.SetBorder(false)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
@@ -38,8 +38,8 @@ func ServerStatusResponse(w io.Writer, r *trustypb.ServerStatusResponse) {
 	fmt.Fprintln(w)
 }
 
-// CallerStatusResponse prints trustypb.CallerStatusResponse
-func CallerStatusResponse(w io.Writer, r *trustypb.CallerStatusResponse) {
+// CallerStatusResponse prints pb.CallerStatusResponse
+func CallerStatusResponse(w io.Writer, r *pb.CallerStatusResponse) {
 	table := tablewriter.NewWriter(w)
 	table.SetBorder(false)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
@@ -51,7 +51,7 @@ func CallerStatusResponse(w io.Writer, r *trustypb.CallerStatusResponse) {
 }
 
 // Issuers prints list of IssuerInfo
-func Issuers(w io.Writer, issuers []*trustypb.IssuerInfo, withPem bool) {
+func Issuers(w io.Writer, issuers []*pb.IssuerInfo, withPem bool) {
 	now := time.Now()
 	for cnt, ci := range issuers {
 		fmt.Fprintf(w, "==================================== %d ====================================\n", cnt+1)
@@ -142,7 +142,7 @@ func Issuers(w io.Writer, issuers []*trustypb.IssuerInfo, withPem bool) {
 }
 
 // Roots prints list of RootCertificate
-func Roots(w io.Writer, roots []*trustypb.RootCertificate, withPem bool) {
+func Roots(w io.Writer, roots []*pb.RootCertificate, withPem bool) {
 	now := time.Now()
 
 	for cnt, ci := range roots {

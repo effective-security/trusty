@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	pb "github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/api/v1/pb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

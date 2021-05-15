@@ -1,7 +1,7 @@
 syntax = "proto3";
-package trustypb;
+package pb;
 
-option go_package = "github.com/ekspand/trusty/api/v1/trustypb";
+option go_package = "github.com/ekspand/trusty/api/v1/pb";
 
 import "google/protobuf/timestamp.proto";
 // for grpc-gateway
@@ -33,6 +33,7 @@ service StatusService {
 message EmptyRequest {
 }
 
+// ServerVersion provides server build and runtime version
 message ServerVersion {
     // Build is the server build version.
     string build = 1;
@@ -40,6 +41,7 @@ message ServerVersion {
     string runtime = 2;
 }
 
+// ServerStatus provides server status information
 message ServerStatus {
     // Name of the server or application.
     string name = 1;
@@ -49,11 +51,12 @@ message ServerStatus {
     // Hostname is operating system's host name.
     string hostname = 3;
     // ListenURLs is the list of URLs the service is listening on.
-    repeated string listen_urls = 4;
+    repeated string listen_urls = 4 [json_name="listen_urls"];
     // StartedAt is the time when the server has started.
-    google.protobuf.Timestamp started_at = 5;
+    google.protobuf.Timestamp started_at = 5 [json_name="started_at"];
 }
 
+// ServerStatusResponse returns status and version
 message ServerStatusResponse {
     // Status of the server.
     ServerStatus status = 1;
@@ -62,6 +65,7 @@ message ServerStatusResponse {
     ServerVersion version = 2;
 }
 
+// CallerStatusResponse returns the caller information
 message CallerStatusResponse {
     // Id of the caller.
     string id = 1;

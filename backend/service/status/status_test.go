@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	v1 "github.com/ekspand/trusty/api/v1"
-	pb "github.com/ekspand/trusty/api/v1/trustypb"
+	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/backend/service/status"
 	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/client/embed"

@@ -3,13 +3,13 @@ package mockpb
 import (
 	"context"
 
-	"github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/gogo/protobuf/proto"
 )
 
 // MockCertInfoServer for testing
 type MockCertInfoServer struct {
-	trustypb.CertInfoServiceServer
+	pb.CertInfoServiceServer
 
 	Reqs []proto.Message
 
@@ -27,9 +27,9 @@ func (m *MockCertInfoServer) SetResponse(r proto.Message) {
 }
 
 // Roots returns the root CAs
-func (m *MockCertInfoServer) Roots(context.Context, *trustypb.EmptyRequest) (*trustypb.RootsResponse, error) {
+func (m *MockCertInfoServer) Roots(context.Context, *pb.EmptyRequest) (*pb.RootsResponse, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
-	return m.Resps[0].(*trustypb.RootsResponse), nil
+	return m.Resps[0].(*pb.RootsResponse), nil
 }

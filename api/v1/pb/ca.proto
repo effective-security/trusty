@@ -1,9 +1,9 @@
 syntax = "proto3";
-package trustypb;
+package pb;
 
-option go_package = "github.com/ekspand/trusty/api/v1/trustypb";
+option go_package = "github.com/ekspand/trusty/api/v1/pb";
 
-import "rpc.proto";
+import "status.proto";
 // import "google/protobuf/timestamp.proto";
 // for grpc-gateway
 import "google/api/annotations.proto";

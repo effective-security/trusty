@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/cli"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/print"
@@ -52,7 +52,7 @@ func Profile(c ctl.Control, p interface{}) error {
 	}
 	defer client.Close()
 
-	res, err := client.AuthorityService.ProfileInfo(context.Background(), &trustypb.CertProfileInfoRequest{
+	res, err := client.AuthorityService.ProfileInfo(context.Background(), &pb.CertProfileInfoRequest{
 		Profile: *flags.Profile,
 		Label:   *flags.Label,
 	})

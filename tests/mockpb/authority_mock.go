@@ -3,13 +3,13 @@ package mockpb
 import (
 	"context"
 
-	"github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/gogo/protobuf/proto"
 )
 
 // MockAuthorityServer for testing
 type MockAuthorityServer struct {
-	trustypb.AuthorityServiceServer
+	pb.AuthorityServiceServer
 
 	Reqs []proto.Message
 
@@ -27,25 +27,25 @@ func (m *MockAuthorityServer) SetResponse(r proto.Message) {
 }
 
 // ProfileInfo returns the certificate profile info
-func (m *MockAuthorityServer) ProfileInfo(context.Context, *trustypb.CertProfileInfoRequest) (*trustypb.CertProfileInfo, error) {
+func (m *MockAuthorityServer) ProfileInfo(context.Context, *pb.CertProfileInfoRequest) (*pb.CertProfileInfo, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
-	return m.Resps[0].(*trustypb.CertProfileInfo), nil
+	return m.Resps[0].(*pb.CertProfileInfo), nil
 }
 
 // SignCertificate returns the certificate
-func (m *MockAuthorityServer) SignCertificate(context.Context, *trustypb.SignCertificateRequest) (*trustypb.CertificateBundle, error) {
+func (m *MockAuthorityServer) SignCertificate(context.Context, *pb.SignCertificateRequest) (*pb.CertificateBundle, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
-	return m.Resps[0].(*trustypb.CertificateBundle), nil
+	return m.Resps[0].(*pb.CertificateBundle), nil
 }
 
 // Issuers returns the issuing CAs
-func (m *MockAuthorityServer) Issuers(context.Context, *trustypb.EmptyRequest) (*trustypb.IssuersInfoResponse, error) {
+func (m *MockAuthorityServer) Issuers(context.Context, *pb.EmptyRequest) (*pb.IssuersInfoResponse, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
-	return m.Resps[0].(*trustypb.IssuersInfoResponse), nil
+	return m.Resps[0].(*pb.IssuersInfoResponse), nil
 }

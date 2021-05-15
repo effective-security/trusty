@@ -6,7 +6,7 @@ export AWS_ACCESS_KEY_ID=notusedbyemulator
 export AWS_SECRET_ACCESS_KEY=notusedbyemulator
 export AWS_DEFAULT_REGION=us-west-2
 
-export COVERAGE_EXCLUSIONS="vendor|tests|main.go|testsuite.go|rpc.pb.go|rpc.pb.gw.go|pkix.pb.go|pkix.pb.gw.go|cis.pb.go|cis.pb.gw.go"
+export COVERAGE_EXCLUSIONS="vendor|tests|main.go|testsuite.go|status.pb.go|status.pb.gw.go|ca.pb.go|ca.pb.gw.go|cis.pb.go|cis.pb.gw.go"
 export TRUSTY_DIR=${PROJ_ROOT}
 export GO111MODULE=on
 BUILD_FLAGS=
@@ -250,9 +250,9 @@ docker-citest:
 	cd ./scripts/integration && ./setup.sh
 
 docker-swag:
-	docker pull swaggerapi/swagger-ui
+	# docker pull swaggerapi/swagger-ui
 	docker run -p 8080:8080 \
 		--network host \
-		-e SWAGGER_JSON=/swagger/ \
+		-e SWAGGER_JSON=/swagger/status.swagger.json \
 		-v ${PROJ_DIR}/Documentation/dev-guide/apispec/swagger:/swagger \
 		swaggerapi/swagger-ui

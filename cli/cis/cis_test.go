@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/cli/cis"
 	"github.com/ekspand/trusty/cli/testsuite"
 	"github.com/ekspand/trusty/tests/mockpb"
@@ -36,7 +36,7 @@ func TestCtlSuiteWithJSON(t *testing.T) {
 }
 
 func (s *testSuite) TestRoots() {
-	expectedResponse := new(trustypb.RootsResponse)
+	expectedResponse := new(pb.RootsResponse)
 	err := loadJSON("testdata/roots.json", expectedResponse)
 	s.Require().NoError(err)
 

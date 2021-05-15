@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/cli"
 	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/ctl"
@@ -27,7 +27,7 @@ func Roots(c ctl.Control, p interface{}) error {
 	}
 	defer client.Close()
 
-	res, err := client.CertInfoService.Roots(context.Background(), &trustypb.EmptyRequest{})
+	res, err := client.CertInfoService.Roots(context.Background(), &pb.EmptyRequest{})
 	if err != nil {
 		return errors.Trace(err)
 	}

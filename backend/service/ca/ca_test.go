@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/backend/service/ca"
 	"github.com/ekspand/trusty/backend/trustymain"
 	"github.com/ekspand/trusty/client"
@@ -117,16 +117,16 @@ func TestIssuers(t *testing.T) {
 
 func TestProfileInfo(t *testing.T) {
 	tcases := []struct {
-		req *trustypb.CertProfileInfoRequest
+		req *pb.CertProfileInfoRequest
 		err string
 	}{
 		{nil, "missing profile parameter"},
-		{&trustypb.CertProfileInfoRequest{}, "missing profile parameter"},
-		{&trustypb.CertProfileInfoRequest{Profile: "test_server"}, ""},
-		{&trustypb.CertProfileInfoRequest{Profile: "test_server", Label: "TrustyCA"}, ""},
-		{&trustypb.CertProfileInfoRequest{Profile: "test_server", Label: "trustyca"}, ""},
-		{&trustypb.CertProfileInfoRequest{Profile: "test_server", Label: "trusty"}, `profile "test_server" is served by TrustyCA issuer`},
-		{&trustypb.CertProfileInfoRequest{Profile: "xxx"}, "profile not found: xxx"},
+		{&pb.CertProfileInfoRequest{}, "missing profile parameter"},
+		{&pb.CertProfileInfoRequest{Profile: "test_server"}, ""},
+		{&pb.CertProfileInfoRequest{Profile: "test_server", Label: "TrustyCA"}, ""},
+		{&pb.CertProfileInfoRequest{Profile: "test_server", Label: "trustyca"}, ""},
+		{&pb.CertProfileInfoRequest{Profile: "test_server", Label: "trusty"}, `profile "test_server" is served by TrustyCA issuer`},
+		{&pb.CertProfileInfoRequest{Profile: "xxx"}, "profile not found: xxx"},
 	}
 
 	for _, tc := range tcases {

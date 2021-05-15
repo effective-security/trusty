@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "api/v1/trustypb/cis.proto",
+    "title": "api/v1/pb/cis.proto",
     "version": "version not set"
   },
   "tags": [
@@ -16,7 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/v1gw/cis/roots": {
+    "/v1/cis/roots": {
       "get": {
         "summary": "Roots returns the root CAs",
         "operationId": "CertInfoService_Roots",
@@ -24,7 +24,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/trustypbRootsResponse"
+              "$ref": "#/definitions/pbRootsResponse"
             }
           },
           "default": {
@@ -41,6 +41,68 @@
     }
   },
   "definitions": {
+    "pbRootCertificate": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64",
+          "title": "Id of the certificate"
+        },
+        "skid": {
+          "type": "string",
+          "title": "Skid provides Subject Key Identifier"
+        },
+        "not_before": {
+          "type": "string",
+          "format": "date-time",
+          "title": "NotBefore is the time when the validity period starts"
+        },
+        "not_after": {
+          "type": "string",
+          "format": "date-time",
+          "title": "NotAfter is the time when the validity period starts"
+        },
+        "subject": {
+          "type": "string",
+          "title": "Subject name"
+        },
+        "sha256": {
+          "type": "string",
+          "title": "SHA256 thnumbprint of the cert"
+        },
+        "trust": {
+          "$ref": "#/definitions/pbTrust",
+          "title": "Trust scope"
+        },
+        "pem": {
+          "type": "string",
+          "title": "PEM encoded certificate"
+        }
+      },
+      "title": "Root provides X509 Root Cert information"
+    },
+    "pbRootsResponse": {
+      "type": "object",
+      "properties": {
+        "roots": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pbRootCertificate"
+          }
+        }
+      },
+      "title": "RootsResponse provides response for GetRootsRequest"
+    },
+    "pbTrust": {
+      "type": "string",
+      "enum": [
+        "Any",
+        "Public",
+        "Private"
+      ],
+      "default": "Any"
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -70,68 +132,6 @@
           }
         }
       }
-    },
-    "trustypbRootCertificate": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64",
-          "title": "Id of the certificate"
-        },
-        "skid": {
-          "type": "string",
-          "title": "Skid provides Subject Key Identifier"
-        },
-        "notBefore": {
-          "type": "string",
-          "format": "date-time",
-          "title": "NotBefore is the time when the validity period starts"
-        },
-        "notAfter": {
-          "type": "string",
-          "format": "date-time",
-          "title": "NotAfter is the time when the validity period starts"
-        },
-        "subject": {
-          "type": "string",
-          "title": "Subject name"
-        },
-        "sha256": {
-          "type": "string",
-          "title": "SHA256 thnumbprint of the cert"
-        },
-        "trust": {
-          "$ref": "#/definitions/trustypbTrust",
-          "title": "Trust scope"
-        },
-        "pem": {
-          "type": "string",
-          "title": "PEM encoded certificate"
-        }
-      },
-      "title": "Root provides X509 Root Cert information"
-    },
-    "trustypbRootsResponse": {
-      "type": "object",
-      "properties": {
-        "roots": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/trustypbRootCertificate"
-          }
-        }
-      },
-      "title": "RootsResponse provides response for GetRootsRequest"
-    },
-    "trustypbTrust": {
-      "type": "string",
-      "enum": [
-        "Any",
-        "Public",
-        "Private"
-      ],
-      "default": "Any"
     }
   }
 }
