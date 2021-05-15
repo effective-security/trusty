@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "api/v1/trustypb/rpc.proto",
+    "title": "api/v1/pb/status.proto",
     "version": "version not set"
   },
   "tags": [
@@ -16,7 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/v1gw/status/caller": {
+    "/v1/status/caller": {
       "get": {
         "summary": "Caller returns the caller status.",
         "operationId": "StatusService_Caller",
@@ -24,7 +24,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/trustypbCallerStatusResponse"
+              "$ref": "#/definitions/pbCallerStatusResponse"
             }
           },
           "default": {
@@ -39,7 +39,7 @@
         ]
       }
     },
-    "/v1gw/status/server": {
+    "/v1/status/server": {
       "get": {
         "summary": "Server returns the server status.",
         "operationId": "StatusService_Server",
@@ -47,7 +47,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/trustypbServerStatusResponse"
+              "$ref": "#/definitions/pbServerStatusResponse"
             }
           },
           "default": {
@@ -62,7 +62,7 @@
         ]
       }
     },
-    "/v1gw/status/version": {
+    "/v1/status/version": {
       "get": {
         "summary": "Version returns the server version.",
         "operationId": "StatusService_Version",
@@ -70,7 +70,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/trustypbServerVersion"
+              "$ref": "#/definitions/pbServerVersion"
             }
           },
           "default": {
@@ -87,6 +87,82 @@
     }
   },
   "definitions": {
+    "pbCallerStatusResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Id of the caller."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the caller."
+        },
+        "role": {
+          "type": "string",
+          "description": "Role of the caller."
+        }
+      },
+      "title": "CallerStatusResponse returns the caller information"
+    },
+    "pbServerStatus": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the server or application."
+        },
+        "nodename": {
+          "type": "string",
+          "description": "Nodename is the human-readable name of the cluster member,\nor empty for single host."
+        },
+        "hostname": {
+          "type": "string",
+          "description": "Hostname is operating system's host name."
+        },
+        "listen_urls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "ListenURLs is the list of URLs the service is listening on."
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "StartedAt is the time when the server has started."
+        }
+      },
+      "title": "ServerStatus provides server status information"
+    },
+    "pbServerStatusResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/pbServerStatus",
+          "description": "Status of the server."
+        },
+        "version": {
+          "$ref": "#/definitions/pbServerVersion",
+          "description": "Version of the server."
+        }
+      },
+      "title": "ServerStatusResponse returns status and version"
+    },
+    "pbServerVersion": {
+      "type": "object",
+      "properties": {
+        "build": {
+          "type": "string",
+          "description": "Build is the server build version."
+        },
+        "runtime": {
+          "type": "string",
+          "description": "Runtime is the runtime version."
+        }
+      },
+      "title": "ServerVersion provides server build and runtime version"
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -114,78 +190,6 @@
           "items": {
             "$ref": "#/definitions/protobufAny"
           }
-        }
-      }
-    },
-    "trustypbCallerStatusResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Id of the caller."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the caller."
-        },
-        "role": {
-          "type": "string",
-          "description": "Role of the caller."
-        }
-      }
-    },
-    "trustypbServerStatus": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "Name of the server or application."
-        },
-        "nodename": {
-          "type": "string",
-          "description": "Nodename is the human-readable name of the cluster member,\nor empty for single host."
-        },
-        "hostname": {
-          "type": "string",
-          "description": "Hostname is operating system's host name."
-        },
-        "listenUrls": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "ListenURLs is the list of URLs the service is listening on."
-        },
-        "startedAt": {
-          "type": "string",
-          "format": "date-time",
-          "description": "StartedAt is the time when the server has started."
-        }
-      }
-    },
-    "trustypbServerStatusResponse": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "$ref": "#/definitions/trustypbServerStatus",
-          "description": "Status of the server."
-        },
-        "version": {
-          "$ref": "#/definitions/trustypbServerVersion",
-          "description": "Version of the server."
-        }
-      }
-    },
-    "trustypbServerVersion": {
-      "type": "object",
-      "properties": {
-        "build": {
-          "type": "string",
-          "description": "Build is the server build version."
-        },
-        "runtime": {
-          "type": "string",
-          "description": "Runtime is the runtime version."
         }
       }
     }

@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	v1 "github.com/ekspand/trusty/api/v1"
-	pb "github.com/ekspand/trusty/api/v1/trustypb"
+	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/juju/errors"
 	"google.golang.org/grpc/codes"
 )

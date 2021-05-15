@@ -1,9 +1,9 @@
 syntax = "proto3";
-package trustypb;
+package pb;
 
-option go_package = "github.com/ekspand/trusty/api/v1/trustypb";
+option go_package = "github.com/ekspand/trusty/api/v1/pb";
 
-import "rpc.proto";
+import "status.proto";
 import "google/protobuf/timestamp.proto";
 // for grpc-gateway
 import "google/api/annotations.proto";
@@ -30,9 +30,9 @@ message RootCertificate  {
     // Skid provides Subject Key Identifier
     string skid = 2;
     // NotBefore is the time when the validity period starts
-    google.protobuf.Timestamp not_before = 3;
+    google.protobuf.Timestamp not_before = 3 [json_name="not_before"];
     // NotAfter is the time when the validity period starts
-    google.protobuf.Timestamp not_after = 4;
+    google.protobuf.Timestamp not_after = 4 [json_name="not_after"];
     // Subject name
     string subject = 5;
     // SHA256 thnumbprint of the cert
@@ -53,7 +53,7 @@ message Certificate  {
     // Id of the certificate
     int64 id = 1;
     // OrgId of the certificate, only used with Org scope
-    int64 org_id = 2;
+    int64 org_id = 2 [json_name="org_id"];
     // Skid provides Subject Key Identifier
     string skid = 3;
     // Ikid provides Issuer Key Identifier
@@ -61,9 +61,9 @@ message Certificate  {
     // SerialNumber provides Serial Number
     string serial_number = 5;
     // NotBefore is the time when the validity period starts
-    google.protobuf.Timestamp not_before = 6;
+    google.protobuf.Timestamp not_before = 6 [json_name="not_before"];
     // NotAfter is the time when the validity period starts
-    google.protobuf.Timestamp not_after = 7;
+    google.protobuf.Timestamp not_after = 7 [json_name="not_after"];
     // Subject name
     string subject = 8;
     // Issuer name
@@ -75,5 +75,5 @@ message Certificate  {
     // Pem encoded certificate
     string pem = 12;
     // IssuersPem provides PEM encoded issuers
-    string issuers_pem = 13;
+    string issuers_pem = 13 [json_name="issuers_pem"];
 }

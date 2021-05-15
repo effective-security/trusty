@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "api/v1/trustypb/pkix.proto",
+    "title": "api/v1/pb/ca.proto",
     "version": "version not set"
   },
   "tags": [
@@ -16,7 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/v1gw/ca/csr/create": {
+    "/v1/ca/csr/create": {
       "post": {
         "summary": "SignCertificate returns the certificate",
         "operationId": "AuthorityService_SignCertificate",
@@ -24,7 +24,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/trustypbCertificateBundle"
+              "$ref": "#/definitions/pbCertificateBundle"
             }
           },
           "default": {
@@ -39,7 +39,7 @@
         ]
       }
     },
-    "/v1gw/ca/csr/profile_info": {
+    "/v1/ca/csr/profile_info": {
       "post": {
         "summary": "ProfileInfo returns the certificate profile info",
         "operationId": "AuthorityService_ProfileInfo",
@@ -47,7 +47,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/trustypbCertProfileInfo"
+              "$ref": "#/definitions/pbCertProfileInfo"
             }
           },
           "default": {
@@ -62,7 +62,7 @@
         ]
       }
     },
-    "/v1gw/ca/issuers": {
+    "/v1/ca/issuers": {
       "get": {
         "summary": "Issuers returns the issuing CAs",
         "operationId": "AuthorityService_Issuers",
@@ -70,7 +70,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/trustypbIssuersInfoResponse"
+              "$ref": "#/definitions/pbIssuersInfoResponse"
             }
           },
           "default": {
@@ -87,37 +87,7 @@
     }
   },
   "definitions": {
-    "protobufAny": {
-      "type": "object",
-      "properties": {
-        "typeUrl": {
-          "type": "string"
-        },
-        "value": {
-          "type": "string",
-          "format": "byte"
-        }
-      }
-    },
-    "rpcStatus": {
-      "type": "object",
-      "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "message": {
-          "type": "string"
-        },
-        "details": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/protobufAny"
-          }
-        }
-      }
-    },
-    "trustypbCAConstraint": {
+    "pbCAConstraint": {
       "type": "object",
       "properties": {
         "isCa": {
@@ -134,7 +104,7 @@
       },
       "description": "CAConstraint specifies various CA constraints on the signed certificate.\nCAConstraint would verify against (and override) the CA\nextensions in the given CSR."
     },
-    "trustypbCSRAllowedFields": {
+    "pbCSRAllowedFields": {
       "type": "object",
       "properties": {
         "subject": {
@@ -151,7 +121,7 @@
         }
       }
     },
-    "trustypbCertProfile": {
+    "pbCertProfile": {
       "type": "object",
       "properties": {
         "description": {
@@ -165,7 +135,7 @@
           "title": "Usage provides a list key usages"
         },
         "caConstraint": {
-          "$ref": "#/definitions/trustypbCAConstraint"
+          "$ref": "#/definitions/pbCAConstraint"
         },
         "ocspNoCheck": {
           "type": "boolean"
@@ -195,25 +165,25 @@
           "title": "AllowedEmail specifies a RegExp to check for allowed email.\nIf not provided, then all names are allowed"
         },
         "allowedFields": {
-          "$ref": "#/definitions/trustypbCSRAllowedFields",
+          "$ref": "#/definitions/pbCSRAllowedFields",
           "description": "AllowedFields provides booleans for fields in the CSR.\nIf a AllowedFields is not present in a CertProfile,\nall of these fields may be copied from the CSR into the signed certificate.\nIf a AllowedFields *is* present in a CertProfile,\nonly those fields with a `true` value in the AllowedFields may\nbe copied from the CSR to the signed certificate.\nNote that some of these fields, like Subject, can be provided or\npartially provided through the API.\nSince API clients are expected to be trusted, but CSRs are not, fields\nprovided through the API are not subject to validation through this\nmechanism."
         }
       },
       "title": "CertProfile provides certificate profile"
     },
-    "trustypbCertProfileInfo": {
+    "pbCertProfileInfo": {
       "type": "object",
       "properties": {
         "issuer": {
           "type": "string"
         },
         "profile": {
-          "$ref": "#/definitions/trustypbCertProfile"
+          "$ref": "#/definitions/pbCertProfile"
         }
       },
       "title": "CertProfileInfo is the response for an Profile Info API request"
     },
-    "trustypbCertificateBundle": {
+    "pbCertificateBundle": {
       "type": "object",
       "properties": {
         "certificate": {
@@ -231,7 +201,7 @@
       },
       "title": "CertificateBundle provides certificate and its issuers"
     },
-    "trustypbEncodingFormat": {
+    "pbEncodingFormat": {
       "type": "string",
       "enum": [
         "PEM",
@@ -240,7 +210,7 @@
       ],
       "default": "PEM"
     },
-    "trustypbIssuerInfo": {
+    "pbIssuerInfo": {
       "type": "object",
       "properties": {
         "certificate": {
@@ -262,17 +232,47 @@
       },
       "title": "IssuerInfo provides Issuer information"
     },
-    "trustypbIssuersInfoResponse": {
+    "pbIssuersInfoResponse": {
       "type": "object",
       "properties": {
         "issuers": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/trustypbIssuerInfo"
+            "$ref": "#/definitions/pbIssuerInfo"
           }
         }
       },
       "title": "IssuersInfoResponse provides response for Issuers Info request"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "typeUrl": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
     }
   }
 }

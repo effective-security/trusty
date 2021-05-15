@@ -8,7 +8,7 @@ import (
 	"time"
 
 	v1 "github.com/ekspand/trusty/api/v1"
-	pb "github.com/ekspand/trusty/api/v1/trustypb"
+	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
 	"google.golang.org/grpc"

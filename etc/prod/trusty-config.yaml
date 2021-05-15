@@ -74,17 +74,17 @@ authz:
     - /v1/crl
     - /v1/ocsp
     - /v1/roots
-    - /trustypb.CertInfoService
-    - /trustypb.StatusService
+    - /pb.CertInfoService
+    - /pb.StatusService
   # allow any authenticated request that includes a non empty role
   allow_any_role:
     - /v1/wf
-    - /trustypb.AuthorityService/Issuers
-    - /trustypb.AuthorityService/Roots
+    - /pb.AuthorityService/Issuers
+    - /pb.AuthorityService/Roots
   # allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
   allow:
     - /v1/ca:trusty-peer
-    - /trustypb.AuthorityService:trusty-peer
+    - /pb.AuthorityService:trusty-peer
   # specifies to log allowed access to Any role
   log_allowed_any: true
   # specifies to log allowed access

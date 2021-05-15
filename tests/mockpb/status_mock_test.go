@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -26,7 +26,7 @@ func TestMockErr(t *testing.T) {
 }
 
 func TestMockVersion(t *testing.T) {
-	resp := &trustypb.ServerVersion{}
+	resp := &pb.ServerVersion{}
 	withErr := &MockStatusServer{
 		Resps: []proto.Message{resp},
 	}
@@ -38,7 +38,7 @@ func TestMockVersion(t *testing.T) {
 }
 
 func TestMockServer(t *testing.T) {
-	resp := &trustypb.ServerStatusResponse{}
+	resp := &pb.ServerStatusResponse{}
 	withErr := &MockStatusServer{}
 	withErr.SetResponse(resp)
 
@@ -49,7 +49,7 @@ func TestMockServer(t *testing.T) {
 }
 
 func TestMockCaller(t *testing.T) {
-	resp := &trustypb.CallerStatusResponse{}
+	resp := &pb.CallerStatusResponse{}
 	withErr := &MockStatusServer{
 		Resps: []proto.Message{resp},
 	}

@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/backend/service/cis"
 	"github.com/ekspand/trusty/backend/trustymain"
 	"github.com/ekspand/trusty/client"
@@ -105,7 +105,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestRoots(t *testing.T) {
-	res, err := trustyClient.CertInfoService.Roots(context.Background(), &trustypb.EmptyRequest{})
+	res, err := trustyClient.CertInfoService.Roots(context.Background(), &pb.EmptyRequest{})
 	require.NoError(t, err)
 	assert.NotEmpty(t, res.Roots)
 }

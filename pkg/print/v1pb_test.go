@@ -14,8 +14,7 @@ import (
 	"time"
 
 	"github.com/cloudflare/cfssl/helpers"
-	"github.com/ekspand/trusty/api/v1/trustypb"
-	pb "github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/pkg/print"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
@@ -25,7 +24,7 @@ import (
 )
 
 func TestPrintServerVersion(t *testing.T) {
-	r := &trustypb.ServerVersion{
+	r := &pb.ServerVersion{
 		Build:   "1.1.1",
 		Runtime: "go1.15.1",
 	}
@@ -38,15 +37,15 @@ func TestPrintServerVersion(t *testing.T) {
 }
 
 func TestServerStatusResponse(t *testing.T) {
-	ver := &trustypb.ServerVersion{
+	ver := &pb.ServerVersion{
 		Build:   "1.1.1",
 		Runtime: "go1.15.1",
 	}
 
 	now := time.Now()
 
-	r := &trustypb.ServerStatusResponse{
-		Status: &trustypb.ServerStatus{
+	r := &pb.ServerStatusResponse{
+		Status: &pb.ServerStatus{
 			Hostname:   "dissoupov",
 			ListenUrls: []string{"https://0.0.0.0:7891"},
 			Name:       "Trusty",
@@ -72,7 +71,7 @@ func TestServerStatusResponse(t *testing.T) {
 }
 
 func TestCallerStatusResponse(t *testing.T) {
-	r := &trustypb.CallerStatusResponse{
+	r := &pb.CallerStatusResponse{
 		Id:   "12341234-1234124",
 		Name: "local",
 		Role: "trustry",

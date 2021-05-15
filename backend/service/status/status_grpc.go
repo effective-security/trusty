@@ -3,7 +3,7 @@ package status
 import (
 	"context"
 
-	pb "github.com/ekspand/trusty/api/v1/trustypb"
+	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/internal/version"
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"google.golang.org/protobuf/types/known/timestamppb"

@@ -12,7 +12,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/cli"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/tests/mockpb"
@@ -181,9 +181,9 @@ var nextPort = int32(51234) + rand.Int31n(5000)
 // SetupMockGRPC for testing
 func (s *Suite) SetupMockGRPC() *grpc.Server {
 	serv := grpc.NewServer()
-	trustypb.RegisterStatusServiceServer(serv, s.MockStatus)
-	trustypb.RegisterAuthorityServiceServer(serv, s.MockAuthority)
-	trustypb.RegisterCertInfoServiceServer(serv, s.MockCertInfo)
+	pb.RegisterStatusServiceServer(serv, s.MockStatus)
+	pb.RegisterAuthorityServiceServer(serv, s.MockAuthority)
+	pb.RegisterCertInfoServiceServer(serv, s.MockCertInfo)
 
 	var lis net.Listener
 	var err error

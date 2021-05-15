@@ -1,4 +1,4 @@
-package trustypb_test
+package pb_test
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ekspand/trusty/api/v1/trustypb"
+	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -14,17 +14,17 @@ import (
 )
 
 func Test_Decode_ValidDTO(t *testing.T) {
-	var serverVersion trustypb.ServerVersion
-	var serverStatus trustypb.ServerStatusResponse
-	var callerStatus trustypb.CallerStatusResponse
+	var serverVersion pb.ServerVersion
+	var serverStatus pb.ServerStatusResponse
+	var callerStatus pb.CallerStatusResponse
 
-	expVer := &trustypb.ServerVersion{
+	expVer := &pb.ServerVersion{
 		Build:   "1.1.1",
 		Runtime: "go1.15.1",
 	}
 
-	expStatus := &trustypb.ServerStatusResponse{
-		Status: &trustypb.ServerStatus{
+	expStatus := &pb.ServerStatusResponse{
+		Status: &pb.ServerStatus{
 			Hostname:   "dissoupov",
 			ListenUrls: []string{"https://0.0.0.0:7891"},
 			Name:       "Trusty",
@@ -32,7 +32,7 @@ func Test_Decode_ValidDTO(t *testing.T) {
 		},
 		Version: expVer,
 	}
-	expCaller := &trustypb.CallerStatusResponse{
+	expCaller := &pb.CallerStatusResponse{
 		Id:   "local",
 		Name: "localhost",
 		Role: "trusty-peer",

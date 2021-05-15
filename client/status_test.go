@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	v1 "github.com/ekspand/trusty/api/v1"
-	pb "github.com/ekspand/trusty/api/v1/trustypb"
+	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/client/proxy"
 	"github.com/ekspand/trusty/tests/mockpb"
