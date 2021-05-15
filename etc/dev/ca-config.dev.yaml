@@ -1,9 +1,9 @@
 ---
 authority:
   default_aia: 
-    issuer_url: http://localhost:8080/v1/certs/${ISSUER_ID}.crt
-    crl_url: http://localhost:8080/v1/crl/${ISSUER_ID}.crl
-    ocsp_url: http://localhost:8080/v1/ocsp
+    issuer_url: http://localhost:7880/v1/certs/${ISSUER_ID}.crt
+    crl_url: http://localhost:7880/v1/crl/${ISSUER_ID}.crl
+    ocsp_url: http://localhost:7880/v1/ocsp
     # value in 72h format for duration of CRL next update time
     crl_expiry: 12h
     # value in 8h format for duration of CRL renewal before next update time

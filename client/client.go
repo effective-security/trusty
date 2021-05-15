@@ -180,7 +180,7 @@ func newClient(cfg *Config) (*Client, error) {
 	dialEndpoint := cfg.Endpoints[0]
 
 	var creds credentials.TransportCredentials
-	if cfg.TLS != nil && !strings.HasSuffix(dialEndpoint, ":8080") {
+	if cfg.TLS != nil && !strings.HasSuffix(dialEndpoint, ":7880") {
 		creds = credentials.NewTLS(cfg.TLS)
 	}
 

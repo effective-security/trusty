@@ -12,21 +12,21 @@ service AuthorityService {
         // ProfileInfo returns the certificate profile info
         rpc ProfileInfo(CertProfileInfoRequest) returns (CertProfileInfo) {
             option (google.api.http) = {
-                post: "/v1gw/ca/csr/profile_info"
+                post: "/v1/ca/csr/profile_info"
             };
         }
 
         // SignCertificate returns the certificate
         rpc SignCertificate(SignCertificateRequest) returns (CertificateBundle) {
             option (google.api.http) = {
-                post: "/v1gw/ca/csr/create"
+                post: "/v1/ca/csr/create"
             };
         }
 
         // Issuers returns the issuing CAs
         rpc Issuers(EmptyRequest) returns (IssuersInfoResponse) {
             option (google.api.http) = {
-                get: "/v1gw/ca/issuers"
+                get: "/v1/ca/issuers"
             };
         }
 }

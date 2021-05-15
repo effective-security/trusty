@@ -71,7 +71,7 @@ services:
         # the source path in the volume definitions are relative to ./scripts/integration
       - ./tests:/opt/trusty/tests
     ports:
-      - "8080" # CIS
+      - "7880" # CIS
       - "7891" # WFE
       - "7892" # CA
       - "7893"
@@ -107,7 +107,7 @@ services:
         --logs-dir=/var/trusty/logs
         --audit-dir=/var/trusty/audit
         --host-name=10.77.88.101
-        --cis-listen-url=http://10.77.88.101:8080
+        --cis-listen-url=http://10.77.88.101:7880
         --wfe-listen-url=https://10.77.88.101:7891
         --ca-listen-url=https://10.77.88.101:7892
         --ra-listen-url=https://10.77.88.101:7893
@@ -135,7 +135,7 @@ services:
         # the source path in the volume definitions are relative to ./scripts/integration
       - ./tests:/opt/trusty/tests
     ports:
-      - "8080" # CIS
+      - "7880" # CIS
       - "7891" # WFE
       - "7892" # CA
       - "7893"
@@ -168,7 +168,7 @@ services:
         --logs-dir=/var/trusty/logs
         --audit-dir=/var/trusty/audit
         --host-name=10.77.88.102
-        --cis-listen-url=http://10.77.88.102:8080
+        --cis-listen-url=http://10.77.88.102:7880
         --wfe-listen-url=https://10.77.88.102:7891
         --ca-listen-url=https://10.77.88.102:7892
         --ra-listen-url=https://10.77.88.102:7893

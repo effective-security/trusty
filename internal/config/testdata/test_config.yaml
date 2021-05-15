@@ -110,7 +110,7 @@ authority: ../../../etc/dev/ca-config.dev.yaml
 servers:
   cis:
     listen_urls:
-      - http://0.0.0.0:8080
+      - http://0.0.0.0:7880
     services:
       - status
     heartbeat_secs: 30
@@ -171,5 +171,5 @@ trusty_client:
     key: /tmp/trusty/certs/trusty_dev_peer-key.pem
     trusted_ca: /tmp/trusty/certs/trusty_dev_root_ca.pem
   server_url:
-    cis: http://localhost:8080
+    cis: http://localhost:7880
     wfe: https://localhost:7891

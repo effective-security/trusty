@@ -248,3 +248,11 @@ docker-push: docker
 
 docker-citest:
 	cd ./scripts/integration && ./setup.sh
+
+docker-swag:
+	docker pull swaggerapi/swagger-ui
+	docker run -p 8080:8080 \
+		--network host \
+		-e SWAGGER_JSON=/swagger/ \
+		-v ${PROJ_DIR}/Documentation/dev-guide/apispec/swagger:/swagger \
+		swaggerapi/swagger-ui

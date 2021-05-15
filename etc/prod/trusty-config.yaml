@@ -119,8 +119,8 @@ servers:
   cis:
     description: Certificate Information Service allows unauthenticated calls to AIA, OCSP and Certificates end-points
     listen_urls:
-      - http://0.0.0.0:8080
-    client_url: http://localhost:8080
+      - http://0.0.0.0:7880
+    client_url: http://localhost:7880
     services:
       - status
       - cis
@@ -202,7 +202,7 @@ trusty_client:
     key: /var/trusty/certs/trusty_peer-key.pem
     trusted_ca: /var/trusty/roots/trusty_root_ca.pem
   server_url:
-    cis: http://127.0.0.1:8080
+    cis: http://127.0.0.1:7880
     wfe: https://127.0.0.1:7891
     ca: https://127.0.0.1:7892
     ra: https://127.0.0.1:7893

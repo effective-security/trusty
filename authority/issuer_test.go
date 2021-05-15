@@ -31,8 +31,8 @@ func (s *testSuite) TestNewIssuer() {
 		s.NotNil(issuer.Profile("client"))
 		s.Nil(issuer.Profile("notfound"))
 
-		s.Equal(fmt.Sprintf("http://localhost:8080/v1/crl/%s.crl", issuer.SubjectKID()), issuer.CrlURL())
-		s.Equal(fmt.Sprintf("http://localhost:8080/v1/certs/%s.crt", issuer.SubjectKID()), issuer.AiaURL())
+		s.Equal(fmt.Sprintf("http://localhost:7880/v1/crl/%s.crl", issuer.SubjectKID()), issuer.CrlURL())
+		s.Equal(fmt.Sprintf("http://localhost:7880/v1/certs/%s.crt", issuer.SubjectKID()), issuer.AiaURL())
 		//s.NotNil(issuer.AIAExtension("server"))
 		//s.Nil(issuer.AIAExtension("not_supported"))
 	}
