@@ -60,6 +60,18 @@ type HTTPServer struct {
 		// Timeout is the additional duration of wait before closing a non-responsive connection, use 0 to disable.
 		Timeout time.Duration `json:"timeout,omitempty" yaml:"timeout,omitempty"`
 	} `json:"keep_alive" yaml:"keep_alive"`
+
+	// Swagger specifies the configuration for Swagger
+	Swagger Swagger `json:"swagger" yaml:"swagger"`
+}
+
+// Swagger specifies the configuration for Swagger
+type Swagger struct {
+	// Enabled allows Swagger
+	Enabled bool `json:"enabled" yaml:"enabled"`
+
+	// Files is a map of service name to location
+	Files map[string]string `json:"files" yaml:"files"`
 }
 
 // TLSInfo contains configuration info for the TLS

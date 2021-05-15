@@ -32,6 +32,12 @@ const (
 	// Verbs: GET
 	// Response: v1.CallerStatusResponse
 	PathForStatusCaller = "/v1/status/caller"
+
+	// PathForSwagger returns swagger file.
+	//
+	// Verbs: GET
+	// Response: JSON
+	PathForSwagger = "/v1/swagger/:service"
 )
 
 // Auth service API

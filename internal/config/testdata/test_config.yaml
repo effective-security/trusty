@@ -120,28 +120,12 @@ servers:
       min_time: 60s
       interval: 30s
       timeout: 180s
-
-  wfe:
-    listen_urls:
-      - https://0.0.0.0:7891
-    server_tls:
-      cert: /tmp/trusty/certs/trusty_dev_peer.pem
-      key: /tmp/trusty/certs/trusty_dev_peer-key.pem
-      trusted_ca: /tmp/trusty/certs/trusty_dev_root_ca.pem
-    services:
-      - auth
-      - status
-      - ca
-      - cis
-      - workflow
-    heartbeat_secs: 30
-    timeout:
-      request: 3s
-    keep_alive:
-      min_time: 60s
-      interval: 30s
-      timeout: 180s
-    cors:
+    swagger:
+      enabled: true
+      files:
+        cis: ${TRUSTY_CONFIG_DIR}/../../../Documentation/dev-guide/apispec/swagger/cis.swagger.json
+        status: ${TRUSTY_CONFIG_DIR}/../../../Documentation/dev-guide/apispec/swagger/status.swagger.json
+    cors: &cors
       enabled: true
       max_age: 600
       allow_credentials: true
@@ -164,6 +148,28 @@ servers:
         - X-Device-ID
         - sec-ch-ua
         - sec-ch-ua-mobile
+
+  wfe:
+    listen_urls:
+      - https://0.0.0.0:7891
+    server_tls:
+      cert: /tmp/trusty/certs/trusty_dev_peer.pem
+      key: /tmp/trusty/certs/trusty_dev_peer-key.pem
+      trusted_ca: /tmp/trusty/certs/trusty_dev_root_ca.pem
+    services:
+      - auth
+      - status
+      - ca
+      - cis
+      - workflow
+    heartbeat_secs: 30
+    timeout:
+      request: 3s
+    keep_alive:
+      min_time: 60s
+      interval: 30s
+      timeout: 180s
+    cors: *cors
 
 trusty_client: 
   client_tls:

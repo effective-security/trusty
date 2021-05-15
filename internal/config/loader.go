@@ -361,30 +361,49 @@ func resolveEnvVars(s string, variables map[string]string) string {
 }
 
 func substituteEnvVars(obj interface{}, variables map[string]string) {
-	doSubstituteEnvVars(reflect.ValueOf(obj), variables, true)
+	doSubstituteEnvVars(reflect.ValueOf(obj), variables)
 }
 
-func doSubstituteEnvVars(v reflect.Value, variables map[string]string, topLevel bool) {
-	for topLevel && v.Kind() == reflect.Ptr {
+func doSubstituteEnvVars(v reflect.Value, variables map[string]string) {
+	for v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
+	if !v.IsValid() {
+		return
+	}
 
-	//logger.Infof("src=doSubstituteEnvVars, type=%v, type=%v", v.Kind(), v.Type())
+	logger.Infof("src=doSubstituteEnvVars, kind=%v, type=%v",
+		v.Kind(), v.Type())
 
 	switch v.Kind() {
 	case reflect.Struct:
 		for i := 0; i < v.NumField(); i++ {
-			doSubstituteEnvVars(v.Field(i), variables, false)
+			doSubstituteEnvVars(v.Field(i), variables)
 		}
 	case reflect.Slice:
 		for i := 0; i < v.Len(); i++ {
-			doSubstituteEnvVars(v.Index(i), variables, false)
+			doSubstituteEnvVars(v.Index(i), variables)
 		}
 	case reflect.String:
 		if v.CanSet() {
 			v.SetString(resolveEnvVars(v.String(), variables))
 		}
+	case reflect.Ptr:
+		doSubstituteEnvVars(v.Elem(), variables)
+	case reflect.Map:
+		if v.Type().String() == "map[string]string" {
+			// logger.Warningf("src=doSubstituteEnvVars, t=%v", v.Interface())
+			m := v.Interface().(map[string]string)
+			for k, v := range m {
+				m[k] = resolveEnvVars(v, variables)
+			}
+		} else {
+			iter := v.MapRange()
+			for iter.Next() {
+				doSubstituteEnvVars(iter.Value(), variables)
+			}
+		}
 	default:
-		//logger.Warningf("src=doSubstituteEnvVars, kind=%v, type=%v", v.Kind(), v.Type())
+		// logger.Warningf("src=doSubstituteEnvVars, skipping")
 	}
 }

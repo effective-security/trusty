@@ -110,3 +110,9 @@ Add the launch configuration to .vscode/launch.json:
 You need to login to ghcr.io
 See more for details:
 https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry
+
+## Swagger
+
+    make start-swagger
+
+Open http://localhost:8080

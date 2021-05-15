@@ -270,6 +270,11 @@ func (e *Server) Name() string {
 	return e.name
 }
 
+// Configuration of the server
+func (e *Server) Configuration() *config.HTTPServer {
+	return &e.cfg
+}
+
 // AddService to the server
 func (e *Server) AddService(svc Service) {
 	logger.Noticef("src=AddService, server=%s, service=%s",
