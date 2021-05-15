@@ -2,9 +2,9 @@
 #!/bin/sh
 set -e
 
-export TRUSTY_CIS_1=http://10.77.88.101:8080
-export TRUSTY_CIS_2=http://10.77.88.102:8080
-export TRUSTY_CIS_3=http://10.77.88.103:8080
+export TRUSTY_CIS_1=http://10.77.88.101:7880
+export TRUSTY_CIS_2=http://10.77.88.102:7880
+export TRUSTY_CIS_3=http://10.77.88.103:7880
 
 export TRUSTY_SERVER_1=https://10.77.88.101:7891
 export TRUSTY_SERVER_2=https://10.77.88.102:7891

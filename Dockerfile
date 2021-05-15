@@ -11,7 +11,7 @@ RUN rm -rf $TRUSTY_DIR/install/
 
 VOLUME ["/var/trusty/roots", "/var/trusty/certs", "/var/trusty/logs", "/var/trusty/audit"]
 
-EXPOSE 8080 7891 7892 7893
+EXPOSE 7880 7891 7892 7893
 
 # Define default command.
 CMD ["/opt/trusty/bin/trusty"]
