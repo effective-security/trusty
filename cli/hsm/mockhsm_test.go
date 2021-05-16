@@ -86,6 +86,61 @@ func (s *mockHsmSuite) Test_KeyInfo() {
 	s.Equal("unsupported command for this crypto provider", err.Error())
 }
 
+func (s *mockHsmSuite) Test_GenKey() {
+	flags := hsm.GenKeyFlags{}
+
+	// without KeyManager interface
+	c, _ := cryptoprov.New(&mockedProvider{}, nil)
+	s.Cli.WithCryptoProvider(c)
+
+	err := s.Run(hsm.GenKey, &flags)
+	s.Require().Error(err)
+	s.Equal("unsupported purpose: \"\"", err.Error())
+
+	purpose := "sign"
+	flags = hsm.GenKeyFlags{
+		Purpose: &purpose,
+	}
+	err = s.Run(hsm.GenKey, &flags)
+	s.Require().Error(err)
+	s.Equal("invalid algorithm: ", err.Error())
+
+	creationTime := time.Now()
+	mocked := &mockedFull{
+		keys: map[uint][]keyInfo{
+			uint(1): {
+				{
+					id:               "123",
+					label:            "label123",
+					typ:              "RSA",
+					class:            "class",
+					currentVersionID: "v124",
+					creationTime:     &creationTime,
+				},
+			},
+		},
+	}
+	pk := struct{}{}
+	mocked.On("GenerateRSAKey", mock.Anything, mock.Anything, mock.Anything).Return(pk, nil)
+	mocked.On("IdentifyKey", mock.Anything).Return("keyID", "lalel", nil)
+	mocked.On("ExportKey", mock.Anything).Return("uri", []byte{1, 2, 3}, nil)
+
+	c, _ = cryptoprov.New(mocked, nil)
+	s.Cli.WithCryptoProvider(c)
+
+	algo := "RSA"
+	size := 2048
+	label := "test*"
+	flags = hsm.GenKeyFlags{
+		Purpose: &purpose,
+		Algo:    &algo,
+		Size:    &size,
+		Label:   &label,
+	}
+	err = s.Run(hsm.GenKey, &flags)
+	s.Require().NoError(err)
+}
+
 func (s *mockHsmSuite) Test_LsKeyFlags() {
 	token := ""
 	serial := ""
