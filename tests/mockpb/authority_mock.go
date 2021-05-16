@@ -5,6 +5,7 @@ import (
 
 	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/gogo/protobuf/proto"
+	"github.com/golang/protobuf/ptypes/empty"
 )
 
 // MockAuthorityServer for testing
@@ -43,7 +44,7 @@ func (m *MockAuthorityServer) SignCertificate(context.Context, *pb.SignCertifica
 }
 
 // Issuers returns the issuing CAs
-func (m *MockAuthorityServer) Issuers(context.Context, *pb.EmptyRequest) (*pb.IssuersInfoResponse, error) {
+func (m *MockAuthorityServer) Issuers(context.Context, *empty.Empty) (*pb.IssuersInfoResponse, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}

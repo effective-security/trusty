@@ -4,6 +4,7 @@ import (
 	"context"
 
 	pb "github.com/ekspand/trusty/api/v1/pb"
+	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
 )
 
@@ -28,7 +29,7 @@ func NewCertInfoFromProxy(proxy pb.CertInfoServiceClient) CertInfoService {
 }
 
 // Roots returns the root CAs
-func (c *cisClient) Roots(ctx context.Context, in *pb.EmptyRequest) (*pb.RootsResponse, error) {
+func (c *cisClient) Roots(ctx context.Context, in *empty.Empty) (*pb.RootsResponse, error) {
 	return c.remote.Roots(ctx, in, c.callOpts...)
 }
 
@@ -46,6 +47,6 @@ func RetryCertInfoClient(conn *grpc.ClientConn) pb.CertInfoServiceClient {
 }
 
 // Roots returns the root CAs
-func (c *retryCertInfoClient) Roots(ctx context.Context, in *pb.EmptyRequest, opts ...grpc.CallOption) (*pb.RootsResponse, error) {
+func (c *retryCertInfoClient) Roots(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*pb.RootsResponse, error) {
 	return c.cis.Roots(ctx, in, opts...)
 }

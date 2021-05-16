@@ -5,6 +5,7 @@ import (
 
 	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/gogo/protobuf/proto"
+	"github.com/golang/protobuf/ptypes/empty"
 )
 
 // MockStatusServer for testing
@@ -27,7 +28,7 @@ func (m *MockStatusServer) SetResponse(r proto.Message) {
 }
 
 // Version returns the server version.
-func (m *MockStatusServer) Version(ctx context.Context, req *pb.EmptyRequest) (*pb.ServerVersion, error) {
+func (m *MockStatusServer) Version(ctx context.Context, req *empty.Empty) (*pb.ServerVersion, error) {
 	//m.reqs = append(m.reqs, req)
 	if m.Err != nil {
 		return nil, m.Err
@@ -36,7 +37,7 @@ func (m *MockStatusServer) Version(ctx context.Context, req *pb.EmptyRequest) (*
 }
 
 // Server returns the server statum.
-func (m *MockStatusServer) Server(ctx context.Context, req *pb.EmptyRequest) (*pb.ServerStatusResponse, error) {
+func (m *MockStatusServer) Server(ctx context.Context, req *empty.Empty) (*pb.ServerStatusResponse, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
@@ -44,7 +45,7 @@ func (m *MockStatusServer) Server(ctx context.Context, req *pb.EmptyRequest) (*p
 }
 
 // Caller returns the caller statum.
-func (m *MockStatusServer) Caller(ctx context.Context, req *pb.EmptyRequest) (*pb.CallerStatusResponse, error) {
+func (m *MockStatusServer) Caller(ctx context.Context, req *empty.Empty) (*pb.CallerStatusResponse, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}

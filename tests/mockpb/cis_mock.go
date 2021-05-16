@@ -5,6 +5,7 @@ import (
 
 	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/gogo/protobuf/proto"
+	"github.com/golang/protobuf/ptypes/empty"
 )
 
 // MockCertInfoServer for testing
@@ -27,7 +28,7 @@ func (m *MockCertInfoServer) SetResponse(r proto.Message) {
 }
 
 // Roots returns the root CAs
-func (m *MockCertInfoServer) Roots(context.Context, *pb.EmptyRequest) (*pb.RootsResponse, error) {
+func (m *MockCertInfoServer) Roots(context.Context, *empty.Empty) (*pb.RootsResponse, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}

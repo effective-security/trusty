@@ -3,77 +3,22 @@ package pb;
 
 option go_package = "github.com/ekspand/trusty/api/v1/pb";
 
-import "status.proto";
-import "google/protobuf/timestamp.proto";
+import "pkix.proto";
+import "google/protobuf/empty.proto";
+//import "google/protobuf/timestamp.proto";
 // for grpc-gateway
 import "google/api/annotations.proto";
 
 service CertInfoService {
     // Roots returns the root CAs
-    rpc Roots(EmptyRequest) returns (RootsResponse) {
+    rpc Roots(google.protobuf.Empty) returns (RootsResponse) {
         option (google.api.http) = {
             get: "/v1/cis/roots"
         };
     }
 }
 
-enum Trust {
-    Any = 0;  // default
-    Public = 1;
-    Private = 2;
-}
-
-// Root provides X509 Root Cert information
-message RootCertificate  {
-    // Id of the certificate
-    int64 id = 1;
-    // Skid provides Subject Key Identifier
-    string skid = 2;
-    // NotBefore is the time when the validity period starts
-    google.protobuf.Timestamp not_before = 3 [json_name="not_before"];
-    // NotAfter is the time when the validity period starts
-    google.protobuf.Timestamp not_after = 4 [json_name="not_after"];
-    // Subject name
-    string subject = 5;
-    // SHA256 thnumbprint of the cert
-    string sha256 =6;
-    // Trust scope
-    Trust trust = 7;
-    // PEM encoded certificate
-    string pem =8;
-}
-
 // RootsResponse provides response for GetRootsRequest
 message RootsResponse {
     repeated RootCertificate roots = 1;
-}
-
-// Certificate provides X509 Certificate information
-message Certificate  {
-    // Id of the certificate
-    int64 id = 1;
-    // OrgId of the certificate, only used with Org scope
-    int64 org_id = 2 [json_name="org_id"];
-    // Skid provides Subject Key Identifier
-    string skid = 3;
-    // Ikid provides Issuer Key Identifier
-    string ikid = 4;
-    // SerialNumber provides Serial Number
-    string serial_number = 5;
-    // NotBefore is the time when the validity period starts
-    google.protobuf.Timestamp not_before = 6 [json_name="not_before"];
-    // NotAfter is the time when the validity period starts
-    google.protobuf.Timestamp not_after = 7 [json_name="not_after"];
-    // Subject name
-    string subject = 8;
-    // Issuer name
-    string issuer = 9;
-    // SHA256 thnumbprint of the cert
-    string sha256 = 10;
-    // Profile of the certificate
-    string profile = 11;
-    // Pem encoded certificate
-    string pem = 12;
-    // IssuersPem provides PEM encoded issuers
-    string issuers_pem = 13 [json_name="issuers_pem"];
 }

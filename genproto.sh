@@ -60,6 +60,7 @@ for dir in ${DIRS}; do
 			-I=. \
 			-I=${GOPATH}/src \
 			-I=${GOPATH}/src/github.com/gogo/googleapis \
+			-I=${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway \
 			--go_out=\
 Mgoogle/protobuf/empty.proto=github.com/golang/protobuf/ptypes/empty,\
 Mgoogle/protobuf/struct.proto=github.com/golang/protobuf/ptypes/struct,\
