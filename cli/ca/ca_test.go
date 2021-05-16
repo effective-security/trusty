@@ -97,6 +97,43 @@ func (s *testSuite) TestProfile() {
 
 }
 
+func (s *testSuite) TestSign() {
+	expectedResponse := new(pb.CertificateBundle)
+	err := loadJSON("testdata/sign.json", expectedResponse)
+	s.Require().NoError(err)
+
+	s.MockAuthority = &mockpb.MockAuthorityServer{
+		Err:   nil,
+		Resps: []proto.Message{expectedResponse},
+	}
+	srv := s.SetupMockGRPC()
+	defer srv.Stop()
+
+	profile := "server"
+	req := "notreal"
+	empty := ""
+	san := []string{}
+	err = s.Run(ca.Sign, &ca.SignFlags{
+		Profile:     &profile,
+		Request:     &req,
+		Token:       &empty,
+		SAN:         &san,
+		IssuerLabel: &empty,
+	})
+	s.Require().Error(err)
+	s.Equal("failed to load request: open notreal: no such file or directory", err.Error())
+
+	req = "testdata/request.csr"
+	err = s.Run(ca.Sign, &ca.SignFlags{
+		Profile:     &profile,
+		Request:     &req,
+		Token:       &empty,
+		SAN:         &san,
+		IssuerLabel: &empty,
+	})
+	s.Require().NoError(err)
+}
+
 func loadJSON(filename string, v interface{}) error {
 	cfr, err := os.Open(filename)
 	if err != nil {

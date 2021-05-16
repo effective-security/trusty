@@ -11,7 +11,6 @@ import (
 	"syscall"
 	"time"
 
-	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/backend/service/auth"
 	"github.com/ekspand/trusty/backend/service/ca"
 	"github.com/ekspand/trusty/backend/service/cis"
@@ -143,7 +142,7 @@ func (a *App) Close() error {
 	defer a.lock.Unlock()
 
 	if a.closed {
-		return errors.Trace(v1.ErrAlreadyClosed)
+		return errors.New("already closed")
 	}
 
 	a.closed = true

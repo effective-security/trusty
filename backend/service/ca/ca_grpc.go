@@ -2,12 +2,13 @@ package ca
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	v1 "github.com/ekspand/trusty/api/v1"
 	pb "github.com/ekspand/trusty/api/v1/pb"
+	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/juju/errors"
 	"google.golang.org/grpc/codes"
 )
 
@@ -63,11 +64,6 @@ func (s *Service) ProfileInfo(ctx context.Context, req *pb.CertProfileInfoReques
 	return res, nil
 }
 
-// SignCertificate returns the certificate
-func (s *Service) SignCertificate(context.Context, *pb.SignCertificateRequest) (*pb.CertificateBundle, error) {
-	return nil, errors.Errorf("not implemented")
-}
-
 // Issuers returns the issuing CAs
 func (s *Service) Issuers(context.Context, *empty.Empty) (*pb.IssuersInfoResponse, error) {
 	issuers := s.ca.Issuers()
@@ -84,6 +80,58 @@ func (s *Service) Issuers(context.Context, *empty.Empty) (*pb.IssuersInfoRespons
 			Root:          bundle.RootCertPEM,
 			Label:         issuer.Label(),
 		}
+	}
+
+	return res, nil
+}
+
+// SignCertificate returns the certificate
+func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRequest) (*pb.CertificateBundle, error) {
+	if req == nil || req.Profile == "" {
+		return nil, v1.NewError(codes.InvalidArgument, "missing profile")
+	}
+	if req.Request == "" {
+		return nil, v1.NewError(codes.InvalidArgument, "missing request")
+	}
+	if req.RequestFormat != pb.EncodingFormat_PEM {
+		return nil, v1.NewError(codes.InvalidArgument, "unsupported request_format: %v", req.RequestFormat)
+	}
+
+	ca, err := s.ca.GetIssuerByProfile(req.Profile)
+	if err != nil {
+		return nil, v1.NewError(codes.InvalidArgument, err.Error())
+	}
+
+	label := req.IssuerLabel
+	if label != "" && label != ca.Label() {
+		msg := fmt.Sprintf("%q issuer does not support the request profile: %q", label, req.Profile)
+		return nil, v1.NewError(codes.InvalidArgument, msg)
+
+	}
+
+	cr := csr.SignRequest{
+		Request: req.Request,
+		Profile: req.Profile,
+		SAN:     req.San,
+	}
+
+	_, pem, err := ca.Sign(cr)
+	if err != nil {
+		return nil, v1.NewError(codes.Internal, "failed to sign certificate request: "+err.Error())
+	}
+
+	// TODO: metrics
+	// TODO: Audit
+	// TODO: Registration
+
+	res := &pb.CertificateBundle{
+		Certificate:   string(pem),
+		Intermediates: ca.PEM(),
+		Root:          ca.Bundle().RootCertPEM,
+	}
+
+	if req.WithBundle {
+		res.Certificate += "\n" + ca.PEM()
 	}
 
 	return res, nil

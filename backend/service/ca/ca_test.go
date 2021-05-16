@@ -140,7 +140,57 @@ func TestProfileInfo(t *testing.T) {
 	}
 }
 
-func TestCreateCertificate(t *testing.T) {
+const testcst = "-----BEGIN CERTIFICATE REQUEST-----\nMIICtTCCAZ0CAQAwQzELMAkGA1UEBhMCVVMxCzAJBgNVBAcTAldBMRMwEQYDVQQK\nEwp0cnVzdHkuY29tMRIwEAYDVQQDEwlsb2NhbGhvc3QwggEiMA0GCSqGSIb3DQEB\nAQUAA4IBDwAwggEKAoIBAQD9NDVA9BFS6JXT2qEPWP8iyk2GZP6hrNkSfko9giyl\nenejnl9pTthJVe5wzi72ozQBa1zHetNDkNvb5B26dGHoJRxg/bj2BTI+TcxIjAVf\nV1FmOiFUqXYklGA/27ownmF29IQSbt3Qd8ed3/cZ5bDlLcNjxkjng9YD5JMqPNW+\nnQvarX1b7KuxZs/fGUyHa1kqbG3dC1Lrq//c/cXbS01OsTC1Vivzihs/dATprw7U\nU08vTCOF4k4+aeIiw9VJX4vxOFsgIS6oZIHLgXHb58XWKkAA/tV6B9VEpzU7ULkZ\nI5Smh6flYreEvoeKOIdB/u1WkTEXGlqptFRQJKN5sYQJAgMBAAGgLTArBgkqhkiG\n9w0BCQ4xHjAcMBoGA1UdEQQTMBGCCWxvY2FsaG9zdIcEfwAAATANBgkqhkiG9w0B\nAQsFAAOCAQEAv4goV8TZ0UFyuhoNH133QdxNhQ51SWbJCgKZeaXxN/J4fWGvhuol\ncHUANjl6OvZA+4JxX/i42OTfQh7NOvCgAlWAdlC4ms7RuE/SPNubKEGJWAmPq+zO\nCTF3WPM6tgMoEWA26plX6IdYZ53cA5RmI6I7piWGD2xnTU2Qpvt1Fy4zGiliJMKD\nXmu581SFSSu15kiFAxTn/o4vy6a0L0PWC8AxIV+DM9nUyZVzBD3KXH4lBZEP+CGZ\n5Evw7r5fKoL6HWuItgP3x+HRjtKfZglnLXtl2ATpFFeQ8gUHYJkgh7zzlpx6w2UZ\nyYuweVkHvc44P+ptqdpTfyGWnzVIBLAoJg==\n-----END CERTIFICATE REQUEST-----\n"
+
+func TestSignCertificate(t *testing.T) {
 	_, err := trustyClient.AuthorityService.SignCertificate(context.Background(), nil)
 	require.Error(t, err)
+	assert.Equal(t, "missing profile", err.Error())
+
+	_, err = trustyClient.AuthorityService.SignCertificate(context.Background(), &pb.SignCertificateRequest{
+		Profile: "test",
+	})
+	require.Error(t, err)
+	assert.Equal(t, "missing request", err.Error())
+
+	_, err = trustyClient.AuthorityService.SignCertificate(context.Background(), &pb.SignCertificateRequest{
+		Profile:       "test",
+		Request:       "abcd",
+		RequestFormat: pb.EncodingFormat_PKCS7,
+	})
+	require.Error(t, err)
+	assert.Equal(t, "unsupported request_format: PKCS7", err.Error())
+
+	_, err = trustyClient.AuthorityService.SignCertificate(context.Background(), &pb.SignCertificateRequest{
+		Profile:       "test",
+		Request:       "abcd",
+		RequestFormat: pb.EncodingFormat_PEM,
+	})
+	require.Error(t, err)
+	assert.Equal(t, "issuer not found for profile: test", err.Error())
+
+	_, err = trustyClient.AuthorityService.SignCertificate(context.Background(), &pb.SignCertificateRequest{
+		Profile:       "test_server",
+		Request:       "abcd",
+		IssuerLabel:   "xxx",
+		RequestFormat: pb.EncodingFormat_PEM,
+	})
+	require.Error(t, err)
+	assert.Equal(t, "\"xxx\" issuer does not support the request profile: \"test_server\"", err.Error())
+
+	_, err = trustyClient.AuthorityService.SignCertificate(context.Background(), &pb.SignCertificateRequest{
+		Profile:       "test_server",
+		Request:       "abcd",
+		RequestFormat: pb.EncodingFormat_PEM,
+	})
+	require.Error(t, err)
+	assert.Equal(t, "failed to sign certificate request: unable to parse PEM", err.Error())
+
+	_, err = trustyClient.AuthorityService.SignCertificate(context.Background(), &pb.SignCertificateRequest{
+		Profile:       "test_server",
+		Request:       testcst,
+		RequestFormat: pb.EncodingFormat_PEM,
+		WithBundle:    true,
+	})
+	require.NoError(t, err)
 }
