@@ -85,4 +85,6 @@ message SignCertificateRequest {
     bool with_bundle = 5;
     // Token provides the authorization token for the request
     string token = 6;
+    // San specifies Subject Alternative Names
+    repeated string san = 7;
 }

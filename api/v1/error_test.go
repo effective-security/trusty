@@ -12,7 +12,7 @@ import (
 )
 
 func TestTrustyError(t *testing.T) {
-	e1 := status.New(codes.PermissionDenied, "trustyserver: permission denied").Err()
+	e1 := status.New(codes.PermissionDenied, "trusty: permission denied").Err()
 	e2 := v1.ErrGRPCPermissionDenied
 	e3 := v1.ErrPermissionDenied
 
@@ -34,5 +34,5 @@ func TestTrustyError(t *testing.T) {
 	assert.Equal(t, "some error", v1.ErrorDesc(someErr))
 
 	assert.NotNil(t, v1.Error(e3))
-	assert.Equal(t, "trustyserver: permission denied", v1.ErrorDesc(e3))
+	assert.Equal(t, "trusty: permission denied", v1.ErrorDesc(e3))
 }

@@ -1,29 +1,17 @@
 package v1
 
 import (
-	"errors"
 	"fmt"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-var (
-	// ErrUnknownMethod specifies UnknownMethod error
-	ErrUnknownMethod = errors.New("unknown method")
-	// ErrAlreadyClosed specifies AlreadyClosed error
-	ErrAlreadyClosed = errors.New("already closed")
-	// ErrStopped specifies Stopped error
-	ErrStopped = errors.New("server stopped")
-	// ErrCanceled specifies Canceled error
-	ErrCanceled = errors.New("request cancelled")
-)
-
 // server-side error
 var (
-	ErrGRPCTimeout          = status.New(codes.Unavailable, "trustyserver: request timed out").Err()
-	ErrGRPCPermissionDenied = status.New(codes.PermissionDenied, "trustyserver: permission denied").Err()
-	ErrGRPCInvalidArgument  = status.New(codes.InvalidArgument, "trustyserver: invalid argument").Err()
+	ErrGRPCTimeout          = status.New(codes.Unavailable, "trusty: request timed out").Err()
+	ErrGRPCPermissionDenied = status.New(codes.PermissionDenied, "trusty: permission denied").Err()
+	ErrGRPCInvalidArgument  = status.New(codes.InvalidArgument, "trusty: invalid argument").Err()
 
 	errStringToError = map[string]error{
 		ErrorDesc(ErrGRPCTimeout):          ErrGRPCTimeout,
@@ -40,7 +28,6 @@ var (
 )
 
 // TrustyError defines gRPC server errors.
-// (https://github.com/grpc/grpc-go/blob/master/rpc_util.go#L319-L323)
 type TrustyError struct {
 	code codes.Code
 	desc string
