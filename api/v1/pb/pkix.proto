@@ -69,6 +69,13 @@ message Certificate  {
     string issuers_pem = 13 [json_name="issuers_pem"];
 }
 
+// RevokedCertificate provides X509 Cert information
+message RevokedCertificate {
+	Certificate certificate = 1;
+	google.protobuf.Timestamp revoked_at = 2 [json_name="revoked_at"];
+	int32 reason = 3;
+}
+
 // X509Name specifies X509 Name
 message X509Name {
     string country = 1;

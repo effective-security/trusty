@@ -174,9 +174,9 @@ CREATE TABLE IF NOT EXISTS public.certificates
     org_id bigint NOT NULL,
     skid character varying(64) COLLATE pg_catalog."default" NOT NULL,
     ikid character varying(64) COLLATE pg_catalog."default" NOT NULL,
-    sn character varying(32) COLLATE pg_catalog."default" NOT NULL,
-    notbefore timestamp with time zone,
-    notafter timestamp with time zone,
+    serial_number character varying(32) COLLATE pg_catalog."default" NOT NULL,
+    not_before timestamp with time zone,
+    no_tafter timestamp with time zone,
     subject character varying(260) COLLATE pg_catalog."default" NOT NULL,
     issuer character varying(260) COLLATE pg_catalog."default" NOT NULL,
     sha256 character varying(64) COLLATE pg_catalog."default" NOT NULL,
@@ -186,7 +186,7 @@ CREATE TABLE IF NOT EXISTS public.certificates
     CONSTRAINT certificates_pkey PRIMARY KEY (id),
     CONSTRAINT certificates_skid UNIQUE (skid),
     CONSTRAINT certificates_sha256 UNIQUE (sha256),
-    CONSTRAINT certificates_issuer_sn UNIQUE (ikid, sn)
+    CONSTRAINT certificates_issuer_sn UNIQUE (ikid, serial_number)
 )
 WITH (
     OIDS = FALSE
@@ -202,7 +202,7 @@ CREATE INDEX IF NOT EXISTS idx_certificates_ikid
 
 CREATE INDEX IF NOT EXISTS idx_certificates_notafter
     ON public.certificates USING btree
-    (notafter);
+    (no_tafter);
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_certificates_sha256
     ON public.certificates USING btree
@@ -233,9 +233,9 @@ CREATE TABLE IF NOT EXISTS public.revoked
     org_id bigint NOT NULL,
     skid character varying(64) COLLATE pg_catalog."default" NOT NULL,
     ikid character varying(64) COLLATE pg_catalog."default" NOT NULL,
-    sn character varying(32) COLLATE pg_catalog."default" NOT NULL,
-    notbefore timestamp with time zone,
-    notafter timestamp with time zone,
+    serial_number character varying(32) COLLATE pg_catalog."default" NOT NULL,
+    not_before timestamp with time zone,
+    no_tafter timestamp with time zone,
     subject character varying(260) COLLATE pg_catalog."default" NOT NULL,
     issuer character varying(260) COLLATE pg_catalog."default" NOT NULL,
     sha256 character varying(64) COLLATE pg_catalog."default" NOT NULL,
@@ -247,7 +247,7 @@ CREATE TABLE IF NOT EXISTS public.revoked
     CONSTRAINT revoked_pkey PRIMARY KEY (id),
     CONSTRAINT revoked_skid UNIQUE (skid),
     CONSTRAINT revoked_sha256 UNIQUE (sha256),
-    CONSTRAINT revoked_issuer_sn UNIQUE (ikid, sn)
+    CONSTRAINT revoked_issuer_sn UNIQUE (ikid, serial_number)
 )
 WITH (
     OIDS = FALSE
@@ -271,7 +271,7 @@ CREATE INDEX IF NOT EXISTS idx_revoked_ikid
 
 CREATE INDEX IF NOT EXISTS idx_revoked_notafter
     ON public.revoked USING btree
-    (notafter);
+    (no_tafter);
 
 SELECT create_constraint_if_not_exists(
     'public',
@@ -292,8 +292,8 @@ CREATE TABLE IF NOT EXISTS public.roots
 (
     id bigint NOT NULL,
     skid character varying(64) COLLATE pg_catalog."default" NOT NULL,
-    notbefore timestamp with time zone,
-    notafter timestamp with time zone,
+    not_before timestamp with time zone,
+    no_tafter timestamp with time zone,
     subject character varying(260) COLLATE pg_catalog."default" NOT NULL,
     sha256 character varying(64) COLLATE pg_catalog."default" NOT NULL,
     trust int NOT NULL,
@@ -316,7 +316,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_roots_sha256
 
 CREATE INDEX IF NOT EXISTS idx_roots_notafter
     ON public.roots USING btree
-    (notafter);
+    (no_tafter);
 
 SELECT create_constraint_if_not_exists(
     'public',

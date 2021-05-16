@@ -372,8 +372,7 @@ func doSubstituteEnvVars(v reflect.Value, variables map[string]string) {
 		return
 	}
 
-	logger.Infof("src=doSubstituteEnvVars, kind=%v, type=%v",
-		v.Kind(), v.Type())
+	// logger.Infof("src=doSubstituteEnvVars, kind=%v, type=%v", v.Kind(), v.Type())
 
 	switch v.Kind() {
 	case reflect.Struct:
