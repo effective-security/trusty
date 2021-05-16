@@ -6,11 +6,12 @@ import (
 	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/internal/version"
 	"github.com/go-phorce/dolly/xhttp/identity"
+	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Version returns the server version.
-func (s *Service) Version(_ context.Context, _ *pb.EmptyRequest) (*pb.ServerVersion, error) {
+func (s *Service) Version(_ context.Context, _ *empty.Empty) (*pb.ServerVersion, error) {
 	v := version.Current()
 	return &pb.ServerVersion{
 		Build:   v.Build,
@@ -19,7 +20,7 @@ func (s *Service) Version(_ context.Context, _ *pb.EmptyRequest) (*pb.ServerVers
 }
 
 // Server returns the server version.
-func (s *Service) Server(_ context.Context, _ *pb.EmptyRequest) (*pb.ServerStatusResponse, error) {
+func (s *Service) Server(_ context.Context, _ *empty.Empty) (*pb.ServerStatusResponse, error) {
 	v := version.Current()
 	res := &pb.ServerStatusResponse{
 		Status: &pb.ServerStatus{
@@ -37,7 +38,7 @@ func (s *Service) Server(_ context.Context, _ *pb.EmptyRequest) (*pb.ServerStatu
 }
 
 // Caller returns the status of the caller.
-func (s *Service) Caller(ctx context.Context, _ *pb.EmptyRequest) (*pb.CallerStatusResponse, error) {
+func (s *Service) Caller(ctx context.Context, _ *empty.Empty) (*pb.CallerStatusResponse, error) {
 	callerCtx := identity.FromContext(ctx)
 	role := identity.GuestRoleName
 	var id, name string

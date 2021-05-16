@@ -6,6 +6,7 @@ import (
 
 	v1 "github.com/ekspand/trusty/api/v1"
 	pb "github.com/ekspand/trusty/api/v1/pb"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/juju/errors"
 	"google.golang.org/grpc/codes"
 )
@@ -68,7 +69,7 @@ func (s *Service) SignCertificate(context.Context, *pb.SignCertificateRequest) (
 }
 
 // Issuers returns the issuing CAs
-func (s *Service) Issuers(context.Context, *pb.EmptyRequest) (*pb.IssuersInfoResponse, error) {
+func (s *Service) Issuers(context.Context, *empty.Empty) (*pb.IssuersInfoResponse, error) {
 	issuers := s.ca.Issuers()
 
 	res := &pb.IssuersInfoResponse{

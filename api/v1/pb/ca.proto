@@ -3,7 +3,9 @@ package pb;
 
 option go_package = "github.com/ekspand/trusty/api/v1/pb";
 
-import "status.proto";
+//import "rpc.proto";
+import "pkix.proto";
+import "google/protobuf/empty.proto";
 // import "google/protobuf/timestamp.proto";
 // for grpc-gateway
 import "google/api/annotations.proto";
@@ -24,92 +26,16 @@ service AuthorityService {
         }
 
         // Issuers returns the issuing CAs
-        rpc Issuers(EmptyRequest) returns (IssuersInfoResponse) {
+        rpc Issuers(google.protobuf.Empty) returns (IssuersInfoResponse) {
             option (google.api.http) = {
                 get: "/v1/ca/issuers"
             };
         }
 }
 
-// X509Name specifies X509 Name
-message X509Name {
-    string country = 1;
-    string state = 2;
-    string locality = 3;
-    string organisation = 4;
-    string organisational_unit = 5;
-}
-
-// X509Subject specifies X509 Subject
-message X509Subject {
-    string common_name = 1;
-    repeated X509Name names = 2;
-    string serial_number = 3;
-}
-
 message CertProfileInfoRequest {
     string label = 1;
     string profile = 2;
-}
-
-// CAConstraint specifies various CA constraints on the signed certificate.
-// CAConstraint would verify against (and override) the CA
-// extensions in the given CSR.
-message CAConstraint {
-	bool is_ca = 1;
-	int32 max_path_len = 2;
-	int32 max_path_len_zero =3;
-}
-
-message CSRAllowedFields {
-	bool subject = 1;
-	bool dns = 2;
-	bool ip = 3;
-	bool email = 4;
-}
-
-// CertProfile provides certificate profile
-message CertProfile {
-	string description = 1;
-
-	// Usage provides a list key usages
-	repeated string usages = 2;
-
-	CAConstraint ca_constraint  = 3;
-	bool ocsp_no_check  = 4;
-
-	string expiry = 5;
-	string backdate = 6;
-
-	repeated string allowed_extensions = 7;
-
-	// AllowedNames specifies a RegExp to check for allowed names.
-	// If not provided, then all names are allowed
-	string allowed_names = 8;
-
-	// AllowedDns specifies a RegExp to check for allowed DNS.
-	// If not provided, then all names are allowed
-	string allowed_dns = 9;
-
-	// AllowedEmail specifies a RegExp to check for allowed email.
-	// If not provided, then all names are allowed
-	string allowed_email = 10;
-
-	// AllowedFields provides booleans for fields in the CSR.
-	// If a AllowedFields is not present in a CertProfile,
-	// all of these fields may be copied from the CSR into the signed certificate.
-	// If a AllowedFields *is* present in a CertProfile,
-	// only those fields with a `true` value in the AllowedFields may
-	// be copied from the CSR to the signed certificate.
-	// Note that some of these fields, like Subject, can be provided or
-	// partially provided through the API.
-	// Since API clients are expected to be trusted, but CSRs are not, fields
-	// provided through the API are not subject to validation through this
-	// mechanism.
-	CSRAllowedFields allowed_fields = 11;
-
-    // TODO
-	// Policies []csr.CertificatePolicy `json:"policies"`
 }
 
 // CertProfileInfo is the response for an Profile Info API request
@@ -143,12 +69,6 @@ message IssuerInfo {
 // IssuersInfoResponse provides response for Issuers Info request
 message IssuersInfoResponse {
     repeated IssuerInfo issuers = 1;
-}
-
-enum EncodingFormat {
-    PEM = 0; // default, PEM encoded
-    DER = 1;
-    PKCS7 = 2;
 }
 
 // SignCertificateRequest specifies certificate request

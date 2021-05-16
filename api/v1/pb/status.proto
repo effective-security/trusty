@@ -3,34 +3,58 @@ package pb;
 
 option go_package = "github.com/ekspand/trusty/api/v1/pb";
 
+//import "rpc.proto";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 // for grpc-gateway
 import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+	info: {
+		title: "Status API";
+		version: "1.0";
+		contact: {
+			name: "Trusty";
+			url: "https://github.com/ekspand/trusty";
+			email: "denis@ekspand.com";
+		};
+		extensions: {
+			key: "x-something-something";
+			value {
+				string_value: "yadda";
+			}
+		}
+	};
+    // host: "trusty.com:7880";
+    schemes: HTTP;
+    // schemes: HTTPS;
+    consumes: "application/json";
+    produces: "application/json";
+};
+
 
 service StatusService {
     // Version returns the server version.
-    rpc Version(EmptyRequest) returns (ServerVersion) {
+    rpc Version(google.protobuf.Empty) returns (ServerVersion) {
         option (google.api.http) = {
             get: "/v1/status/version"
         };
     }
 
     // Server returns the server status.
-    rpc Server(EmptyRequest) returns (ServerStatusResponse) {
+    rpc Server(google.protobuf.Empty) returns (ServerStatusResponse) {
         option (google.api.http) = {
             get: "/v1/status/server"
       };
     }
 
     // Caller returns the caller status.
-    rpc Caller(EmptyRequest) returns (CallerStatusResponse) {
+    rpc Caller(google.protobuf.Empty) returns (CallerStatusResponse) {
         option (google.api.http) = {
             get: "/v1/status/caller"
       };
     }
-}
-
-message EmptyRequest {
 }
 
 // ServerVersion provides server build and runtime version
@@ -51,9 +75,13 @@ message ServerStatus {
     // Hostname is operating system's host name.
     string hostname = 3;
     // ListenURLs is the list of URLs the service is listening on.
-    repeated string listen_urls = 4 [json_name="listen_urls"];
+    repeated string listen_urls = 4 [
+        json_name="listen_urls"
+    ];
     // StartedAt is the time when the server has started.
-    google.protobuf.Timestamp started_at = 5 [json_name="started_at"];
+    google.protobuf.Timestamp started_at = 5 [
+        json_name="started_at"
+    ];
 }
 
 // ServerStatusResponse returns status and version
@@ -73,11 +101,4 @@ message CallerStatusResponse {
     string name = 2;
     // Role of the caller.
     string role = 3;
-}
-
-// Error is the generic error returned from unary RPCs.
-message Error {
-    string error = 1;
-    int32 code = 2;
-    string message = 3;
 }

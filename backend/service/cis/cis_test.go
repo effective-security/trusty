@@ -8,13 +8,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/backend/service/cis"
 	"github.com/ekspand/trusty/backend/trustymain"
 	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/client/embed"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/tests/testutils"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -105,7 +105,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestRoots(t *testing.T) {
-	res, err := trustyClient.CertInfoService.Roots(context.Background(), &pb.EmptyRequest{})
+	res, err := trustyClient.CertInfoService.Roots(context.Background(), &empty.Empty{})
 	require.NoError(t, err)
 	assert.NotEmpty(t, res.Roots)
 }

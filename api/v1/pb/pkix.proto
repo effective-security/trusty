@@ -1,0 +1,146 @@
+syntax = "proto3";
+package pb;
+
+option go_package = "github.com/ekspand/trusty/api/v1/pb";
+
+import "google/protobuf/timestamp.proto";
+// for grpc-gateway
+import "google/api/annotations.proto";
+
+enum Trust {
+    Any = 0;  // default
+    Public = 1;
+    Private = 2;
+}
+
+enum EncodingFormat {
+    PEM = 0; // default, PEM encoded
+    DER = 1;
+    PKCS7 = 2;
+}
+
+// Root provides X509 Root Cert information
+message RootCertificate  {
+    // Id of the certificate
+    int64 id = 1;
+    // Skid provides Subject Key Identifier
+    string skid = 2;
+    // NotBefore is the time when the validity period starts
+    google.protobuf.Timestamp not_before = 3 [json_name="not_before"];
+    // NotAfter is the time when the validity period starts
+    google.protobuf.Timestamp not_after = 4 [json_name="not_after"];
+    // Subject name
+    string subject = 5;
+    // SHA256 thnumbprint of the cert
+    string sha256 =6;
+    // Trust scope
+    Trust trust = 7;
+    // PEM encoded certificate
+    string pem =8;
+}
+
+// Certificate provides X509 Certificate information
+message Certificate  {
+    // Id of the certificate
+    int64 id = 1;
+    // OrgId of the certificate, only used with Org scope
+    int64 org_id = 2 [json_name="org_id"];
+    // Skid provides Subject Key Identifier
+    string skid = 3;
+    // Ikid provides Issuer Key Identifier
+    string ikid = 4;
+    // SerialNumber provides Serial Number
+    string serial_number = 5;
+    // NotBefore is the time when the validity period starts
+    google.protobuf.Timestamp not_before = 6 [json_name="not_before"];
+    // NotAfter is the time when the validity period starts
+    google.protobuf.Timestamp not_after = 7 [json_name="not_after"];
+    // Subject name
+    string subject = 8;
+    // Issuer name
+    string issuer = 9;
+    // SHA256 thnumbprint of the cert
+    string sha256 = 10;
+    // Profile of the certificate
+    string profile = 11;
+    // Pem encoded certificate
+    string pem = 12;
+    // IssuersPem provides PEM encoded issuers
+    string issuers_pem = 13 [json_name="issuers_pem"];
+}
+
+// X509Name specifies X509 Name
+message X509Name {
+    string country = 1;
+    string state = 2;
+    string locality = 3;
+    string organisation = 4;
+    string organisational_unit = 5;
+}
+
+// X509Subject specifies X509 Subject
+message X509Subject {
+    string common_name = 1;
+    repeated X509Name names = 2;
+    string serial_number = 3;
+}
+
+// CAConstraint specifies various CA constraints on the signed certificate.
+// CAConstraint would verify against (and override) the CA
+// extensions in the given CSR.
+message CAConstraint {
+	bool is_ca = 1;
+	int32 max_path_len = 2;
+	int32 max_path_len_zero =3;
+}
+
+message CSRAllowedFields {
+	bool subject = 1;
+	bool dns = 2;
+	bool ip = 3;
+	bool email = 4;
+}
+
+// CertProfile provides certificate profile
+message CertProfile {
+	string description = 1;
+
+	// Usage provides a list key usages
+	repeated string usages = 2;
+
+	CAConstraint ca_constraint  = 3;
+	bool ocsp_no_check  = 4;
+
+	string expiry = 5;
+	string backdate = 6;
+
+	repeated string allowed_extensions = 7;
+
+	// AllowedNames specifies a RegExp to check for allowed names.
+	// If not provided, then all names are allowed
+	string allowed_names = 8;
+
+	// AllowedDns specifies a RegExp to check for allowed DNS.
+	// If not provided, then all names are allowed
+	string allowed_dns = 9;
+
+	// AllowedEmail specifies a RegExp to check for allowed email.
+	// If not provided, then all names are allowed
+	string allowed_email = 10;
+
+	// AllowedFields provides booleans for fields in the CSR.
+	// If a AllowedFields is not present in a CertProfile,
+	// all of these fields may be copied from the CSR into the signed certificate.
+	// If a AllowedFields *is* present in a CertProfile,
+	// only those fields with a `true` value in the AllowedFields may
+	// be copied from the CSR to the signed certificate.
+	// Note that some of these fields, like Subject, can be provided or
+	// partially provided through the API.
+	// Since API clients are expected to be trusted, but CSRs are not, fields
+	// provided through the API are not subject to validation through this
+	// mechanism.
+	CSRAllowedFields allowed_fields = 11;
+
+    // TODO
+	// Policies []csr.CertificatePolicy `json:"policies"`
+}

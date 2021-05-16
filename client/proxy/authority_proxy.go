@@ -4,6 +4,7 @@ import (
 	"context"
 
 	pb "github.com/ekspand/trusty/api/v1/pb"
+	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
 )
 
@@ -27,6 +28,6 @@ func (s *authoritySrv2C) SignCertificate(ctx context.Context, in *pb.SignCertifi
 }
 
 // Issuers returns the issuing CAs
-func (s *authoritySrv2C) Issuers(ctx context.Context, in *pb.EmptyRequest, opts ...grpc.CallOption) (*pb.IssuersInfoResponse, error) {
+func (s *authoritySrv2C) Issuers(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*pb.IssuersInfoResponse, error) {
 	return s.srv.Issuers(ctx, in)
 }

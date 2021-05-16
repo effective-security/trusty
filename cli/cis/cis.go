@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/cli"
 	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/ctl"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/juju/errors"
 )
 
@@ -27,7 +27,7 @@ func Roots(c ctl.Control, p interface{}) error {
 	}
 	defer client.Close()
 
-	res, err := client.CertInfoService.Roots(context.Background(), &pb.EmptyRequest{})
+	res, err := client.CertInfoService.Roots(context.Background(), &empty.Empty{})
 	if err != nil {
 		return errors.Trace(err)
 	}

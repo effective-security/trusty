@@ -4,6 +4,7 @@ import (
 	"context"
 
 	pb "github.com/ekspand/trusty/api/v1/pb"
+	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
 )
 
@@ -27,7 +28,7 @@ func NewStatusFromProxy(proxy pb.StatusServiceClient) StatusService {
 	}
 }
 
-var emptyReq = &pb.EmptyRequest{}
+var emptyReq = &empty.Empty{}
 
 // Version returns the server version.
 func (c *statusClient) Version(ctx context.Context) (*pb.ServerVersion, error) {
@@ -58,16 +59,16 @@ func RetryStatusClient(conn *grpc.ClientConn) pb.StatusServiceClient {
 }
 
 // Version returns the server version.
-func (r *retryStatusClient) Version(ctx context.Context, in *pb.EmptyRequest, opts ...grpc.CallOption) (*pb.ServerVersion, error) {
+func (r *retryStatusClient) Version(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*pb.ServerVersion, error) {
 	return r.status.Version(ctx, in, opts...)
 }
 
 // Server returns the server status.
-func (r *retryStatusClient) Server(ctx context.Context, in *pb.EmptyRequest, opts ...grpc.CallOption) (*pb.ServerStatusResponse, error) {
+func (r *retryStatusClient) Server(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*pb.ServerStatusResponse, error) {
 	return r.status.Server(ctx, in, opts...)
 }
 
 // Caller returns the caller status.
-func (r *retryStatusClient) Caller(ctx context.Context, in *pb.EmptyRequest, opts ...grpc.CallOption) (*pb.CallerStatusResponse, error) {
+func (r *retryStatusClient) Caller(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*pb.CallerStatusResponse, error) {
 	return r.status.Caller(ctx, in, opts...)
 }

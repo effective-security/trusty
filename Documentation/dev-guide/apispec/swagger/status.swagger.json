@@ -1,13 +1,22 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "api/v1/pb/status.proto",
-    "version": "version not set"
+    "title": "Status API",
+    "version": "1.0",
+    "contact": {
+      "name": "Trusty",
+      "url": "https://github.com/ekspand/trusty",
+      "email": "denis@ekspand.com"
+    },
+    "x-something-something": "yadda"
   },
   "tags": [
     {
       "name": "StatusService"
     }
+  ],
+  "schemes": [
+    "http"
   ],
   "consumes": [
     "application/json"

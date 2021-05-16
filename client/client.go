@@ -10,6 +10,7 @@ import (
 	v1 "github.com/ekspand/trusty/api/v1"
 	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/go-phorce/dolly/xlog"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/juju/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -87,7 +88,7 @@ type AuthorityService interface {
 // CertInfoService client interface
 type CertInfoService interface {
 	// Roots returns the root CAs
-	Roots(ctx context.Context, in *pb.EmptyRequest) (*pb.RootsResponse, error)
+	Roots(ctx context.Context, in *empty.Empty) (*pb.RootsResponse, error)
 }
 
 // Client provides and manages an trusty v1 client session.
