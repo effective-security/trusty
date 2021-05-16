@@ -11,8 +11,8 @@ import (
 type RootCertificate struct {
 	ID               int64     `db:"id"`
 	SKID             string    `db:"skid"`
-	NotBefore        time.Time `db:"notbefore"`
-	NotAfter         time.Time `db:"notafter"`
+	NotBefore        time.Time `db:"not_before"`
+	NotAfter         time.Time `db:"no_tafter"`
 	Subject          string    `db:"subject"`
 	ThumbprintSha256 string    `db:"sha256"`
 	Trust            int       `db:"trust"`

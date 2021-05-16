@@ -13,9 +13,9 @@ type Certificate struct {
 	OrgID            int64     `db:"org_id"`
 	SKID             string    `db:"skid"`
 	IKID             string    `db:"ikid"`
-	SerialNumber     string    `db:"sn"`
-	NotBefore        time.Time `db:"notbefore"`
-	NotAfter         time.Time `db:"notafter"`
+	SerialNumber     string    `db:"serial_number"`
+	NotBefore        time.Time `db:"not_before"`
+	NotAfter         time.Time `db:"no_tafter"`
 	Subject          string    `db:"subject"`
 	Issuer           string    `db:"issuer"`
 	ThumbprintSha256 string    `db:"sha256"`

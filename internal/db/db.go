@@ -84,6 +84,13 @@ type RaDb interface {
 	GetCertificatesForUser(ctx context.Context, userID int64) (model.Certificates, error)
 	// GetCertificatesForUser returns list of certs
 	GetCertificatesForOrg(ctx context.Context, orgID int64) (model.Certificates, error)
+
+	// RegisterRevokedCertificate registers revoked Certificate
+	RegisterRevokedCertificate(ctx context.Context, revoked *model.RevokedCertificate) (*model.RevokedCertificate, error)
+	// RemoveRevokedCertificate removes revoked Certificate
+	RemoveRevokedCertificate(ctx context.Context, id int64) error
+	// GetRevokedCertificatesForOrg returns list of Org's revoked certificates
+	GetRevokedCertificatesForOrg(ctx context.Context, orgID int64) (model.RevokedCertificates, error)
 }
 
 // Provider reprOrgtsuserL client instance

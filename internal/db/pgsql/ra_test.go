@@ -134,3 +134,84 @@ func TestRegisterCertificate(t *testing.T) {
 	require.NotNil(t, r4)
 	assert.Equal(t, *r, *r4)
 }
+
+func TestRegisterRevokedCertificate(t *testing.T) {
+	id, err := provider.NextID()
+	require.NoError(t, err)
+
+	login1 := fmt.Sprintf("user1%d", id)
+	email1 := fmt.Sprintf("test1%d@ekspand.com", id)
+	name := fmt.Sprintf("org-%d", id)
+
+	uid := int64(id)
+	or := &model.Organization{
+		ExternalID: uid,
+		Provider:   v1.ProviderGithub,
+		Name:       name,
+		Login:      email1,
+		Email:      email1,
+		//BillingEmail: email,
+		Company:   "ekspand",
+		Location:  "Kirkland, WA",
+		Type:      "Organization",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	org, err := provider.UpdateOrg(ctx, or)
+	require.NoError(t, err)
+	require.NotNil(t, org)
+	defer provider.RemoveOrg(ctx, org.ID)
+
+	user1, err := provider.LoginUser(ctx, &model.User{Login: login1, Email: email1, Name: email1})
+	require.NoError(t, err)
+	assert.NotNil(t, user1)
+
+	_, err = provider.AddOrgMember(ctx, org.ID, user1.ID, "admin", v1.ProviderGithub)
+	require.NoError(t, err)
+
+	mrc := &model.RevokedCertificate{
+		Certificate: model.Certificate{
+			OrgID:            org.ID,
+			SKID:             guid.MustCreate(),
+			IKID:             guid.MustCreate(),
+			SerialNumber:     certutil.RandomString(10),
+			Subject:          "subj",
+			Issuer:           "iss",
+			NotBefore:        time.Now().Add(-time.Hour).UTC(),
+			NotAfter:         time.Now().Add(time.Hour).UTC(),
+			ThumbprintSha256: certutil.RandomString(64),
+			Pem:              "pem",
+			IssuersPem:       "ipem",
+			Profile:          "client",
+		},
+		RevokedAt: time.Now(),
+		Reason:    1,
+	}
+
+	mr, err := provider.RegisterRevokedCertificate(ctx, mrc)
+	require.NoError(t, err)
+	require.NotNil(t, mr)
+	defer provider.RemoveRevokedCertificate(ctx, mr.Certificate.ID)
+
+	rc := &mrc.Certificate
+	r := &mr.Certificate
+	assert.Equal(t, rc.OrgID, r.OrgID)
+	assert.Equal(t, rc.SKID, r.SKID)
+	assert.Equal(t, rc.IKID, r.IKID)
+	assert.Equal(t, rc.SerialNumber, r.SerialNumber)
+	assert.Equal(t, rc.Subject, r.Subject)
+	assert.Equal(t, rc.Issuer, r.Issuer)
+	assert.Equal(t, rc.ThumbprintSha256, r.ThumbprintSha256)
+	assert.Equal(t, rc.Pem, r.Pem)
+	assert.Equal(t, rc.IssuersPem, r.IssuersPem)
+	assert.Equal(t, rc.Profile, r.Profile)
+	assert.Equal(t, rc.NotBefore.Unix(), r.NotBefore.Unix())
+	assert.Equal(t, rc.NotAfter.Unix(), r.NotAfter.Unix())
+
+	list, err := provider.GetRevokedCertificatesForOrg(ctx, org.ID)
+	require.NoError(t, err)
+	r3 := list.Find(r.ID)
+	require.NotNil(t, r3)
+	assert.Equal(t, *mr, *r3)
+}
