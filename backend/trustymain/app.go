@@ -21,6 +21,7 @@ import (
 	"github.com/ekspand/trusty/internal/version"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/go-phorce/dolly/audit"
+	"github.com/go-phorce/dolly/metrics"
 	"github.com/go-phorce/dolly/netutil"
 	"github.com/go-phorce/dolly/tasks"
 	"github.com/go-phorce/dolly/xlog"
@@ -218,6 +219,11 @@ func (a *App) Run(startedCh chan<- bool) error {
 		if err != nil {
 			return errors.Trace(err)
 		}
+	}
+
+	err = a.setupMetrics()
+	if err != nil {
+		return errors.Trace(err)
 	}
 
 	_, err = a.Container()
@@ -456,4 +462,50 @@ func (a *App) initCPUProfiler(file string) error {
 		a.OnClose(&cpuProfileCloser{file: file})
 	}
 	return nil
+}
+
+// can be initialized only once per process.
+// keep global for tests
+var promSink *metrics.PrometheusSink
+
+func (a *App) setupMetrics() error {
+	cfg := a.cfg
+
+	var err error
+	var sink metrics.Sink
+
+	switch cfg.Metrics.Provider {
+	case "datadog":
+		sink, err = metrics.NewDogStatsdSink("127.0.0.1:8125", cfg.ServiceName)
+		if err != nil {
+			return errors.Trace(err)
+		}
+	case "prometheus":
+		if promSink == nil {
+			promSink, err = metrics.NewPrometheusSink()
+			if err != nil {
+				return errors.Trace(err)
+			}
+		}
+		sink = promSink
+	case "inmem", "inmemory":
+	default:
+		return errors.NotImplementedf("metrics provider %q", cfg.Metrics.Provider)
+	}
+
+	if sink != nil {
+		cfg := &metrics.Config{
+			ServiceName:    cfg.ServiceName,
+			EnableHostname: true,
+			FilterDefault:  true,
+		}
+		prov, err := metrics.NewGlobal(cfg, sink)
+		if err != nil {
+			return errors.Trace(err)
+		}
+		prov.SetGauge([]string{"version"}, version.Current().Float())
+	}
+
+	return nil
+
 }

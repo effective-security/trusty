@@ -259,7 +259,29 @@ start-swagger:
 		--network host \
 		-e URLS="[ { url: \"http://localhost:7880/v1/swagger/status\", name: \"StatusService\" }, { url: \"http://localhost:7880/v1/swagger/cis\", name: \"CISService\" }, { url: \"https://localhost:7892/v1/swagger/ca\", name: \"AuthorityService\" } ]" \
 		-v ${PROJ_DIR}/Documentation/dev-guide/apispec/swagger:/swagger \
+		--name trusty-swagger \
 		swaggerapi/swagger-ui ; \
 	elif [ "$$CONTAINER_STATE" = "false" ]; then docker start trusty-swagger; fi;
 
-	
+start-prometheus:
+	CONTAINER_STATE=$$(echo $$(docker inspect -f "{{.State.Running}}" trusty-prometheus 2>/dev/null || echo "missing") | sed -e 's/^[ \t]*//'); \
+	if [ "$$CONTAINER_STATE" = "missing" ]; then \
+		docker pull prom/prometheus && \
+		docker run \
+			--network host \
+			-d  -p 9090:9090 \
+			-v ${PROJ_DIR}/etc/dev/prometheus.yml:/etc/prometheus/prometheus.yml \
+			--name trusty-prometheus \
+			prom/prometheus ;\
+	elif [ "$$CONTAINER_STATE" = "false" ]; then docker start trusty-prometheus; fi;
+
+start-grafana:
+	CONTAINER_STATE=$$(echo $$(docker inspect -f "{{.State.Running}}" trusty-grafana 2>/dev/null || echo "missing") | sed -e 's/^[ \t]*//'); \
+	if [ "$$CONTAINER_STATE" = "missing" ]; then \
+		docker pull grafana/grafana && \
+		docker run \
+		--network host \
+		-d -p 3000:3000 \
+		--name trusty-grafana \
+		grafana/grafana ;\
+	elif [ "$$CONTAINER_STATE" = "false" ]; then docker start trusty-grafana; fi;
