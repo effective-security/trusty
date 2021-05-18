@@ -10,6 +10,7 @@ import (
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xhttp/marshal"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var alive = []byte("ALIVE")
@@ -61,6 +62,13 @@ func (s *Service) callerStatus() rest.Handle {
 			w.Header().Set(header.ContentType, header.TextPlain)
 			print.CallerStatusResponse(w, res)
 		}
+	}
+}
+
+func (s *Service) metricsHandler() rest.Handle {
+	handler := promhttp.Handler()
+	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
+		handler.ServeHTTP(w, r)
 	}
 }
 

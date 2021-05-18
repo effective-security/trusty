@@ -41,9 +41,9 @@ audit:
 
 metrics:
   # specifies if the metrics provider is disabled
-  disabled: true
+  disabled: false
   # the metrics provider: prometeus|inmem
-  provider: inmem
+  provider: prometheus
 
 # configuration for crypto providers
 crypto_provider:
@@ -69,6 +69,7 @@ authz:
   # allow any non-authenticated request access to this path and its children
   allow_any:
     - /favicon.ico
+    - /v1/metrics
     - /v1/swagger
     - /v1/auth
     - /v1/status
