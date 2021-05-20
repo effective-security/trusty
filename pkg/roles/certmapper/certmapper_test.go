@@ -1,6 +1,7 @@
 package certmapper_test
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
@@ -15,6 +16,8 @@ import (
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/peer"
 )
 
 var commonNamesToIdentities = map[string]string{
@@ -187,7 +190,7 @@ func Test_identity(t *testing.T) {
 			require.Error(t, err)
 			identity := certutil.NameToString(&subj)
 			identity = strings.ToLower(identity)
-			assert.Equal(t, fmt.Sprintf(`api=IdentityMapper, subject=%q, reason='could not determine identity'`, identity), err.Error())
+			assert.Equal(t, fmt.Sprintf("could not determine identity: %q", identity), err.Error())
 		})
 	}
 
@@ -270,8 +273,7 @@ func Test_identity_mapper(t *testing.T) {
 	for _, subj := range allowedSubjects {
 		t.Run("regex_subject_allow", func(t *testing.T) {
 			r, _ := http.NewRequest(http.MethodGet, "/", nil)
-			var pkxname pkix.Name
-			pkxname = pkix.Name{
+			pkxname := pkix.Name{
 				CommonName:         subj.CommonName,
 				Organization:       subj.Organization,
 				OrganizationalUnit: subj.OrganizationalUnit,
@@ -279,7 +281,7 @@ func Test_identity_mapper(t *testing.T) {
 				Province:           subj.Province,
 				Locality:           subj.Locality,
 			}
-			r.TLS = &tls.ConnectionState{
+			state := &tls.ConnectionState{
 				VerifiedChains: [][]*x509.Certificate{
 					{
 						{
@@ -295,9 +297,25 @@ func Test_identity_mapper(t *testing.T) {
 					},
 				},
 			}
+			//
+			// HTTP
+			//
+			r.TLS = state
 			id, err := p.IdentityMapper(r)
 			require.NoError(t, err)
 			cn := certutil.NameToString(&subj)
+			assert.Equal(t, commonNamesToIdentities[cn], id.String())
+
+			//
+			// gRPC
+			//
+			ctx := context.Background()
+			assert.False(t, p.ApplicableForContext(ctx))
+			ctx = createPeerContext(ctx, state)
+			assert.True(t, p.ApplicableForContext(ctx))
+			id, err = p.IdentityFromContext(ctx)
+			require.NoError(t, err)
+			cn = certutil.NameToString(&subj)
 			assert.Equal(t, commonNamesToIdentities[cn], id.String())
 		})
 	}
@@ -351,10 +369,19 @@ func Test_identity_mapper(t *testing.T) {
 			require.Error(t, err)
 			identity := certutil.NameToString(&subj)
 			identity = strings.ToLower(identity)
-			assert.Equal(t, fmt.Sprintf(`api=IdentityMapper, subject=%q, reason='could not determine identity'`, identity), err.Error())
+			assert.Equal(t, fmt.Sprintf("could not determine identity: %q", identity), err.Error())
 		})
 	}
+}
 
+func createPeerContext(ctx context.Context, TLS *tls.ConnectionState) context.Context {
+	creds := credentials.TLSInfo{
+		State: *TLS,
+	}
+	p := &peer.Peer{
+		AuthInfo: creds,
+	}
+	return peer.NewContext(ctx, p)
 }
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")

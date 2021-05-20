@@ -1,6 +1,8 @@
 package certmapper
 
 import (
+	"context"
+	"crypto/tls"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -12,6 +14,8 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/peer"
 	"gopkg.in/yaml.v2"
 )
 
@@ -114,14 +118,42 @@ func (p *Provider) Applicable(r *http.Request) bool {
 
 // IdentityMapper interface
 func (p *Provider) IdentityMapper(r *http.Request) (identity.Identity, error) {
-	var id identity.Identity
 	if !p.Applicable(r) {
 		return nil, nil
 	}
 
-	peers := r.TLS.PeerCertificates
+	return p.identity(r.TLS)
+}
 
+// ApplicableForContext returns true if the provider is applicable for context
+func (p *Provider) ApplicableForContext(ctx context.Context) bool {
+	c, ok := peer.FromContext(ctx)
+	if ok {
+		si, ok := c.AuthInfo.(credentials.TLSInfo)
+		return ok && len(si.State.PeerCertificates) > 0
+	}
+
+	return false
+}
+
+// IdentityFromContext returns identity from context
+func (p *Provider) IdentityFromContext(ctx context.Context) (identity.Identity, error) {
+	c, ok := peer.FromContext(ctx)
+	if ok {
+		si, ok := c.AuthInfo.(credentials.TLSInfo)
+		if ok {
+			return p.identity(&si.State)
+		}
+	}
+
+	return nil, nil
+}
+
+func (p *Provider) identity(TLS *tls.ConnectionState) (identity.Identity, error) {
+	var id identity.Identity
 	var org, issuer string
+
+	peers := TLS.PeerCertificates
 	if len(p.organizations) > 0 {
 		found := false
 		for _, peer := range peers {
@@ -140,7 +172,7 @@ func (p *Provider) IdentityMapper(r *http.Request) (identity.Identity, error) {
 	}
 	if len(p.issuers) > 0 {
 		found := false
-		for _, chain := range r.TLS.VerifiedChains {
+		for _, chain := range TLS.VerifiedChains {
 			issuer = certutil.NameToString(&chain[len(chain)-1].Subject)
 			if found = slices.ContainsString(p.issuers, issuer); found {
 				break
@@ -161,10 +193,10 @@ func (p *Provider) IdentityMapper(r *http.Request) (identity.Identity, error) {
 			logger.Infof("api=IdentityMapper, subject=%q, role=%s, name=%q", subj, id.Role(), id.Name())
 			return id, nil
 		}
-		return nil, errors.Errorf("api=IdentityMapper, subject=%q, message='identity is nil'", subj)
+		return nil, errors.Errorf("identity is nil: %q", subj)
 	}
 
-	return nil, errors.Errorf("api=IdentityMapper, subject=%q, reason='could not determine identity'", subj)
+	return nil, errors.Errorf("could not determine identity: %q", subj)
 }
 
 func (p *Provider) isSubjectAllowed(subject string) (bool, identity.Identity) {

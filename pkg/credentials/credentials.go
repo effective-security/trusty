@@ -16,8 +16,6 @@ var (
 	TokenFieldNameGRPC = "token"
 	// TokenFieldNameAuthorization specifies name for authorization
 	TokenFieldNameAuthorization = "authorization"
-	// TokenFieldNameBearer specifies name for Bearer
-	TokenFieldNameBearer = "Bearer"
 )
 
 // Config defines gRPC credential configuration.
@@ -26,6 +24,7 @@ type Config struct {
 }
 
 // Bundle defines gRPC credential interface.
+// see https://pkg.go.dev/google.golang.org/grpc/credentials
 type Bundle interface {
 	grpccredentials.Bundle
 	UpdateAuthToken(token string)
@@ -108,7 +107,9 @@ func (rc *perRPCCredential) GetRequestMetadata(ctx context.Context, s ...string)
 	if authToken == "" {
 		return nil, nil
 	}
-	return map[string]string{TokenFieldNameGRPC: authToken}, nil
+	return map[string]string{
+		TokenFieldNameGRPC: authToken,
+	}, nil
 }
 
 func (b *bundle) UpdateAuthToken(token string) {

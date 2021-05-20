@@ -15,6 +15,7 @@ import (
 	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/rest"
+	"github.com/go-phorce/dolly/xhttp/authz"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/retriable"
 	"github.com/go-phorce/dolly/xlog"
@@ -63,7 +64,7 @@ func TestMain(m *testing.M) {
 		Swagger:  devcfg.HTTPServers["cis"].Swagger,
 	}
 
-	container := createContainer(nil, nil, nil)
+	container := createContainer(nil, nil, nil, nil)
 	trustyServer, err = gserver.Start("SwaggerTest", cfg, container, serviceFactories)
 	if err != nil || trustyServer == nil {
 		panic(errors.Trace(err))
@@ -108,10 +109,10 @@ func TestSwagger(t *testing.T) {
 }
 
 // TODO: move to testutil.ContainerBuilder
-func createContainer(authz rest.Authz, auditor audit.Auditor, crypto *cryptoprov.Crypto) *dig.Container {
+func createContainer(restAuthz rest.Authz, grpcAuthz authz.GRPCAuthz, auditor audit.Auditor, crypto *cryptoprov.Crypto) *dig.Container {
 	c := dig.New()
-	c.Provide(func() (rest.Authz, audit.Auditor, *cryptoprov.Crypto) {
-		return authz, auditor, crypto
+	c.Provide(func() (rest.Authz, authz.GRPCAuthz, audit.Auditor, *cryptoprov.Crypto) {
+		return restAuthz, grpcAuthz, auditor, crypto
 	})
 	return c
 }
