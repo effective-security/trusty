@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/ekspand/trusty/internal/config"
+	"github.com/ekspand/trusty/pkg/credentials"
 	"github.com/ekspand/trusty/pkg/transport"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/rest/ready"
@@ -17,6 +18,8 @@ import (
 	"github.com/go-phorce/dolly/xhttp/httperror"
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xhttp/marshal"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/juju/errors"
 	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
@@ -203,7 +206,9 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 		grpcL := m.Match(cmux.HTTP2())
 		go func() { errHandler(gsInsecure.Serve(grpcL)) }()
 
-		handler := router.Handler()
+		handler := s.traceHandler(router.Handler(), "router")
+		handler = configureHandlers(s, handler)
+
 		/*
 			var gwmux *runtime.ServeMux
 			if sctx.cfg.EnableGRPCGateway {
@@ -214,24 +219,27 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 				handler = sctx.createMux(gwmux, handler)
 			}
 		*/
-		handler = configureHandlers(s, handler)
-		srvhttp := &http.Server{
+
+		srv := &http.Server{
 			Handler: handler,
 			//ErrorLog: logger, // do not log user error
 		}
-		httpL := m.Match(cmux.HTTP1())
-		go func() { errHandler(srvhttp.Serve(httpL)) }()
 
-		sctx.serversC <- &servers{grpc: gsInsecure, http: srvhttp}
+		httpL := m.Match(cmux.HTTP1())
+		go func() { errHandler(srv.Serve(httpL)) }()
+
+		sctx.serversC <- &servers{grpc: gsInsecure, http: srv}
 
 		logger.Warningf("src=serve, reason=insecure, service=%s, address=%q", s.Name(), sctx.addr)
 	}
 
 	if sctx.secure {
 		gsSecure = grpcServer(s, sctx.tlsInfo.Config(), sctx.gopts...)
-		handler := router.Handler()
+		handler := s.traceHandler(router.Handler(), "router")
+		handler = configureHandlers(s, handler)
+
 		// mux between http and grpc
-		handler = grpcHandlerFunc(gsSecure, handler)
+		handler = s.traceHandler(grpcHandlerFunc(gsSecure, handler), "mux")
 
 		/*
 			if sctx.cfg.EnableGRPCGateway {
@@ -251,17 +259,15 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 				handler = sctx.createMux(gwmux, handler)
 			}
 		*/
-		grpcL, err := transport.NewTLSListener(m.Match(cmux.Any()), sctx.tlsInfo)
-		if err != nil {
-			return err
-		}
-
-		handler = configureHandlers(s, handler)
 
 		srv := &http.Server{
 			Handler:   handler,
 			TLSConfig: sctx.tlsInfo.Config(),
 			//ErrorLog:  logger, // do not log user error
+		}
+		grpcL, err := transport.NewTLSListener(m.Match(cmux.Any()), sctx.tlsInfo)
+		if err != nil {
+			return err
 		}
 		go func() { errHandler(srv.Serve(grpcL)) }()
 
@@ -350,6 +356,11 @@ func (sctx *serveCtx) createMux(gwmux *runtime.ServeMux, handler http.Handler) *
 */
 
 func configureHandlers(s *Server, handler http.Handler) http.Handler {
+	// NOTE: the handlers are executed in the reverse order
+
+	// service ready
+	handler = s.traceHandler(ready.NewServiceStatusVerifier(s, handler), "ready")
+
 	var err error
 	// authz
 	if s.authz != nil {
@@ -357,18 +368,17 @@ func configureHandlers(s *Server, handler http.Handler) http.Handler {
 		if err != nil {
 			panic(errors.ErrorStack(err))
 		}
+		handler = s.traceHandler(handler, "authz")
 	}
 
 	// logging wrapper
-	handler = xhttp.NewRequestLogger(handler, s.Name(), serverExtraLogger, time.Millisecond, s.cfg.PackageLogger)
-	// metrics wrapper
-	handler = xhttp.NewRequestMetrics(handler)
+	handler = s.traceHandler(xhttp.NewRequestLogger(handler, s.Name(), serverExtraLogger, time.Millisecond, s.cfg.PackageLogger), "logger")
 
-	// service ready
-	handler = ready.NewServiceStatusVerifier(s, handler)
+	// metrics wrapper
+	handler = s.traceHandler(xhttp.NewRequestMetrics(handler), "metrics")
 
 	// role/contextID wrapper
-	handler = identity.NewContextHandler(handler)
+	handler = s.traceHandler(identity.NewContextHandler(handler), "roles")
 
 	return handler
 }
@@ -392,7 +402,7 @@ func restRouter(s *Server) rest.Router {
 
 	for name, svc := range s.services {
 		if registrator, ok := svc.(RouteRegistrator); ok {
-			logger.Infof("src=grpcServer, status=RouteRegistrator, server=%s, service=%s",
+			logger.Infof("src=restRouter, status=RouteRegistrator, server=%s, service=%s",
 				s.Name(), name)
 
 			registrator.RegisterRoute(router)
@@ -408,25 +418,30 @@ func restRouter(s *Server) rest.Router {
 func grpcServer(s *Server, tls *tls.Config, gopts ...grpc.ServerOption) *grpc.Server {
 	var opts []grpc.ServerOption
 	//opts = append(opts, grpc.CustomCodec(&codec{}))
-	/*
-		if tls != nil {
-			bundle := credentials.NewBundle(credentials.Config{TLSConfig: tls})
-			opts = append(opts, grpc.Creds(bundle.TransportCredentials()))
-		}
 
-			opts = append(opts, grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-				newLogUnaryInterceptor(s),
-				newUnaryInterceptor(s),
-				grpc_prometheus.UnaryServerInterceptor,
-			)))
-			opts = append(opts, grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
-				newStreamInterceptor(s),
-				grpc_prometheus.StreamServerInterceptor,
-			)))
-			opts = append(opts, grpc.MaxRecvMsgSize(int(s.Cfg.MaxRequestBytes+grpcOverheadBytes)))
-			opts = append(opts, grpc.MaxSendMsgSize(maxSendBytes))
-			opts = append(opts, grpc.MaxConcurrentStreams(maxStreams))
-	*/
+	if tls != nil {
+		bundle := credentials.NewBundle(credentials.Config{TLSConfig: tls})
+		opts = append(opts, grpc.Creds(bundle.TransportCredentials()))
+	}
+
+	chainUnaryInterceptors := []grpc.UnaryServerInterceptor{
+		identity.NewAuthUnaryInterceptor(),
+		s.newLogUnaryInterceptor(),
+		grpc_prometheus.UnaryServerInterceptor,
+	}
+	if s.grpcAuthz != nil {
+		// Authz must be the
+		chainUnaryInterceptors = append(chainUnaryInterceptors, s.grpcAuthz.NewUnaryInterceptor())
+	}
+
+	chainStreamInterceptors := []grpc.StreamServerInterceptor{
+		newStreamInterceptor(s),
+		grpc_prometheus.StreamServerInterceptor,
+	}
+
+	opts = append(opts, grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(chainUnaryInterceptors...)))
+	opts = append(opts, grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(chainStreamInterceptors...)))
+
 	grpcServer := grpc.NewServer(append(opts, gopts...)...)
 
 	for name, svc := range s.services {
@@ -453,11 +468,25 @@ func grpcHandlerFunc(grpcServer *grpc.Server, otherHandler http.Handler) http.Ha
 		})
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.ProtoMajor == 2 && strings.Contains(r.Header.Get(header.ContentType), "application/grpc") {
+		ct := r.Header.Get(header.ContentType)
+		if r.ProtoMajor == 2 && strings.Contains(ct, "application/grpc") {
+			//logger.Debugf(">>> scr=grpcHandlerFunc, handle=grpcServer, method=%s, url=%s", r.Method, r.URL.String())
 			grpcServer.ServeHTTP(w, r)
 		} else {
+			//logger.Debugf(">>> scr=grpcHandlerFunc, handle=otherHandler, ct=%s, proto_ver=%d/%d", ct, r.ProtoMinor, r.ProtoMajor)
 			otherHandler.ServeHTTP(w, r)
 		}
+	})
+}
+
+func (s *Server) traceHandler(h http.Handler, name string) http.Handler {
+	if !s.cfg.DebugHandlers {
+		return h
+	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		logger.Debugf(">>> scr=traceHandler, start=%s", name)
+		h.ServeHTTP(w, r)
+		logger.Debugf("<<< scr=traceHandler, end=%s", name)
 	})
 }
 

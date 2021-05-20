@@ -23,6 +23,12 @@ log_levels:
   - repo: github.com/ekspand/trusty
     package: "*"
     level: TRACE
+  - repo: github.com/ekspand/trusty/pkg
+    package: "*"
+    level: DEBUG
+  - repo: github.com/ekspand/trusty/backend
+    package: "*"
+    level: DEBUG
   - repo: github.com/ekspand/trusty/health
     package: xhttp
     level: ERROR
@@ -67,18 +73,10 @@ sql:
 # configuration for the authorization module
 authz:
   # allow any non-authenticated request access to this path and its children
+  # /v1/* is allowed
   allow_any:
     - /favicon.ico
-    - /v1/metrics
-    - /v1/swagger
-    - /v1/auth
-    - /v1/status
-    - /v1/certs
-    - /v1/crl
-    - /v1/ocsp
-    - /v1/roots
-    - /v1/ca/issuers
-    - /v1/ca/csr/profile_info
+    - /v1
     - /pb.CertInfoService
     - /pb.StatusService
     - /pb.AuthorityService/ProfileInfo
@@ -88,7 +86,6 @@ authz:
     - /v1/wf
   # allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
   allow:
-    - /v1/ca:trusty-peer
     - /pb.AuthorityService/SignCertificate:trusty-peer,trusty-admin
   # specifies to log allowed access to Any role
   log_allowed_any: true
@@ -129,6 +126,8 @@ servers:
       - status
       - cis
       - swagger
+    enable_grpc_gateway: false
+    debug_handlers: true
     heartbeat_secs: 30
     timeout:
       request: 3s
@@ -170,10 +169,13 @@ servers:
       cert: /tmp/trusty/certs/trusty_dev_peer.pem
       key: /tmp/trusty/certs/trusty_dev_peer-key.pem
       trusted_ca: /tmp/trusty/certs/trusty_dev_root_ca.pem
+      # client_cert_auth: true
     services:
       - auth
       - status
       - workflow
+    enable_grpc_gateway: false
+    debug_handlers: true
     heartbeat_secs: 30
     timeout:
       request: 3s
@@ -193,6 +195,8 @@ servers:
       - status
       - ca
       - swagger
+    enable_grpc_gateway: false
+    debug_handlers: true
     heartbeat_secs: 30
     timeout:
       request: 3s

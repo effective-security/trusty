@@ -50,19 +50,28 @@ type HTTPServer struct {
 	} `json:"timeout" yaml:"timeout"`
 
 	// KeepAlive settings
-	KeepAlive struct {
-		// MinTime is the minimum interval that a client should wait before pinging server.
-		MinTime time.Duration `json:"min_time,omitempty" yaml:"min_time,omitempty"`
-
-		// Interval is the frequency of server-to-client ping to check if a connection is alive.
-		Interval time.Duration `json:"interval,omitempty" yaml:"interval,omitempty"`
-
-		// Timeout is the additional duration of wait before closing a non-responsive connection, use 0 to disable.
-		Timeout time.Duration `json:"timeout,omitempty" yaml:"timeout,omitempty"`
-	} `json:"keep_alive" yaml:"keep_alive"`
+	KeepAlive KeepAlive `json:"keep_alive" yaml:"keep_alive"`
 
 	// Swagger specifies the configuration for Swagger
 	Swagger Swagger `json:"swagger" yaml:"swagger"`
+
+	// EnableGRPCGateway allows gRPC GW
+	EnableGRPCGateway bool `json:"enable_grpc_gateway" yaml:"enable_grpc_gateway"`
+
+	// DebugHandlers allows for verbose logging of request handlers
+	DebugHandlers bool `json:"debug_handlers" yaml:"debug_handlers"`
+}
+
+// KeepAlive settings
+type KeepAlive struct {
+	// MinTime is the minimum interval that a client should wait before pinging server.
+	MinTime time.Duration `json:"min_time,omitempty" yaml:"min_time,omitempty"`
+
+	// Interval is the frequency of server-to-client ping to check if a connection is alive.
+	Interval time.Duration `json:"interval,omitempty" yaml:"interval,omitempty"`
+
+	// Timeout is the additional duration of wait before closing a non-responsive connection, use 0 to disable.
+	Timeout time.Duration `json:"timeout,omitempty" yaml:"timeout,omitempty"`
 }
 
 // Swagger specifies the configuration for Swagger

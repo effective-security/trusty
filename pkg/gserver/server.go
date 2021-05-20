@@ -11,6 +11,7 @@ import (
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/netutil"
 	"github.com/go-phorce/dolly/rest"
+	"github.com/go-phorce/dolly/xhttp/authz"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
@@ -61,9 +62,10 @@ type Server struct {
 
 	services map[string]Service
 
-	authz   rest.Authz
-	auditor audit.Auditor
-	crypto  *cryptoprov.Crypto
+	authz     rest.Authz
+	grpcAuthz authz.GRPCAuthz
+	auditor   audit.Auditor
+	crypto    *cryptoprov.Crypto
 }
 
 // Start returns running Server
@@ -95,10 +97,12 @@ func Start(
 	}
 
 	err = container.Invoke(func(authz rest.Authz,
+		grpcAuthz authz.GRPCAuthz,
 		auditor audit.Auditor,
 		crypto *cryptoprov.Crypto) error {
 		e.authz = authz
 		e.auditor = auditor
+		e.grpcAuthz = grpcAuthz
 		e.crypto = crypto
 		return nil
 	})

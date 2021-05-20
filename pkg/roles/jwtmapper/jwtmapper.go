@@ -1,6 +1,7 @@
 package jwtmapper
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
+	"google.golang.org/grpc/metadata"
 	"gopkg.in/yaml.v2"
 )
 
@@ -219,6 +221,40 @@ func (p *Provider) IdentityMapper(r *http.Request) (identity.Identity, error) {
 	}
 
 	deviceID := r.Header.Get(header.XDeviceID)
+
+	return p.identity(parts[1], deviceID)
+}
+
+// ApplicableForContext returns true if the provider is applicable for context
+func (p *Provider) ApplicableForContext(ctx context.Context) bool {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		return len(md["authorization"]) > 0
+	}
+
+	return false
+}
+
+// IdentityFromContext returns identity from context
+func (p *Provider) IdentityFromContext(ctx context.Context) (identity.Identity, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, nil
+	}
+	authMD := md["authorization"]
+	devMD := md["x-device-id"]
+	deviceID := ""
+	if len(authMD) < 1 {
+		return nil, errors.Errorf("invalid authorization header")
+	}
+	if len(devMD) > 0 {
+		deviceID = devMD[0]
+	}
+
+	return p.identity(authMD[0], deviceID)
+}
+
+func (p *Provider) identity(authorization, deviceID string) (identity.Identity, error) {
 	claims := &TrustyClaims{
 		nil,
 		deviceID,
@@ -228,7 +264,7 @@ func (p *Provider) IdentityMapper(r *http.Request) (identity.Identity, error) {
 		},
 	}
 
-	token, err := jwt.ParseWithClaims(parts[1], claims, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(authorization, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}

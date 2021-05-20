@@ -1,6 +1,7 @@
 package jwtmapper_test
 
 import (
+	"context"
 	"net/http"
 	"testing"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/metadata"
 )
 
 func Test_Config(t *testing.T) {
@@ -84,7 +86,7 @@ func Test_Sign(t *testing.T) {
 	p2, err := jwtmapper.Load("testdata/roles.2.json")
 	require.NoError(t, err)
 
-	t.Run("default role", func(t *testing.T) {
+	t.Run("default role http", func(t *testing.T) {
 		userInfo := &v1.UserInfo{
 			ID:    "123",
 			Email: "daniel@ekspand.com",
@@ -98,6 +100,27 @@ func Test_Sign(t *testing.T) {
 		assert.True(t, p.Applicable(r))
 
 		id, err := p.IdentityMapper(r)
+		require.NoError(t, err)
+		assert.Equal(t, roles.TrustyClient, id.Role())
+		assert.Equal(t, userInfo.Email, id.Name())
+		assert.Equal(t, "123", id.UserID())
+	})
+	t.Run("default role grpc", func(t *testing.T) {
+		userInfo := &v1.UserInfo{
+			ID:    "123",
+			Email: "daniel@ekspand.com",
+		}
+
+		auth, err := p.SignToken(userInfo, "device123", time.Minute)
+		require.NoError(t, err)
+
+		ctx := context.Background()
+		assert.False(t, p.ApplicableForContext(ctx))
+
+		ctx = metadata.NewIncomingContext(ctx, metadata.Pairs("authorization", auth.AccessToken, "x-device-id", "local"))
+		assert.True(t, p.ApplicableForContext(ctx))
+
+		id, err := p.IdentityFromContext(ctx)
 		require.NoError(t, err)
 		assert.Equal(t, roles.TrustyClient, id.Role())
 		assert.Equal(t, userInfo.Email, id.Name())

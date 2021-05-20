@@ -1,15 +1,22 @@
 package gserver
 
 import (
+	"net/http"
 	"testing"
+	"time"
 
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/pkg/oauth2client"
+	"github.com/ekspand/trusty/pkg/roles"
 	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/rest"
+	"github.com/go-phorce/dolly/xhttp/authz"
+	"github.com/go-phorce/dolly/xhttp/header"
+	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
+	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/dig"
@@ -18,15 +25,38 @@ import (
 func TestStartTrustyEmptyHTTP(t *testing.T) {
 	cfg := &config.HTTPServer{
 		ListenURLs: []string{testutils.CreateURLs("http", ""), testutils.CreateURLs("unix", "localhost")},
+		Services:   []string{"test"},
+		KeepAlive: config.KeepAlive{
+			MinTime:  time.Second,
+			Interval: time.Second,
+			Timeout:  time.Second,
+		},
 	}
 
-	c := createContainer(nil, nil, nil, nil, nil)
-	srv, err := Start("EmptyTrusty", cfg, c, nil)
+	restAuthz, grpcAuthz, err := provideAuthz()
+	require.NoError(t, err)
+
+	c := createContainer(restAuthz, grpcAuthz, nil, nil, nil, nil)
+
+	fact := map[string]ServiceFactory{
+		"test": testServiceFactory,
+	}
+	srv, err := Start("EmptyTrusty", cfg, c, fact)
 	require.NoError(t, err)
 	require.NotNil(t, srv)
 	defer srv.Close()
 
 	assert.Equal(t, "EmptyTrusty", srv.Name())
+	assert.NotNil(t, srv.Configuration())
+	//srv.AddService(&service{})
+	assert.NotNil(t, srv.Service("test"))
+	assert.True(t, srv.IsReady())
+	assert.True(t, srv.StartedAt().Unix() > 0)
+	assert.NotEmpty(t, srv.ListenURLs())
+	assert.NotEmpty(t, srv.Hostname())
+	assert.NotEmpty(t, srv.LocalIP())
+
+	srv.Audit("test", "evt", "iden", "123-345", 0, "msg")
 }
 
 func TestStartTrustyEmptyHTTPS(t *testing.T) {
@@ -39,7 +69,7 @@ func TestStartTrustyEmptyHTTPS(t *testing.T) {
 		},
 	}
 
-	c := createContainer(nil, nil, nil, nil, nil)
+	c := createContainer(nil, nil, nil, nil, nil, nil)
 	srv, err := Start("EmptyTrustyHTTPS", cfg, c, nil)
 	require.NoError(t, err)
 	require.NotNil(t, srv)
@@ -49,14 +79,60 @@ func TestStartTrustyEmptyHTTPS(t *testing.T) {
 }
 
 // TODO: move to testutil.ContainerBuilder
-func createContainer(authz rest.Authz,
+func createContainer(restAuthz rest.Authz,
+	grpcAuthz authz.GRPCAuthz,
 	auditor audit.Auditor,
 	crypto *cryptoprov.Crypto,
 	data db.Provider,
 	oauth *oauth2client.Provider) *dig.Container {
 	c := dig.New()
-	c.Provide(func() (rest.Authz, audit.Auditor, *cryptoprov.Crypto, db.Provider, *oauth2client.Provider) {
-		return authz, auditor, crypto, data, oauth
+	c.Provide(func() (rest.Authz, authz.GRPCAuthz, audit.Auditor, *cryptoprov.Crypto, db.Provider, *oauth2client.Provider) {
+		return restAuthz, grpcAuthz, auditor, crypto, data, oauth
 	})
 	return c
+}
+
+func provideAuthz() (rest.Authz, authz.GRPCAuthz, error) {
+	var azp *authz.Provider
+	var err error
+	azp, err = authz.New(&authz.Config{
+		AllowAny: []string{"/"},
+	})
+	if err != nil {
+		return nil, nil, errors.Trace(err)
+	}
+
+	prov, err := roles.New("", "")
+	if err != nil {
+		return nil, nil, errors.Trace(err)
+	}
+	identity.SetGlobalIdentityMapper(prov.IdentityMapper)
+	identity.SetGlobalGRPCIdentityMapper(prov.IdentityFromContext)
+
+	return azp, azp, nil
+}
+
+type service struct{}
+
+// Name returns the service name
+func (s *service) Name() string  { return "test" }
+func (s *service) IsReady() bool { return true }
+func (s *service) Close()        {}
+
+func (s *service) RegisterRoute(r rest.Router) {
+	r.GET("/v1/metrics", s.handler())
+}
+
+func (s *service) handler() rest.Handle {
+	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
+		w.Header().Set(header.ContentType, header.TextPlain)
+		w.Write([]byte("alive"))
+	}
+}
+
+func testServiceFactory(server *Server) interface{} {
+	return func() {
+		svc := &service{}
+		server.AddService(svc)
+	}
 }

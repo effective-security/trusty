@@ -33,7 +33,7 @@ type ProvideAuditorFn func(cfg *config.Configuration, r CloseRegistrator) (audit
 type ProvideSchedulerFn func() (tasks.Scheduler, error)
 
 // ProvideAuthzFn defines Authz provider
-type ProvideAuthzFn func(cfg *config.Configuration) (rest.Authz, *jwtmapper.Provider, error)
+type ProvideAuthzFn func(cfg *config.Configuration) (rest.Authz, authz.GRPCAuthz, *jwtmapper.Provider, error)
 
 // ProvideOAuthClientsFn defines OAuth clients provider
 type ProvideOAuthClientsFn func(cfg *config.Configuration) (*oauth2client.Provider, error)
@@ -193,8 +193,8 @@ func provideAuditor(cfg *config.Configuration, r CloseRegistrator) (audit.Audito
 	return auditor, nil
 }
 
-func provideAuthz(cfg *config.Configuration) (rest.Authz, *jwtmapper.Provider, error) {
-	var azp rest.Authz
+func provideAuthz(cfg *config.Configuration) (rest.Authz, authz.GRPCAuthz, *jwtmapper.Provider, error) {
+	var azp *authz.Provider
 	var jwt *jwtmapper.Provider
 	var err error
 	if len(cfg.Authz.Allow) > 0 ||
@@ -209,22 +209,23 @@ func provideAuthz(cfg *config.Configuration) (rest.Authz, *jwtmapper.Provider, e
 			LogDenied:     cfg.Authz.LogDenied,
 		})
 		if err != nil {
-			return nil, nil, errors.Trace(err)
+			return nil, nil, nil, errors.Trace(err)
 		}
 	}
 	if cfg.Identity.JWTMapper != "" || cfg.Identity.CertMapper != "" {
-		p, err := roles.New(
+		prov, err := roles.New(
 			cfg.Identity.JWTMapper,
 			cfg.Identity.CertMapper,
 		)
 		if err != nil {
-			return nil, nil, errors.Trace(err)
+			return nil, nil, nil, errors.Trace(err)
 		}
-		identity.SetGlobalIdentityMapper(p.IdentityMapper)
-		jwt = p.JwtMapper
+		identity.SetGlobalIdentityMapper(prov.IdentityMapper)
+		identity.SetGlobalGRPCIdentityMapper(prov.IdentityFromContext)
+		jwt = prov.JwtMapper
 	}
 
-	return azp, jwt, nil
+	return azp, azp, jwt, nil
 }
 
 func provideOAuth(cfg *config.Configuration) (*oauth2client.Provider, error) {

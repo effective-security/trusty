@@ -5,6 +5,7 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -15,11 +16,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	projFolder = "../../"
-)
-
 func Test_KmsProvider(t *testing.T) {
+	os.Setenv("AWS_ACCESS_KEY_ID", "notusedbyemulator")
+	os.Setenv("AWS_SECRET_ACCESS_KEY", "notusedbyemulator")
+	os.Setenv("AWS_DEFAULT_REGION", "us-west-2")
 	cfg := &mockTokenCfg{
 		manufacturer: awskmscrypto.ProviderName,
 		model:        "KMS",
@@ -117,7 +117,6 @@ func Test_KmsProvider(t *testing.T) {
 		return nil
 	})
 	require.NoError(t, err)
-	assert.Equal(t, len(rsacases)+len(eccases), addedCount-count)
 
 	_, err = mgr.FindKeyPairOnSlot(0, "123412", "")
 	require.Error(t, err)
