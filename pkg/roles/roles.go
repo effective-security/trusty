@@ -68,21 +68,22 @@ func New(jwtMapper, certMapper string) (*Provider, error) {
 
 // IdentityMapper returns identity from the request
 func (p *Provider) IdentityMapper(r *http.Request) (identity.Identity, error) {
-	if p.JwtMapper != nil && p.JwtMapper.Applicable(r) {
-		id, err := p.JwtMapper.IdentityMapper(r)
-		if err == nil {
-			logger.Debugf("src=IdentityMapper, type=JWT, role=%v", id)
+	if p != nil {
+		if p.JwtMapper != nil && p.JwtMapper.Applicable(r) {
+			id, err := p.JwtMapper.IdentityMapper(r)
+			if err == nil {
+				logger.Debugf("src=IdentityMapper, type=JWT, role=%v", id)
+			}
+			return id, err
 		}
-		return id, err
-	}
-	if p.CertMapper != nil && p.CertMapper.Applicable(r) {
-		id, err := p.CertMapper.IdentityMapper(r)
-		if err == nil {
-			logger.Debugf("src=IdentityMapper, type=TLS, role=%v", id)
+		if p.CertMapper != nil && p.CertMapper.Applicable(r) {
+			id, err := p.CertMapper.IdentityMapper(r)
+			if err == nil {
+				logger.Debugf("src=IdentityMapper, type=TLS, role=%v", id)
+			}
+			return id, err
 		}
-		return id, err
 	}
-
 	// if none of mappers are applicable or configured,
 	// then use default guest mapper
 	return identity.GuestIdentityMapper(r)

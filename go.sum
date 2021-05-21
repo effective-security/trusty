@@ -119,6 +119,10 @@ github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba h1:I45RdP92
 github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba/go.mod h1:UZQo6+h5O8HW6TPt7HaXd4Nc234FYx5aFvw9RKL2IUk=
 github.com/go-phorce/dolly v0.6.0 h1:IhcReilM1hjAFyw5Mz2HWyfiF1zTU1Ib+YF+axpt3pE=
 github.com/go-phorce/dolly v0.6.0/go.mod h1:eMKwTWti4P8J2K10lBNs6GwI5uMgNDRlKDHPiafMVfQ=
+github.com/go-phorce/dolly v0.6.1-0.20210521173607-c88f22882839 h1:eTozVI2iewFipKXj4myQQH8YG8eOduYqDBbvK+UsFoc=
+github.com/go-phorce/dolly v0.6.1-0.20210521173607-c88f22882839/go.mod h1:eMKwTWti4P8J2K10lBNs6GwI5uMgNDRlKDHPiafMVfQ=
+github.com/go-phorce/dolly v0.6.1-0.20210521222023-4f7e9a58a877 h1:b8y12f+P+KLpTHf3z1p1ZFHFkt8HtnakwOWSdz9MWjg=
+github.com/go-phorce/dolly v0.6.1-0.20210521222023-4f7e9a58a877/go.mod h1:eMKwTWti4P8J2K10lBNs6GwI5uMgNDRlKDHPiafMVfQ=
 github.com/go-sql-driver/mysql v1.4.0/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG5ZlKdlhCg5w=
 github.com/go-sql-driver/mysql v1.5.0 h1:ozyZYNQW3x3HtqT1jira07DN2PArx2v7/mN66gGcHOs=
 github.com/go-sql-driver/mysql v1.5.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=

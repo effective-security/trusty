@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/ekspand/trusty/internal/config"
+	"github.com/ekspand/trusty/pkg/roles"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/netutil"
 	"github.com/go-phorce/dolly/rest"
@@ -62,10 +63,10 @@ type Server struct {
 
 	services map[string]Service
 
-	authz     rest.Authz
-	grpcAuthz authz.GRPCAuthz
-	auditor   audit.Auditor
-	crypto    *cryptoprov.Crypto
+	authz    *authz.Provider
+	auditor  audit.Auditor
+	identity *roles.Provider
+	crypto   *cryptoprov.Crypto
 }
 
 // Start returns running Server
@@ -96,18 +97,33 @@ func Start(
 		return nil, errors.Trace(err)
 	}
 
-	err = container.Invoke(func(authz rest.Authz,
-		grpcAuthz authz.GRPCAuthz,
+	err = container.Invoke(func(
+		role *roles.Provider,
 		auditor audit.Auditor,
 		crypto *cryptoprov.Crypto) error {
-		e.authz = authz
 		e.auditor = auditor
-		e.grpcAuthz = grpcAuthz
+		e.identity = role
 		e.crypto = crypto
 		return nil
 	})
 	if err != nil {
 		return nil, errors.Trace(err)
+	}
+
+	if len(cfg.Authz.Allow) > 0 ||
+		len(cfg.Authz.AllowAny) > 0 ||
+		len(cfg.Authz.AllowAnyRole) > 0 {
+		e.authz, err = authz.New(&authz.Config{
+			Allow:         cfg.Authz.Allow,
+			AllowAny:      cfg.Authz.AllowAny,
+			AllowAnyRole:  cfg.Authz.AllowAnyRole,
+			LogAllowedAny: cfg.Authz.LogAllowedAny,
+			LogAllowed:    cfg.Authz.LogAllowed,
+			LogDenied:     cfg.Authz.LogDenied,
+		})
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
 	}
 
 	if err = e.serveClients(); err != nil {

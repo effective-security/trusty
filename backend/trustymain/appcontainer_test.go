@@ -8,7 +8,6 @@ import (
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/audit"
-	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/tasks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -32,7 +31,6 @@ func TestNewContainerFactory(t *testing.T) {
 		{
 			name: "no_logs",
 			cfg: &config.Configuration{
-				Authz: config.Authz{AllowAny: []string{"/v1/status"}},
 				Logs:  config.Logger{Directory: "/dev/null"},
 				Audit: config.Logger{Directory: "/dev/null"},
 			},
@@ -61,7 +59,6 @@ func TestNewContainerFactory(t *testing.T) {
 			require.NoError(t, err)
 
 			err = container.Invoke(func(cfg *config.Configuration,
-				authz rest.Authz,
 				auditor audit.Auditor,
 				scheduler tasks.Scheduler,
 			) {

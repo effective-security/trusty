@@ -15,6 +15,7 @@ import (
 	"github.com/ekspand/trusty/internal/db/model"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/pkg/oauth2client"
+	"github.com/ekspand/trusty/pkg/roles"
 	"github.com/ekspand/trusty/pkg/roles/jwtmapper"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
@@ -55,13 +56,13 @@ func Factory(server *gserver.Server) interface{} {
 		logger.Panic("status.Factory: invalid parameter")
 	}
 
-	return func(cfg *config.Configuration, oauthProv *oauth2client.Provider, db db.Provider, jwt *jwtmapper.Provider) error {
+	return func(cfg *config.Configuration, oauthProv *oauth2client.Provider, db db.Provider, identity *roles.Provider) error {
 		svc := &Service{
 			server:    server,
 			cfg:       cfg,
 			oauthProv: oauthProv,
 			db:        db,
-			jwt:       jwt,
+			jwt:       identity.JwtMapper,
 		}
 
 		if cfg.Github.BaseURL != "" {
@@ -284,7 +285,7 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 // RefreshHandler  for token
 func (s *Service) RefreshHandler() rest.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
-		ctx := identity.ForRequest(r)
+		ctx := identity.FromRequest(r)
 		deviceID := r.Header.Get(header.XDeviceID)
 		idn := ctx.Identity()
 

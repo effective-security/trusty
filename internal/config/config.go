@@ -46,9 +46,6 @@ type Configuration struct {
 	// SQL specifies the configuration for SQL provider
 	SQL SQL `json:"sql" yaml:"sql"`
 
-	// Authz contains configuration for the authorization module
-	Authz Authz `json:"authz" yaml:"authz"`
-
 	// Identity contains configuration for the identity mapper
 	Identity Identity `json:"identity" yaml:"identity"`
 

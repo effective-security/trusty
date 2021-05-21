@@ -40,6 +40,9 @@ type HTTPServer struct {
 	// HeartbeatSecs specifies heartbeat interval in seconds [5 secs is a minimum]
 	HeartbeatSecs int `json:"heartbeat_secs" yaml:"heartbeat_secs"`
 
+	// Authz contains configuration for the authorization module
+	Authz Authz `json:"authz" yaml:"authz"`
+
 	// CORS contains configuration for CORS.
 	CORS *CORS `json:"cors,omitempty" yaml:"cors,omitempty"`
 
@@ -57,9 +60,6 @@ type HTTPServer struct {
 
 	// EnableGRPCGateway allows gRPC GW
 	EnableGRPCGateway bool `json:"enable_grpc_gateway" yaml:"enable_grpc_gateway"`
-
-	// DebugHandlers allows for verbose logging of request handlers
-	DebugHandlers bool `json:"debug_handlers" yaml:"debug_handlers"`
 }
 
 // KeepAlive settings

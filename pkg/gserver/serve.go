@@ -206,7 +206,7 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 		grpcL := m.Match(cmux.HTTP2())
 		go func() { errHandler(gsInsecure.Serve(grpcL)) }()
 
-		handler := s.traceHandler(router.Handler(), "router")
+		handler := router.Handler()
 		handler = configureHandlers(s, handler)
 
 		/*
@@ -235,11 +235,11 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 
 	if sctx.secure {
 		gsSecure = grpcServer(s, sctx.tlsInfo.Config(), sctx.gopts...)
-		handler := s.traceHandler(router.Handler(), "router")
+		handler := router.Handler()
 		handler = configureHandlers(s, handler)
 
 		// mux between http and grpc
-		handler = s.traceHandler(grpcHandlerFunc(gsSecure, handler), "mux")
+		handler = grpcHandlerFunc(gsSecure, handler)
 
 		/*
 			if sctx.cfg.EnableGRPCGateway {
@@ -359,7 +359,7 @@ func configureHandlers(s *Server, handler http.Handler) http.Handler {
 	// NOTE: the handlers are executed in the reverse order
 
 	// service ready
-	handler = s.traceHandler(ready.NewServiceStatusVerifier(s, handler), "ready")
+	handler = ready.NewServiceStatusVerifier(s, handler)
 
 	var err error
 	// authz
@@ -368,17 +368,16 @@ func configureHandlers(s *Server, handler http.Handler) http.Handler {
 		if err != nil {
 			panic(errors.ErrorStack(err))
 		}
-		handler = s.traceHandler(handler, "authz")
 	}
 
 	// logging wrapper
-	handler = s.traceHandler(xhttp.NewRequestLogger(handler, s.Name(), serverExtraLogger, time.Millisecond, s.cfg.PackageLogger), "logger")
+	handler = xhttp.NewRequestLogger(handler, s.Name(), serverExtraLogger, time.Millisecond, s.cfg.PackageLogger)
 
 	// metrics wrapper
-	handler = s.traceHandler(xhttp.NewRequestMetrics(handler), "metrics")
+	handler = xhttp.NewRequestMetrics(handler)
 
 	// role/contextID wrapper
-	handler = s.traceHandler(identity.NewContextHandler(handler), "roles")
+	handler = identity.NewContextHandler(handler, s.identity.IdentityMapper)
 
 	return handler
 }
@@ -425,13 +424,10 @@ func grpcServer(s *Server, tls *tls.Config, gopts ...grpc.ServerOption) *grpc.Se
 	}
 
 	chainUnaryInterceptors := []grpc.UnaryServerInterceptor{
-		identity.NewAuthUnaryInterceptor(),
+		identity.NewAuthUnaryInterceptor(s.identity.IdentityFromContext),
 		s.newLogUnaryInterceptor(),
 		grpc_prometheus.UnaryServerInterceptor,
-	}
-	if s.grpcAuthz != nil {
-		// Authz must be the
-		chainUnaryInterceptors = append(chainUnaryInterceptors, s.grpcAuthz.NewUnaryInterceptor())
+		s.authz.NewUnaryInterceptor(),
 	}
 
 	chainStreamInterceptors := []grpc.StreamServerInterceptor{
@@ -479,21 +475,10 @@ func grpcHandlerFunc(grpcServer *grpc.Server, otherHandler http.Handler) http.Ha
 	})
 }
 
-func (s *Server) traceHandler(h http.Handler, name string) http.Handler {
-	if !s.cfg.DebugHandlers {
-		return h
-	}
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		logger.Debugf(">>> scr=traceHandler, start=%s", name)
-		h.ServeHTTP(w, r)
-		logger.Debugf("<<< scr=traceHandler, end=%s", name)
-	})
-}
-
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	marshal.WriteJSON(w, r, httperror.WithNotFound(r.URL.Path))
 }
 
 func serverExtraLogger(resp *xhttp.ResponseCapture, req *http.Request) []string {
-	return []string{identity.ForRequest(req).CorrelationID()}
+	return []string{identity.FromRequest(req).CorrelationID()}
 }
