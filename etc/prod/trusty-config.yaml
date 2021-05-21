@@ -64,36 +64,6 @@ sql:
   # the directory that contains migrations.
   migrations_dir: /opt/trusty/bin/sql/postgres/migrations
         
-# configuration for the authorization module
-authz:
-  # allow any non-authenticated request access to this path and its children
-  allow_any:
-    - /favicon.ico
-    - /v1/swagger
-    - /v1/auth
-    - /v1/status
-    - /v1/certs
-    - /v1/crl
-    - /v1/ocsp
-    - /v1/roots
-    - /pb.CertInfoService
-    - /pb.StatusService
-  # allow any authenticated request that includes a non empty role
-  allow_any_role:
-    - /v1/wf
-    - /pb.AuthorityService/Issuers
-    - /pb.AuthorityService/Roots
-  # allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
-  allow:
-    - /v1/ca:trusty-peer
-    - /pb.AuthorityService:trusty-peer
-  # specifies to log allowed access to Any role
-  log_allowed_any: true
-  # specifies to log allowed access
-  log_allowed: true
-  # specifies to log denied access
-  log_denied: true
-
 # configuration for the Identity mappers
 identity:
   # location of the config file for certificate based identity
@@ -155,6 +125,27 @@ servers:
         - X-Device-ID
         - sec-ch-ua
         - sec-ch-ua-mobile
+    # configuration for the authorization module
+    authz:
+      # allow any non-authenticated request access to this path and its children
+      # /v1/* is allowed
+      allow_any:
+        - /favicon.ico
+        - /v1
+        - /pb.CertInfoService
+        - /pb.StatusService
+        - /pb.AuthorityService/ProfileInfo
+        - /pb.AuthorityService/Issuers
+      # allow any authenticated request that includes a non empty role
+      allow_any_role:
+      # allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
+      allow:
+      # specifies to log allowed access to Any role
+      log_allowed_any: false
+      # specifies to log allowed access
+      log_allowed: true
+      # specifies to log denied access
+      log_denied: true
 
   wfe:
     description: Web Front End
@@ -174,6 +165,27 @@ servers:
       request: 3s
     keep_alive: *keep_alive
     cors: *cors
+    authz:
+      # allow any non-authenticated request access to this path and its children
+      # /v1/* is allowed
+      allow_any:
+        - /favicon.ico
+        - /v1
+        - /pb.CertInfoService
+        - /pb.StatusService
+        - /pb.AuthorityService/ProfileInfo
+        - /pb.AuthorityService/Issuers
+      # allow any authenticated request that includes a non empty role
+      allow_any_role:
+        - /v1/wf
+      # allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
+      allow:
+      # specifies to log allowed access to Any role
+      log_allowed_any: false
+      # specifies to log allowed access
+      log_allowed: true
+      # specifies to log denied access
+      log_denied: true
 
   ca:
     description: Certification Authority
@@ -189,6 +201,25 @@ servers:
       request: 3s
     keep_alive: *keep_alive
     cors: *cors
+    authz:
+      # allow any non-authenticated request access to this path and its children
+      # /v1/* is allowed
+      allow_any:
+        - /v1/status
+      # allow any authenticated request that includes a non empty role
+      allow_any_role:
+        - /pb.StatusService
+        - /pb.AuthorityService/ProfileInfo
+        - /pb.AuthorityService/Issuers
+      # allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
+      allow:
+        - /pb.AuthorityService/SignCertificate:trusty-peer,trusty-admin
+      # specifies to log allowed access to Any role
+      log_allowed_any: false
+      # specifies to log allowed access
+      log_allowed: true
+      # specifies to log denied access
+      log_denied: true
 
 trusty_client: 
   client_tls:

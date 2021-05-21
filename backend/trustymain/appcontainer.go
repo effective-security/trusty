@@ -10,13 +10,9 @@ import (
 	"github.com/ekspand/trusty/pkg/awskmscrypto"
 	"github.com/ekspand/trusty/pkg/oauth2client"
 	"github.com/ekspand/trusty/pkg/roles"
-	"github.com/ekspand/trusty/pkg/roles/jwtmapper"
 	"github.com/go-phorce/dolly/audit"
 	fauditor "github.com/go-phorce/dolly/audit/log"
-	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/tasks"
-	"github.com/go-phorce/dolly/xhttp/authz"
-	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
 	"github.com/sony/sonyflake"
@@ -32,8 +28,8 @@ type ProvideAuditorFn func(cfg *config.Configuration, r CloseRegistrator) (audit
 // ProvideSchedulerFn defines Scheduler provider
 type ProvideSchedulerFn func() (tasks.Scheduler, error)
 
-// ProvideAuthzFn defines Authz provider
-type ProvideAuthzFn func(cfg *config.Configuration) (rest.Authz, authz.GRPCAuthz, *jwtmapper.Provider, error)
+// ProvideIdentityFn defines Identity provider
+type ProvideIdentityFn func(cfg *config.Configuration) (*roles.Provider, error)
 
 // ProvideOAuthClientsFn defines OAuth clients provider
 type ProvideOAuthClientsFn func(cfg *config.Configuration) (*oauth2client.Provider, error)
@@ -57,7 +53,7 @@ type ContainerFactory struct {
 	app               *App
 	auditorProvider   ProvideAuditorFn
 	schedulerProvider ProvideSchedulerFn
-	authzProvider     ProvideAuthzFn
+	identityProvider  ProvideIdentityFn
 	cryptoProvider    ProvideCryptoFn
 	authorityProvider ProvideAuthorityFn
 	dbProvider        ProvideDbFn
@@ -80,7 +76,7 @@ func NewContainerFactory(app *App) *ContainerFactory {
 	// configure with default providers
 	return f.
 		WithAuditorProvider(provideAuditor).
-		WithAuthzProvider(provideAuthz).
+		WithIdentityProvider(provideIdentity).
 		WithSchedulerProvider(defaultSchedulerProv).
 		WithCryptoProvider(provideCrypto).
 		WithAuthorityProvider(provideAuthority).
@@ -88,9 +84,9 @@ func NewContainerFactory(app *App) *ContainerFactory {
 		WithOAuthClientsProvider(provideOAuth)
 }
 
-// WithAuthzProvider allows to specify custom Authz
-func (f *ContainerFactory) WithAuthzProvider(p ProvideAuthzFn) *ContainerFactory {
-	f.authzProvider = p
+// WithIdentityProvider allows to specify custom Identity
+func (f *ContainerFactory) WithIdentityProvider(p ProvideIdentityFn) *ContainerFactory {
+	f.identityProvider = p
 	return f
 }
 
@@ -148,7 +144,7 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 		return nil, errors.Trace(err)
 	}
 
-	err = container.Provide(f.authzProvider)
+	err = container.Provide(f.identityProvider)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -193,39 +189,20 @@ func provideAuditor(cfg *config.Configuration, r CloseRegistrator) (audit.Audito
 	return auditor, nil
 }
 
-func provideAuthz(cfg *config.Configuration) (rest.Authz, authz.GRPCAuthz, *jwtmapper.Provider, error) {
-	var azp *authz.Provider
-	var jwt *jwtmapper.Provider
+func provideIdentity(cfg *config.Configuration) (*roles.Provider, error) {
+	var provider *roles.Provider
 	var err error
-	if len(cfg.Authz.Allow) > 0 ||
-		len(cfg.Authz.AllowAny) > 0 ||
-		len(cfg.Authz.AllowAnyRole) > 0 {
-		azp, err = authz.New(&authz.Config{
-			Allow:         cfg.Authz.Allow,
-			AllowAny:      cfg.Authz.AllowAny,
-			AllowAnyRole:  cfg.Authz.AllowAnyRole,
-			LogAllowedAny: cfg.Authz.LogAllowedAny,
-			LogAllowed:    cfg.Authz.LogAllowed,
-			LogDenied:     cfg.Authz.LogDenied,
-		})
-		if err != nil {
-			return nil, nil, nil, errors.Trace(err)
-		}
-	}
 	if cfg.Identity.JWTMapper != "" || cfg.Identity.CertMapper != "" {
-		prov, err := roles.New(
+		provider, err = roles.New(
 			cfg.Identity.JWTMapper,
 			cfg.Identity.CertMapper,
 		)
 		if err != nil {
-			return nil, nil, nil, errors.Trace(err)
+			return nil, errors.Trace(err)
 		}
-		identity.SetGlobalIdentityMapper(prov.IdentityMapper)
-		identity.SetGlobalGRPCIdentityMapper(prov.IdentityFromContext)
-		jwt = prov.JwtMapper
 	}
 
-	return azp, azp, jwt, nil
+	return provider, nil
 }
 
 func provideOAuth(cfg *config.Configuration) (*oauth2client.Provider, error) {

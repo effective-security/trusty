@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"path/filepath"
 	"testing"
 
 	v1 "github.com/ekspand/trusty/api/v1"
@@ -17,18 +16,13 @@ import (
 	"github.com/ekspand/trusty/internal/version"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/tests/testutils"
-	"github.com/go-phorce/dolly/audit"
-	"github.com/go-phorce/dolly/rest"
-	"github.com/go-phorce/dolly/xhttp/authz"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xhttp/retriable"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/dig"
 )
 
 var (
@@ -36,10 +30,6 @@ var (
 	trustyClient *client.Client
 	httpAddr     string
 	httpsAddr    string
-)
-
-const (
-	projFolder = "../../"
 )
 
 var jsonContentHeaders = map[string]string{
@@ -74,7 +64,11 @@ func TestMain(m *testing.M) {
 		Services: []string{status.ServiceName},
 	}
 
-	container := createContainer(nil, nil, nil, nil)
+	container := testutils.NewContainerBuilder().
+		WithAuditor(nil).
+		WithCrypto(nil).
+		WithIdentity(nil).
+		Container()
 	trustyServer, err = gserver.Start("StatusTest", cfg, container, serviceFactories)
 	if err != nil || trustyServer == nil {
 		panic(errors.Trace(err))
@@ -110,7 +104,7 @@ func TestVersionHttpText(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	assert.Contains(t, hdr.Get(header.ContentType), header.TextPlain)
-	res := string(w.Body.Bytes())
+	res := w.Body.String()
 	assert.Equal(t, version.Current().Build, res)
 }
 
@@ -253,23 +247,4 @@ func TestCallerStatusGrpc(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, identity.GuestRoleName, res.Role)
-}
-
-// TODO: move to testutil.ContainerBuilder
-func createContainer(restAuthz rest.Authz, grpcAuthz authz.GRPCAuthz, auditor audit.Auditor, crypto *cryptoprov.Crypto) *dig.Container {
-	c := dig.New()
-	c.Provide(func() (rest.Authz, authz.GRPCAuthz, audit.Auditor, *cryptoprov.Crypto) {
-		return restAuthz, grpcAuthz, auditor, crypto
-	})
-	return c
-}
-
-func loadConfig(t *testing.T) *config.Configuration {
-	cfgPath, err := filepath.Abs(projFolder + "etc/dev/" + config.ConfigFileName)
-	require.NoError(t, err)
-
-	cfg, err := config.LoadConfig(cfgPath)
-	require.NoError(t, err)
-
-	return cfg
 }

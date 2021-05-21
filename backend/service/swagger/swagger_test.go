@@ -13,17 +13,12 @@ import (
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/tests/testutils"
-	"github.com/go-phorce/dolly/audit"
-	"github.com/go-phorce/dolly/rest"
-	"github.com/go-phorce/dolly/xhttp/authz"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/retriable"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/dig"
 )
 
 var (
@@ -64,7 +59,12 @@ func TestMain(m *testing.M) {
 		Swagger:  devcfg.HTTPServers["cis"].Swagger,
 	}
 
-	container := createContainer(nil, nil, nil, nil)
+	container := testutils.NewContainerBuilder().
+		WithAuditor(nil).
+		WithCrypto(nil).
+		WithIdentity(nil).
+		Container()
+
 	trustyServer, err = gserver.Start("SwaggerTest", cfg, container, serviceFactories)
 	if err != nil || trustyServer == nil {
 		panic(errors.Trace(err))
@@ -106,13 +106,4 @@ func TestSwagger(t *testing.T) {
 		w)
 	require.Error(t, err)
 	assert.Equal(t, http.StatusNotFound, status)
-}
-
-// TODO: move to testutil.ContainerBuilder
-func createContainer(restAuthz rest.Authz, grpcAuthz authz.GRPCAuthz, auditor audit.Auditor, crypto *cryptoprov.Crypto) *dig.Container {
-	c := dig.New()
-	c.Provide(func() (rest.Authz, authz.GRPCAuthz, audit.Auditor, *cryptoprov.Crypto) {
-		return restAuthz, grpcAuthz, auditor, crypto
-	})
-	return c
 }

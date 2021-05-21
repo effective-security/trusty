@@ -16,7 +16,7 @@ import (
 func (s *Service) GetReposHandler() rest.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
 		//provider := p.ByName("provider")
-		ctx := identity.ForRequest(r)
+		ctx := identity.FromRequest(r)
 		idn := ctx.Identity()
 
 		userInfo, ok := idn.UserInfo().(*v1.UserInfo)

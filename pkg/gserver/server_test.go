@@ -12,11 +12,8 @@ import (
 	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/rest"
-	"github.com/go-phorce/dolly/xhttp/authz"
 	"github.com/go-phorce/dolly/xhttp/header"
-	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
-	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/dig"
@@ -33,10 +30,7 @@ func TestStartTrustyEmptyHTTP(t *testing.T) {
 		},
 	}
 
-	restAuthz, grpcAuthz, err := provideAuthz()
-	require.NoError(t, err)
-
-	c := createContainer(restAuthz, grpcAuthz, nil, nil, nil, nil)
+	c := createContainer(nil, nil, nil, nil, nil)
 
 	fact := map[string]ServiceFactory{
 		"test": testServiceFactory,
@@ -69,7 +63,7 @@ func TestStartTrustyEmptyHTTPS(t *testing.T) {
 		},
 	}
 
-	c := createContainer(nil, nil, nil, nil, nil, nil)
+	c := createContainer(nil, nil, nil, nil, nil)
 	srv, err := Start("EmptyTrustyHTTPS", cfg, c, nil)
 	require.NoError(t, err)
 	require.NotNil(t, srv)
@@ -79,37 +73,17 @@ func TestStartTrustyEmptyHTTPS(t *testing.T) {
 }
 
 // TODO: move to testutil.ContainerBuilder
-func createContainer(restAuthz rest.Authz,
-	grpcAuthz authz.GRPCAuthz,
+func createContainer(
+	identity *roles.Provider,
 	auditor audit.Auditor,
 	crypto *cryptoprov.Crypto,
 	data db.Provider,
 	oauth *oauth2client.Provider) *dig.Container {
 	c := dig.New()
-	c.Provide(func() (rest.Authz, authz.GRPCAuthz, audit.Auditor, *cryptoprov.Crypto, db.Provider, *oauth2client.Provider) {
-		return restAuthz, grpcAuthz, auditor, crypto, data, oauth
+	c.Provide(func() (*roles.Provider, audit.Auditor, *cryptoprov.Crypto, db.Provider, *oauth2client.Provider) {
+		return identity, auditor, crypto, data, oauth
 	})
 	return c
-}
-
-func provideAuthz() (rest.Authz, authz.GRPCAuthz, error) {
-	var azp *authz.Provider
-	var err error
-	azp, err = authz.New(&authz.Config{
-		AllowAny: []string{"/"},
-	})
-	if err != nil {
-		return nil, nil, errors.Trace(err)
-	}
-
-	prov, err := roles.New("", "")
-	if err != nil {
-		return nil, nil, errors.Trace(err)
-	}
-	identity.SetGlobalIdentityMapper(prov.IdentityMapper)
-	identity.SetGlobalGRPCIdentityMapper(prov.IdentityFromContext)
-
-	return azp, azp, nil
 }
 
 type service struct{}

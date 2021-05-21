@@ -8,7 +8,6 @@ import (
 	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
-	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -17,8 +16,6 @@ var alive = []byte("ALIVE")
 
 func (s *Service) version() rest.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
-		identity.ForRequest(r)
-
 		accept := r.Header.Get(header.Accept)
 		if accept == "" || strings.EqualFold(accept, header.ApplicationJSON) {
 			res, _ := s.Version(r.Context(), nil)
