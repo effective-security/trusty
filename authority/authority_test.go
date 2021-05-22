@@ -196,9 +196,8 @@ func (s *testSuite) TestIssuerSign() {
 				Backdate:    0,
 				OCSPNoCheck: true,
 				CAConstraint: authority.CAConstraint{
-					IsCA:           true,
-					MaxPathLen:     0,
-					MaxPathLenZero: true,
+					IsCA:       true,
+					MaxPathLen: 0,
 				},
 				AllowedNames: "^[Tt]rusty CA$",
 				AllowedDNS:   "^trusty\\.com$",

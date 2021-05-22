@@ -98,7 +98,6 @@ message X509Subject {
 message CAConstraint {
 	bool is_ca = 1;
 	int32 max_path_len = 2;
-	int32 max_path_len_zero =3;
 }
 
 message CSRAllowedFields {

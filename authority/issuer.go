@@ -456,10 +456,9 @@ func (ca *Issuer) fillTemplate(template *x509.Certificate, profile *CertProfile,
 	template.BasicConstraintsValid = true
 	template.IsCA = profile.CAConstraint.IsCA
 	if template.IsCA {
+		logger.Noticef("src=issuer, subject=%q, is_ca=true, MaxPathLen=%d", template.Subject.String(), profile.CAConstraint.MaxPathLen)
 		template.MaxPathLen = profile.CAConstraint.MaxPathLen
-		if template.MaxPathLen == 0 {
-			template.MaxPathLenZero = profile.CAConstraint.MaxPathLenZero
-		}
+		template.MaxPathLenZero = template.MaxPathLen == 0
 		template.DNSNames = nil
 		template.IPAddresses = nil
 		template.EmailAddresses = nil
