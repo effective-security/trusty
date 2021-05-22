@@ -46,7 +46,6 @@ authority:
 # ca_constraint:
 #   is_ca:
 #   max_path_len: 
-#   max_path_len_zero:
 #
 profiles:
 

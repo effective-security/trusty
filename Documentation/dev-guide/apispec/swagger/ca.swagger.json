@@ -96,10 +96,6 @@
         "maxPathLen": {
           "type": "integer",
           "format": "int32"
-        },
-        "maxPathLenZero": {
-          "type": "integer",
-          "format": "int32"
         }
       },
       "description": "CAConstraint specifies various CA constraints on the signed certificate.\nCAConstraint would verify against (and override) the CA\nextensions in the given CSR."

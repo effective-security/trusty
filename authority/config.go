@@ -209,9 +209,8 @@ type CertProfile struct {
 // CAConstraint would verify against (and override) the CA
 // extensions in the given CSR.
 type CAConstraint struct {
-	IsCA           bool `json:"is_ca" yaml:"is_ca"`
-	MaxPathLen     int  `json:"max_path_len" yaml:"max_path_len"`
-	MaxPathLenZero bool `json:"max_path_len_zero" yaml:"max_path_len_zero"`
+	IsCA       bool `json:"is_ca" yaml:"is_ca"`
+	MaxPathLen int  `json:"max_path_len" yaml:"max_path_len"`
 }
 
 // Copy returns new copy
