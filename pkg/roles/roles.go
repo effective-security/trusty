@@ -14,18 +14,18 @@ import (
 var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "roles")
 
 const (
-	// TrustyAdmin defines role name to the service admins
-	TrustyAdmin = "trusty-admin"
-	// TrustyClient defines role name to the service clients
-	TrustyClient = "trusty-client"
-	// TrustyPeer defines role name to the service peers
-	TrustyPeer = "trusty-peer"
 	// GuestRoleName defines role name for an unauthenticated user
 	GuestRoleName = "guest"
+
+	// TLSUserRoleName defines a generic role name for an authenticated user
+	TLSUserRoleName = "tls_authenticated"
+
+	// JWTUserRoleName defines a generic role name for an authenticated user
+	JWTUserRoleName = "jwt_authenticated"
 )
 
-// IdentityProvider interface to extract identity from requests
-type IdentityProvider interface {
+// HTTPIdentityProvider interface to extract identity from requests
+type HTTPIdentityProvider interface {
 	// Applicable returns true if the provider is applicable for the request
 	Applicable(*http.Request) bool
 	// IdentityMapper returns identity from the request

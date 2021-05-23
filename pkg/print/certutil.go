@@ -45,6 +45,18 @@ func Certificate(w io.Writer, crt *x509.Certificate) {
 			fmt.Fprintf(w, "  - %s\n", n.String())
 		}
 	}
+	if len(crt.URIs) > 0 {
+		fmt.Fprintf(w, "URIs:\n")
+		for _, n := range crt.URIs {
+			fmt.Fprintf(w, "  - %s\n", n.String())
+		}
+	}
+	if len(crt.EmailAddresses) > 0 {
+		fmt.Fprintf(w, "Emails:\n")
+		for _, n := range crt.EmailAddresses {
+			fmt.Fprintf(w, "  - %s\n", n)
+		}
+	}
 	if len(crt.CRLDistributionPoints) > 0 {
 		fmt.Fprintf(w, "CRL Distribution Points:\n")
 		for _, n := range crt.CRLDistributionPoints {
@@ -83,6 +95,18 @@ func CertificateRequest(w io.Writer, crt *x509.CertificateRequest) {
 		fmt.Fprintf(w, "IP Addresses:\n")
 		for _, n := range crt.IPAddresses {
 			fmt.Fprintf(w, "  - %s\n", n.String())
+		}
+	}
+	if len(crt.URIs) > 0 {
+		fmt.Fprintf(w, "URIs:\n")
+		for _, n := range crt.URIs {
+			fmt.Fprintf(w, "  - %s\n", n.String())
+		}
+	}
+	if len(crt.EmailAddresses) > 0 {
+		fmt.Fprintf(w, "Emails:\n")
+		for _, n := range crt.EmailAddresses {
+			fmt.Fprintf(w, "  - %s\n", n)
 		}
 	}
 	if len(crt.Extensions) > 0 {

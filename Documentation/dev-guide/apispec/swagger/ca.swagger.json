@@ -114,6 +114,9 @@
         },
         "email": {
           "type": "boolean"
+        },
+        "uri": {
+          "type": "boolean"
         }
       }
     },
@@ -150,15 +153,19 @@
         },
         "allowedNames": {
           "type": "string",
-          "title": "AllowedNames specifies a RegExp to check for allowed names.\nIf not provided, then all names are allowed"
+          "title": "AllowedNames specifies a RegExp to check for allowed names.\nIf not provided, then all values are allowed"
         },
         "allowedDns": {
           "type": "string",
-          "title": "AllowedDns specifies a RegExp to check for allowed DNS.\nIf not provided, then all names are allowed"
+          "title": "AllowedDns specifies a RegExp to check for allowed DNS.\nIf not provided, then all values are allowed"
         },
         "allowedEmail": {
           "type": "string",
-          "title": "AllowedEmail specifies a RegExp to check for allowed email.\nIf not provided, then all names are allowed"
+          "title": "AllowedEmail specifies a RegExp to check for allowed email.\nIf not provided, then all values are allowed"
+        },
+        "allowedUri": {
+          "type": "string",
+          "title": "AllowedUri specifies a RegExp to check for allowed URI.\nIf not provided, then all values are allowed"
         },
         "allowedFields": {
           "$ref": "#/definitions/pbCSRAllowedFields",

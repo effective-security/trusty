@@ -235,7 +235,7 @@ if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}peer_c
         --ca-cert ${OUT_DIR}/${PREFIX}issuer2_ca.pem \
         --ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
         --csr-profile ${CSR_DIR}/${PREFIX}peer_ca.json \
-        --SAN=localhost,${SAN},${HOSTNAME} \
+        --SAN=localhost,${SAN},${HOSTNAME},spifee://trusty/ca \
         --key-label="${PREFIX}peer_ca*" \
         --out ${OUT_DIR}/${PREFIX}peer_ca
 
@@ -252,7 +252,7 @@ if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}peer_r
         --ca-cert ${OUT_DIR}/${PREFIX}issuer2_ca.pem \
         --ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
         --csr-profile ${CSR_DIR}/${PREFIX}peer_ra.json \
-        --SAN=localhost,${SAN},${HOSTNAME} \
+        --SAN=localhost,${SAN},${HOSTNAME},spifee://trusty/ra \
         --key-label="${PREFIX}peer_ra*" \
         --out ${OUT_DIR}/${PREFIX}peer_ra
 
@@ -269,7 +269,7 @@ if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}peer_c
         --ca-cert ${OUT_DIR}/${PREFIX}issuer2_ca.pem \
         --ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
         --csr-profile ${CSR_DIR}/${PREFIX}peer_cis.json \
-        --SAN=localhost,${SAN},${HOSTNAME} \
+        --SAN=localhost,${SAN},${HOSTNAME},spifee://trusty/cis \
         --key-label="${PREFIX}peer_cis*" \
         --out ${OUT_DIR}/${PREFIX}peer_cis
 
@@ -286,7 +286,7 @@ if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}peer_w
         --ca-cert ${OUT_DIR}/${PREFIX}issuer2_ca.pem \
         --ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
         --csr-profile ${CSR_DIR}/${PREFIX}peer_wfe.json \
-        --SAN=localhost,${SAN},${HOSTNAME} \
+        --SAN=localhost,${SAN},${HOSTNAME},spifee://trusty/wfe \
         --key-label="${PREFIX}peer_wfe*" \
         --out ${OUT_DIR}/${PREFIX}peer_wfe
 
