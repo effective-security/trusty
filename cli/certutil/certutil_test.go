@@ -188,7 +188,7 @@ func (s *testSuite) Test_CertInfo() {
 	s.Require().Error(err)
 	s.Equal("unable to load PEM file: open notfound: no such file or directory", err.Error())
 
-	js := projFolder + "etc/dev/csr/trusty_dev_peer.json"
+	js := projFolder + "etc/dev/csr_profile/trusty_dev_peer.json"
 	err = s.Run(certutil.CertInfo, &certutil.CertInfoFlags{
 		In:  &js,
 		Out: &out,

@@ -2,6 +2,7 @@ package trustymain
 
 import (
 	"io"
+	"os"
 	"time"
 
 	"github.com/ekspand/trusty/authority"
@@ -175,6 +176,8 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 func provideAuditor(cfg *config.Configuration, r CloseRegistrator) (audit.Auditor, error) {
 	var auditor audit.Auditor
 	if cfg.Audit.Directory != "" && cfg.Audit.Directory != nullDevName {
+		os.MkdirAll(cfg.Audit.Directory, 0644)
+
 		// create auditor
 		var err error
 		auditor, err = fauditor.New(cfg.ServiceName+".log", cfg.Audit.Directory, cfg.Audit.MaxAgeDays, cfg.Audit.MaxSizeMb)

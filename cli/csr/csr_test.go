@@ -58,7 +58,7 @@ func (s *testSuite) TestRootCA() {
 	s.Error(err)
 
 	// test root, to stdout
-	csrFile = projFolder + "etc/dev/csr/trusty_dev_root_ca.json"
+	csrFile = projFolder + "etc/dev/csr_profile/trusty_dev_root_ca.json"
 	label = "test_root"
 	err = s.Run(csr.Root, &csr.RootFlags{
 		CsrProfile: &csrFile,
@@ -85,7 +85,7 @@ func (s *testSuite) TestRootCA() {
 */
 
 func (s *testSuite) TestCreate() {
-	csrFile := projFolder + "etc/dev/csr/trusty_dev_client.json"
+	csrFile := projFolder + "etc/dev/csr_profile/trusty_dev_client.json"
 	label := "cert" + guid.MustCreate()
 	output := ""
 
@@ -111,7 +111,7 @@ func (s *testSuite) TestCreate() {
 func (s *testSuite) TestSignCert() {
 	s.createRootCA()
 
-	csrProfile := projFolder + "etc/dev/csr/trusty_dev_server.json"
+	csrProfile := projFolder + "etc/dev/csr_profile/trusty_dev_server.json"
 	caConfig := projFolder + "etc/dev/ca-config.dev.yaml"
 	label := "*"
 	output := filepath.Join(s.tmpdir, label)
@@ -162,7 +162,7 @@ func (s *testSuite) TestSignCert() {
 func (s *testSuite) TestGenCert() {
 	s.createRootCA()
 
-	csrProfile := projFolder + "etc/dev/csr/trusty_dev_server.json"
+	csrProfile := projFolder + "etc/dev/csr_profile/trusty_dev_server.json"
 	caConfig := projFolder + "etc/dev/ca-config.dev.yaml"
 	label := "server" + guid.MustCreate()
 	output := ""
@@ -208,7 +208,7 @@ func (s *testSuite) createRootCA() {
 	}
 
 	caConfig := projFolder + "etc/dev/ca-config.bootstrap.yaml"
-	csrProfile := projFolder + "etc/dev/csr/trusty_dev_root_ca.json"
+	csrProfile := projFolder + "etc/dev/csr_profile/trusty_dev_root_ca.json"
 	profile := "ROOT"
 	trueVal := true
 	label := "root" + guid.MustCreate()

@@ -68,7 +68,7 @@ sql:
   # specifies the connection string. It can be prefixed with file:// or env:// to load the source from a file or environment variable.
   data_source: file://${TRUSTY_CONFIG_DIR}/sql-conn.txt
   # the directory that contains migrations.
-  migrations_dir: ../../scripts/sql/postgres/migrations
+  migrations_dir: ${TRUSTY_CONFIG_DIR}/../../scripts/sql/postgres/migrations
         
 # configuration for the Identity mappers
 identity:
@@ -88,7 +88,7 @@ authority: ca-config.dev.yaml
 ra:
   # the list of private Root Certs files.
   private_roots:
-    - /tmp/trusty/certs/trusty_dev_root_ca.pem
+    - ${TRUSTY_CONFIG_DIR}/roots/trusty_dev_root_ca.pem
   # the list of public Root Certs files.
   public_roots:
 
@@ -161,10 +161,10 @@ servers:
     listen_urls:
       - https://0.0.0.0:7891
     client_url: https://localhost:7891
-    server_tls: &server_tls
-      cert: /tmp/trusty/certs/trusty_dev_peer.pem
-      key: /tmp/trusty/certs/trusty_dev_peer-key.pem
-      trusted_ca: /tmp/trusty/certs/trusty_dev_root_ca.pem
+    server_tls:
+      cert: /tmp/trusty/certs/trusty_dev_peer_wfe.pem
+      key: /tmp/trusty/certs/trusty_dev_peer_wfe-key.pem
+      trusted_ca: ${TRUSTY_CONFIG_DIR}/roots/trusty_dev_root_ca.pem
       # client_cert_auth: true
     services:
       - auth
@@ -206,7 +206,11 @@ servers:
     listen_urls:
       - https://0.0.0.0:7892
     client_url: https://localhost:7892
-    server_tls: *server_tls
+    server_tls:
+      cert: /tmp/trusty/certs/trusty_dev_peer_ca.pem
+      key: /tmp/trusty/certs/trusty_dev_peer_ca-key.pem
+      trusted_ca: ${TRUSTY_CONFIG_DIR}/roots/trusty_dev_root_ca.pem
+      client_cert_auth: true
     services:
       - status
       - ca
@@ -236,7 +240,7 @@ servers:
         - /pb.AuthorityService/Issuers
       # allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
       allow:
-        - /pb.AuthorityService/SignCertificate:trusty-peer,trusty-admin
+        - /pb.AuthorityService/SignCertificate:trusty-wfe,trusty-ra,trusty-admin
       # specifies to log allowed access to Any role
       log_allowed_any: false
       # specifies to log allowed access
@@ -246,9 +250,9 @@ servers:
 
 trusty_client: 
   client_tls:
-    cert: /tmp/trusty/certs/trusty_dev_peer.pem
-    key: /tmp/trusty/certs/trusty_dev_peer-key.pem
-    trusted_ca: /tmp/trusty/certs/trusty_dev_root_ca.pem
+    cert: /tmp/trusty/certs/trusty_dev_client.pem
+    key: /tmp/trusty/certs/trusty_dev_client-key.pem
+    trusted_ca: ${TRUSTY_CONFIG_DIR}/roots/trusty_dev_root_ca.pem
   server_url:
     cis: http://localhost:7880
     wfe: https://localhost:7891

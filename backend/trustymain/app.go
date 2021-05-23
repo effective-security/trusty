@@ -55,6 +55,7 @@ type appFlags struct {
 	isStderr            *bool
 	dryRun              *bool
 	hsmCfg              *string
+	sqlDataSource       *string
 	cryptoProvs         *[]string
 	cisURLs             *[]string
 	wfeURLs             *[]string
@@ -314,6 +315,7 @@ func (a *App) loadConfig() error {
 	flags.dryRun = app.Flag("dry-run", "verify config etc, and do not start the service").Bool()
 	flags.hsmCfg = app.Flag("hsm-cfg", "location of the HSM configuration file").String()
 	flags.cryptoProvs = app.Flag("crypto-prov", "path to additional Crypto provider configurations").Strings()
+	flags.sqlDataSource = app.Flag("sql", "SQL data source").String()
 
 	flags.cisURLs = app.Flag("cis-listen-url", "URL for the CIS listening end-point").Strings()
 	flags.wfeURLs = app.Flag("wfe-listen-url", "URL for the WFE listening end-point").Strings()
@@ -351,6 +353,9 @@ func (a *App) loadConfig() error {
 	}
 	if *flags.hsmCfg != "" {
 		cfg.CryptoProv.Default = *flags.hsmCfg
+	}
+	if *flags.sqlDataSource != "" {
+		cfg.SQL.DataSource = *flags.sqlDataSource
 	}
 	if len(*flags.cryptoProvs) > 0 {
 		cfg.CryptoProv.Providers = *flags.cryptoProvs
@@ -411,6 +416,8 @@ func (a *App) loadConfig() error {
 func (a *App) initLogs() error {
 	cfg := a.cfg
 	if cfg.Logs.Directory != "" && cfg.Logs.Directory != nullDevName {
+		os.MkdirAll(cfg.Logs.Directory, 0644)
+
 		var sink io.Writer
 		if a.flags != nil && *a.flags.isStderr {
 			sink = os.Stderr

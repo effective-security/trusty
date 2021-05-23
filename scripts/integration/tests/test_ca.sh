@@ -10,5 +10,9 @@ echo "*** trusty ca: checking against http endpoint: $TRUSTY_CA_1"
 echo "*** trusty ca: checking against http endpoint: $TRUSTY_CA_2"
 /opt/trusty/bin/trustyctl $TRUSTYCTL_FLAGS -s $TRUSTY_CA_2 --timeout 3 --json ca issuers
 
-/opt/trusty/bin/trusty-tool --hsm-cfg=inmem csr create --plain-key --csr-profile=/opt/trusty/etc/prod/csr/trusty_server.json --out /tmp/csr
-/opt/trusty/bin/trustyctl $TRUSTYCTL_FLAGS -s $TRUSTY_CA_2 --timeout 3 --json ca sign --csr /tmp/csr.csr --profile=server
+/opt/trusty/bin/trusty-tool --hsm-cfg=inmem csr create --plain-key --csr-profile=/opt/trusty/etc/dev/csr_profile/trusty_dev_server.json --out /tmp/csr
+/opt/trusty/bin/trustyctl -V -D --cfg /opt/trusty/etc/dev/trusty-config.yaml -s $TRUSTY_CA_2 --timeout 3 --json \
+    -c /tmp/trusty/certs/trusty_dev_peer_ra.pem \
+    -k /tmp/trusty/certs/trusty_dev_peer_ra-key.pem \
+    -r /tmp/trusty/certs/trusty_dev_root_ca.pem \
+    ca sign --csr /tmp/csr.csr --profile=server

@@ -88,7 +88,7 @@ func TestCallerStatusResponse(t *testing.T) {
 }
 
 func Test_PrintCerts(t *testing.T) {
-	certsRaw, err := ioutil.ReadFile("/tmp/trusty/certs/trusty_dev_peer.pem")
+	certsRaw, err := ioutil.ReadFile("/tmp/trusty/certs/trusty_dev_peer_wfe.pem")
 	require.NoError(t, err)
 
 	certs, err := helpers.ParseCertificatesPEM(certsRaw)
