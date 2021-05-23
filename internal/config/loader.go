@@ -157,9 +157,9 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 
 	// Add to this list all configs that require folder resolution to absolute path
 	dirsToResolve := []*string{
+		&c.SQL.MigrationsDir,
 		&c.Logs.Directory,
 		&c.Audit.Directory,
-		&c.SQL.MigrationsDir,
 	}
 
 	filesToResove := []*string{
@@ -194,7 +194,7 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 	for _, ptr := range dirsToResolve {
 		*ptr, err = resolve.Directory(*ptr, baseDir, false)
 		if err != nil {
-			return nil, errors.Annotatef(err, "unable to resolve folder")
+			logger.Errorf("src=LoadConfigForHostName, dir=%q, err=[%v]", *ptr, err.Error())
 		}
 	}
 

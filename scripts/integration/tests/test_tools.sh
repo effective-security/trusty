@@ -25,17 +25,16 @@ echo "*** trusty tool: hsm rmkey"
 echo "*** trusty tool: csr create"
 /opt/trusty/bin/trusty-tool $TOOL_FLAGS csr create \
         --plain-key \
-        --csr-profile=/opt/trusty/etc/prod/csr/trusty_issuer1_ca.json \
+        --csr-profile=/opt/trusty/etc/dev/csr_profile/trusty_dev_issuer1_ca.json \
         --key-label="ci_csrtest_issuer1_ca*"
 echo "*** trusty tool: csr gencert"
 /opt/trusty/bin/trusty-tool $TOOL_FLAGS csr gencert \
-        --ca-config /opt/trusty/etc/prod/ca-config.bootstrap.yaml \
+        --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml \
         --profile=L1_CA \
-        --csr-profile=/opt/trusty/etc/prod/csr/trusty_issuer1_ca.json \
+        --csr-profile=/opt/trusty/etc/dev/csr_profile/trusty_dev_issuer1_ca.json \
         --key-label="ci_test_issuer1_ca*" \
-        --ca-cert=/var/trusty/roots/trusty_root_ca.pem \
-        --ca-key=/var/trusty/roots/trusty_root_ca-key.pem \
-
+        --ca-cert=/opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem \
+        --ca-key=/opt/trusty/etc/dev/roots/trusty_dev_root_ca-key.pem \
 
 echo "*** trusty tool: local-kms"
 export TOOL_FLAGS="-V -D --hsm-cfg /opt/trusty/tests/aws-test-kms.json"

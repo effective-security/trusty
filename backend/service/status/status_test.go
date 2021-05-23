@@ -57,8 +57,8 @@ func TestMain(m *testing.M) {
 	cfg := &config.HTTPServer{
 		ListenURLs: []string{httpsAddr, httpAddr},
 		ServerTLS: &config.TLSInfo{
-			CertFile:      "/tmp/trusty/certs/trusty_dev_peer.pem",
-			KeyFile:       "/tmp/trusty/certs/trusty_dev_peer-key.pem",
+			CertFile:      "/tmp/trusty/certs/trusty_dev_peer_wfe.pem",
+			KeyFile:       "/tmp/trusty/certs/trusty_dev_peer_wfe-key.pem",
 			TrustedCAFile: "/tmp/trusty/certs/trusty_dev_root_ca.pem",
 		},
 		Services: []string{status.ServiceName},

@@ -65,11 +65,12 @@ services:
       - local-kms
       - trusty-sql
     volumes:
-      - trusty-shared-certs:/var/trusty/roots
         # Mounts the volumes from build container to the container in test
         # docker-compose command runs with ./scripts/integration as CWD, 
         # the source path in the volume definitions are relative to ./scripts/integration
       - ./tests:/opt/trusty/tests
+      - ../../etc/dev:/opt/trusty/etc/dev
+      - ../../scripts/sql/postgres/migrations:/opt/trusty/scripts/sql/postgres/migrations
     ports:
       - "7880" # CIS
       - "7891" # WFE
@@ -84,7 +85,8 @@ services:
       - -c
       - >-
         /opt/trusty/bin/sql/postgres/wait_sql.sh 10.77.88.100 5432 postgres postgres echo "SQL is ready" &&
-        /opt/trusty/tests/if-root-exists.sh mkdir -p /tmp/trusty/softhsm/tokens /tmp/trusty/certs &&
+        mkdir -p /tmp/trusty/softhsm/tokens /tmp/trusty/certs &&
+        cp /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem /tmp/trusty/certs/trusty_dev_root_ca.pem &&
         /opt/trusty/bin/config-softhsm.sh
         --tokens-dir /tmp/trusty/softhsm/tokens
         --pin-file /tmp/trusty/softhsm/trusty_unittest.txt
@@ -93,17 +95,18 @@ services:
         --delete --list-slots --list-object &&
         /opt/trusty/bin/gen_test_certs.sh
         --hsm-config /tmp/trusty/softhsm/unittest_hsm.json
-        --ca-config /opt/trusty/etc/prod/ca-config.bootstrap.yaml
-        --out-dir /var/trusty/certs
-        --csr-dir /opt/trusty/etc/prod/csr
-        --root-ca /var/trusty/roots/trusty_root_ca.pem
-        --root-ca-key /var/trusty/roots/trusty_root_ca-key.pem
-        --prefix trusty_
+        --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml
+        --out-dir /tmp/trusty/certs
+        --csr-dir /opt/trusty/etc/dev/csr_profile
+        --root-ca /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem
+        --root-ca-key /opt/trusty/etc/dev/roots/trusty_dev_root_ca-key.pem
+        --prefix trusty_dev_
         --san 10.77.88.101
-        --ca1 --ca2 --bundle --peer --force &&
+        --ca1 --ca2 --bundle --client --peer --force &&
         /opt/trusty/bin/trusty --std
         --hsm-cfg=/tmp/trusty/softhsm/unittest_hsm.json
-        --cfg=/opt/trusty/etc/prod/trusty-config.yaml
+        --cfg=/opt/trusty/etc/dev/trusty-config.yaml
+        --sql=env://TRUSTY_SQL_CONN
         --logs-dir=/var/trusty/logs
         --audit-dir=/var/trusty/audit
         --host-name=10.77.88.101
@@ -129,11 +132,12 @@ services:
       - local-kms
       - trusty-sql
     volumes:
-      - trusty-shared-certs:/var/trusty/roots
         # Mounts the volumes from build container to the container in test
         # docker-compose command runs with ./scripts/integration as CWD, 
         # the source path in the volume definitions are relative to ./scripts/integration
       - ./tests:/opt/trusty/tests
+      - ../../etc/dev:/opt/trusty/etc/dev
+      - ../../scripts/sql/postgres/migrations:/opt/trusty/scripts/sql/postgres/migrations
     ports:
       - "7880" # CIS
       - "7891" # WFE
@@ -151,20 +155,22 @@ services:
       - -c
       - >-
         /opt/trusty/bin/sql/postgres/wait_sql.sh 10.77.88.100 5432 postgres postgres echo "SQL is ready" &&
-        /opt/trusty/tests/if-root-exists.sh mkdir -p /tmp/trusty/certs &&
+        mkdir -p /tmp/trusty/certs &&
+        cp /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem /tmp/trusty/certs/trusty_dev_root_ca.pem &&
         /opt/trusty/bin/gen_test_certs.sh
         --hsm-config /opt/trusty/tests/aws-test-kms.json
-        --ca-config /opt/trusty/etc/prod/ca-config.bootstrap.yaml
-        --out-dir /var/trusty/certs
-        --csr-dir /opt/trusty/etc/prod/csr
-        --root-ca /var/trusty/roots/trusty_root_ca.pem
-        --root-ca-key /var/trusty/roots/trusty_root_ca-key.pem
-        --prefix trusty_
+        --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml
+        --out-dir /tmp/trusty/certs
+        --csr-dir /opt/trusty/etc/dev/csr_profile
+        --root-ca /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem
+        --root-ca-key /opt/trusty/etc/dev/roots/trusty_dev_root_ca-key.pem
+        --prefix trusty_dev_
         --san 10.77.88.102
-        --ca1 --ca2 --bundle --peer --force &&
+        --ca1 --ca2 --bundle --client --peer --force &&
         /opt/trusty/bin/trusty --std
         --hsm-cfg=/opt/trusty/tests/aws-test-kms.json
-        --cfg=/opt/trusty/etc/prod/trusty-config.yaml
+        --cfg=/opt/trusty/etc/dev/trusty-config.yaml
+        --sql=env://TRUSTY_SQL_CONN
         --logs-dir=/var/trusty/logs
         --audit-dir=/var/trusty/audit
         --host-name=10.77.88.102
@@ -182,11 +188,12 @@ services:
         aliases:
           - tester.trusty.ca
     volumes:
-      - trusty-shared-certs:/var/trusty/roots
       # Mounts the volumes from build container to the container in test
       # docker-compose command runs with ./scripts/integration as CWD, 
       # the source path in the volume definitions are relative to ./scripts/integration
       - ./tests:/opt/trusty/tests
+      - ../../etc/dev:/opt/trusty/etc/dev
+      - ../../scripts/sql/postgres/migrations:/opt/trusty/scripts/sql/postgres/migrations
     depends_on:
       - trusty-node1
       - trusty-node2
@@ -203,7 +210,8 @@ services:
       - /bin/bash
       - -c
       - >-
-        mkdir -p /tmp/trusty/softhsm/tokens /var/trusty/certs &&
+        mkdir -p /tmp/trusty/softhsm/tokens /tmp/trusty/certs &&
+        cp /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem /tmp/trusty/certs/trusty_dev_root_ca.pem &&
         /opt/trusty/bin/sql/postgres/create_sql.sh 10.77.88.100 5432 postgres postgres
         /opt/trusty/bin/config-softhsm.sh
         --tokens-dir /tmp/trusty/softhsm/tokens
@@ -213,11 +221,11 @@ services:
         --delete --list-slots --list-object &&
         /opt/trusty/bin/gen_test_certs.sh
         --hsm-config inmem
-        --ca-config /opt/trusty/etc/prod/ca-config.bootstrap.yaml
-        --out-dir /var/trusty/certs
-        --csr-dir /opt/trusty/etc/prod/csr
-        --root-ca /var/trusty/roots/trusty_root_ca.pem
-        --root-ca-key /var/trusty/roots/trusty_root_ca-key.pem
-        --prefix trusty_
+        --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml
+        --out-dir /tmp/trusty/certs
+        --csr-dir /opt/trusty/etc/dev/csr_profile
+        --root-ca /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem
+        --root-ca-key /opt/trusty/etc/dev/roots/trusty_dev_root_ca-key.pem
+        --prefix trusty_dev_
         --root --ca1 --ca2 --bundle --client --peer &&
         /opt/trusty/tests/if-trusty-ready.sh /opt/trusty/tests/run.sh

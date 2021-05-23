@@ -101,22 +101,23 @@ gen_test_certs:
 		--hsm-config /tmp/trusty/softhsm/unittest_hsm.json \
 		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.yaml \
 		--out-dir /tmp/trusty/certs \
-		--csr-dir $(PROJ_ROOT)/etc/dev/csr \
+		--csr-dir $(PROJ_ROOT)/etc/dev/csr_profile \
 		--prefix $(PROJ_NAME)_untrusted_ \
 		--root-ca /tmp/trusty/certs/trusty_untrusted_root_ca.pem \
 		--root-ca-key /tmp/trusty/certs/trusty_untrusted_root_ca-key.pem \
-		--root --ca1 --ca2 --bundle --peer --force
+		--root --ca1 --ca2 --bundle --client --force
 	echo "*** generating test CAs"
-	rm -f /tmp/trusty/certs/$(PROJ_NAME)_dev_peer*
+	tar -xzvf $(PROJ_ROOT)/etc/dev/roots/trusty_dev_root_ca-key.pem.tar.gz -C $(PROJ_ROOT)/etc/dev/roots/
 	./scripts/build/gen_test_certs.sh \
 		--hsm-config /tmp/trusty/softhsm/unittest_hsm.json \
 		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.yaml \
 		--out-dir /tmp/trusty/certs \
-		--csr-dir $(PROJ_ROOT)/etc/dev/csr \
+		--csr-dir $(PROJ_ROOT)/etc/dev/csr_profile \
 		--prefix $(PROJ_NAME)_dev_ \
-		--root-ca /tmp/trusty/certs/trusty_dev_root_ca.pem \
-		--root-ca-key /tmp/trusty/certs/trusty_dev_root_ca-key.pem \
-		--root --ca1 --ca2  --bundle --peer --force
+		--root-ca $(PROJ_ROOT)/etc/dev/roots/trusty_dev_root_ca.pem \
+		--root-ca-key $(PROJ_ROOT)/etc/dev/roots/trusty_dev_root_ca-key.pem \
+		--ca1 --ca2  --bundle --peer --client --force
+	cp $(PROJ_ROOT)/etc/dev/roots/trusty_dev_root_ca.pem /tmp/trusty/certs/trusty_dev_root_ca.pem
 
 start-local-kms:
 	# Container state will be true (it's already running), false (exists but stopped), or missing (does not exist).
@@ -167,7 +168,7 @@ preprpm: change_log
 	rm -rf .rpm
 	mkdir -p .rpm/dist
 	mkdir -p .rpm/trusty/opt/trusty/bin/sql/postgres/migrations
-	mkdir -p .rpm/trusty/opt/trusty/etc/prod/csr
+	mkdir -p .rpm/trusty/opt/trusty/etc/prod/csr_profile
 	# bin
 	cp ./change_log.txt .rpm/trusty/opt/trusty/bin/
 	cp bin/trusty .rpm/trusty/opt/trusty/bin/
@@ -179,7 +180,7 @@ preprpm: change_log
 	# etc
 	# cp etc/prod/*.json .rpm/trusty/opt/trusty/etc/prod/
 	cp etc/prod/*.yaml .rpm/trusty/opt/trusty/etc/prod/
-	cp -R etc/prod/csr/ .rpm/trusty/opt/trusty/etc/prod/
+	cp -R etc/prod/csr_profile/ .rpm/trusty/opt/trusty/etc/prod/
 	# rpm
 	cp ./scripts/rpm/*.sh .rpm/
 	# systemd
