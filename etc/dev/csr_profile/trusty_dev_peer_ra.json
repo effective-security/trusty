@@ -1,7 +1,8 @@
 {
     "san": [
         "localhost",
-        "127.0.0.1"
+        "127.0.0.1",
+        "spifee://trusty/ra"
     ],
     "common_name": "ra.trusty.com",
     "key": {

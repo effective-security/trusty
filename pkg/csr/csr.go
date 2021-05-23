@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"net"
 	"net/mail"
+	"net/url"
 	"strings"
 	"time"
 
@@ -35,6 +36,7 @@ type AllowedFields struct {
 	DNSNames       bool `json:"dns" yaml:"dns"`
 	IPAddresses    bool `json:"ip" yaml:"ip"`
 	EmailAddresses bool `json:"email" yaml:"email"`
+	URIs           bool `json:"uri" yaml:"uri"`
 }
 
 // CertificatePolicy represents the ASN.1 PolicyInformation structure from
@@ -198,6 +200,7 @@ func Parse(csrBytes []byte) (*x509.Certificate, error) {
 		DNSNames:           csrv.DNSNames,
 		IPAddresses:        csrv.IPAddresses,
 		EmailAddresses:     csrv.EmailAddresses,
+		URIs:               csrv.URIs,
 	}
 
 	for _, val := range csrv.Extensions {
@@ -299,10 +302,17 @@ func SetSAN(template *x509.Certificate, SAN []string) {
 		template.IPAddresses = []net.IP{}
 		template.EmailAddresses = []string{}
 		template.DNSNames = []string{}
+		template.URIs = []*url.URL{}
 	}
 
 	for _, san := range SAN {
-		if ip := net.ParseIP(san); ip != nil {
+		if strings.Contains(san, "://") {
+			u, err := url.Parse(san)
+			if err != nil {
+				logger.Errorf("src=SetSAN, uri=%q, err=%q", san, err.Error())
+			}
+			template.URIs = append(template.URIs, u)
+		} else if ip := net.ParseIP(san); ip != nil {
 			template.IPAddresses = append(template.IPAddresses, ip)
 		} else if email, err := mail.ParseAddress(san); err == nil && email != nil {
 			template.EmailAddresses = append(template.EmailAddresses, email.Address)

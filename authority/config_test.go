@@ -45,6 +45,7 @@ func TestLoadInvalidConfigFile(t *testing.T) {
 		{"testdata/invalid_nousage.json", "invalid configuration: invalid no_usage_profile profile: no usages specified"},
 		{"testdata/invalid_allowedname.json", "invalid configuration: invalid withregex profile: failed to compile AllowedNames: error parsing regexp: missing closing ]: `[}`"},
 		{"testdata/invalid_dns.json", "invalid configuration: invalid withregex profile: failed to compile AllowedDNS: error parsing regexp: missing closing ]: `[}`"},
+		{"testdata/invalid_uri.json", "invalid configuration: invalid withregex profile: failed to compile AllowedURI: error parsing regexp: missing closing ]: `[}`"},
 		{"testdata/invalid_email.json", "invalid configuration: invalid withregex profile: failed to compile AllowedEmail: error parsing regexp: missing closing ]: `[}`"},
 		{"testdata/invalid_qualifier.json", "invalid configuration: invalid with-qt profile: invalid policy qualifier type: qt-type"},
 	}
@@ -101,6 +102,7 @@ func TestCertProfile(t *testing.T) {
 		AllowedNames: "trusty*",
 		AllowedDNS:   "^(www\\.)?trusty\\.com$",
 		AllowedEmail: "^ca@trusty\\.com$",
+		AllowedURI:   "^spifee://trysty/.*$",
 		AllowedExtensions: []csr.OID{
 			{1, 1000, 1, 1},
 			{1, 1000, 1, 3},

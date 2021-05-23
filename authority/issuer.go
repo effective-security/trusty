@@ -262,6 +262,9 @@ func (ca *Issuer) Sign(req csr.SignRequest) (*x509.Certificate, []byte, error) {
 		if profile.AllowedCSRFields.IPAddresses {
 			safeTemplate.IPAddresses = csrTemplate.IPAddresses
 		}
+		if profile.AllowedCSRFields.URIs {
+			safeTemplate.URIs = csrTemplate.URIs
+		}
 		if profile.AllowedCSRFields.EmailAddresses {
 			safeTemplate.EmailAddresses = csrTemplate.EmailAddresses
 		}
@@ -311,6 +314,14 @@ func (ca *Issuer) Sign(req csr.SignRequest) (*x509.Certificate, []byte, error) {
 		for _, name := range safeTemplate.EmailAddresses {
 			if !profile.AllowedEmailRegex.Match([]byte(name)) {
 				return nil, nil, errors.New("Email does not match allowed list: " + name)
+			}
+		}
+	}
+	if profile.AllowedURIRegex != nil {
+		for _, u := range safeTemplate.URIs {
+			uri := u.String()
+			if !profile.AllowedURIRegex.Match([]byte(uri)) {
+				return nil, nil, errors.New("URI does not match allowed list: " + uri)
 			}
 		}
 	}
@@ -396,8 +407,8 @@ func (ca *Issuer) sign(template *x509.Certificate) ([]byte, error) {
 		return nil, errors.Annotatef(err, "create certificate")
 	}
 
-	logger.Infof("src=sign, serial=%d, CN=%q",
-		template.SerialNumber, template.Subject.CommonName)
+	logger.Infof("src=sign, serial=%d, CN=%q, URI=%v, DNS=%v, Email=%v",
+		template.SerialNumber, template.Subject.CommonName, template.URIs, template.DNSNames, template.EmailAddresses)
 
 	cert := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
 	return cert, nil

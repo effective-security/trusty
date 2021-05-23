@@ -10,6 +10,8 @@ import (
 	"encoding/pem"
 	"net"
 	"net/mail"
+	"net/url"
+	"strings"
 
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
@@ -118,7 +120,13 @@ func (c *Provider) GenerateKeyAndRequest(req *CertificateRequest) (csrPEM []byte
 	}
 
 	for _, san := range req.SAN {
-		if ip := net.ParseIP(san); ip != nil {
+		if strings.Contains(san, "://") {
+			u, err := url.Parse(san)
+			if err != nil {
+				logger.Errorf("src=SetSAN, uri=%q, err=%q", san, err.Error())
+			}
+			template.URIs = append(template.URIs, u)
+		} else if ip := net.ParseIP(san); ip != nil {
 			template.IPAddresses = append(template.IPAddresses, ip)
 		} else if email, err := mail.ParseAddress(san); err == nil && email != nil {
 			template.EmailAddresses = append(template.EmailAddresses, email.Address)

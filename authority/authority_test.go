@@ -202,11 +202,13 @@ func (s *testSuite) TestIssuerSign() {
 				AllowedNames: "^[Tt]rusty CA$",
 				AllowedDNS:   "^trusty\\.com$",
 				AllowedEmail: "^ca@trusty\\.com$",
+				AllowedURI:   "^spifee://trusty/.*$",
 				AllowedCSRFields: &csr.AllowedFields{
 					Subject:        true,
 					DNSNames:       true,
 					IPAddresses:    true,
 					EmailAddresses: true,
+					URIs:           true,
 				},
 			},
 			"RestrictedServer": {
@@ -216,11 +218,13 @@ func (s *testSuite) TestIssuerSign() {
 				AllowedNames: "trusty.com",
 				AllowedDNS:   "^(www\\.)?trusty\\.com$",
 				AllowedEmail: "^ca@trusty\\.com$",
+				AllowedURI:   "^spifee://trusty/.*$",
 				AllowedCSRFields: &csr.AllowedFields{
 					Subject:        true,
 					DNSNames:       true,
 					IPAddresses:    true,
 					EmailAddresses: true,
+					URIs:           true,
 				},
 				AllowedExtensions: []csr.OID{
 					{1, 3, 6, 1, 5, 5, 7, 1, 1},
@@ -231,9 +235,11 @@ func (s *testSuite) TestIssuerSign() {
 				Expiry:       1 * csr.OneYear,
 				Backdate:     0,
 				AllowedNames: "trusty.com",
+				AllowedURI:   "^spifee://trusty/.*$",
 				AllowedCSRFields: &csr.AllowedFields{
 					Subject:  true,
 					DNSNames: true,
+					URIs:     true,
 				},
 				AllowedExtensions: []csr.OID{
 					{1, 2, 3},
@@ -252,7 +258,7 @@ func (s *testSuite) TestIssuerSign() {
 	s.Run("default", func() {
 		req := csr.CertificateRequest{
 			CommonName: "trusty.com",
-			SAN:        []string{"www.trusty.com", "127.0.0.1", "server@trusty.com"},
+			SAN:        []string{"www.trusty.com", "127.0.0.1", "server@trusty.com", "spifee://trusty/test"},
 			KeyRequest: kr,
 		}
 
@@ -261,6 +267,7 @@ func (s *testSuite) TestIssuerSign() {
 
 		sreq := csr.SignRequest{
 			Request: string(csrPEM),
+			SAN:     req.SAN,
 			Extensions: []csr.X509Extension{
 				{
 					ID:    csr.OID{1, 2, 3},
@@ -275,6 +282,10 @@ func (s *testSuite) TestIssuerSign() {
 		s.Equal(rootReq.CommonName, crt.Issuer.CommonName)
 		s.False(crt.IsCA)
 		s.Equal(-1, crt.MaxPathLen)
+		s.NotEmpty(crt.IPAddresses)
+		s.NotEmpty(crt.EmailAddresses)
+		s.NotEmpty(crt.DNSNames)
+		s.NotEmpty(crt.URIs)
 
 		// test unknown profile
 		sreq.Profile = "unknown"
@@ -339,7 +350,7 @@ func (s *testSuite) TestIssuerSign() {
 		caReq := csr.CertificateRequest{
 			CommonName: "trusty CA",
 			KeyRequest: kr,
-			SAN:        []string{"ca@trustry.com", "trustyca.com", "127.0.0.1"},
+			SAN:        []string{"ca@trusty.com", "trustyca.com", "127.0.0.1"},
 			Names: []csr.X509Name{
 				{
 					O: "trusty",
@@ -359,6 +370,33 @@ func (s *testSuite) TestIssuerSign() {
 		_, _, err = rootCA.Sign(sreq)
 		s.Require().Error(err)
 		s.Equal("DNS Name does not match allowed list: trustyca.com", err.Error())
+	})
+
+	s.Run("RestrictedCA/NotAllowedURI", func() {
+		caReq := csr.CertificateRequest{
+			CommonName: "trusty CA",
+			KeyRequest: kr,
+			SAN:        []string{"ca@trusty.com", "127.0.0.1", "spifee://google.com/ca"},
+			Names: []csr.X509Name{
+				{
+					O: "trusty",
+					C: "US",
+				},
+			},
+		}
+
+		caCsrPEM, _, _, _, err := csr.NewProvider(crypto).CreateRequestAndExportKey(&caReq)
+		s.Require().NoError(err)
+
+		sreq := csr.SignRequest{
+			SAN:     caReq.SAN,
+			Request: string(caCsrPEM),
+			Profile: "RestrictedCA",
+		}
+
+		_, _, err = rootCA.Sign(sreq)
+		s.Require().Error(err)
+		s.Equal("URI does not match allowed list: spifee://google.com/ca", err.Error())
 	})
 
 	s.Run("RestrictedCA/NotAllowedEmail", func() {

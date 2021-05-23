@@ -105,6 +105,7 @@ message CSRAllowedFields {
 	bool dns = 2;
 	bool ip = 3;
 	bool email = 4;
+    bool uri = 5;
 }
 
 // CertProfile provides certificate profile
@@ -123,16 +124,20 @@ message CertProfile {
 	repeated string allowed_extensions = 7;
 
 	// AllowedNames specifies a RegExp to check for allowed names.
-	// If not provided, then all names are allowed
+	// If not provided, then all values are allowed
 	string allowed_names = 8;
 
 	// AllowedDns specifies a RegExp to check for allowed DNS.
-	// If not provided, then all names are allowed
+	// If not provided, then all values are allowed
 	string allowed_dns = 9;
 
 	// AllowedEmail specifies a RegExp to check for allowed email.
-	// If not provided, then all names are allowed
+	// If not provided, then all values are allowed
 	string allowed_email = 10;
+
+	// AllowedUri specifies a RegExp to check for allowed URI.
+	// If not provided, then all values are allowed
+	string allowed_uri = 11;
 
 	// AllowedFields provides booleans for fields in the CSR.
 	// If a AllowedFields is not present in a CertProfile,
@@ -145,7 +150,7 @@ message CertProfile {
 	// Since API clients are expected to be trusted, but CSRs are not, fields
 	// provided through the API are not subject to validation through this
 	// mechanism.
-	CSRAllowedFields allowed_fields = 11;
+	CSRAllowedFields allowed_fields = 12;
 
     // TODO
 	// Policies []csr.CertificatePolicy `json:"policies"`

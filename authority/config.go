@@ -170,16 +170,20 @@ type CertProfile struct {
 	AllowedExtensions []csr.OID `json:"allowed_extensions" yaml:"allowed_extensions"`
 
 	// AllowedNames specifies a RegExp to check for allowed names.
-	// If not provided, then all names are allowed
+	// If not provided, then all values are allowed
 	AllowedNames string `json:"allowed_names" yaml:"allowed_names"`
 
 	// AllowedDNS specifies a RegExp to check for allowed DNS.
-	// If not provided, then all names are allowed
+	// If not provided, then all values are allowed
 	AllowedDNS string `json:"allowed_dns" yaml:"allowed_dns"`
 
 	// AllowedEmail specifies a RegExp to check for allowed email.
-	// If not provided, then all names are allowed
+	// If not provided, then all values are allowed
 	AllowedEmail string `json:"allowed_email" yaml:"allowed_email"`
+
+	// AllowedURI specifies a RegExp to check for allowed URI.
+	// If not provided, then all values are allowed
+	AllowedURI string `json:"allowed_uri" yaml:"allowed_uri"`
 
 	// AllowedFields provides booleans for fields in the CSR.
 	// If a AllowedFields is not present in a CertProfile,
@@ -203,6 +207,7 @@ type CertProfile struct {
 	AllowedNamesRegex *regexp.Regexp `json:"-" yaml:"-"`
 	AllowedDNSRegex   *regexp.Regexp `json:"-" yaml:"-"`
 	AllowedEmailRegex *regexp.Regexp `json:"-" yaml:"-"`
+	AllowedURIRegex   *regexp.Regexp `json:"-" yaml:"-"`
 }
 
 // CAConstraint specifies various CA constraints on the signed certificate.
@@ -377,6 +382,14 @@ func (p *CertProfile) Validate() error {
 		}
 		p.AllowedEmailRegex = rule
 	}
+	if p.AllowedURI != "" && p.AllowedURIRegex == nil {
+		rule, err := regexp.Compile(p.AllowedURI)
+		if err != nil {
+			return errors.Annotate(err, "failed to compile AllowedURI")
+		}
+		p.AllowedURIRegex = rule
+	}
+
 	return nil
 }
 

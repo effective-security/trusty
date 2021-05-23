@@ -7,7 +7,6 @@ import (
 	"time"
 
 	v1 "github.com/ekspand/trusty/api/v1"
-	"github.com/ekspand/trusty/pkg/roles"
 	"github.com/ekspand/trusty/pkg/roles/jwtmapper"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/stretchr/testify/assert"
@@ -101,7 +100,7 @@ func Test_Sign(t *testing.T) {
 
 		id, err := p.IdentityMapper(r)
 		require.NoError(t, err)
-		assert.Equal(t, roles.TrustyClient, id.Role())
+		assert.Equal(t, "trusty-client", id.Role())
 		assert.Equal(t, userInfo.Email, id.Name())
 		assert.Equal(t, "123", id.UserID())
 	})
@@ -122,7 +121,7 @@ func Test_Sign(t *testing.T) {
 
 		id, err := p.IdentityFromContext(ctx)
 		require.NoError(t, err)
-		assert.Equal(t, roles.TrustyClient, id.Role())
+		assert.Equal(t, "trusty-client", id.Role())
 		assert.Equal(t, userInfo.Email, id.Name())
 		assert.Equal(t, "123", id.UserID())
 	})
@@ -142,7 +141,7 @@ func Test_Sign(t *testing.T) {
 
 		id, err := p.IdentityMapper(r)
 		require.NoError(t, err)
-		assert.Equal(t, roles.TrustyAdmin, id.Role())
+		assert.Equal(t, "trusty-admin", id.Role())
 		assert.Equal(t, userInfo.Email, id.Name())
 	})
 

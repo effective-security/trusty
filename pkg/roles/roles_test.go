@@ -101,7 +101,7 @@ func Test_All(t *testing.T) {
 
 		id, err := p.IdentityMapper(r)
 		require.NoError(t, err)
-		assert.Equal(t, roles.TrustyClient, id.Role())
+		assert.Equal(t, "trusty-client", id.Role())
 		assert.Equal(t, userInfo.Email, id.Name())
 		assert.Equal(t, "123", id.UserID())
 	})
@@ -120,7 +120,7 @@ func Test_All(t *testing.T) {
 
 		id, err := p.IdentityFromContext(ctx)
 		require.NoError(t, err)
-		assert.Equal(t, roles.TrustyClient, id.Role())
+		assert.Equal(t, "trusty-client", id.Role())
 		assert.Equal(t, userInfo.Email, id.Name())
 		assert.Equal(t, "123", id.UserID())
 	})
