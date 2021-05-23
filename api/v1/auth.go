@@ -21,11 +21,12 @@ type UserInfo struct {
 	Login      string `json:"login"`
 	Name       string `json:"name"`
 	Email      string `json:"email"`
-	Company    string `json:"company"`
-	AvatarURL  string `json:"avatar_url"`
+	Company    string `json:"company,omitempty"`
+	AvatarURL  string `json:"avatar_url,omitempty"`
 }
 
 // Authorization is returned to the client in token refresh response
+// TODO: add refresf token
 type Authorization struct {
 	Version     string    `json:"version"`
 	DeviceID    string    `json:"device_id"`
