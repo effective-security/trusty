@@ -46,8 +46,8 @@ type Configuration struct {
 	// SQL specifies the configuration for SQL provider
 	SQL SQL `json:"sql" yaml:"sql"`
 
-	// Identity contains configuration for the identity mapper
-	Identity Identity `json:"identity" yaml:"identity"`
+	// JWT specifies configuration file for the JWT provider
+	JWT string `json:"jwt_provider" yaml:"jwt_provider"`
 
 	// Authority specifies configuration file for CA
 	Authority string `json:"authority" yaml:"authority"`

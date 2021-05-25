@@ -67,7 +67,7 @@ func TestMain(m *testing.M) {
 	container := testutils.NewContainerBuilder().
 		WithAuditor(nil).
 		WithCrypto(nil).
-		WithIdentity(nil).
+		WithJwtParser(nil).
 		Container()
 	trustyServer, err = gserver.Start("StatusTest", cfg, container, serviceFactories)
 	if err != nil || trustyServer == nil {

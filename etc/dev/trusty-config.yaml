@@ -62,6 +62,8 @@ crypto_provider:
     - SoftHSM
     - Gemalto NV
 
+jwt_provider: ${TRUSTY_CONFIG_DIR}/jwt-provider.yaml
+
 sql:
   # the driver name: postgres|mysql
   driver: postgres
@@ -70,15 +72,6 @@ sql:
   # the directory that contains migrations.
   migrations_dir: ${TRUSTY_CONFIG_DIR}/../../scripts/sql/postgres/migrations
         
-# configuration for the Identity mappers
-identity:
-  # location of the config file for certificate based identity
-  cert_mapper: cert-roles.dev.yaml
-  # location of the config file for JWT based identity
-  jwt_mapper: jwt-roles.dev.yaml
-  # location of the config file for API-Key based identity
-  api_key_mapper:
-
 # the configuration files for OAuth clients    
 oauth_clients:
   - oauth-github.dev.yaml
@@ -155,6 +148,12 @@ servers:
       log_allowed: true
       # specifies to log denied access
       log_denied: true
+    # configuration for the Identity mappers
+    identity_map:
+      tls:
+        enabled:  false
+      jwt:
+        enabled:  false
 
   wfe:
     description: Web Front End
@@ -200,6 +199,27 @@ servers:
       log_allowed: true
       # specifies to log denied access
       log_denied: true
+    # configuration for the Identity mappers
+    identity_map:
+      tls:
+        enabled:  true
+        default_authenticated_role: authenticated_tls
+        roles:
+          trusty-cis:
+            - spifee://trusty/cis
+          trusty-ca:
+            - spifee://trusty/ca
+          trusty-ra:
+            - spifee://trusty/ra
+          trusty-wfe:
+            - spifee://trusty/wfe
+      jwt:
+        enabled:  true
+        audience: trusty-wfe
+        default_authenticated_role: authenticated_jwt
+        roles:
+          trusty-admin:
+          - denis@ekspand.com
 
   ca:
     description: Certification Authority
@@ -234,8 +254,8 @@ servers:
       # /v1/* is allowed
       allow_any:
       # allow any authenticated request that includes a non empty role
-      allow_any_role:
         - /pb.StatusService
+      allow_any_role:
         - /pb.AuthorityService/ProfileInfo
         - /pb.AuthorityService/Issuers
       # allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
@@ -247,6 +267,27 @@ servers:
       log_allowed: true
       # specifies to log denied access
       log_denied: true
+    # configuration for the Identity mappers
+    identity_map:
+      tls:
+        enabled:  true
+        default_authenticated_role: authenticated_tls
+        roles:
+          trusty-cis:
+            - spifee://trusty/cis
+          trusty-ca:
+            - spifee://trusty/ca
+          trusty-ra:
+            - spifee://trusty/ra
+          trusty-wfe:
+            - spifee://trusty/wfe
+      jwt:
+        enabled: true
+        audience: trusty-ca
+        default_authenticated_role: authenticated_jwt
+        roles:
+          trusty-admin:
+          - denis@ekspand.com
 
 trusty_client: 
   client_tls:

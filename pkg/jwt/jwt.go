@@ -16,12 +16,22 @@ import (
 
 var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "jwt")
 
-// Provider specifies JWT provider interface
-type Provider interface {
+// Signer specifies JWT signer interface
+type Signer interface {
 	// SignToken returns signed JWT token
 	SignToken(subject, audience string, expiry time.Duration) (string, *jwt.StandardClaims, error)
+}
+
+// Parser specifies JWT parser interface
+type Parser interface {
 	// ParseToken returns jwt.StandardClaims
 	ParseToken(authorization, audience string) (*jwt.StandardClaims, error)
+}
+
+// Provider specifies JWT provider interface
+type Provider interface {
+	Signer
+	Parser
 }
 
 // Key for JWT signature

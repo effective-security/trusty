@@ -40,6 +40,9 @@ type HTTPServer struct {
 	// HeartbeatSecs specifies heartbeat interval in seconds [5 secs is a minimum]
 	HeartbeatSecs int `json:"heartbeat_secs" yaml:"heartbeat_secs"`
 
+	// IdentityMap contains configuration for the roles
+	IdentityMap IdentityMap `json:"identity_map" yaml:"identity_map"`
+
 	// Authz contains configuration for the authorization module
 	Authz Authz `json:"authz" yaml:"authz"`
 

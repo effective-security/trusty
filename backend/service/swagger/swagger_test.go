@@ -62,7 +62,7 @@ func TestMain(m *testing.M) {
 	container := testutils.NewContainerBuilder().
 		WithAuditor(nil).
 		WithCrypto(nil).
-		WithIdentity(nil).
+		WithJwtParser(nil).
 		Container()
 
 	trustyServer, err = gserver.Start("SwaggerTest", cfg, container, serviceFactories)
