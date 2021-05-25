@@ -1,7 +1,7 @@
 package testutils
 
 import (
-	"github.com/ekspand/trusty/pkg/roles"
+	"github.com/ekspand/trusty/pkg/jwt"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"go.uber.org/dig"
@@ -24,14 +24,6 @@ func (b *ContainerBuilder) Container() *dig.Container {
 	return b.container
 }
 
-// WithIdentity sets roles.Provider
-func (b *ContainerBuilder) WithIdentity(identity *roles.Provider) *ContainerBuilder {
-	b.container.Provide(func() *roles.Provider {
-		return identity
-	})
-	return b
-}
-
 // WithAuditor sets Auditor
 func (b *ContainerBuilder) WithAuditor(auditor audit.Auditor) *ContainerBuilder {
 	b.container.Provide(func() audit.Auditor {
@@ -44,6 +36,22 @@ func (b *ContainerBuilder) WithAuditor(auditor audit.Auditor) *ContainerBuilder 
 func (b *ContainerBuilder) WithCrypto(crypto *cryptoprov.Crypto) *ContainerBuilder {
 	b.container.Provide(func() *cryptoprov.Crypto {
 		return crypto
+	})
+	return b
+}
+
+// WithJwtSigner sets JWT Signer
+func (b *ContainerBuilder) WithJwtSigner(j jwt.Signer) *ContainerBuilder {
+	b.container.Provide(func() jwt.Signer {
+		return j
+	})
+	return b
+}
+
+// WithJwtParser sets JWT Parser
+func (b *ContainerBuilder) WithJwtParser(j jwt.Parser) *ContainerBuilder {
+	b.container.Provide(func() jwt.Parser {
+		return j
 	})
 	return b
 }

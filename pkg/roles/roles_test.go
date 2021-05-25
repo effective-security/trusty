@@ -4,12 +4,12 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"crypto/x509/pkix"
 	"net/http"
+	"net/url"
 	"testing"
-	"time"
 
-	v1 "github.com/ekspand/trusty/api/v1"
+	jwtjwt "github.com/dgrijalva/jwt-go"
+	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/roles"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/identity"
@@ -21,61 +21,82 @@ import (
 )
 
 func Test_Empty(t *testing.T) {
-	p, err := roles.New("", "")
+	p, err := roles.New(&config.IdentityMap{}, nil)
 	require.NoError(t, err)
 
 	r, _ := http.NewRequest(http.MethodGet, "/", nil)
-	id, err := p.IdentityMapper(r)
+	id, err := p.IdentityFromRequest(r)
 	require.NoError(t, err)
 	require.NotNil(t, id)
 	assert.Equal(t, identity.GuestRoleName, id.Role())
 }
 
-func Test_Notfound(t *testing.T) {
-	_, err := roles.New("", "missing_roles.json")
-	require.Error(t, err)
-	assert.Equal(t, "failed to load cert mapper missing_roles.json: open missing_roles.json: no such file or directory", err.Error())
-
-	_, err = roles.New("missing_roles.json", "")
-	require.Error(t, err)
-	assert.Equal(t, "failed to load JWT mapper: open missing_roles.json: no such file or directory", err.Error())
-}
-
 func Test_All(t *testing.T) {
-	p, err := roles.New(
-		"jwtmapper/testdata/roles.json",
-		"certmapper/testdata/roles.json")
+	mock := mockJWT{
+		claims: &jwtjwt.StandardClaims{
+			Subject: "denis@trusty.com",
+		},
+		err: nil,
+	}
+
+	p, err := roles.New(&config.IdentityMap{
+		TLS: config.TLSIdentityMap{
+			Enabled:                  true,
+			DefaultAuthenticatedRole: "tls_authenticated",
+			Roles: map[string][]string{
+				"trusty-client": {"spifee://trusty/client"},
+			},
+		},
+		JWT: config.JWTIdentityMap{
+			Enabled:                  true,
+			DefaultAuthenticatedRole: "jwt_authenticated",
+			Roles: map[string][]string{
+				"trusty-client": {"denis@trusty.ca"},
+			},
+		},
+	}, mock)
 	require.NoError(t, err)
 
-	t.Run("trusty-client", func(t *testing.T) {
+	t.Run("default role http", func(t *testing.T) {
 		r, _ := http.NewRequest(http.MethodGet, "/", nil)
+		setAuthorizationHeader(r, "AccessToken123")
+		assert.True(t, p.ApplicableForRequest(r))
+
+		id, err := p.IdentityFromRequest(r)
+		require.NoError(t, err)
+		assert.Equal(t, "jwt_authenticated", id.Role())
+		assert.Equal(t, "denis@trusty.com", id.Name())
+		assert.Empty(t, id.UserID())
+	})
+
+	t.Run("default role grpc", func(t *testing.T) {
+		ctx := context.Background()
+		assert.False(t, p.ApplicableForContext(ctx))
+		ctx = metadata.NewIncomingContext(ctx, metadata.Pairs("authorization", "AccessToken123"))
+
+		id, err := p.IdentityFromContext(ctx)
+		require.NoError(t, err)
+		assert.Equal(t, "jwt_authenticated", id.Role())
+		assert.Equal(t, "denis@trusty.com", id.Name())
+		assert.Empty(t, id.UserID())
+	})
+
+	t.Run("tls:trusty-client", func(t *testing.T) {
+		r, _ := http.NewRequest(http.MethodGet, "/", nil)
+
+		u, _ := url.Parse("spifee://trusty/client")
 		state := &tls.ConnectionState{
-			VerifiedChains: [][]*x509.Certificate{
-				{
-					{
-						Subject: pkix.Name{
-							CommonName: "[TEST] Trusty Root CA",
-						},
-					},
-				},
-			},
 			PeerCertificates: []*x509.Certificate{
 				{
-					Subject: pkix.Name{
-						CommonName:   "ra-1.trusty.com",
-						Organization: []string{"trusty.com"},
-						Country:      []string{"US"},
-						Province:     []string{"wa"},
-						Locality:     []string{"Kirkland"},
-					},
+					URIs: []*url.URL{u},
 				},
 			},
 		}
 		r.TLS = state
 
-		id, err := p.IdentityMapper(r)
+		id, err := p.IdentityFromRequest(r)
 		require.NoError(t, err)
-		assert.Equal(t, "trusty-client/ra-*.trusty.com", id.String())
+		assert.Equal(t, "trusty-client", id.Role())
 
 		//
 		// gRPC
@@ -83,47 +104,104 @@ func Test_All(t *testing.T) {
 		ctx := createPeerContext(context.Background(), state)
 		id, err = p.IdentityFromContext(ctx)
 		require.NoError(t, err)
-		assert.Equal(t, "trusty-client/ra-*.trusty.com", id.String())
+		assert.Equal(t, "trusty-client", id.Role())
 	})
+}
+
+func TestTLSOnly(t *testing.T) {
+	p, err := roles.New(&config.IdentityMap{
+		TLS: config.TLSIdentityMap{
+			Enabled:                  true,
+			DefaultAuthenticatedRole: "tls_authenticated",
+			Roles: map[string][]string{
+				"trusty-client": {"spifee://trusty/client"},
+			},
+		},
+	}, nil)
+	require.NoError(t, err)
 
 	t.Run("default role http", func(t *testing.T) {
-		userInfo := &v1.UserInfo{
-			ID:    "123",
-			Email: "daniel@ekspand.com",
-		}
-
-		auth, err := p.JwtMapper.SignToken(userInfo, "device123", time.Minute)
-		require.NoError(t, err)
-
 		r, _ := http.NewRequest(http.MethodGet, "/", nil)
-		setAuthorizationHeader(r, auth.AccessToken, "device123")
-		assert.True(t, p.JwtMapper.Applicable(r))
+		setAuthorizationHeader(r, "AccessToken123")
+		assert.False(t, p.ApplicableForRequest(r))
 
-		id, err := p.IdentityMapper(r)
+		id, err := p.IdentityFromRequest(r)
 		require.NoError(t, err)
-		assert.Equal(t, "trusty-client", id.Role())
-		assert.Equal(t, userInfo.Email, id.Name())
-		assert.Equal(t, "123", id.UserID())
+		assert.Equal(t, "guest", id.Role())
+		assert.NotEmpty(t, id.Name())
+		assert.Empty(t, id.UserID())
 	})
+
 	t.Run("default role grpc", func(t *testing.T) {
-		userInfo := &v1.UserInfo{
-			ID:    "123",
-			Email: "daniel@ekspand.com",
-		}
-
-		auth, err := p.JwtMapper.SignToken(userInfo, "device123", time.Minute)
-		require.NoError(t, err)
-
 		ctx := context.Background()
-		assert.False(t, p.JwtMapper.ApplicableForContext(ctx))
-		ctx = metadata.NewIncomingContext(ctx, metadata.Pairs("authorization", auth.AccessToken, "x-device-id", "local"))
+		assert.False(t, p.ApplicableForContext(ctx))
+		ctx = metadata.NewIncomingContext(ctx, metadata.Pairs("authorization", "AccessToken123"))
 
 		id, err := p.IdentityFromContext(ctx)
 		require.NoError(t, err)
-		assert.Equal(t, "trusty-client", id.Role())
-		assert.Equal(t, userInfo.Email, id.Name())
-		assert.Equal(t, "123", id.UserID())
+		assert.Equal(t, "guest", id.Role())
+		assert.Empty(t, id.Name())
+		assert.Empty(t, id.UserID())
 	})
+
+	t.Run("tls:trusty-client", func(t *testing.T) {
+		r, _ := http.NewRequest(http.MethodGet, "/", nil)
+
+		u, _ := url.Parse("spifee://trusty/client")
+		state := &tls.ConnectionState{
+			PeerCertificates: []*x509.Certificate{
+				{
+					URIs: []*url.URL{u},
+				},
+			},
+		}
+		r.TLS = state
+
+		assert.True(t, p.ApplicableForRequest(r))
+
+		id, err := p.IdentityFromRequest(r)
+		require.NoError(t, err)
+		assert.Equal(t, "trusty-client", id.Role())
+
+		//
+		// gRPC
+		//
+		ctx := createPeerContext(context.Background(), state)
+		assert.True(t, p.ApplicableForContext(ctx))
+		id, err = p.IdentityFromContext(ctx)
+		require.NoError(t, err)
+		assert.Equal(t, "trusty-client", id.Role())
+	})
+
+	t.Run("tls:invalid", func(t *testing.T) {
+		r, _ := http.NewRequest(http.MethodGet, "/", nil)
+
+		u, _ := url.Parse("spifee://trusty/client")
+		state := &tls.ConnectionState{
+			PeerCertificates: []*x509.Certificate{
+				{
+					URIs: []*url.URL{u, u}, // spifee must have only one URI
+				},
+			},
+		}
+		r.TLS = state
+
+		assert.True(t, p.ApplicableForRequest(r))
+
+		id, err := p.IdentityFromRequest(r)
+		require.NoError(t, err)
+		assert.Equal(t, "guest", id.Role())
+
+		//
+		// gRPC
+		//
+		ctx := createPeerContext(context.Background(), state)
+		assert.True(t, p.ApplicableForContext(ctx))
+		id, err = p.IdentityFromContext(ctx)
+		require.NoError(t, err)
+		assert.Equal(t, "guest", id.Role())
+	})
+
 }
 
 func createPeerContext(ctx context.Context, TLS *tls.ConnectionState) context.Context {
@@ -137,9 +215,15 @@ func createPeerContext(ctx context.Context, TLS *tls.ConnectionState) context.Co
 }
 
 // setAuthorizationHeader applies Authorization header
-func setAuthorizationHeader(r *http.Request, token, deviceID string) {
+func setAuthorizationHeader(r *http.Request, token string) {
 	r.Header.Set(header.Authorization, header.Bearer+" "+token)
-	if deviceID != "" {
-		r.Header.Set(header.XDeviceID, deviceID)
-	}
+}
+
+type mockJWT struct {
+	claims *jwtjwt.StandardClaims
+	err    error
+}
+
+func (m mockJWT) ParseToken(authorization, audience string) (*jwtjwt.StandardClaims, error) {
+	return m.claims, m.err
 }

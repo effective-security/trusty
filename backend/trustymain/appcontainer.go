@@ -9,8 +9,8 @@ import (
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/pkg/awskmscrypto"
+	"github.com/ekspand/trusty/pkg/jwt"
 	"github.com/ekspand/trusty/pkg/oauth2client"
-	"github.com/ekspand/trusty/pkg/roles"
 	"github.com/go-phorce/dolly/audit"
 	fauditor "github.com/go-phorce/dolly/audit/log"
 	"github.com/go-phorce/dolly/tasks"
@@ -29,8 +29,8 @@ type ProvideAuditorFn func(cfg *config.Configuration, r CloseRegistrator) (audit
 // ProvideSchedulerFn defines Scheduler provider
 type ProvideSchedulerFn func() (tasks.Scheduler, error)
 
-// ProvideIdentityFn defines Identity provider
-type ProvideIdentityFn func(cfg *config.Configuration) (*roles.Provider, error)
+// ProvideJwtFn defines JWT provider
+type ProvideJwtFn func(cfg *config.Configuration) (jwt.Parser, jwt.Provider, error)
 
 // ProvideOAuthClientsFn defines OAuth clients provider
 type ProvideOAuthClientsFn func(cfg *config.Configuration) (*oauth2client.Provider, error)
@@ -54,11 +54,11 @@ type ContainerFactory struct {
 	app               *App
 	auditorProvider   ProvideAuditorFn
 	schedulerProvider ProvideSchedulerFn
-	identityProvider  ProvideIdentityFn
 	cryptoProvider    ProvideCryptoFn
 	authorityProvider ProvideAuthorityFn
 	dbProvider        ProvideDbFn
 	oauthProvider     ProvideOAuthClientsFn
+	jwtProvider       ProvideJwtFn
 }
 
 // NewContainerFactory returns an instance of ContainerFactory
@@ -77,17 +77,17 @@ func NewContainerFactory(app *App) *ContainerFactory {
 	// configure with default providers
 	return f.
 		WithAuditorProvider(provideAuditor).
-		WithIdentityProvider(provideIdentity).
 		WithSchedulerProvider(defaultSchedulerProv).
 		WithCryptoProvider(provideCrypto).
 		WithAuthorityProvider(provideAuthority).
 		WithDbProvider(provideDB).
-		WithOAuthClientsProvider(provideOAuth)
+		WithOAuthClientsProvider(provideOAuth).
+		WithJwtProvider(provideJwt)
 }
 
-// WithIdentityProvider allows to specify custom Identity
-func (f *ContainerFactory) WithIdentityProvider(p ProvideIdentityFn) *ContainerFactory {
-	f.identityProvider = p
+// WithJwtProvider allows to specify custom JWT provider
+func (f *ContainerFactory) WithJwtProvider(p ProvideJwtFn) *ContainerFactory {
+	f.jwtProvider = p
 	return f
 }
 
@@ -145,7 +145,7 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 		return nil, errors.Trace(err)
 	}
 
-	err = container.Provide(f.identityProvider)
+	err = container.Provide(f.jwtProvider)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -192,20 +192,17 @@ func provideAuditor(cfg *config.Configuration, r CloseRegistrator) (audit.Audito
 	return auditor, nil
 }
 
-func provideIdentity(cfg *config.Configuration) (*roles.Provider, error) {
-	var provider *roles.Provider
+func provideJwt(cfg *config.Configuration) (jwt.Parser, jwt.Provider, error) {
+	var provider jwt.Provider
 	var err error
-	if cfg.Identity.JWTMapper != "" || cfg.Identity.CertMapper != "" {
-		provider, err = roles.New(
-			cfg.Identity.JWTMapper,
-			cfg.Identity.CertMapper,
-		)
+	if cfg.JWT != "" {
+		provider, err = jwt.Load(cfg.JWT)
 		if err != nil {
-			return nil, errors.Trace(err)
+			return nil, nil, errors.Trace(err)
 		}
 	}
 
-	return provider, nil
+	return provider, provider, nil
 }
 
 func provideOAuth(cfg *config.Configuration) (*oauth2client.Provider, error) {

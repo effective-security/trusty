@@ -377,7 +377,7 @@ func configureHandlers(s *Server, handler http.Handler) http.Handler {
 	handler = xhttp.NewRequestMetrics(handler)
 
 	// role/contextID wrapper
-	handler = identity.NewContextHandler(handler, s.identity.IdentityMapper)
+	handler = identity.NewContextHandler(handler, s.identity.IdentityFromRequest)
 
 	return handler
 }

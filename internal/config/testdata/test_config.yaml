@@ -64,15 +64,6 @@ sql:
   # the directory that contains migrations.
   migrations_dir: ../../../scripts/sql/postgres/migrations
 
-# configuration for the Identity mappers
-identity:
-  # location of the config file for certificate based identity
-  cert_mapper: ../../../etc/dev/cert-roles.dev.yaml
-  # location of the config file for JWT based identity
-  jwt_mapper: ../../../etc/dev/jwt-roles.dev.yaml
-  # location of the config file for API-Key based identity
-  api_key_mapper:
-
 # the configuration files for OAuth clients    
 oauth_clients:
   - ../../../etc/dev/oauth-github.dev.yaml

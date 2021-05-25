@@ -6,17 +6,11 @@ import (
 	"time"
 
 	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/internal/db"
-	"github.com/ekspand/trusty/pkg/oauth2client"
-	"github.com/ekspand/trusty/pkg/roles"
 	"github.com/ekspand/trusty/tests/testutils"
-	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
-	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/dig"
 )
 
 func TestStartTrustyEmptyHTTP(t *testing.T) {
@@ -30,7 +24,11 @@ func TestStartTrustyEmptyHTTP(t *testing.T) {
 		},
 	}
 
-	c := createContainer(nil, nil, nil, nil, nil)
+	c := testutils.NewContainerBuilder().
+		WithAuditor(nil).
+		WithCrypto(nil).
+		WithJwtParser(nil).
+		Container()
 
 	fact := map[string]ServiceFactory{
 		"test": testServiceFactory,
@@ -63,27 +61,18 @@ func TestStartTrustyEmptyHTTPS(t *testing.T) {
 		},
 	}
 
-	c := createContainer(nil, nil, nil, nil, nil)
+	c := testutils.NewContainerBuilder().
+		WithAuditor(nil).
+		WithCrypto(nil).
+		WithJwtParser(nil).
+		Container()
+
 	srv, err := Start("EmptyTrustyHTTPS", cfg, c, nil)
 	require.NoError(t, err)
 	require.NotNil(t, srv)
 	defer srv.Close()
 
 	assert.Equal(t, "EmptyTrustyHTTPS", srv.Name())
-}
-
-// TODO: move to testutil.ContainerBuilder
-func createContainer(
-	identity *roles.Provider,
-	auditor audit.Auditor,
-	crypto *cryptoprov.Crypto,
-	data db.Provider,
-	oauth *oauth2client.Provider) *dig.Container {
-	c := dig.New()
-	c.Provide(func() (*roles.Provider, audit.Auditor, *cryptoprov.Crypto, db.Provider, *oauth2client.Provider) {
-		return identity, auditor, crypto, data, oauth
-	})
-	return c
 }
 
 type service struct{}

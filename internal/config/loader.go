@@ -164,6 +164,7 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 
 	filesToResove := []*string{
 		&c.Authority,
+		&c.JWT,
 	}
 
 	for i := range c.OAuthClients {
@@ -183,9 +184,6 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 		&c.TrustyClient.ClientTLS.CertFile,
 		&c.TrustyClient.ClientTLS.KeyFile,
 		&c.TrustyClient.ClientTLS.TrustedCAFile,
-		&c.Identity.CertMapper,
-		&c.Identity.JWTMapper,
-		&c.Identity.APIKeyMapper,
 	}
 	for i := range c.CryptoProv.Providers {
 		optionalFilesToResove = append(optionalFilesToResove, &c.CryptoProv.Providers[i])
@@ -194,7 +192,7 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 	for _, ptr := range dirsToResolve {
 		*ptr, err = resolve.Directory(*ptr, baseDir, false)
 		if err != nil {
-			logger.Errorf("src=LoadConfigForHostName, dir=%q, err=[%v]", *ptr, err.Error())
+			logger.Warningf("src=LoadConfigForHostName, dir=%q, err=[%v]", *ptr, err.Error())
 		}
 	}
 

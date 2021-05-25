@@ -14,9 +14,8 @@ import (
 	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/internal/db/model"
 	"github.com/ekspand/trusty/pkg/gserver"
+	"github.com/ekspand/trusty/pkg/jwt"
 	"github.com/ekspand/trusty/pkg/oauth2client"
-	"github.com/ekspand/trusty/pkg/roles"
-	"github.com/ekspand/trusty/pkg/roles/jwtmapper"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/httperror"
@@ -47,7 +46,7 @@ type Service struct {
 	cfg       *config.Configuration
 	oauthProv *oauth2client.Provider
 	db        db.Provider
-	jwt       *jwtmapper.Provider
+	jwt       jwt.Provider
 }
 
 // Factory returns a factory of the service
@@ -56,13 +55,13 @@ func Factory(server *gserver.Server) interface{} {
 		logger.Panic("status.Factory: invalid parameter")
 	}
 
-	return func(cfg *config.Configuration, oauthProv *oauth2client.Provider, db db.Provider, identity *roles.Provider) error {
+	return func(cfg *config.Configuration, oauthProv *oauth2client.Provider, db db.Provider, jwt jwt.Provider) error {
 		svc := &Service{
 			server:    server,
 			cfg:       cfg,
 			oauthProv: oauthProv,
 			db:        db,
-			jwt:       identity.JwtMapper,
+			jwt:       jwt,
 		}
 
 		if cfg.Github.BaseURL != "" {
@@ -260,13 +259,14 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 				oauthStatus.DeviceID, uemail, validFor)
 		}
 
-		auth, err := s.jwt.SignToken(dto, oauthStatus.DeviceID, validFor)
+		// TODO: add Audience to config
+		tokenStr, _, err := s.jwt.SignToken(user.Email, "trusty-wfe", validFor)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("failed to sign JWT: %s", err.Error()).WithCause(err))
 			return
 		}
 
-		redirect := fmt.Sprintf("%s?code=%s&device_id=%s", oauthStatus.RedirectURL, auth.AccessToken, oauthStatus.DeviceID)
+		redirect := fmt.Sprintf("%s?code=%s&device_id=%s", oauthStatus.RedirectURL, tokenStr, oauthStatus.DeviceID)
 
 		s.server.Audit(
 			ServiceName,
@@ -308,7 +308,7 @@ func (s *Service) RefreshHandler() rest.Handle {
 			return
 		}
 
-		auth, err := s.jwt.SignToken(userInfo, deviceID, 8*60*time.Minute)
+		auth, claims, err := s.jwt.SignToken(userInfo.Email, "trusty-wfe", 8*60*time.Minute)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("failed to sign JWT: %s", err.Error()).WithCause(err))
 			return
@@ -325,8 +325,20 @@ func (s *Service) RefreshHandler() rest.Handle {
 		)
 
 		res := &v1.AuthTokenRefreshResponse{
-			Authorization: auth,
-			Profile:       userInfo,
+			Authorization: &v1.Authorization{
+				Version:  "v1.0",
+				DeviceID: deviceID,
+				UserID:   userInfo.ID,
+				Login:    userInfo.Login,
+				Name:     userInfo.Name,
+				Email:    userInfo.Email,
+				//Role
+				ExpiresAt:   time.Unix(claims.ExpiresAt, 0),
+				IssuedAt:    time.Now(),
+				TokenType:   "jwt",
+				AccessToken: auth,
+			},
+			Profile: userInfo,
 		}
 
 		marshal.WriteJSON(w, r, res)

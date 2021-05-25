@@ -21,14 +21,32 @@ type Authz struct {
 	LogDenied bool `json:"log_denied" yaml:"log_denied"`
 }
 
-// Identity contains configuration for the Identity mappers
-type Identity struct {
-	// CertMapper specifies location of the config file for certificate based identity.
-	CertMapper string `json:"cert_mapper,omitempty" yaml:"cert_mapper,omitempty"`
+// IdentityMap contains configuration for the roles
+type IdentityMap struct {
+	// TLS identity map
+	TLS TLSIdentityMap `json:"tls" yaml:"tls"`
+	// JWT identity map
+	JWT JWTIdentityMap `json:"jwt" yaml:"jwt"`
+}
 
-	// APIKeyMapper specifies location of the config file for API-Key based identity.
-	APIKeyMapper string `json:"api_key_mapper,omitempty" yaml:"api_key_mapper,omitempty"`
+// TLSIdentityMap provides roles for TLS
+type TLSIdentityMap struct {
+	// DefaultAuthenticatedRole specifies role name for identity, if not found in maps
+	DefaultAuthenticatedRole string `json:"default_authenticated_role" yaml:"default_authenticated_role"`
+	// Enable TLS identities
+	Enabled bool `json:"enabled" yaml:"enabled"`
+	// Roles is a map of role to TLS identity
+	Roles map[string][]string `json:"roles" yaml:"roles"`
+}
 
-	// JWTMapper specifies location of the config file for JWT based identity.
-	JWTMapper string `json:"jwt_mapper,omitempty" yaml:"jwt_mapper,omitempty"`
+// JWTIdentityMap provides roles for JWT
+type JWTIdentityMap struct {
+	// DefaultAuthenticatedRole specifies role name for identity, if not found in maps
+	DefaultAuthenticatedRole string `json:"default_authenticated_role" yaml:"default_authenticated_role"`
+	// Enable TLS identities
+	Enabled bool `json:"enabled" yaml:"enabled"`
+	// Audience specifies the token audience
+	Audience string `json:"audience" yaml:"audience"`
+	// Roles is a map of role to JWT identity
+	Roles map[string][]string `json:"roles" yaml:"roles"`
 }

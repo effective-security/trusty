@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/ekspand/trusty/internal/config"
+	"github.com/ekspand/trusty/pkg/jwt"
 	"github.com/ekspand/trusty/pkg/roles"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/netutil"
@@ -65,7 +66,7 @@ type Server struct {
 
 	authz    *authz.Provider
 	auditor  audit.Auditor
-	identity *roles.Provider
+	identity roles.IdentityProvider
 	crypto   *cryptoprov.Crypto
 }
 
@@ -98,12 +99,20 @@ func Start(
 	}
 
 	err = container.Invoke(func(
-		role *roles.Provider,
+		jwtParser jwt.Parser,
 		auditor audit.Auditor,
 		crypto *cryptoprov.Crypto) error {
 		e.auditor = auditor
-		e.identity = role
 		e.crypto = crypto
+
+		iden, err := roles.New(&cfg.IdentityMap, jwtParser)
+		if err != nil {
+			logger.Errorf("src=Start, err=[%v]", errors.Details(err))
+			return err
+		}
+
+		e.identity = iden
+
 		return nil
 	})
 	if err != nil {
