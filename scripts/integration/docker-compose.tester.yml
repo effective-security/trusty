@@ -8,8 +8,8 @@ networks:
       config:
         - subnet: 10.77.88.0/24
 
-volumes:
-  trusty-shared-certs:
+#volumes:
+#  trusty-shared-certs:
 
 services:
   local-kms:
@@ -70,7 +70,7 @@ services:
         # the source path in the volume definitions are relative to ./scripts/integration
       - ./tests:/opt/trusty/tests
       - ../../etc/dev:/opt/trusty/etc/dev
-      - ../../scripts/sql/postgres/migrations:/opt/trusty/scripts/sql/postgres/migrations
+      - ../../scripts/sql:/opt/trusty/scripts/sql
     ports:
       - "7880" # CIS
       - "7891" # WFE
@@ -84,7 +84,7 @@ services:
       - /bin/bash
       - -c
       - >-
-        /opt/trusty/bin/sql/postgres/wait_sql.sh 10.77.88.100 5432 postgres postgres echo "SQL is ready" &&
+        /opt/trusty/scripts/sql/postgres/wait_sql.sh 10.77.88.100 5432 postgres postgres echo "SQL is ready" &&
         mkdir -p /tmp/trusty/softhsm/tokens /tmp/trusty/certs &&
         cp /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem /tmp/trusty/certs/trusty_dev_root_ca.pem &&
         /opt/trusty/bin/config-softhsm.sh
@@ -137,7 +137,7 @@ services:
         # the source path in the volume definitions are relative to ./scripts/integration
       - ./tests:/opt/trusty/tests
       - ../../etc/dev:/opt/trusty/etc/dev
-      - ../../scripts/sql/postgres/migrations:/opt/trusty/scripts/sql/postgres/migrations
+      - ../../scripts/sql:/opt/trusty/scripts/sql
     ports:
       - "7880" # CIS
       - "7891" # WFE
@@ -154,7 +154,7 @@ services:
       - /bin/bash
       - -c
       - >-
-        /opt/trusty/bin/sql/postgres/wait_sql.sh 10.77.88.100 5432 postgres postgres echo "SQL is ready" &&
+        /opt/trusty/scripts/sql/postgres/wait_sql.sh 10.77.88.100 5432 postgres postgres echo "SQL is ready" &&
         mkdir -p /tmp/trusty/certs &&
         cp /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem /tmp/trusty/certs/trusty_dev_root_ca.pem &&
         /opt/trusty/bin/gen_test_certs.sh
@@ -193,7 +193,7 @@ services:
       # the source path in the volume definitions are relative to ./scripts/integration
       - ./tests:/opt/trusty/tests
       - ../../etc/dev:/opt/trusty/etc/dev
-      - ../../scripts/sql/postgres/migrations:/opt/trusty/scripts/sql/postgres/migrations
+      - ../../scripts/sql:/opt/trusty/scripts/sql
     depends_on:
       - trusty-node1
       - trusty-node2
@@ -212,7 +212,7 @@ services:
       - >-
         mkdir -p /tmp/trusty/softhsm/tokens /tmp/trusty/certs &&
         cp /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem /tmp/trusty/certs/trusty_dev_root_ca.pem &&
-        /opt/trusty/bin/sql/postgres/create_sql.sh 10.77.88.100 5432 postgres postgres
+        /opt/trusty/scripts/sql/postgres/create_sql.sh 10.77.88.100 5432 postgres postgres
         /opt/trusty/bin/config-softhsm.sh
         --tokens-dir /tmp/trusty/softhsm/tokens
         --pin-file /tmp/trusty/softhsm/trusty_unittest.txt

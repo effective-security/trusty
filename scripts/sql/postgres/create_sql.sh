@@ -16,7 +16,7 @@ echo "*** trusty-sql: waiting..."
 sleep 3
 until PGPASSWORD=$POSTGRES_PWD psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -lqt | cut -d \| -f 1 | grep -qw trustydb; do
   >&2 echo "trustydb is unavailable $POSTGRES_HOST:$POSTGRES_PORT - sleeping"
-  >&2 PGPASSWORD=$POSTGRES_PWD psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -a -f /opt/trusty/bin/sql/postgres/create-trustrydb.sql
+  >&2 PGPASSWORD=$POSTGRES_PWD psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -a -f /opt/trusty/scripts/sql/postgres/create-trustrydb.sql
   >&2 PGPASSWORD=$POSTGRES_PWD psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -lqt
   sleep 3
 done
