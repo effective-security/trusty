@@ -8,13 +8,23 @@ import (
 	"google.golang.org/grpc"
 )
 
+// StatusClient client interface
+type StatusClient interface {
+	// Version returns the server version.
+	Version(ctx context.Context) (*pb.ServerVersion, error)
+	// Server returns the server status.
+	Server(ctx context.Context) (*pb.ServerStatusResponse, error)
+	// Caller returns the caller status.
+	Caller(ctx context.Context) (*pb.CallerStatusResponse, error)
+}
+
 type statusClient struct {
 	remote   pb.StatusServiceClient
 	callOpts []grpc.CallOption
 }
 
 // NewStatus returns instance of Status client
-func NewStatus(conn *grpc.ClientConn, callOpts []grpc.CallOption) StatusService {
+func NewStatus(conn *grpc.ClientConn, callOpts []grpc.CallOption) StatusClient {
 	return &statusClient{
 		remote:   RetryStatusClient(conn),
 		callOpts: callOpts,
@@ -22,7 +32,7 @@ func NewStatus(conn *grpc.ClientConn, callOpts []grpc.CallOption) StatusService 
 }
 
 // NewStatusFromProxy returns instance of Status client
-func NewStatusFromProxy(proxy pb.StatusServiceClient) StatusService {
+func NewStatusFromProxy(proxy pb.StatusServiceClient) StatusClient {
 	return &statusClient{
 		remote: proxy,
 	}

@@ -8,13 +8,23 @@ import (
 	"google.golang.org/grpc"
 )
 
+// AuthorityClient client interface
+type AuthorityClient interface {
+	// ProfileInfo returns the certificate profile info
+	ProfileInfo(ctx context.Context, in *pb.CertProfileInfoRequest) (*pb.CertProfileInfo, error)
+	// SignCertificate returns the certificate
+	SignCertificate(ctx context.Context, in *pb.SignCertificateRequest) (*pb.CertificateBundle, error)
+	// Issuers returns the issuing CAs
+	Issuers(ctx context.Context) (*pb.IssuersInfoResponse, error)
+}
+
 type authorityClient struct {
 	remote   pb.AuthorityServiceClient
 	callOpts []grpc.CallOption
 }
 
 // NewAuthority returns instance of AuthorityService client
-func NewAuthority(conn *grpc.ClientConn, callOpts []grpc.CallOption) AuthorityService {
+func NewAuthority(conn *grpc.ClientConn, callOpts []grpc.CallOption) AuthorityClient {
 	return &authorityClient{
 		remote:   RetryAuthorityClient(conn),
 		callOpts: callOpts,
@@ -22,7 +32,7 @@ func NewAuthority(conn *grpc.ClientConn, callOpts []grpc.CallOption) AuthoritySe
 }
 
 // NewAuthorityFromProxy returns instance of Authority client
-func NewAuthorityFromProxy(proxy pb.AuthorityServiceClient) AuthorityService {
+func NewAuthorityFromProxy(proxy pb.AuthorityServiceClient) AuthorityClient {
 	return &authorityClient{
 		remote: proxy,
 	}

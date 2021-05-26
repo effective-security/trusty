@@ -8,8 +8,6 @@ import (
 	"testing"
 
 	"github.com/ekspand/trusty/backend/service/swagger"
-	"github.com/ekspand/trusty/client"
-	"github.com/ekspand/trusty/client/embed"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/tests/testutils"
@@ -23,7 +21,6 @@ import (
 
 var (
 	trustyServer *gserver.Server
-	trustyClient *client.Client
 	httpAddr     string
 	httpsAddr    string
 )
@@ -71,13 +68,11 @@ func TestMain(m *testing.M) {
 	}
 
 	// TODO: channel for <-trustyServer.ServerReady()
-	trustyClient = embed.NewClient(trustyServer)
 
 	// Run the tests
 	rc := m.Run()
 
 	// cleanup
-	trustyClient.Close()
 	trustyServer.Close()
 
 	os.Exit(rc)

@@ -8,9 +8,7 @@ import (
 	"time"
 
 	v1 "github.com/ekspand/trusty/api/v1"
-	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/juju/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -65,38 +63,8 @@ var defaultCallOpts = []grpc.CallOption{
 	defaultMaxCallRecvMsgSize,
 }
 
-// StatusService client interface
-type StatusService interface {
-	// Version returns the server version.
-	Version(ctx context.Context) (*pb.ServerVersion, error)
-	// Server returns the server status.
-	Server(ctx context.Context) (*pb.ServerStatusResponse, error)
-	// Caller returns the caller status.
-	Caller(ctx context.Context) (*pb.CallerStatusResponse, error)
-}
-
-// AuthorityService client interface
-type AuthorityService interface {
-	// ProfileInfo returns the certificate profile info
-	ProfileInfo(ctx context.Context, in *pb.CertProfileInfoRequest) (*pb.CertProfileInfo, error)
-	// SignCertificate returns the certificate
-	SignCertificate(ctx context.Context, in *pb.SignCertificateRequest) (*pb.CertificateBundle, error)
-	// Issuers returns the issuing CAs
-	Issuers(ctx context.Context) (*pb.IssuersInfoResponse, error)
-}
-
-// CertInfoService client interface
-type CertInfoService interface {
-	// Roots returns the root CAs
-	Roots(ctx context.Context, in *empty.Empty) (*pb.RootsResponse, error)
-}
-
 // Client provides and manages an trusty v1 client session.
 type Client struct {
-	AuthorityService
-	StatusService
-	CertInfoService
-
 	cfg      Config
 	conn     *grpc.ClientConn
 	callOpts []grpc.CallOption
@@ -134,6 +102,21 @@ func NewFromURLs(urls []string) (*Client, error) {
 // New creates a new trusty client from a given configuration.
 func New(cfg *Config) (*Client, error) {
 	return newClient(cfg)
+}
+
+// Authority returns Authority client from connection
+func (c *Client) Authority() AuthorityClient {
+	return NewAuthority(c.conn, c.callOpts)
+}
+
+// Status returns Status client from connection
+func (c *Client) Status() StatusClient {
+	return NewStatus(c.conn, c.callOpts)
+}
+
+// CertInfo returns CertInfo client from connection
+func (c *Client) CertInfo() CertInfoClient {
+	return NewCertInfo(c.conn, c.callOpts)
 }
 
 // Close shuts down the client's trusty connections.
@@ -192,9 +175,6 @@ func newClient(cfg *Config) (*Client, error) {
 	}
 
 	client.conn = conn
-	client.AuthorityService = NewAuthority(conn, client.callOpts)
-	client.StatusService = NewStatus(conn, client.callOpts)
-	client.CertInfoService = NewCertInfo(conn, client.callOpts)
 	return client, nil
 }
 
