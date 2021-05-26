@@ -27,7 +27,7 @@ import (
 
 var (
 	trustyServer *gserver.Server
-	trustyClient *client.Client
+	statusClient client.StatusClient
 	httpAddr     string
 	httpsAddr    string
 )
@@ -75,13 +75,12 @@ func TestMain(m *testing.M) {
 	}
 
 	// TODO: channel for <-trustyServer.ServerReady()
-	trustyClient = embed.NewClient(trustyServer)
+	statusClient = embed.NewStatusClient(trustyServer)
 
 	// Run the tests
 	rc := m.Run()
 
 	// cleanup
-	trustyClient.Close()
 	trustyServer.Close()
 
 	os.Exit(rc)
@@ -130,7 +129,7 @@ func TestVersionHttpJSON(t *testing.T) {
 
 func TestVersionGrpc(t *testing.T) {
 	res := new(pb.ServerVersion)
-	res, err := trustyClient.StatusService.Version(context.Background())
+	res, err := statusClient.Version(context.Background())
 	require.NoError(t, err)
 
 	ver := version.Current()
@@ -197,7 +196,7 @@ func TestServerStatusHttpJSON(t *testing.T) {
 
 func TestServerStatusGrpc(t *testing.T) {
 	res := new(pb.ServerStatusResponse)
-	res, err := trustyClient.StatusService.Server(context.Background())
+	res, err := statusClient.Server(context.Background())
 	require.NoError(t, err)
 
 	require.NotNil(t, res.Status)
@@ -243,7 +242,7 @@ func TestCallerStatusHttpJSON(t *testing.T) {
 func TestCallerStatusGrpc(t *testing.T) {
 	res := new(pb.CallerStatusResponse)
 
-	res, err := trustyClient.StatusService.Caller(context.Background())
+	res, err := statusClient.Caller(context.Background())
 	require.NoError(t, err)
 
 	assert.Equal(t, identity.GuestRoleName, res.Role)

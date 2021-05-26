@@ -21,8 +21,8 @@ import (
 )
 
 var (
-	trustyServer *gserver.Server
-	trustyClient *client.Client
+	trustyServer   *gserver.Server
+	certInfoClient client.CertInfoClient
 )
 
 const (
@@ -83,12 +83,10 @@ func TestMain(m *testing.M) {
 			if trustyServer == nil {
 				panic("cis not found!")
 			}
-			trustyClient = embed.NewClient(trustyServer)
+			certInfoClient = embed.NewCertInfoClient(trustyServer)
 
 			// Run the tests
 			rc = m.Run()
-
-			trustyClient.Close()
 
 			// trigger stop
 			sigs <- syscall.SIGTERM
@@ -105,7 +103,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestRoots(t *testing.T) {
-	res, err := trustyClient.CertInfoService.Roots(context.Background(), &empty.Empty{})
+	res, err := certInfoClient.Roots(context.Background(), &empty.Empty{})
 	require.NoError(t, err)
 	assert.NotEmpty(t, res.Roots)
 }

@@ -23,7 +23,7 @@ func Issuers(c ctl.Control, _ interface{}) error {
 	}
 	defer client.Close()
 
-	res, err := client.AuthorityService.Issuers(context.Background())
+	res, err := client.Authority().Issuers(context.Background())
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -53,7 +53,7 @@ func Profile(c ctl.Control, p interface{}) error {
 	}
 	defer client.Close()
 
-	res, err := client.AuthorityService.ProfileInfo(context.Background(), &pb.CertProfileInfoRequest{
+	res, err := client.Authority().ProfileInfo(context.Background(), &pb.CertProfileInfoRequest{
 		Profile: *flags.Profile,
 		Label:   *flags.Label,
 	})
@@ -93,7 +93,7 @@ func Sign(c ctl.Control, p interface{}) error {
 		return errors.Annotatef(err, "failed to load request")
 	}
 
-	res, err := client.AuthorityService.SignCertificate(context.Background(), &pb.SignCertificateRequest{
+	res, err := client.Authority().SignCertificate(context.Background(), &pb.SignCertificateRequest{
 		RequestFormat: pb.EncodingFormat_PEM,
 		Request:       string(csr),
 		Profile:       *flags.Profile,

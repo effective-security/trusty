@@ -8,13 +8,19 @@ import (
 	"google.golang.org/grpc"
 )
 
+// CertInfoClient client interface
+type CertInfoClient interface {
+	// Roots returns the root CAs
+	Roots(ctx context.Context, in *empty.Empty) (*pb.RootsResponse, error)
+}
+
 type cisClient struct {
 	remote   pb.CertInfoServiceClient
 	callOpts []grpc.CallOption
 }
 
 // NewCertInfo returns instance of CertInfoService client
-func NewCertInfo(conn *grpc.ClientConn, callOpts []grpc.CallOption) CertInfoService {
+func NewCertInfo(conn *grpc.ClientConn, callOpts []grpc.CallOption) CertInfoClient {
 	return &cisClient{
 		remote:   RetryCertInfoClient(conn),
 		callOpts: callOpts,
@@ -22,7 +28,7 @@ func NewCertInfo(conn *grpc.ClientConn, callOpts []grpc.CallOption) CertInfoServ
 }
 
 // NewCertInfoFromProxy returns instance of CertInfoService client
-func NewCertInfoFromProxy(proxy pb.CertInfoServiceClient) CertInfoService {
+func NewCertInfoFromProxy(proxy pb.CertInfoServiceClient) CertInfoClient {
 	return &cisClient{
 		remote: proxy,
 	}

@@ -7,7 +7,7 @@ import (
 	v1 "github.com/ekspand/trusty/api/v1"
 	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/client"
-	"github.com/ekspand/trusty/client/proxy"
+	"github.com/ekspand/trusty/client/embed/proxy"
 	"github.com/ekspand/trusty/tests/mockpb"
 	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/assert"
@@ -18,10 +18,7 @@ func TestStatusWithNewCtxClient(t *testing.T) {
 	ctx := context.Background()
 	srv := &mockpb.MockStatusServer{}
 
-	cli := client.NewCtxClient(ctx)
-	cli.StatusService = client.NewStatusFromProxy(proxy.StatusServerToClient(srv))
-	defer cli.Close()
-
+	cli := client.NewStatusFromProxy(proxy.StatusServerToClient(srv))
 	vexp := &pb.ServerVersion{Build: "1234", Runtime: "go1.15"}
 	srv.Resps = []proto.Message{vexp}
 	vres, err := cli.Version(ctx)
@@ -54,12 +51,13 @@ func TestStatusWithNewClientMock(t *testing.T) {
 	ctx := context.Background()
 	srv := &mockpb.MockStatusServer{}
 
-	cli, grpc := setupStatusMockGRPC(t, srv)
+	client, grpc := setupStatusMockGRPC(t, srv)
 	defer grpc.Stop()
-	defer cli.Close()
+	defer client.Close()
 
-	assert.NotNil(t, cli.ActiveConnection())
+	assert.NotNil(t, client.ActiveConnection())
 
+	cli := client.Status()
 	expErr := v1.ErrGRPCPermissionDenied
 
 	t.Run("Version", func(t *testing.T) {

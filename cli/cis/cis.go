@@ -27,7 +27,7 @@ func Roots(c ctl.Control, p interface{}) error {
 	}
 	defer client.Close()
 
-	res, err := client.CertInfoService.Roots(context.Background(), &empty.Empty{})
+	res, err := client.CertInfo().Roots(context.Background(), &empty.Empty{})
 	if err != nil {
 		return errors.Trace(err)
 	}

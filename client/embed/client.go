@@ -1,33 +1,35 @@
 package embed
 
 import (
-	"context"
-
 	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/backend/service/ca"
 	"github.com/ekspand/trusty/backend/service/cis"
 	"github.com/ekspand/trusty/backend/service/status"
 	"github.com/ekspand/trusty/client"
-	"github.com/ekspand/trusty/client/proxy"
+	"github.com/ekspand/trusty/client/embed/proxy"
 	"github.com/ekspand/trusty/pkg/gserver"
 )
 
-// TODO: refactor
-
-// NewClient returns client.Client for running TrustyServer
-func NewClient(s *gserver.Server) *client.Client {
-	c := client.NewCtxClient(context.Background())
-
+// NewStatusClient returns embedded StatusClient for running server
+func NewStatusClient(s *gserver.Server) client.StatusClient {
 	if statusServiceServer, ok := s.Service(status.ServiceName).(pb.StatusServiceServer); ok {
-		c.StatusService = client.NewStatusFromProxy(proxy.StatusServerToClient(statusServiceServer))
+		return client.NewStatusFromProxy(proxy.StatusServerToClient(statusServiceServer))
 	}
+	return nil
+}
 
+// NewAuthorityClient returns embedded AuthorityClient for running server
+func NewAuthorityClient(s *gserver.Server) client.AuthorityClient {
 	if authorityServiceServer, ok := s.Service(ca.ServiceName).(pb.AuthorityServiceServer); ok {
-		c.AuthorityService = client.NewAuthorityFromProxy(proxy.AuthorityServerToClient(authorityServiceServer))
+		return client.NewAuthorityFromProxy(proxy.AuthorityServerToClient(authorityServiceServer))
 	}
+	return nil
+}
 
+// NewCertInfoClient returns embedded CertInfoClient for running server
+func NewCertInfoClient(s *gserver.Server) client.CertInfoClient {
 	if certInfoServiceServer, ok := s.Service(cis.ServiceName).(pb.CertInfoServiceServer); ok {
-		c.CertInfoService = client.NewCertInfoFromProxy(proxy.CertInfoServiceServerToClient(certInfoServiceServer))
+		return client.NewCertInfoFromProxy(proxy.CertInfoServiceServerToClient(certInfoServiceServer))
 	}
-	return c
+	return nil
 }
