@@ -209,17 +209,6 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 		handler := router.Handler()
 		handler = configureHandlers(s, handler)
 
-		/*
-			var gwmux *runtime.ServeMux
-			if sctx.cfg.EnableGRPCGateway {
-				gwmux, err = sctx.registerGateway([]grpc.DialOption{grpc.WithInsecure()})
-				if err != nil {
-					return err
-				}
-				handler = sctx.createMux(gwmux, handler)
-			}
-		*/
-
 		srv := &http.Server{
 			Handler: handler,
 			//ErrorLog: logger, // do not log user error
@@ -240,25 +229,6 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 
 		// mux between http and grpc
 		handler = grpcHandlerFunc(gsSecure, handler)
-
-		/*
-			if sctx.cfg.EnableGRPCGateway {
-				dtls := sctx.tlsInfo.Config().Clone()
-				// trust local server
-				dtls.InsecureSkipVerify = true
-
-				// TODO: FIX the creds, as Identity will be of the server
-				bundle := credentials.NewBundle(credentials.Config{TLSConfig: dtls})
-				opts := []grpc.DialOption{grpc.WithTransportCredentials(bundle.TransportCredentials())}
-				//creds := credentials.NewTLS(dtls)
-				//opts := []grpc.DialOption{grpc.WithTransportCredentials(creds)}
-				gwmux, err = sctx.registerGateway(opts)
-				if err != nil {
-					return err
-				}
-				handler = sctx.createMux(gwmux, handler)
-			}
-		*/
 
 		srv := &http.Server{
 			Handler:   handler,
@@ -283,77 +253,6 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 	// Serve blocks and perhaps should be invoked concurrently within a go routine.
 	return m.Serve()
 }
-
-/* TODO: move to a separate end-point
-type registerHandlerFunc func(context.Context, *runtime.ServeMux, *grpc.ClientConn) error
-
-func (sctx *serveCtx) registerGateway(opts []grpc.DialOption) (*runtime.ServeMux, error) {
-	ctx := sctx.ctx
-
-	addr := sctx.addr
-	if network := sctx.network; network == "unix" {
-		// explicitly define unix network for gRPC socket support
-		addr = fmt.Sprintf("%s://%s", network, addr)
-	}
-
-	conn, err := grpc.DialContext(ctx, addr, opts...)
-	if err != nil {
-		return nil, err
-	}
-	gwmux := runtime.NewServeMux(runtime.WithMetadata(
-		func(crx context.Context, r *http.Request) metadata.MD {
-			callerCtx := identity.FromContext(r.Context())
-			if callerCtx != nil {
-				identity.AddToContext(crx, callerCtx)
-				caller := callerCtx.Identity()
-				return metadata.Pairs(
-					"trusty-gwid-userid", caller.UserID(),
-					"trusty-gwid-name", caller.Name(),
-					"trusty-gwid-role", caller.Role(),
-				)
-			}
-
-			return nil
-		}))
-
-	// TODO: refactor for factories
-	handlers := []registerHandlerFunc{
-		gw.RegisterAuthorityServiceHandler,
-		gw.RegisterCertInfoServiceHandler,
-		gw.RegisterStatusServiceHandler,
-	}
-	for _, h := range handlers {
-		if err := h(ctx, gwmux, conn); err != nil {
-			return nil, err
-		}
-	}
-	go func() {
-		<-ctx.Done()
-		if cerr := conn.Close(); cerr != nil {
-			logger.Warningf("src=registerGateway, address=%s, err=[%v]",
-				sctx.listener.Addr().String(),
-				cerr,
-			)
-		}
-	}()
-
-	return gwmux, nil
-}
-
-func (sctx *serveCtx) createMux(gwmux *runtime.ServeMux, handler http.Handler) *http.ServeMux {
-	httpmux := http.NewServeMux()
-	if gwmux != nil {
-		httpmux.Handle(
-			"/v1gw/",
-			gwmux,
-		)
-	}
-	if handler != nil {
-		httpmux.Handle("/", handler)
-	}
-	return httpmux
-}
-*/
 
 func configureHandlers(s *Server, handler http.Handler) http.Handler {
 	// NOTE: the handlers are executed in the reverse order
