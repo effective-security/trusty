@@ -54,7 +54,6 @@ func Test_AppOnClose(t *testing.T) {
 		"--wfe-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--ca-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--ra-listen-url", testutils.CreateURLs("http", "localhost"),
-		"--sa-listen-url", testutils.CreateURLs("http", "localhost"),
 	})
 
 	app.OnClose(c)
@@ -85,7 +84,6 @@ func Test_AppInitWithRun(t *testing.T) {
 		"--wfe-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--ca-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--ra-listen-url", testutils.CreateURLs("http", "localhost"),
-		"--sa-listen-url", testutils.CreateURLs("http", "localhost"),
 	})
 
 	err = app.Run(nil)
@@ -109,7 +107,6 @@ func Test_AppInitWithCfg(t *testing.T) {
 		"--wfe-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--ca-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--ra-listen-url", testutils.CreateURLs("http", "localhost"),
-		"--sa-listen-url", testutils.CreateURLs("http", "localhost"),
 	})
 	defer app.OnClose(c)
 
@@ -150,7 +147,6 @@ func Test_AppInstance_StartFailOnPort(t *testing.T) {
 		"--wfe-listen-url", listenURL,
 		"--ca-listen-url", listenURL,
 		"--ra-listen-url", testutils.CreateURLs("http", "localhost"),
-		"--sa-listen-url", testutils.CreateURLs("http", "localhost"),
 	}).WithSignal(sigs)
 	defer app.Close()
 
@@ -206,7 +202,6 @@ func Test_AppInstance_CryptoProvError(t *testing.T) {
 		"--wfe-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--ca-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--ra-listen-url", testutils.CreateURLs("http", "localhost"),
-		"--sa-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--hsm-cfg", cfg.CryptoProv.Default,
 		"--crypto-prov", cfg.CryptoProv.Default,
 	}).WithSignal(sigs)
@@ -262,7 +257,6 @@ func Test_AppInstance_StartStop(t *testing.T) {
 		"--wfe-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--ca-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--ra-listen-url", testutils.CreateURLs("http", "localhost"),
-		"--sa-listen-url", testutils.CreateURLs("http", "localhost"),
 	}).WithSignal(sigs)
 	defer app.Close()
 

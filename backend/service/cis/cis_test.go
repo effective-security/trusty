@@ -29,8 +29,6 @@ const (
 	projFolder = "../../../"
 )
 
-var trueVal = true
-
 func TestMain(m *testing.M) {
 	var err error
 	//	xlog.SetPackageLogLevel("github.com/go-phorce/dolly/xhttp", "retriable", xlog.DEBUG)
@@ -47,9 +45,9 @@ func TestMain(m *testing.M) {
 		case cis.ServiceName:
 			httpCfg.Services = []string{cis.ServiceName}
 			httpCfg.ListenURLs = []string{httpAddr}
-
+			httpCfg.Disabled = false
 		default:
-			httpCfg.Disabled = &trueVal
+			httpCfg.Disabled = true
 		}
 	}
 

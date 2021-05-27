@@ -32,13 +32,6 @@ const (
 	projFolder = "../../../"
 )
 
-// serviceFactories provides map of trustyserver.ServiceFactory
-var serviceFactories = map[string]gserver.ServiceFactory{
-	auth.ServiceName: auth.Factory,
-}
-
-var trueVal = true
-
 func TestMain(m *testing.M) {
 	var err error
 	//	xlog.SetPackageLogLevel("github.com/go-phorce/dolly/xhttp", "retriable", xlog.DEBUG)
@@ -54,9 +47,10 @@ func TestMain(m *testing.M) {
 		case config.WFEServerName:
 			httpCfg.Services = []string{auth.ServiceName}
 			httpCfg.ListenURLs = []string{httpAddr}
+			httpCfg.Disabled = false
 		default:
 			// disable other servers
-			httpCfg.Disabled = &trueVal
+			httpCfg.Disabled = true
 		}
 	}
 

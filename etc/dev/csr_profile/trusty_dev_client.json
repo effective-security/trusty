@@ -1,5 +1,8 @@
 {
     "common_name": "trusty-client",
+    "san": [
+        "spifee://trusty/client"
+    ],    
     "key": {
         "algo": "rsa",
         "size": 2048

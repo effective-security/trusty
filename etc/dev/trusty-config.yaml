@@ -88,6 +88,7 @@ ra:
 servers:
   cis:
     description: Certificate Information Service allows unauthenticated calls to AIA, OCSP and Certificates end-points
+    disabled: false
     listen_urls:
       - http://0.0.0.0:7880
     client_url: http://localhost:7880
@@ -157,6 +158,7 @@ servers:
 
   wfe:
     description: Web Front End
+    disabled: false
     listen_urls:
       - https://0.0.0.0:7891
     client_url: https://localhost:7891
@@ -223,6 +225,7 @@ servers:
 
   ca:
     description: Certification Authority
+    disabled: false
     listen_urls:
       - https://0.0.0.0:7892
     client_url: https://localhost:7892

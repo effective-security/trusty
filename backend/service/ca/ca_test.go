@@ -35,8 +35,6 @@ var serviceFactories = map[string]gserver.ServiceFactory{
 	ca.ServiceName: ca.Factory,
 }
 
-var trueVal = true
-
 func TestMain(m *testing.M) {
 	var err error
 	//	xlog.SetPackageLogLevel("github.com/go-phorce/dolly/xhttp", "retriable", xlog.DEBUG)
@@ -53,8 +51,9 @@ func TestMain(m *testing.M) {
 		case ca.ServiceName:
 			httpCfg.Services = []string{ca.ServiceName}
 			httpCfg.ListenURLs = []string{httpAddr}
+			httpCfg.Disabled = false
 		default:
-			httpCfg.Disabled = &trueVal
+			httpCfg.Disabled = true
 		}
 	}
 
