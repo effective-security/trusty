@@ -14,7 +14,7 @@ type HTTPServer struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 
 	// Disabled specifies if the service is disabled
-	Disabled *bool `json:"disabled,omitempty" yaml:"disabled,omitempty"`
+	Disabled bool `json:"disabled,omitempty" yaml:"disabled,omitempty"`
 
 	// ClientURL is the public URL exposed to clients
 	ClientURL string `json:"client_url" yaml:"client_url"`
@@ -149,11 +149,6 @@ type CORS struct {
 
 	// Debug flag adds additional output to debug server side CORS issues.
 	Debug *bool `json:"debug,omitempty" yaml:"debug,omitempty"`
-}
-
-// GetDisabled specifies if the service is disabled
-func (c *HTTPServer) GetDisabled() bool {
-	return c.Disabled != nil && *c.Disabled
 }
 
 // ParseListenURLs constructs a list of listen peers URLs

@@ -312,6 +312,19 @@ func (s *testSuite) Test_ValidateCA_notfound() {
 }
 
 func (s *testSuite) Test_ValidateCA_untrusted() {
+	cert := "/tmp/trusty/certs/trusty_untrusted_issuer2_ca.pem"
+	caBundle := "/tmp/trusty/certs/trusty_untrusted_issuer2_ca.pem"
+	rootBundle := "/tmp/trusty/certs/trusty_untrusted_root_ca.pem"
+	err := s.Run(certutil.Validate, &certutil.ValidateFlags{
+		Cert: &cert,
+		CA:   &caBundle,
+		Root: &rootBundle,
+	})
+	s.Require().Error(err)
+	s.Equal("unable to verify certificate: failed to bundle: {\"code\":1220,\"message\":\"x509: certificate signed by unknown authority\"}", err.Error())
+}
+
+func (s *testSuite) Test_ValidateCA_expired() {
 	cert := "testdata/trusty_dev_peer.pem"
 	caBundle := "testdata/trusty_dev_cabundle.pem"
 	rootBundle := "testdata/trusty_untrusted_root_ca.pem"
@@ -321,7 +334,7 @@ func (s *testSuite) Test_ValidateCA_untrusted() {
 		Root: &rootBundle,
 	})
 	s.Require().Error(err)
-	s.Equal(`unable to verify certificate: failed to bundle: {"code":1220,"message":"x509: certificate signed by unknown authority (possibly because of \"x509: ECDSA verification failure\" while trying to verify candidate authority certificate \"[TEST] Trusty Level 2 CA\")"}`, err.Error())
+	s.Contains(err.Error(), `unable to verify certificate: failed to bundle: {"code":1211,"message":"x509: certificate has expired or is not yet valid: `)
 }
 
 func makeSelfCertRSA(hours int, crldp, ocsp string) (*x509.Certificate, crypto.PrivateKey, error) {

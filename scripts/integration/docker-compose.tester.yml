@@ -114,7 +114,6 @@ services:
         --wfe-listen-url=https://10.77.88.101:7891
         --ca-listen-url=https://10.77.88.101:7892
         --ra-listen-url=https://10.77.88.101:7893
-        --sa-listen-url=https://10.77.88.101:7894
 
   # NODE 2 on local-kms
   trusty-node2:
@@ -178,7 +177,6 @@ services:
         --wfe-listen-url=https://10.77.88.102:7891
         --ca-listen-url=https://10.77.88.102:7892
         --ra-listen-url=https://10.77.88.102:7893
-        --sa-listen-url=https://10.77.88.102:7894
   test-runner:
     image: ghcr.io/ekspand/trusty:${ITEST_IMAGE_TAG}
     domainname: tester.trusty.ca

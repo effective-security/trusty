@@ -20,13 +20,11 @@ import (
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/version"
 	"github.com/ekspand/trusty/pkg/gserver"
-	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/metrics"
 	"github.com/go-phorce/dolly/netutil"
 	"github.com/go-phorce/dolly/tasks"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xlog/logrotate"
-	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
 	"go.uber.org/dig"
 	kp "gopkg.in/alecthomas/kingpin.v2"
@@ -60,7 +58,6 @@ type appFlags struct {
 	cisURLs             *[]string
 	wfeURLs             *[]string
 	caURLs              *[]string
-	saURLs              *[]string
 	raURLs              *[]string
 	hostNames           *[]string
 	logsDir             *string
@@ -84,8 +81,6 @@ type App struct {
 	args             []string
 	flags            *appFlags
 	cfg              *config.Configuration
-	auditor          audit.Auditor
-	crypto           *cryptoprov.Crypto
 	scheduler        tasks.Scheduler
 	containerFactory ContainerFactoryFn
 	servers          map[string]*gserver.Server
@@ -239,7 +234,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 	}
 
 	for name, svcCfg := range a.cfg.HTTPServers {
-		if svcCfg.GetDisabled() == false {
+		if !svcCfg.Disabled {
 			httpServer, err := gserver.Start(name, svcCfg, a.container, ServiceFactories)
 			if err != nil {
 				logger.Errorf("src=Run, reason=Start, server=%s, err=[%v]", name, errors.ErrorStack(err))
@@ -321,7 +316,6 @@ func (a *App) loadConfig() error {
 	flags.wfeURLs = app.Flag("wfe-listen-url", "URL for the WFE listening end-point").Strings()
 	flags.caURLs = app.Flag("ca-listen-url", "URL for the CA listening end-point").Strings()
 	flags.raURLs = app.Flag("ra-listen-url", "URL for the RA listening end-point").Strings()
-	flags.saURLs = app.Flag("sa-listen-url", "URL for the Storage listening end-point").Strings()
 
 	flags.hostNames = app.Flag("host-name", "Set of host names to be used in CSR requests to obtaine a server certificate").Strings()
 	flags.logsDir = app.Flag("logs-dir", "Path to the logs folder.").String()
@@ -387,23 +381,23 @@ func (a *App) loadConfig() error {
 		case config.CISServerName:
 			if len(*flags.cisURLs) > 0 {
 				httpCfg.ListenURLs = *flags.cisURLs
+				httpCfg.Disabled = len(httpCfg.ListenURLs) == 1 && httpCfg.ListenURLs[0] == "none"
 			}
 
 		case config.WFEServerName:
 			if len(*flags.wfeURLs) > 0 {
 				httpCfg.ListenURLs = *flags.wfeURLs
+				httpCfg.Disabled = len(httpCfg.ListenURLs) == 1 && httpCfg.ListenURLs[0] == "none"
 			}
 		case config.CAServerName:
 			if len(*flags.caURLs) > 0 {
 				httpCfg.ListenURLs = *flags.caURLs
+				httpCfg.Disabled = len(httpCfg.ListenURLs) == 1 && httpCfg.ListenURLs[0] == "none"
 			}
 		case config.RAServerName:
 			if len(*flags.raURLs) > 0 {
 				httpCfg.ListenURLs = *flags.raURLs
-			}
-		case config.SAServerName:
-			if len(*flags.saURLs) > 0 {
-				httpCfg.ListenURLs = *flags.saURLs
+				httpCfg.Disabled = len(httpCfg.ListenURLs) == 1 && httpCfg.ListenURLs[0] == "none"
 			}
 		default:
 			return errors.Errorf("unknows server name in configuration: %s", name)

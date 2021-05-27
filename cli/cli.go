@@ -331,12 +331,14 @@ func (cli *Cli) Client(svc string) (*client.Client, error) {
 			tlsCert = *cli.flags.certFile
 			tlsKey = *cli.flags.keyFile
 		}
-
 		if (tlsCert == "" || tlsKey == "") && cfg != nil {
 			tlsCert = cfg.TrustyClient.ClientTLS.CertFile
 			tlsKey = cfg.TrustyClient.ClientTLS.KeyFile
+		}
+		if (tlsCA == "" || tlsKey == "") && cfg != nil {
 			tlsCA = cfg.TrustyClient.ClientTLS.TrustedCAFile
 		}
+		logger.Debugf("src=Client, tls-cert=%s, tls-trusted-ca=%s", tlsCert, tlsCA)
 		tlscfg, err = tlsconfig.NewClientTLSFromFiles(
 			tlsCert,
 			tlsKey,
