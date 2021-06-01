@@ -38,8 +38,9 @@ type Suite struct {
 	Cli *cli.Cli
 
 	MockStatus    *mockpb.MockStatusServer
-	MockAuthority *mockpb.MockAuthorityServer
-	MockCertInfo  *mockpb.MockCertInfoServer
+	MockAuthority *mockpb.MockCAServer
+	MockCertInfo  *mockpb.MockCIServer
+	MockRA        *mockpb.MockRAServer
 
 	appFlags       []string
 	withGRPC       bool
@@ -182,8 +183,9 @@ var nextPort = int32(51234) + rand.Int31n(5000)
 func (s *Suite) SetupMockGRPC() *grpc.Server {
 	serv := grpc.NewServer()
 	pb.RegisterStatusServiceServer(serv, s.MockStatus)
-	pb.RegisterAuthorityServiceServer(serv, s.MockAuthority)
-	pb.RegisterCertInfoServiceServer(serv, s.MockCertInfo)
+	pb.RegisterCAServiceServer(serv, s.MockAuthority)
+	pb.RegisterRAServiceServer(serv, s.MockRA)
+	pb.RegisterCIServiceServer(serv, s.MockCertInfo)
 
 	var lis net.Listener
 	var err error

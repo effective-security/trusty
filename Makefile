@@ -183,7 +183,7 @@ start-swagger:
 		docker run \
 		-d -p 8080:8080 \
 		--network host \
-		-e URLS="[ { url: \"http://localhost:7880/v1/swagger/status\", name: \"StatusService\" }, { url: \"http://localhost:7880/v1/swagger/cis\", name: \"CISService\" }, { url: \"https://localhost:7892/v1/swagger/ca\", name: \"AuthorityService\" } ]" \
+		-e URLS="[ { url: \"http://localhost:7880/v1/swagger/status\", name: \"StatusService\" }, { url: \"http://localhost:7880/v1/swagger/cis\", name: \"CIService\" }, { url: \"https://localhost:7892/v1/swagger/ca\", name: \"CAService\" } ]" \
 		-v ${PROJ_DIR}/Documentation/dev-guide/apispec/swagger:/swagger \
 		--name trusty-swagger \
 		swaggerapi/swagger-ui ; \

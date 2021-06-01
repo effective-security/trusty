@@ -1,4 +1,4 @@
-package trustymain
+package appcontainer
 
 import (
 	"testing"

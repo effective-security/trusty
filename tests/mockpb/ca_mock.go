@@ -8,9 +8,9 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 )
 
-// MockAuthorityServer for testing
-type MockAuthorityServer struct {
-	pb.AuthorityServiceServer
+// MockCAServer for testing
+type MockCAServer struct {
+	pb.CAServiceServer
 
 	Reqs []proto.Message
 
@@ -22,13 +22,13 @@ type MockAuthorityServer struct {
 }
 
 // SetResponse sets a single response without errors
-func (m *MockAuthorityServer) SetResponse(r proto.Message) {
+func (m *MockCAServer) SetResponse(r proto.Message) {
 	m.Err = nil
 	m.Resps = []proto.Message{r}
 }
 
 // ProfileInfo returns the certificate profile info
-func (m *MockAuthorityServer) ProfileInfo(context.Context, *pb.CertProfileInfoRequest) (*pb.CertProfileInfo, error) {
+func (m *MockCAServer) ProfileInfo(context.Context, *pb.CertProfileInfoRequest) (*pb.CertProfileInfo, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
@@ -36,7 +36,7 @@ func (m *MockAuthorityServer) ProfileInfo(context.Context, *pb.CertProfileInfoRe
 }
 
 // SignCertificate returns the certificate
-func (m *MockAuthorityServer) SignCertificate(context.Context, *pb.SignCertificateRequest) (*pb.CertificateBundle, error) {
+func (m *MockCAServer) SignCertificate(context.Context, *pb.SignCertificateRequest) (*pb.CertificateBundle, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
@@ -44,7 +44,7 @@ func (m *MockAuthorityServer) SignCertificate(context.Context, *pb.SignCertifica
 }
 
 // Issuers returns the issuing CAs
-func (m *MockAuthorityServer) Issuers(context.Context, *empty.Empty) (*pb.IssuersInfoResponse, error) {
+func (m *MockCAServer) Issuers(context.Context, *empty.Empty) (*pb.IssuersInfoResponse, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}

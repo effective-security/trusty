@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ekspand/trusty/internal/appcontainer"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/rest"
@@ -24,10 +25,11 @@ func TestStartTrustyEmptyHTTP(t *testing.T) {
 		},
 	}
 
-	c := testutils.NewContainerBuilder().
+	c := appcontainer.NewBuilder().
 		WithAuditor(nil).
 		WithCrypto(nil).
 		WithJwtParser(nil).
+		WithDiscovery(appcontainer.NewDiscovery()).
 		Container()
 
 	fact := map[string]ServiceFactory{
@@ -61,10 +63,11 @@ func TestStartTrustyEmptyHTTPS(t *testing.T) {
 		},
 	}
 
-	c := testutils.NewContainerBuilder().
+	c := appcontainer.NewBuilder().
 		WithAuditor(nil).
 		WithCrypto(nil).
 		WithJwtParser(nil).
+		WithDiscovery(appcontainer.NewDiscovery()).
 		Container()
 
 	srv, err := Start("EmptyTrustyHTTPS", cfg, c, nil)

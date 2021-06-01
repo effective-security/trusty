@@ -33,42 +33,94 @@ var _ = runtime.String
 var _ = utilities.NewDoubleArray
 var _ = metadata.Join
 
-func request_CertInfoService_Roots_0(ctx context.Context, marshaler runtime.Marshaler, client extPb.CertInfoServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_CIService_GetRoots_0(ctx context.Context, marshaler runtime.Marshaler, client extPb.CIServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq extEmpty.Empty
 	var metadata runtime.ServerMetadata
 
-	msg, err := client.Roots(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.GetRoots(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_CertInfoService_Roots_0(ctx context.Context, marshaler runtime.Marshaler, server extPb.CertInfoServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_CIService_GetRoots_0(ctx context.Context, marshaler runtime.Marshaler, server extPb.CIServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq extEmpty.Empty
 	var metadata runtime.ServerMetadata
 
-	msg, err := server.Roots(ctx, &protoReq)
+	msg, err := server.GetRoots(ctx, &protoReq)
 	return msg, metadata, err
 
 }
 
-// RegisterCertInfoServiceHandlerServer registers the http handlers for service CertInfoService to "mux".
-// UnaryRPC     :call CertInfoServiceServer directly.
+func request_CIService_GetCertificate_0(ctx context.Context, marshaler runtime.Marshaler, client extPb.CIServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq extPb.GetCertificateRequest
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
+	}
+
+	protoReq.Id, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
+	}
+
+	msg, err := client.GetCertificate(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_CIService_GetCertificate_0(ctx context.Context, marshaler runtime.Marshaler, server extPb.CIServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq extPb.GetCertificateRequest
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
+	}
+
+	protoReq.Id, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
+	}
+
+	msg, err := server.GetCertificate(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
+// RegisterCIServiceHandlerServer registers the http handlers for service CIService to "mux".
+// UnaryRPC     :call CIServiceServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
-// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterCertInfoServiceHandlerFromEndpoint instead.
-func RegisterCertInfoServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server extPb.CertInfoServiceServer) error {
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterCIServiceHandlerFromEndpoint instead.
+func RegisterCIServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server extPb.CIServiceServer) error {
 
-	mux.Handle("GET", pattern_CertInfoService_Roots_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_CIService_GetRoots_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/pb.CertInfoService/Roots")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/pb.CIService/GetRoots")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_CertInfoService_Roots_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_CIService_GetRoots_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -76,16 +128,39 @@ func RegisterCertInfoServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 			return
 		}
 
-		forward_CertInfoService_Roots_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_CIService_GetRoots_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_CIService_GetCertificate_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/pb.CIService/GetCertificate")
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_CIService_GetCertificate_0(rctx, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_CIService_GetCertificate_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
 	return nil
 }
 
-// RegisterCertInfoServiceHandlerFromEndpoint is same as RegisterCertInfoServiceHandler but
+// RegisterCIServiceHandlerFromEndpoint is same as RegisterCIServiceHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterCertInfoServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+func RegisterCIServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.Dial(endpoint, opts...)
 	if err != nil {
 		return err
@@ -105,39 +180,59 @@ func RegisterCertInfoServiceHandlerFromEndpoint(ctx context.Context, mux *runtim
 		}()
 	}()
 
-	return RegisterCertInfoServiceHandler(ctx, mux, conn)
+	return RegisterCIServiceHandler(ctx, mux, conn)
 }
 
-// RegisterCertInfoServiceHandler registers the http handlers for service CertInfoService to "mux".
+// RegisterCIServiceHandler registers the http handlers for service CIService to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterCertInfoServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterCertInfoServiceHandlerClient(ctx, mux, extPb.NewCertInfoServiceClient(conn))
+func RegisterCIServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterCIServiceHandlerClient(ctx, mux, extPb.NewCIServiceClient(conn))
 }
 
-// RegisterCertInfoServiceHandlerClient registers the http handlers for service CertInfoService
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "extPb.CertInfoServiceClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "extPb.CertInfoServiceClient"
+// RegisterCIServiceHandlerClient registers the http handlers for service CIService
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "extPb.CIServiceClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "extPb.CIServiceClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "extPb.CertInfoServiceClient" to call the correct interceptors.
-func RegisterCertInfoServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client extPb.CertInfoServiceClient) error {
+// "extPb.CIServiceClient" to call the correct interceptors.
+func RegisterCIServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client extPb.CIServiceClient) error {
 
-	mux.Handle("GET", pattern_CertInfoService_Roots_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_CIService_GetRoots_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/pb.CertInfoService/Roots")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/pb.CIService/GetRoots")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_CertInfoService_Roots_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_CIService_GetRoots_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_CertInfoService_Roots_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_CIService_GetRoots_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_CIService_GetCertificate_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/pb.CIService/GetCertificate")
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_CIService_GetCertificate_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_CIService_GetCertificate_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -145,9 +240,13 @@ func RegisterCertInfoServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 }
 
 var (
-	pattern_CertInfoService_Roots_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "cis", "roots"}, ""))
+	pattern_CIService_GetRoots_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "cis", "roots"}, ""))
+
+	pattern_CIService_GetCertificate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"v1", "cis", "certs", "id"}, ""))
 )
 
 var (
-	forward_CertInfoService_Roots_0 = runtime.ForwardResponseMessage
+	forward_CIService_GetRoots_0 = runtime.ForwardResponseMessage
+
+	forward_CIService_GetCertificate_0 = runtime.ForwardResponseMessage
 )

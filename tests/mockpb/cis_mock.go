@@ -8,9 +8,9 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 )
 
-// MockCertInfoServer for testing
-type MockCertInfoServer struct {
-	pb.CertInfoServiceServer
+// MockCIServer for testing
+type MockCIServer struct {
+	pb.CIServiceServer
 
 	Reqs []proto.Message
 
@@ -22,15 +22,23 @@ type MockCertInfoServer struct {
 }
 
 // SetResponse sets a single response without errors
-func (m *MockCertInfoServer) SetResponse(r proto.Message) {
+func (m *MockCIServer) SetResponse(r proto.Message) {
 	m.Err = nil
 	m.Resps = []proto.Message{r}
 }
 
-// Roots returns the root CAs
-func (m *MockCertInfoServer) Roots(context.Context, *empty.Empty) (*pb.RootsResponse, error) {
+// GetRoots returns the root CAs
+func (m *MockCIServer) GetRoots(context.Context, *empty.Empty) (*pb.RootsResponse, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
 	return m.Resps[0].(*pb.RootsResponse), nil
+}
+
+// GetCertificate returns the certificate
+func (m *MockCIServer) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.GetCertificateResponse, error) {
+	if m.Err != nil {
+		return nil, m.Err
+	}
+	return m.Resps[0].(*pb.GetCertificateResponse), nil
 }

@@ -40,7 +40,7 @@ func (s *testSuite) TestRoots() {
 	err := loadJSON("testdata/roots.json", expectedResponse)
 	s.Require().NoError(err)
 
-	s.MockCertInfo = &mockpb.MockCertInfoServer{
+	s.MockCertInfo = &mockpb.MockCIServer{
 		Err:   nil,
 		Resps: []proto.Message{expectedResponse},
 	}

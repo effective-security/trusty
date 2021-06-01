@@ -23,7 +23,7 @@ func (oa oauthAccess) GetRequestMetadata(ctx context.Context, uri ...string) (ma
 		return nil, errors.Annotatef(err, "unable to transfer oauthAccess PerRPCCredentials")
 	}
 	return map[string]string{
-		TokenFieldNameAuthorization: oa.token,
+		TokenFieldNameGRPC: oa.token,
 	}, nil
 }
 

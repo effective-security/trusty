@@ -79,7 +79,7 @@ func Test_Sign(t *testing.T) {
 	p2, err := jwt.Load("testdata/jwtprov.2.json")
 	require.NoError(t, err)
 
-	token, std, err := p.SignToken("denis@ekspand.com", "trusty.com", time.Minute)
+	token, std, err := p.SignToken("1000", "denis@ekspand.com", "trusty.com", time.Minute)
 	require.NoError(t, err)
 
 	claims, err := p.ParseToken(token, "trusty.com")

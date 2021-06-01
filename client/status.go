@@ -23,16 +23,16 @@ type statusClient struct {
 	callOpts []grpc.CallOption
 }
 
-// NewStatus returns instance of Status client
-func NewStatus(conn *grpc.ClientConn, callOpts []grpc.CallOption) StatusClient {
+// NewStatusClient returns instance of Status client
+func NewStatusClient(conn *grpc.ClientConn, callOpts []grpc.CallOption) StatusClient {
 	return &statusClient{
 		remote:   RetryStatusClient(conn),
 		callOpts: callOpts,
 	}
 }
 
-// NewStatusFromProxy returns instance of Status client
-func NewStatusFromProxy(proxy pb.StatusServiceClient) StatusClient {
+// NewStatusClientFromProxy returns instance of Status client
+func NewStatusClientFromProxy(proxy pb.StatusServiceClient) StatusClient {
 	return &statusClient{
 		remote: proxy,
 	}

@@ -8,8 +8,8 @@ import (
 	"google.golang.org/grpc"
 )
 
-// AuthorityClient client interface
-type AuthorityClient interface {
+// CAClient client interface
+type CAClient interface {
 	// ProfileInfo returns the certificate profile info
 	ProfileInfo(ctx context.Context, in *pb.CertProfileInfoRequest) (*pb.CertProfileInfo, error)
 	// SignCertificate returns the certificate
@@ -19,20 +19,20 @@ type AuthorityClient interface {
 }
 
 type authorityClient struct {
-	remote   pb.AuthorityServiceClient
+	remote   pb.CAServiceClient
 	callOpts []grpc.CallOption
 }
 
-// NewAuthority returns instance of AuthorityService client
-func NewAuthority(conn *grpc.ClientConn, callOpts []grpc.CallOption) AuthorityClient {
+// NewCAClient returns instance of CAService client
+func NewCAClient(conn *grpc.ClientConn, callOpts []grpc.CallOption) CAClient {
 	return &authorityClient{
-		remote:   RetryAuthorityClient(conn),
+		remote:   RetryCAClient(conn),
 		callOpts: callOpts,
 	}
 }
 
-// NewAuthorityFromProxy returns instance of Authority client
-func NewAuthorityFromProxy(proxy pb.AuthorityServiceClient) AuthorityClient {
+// NewCAClientFromProxy returns instance of Authority client
+func NewCAClientFromProxy(proxy pb.CAServiceClient) CAClient {
 	return &authorityClient{
 		remote: proxy,
 	}
@@ -53,30 +53,30 @@ func (c *authorityClient) Issuers(ctx context.Context) (*pb.IssuersInfoResponse,
 	return c.remote.Issuers(ctx, emptyReq, c.callOpts...)
 }
 
-type retryAuthorityClient struct {
-	authority pb.AuthorityServiceClient
+type retryCAClient struct {
+	authority pb.CAServiceClient
 }
 
 // TODO: implement retry for gRPC client interceptor
 
-// RetryAuthorityClient implements a AuthorityClient.
-func RetryAuthorityClient(conn *grpc.ClientConn) pb.AuthorityServiceClient {
-	return &retryAuthorityClient{
-		authority: pb.NewAuthorityServiceClient(conn),
+// RetryCAClient implements a CAClient.
+func RetryCAClient(conn *grpc.ClientConn) pb.CAServiceClient {
+	return &retryCAClient{
+		authority: pb.NewCAServiceClient(conn),
 	}
 }
 
 // ProfileInfo returns the certificate profile info
-func (c *retryAuthorityClient) ProfileInfo(ctx context.Context, in *pb.CertProfileInfoRequest, opts ...grpc.CallOption) (*pb.CertProfileInfo, error) {
+func (c *retryCAClient) ProfileInfo(ctx context.Context, in *pb.CertProfileInfoRequest, opts ...grpc.CallOption) (*pb.CertProfileInfo, error) {
 	return c.authority.ProfileInfo(ctx, in, opts...)
 }
 
 // SignCertificate returns the certificate
-func (c *retryAuthorityClient) SignCertificate(ctx context.Context, in *pb.SignCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateBundle, error) {
+func (c *retryCAClient) SignCertificate(ctx context.Context, in *pb.SignCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateBundle, error) {
 	return c.authority.SignCertificate(ctx, in, opts...)
 }
 
 // Issuers returns the issuing CAs
-func (c *retryAuthorityClient) Issuers(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*pb.IssuersInfoResponse, error) {
+func (c *retryCAClient) Issuers(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*pb.IssuersInfoResponse, error) {
 	return c.authority.Issuers(ctx, in, opts...)
 }

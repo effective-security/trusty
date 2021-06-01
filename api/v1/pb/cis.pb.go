@@ -27,17 +27,16 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// RootsResponse provides response for GetRootsRequest
-type RootsResponse struct {
+type GetCertificateRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Roots []*RootCertificate `protobuf:"bytes,1,rep,name=roots,proto3" json:"roots,omitempty"`
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
-func (x *RootsResponse) Reset() {
-	*x = RootsResponse{}
+func (x *GetCertificateRequest) Reset() {
+	*x = GetCertificateRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_cis_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -45,13 +44,13 @@ func (x *RootsResponse) Reset() {
 	}
 }
 
-func (x *RootsResponse) String() string {
+func (x *GetCertificateRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RootsResponse) ProtoMessage() {}
+func (*GetCertificateRequest) ProtoMessage() {}
 
-func (x *RootsResponse) ProtoReflect() protoreflect.Message {
+func (x *GetCertificateRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_cis_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -63,14 +62,61 @@ func (x *RootsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use RootsResponse.ProtoReflect.Descriptor instead.
-func (*RootsResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetCertificateRequest.ProtoReflect.Descriptor instead.
+func (*GetCertificateRequest) Descriptor() ([]byte, []int) {
 	return file_cis_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *RootsResponse) GetRoots() []*RootCertificate {
+func (x *GetCertificateRequest) GetId() string {
 	if x != nil {
-		return x.Roots
+		return x.Id
+	}
+	return ""
+}
+
+type GetCertificateResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Certificate *Certificate `protobuf:"bytes,1,opt,name=certificate,proto3" json:"certificate,omitempty"`
+}
+
+func (x *GetCertificateResponse) Reset() {
+	*x = GetCertificateResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_cis_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetCertificateResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCertificateResponse) ProtoMessage() {}
+
+func (x *GetCertificateResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_cis_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCertificateResponse.ProtoReflect.Descriptor instead.
+func (*GetCertificateResponse) Descriptor() ([]byte, []int) {
+	return file_cis_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *GetCertificateResponse) GetCertificate() *Certificate {
+	if x != nil {
+		return x.Certificate
 	}
 	return nil
 }
@@ -79,23 +125,34 @@ var File_cis_proto protoreflect.FileDescriptor
 
 var file_cis_proto_rawDesc = []byte{
 	0x0a, 0x09, 0x63, 0x69, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x02, 0x70, 0x62, 0x1a,
-	0x0a, 0x70, 0x6b, 0x69, 0x78, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x1b, 0x67, 0x6f, 0x6f,
-	0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x65, 0x6d, 0x70,
-	0x74, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x1c, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65,
-	0x2f, 0x61, 0x70, 0x69, 0x2f, 0x61, 0x6e, 0x6e, 0x6f, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73,
-	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x3a, 0x0a, 0x0d, 0x52, 0x6f, 0x6f, 0x74, 0x73, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x29, 0x0a, 0x05, 0x72, 0x6f, 0x6f, 0x74, 0x73,
-	0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x13, 0x2e, 0x70, 0x62, 0x2e, 0x52, 0x6f, 0x6f, 0x74,
-	0x43, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x52, 0x05, 0x72, 0x6f, 0x6f,
-	0x74, 0x73, 0x32, 0x5c, 0x0a, 0x0f, 0x43, 0x65, 0x72, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x53, 0x65,
-	0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x49, 0x0a, 0x05, 0x52, 0x6f, 0x6f, 0x74, 0x73, 0x12, 0x16,
-	0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
-	0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x11, 0x2e, 0x70, 0x62, 0x2e, 0x52, 0x6f, 0x6f, 0x74,
-	0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x15, 0x82, 0xd3, 0xe4, 0x93, 0x02,
-	0x0f, 0x12, 0x0d, 0x2f, 0x76, 0x31, 0x2f, 0x63, 0x69, 0x73, 0x2f, 0x72, 0x6f, 0x6f, 0x74, 0x73,
-	0x42, 0x25, 0x5a, 0x23, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x65,
-	0x6b, 0x73, 0x70, 0x61, 0x6e, 0x64, 0x2f, 0x74, 0x72, 0x75, 0x73, 0x74, 0x79, 0x2f, 0x61, 0x70,
-	0x69, 0x2f, 0x76, 0x31, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x0a, 0x70, 0x6b, 0x69, 0x78, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x08, 0x72, 0x61, 0x2e,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x1b, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x65, 0x6d, 0x70, 0x74, 0x79, 0x2e, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x1a, 0x1c, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x61,
+	0x6e, 0x6e, 0x6f, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x22, 0x27, 0x0a, 0x15, 0x47, 0x65, 0x74, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61,
+	0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x22, 0x4b, 0x0a, 0x16, 0x47, 0x65, 0x74,
+	0x43, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x12, 0x31, 0x0a, 0x0b, 0x63, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61,
+	0x74, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0f, 0x2e, 0x70, 0x62, 0x2e, 0x43, 0x65,
+	0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x52, 0x0b, 0x63, 0x65, 0x72, 0x74, 0x69,
+	0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x32, 0xbe, 0x01, 0x0a, 0x09, 0x43, 0x49, 0x53, 0x65, 0x72,
+	0x76, 0x69, 0x63, 0x65, 0x12, 0x4c, 0x0a, 0x08, 0x47, 0x65, 0x74, 0x52, 0x6f, 0x6f, 0x74, 0x73,
+	0x12, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
+	0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x11, 0x2e, 0x70, 0x62, 0x2e, 0x52, 0x6f,
+	0x6f, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x15, 0x82, 0xd3, 0xe4,
+	0x93, 0x02, 0x0f, 0x12, 0x0d, 0x2f, 0x76, 0x31, 0x2f, 0x63, 0x69, 0x73, 0x2f, 0x72, 0x6f, 0x6f,
+	0x74, 0x73, 0x12, 0x63, 0x0a, 0x0e, 0x47, 0x65, 0x74, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69,
+	0x63, 0x61, 0x74, 0x65, 0x12, 0x19, 0x2e, 0x70, 0x62, 0x2e, 0x47, 0x65, 0x74, 0x43, 0x65, 0x72,
+	0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
+	0x1a, 0x2e, 0x70, 0x62, 0x2e, 0x47, 0x65, 0x74, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63,
+	0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x1a, 0x82, 0xd3, 0xe4,
+	0x93, 0x02, 0x14, 0x12, 0x12, 0x2f, 0x76, 0x31, 0x2f, 0x63, 0x69, 0x73, 0x2f, 0x63, 0x65, 0x72,
+	0x74, 0x73, 0x2f, 0x7b, 0x69, 0x64, 0x7d, 0x42, 0x25, 0x5a, 0x23, 0x67, 0x69, 0x74, 0x68, 0x75,
+	0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x65, 0x6b, 0x73, 0x70, 0x61, 0x6e, 0x64, 0x2f, 0x74, 0x72,
+	0x75, 0x73, 0x74, 0x79, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x31, 0x2f, 0x70, 0x62, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -110,18 +167,22 @@ func file_cis_proto_rawDescGZIP() []byte {
 	return file_cis_proto_rawDescData
 }
 
-var file_cis_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_cis_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_cis_proto_goTypes = []interface{}{
-	(*RootsResponse)(nil),   // 0: pb.RootsResponse
-	(*RootCertificate)(nil), // 1: pb.RootCertificate
-	(*empty.Empty)(nil),     // 2: google.protobuf.Empty
+	(*GetCertificateRequest)(nil),  // 0: pb.GetCertificateRequest
+	(*GetCertificateResponse)(nil), // 1: pb.GetCertificateResponse
+	(*Certificate)(nil),            // 2: pb.Certificate
+	(*empty.Empty)(nil),            // 3: google.protobuf.Empty
+	(*RootsResponse)(nil),          // 4: pb.RootsResponse
 }
 var file_cis_proto_depIdxs = []int32{
-	1, // 0: pb.RootsResponse.roots:type_name -> pb.RootCertificate
-	2, // 1: pb.CertInfoService.Roots:input_type -> google.protobuf.Empty
-	0, // 2: pb.CertInfoService.Roots:output_type -> pb.RootsResponse
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
+	2, // 0: pb.GetCertificateResponse.certificate:type_name -> pb.Certificate
+	3, // 1: pb.CIService.GetRoots:input_type -> google.protobuf.Empty
+	0, // 2: pb.CIService.GetCertificate:input_type -> pb.GetCertificateRequest
+	4, // 3: pb.CIService.GetRoots:output_type -> pb.RootsResponse
+	1, // 4: pb.CIService.GetCertificate:output_type -> pb.GetCertificateResponse
+	3, // [3:5] is the sub-list for method output_type
+	1, // [1:3] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
 	1, // [1:1] is the sub-list for extension extendee
 	0, // [0:1] is the sub-list for field type_name
@@ -133,9 +194,22 @@ func file_cis_proto_init() {
 		return
 	}
 	file_pkix_proto_init()
+	file_ra_proto_init()
 	if !protoimpl.UnsafeEnabled {
 		file_cis_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RootsResponse); i {
+			switch v := v.(*GetCertificateRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_cis_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetCertificateResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -153,7 +227,7 @@ func file_cis_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_cis_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -175,74 +249,112 @@ var _ grpc.ClientConnInterface
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion6
 
-// CertInfoServiceClient is the client API for CertInfoService service.
+// CIServiceClient is the client API for CIService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type CertInfoServiceClient interface {
+type CIServiceClient interface {
 	// Roots returns the root CAs
-	Roots(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*RootsResponse, error)
+	GetRoots(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*RootsResponse, error)
+	// GetCertificate returns the certificate
+	GetCertificate(ctx context.Context, in *GetCertificateRequest, opts ...grpc.CallOption) (*GetCertificateResponse, error)
 }
 
-type certInfoServiceClient struct {
+type cIServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewCertInfoServiceClient(cc grpc.ClientConnInterface) CertInfoServiceClient {
-	return &certInfoServiceClient{cc}
+func NewCIServiceClient(cc grpc.ClientConnInterface) CIServiceClient {
+	return &cIServiceClient{cc}
 }
 
-func (c *certInfoServiceClient) Roots(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*RootsResponse, error) {
+func (c *cIServiceClient) GetRoots(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*RootsResponse, error) {
 	out := new(RootsResponse)
-	err := c.cc.Invoke(ctx, "/pb.CertInfoService/Roots", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/pb.CIService/GetRoots", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// CertInfoServiceServer is the server API for CertInfoService service.
-type CertInfoServiceServer interface {
+func (c *cIServiceClient) GetCertificate(ctx context.Context, in *GetCertificateRequest, opts ...grpc.CallOption) (*GetCertificateResponse, error) {
+	out := new(GetCertificateResponse)
+	err := c.cc.Invoke(ctx, "/pb.CIService/GetCertificate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// CIServiceServer is the server API for CIService service.
+type CIServiceServer interface {
 	// Roots returns the root CAs
-	Roots(context.Context, *empty.Empty) (*RootsResponse, error)
+	GetRoots(context.Context, *empty.Empty) (*RootsResponse, error)
+	// GetCertificate returns the certificate
+	GetCertificate(context.Context, *GetCertificateRequest) (*GetCertificateResponse, error)
 }
 
-// UnimplementedCertInfoServiceServer can be embedded to have forward compatible implementations.
-type UnimplementedCertInfoServiceServer struct {
+// UnimplementedCIServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedCIServiceServer struct {
 }
 
-func (*UnimplementedCertInfoServiceServer) Roots(context.Context, *empty.Empty) (*RootsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Roots not implemented")
+func (*UnimplementedCIServiceServer) GetRoots(context.Context, *empty.Empty) (*RootsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRoots not implemented")
+}
+func (*UnimplementedCIServiceServer) GetCertificate(context.Context, *GetCertificateRequest) (*GetCertificateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCertificate not implemented")
 }
 
-func RegisterCertInfoServiceServer(s *grpc.Server, srv CertInfoServiceServer) {
-	s.RegisterService(&_CertInfoService_serviceDesc, srv)
+func RegisterCIServiceServer(s *grpc.Server, srv CIServiceServer) {
+	s.RegisterService(&_CIService_serviceDesc, srv)
 }
 
-func _CertInfoService_Roots_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _CIService_GetRoots_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CertInfoServiceServer).Roots(ctx, in)
+		return srv.(CIServiceServer).GetRoots(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/pb.CertInfoService/Roots",
+		FullMethod: "/pb.CIService/GetRoots",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CertInfoServiceServer).Roots(ctx, req.(*empty.Empty))
+		return srv.(CIServiceServer).GetRoots(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _CertInfoService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "pb.CertInfoService",
-	HandlerType: (*CertInfoServiceServer)(nil),
+func _CIService_GetCertificate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCertificateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CIServiceServer).GetCertificate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.CIService/GetCertificate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CIServiceServer).GetCertificate(ctx, req.(*GetCertificateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _CIService_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "pb.CIService",
+	HandlerType: (*CIServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Roots",
-			Handler:    _CertInfoService_Roots_Handler,
+			MethodName: "GetRoots",
+			Handler:    _CIService_GetRoots_Handler,
+		},
+		{
+			MethodName: "GetCertificate",
+			Handler:    _CIService_GetCertificate_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

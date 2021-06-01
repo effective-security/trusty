@@ -80,7 +80,7 @@ done
 
 # remove old swagger files so it's obvious whether the files fail to generate
 rm -rf Documentation/dev-guide/apispec/swagger/*json
-for pb in pb/status pb/ca pb/cis; do
+for pb in pb/status pb/ca pb/cis pb/ra; do
 	protobase="api/v1/${pb}"
 	echo "making docs and gw on: ${protobase}"
 	echo "protobase=${protobase}"

@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ekspand/trusty/internal/appcontainer"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/jwt"
 	"github.com/ekspand/trusty/pkg/roles"
@@ -32,6 +33,13 @@ type Service interface {
 	Close()
 	// IsReady indicates that service is ready to serve its end-points
 	IsReady() bool
+}
+
+// StartSubcriber provides
+type StartSubcriber interface {
+	// OnStarted is called when the server started and
+	// is ready to serve requests
+	OnStarted() error
 }
 
 // RouteRegistrator provides interface to register HTTP route
@@ -68,6 +76,7 @@ type Server struct {
 	auditor  audit.Auditor
 	identity roles.IdentityProvider
 	crypto   *cryptoprov.Crypto
+	disco    appcontainer.Discovery
 }
 
 // Start returns running Server
@@ -99,12 +108,13 @@ func Start(
 	}
 
 	err = container.Invoke(func(
+		d appcontainer.Discovery,
 		jwtParser jwt.Parser,
 		auditor audit.Auditor,
 		crypto *cryptoprov.Crypto) error {
 		e.auditor = auditor
 		e.crypto = crypto
-
+		e.disco = d
 		iden, err := roles.New(&cfg.IdentityMap, jwtParser)
 		if err != nil {
 			logger.Errorf("src=Start, err=[%v]", errors.Details(err))
@@ -137,6 +147,11 @@ func Start(
 
 	if err = e.serveClients(); err != nil {
 		return e, err
+	}
+
+	// Register services
+	for _, svc := range e.services {
+		e.disco.Register(e.Name(), svc)
 	}
 
 	serving = true
@@ -345,6 +360,11 @@ func (e *Server) Hostname() string {
 // LocalIP is the local IP4
 func (e *Server) LocalIP() string {
 	return e.ipaddr
+}
+
+// Discovery returns Discovery interface
+func (e *Server) Discovery() appcontainer.Discovery {
+	return e.disco
 }
 
 // Audit create an audit event

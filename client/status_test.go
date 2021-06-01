@@ -18,7 +18,7 @@ func TestStatusWithNewCtxClient(t *testing.T) {
 	ctx := context.Background()
 	srv := &mockpb.MockStatusServer{}
 
-	cli := client.NewStatusFromProxy(proxy.StatusServerToClient(srv))
+	cli := client.NewStatusClientFromProxy(proxy.StatusServerToClient(srv))
 	vexp := &pb.ServerVersion{Build: "1234", Runtime: "go1.15"}
 	srv.Resps = []proto.Message{vexp}
 	vres, err := cli.Version(ctx)
@@ -57,7 +57,7 @@ func TestStatusWithNewClientMock(t *testing.T) {
 
 	assert.NotNil(t, client.ActiveConnection())
 
-	cli := client.Status()
+	cli := client.StatusClient()
 	expErr := v1.ErrGRPCPermissionDenied
 
 	t.Run("Version", func(t *testing.T) {

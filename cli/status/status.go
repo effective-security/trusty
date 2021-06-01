@@ -20,7 +20,7 @@ func Version(c ctl.Control, _ interface{}) error {
 	}
 	defer client.Close()
 
-	res, err := client.Status().Version(context.Background())
+	res, err := client.StatusClient().Version(context.Background())
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -43,7 +43,7 @@ func Server(c ctl.Control, _ interface{}) error {
 	}
 	defer client.Close()
 
-	res, err := client.Status().Server(context.Background())
+	res, err := client.StatusClient().Server(context.Background())
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -67,7 +67,7 @@ func Caller(c ctl.Control, _ interface{}) error {
 	}
 	defer client.Close()
 
-	res, err := client.Status().Caller(context.Background())
+	res, err := client.StatusClient().Caller(context.Background())
 	if err != nil {
 		return errors.Trace(err)
 	}

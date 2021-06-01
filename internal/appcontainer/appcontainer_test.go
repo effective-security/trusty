@@ -1,4 +1,4 @@
-package trustymain
+package appcontainer
 
 import (
 	"os"
@@ -11,11 +11,6 @@ import (
 	"github.com/go-phorce/dolly/tasks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-)
-
-const (
-	falseVal = false
-	trueVal  = true
 )
 
 func TestNewContainerFactory(t *testing.T) {
@@ -52,10 +47,12 @@ func TestNewContainerFactory(t *testing.T) {
 	for _, tc := range tcases {
 
 		t.Run(tc.name, func(t *testing.T) {
-			app := NewApp([]string{"--dry-run"})
-			app.cfg = tc.cfg
 
-			container, err := app.containerFactory()
+			container, err := NewContainerFactory(nil).
+				WithConfigurationProvider(func() (*config.Configuration, error) {
+					return tc.cfg, nil
+				}).
+				CreateContainerWithDependencies()
 			require.NoError(t, err)
 
 			err = container.Invoke(func(cfg *config.Configuration,

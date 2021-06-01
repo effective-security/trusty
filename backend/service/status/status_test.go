@@ -12,6 +12,7 @@ import (
 	"github.com/ekspand/trusty/backend/service/status"
 	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/client/embed"
+	"github.com/ekspand/trusty/internal/appcontainer"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/version"
 	"github.com/ekspand/trusty/pkg/gserver"
@@ -64,11 +65,13 @@ func TestMain(m *testing.M) {
 		Services: []string{status.ServiceName},
 	}
 
-	container := testutils.NewContainerBuilder().
+	container := appcontainer.NewBuilder().
 		WithAuditor(nil).
 		WithCrypto(nil).
 		WithJwtParser(nil).
+		WithDiscovery(appcontainer.NewDiscovery()).
 		Container()
+
 	trustyServer, err = gserver.Start("StatusTest", cfg, container, serviceFactories)
 	if err != nil || trustyServer == nil {
 		panic(errors.Trace(err))

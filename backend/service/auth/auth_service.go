@@ -131,7 +131,7 @@ func (s *Service) AuthURLHandler() rest.Handle {
 		conf := &oauth2.Config{
 			ClientID:     o.ClientID,
 			ClientSecret: o.ClientSecret,
-			RedirectURL:  s.cfg.TrustyClient.ServerURL[config.WFEServerName] + v1.PathForAuthGithubCallback,
+			RedirectURL:  s.cfg.TrustyClient.ServerURL[config.WFEServerName][0] + v1.PathForAuthGithubCallback,
 			Scopes:       o.Scopes,
 			Endpoint: oauth2.Endpoint{
 				AuthURL:  o.AuthURL,
@@ -184,7 +184,7 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 		conf := &oauth2.Config{
 			ClientID:     o.ClientID,
 			ClientSecret: o.ClientSecret,
-			RedirectURL:  s.cfg.TrustyClient.ServerURL[config.WFEServerName] + v1.PathForAuthGithubCallback,
+			RedirectURL:  s.cfg.TrustyClient.ServerURL[config.WFEServerName][0] + v1.PathForAuthGithubCallback,
 			Scopes:       o.Scopes,
 			Endpoint: oauth2.Endpoint{
 				AuthURL:  o.AuthURL,
@@ -259,8 +259,8 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 				oauthStatus.DeviceID, uemail, validFor)
 		}
 
-		// TODO: add Audience to config
-		tokenStr, _, err := s.jwt.SignToken(user.Email, "trusty-wfe", validFor)
+		audience := s.server.Configuration().IdentityMap.JWT.Audience
+		tokenStr, _, err := s.jwt.SignToken(dto.ID, user.Email, audience, validFor)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("failed to sign JWT: %s", err.Error()).WithCause(err))
 			return
@@ -289,26 +289,21 @@ func (s *Service) RefreshHandler() rest.Handle {
 		deviceID := r.Header.Get(header.XDeviceID)
 		idn := ctx.Identity()
 
-		userInfo, ok := idn.UserInfo().(*v1.UserInfo)
-		if !ok {
-			marshal.WriteJSON(w, r, httperror.WithForbidden("failed to extract User Info from the token"))
-			return
-		}
-
-		userID, _ := model.ID(userInfo.ID)
-
+		userID, _ := model.ID(idn.UserID())
 		user, err := s.db.GetUser(context.Background(), userID)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithForbidden("user ID %d not found: %s", userID, err.Error()).WithCause(err))
 			return
 		}
 
-		if user.Email != userInfo.Email {
-			marshal.WriteJSON(w, r, httperror.WithForbidden("email in the token %s does not match to registered %s", userInfo.Email, user.Email))
+		if user.Email != idn.Name() {
+			marshal.WriteJSON(w, r, httperror.WithForbidden("email in the token %s does not match to registered %s", idn.Name(), user.Email))
 			return
 		}
 
-		auth, claims, err := s.jwt.SignToken(userInfo.Email, "trusty-wfe", 8*60*time.Minute)
+		dto := user.ToDto()
+		audience := s.server.Configuration().IdentityMap.JWT.Audience
+		auth, claims, err := s.jwt.SignToken(idn.UserID(), user.Email, audience, 8*60*time.Minute)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("failed to sign JWT: %s", err.Error()).WithCause(err))
 			return
@@ -317,28 +312,28 @@ func (s *Service) RefreshHandler() rest.Handle {
 		s.server.Audit(
 			ServiceName,
 			evtTokenRefreshed,
-			userInfo.Email,
+			user.Email,
 			deviceID,
 			0,
 			fmt.Sprintf("ID=%s, ExternalID=%s, email=%s, name=%q",
-				userInfo.ID, userInfo.ExternalID, userInfo.Email, userInfo.Name),
+				dto.ID, dto.ExternalID, dto.Email, dto.Name),
 		)
 
 		res := &v1.AuthTokenRefreshResponse{
 			Authorization: &v1.Authorization{
 				Version:  "v1.0",
 				DeviceID: deviceID,
-				UserID:   userInfo.ID,
-				Login:    userInfo.Login,
-				Name:     userInfo.Name,
-				Email:    userInfo.Email,
+				UserID:   dto.ID,
+				Login:    user.Login,
+				Name:     user.Name,
+				Email:    user.Email,
 				//Role
 				ExpiresAt:   time.Unix(claims.ExpiresAt, 0),
 				IssuedAt:    time.Now(),
 				TokenType:   "jwt",
 				AccessToken: auth,
 			},
-			Profile: userInfo,
+			Profile: dto,
 		}
 
 		marshal.WriteJSON(w, r, res)

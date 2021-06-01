@@ -59,5 +59,5 @@ func (s *Service) RegisterRoute(r rest.Router) {
 
 // RegisterGRPC registers gRPC handler
 func (s *Service) RegisterGRPC(r *grpc.Server) {
-	pb.RegisterAuthorityServiceServer(r, s)
+	pb.RegisterCAServiceServer(r, s)
 }

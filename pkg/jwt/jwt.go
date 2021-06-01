@@ -19,7 +19,7 @@ var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "jwt")
 // Signer specifies JWT signer interface
 type Signer interface {
 	// SignToken returns signed JWT token
-	SignToken(subject, audience string, expiry time.Duration) (string, *jwt.StandardClaims, error)
+	SignToken(id, subject, audience string, expiry time.Duration) (string, *jwt.StandardClaims, error)
 }
 
 // Parser specifies JWT parser interface
@@ -137,11 +137,12 @@ func (p *provider) currentKey() (string, []byte) {
 }
 
 // SignToken returns signed JWT token with custom claims
-func (p *provider) SignToken(subject, audience string, expiry time.Duration) (string, *jwt.StandardClaims, error) {
+func (p *provider) SignToken(id, subject, audience string, expiry time.Duration) (string, *jwt.StandardClaims, error) {
 	kid, key := p.currentKey()
 	now := time.Now().UTC()
 	expiresAt := now.Add(expiry)
 	claims := &jwt.StandardClaims{
+		Id:        id,
 		ExpiresAt: expiresAt.Unix(),
 		Issuer:    p.issuer,
 		IssuedAt:  now.Unix(),

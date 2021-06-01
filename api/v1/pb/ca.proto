@@ -10,7 +10,7 @@ import "google/protobuf/empty.proto";
 // for grpc-gateway
 import "google/api/annotations.proto";
 
-service AuthorityService {
+service CAService {
         // ProfileInfo returns the certificate profile info
         rpc ProfileInfo(CertProfileInfoRequest) returns (CertProfileInfo) {
             option (google.api.http) = {
