@@ -6,7 +6,7 @@
   },
   "tags": [
     {
-      "name": "AuthorityService"
+      "name": "CAService"
     }
   ],
   "consumes": [
@@ -19,7 +19,7 @@
     "/v1/ca/csr/create": {
       "post": {
         "summary": "SignCertificate returns the certificate",
-        "operationId": "AuthorityService_SignCertificate",
+        "operationId": "CAService_SignCertificate",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -35,14 +35,14 @@
           }
         },
         "tags": [
-          "AuthorityService"
+          "CAService"
         ]
       }
     },
     "/v1/ca/csr/profile_info": {
       "post": {
         "summary": "ProfileInfo returns the certificate profile info",
-        "operationId": "AuthorityService_ProfileInfo",
+        "operationId": "CAService_ProfileInfo",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -58,14 +58,14 @@
           }
         },
         "tags": [
-          "AuthorityService"
+          "CAService"
         ]
       }
     },
     "/v1/ca/issuers": {
       "get": {
         "summary": "Issuers returns the issuing CAs",
-        "operationId": "AuthorityService_Issuers",
+        "operationId": "CAService_Issuers",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -81,7 +81,7 @@
           }
         },
         "tags": [
-          "AuthorityService"
+          "CAService"
         ]
       }
     }

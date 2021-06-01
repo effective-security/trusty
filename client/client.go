@@ -3,11 +3,12 @@ package client
 import (
 	"context"
 	"math"
+	"os"
 	"strings"
-	"sync"
 	"time"
 
 	v1 "github.com/ekspand/trusty/api/v1"
+	tcredentials "github.com/ekspand/trusty/pkg/credentials"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
 	"google.golang.org/grpc"
@@ -72,15 +73,7 @@ type Client struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 
-	lock sync.RWMutex
-}
-
-// NewCtxClient creates a client with a context but no underlying grpc
-// connection. This is useful for embedded cases that override the
-// service interface implementations and do not need connection management.
-func NewCtxClient(ctx context.Context) *Client {
-	cctx, cancel := context.WithCancel(ctx)
-	return &Client{ctx: cctx, cancel: cancel}
+	//lock sync.RWMutex
 }
 
 // NewFromURL creates a new trusty client from a URL.
@@ -104,19 +97,24 @@ func New(cfg *Config) (*Client, error) {
 	return newClient(cfg)
 }
 
-// Authority returns Authority client from connection
-func (c *Client) Authority() AuthorityClient {
-	return NewAuthority(c.conn, c.callOpts)
+// RAClient returns RAClient client from connection
+func (c *Client) RAClient() RAClient {
+	return NewRAClient(c.conn, c.callOpts)
 }
 
-// Status returns Status client from connection
-func (c *Client) Status() StatusClient {
-	return NewStatus(c.conn, c.callOpts)
+// CAClient returns CAClient client from connection
+func (c *Client) CAClient() CAClient {
+	return NewCAClient(c.conn, c.callOpts)
 }
 
-// CertInfo returns CertInfo client from connection
-func (c *Client) CertInfo() CertInfoClient {
-	return NewCertInfo(c.conn, c.callOpts)
+// StatusClient returns StatusClient client from connection
+func (c *Client) StatusClient() StatusClient {
+	return NewStatusClient(c.conn, c.callOpts)
+}
+
+// CIClient returns CIClient client from connection
+func (c *Client) CIClient() CIClient {
+	return NewCIClient(c.conn, c.callOpts)
 }
 
 // Close shuts down the client's trusty connections.
@@ -139,15 +137,8 @@ func newClient(cfg *Config) (*Client, error) {
 		return nil, errors.Errorf("at least one Endpoint must is required in client config")
 	}
 
-	/* TODO
-	var creds credentials.TransportCredentials
-	if cfg.TLS != nil {
-		creds = credentials.NewBundle(credentials.Config{TLSConfig: cfg.TLS}).TransportCredentials()
-	}
-	*/
-
 	// use a temporary skeleton client to bootstrap first connection
-	baseCtx := context.TODO()
+	baseCtx := context.Background()
 	if cfg.Context != nil {
 		baseCtx = cfg.Context
 	}
@@ -163,12 +154,22 @@ func newClient(cfg *Config) (*Client, error) {
 
 	dialEndpoint := cfg.Endpoints[0]
 
+	var dopts []grpc.DialOption
 	var creds credentials.TransportCredentials
-	if cfg.TLS != nil && !strings.HasSuffix(dialEndpoint, ":7880") {
-		creds = credentials.NewTLS(cfg.TLS)
+	if cfg.TLS != nil &&
+		(strings.HasPrefix(dialEndpoint, "https://") || strings.HasPrefix(dialEndpoint, "unixs://")) {
+
+		bundle := tcredentials.NewBundle(tcredentials.Config{TLSConfig: cfg.TLS})
+		creds = bundle.TransportCredentials()
+		// grpc: the credentials require transport level security
+		tk := os.Getenv("TRUSTY_AUTH_TOKEN")
+		if tk != "" {
+			bundle.UpdateAuthToken(tk)
+			dopts = append(dopts, grpc.WithPerRPCCredentials(bundle.PerRPCCredentials()))
+		}
 	}
 
-	conn, err := client.dial(dialEndpoint, creds)
+	conn, err := client.dial(dialEndpoint, creds, dopts...)
 	if err != nil {
 		client.cancel()
 		return nil, errors.Trace(err)
@@ -198,6 +199,8 @@ func (c *Client) dial(target string, creds credentials.TransportCredentials, dop
 
 	target = strings.TrimPrefix(target, "https://")
 	target = strings.TrimPrefix(target, "http://")
+	target = strings.TrimPrefix(target, "unixs://")
+	target = strings.TrimPrefix(target, "unix://")
 
 	logger.Debugf("scr=dial, target=%q, with_timeout=%v", target, c.cfg.DialTimeout)
 
@@ -252,6 +255,7 @@ func toErr(ctx context.Context, err error) error {
 	return err
 }
 
+/*
 func canceledByCaller(stopCtx context.Context, err error) bool {
 	if stopCtx.Err() == nil || err == nil {
 		return false
@@ -259,3 +263,4 @@ func canceledByCaller(stopCtx context.Context, err error) bool {
 
 	return err == context.Canceled || err == context.DeadlineExceeded
 }
+*/

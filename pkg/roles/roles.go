@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ekspand/trusty/internal/config"
+	tcredentials "github.com/ekspand/trusty/pkg/credentials"
 	"github.com/ekspand/trusty/pkg/jwt"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/identity"
@@ -119,7 +120,7 @@ func (p *provider) IdentityFromRequest(r *http.Request) (identity.Identity, erro
 	if p.config.JWT.Enabled {
 		key := r.Header.Get(header.Authorization)
 		if key != "" && strings.HasPrefix(key, header.Bearer) {
-			return p.jwtIdentity(key[0:7])
+			return p.jwtIdentity(key[7:])
 		}
 	}
 
@@ -140,8 +141,8 @@ func (p *provider) IdentityFromRequest(r *http.Request) (identity.Identity, erro
 func (p *provider) IdentityFromContext(ctx context.Context) (identity.Identity, error) {
 	if p.config.JWT.Enabled {
 		md, ok := metadata.FromIncomingContext(ctx)
-		if ok && len(md["authorization"]) > 0 {
-			return p.jwtIdentity(md["authorization"][0])
+		if ok && len(md[tcredentials.TokenFieldNameGRPC]) > 0 {
+			return p.jwtIdentity(md[tcredentials.TokenFieldNameGRPC][0])
 		}
 	}
 
@@ -170,7 +171,9 @@ func (p *provider) jwtIdentity(auth string) (identity.Identity, error) {
 	if role == "" {
 		role = p.config.JWT.DefaultAuthenticatedRole
 	}
-	return identity.NewIdentity(role, token.Subject, ""), nil
+	logger.Debugf("src=jwtIdentity, role=%s, subject=%s, id=%s",
+		role, token.Subject, token.Id)
+	return identity.NewIdentity(role, token.Subject, token.Id), nil
 }
 
 func (p *provider) tlsIdentity(TLS *tls.ConnectionState) (identity.Identity, error) {
@@ -182,8 +185,8 @@ func (p *provider) tlsIdentity(TLS *tls.ConnectionState) (identity.Identity, err
 			role = p.config.TLS.DefaultAuthenticatedRole
 		}
 		logger.Debugf("src=tlsIdentity, spifee=%s, role=%s", spifee, role)
-		return identity.NewIdentity(role, peer.Issuer.CommonName, ""), nil
+		return identity.NewIdentity(role, peer.Subject.CommonName, ""), nil
 	}
 
-	return nil, errors.Errorf("could not determine identity: %q", peer.Issuer.CommonName)
+	return nil, errors.Errorf("could not determine identity: %q", peer.Subject.CommonName)
 }

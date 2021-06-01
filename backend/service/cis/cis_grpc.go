@@ -3,22 +3,28 @@ package cis
 import (
 	"context"
 
+	v1 "github.com/ekspand/trusty/api/v1"
 	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/juju/errors"
+	"google.golang.org/grpc/codes"
 )
 
-// Roots returns the root CAs
-func (s *Service) Roots(ctx context.Context, _ *empty.Empty) (*pb.RootsResponse, error) {
-	roots, err := s.db.GetRootCertificates(ctx)
+// GetRoots returns the root CAs
+func (s *Service) GetRoots(ctx context.Context, empty *empty.Empty) (*pb.RootsResponse, error) {
+	ra, err := s.getRAClient()
 	if err != nil {
-		logger.Errorf("src=Roots, err=[%v]", errors.ErrorStack(err))
-		return nil, errors.Annotatef(err, "unable to query root certificates")
+		return nil, v1.NewError(codes.Internal, "failed to create RA client: "+err.Error())
 	}
 
-	res := &pb.RootsResponse{
-		Roots: roots.ToDTO(),
+	res, err := ra.GetRoots(ctx, empty)
+	if err != nil {
+		return nil, v1.NewError(codes.Internal, "failed to get Roots: "+err.Error())
 	}
 
 	return res, nil
+}
+
+// GetCertificate returns the certificate
+func (s *Service) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.GetCertificateResponse, error) {
+	return nil, nil
 }

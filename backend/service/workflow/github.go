@@ -20,7 +20,7 @@ func (s *Service) githubClient(ctx context.Context, user *model.User) *github.Cl
 	conf := &oauth2.Config{
 		ClientID:     o.ClientID,
 		ClientSecret: o.ClientSecret,
-		RedirectURL:  s.cfg.TrustyClient.ServerURL[config.WFEServerName] + v1.PathForAuthGithubCallback,
+		RedirectURL:  s.cfg.TrustyClient.ServerURL[config.WFEServerName][0] + v1.PathForAuthGithubCallback,
 		Scopes:       o.Scopes,
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  o.AuthURL,

@@ -4,6 +4,7 @@ import (
 	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/backend/service/ca"
 	"github.com/ekspand/trusty/backend/service/cis"
+	"github.com/ekspand/trusty/backend/service/ra"
 	"github.com/ekspand/trusty/backend/service/status"
 	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/client/embed/proxy"
@@ -13,23 +14,31 @@ import (
 // NewStatusClient returns embedded StatusClient for running server
 func NewStatusClient(s *gserver.Server) client.StatusClient {
 	if statusServiceServer, ok := s.Service(status.ServiceName).(pb.StatusServiceServer); ok {
-		return client.NewStatusFromProxy(proxy.StatusServerToClient(statusServiceServer))
+		return client.NewStatusClientFromProxy(proxy.StatusServerToClient(statusServiceServer))
 	}
 	return nil
 }
 
-// NewAuthorityClient returns embedded AuthorityClient for running server
-func NewAuthorityClient(s *gserver.Server) client.AuthorityClient {
-	if authorityServiceServer, ok := s.Service(ca.ServiceName).(pb.AuthorityServiceServer); ok {
-		return client.NewAuthorityFromProxy(proxy.AuthorityServerToClient(authorityServiceServer))
+// NewCAClient returns embedded CAClient for running server
+func NewCAClient(s *gserver.Server) client.CAClient {
+	if caServiceServer, ok := s.Service(ca.ServiceName).(pb.CAServiceServer); ok {
+		return client.NewCAClientFromProxy(proxy.CAServerToClient(caServiceServer))
 	}
 	return nil
 }
 
-// NewCertInfoClient returns embedded CertInfoClient for running server
-func NewCertInfoClient(s *gserver.Server) client.CertInfoClient {
-	if certInfoServiceServer, ok := s.Service(cis.ServiceName).(pb.CertInfoServiceServer); ok {
-		return client.NewCertInfoFromProxy(proxy.CertInfoServiceServerToClient(certInfoServiceServer))
+// NewCIClient returns embedded CIClient for running server
+func NewCIClient(s *gserver.Server) client.CIClient {
+	if cisServer, ok := s.Service(cis.ServiceName).(pb.CIServiceServer); ok {
+		return client.NewCIClientFromProxy(proxy.CIServiceServerToClient(cisServer))
+	}
+	return nil
+}
+
+// NewRAClient returns embedded RAClient for running server
+func NewRAClient(s *gserver.Server) client.RAClient {
+	if eaServiceServer, ok := s.Service(ra.ServiceName).(pb.RAServiceServer); ok {
+		return client.NewRAClientFromProxy(proxy.RAServiceServerToClient(eaServiceServer))
 	}
 	return nil
 }

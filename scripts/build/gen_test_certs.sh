@@ -219,7 +219,7 @@ if [[ "$CLIENT" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}clien
         --ca-cert ${OUT_DIR}/${PREFIX}issuer2_ca.pem \
         --ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
         --csr-profile ${CSR_DIR}/${PREFIX}client.json \
-        --SAN=spifee://trusty/client \
+        --SAN=spifee://trusty/all \
         --key-label="${PREFIX}client*" \
         --out ${OUT_DIR}/${PREFIX}client
 

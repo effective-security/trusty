@@ -12,14 +12,12 @@ import (
 	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/awskmscrypto"
-	"github.com/ekspand/trusty/pkg/credentials"
 	"github.com/ekspand/trusty/pkg/inmemcrypto"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/rest/tlsconfig"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
-	"google.golang.org/grpc"
 )
 
 var logger = xlog.NewPackageLogger("github.com/ekspand/trusty", "cli")
@@ -312,8 +310,8 @@ func (cli *Cli) Client(svc string) (*client.Client, error) {
 		}
 
 		cfg = cli.Config()
-		if cli.Server() == "" && cfg.TrustyClient.ServerURL[svc] != "" {
-			*cli.flags.server = cfg.TrustyClient.ServerURL[svc]
+		if cli.Server() == "" && len(cfg.TrustyClient.ServerURL[svc]) > 0 {
+			*cli.flags.server = cfg.TrustyClient.ServerURL[svc][0]
 		}
 	}
 
@@ -357,15 +355,6 @@ func (cli *Cli) Client(svc string) (*client.Client, error) {
 		TLS:                  tlscfg,
 	}
 
-	if tlscfg != nil {
-		// grpc: the credentials require transport level security
-		tk := os.Getenv("TRUSTY_AUTH_TOKEN")
-		if tk != "" {
-			logger.Debugf("src=Client, token=TRUSTY_AUTH_TOKEN")
-			perGRPC := credentials.NewOauthAccess(tk)
-			clientCfg.DialOptions = append(clientCfg.DialOptions, grpc.WithPerRPCCredentials(perGRPC))
-		}
-	}
 	client, err := client.New(clientCfg)
 	if err != nil {
 		return nil, errors.Annotate(err, "unable to create client")

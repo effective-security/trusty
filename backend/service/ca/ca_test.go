@@ -23,7 +23,7 @@ import (
 
 var (
 	trustyServer    *gserver.Server
-	authorityClient client.AuthorityClient
+	authorityClient client.CAClient
 )
 
 const (
@@ -87,7 +87,7 @@ func TestMain(m *testing.M) {
 			if trustyServer == nil {
 				panic("ca not found!")
 			}
-			authorityClient = embed.NewAuthorityClient(trustyServer)
+			authorityClient = embed.NewCAClient(trustyServer)
 
 			// Run the tests
 			rc = m.Run()

@@ -1,12 +1,11 @@
-package cis_test
+package ra_test
 
 import (
 	"context"
 	"os"
 	"testing"
 
-	"github.com/ekspand/trusty/api/v1/pb"
-	"github.com/ekspand/trusty/backend/service/cis"
+	"github.com/ekspand/trusty/backend/service/ra"
 	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/client/embed"
 	"github.com/ekspand/trusty/internal/appcontainer"
@@ -20,20 +19,20 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var (
+	trustyServer *gserver.Server
+	raClient     client.RAClient
+	caMock       = &mockpb.MockCAServer{}
+)
+
 const (
 	projFolder = "../../../"
 )
 
-var (
-	trustyServer *gserver.Server
-	cisClient    client.CIClient
-	raMock       = &mockpb.MockRAServer{}
-
-	// serviceFactories provides map of trustyserver.ServiceFactory
-	serviceFactories = map[string]gserver.ServiceFactory{
-		cis.ServiceName: cis.Factory,
-	}
-)
+// serviceFactories provides map of trustyserver.ServiceFactory
+var serviceFactories = map[string]gserver.ServiceFactory{
+	ra.ServiceName: ra.Factory,
+}
 
 func TestMain(m *testing.M) {
 	var err error
@@ -48,11 +47,11 @@ func TestMain(m *testing.M) {
 
 	httpcfg := &config.HTTPServer{
 		ListenURLs: []string{httpAddr},
-		Services:   []string{cis.ServiceName},
+		Services:   []string{ra.ServiceName},
 	}
 
 	disco := appcontainer.NewDiscovery()
-	disco.Register("MockRAServer", raMock)
+	disco.Register("MockCAServer", caMock)
 
 	container, err := appcontainer.NewContainerFactory(nil).
 		WithConfigurationProvider(func() (*config.Configuration, error) {
@@ -66,13 +65,13 @@ func TestMain(m *testing.M) {
 		panic(errors.Trace(err))
 	}
 
-	trustyServer, err = gserver.Start("cis", httpcfg, container, serviceFactories)
+	trustyServer, err = gserver.Start("ra", httpcfg, container, serviceFactories)
 	if err != nil || trustyServer == nil {
 		panic(errors.Trace(err))
 	}
-	cisClient = embed.NewCIClient(trustyServer)
+	raClient = embed.NewRAClient(trustyServer)
 
-	err = trustyServer.Service("cis").(*cis.Service).OnStarted()
+	err = trustyServer.Service("ra").(*ra.Service).OnStarted()
 	if err != nil {
 		panic(errors.Trace(err))
 	}
@@ -87,20 +86,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestRoots(t *testing.T) {
-	raMock.SetResponse(&pb.RootsResponse{
-		Roots: []*pb.RootCertificate{
-			{
-				Id: 1,
-			},
-		},
-	})
-
-	res, err := cisClient.GetRoots(context.Background(), &empty.Empty{})
+	res, err := raClient.GetRoots(context.Background(), &empty.Empty{})
 	require.NoError(t, err)
-	assert.Len(t, res.Roots, 1)
-
-	raMock.SetError(errors.New("unable to read DB"))
-	_, err = cisClient.GetRoots(context.Background(), &empty.Empty{})
-	require.Error(t, err)
-	assert.Equal(t, "failed to get Roots: unable to read DB", err.Error())
+	assert.NotEmpty(t, res.Roots)
 }

@@ -1,7 +1,7 @@
 {
-    "common_name": "trusty-client",
+    "common_name": "trusty",
     "san": [
-        "spifee://trusty/client"
+        "spifee://trusty/all"
     ],    
     "key": {
         "algo": "rsa",

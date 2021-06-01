@@ -1,12 +1,12 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "api/v1/pb/cis.proto",
+    "title": "api/v1/pb/ra.proto",
     "version": "version not set"
   },
   "tags": [
     {
-      "name": "CIService"
+      "name": "RAService"
     }
   ],
   "consumes": [
@@ -16,41 +16,10 @@
     "application/json"
   ],
   "paths": {
-    "/v1/cis/certs/{id}": {
+    "/v1/ra/roots": {
       "get": {
-        "summary": "GetCertificate returns the certificate",
-        "operationId": "CIService_GetCertificate",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/pbGetCertificateResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "CIService"
-        ]
-      }
-    },
-    "/v1/cis/roots": {
-      "get": {
-        "summary": "Roots returns the root CAs",
-        "operationId": "CIService_GetRoots",
+        "summary": "GetRoots returns the root certificates",
+        "operationId": "RAService_GetRoots",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -66,7 +35,7 @@
           }
         },
         "tags": [
-          "CIService"
+          "RAService"
         ]
       }
     }
@@ -134,13 +103,17 @@
       },
       "title": "Certificate provides X509 Certificate information"
     },
-    "pbGetCertificateResponse": {
+    "pbCertificatesResponse": {
       "type": "object",
       "properties": {
-        "certificate": {
-          "$ref": "#/definitions/pbCertificate"
+        "certificates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pbCertificate"
+          }
         }
-      }
+      },
+      "title": "CertificatesResponse returns Certificates"
     },
     "pbRootCertificate": {
       "type": "object",

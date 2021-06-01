@@ -19,13 +19,7 @@ func (s *Service) SyncOrgsHandler() rest.Handle {
 		ctx := identity.FromRequest(r)
 		idn := ctx.Identity()
 
-		userInfo, ok := idn.UserInfo().(*v1.UserInfo)
-		if !ok {
-			marshal.WriteJSON(w, r, httperror.WithForbidden("failed to extract User Info from the token"))
-			return
-		}
-
-		userID, _ := model.ID(userInfo.ID)
+		userID, _ := model.ID(idn.UserID())
 		user, err := s.db.GetUser(context.Background(), userID)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithForbidden("user ID %d not found: %s", userID, err.Error()).WithCause(err))
@@ -47,14 +41,7 @@ func (s *Service) GetOrgsHandler() rest.Handle {
 		ctx := identity.FromRequest(r)
 		idn := ctx.Identity()
 
-		userInfo, ok := idn.UserInfo().(*v1.UserInfo)
-		if !ok {
-			marshal.WriteJSON(w, r, httperror.WithForbidden("failed to extract User Info from the token"))
-			return
-		}
-
-		userID, _ := model.ID(userInfo.ID)
-
+		userID, _ := model.ID(idn.UserID())
 		orgs, err := s.db.GetUserOrgs(r.Context(), userID)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to fetch repos: %s", err.Error()).WithCause(err))

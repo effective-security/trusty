@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/ekspand/trusty/backend/service/swagger"
+	"github.com/ekspand/trusty/internal/appcontainer"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/tests/testutils"
@@ -56,10 +57,11 @@ func TestMain(m *testing.M) {
 		Swagger:  devcfg.HTTPServers["cis"].Swagger,
 	}
 
-	container := testutils.NewContainerBuilder().
+	container := appcontainer.NewBuilder().
 		WithAuditor(nil).
 		WithCrypto(nil).
 		WithJwtParser(nil).
+		WithDiscovery(appcontainer.NewDiscovery()).
 		Container()
 
 	trustyServer, err = gserver.Start("SwaggerTest", cfg, container, serviceFactories)

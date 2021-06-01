@@ -9,15 +9,20 @@ import (
 )
 
 type cisSrv2C struct {
-	srv pb.CertInfoServiceServer
+	srv pb.CIServiceServer
 }
 
-// CertInfoServiceServerToClient returns pb.CertInfoServiceClient
-func CertInfoServiceServerToClient(srv pb.CertInfoServiceServer) pb.CertInfoServiceClient {
+// CIServiceServerToClient returns pb.CIServiceClient
+func CIServiceServerToClient(srv pb.CIServiceServer) pb.CIServiceClient {
 	return &cisSrv2C{srv}
 }
 
 // Roots returns the root CAs
-func (s *cisSrv2C) Roots(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*pb.RootsResponse, error) {
-	return s.srv.Roots(ctx, in)
+func (s *cisSrv2C) GetRoots(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*pb.RootsResponse, error) {
+	return s.srv.GetRoots(ctx, in)
+}
+
+// Roots returns the root CAs
+func (s *cisSrv2C) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest, opts ...grpc.CallOption) (*pb.GetCertificateResponse, error) {
+	return s.srv.GetCertificate(ctx, in)
 }

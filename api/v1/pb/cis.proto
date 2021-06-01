@@ -4,21 +4,32 @@ package pb;
 option go_package = "github.com/ekspand/trusty/api/v1/pb";
 
 import "pkix.proto";
+import "ra.proto";
 import "google/protobuf/empty.proto";
 //import "google/protobuf/timestamp.proto";
 // for grpc-gateway
 import "google/api/annotations.proto";
 
-service CertInfoService {
+service CIService {
     // Roots returns the root CAs
-    rpc Roots(google.protobuf.Empty) returns (RootsResponse) {
+    rpc GetRoots(google.protobuf.Empty) returns (RootsResponse) {
         option (google.api.http) = {
             get: "/v1/cis/roots"
         };
     }
+
+    // GetCertificate returns the certificate
+    rpc GetCertificate(GetCertificateRequest) returns (GetCertificateResponse) {
+        option (google.api.http) = {
+            get: "/v1/cis/certs/{id}"
+        };
+    }
 }
 
-// RootsResponse provides response for GetRootsRequest
-message RootsResponse {
-    repeated RootCertificate roots = 1;
+message GetCertificateRequest {
+    string id = 1;
+}
+
+message GetCertificateResponse {
+    Certificate certificate = 1;
 }

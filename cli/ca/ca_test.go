@@ -40,7 +40,7 @@ func (s *testSuite) TestIssuers() {
 	err := loadJSON("testdata/issuers.json", expectedResponse)
 	s.Require().NoError(err)
 
-	s.MockAuthority = &mockpb.MockAuthorityServer{
+	s.MockAuthority = &mockpb.MockCAServer{
 		Err:   nil,
 		Resps: []proto.Message{expectedResponse},
 	}
@@ -62,7 +62,7 @@ func (s *testSuite) TestProfile() {
 	err := loadJSON("testdata/server_profile.json", expectedResponse)
 	s.Require().NoError(err)
 
-	s.MockAuthority = &mockpb.MockAuthorityServer{
+	s.MockAuthority = &mockpb.MockCAServer{
 		Err:   nil,
 		Resps: []proto.Message{expectedResponse},
 	}
@@ -102,7 +102,7 @@ func (s *testSuite) TestSign() {
 	err := loadJSON("testdata/sign.json", expectedResponse)
 	s.Require().NoError(err)
 
-	s.MockAuthority = &mockpb.MockAuthorityServer{
+	s.MockAuthority = &mockpb.MockCAServer{
 		Err:   nil,
 		Resps: []proto.Message{expectedResponse},
 	}

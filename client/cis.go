@@ -8,51 +8,63 @@ import (
 	"google.golang.org/grpc"
 )
 
-// CertInfoClient client interface
-type CertInfoClient interface {
-	// Roots returns the root CAs
-	Roots(ctx context.Context, in *empty.Empty) (*pb.RootsResponse, error)
+// CIClient client interface
+type CIClient interface {
+	// GetRoots returns the root CAs
+	GetRoots(ctx context.Context, in *empty.Empty) (*pb.RootsResponse, error)
+	// GetCertificate returns the certificate
+	GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.GetCertificateResponse, error)
 }
 
 type cisClient struct {
-	remote   pb.CertInfoServiceClient
+	remote   pb.CIServiceClient
 	callOpts []grpc.CallOption
 }
 
-// NewCertInfo returns instance of CertInfoService client
-func NewCertInfo(conn *grpc.ClientConn, callOpts []grpc.CallOption) CertInfoClient {
+// NewCIClient returns instance of CIService client
+func NewCIClient(conn *grpc.ClientConn, callOpts []grpc.CallOption) CIClient {
 	return &cisClient{
-		remote:   RetryCertInfoClient(conn),
+		remote:   RetryCIClient(conn),
 		callOpts: callOpts,
 	}
 }
 
-// NewCertInfoFromProxy returns instance of CertInfoService client
-func NewCertInfoFromProxy(proxy pb.CertInfoServiceClient) CertInfoClient {
+// NewCIClientFromProxy returns instance of CIService client
+func NewCIClientFromProxy(proxy pb.CIServiceClient) CIClient {
 	return &cisClient{
 		remote: proxy,
 	}
 }
 
 // Roots returns the root CAs
-func (c *cisClient) Roots(ctx context.Context, in *empty.Empty) (*pb.RootsResponse, error) {
-	return c.remote.Roots(ctx, in, c.callOpts...)
+func (c *cisClient) GetRoots(ctx context.Context, in *empty.Empty) (*pb.RootsResponse, error) {
+	return c.remote.GetRoots(ctx, in, c.callOpts...)
 }
 
-type retryCertInfoClient struct {
-	cis pb.CertInfoServiceClient
+// GetCertificate returns the certificate
+func (c *cisClient) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.GetCertificateResponse, error) {
+	return c.remote.GetCertificate(ctx, in, c.callOpts...)
+}
+
+type retryCIClient struct {
+	cis pb.CIServiceClient
 }
 
 // TODO: implement retry for gRPC client interceptor
 
-// RetryCertInfoClient implements a CertInfoServiceClient.
-func RetryCertInfoClient(conn *grpc.ClientConn) pb.CertInfoServiceClient {
-	return &retryCertInfoClient{
-		cis: pb.NewCertInfoServiceClient(conn),
+// RetryCIClient implements a CIServiceClient.
+func RetryCIClient(conn *grpc.ClientConn) pb.CIServiceClient {
+	return &retryCIClient{
+		cis: pb.NewCIServiceClient(conn),
 	}
 }
 
 // Roots returns the root CAs
-func (c *retryCertInfoClient) Roots(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*pb.RootsResponse, error) {
-	return c.cis.Roots(ctx, in, opts...)
+func (c *retryCIClient) GetRoots(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*pb.RootsResponse, error) {
+	return c.cis.GetRoots(ctx, in, opts...)
+}
+
+// GetCertificate returns the certificate
+func (c *retryCIClient) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest, opts ...grpc.CallOption) (*pb.GetCertificateResponse, error) {
+	return c.cis.GetCertificate(ctx, in, opts...)
 }

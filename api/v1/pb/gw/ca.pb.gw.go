@@ -34,17 +34,17 @@ var _ = utilities.NewDoubleArray
 var _ = metadata.Join
 
 var (
-	filter_AuthorityService_ProfileInfo_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+	filter_CAService_ProfileInfo_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
 )
 
-func request_AuthorityService_ProfileInfo_0(ctx context.Context, marshaler runtime.Marshaler, client extPb.AuthorityServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_CAService_ProfileInfo_0(ctx context.Context, marshaler runtime.Marshaler, client extPb.CAServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq extPb.CertProfileInfoRequest
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_AuthorityService_ProfileInfo_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CAService_ProfileInfo_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -53,14 +53,14 @@ func request_AuthorityService_ProfileInfo_0(ctx context.Context, marshaler runti
 
 }
 
-func local_request_AuthorityService_ProfileInfo_0(ctx context.Context, marshaler runtime.Marshaler, server extPb.AuthorityServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_CAService_ProfileInfo_0(ctx context.Context, marshaler runtime.Marshaler, server extPb.CAServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq extPb.CertProfileInfoRequest
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_AuthorityService_ProfileInfo_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CAService_ProfileInfo_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -70,17 +70,17 @@ func local_request_AuthorityService_ProfileInfo_0(ctx context.Context, marshaler
 }
 
 var (
-	filter_AuthorityService_SignCertificate_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+	filter_CAService_SignCertificate_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
 )
 
-func request_AuthorityService_SignCertificate_0(ctx context.Context, marshaler runtime.Marshaler, client extPb.AuthorityServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_CAService_SignCertificate_0(ctx context.Context, marshaler runtime.Marshaler, client extPb.CAServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq extPb.SignCertificateRequest
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_AuthorityService_SignCertificate_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CAService_SignCertificate_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -89,14 +89,14 @@ func request_AuthorityService_SignCertificate_0(ctx context.Context, marshaler r
 
 }
 
-func local_request_AuthorityService_SignCertificate_0(ctx context.Context, marshaler runtime.Marshaler, server extPb.AuthorityServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_CAService_SignCertificate_0(ctx context.Context, marshaler runtime.Marshaler, server extPb.CAServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq extPb.SignCertificateRequest
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_AuthorityService_SignCertificate_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_CAService_SignCertificate_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -105,7 +105,7 @@ func local_request_AuthorityService_SignCertificate_0(ctx context.Context, marsh
 
 }
 
-func request_AuthorityService_Issuers_0(ctx context.Context, marshaler runtime.Marshaler, client extPb.AuthorityServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_CAService_Issuers_0(ctx context.Context, marshaler runtime.Marshaler, client extPb.CAServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq extEmpty.Empty
 	var metadata runtime.ServerMetadata
 
@@ -114,7 +114,7 @@ func request_AuthorityService_Issuers_0(ctx context.Context, marshaler runtime.M
 
 }
 
-func local_request_AuthorityService_Issuers_0(ctx context.Context, marshaler runtime.Marshaler, server extPb.AuthorityServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_CAService_Issuers_0(ctx context.Context, marshaler runtime.Marshaler, server extPb.CAServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq extEmpty.Empty
 	var metadata runtime.ServerMetadata
 
@@ -123,24 +123,24 @@ func local_request_AuthorityService_Issuers_0(ctx context.Context, marshaler run
 
 }
 
-// RegisterAuthorityServiceHandlerServer registers the http handlers for service AuthorityService to "mux".
-// UnaryRPC     :call AuthorityServiceServer directly.
+// RegisterCAServiceHandlerServer registers the http handlers for service CAService to "mux".
+// UnaryRPC     :call CAServiceServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
-// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterAuthorityServiceHandlerFromEndpoint instead.
-func RegisterAuthorityServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server extPb.AuthorityServiceServer) error {
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterCAServiceHandlerFromEndpoint instead.
+func RegisterCAServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server extPb.CAServiceServer) error {
 
-	mux.Handle("POST", pattern_AuthorityService_ProfileInfo_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_CAService_ProfileInfo_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/pb.AuthorityService/ProfileInfo")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/pb.CAService/ProfileInfo")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_AuthorityService_ProfileInfo_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_CAService_ProfileInfo_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -148,22 +148,22 @@ func RegisterAuthorityServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 
-		forward_AuthorityService_ProfileInfo_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_CAService_ProfileInfo_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_AuthorityService_SignCertificate_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_CAService_SignCertificate_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/pb.AuthorityService/SignCertificate")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/pb.CAService/SignCertificate")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_AuthorityService_SignCertificate_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_CAService_SignCertificate_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -171,22 +171,22 @@ func RegisterAuthorityServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 
-		forward_AuthorityService_SignCertificate_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_CAService_SignCertificate_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_AuthorityService_Issuers_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_CAService_Issuers_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/pb.AuthorityService/Issuers")
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/pb.CAService/Issuers")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_AuthorityService_Issuers_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_CAService_Issuers_0(rctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -194,16 +194,16 @@ func RegisterAuthorityServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 
-		forward_AuthorityService_Issuers_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_CAService_Issuers_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
 	return nil
 }
 
-// RegisterAuthorityServiceHandlerFromEndpoint is same as RegisterAuthorityServiceHandler but
+// RegisterCAServiceHandlerFromEndpoint is same as RegisterCAServiceHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterAuthorityServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+func RegisterCAServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.Dial(endpoint, opts...)
 	if err != nil {
 		return err
@@ -223,79 +223,79 @@ func RegisterAuthorityServiceHandlerFromEndpoint(ctx context.Context, mux *runti
 		}()
 	}()
 
-	return RegisterAuthorityServiceHandler(ctx, mux, conn)
+	return RegisterCAServiceHandler(ctx, mux, conn)
 }
 
-// RegisterAuthorityServiceHandler registers the http handlers for service AuthorityService to "mux".
+// RegisterCAServiceHandler registers the http handlers for service CAService to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterAuthorityServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterAuthorityServiceHandlerClient(ctx, mux, extPb.NewAuthorityServiceClient(conn))
+func RegisterCAServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterCAServiceHandlerClient(ctx, mux, extPb.NewCAServiceClient(conn))
 }
 
-// RegisterAuthorityServiceHandlerClient registers the http handlers for service AuthorityService
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "extPb.AuthorityServiceClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "extPb.AuthorityServiceClient"
+// RegisterCAServiceHandlerClient registers the http handlers for service CAService
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "extPb.CAServiceClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "extPb.CAServiceClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "extPb.AuthorityServiceClient" to call the correct interceptors.
-func RegisterAuthorityServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client extPb.AuthorityServiceClient) error {
+// "extPb.CAServiceClient" to call the correct interceptors.
+func RegisterCAServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client extPb.CAServiceClient) error {
 
-	mux.Handle("POST", pattern_AuthorityService_ProfileInfo_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_CAService_ProfileInfo_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/pb.AuthorityService/ProfileInfo")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/pb.CAService/ProfileInfo")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_AuthorityService_ProfileInfo_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_CAService_ProfileInfo_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_AuthorityService_ProfileInfo_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_CAService_ProfileInfo_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_AuthorityService_SignCertificate_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_CAService_SignCertificate_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/pb.AuthorityService/SignCertificate")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/pb.CAService/SignCertificate")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_AuthorityService_SignCertificate_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_CAService_SignCertificate_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_AuthorityService_SignCertificate_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_CAService_SignCertificate_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_AuthorityService_Issuers_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_CAService_Issuers_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/pb.AuthorityService/Issuers")
+		rctx, err := runtime.AnnotateContext(ctx, mux, req, "/pb.CAService/Issuers")
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_AuthorityService_Issuers_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_CAService_Issuers_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_AuthorityService_Issuers_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_CAService_Issuers_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -303,17 +303,17 @@ func RegisterAuthorityServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 }
 
 var (
-	pattern_AuthorityService_ProfileInfo_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"v1", "ca", "csr", "profile_info"}, ""))
+	pattern_CAService_ProfileInfo_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"v1", "ca", "csr", "profile_info"}, ""))
 
-	pattern_AuthorityService_SignCertificate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"v1", "ca", "csr", "create"}, ""))
+	pattern_CAService_SignCertificate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"v1", "ca", "csr", "create"}, ""))
 
-	pattern_AuthorityService_Issuers_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "ca", "issuers"}, ""))
+	pattern_CAService_Issuers_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "ca", "issuers"}, ""))
 )
 
 var (
-	forward_AuthorityService_ProfileInfo_0 = runtime.ForwardResponseMessage
+	forward_CAService_ProfileInfo_0 = runtime.ForwardResponseMessage
 
-	forward_AuthorityService_SignCertificate_0 = runtime.ForwardResponseMessage
+	forward_CAService_SignCertificate_0 = runtime.ForwardResponseMessage
 
-	forward_AuthorityService_Issuers_0 = runtime.ForwardResponseMessage
+	forward_CAService_Issuers_0 = runtime.ForwardResponseMessage
 )

@@ -1,17 +1,16 @@
 package cis
 
 import (
-	"context"
-	"encoding/hex"
+	"sync"
 
 	pb "github.com/ekspand/trusty/api/v1/pb"
+	"github.com/ekspand/trusty/client"
+	"github.com/ekspand/trusty/client/embed/proxy"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/db"
-	"github.com/ekspand/trusty/internal/db/model"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
 	"google.golang.org/grpc"
 )
@@ -23,11 +22,13 @@ var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", 
 
 // Service defines the Status service
 type Service struct {
-	server *gserver.Server
-	db     db.Provider
-	cfg    *config.Configuration
-
-	registered bool
+	server        *gserver.Server
+	db            db.Provider
+	cfg           *config.Configuration
+	clientFactory client.Factory
+	grpClient     *client.Client
+	ra            client.RAClient
+	lock          sync.RWMutex
 }
 
 // Factory returns a factory of the service
@@ -36,16 +37,15 @@ func Factory(server *gserver.Server) interface{} {
 		logger.Panic("status.Factory: invalid parameter")
 	}
 
-	return func(cfg *config.Configuration, db db.Provider) {
+	return func(cfg *config.Configuration, db db.Provider, clientFactory client.Factory) {
 		svc := &Service{
-			server: server,
-			cfg:    cfg,
-			db:     db,
+			server:        server,
+			cfg:           cfg,
+			db:            db,
+			clientFactory: clientFactory,
 		}
 
 		server.AddService(svc)
-
-		go svc.registerRoots(context.Background())
 	}
 }
 
@@ -56,11 +56,14 @@ func (s *Service) Name() string {
 
 // IsReady indicates that the service is ready to serve its end-points
 func (s *Service) IsReady() bool {
-	return s.registered
+	return true
 }
 
 // Close the subservices and it's resources
 func (s *Service) Close() {
+	if s.grpClient != nil {
+		s.grpClient.Close()
+	}
 }
 
 // RegisterRoute adds the Status API endpoints to the overall URL router
@@ -69,47 +72,50 @@ func (s *Service) RegisterRoute(r rest.Router) {
 
 // RegisterGRPC registers gRPC handler
 func (s *Service) RegisterGRPC(r *grpc.Server) {
-	pb.RegisterCertInfoServiceServer(r, s)
+	pb.RegisterCIServiceServer(r, s)
 }
 
-func (s *Service) registerRoots(ctx context.Context) {
-	registerCert := func(trust pb.Trust, location string) error {
-		crt, err := certutil.LoadFromPEM(location)
-		if err != nil {
-			return err
-		}
-		pem, err := certutil.EncodeToPEMString(true, crt)
-		if err != nil {
-			return err
-		}
-		c := &model.RootCertificate{
-			SKID:             hex.EncodeToString(crt.SubjectKeyId),
-			NotBefore:        crt.NotBefore.UTC(),
-			NotAfter:         crt.NotAfter.UTC(),
-			Subject:          crt.Subject.String(),
-			ThumbprintSha256: certutil.SHA256Hex(crt.Raw),
-			Trust:            int(trust),
-			Pem:              pem,
-		}
-		_, err = s.db.RegisterRootCertificate(ctx, c)
-		if err != nil {
-			return err
-		}
-		logger.Infof("src=registerRoots, trust=%v, subject=%q", trust, c.Subject)
-		return nil
+// OnStarted is called when the server started and
+// is ready to serve requests
+func (s *Service) OnStarted() error {
+	_, err := s.getRAClient()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	return nil
+}
+
+func (s *Service) getRAClient() (client.RAClient, error) {
+	var ra client.RAClient
+	s.lock.RLock()
+	ra = s.ra
+	s.lock.RUnlock()
+	if ra != nil {
+		return ra, nil
 	}
 
-	for _, r := range s.cfg.RegistrationAuthority.PrivateRoots {
-		err := registerCert(pb.Trust_Private, r)
-		if err != nil {
-			logger.Errorf("src=registerRoots, err=[%v]", errors.ErrorStack(err))
-		}
+	var pb pb.RAServiceServer
+	err := s.server.Discovery().Find(&pb)
+	if err == nil {
+		s.lock.Lock()
+		defer s.lock.Unlock()
+		s.ra = client.NewRAClientFromProxy(proxy.RAServiceServerToClient(pb))
+		return s.ra, nil
 	}
-	for _, r := range s.cfg.RegistrationAuthority.PublicRoots {
-		err := registerCert(pb.Trust_Public, r)
-		if err != nil {
-			logger.Errorf("src=registerRoots, err=[%v]", errors.ErrorStack(err))
-		}
+
+	grpClient, err := s.clientFactory.NewClient("ra")
+	if err != nil {
+		logger.Errorf("src=createRAClient, err=[%v]", errors.Details(err))
+		return nil, errors.Trace(err)
 	}
-	s.registered = true
+
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	if s.grpClient != nil {
+		s.grpClient.Close()
+	}
+	s.grpClient = grpClient
+	s.ra = grpClient.RAClient()
+	return s.ra, nil
 }

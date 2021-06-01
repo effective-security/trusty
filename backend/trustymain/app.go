@@ -14,9 +14,11 @@ import (
 	"github.com/ekspand/trusty/backend/service/auth"
 	"github.com/ekspand/trusty/backend/service/ca"
 	"github.com/ekspand/trusty/backend/service/cis"
+	"github.com/ekspand/trusty/backend/service/ra"
 	"github.com/ekspand/trusty/backend/service/status"
 	"github.com/ekspand/trusty/backend/service/swagger"
 	"github.com/ekspand/trusty/backend/service/workflow"
+	"github.com/ekspand/trusty/internal/appcontainer"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/version"
 	"github.com/ekspand/trusty/pkg/gserver"
@@ -40,6 +42,7 @@ const (
 var ServiceFactories = map[string]gserver.ServiceFactory{
 	auth.ServiceName:     auth.Factory,
 	ca.ServiceName:       ca.Factory,
+	ra.ServiceName:       ra.Factory,
 	cis.ServiceName:      cis.Factory,
 	status.ServiceName:   status.Factory,
 	workflow.ServiceName: workflow.Factory,
@@ -82,7 +85,7 @@ type App struct {
 	flags            *appFlags
 	cfg              *config.Configuration
 	scheduler        tasks.Scheduler
-	containerFactory ContainerFactoryFn
+	containerFactory appcontainer.ContainerFactoryFn
 	servers          map[string]*gserver.Server
 }
 
@@ -95,7 +98,11 @@ func NewApp(args []string) *App {
 		flags:     new(appFlags),
 		servers:   make(map[string]*gserver.Server),
 	}
-	f := NewContainerFactory(app)
+
+	f := appcontainer.NewContainerFactory(app).
+		WithConfigurationProvider(func() (*config.Configuration, error) {
+			return app.Configuration()
+		})
 
 	// use default Container Factory
 	return app.WithContainerFactory(f.CreateContainerWithDependencies)
@@ -110,7 +117,7 @@ func (a *App) WithConfiguration(cfg *config.Configuration) *App {
 
 // WithContainerFactory allows to specify an app container factory,
 // used mainly for testing purposes
-func (a *App) WithContainerFactory(f ContainerFactoryFn) *App {
+func (a *App) WithContainerFactory(f appcontainer.ContainerFactoryFn) *App {
 	a.containerFactory = f
 	return a
 }
@@ -246,6 +253,23 @@ func (a *App) Run(startedCh chan<- bool) error {
 		} else {
 			logger.Infof("src=Run, reason=skip_disabled, server=%s", name)
 		}
+	}
+
+	// Notify services
+	err = a.container.Invoke(func(disco appcontainer.Discovery) error {
+		var svc gserver.Service
+		return disco.ForEach(&svc, func(key string) error {
+			if onstarted, ok := svc.(gserver.StartSubcriber); ok {
+				logger.Infof("src=Run, onstarted=running, key=%s, service=%s", key, svc.Name())
+				return onstarted.OnStarted()
+			}
+			logger.Infof("src=Run, onstarted=skipped, key=%s, service=%s", key, svc.Name())
+			return nil
+		})
+	})
+	if err != nil {
+		a.stopServers()
+		return errors.Trace(err)
 	}
 
 	if startedCh != nil {

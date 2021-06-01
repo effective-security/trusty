@@ -1,4 +1,4 @@
-package trustymain
+package appcontainer
 
 import (
 	"io"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/ekspand/trusty/authority"
+	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/pkg/awskmscrypto"
@@ -22,6 +23,12 @@ import (
 
 // ContainerFactoryFn defines an app container factory interface
 type ContainerFactoryFn func() (*dig.Container, error)
+
+// ProvideConfigurationFn defines Configuration provider
+type ProvideConfigurationFn func() (*config.Configuration, error)
+
+// ProvideDiscoveryFn defines Discovery provider
+type ProvideDiscoveryFn func() (Discovery, error)
 
 // ProvideAuditorFn defines Auditor provider
 type ProvideAuditorFn func(cfg *config.Configuration, r CloseRegistrator) (audit.Auditor, error)
@@ -44,6 +51,9 @@ type ProvideAuthorityFn func(cfg *config.Configuration, crypto *cryptoprov.Crypt
 // ProvideDbFn defines DB provider
 type ProvideDbFn func(cfg *config.Configuration) (db.Provider, error)
 
+// ProvideClientFactoryFn defines client.Facroty provider
+type ProvideClientFactoryFn func(cfg *config.Configuration) (client.Factory, error)
+
 // CloseRegistrator provides interface to release resources on close
 type CloseRegistrator interface {
 	OnClose(closer io.Closer)
@@ -51,38 +61,59 @@ type CloseRegistrator interface {
 
 // ContainerFactory is default implementation
 type ContainerFactory struct {
-	app               *App
-	auditorProvider   ProvideAuditorFn
-	schedulerProvider ProvideSchedulerFn
-	cryptoProvider    ProvideCryptoFn
-	authorityProvider ProvideAuthorityFn
-	dbProvider        ProvideDbFn
-	oauthProvider     ProvideOAuthClientsFn
-	jwtProvider       ProvideJwtFn
+	closer CloseRegistrator
+
+	configProvider        ProvideConfigurationFn
+	discoveryProvider     ProvideDiscoveryFn
+	auditorProvider       ProvideAuditorFn
+	schedulerProvider     ProvideSchedulerFn
+	cryptoProvider        ProvideCryptoFn
+	authorityProvider     ProvideAuthorityFn
+	dbProvider            ProvideDbFn
+	oauthProvider         ProvideOAuthClientsFn
+	jwtProvider           ProvideJwtFn
+	clientFactoryProvider ProvideClientFactoryFn
 }
 
 // NewContainerFactory returns an instance of ContainerFactory
-func NewContainerFactory(app *App) *ContainerFactory {
+func NewContainerFactory(closer CloseRegistrator) *ContainerFactory {
 	f := &ContainerFactory{
-		app: app,
+		closer: closer,
 	}
 
 	defaultSchedulerProv := func() (tasks.Scheduler, error) {
-		if app.scheduler == nil {
-			app.scheduler = tasks.NewScheduler()
-		}
-		return app.scheduler, nil
+		return tasks.NewScheduler(), nil
 	}
 
 	// configure with default providers
 	return f.
+		WithDiscoveryProvider(provideDiscovery).
 		WithAuditorProvider(provideAuditor).
 		WithSchedulerProvider(defaultSchedulerProv).
 		WithCryptoProvider(provideCrypto).
 		WithAuthorityProvider(provideAuthority).
 		WithDbProvider(provideDB).
 		WithOAuthClientsProvider(provideOAuth).
-		WithJwtProvider(provideJwt)
+		WithJwtProvider(provideJwt).
+		WithClientFactoryProvider(provideClientFactory)
+}
+
+// WithConfigurationProvider allows to specify configuration
+func (f *ContainerFactory) WithConfigurationProvider(p ProvideConfigurationFn) *ContainerFactory {
+	f.configProvider = p
+	return f
+}
+
+// WithDiscoveryProvider allows to specify Discovery
+func (f *ContainerFactory) WithDiscoveryProvider(p ProvideDiscoveryFn) *ContainerFactory {
+	f.discoveryProvider = p
+	return f
+}
+
+// WithClientFactoryProvider allows to specify custom client.Factory provider
+func (f *ContainerFactory) WithClientFactoryProvider(p ProvideClientFactoryFn) *ContainerFactory {
+	f.clientFactoryProvider = p
+	return f
 }
 
 // WithJwtProvider allows to specify custom JWT provider
@@ -131,11 +162,21 @@ func (f *ContainerFactory) WithAuthorityProvider(p ProvideAuthorityFn) *Containe
 func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, error) {
 	container := dig.New()
 
-	container.Provide(func() (*config.Configuration, CloseRegistrator) {
-		return f.app.cfg, f.app
+	err := container.Provide(f.configProvider)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	container.Provide(func() CloseRegistrator {
+		return f.closer
 	})
 
-	err := container.Provide(f.schedulerProvider)
+	err = container.Provide(f.discoveryProvider)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	err = container.Provide(f.schedulerProvider)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -169,8 +210,20 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
+	err = container.Provide(f.clientFactoryProvider)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
 
 	return container, nil
+}
+
+const (
+	nullDevName = "/dev/null"
+)
+
+func provideDiscovery() (Discovery, error) {
+	return NewDiscovery(), nil
 }
 
 func provideAuditor(cfg *config.Configuration, r CloseRegistrator) (audit.Auditor, error) {
@@ -188,7 +241,9 @@ func provideAuditor(cfg *config.Configuration, r CloseRegistrator) (audit.Audito
 	} else {
 		auditor = auditornoop{}
 	}
-	r.OnClose(auditor)
+	if r != nil {
+		r.OnClose(auditor)
+	}
 	return auditor, nil
 }
 
@@ -252,4 +307,8 @@ func provideDB(cfg *config.Configuration) (db.Provider, error) {
 		return nil, errors.Trace(err)
 	}
 	return d, nil
+}
+
+func provideClientFactory(cfg *config.Configuration) (client.Factory, error) {
+	return client.NewFactory(&cfg.TrustyClient), nil
 }
