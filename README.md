@@ -17,11 +17,14 @@ Trusty is a Certification Authority.
 	echo "export PATH=$PATH:/usr/local/protoc/bin"
 ```
 
-To run or test locally, you need GitHub OAuth secret:
+To run or test locally, you need GitHub OAuth secret and a random seed.
+Add this to your ~/.profile
 
 ```.sh
-export TRUSTY_GITHUB_CLIENT_ID=...
-export TRUSTY_GITHUB_CLIENT_SECRET=...
+export TRUSTY_GITHUB_CLIENT_SECRET=0d...a8
+export TRUSTY_GITHUB_CLIENT_ID=09...71
+export TRUSTY_JWT_SEED=g...A
+# export CR_PAT=ghp_M...v
 ```
 
 ## Build

@@ -1,0 +1,15 @@
+{
+    "common_name": "Trusty Code Signing Level 2 CA",
+    "key": {
+        "algo": "ecdsa",
+        "size": 256
+    },
+    "names": [
+        {
+            "C": "US",
+            "L": "WA",
+            "O": "trusty.ekspand.com",
+            "OU": "dev"
+        }
+    ]
+}

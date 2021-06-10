@@ -74,7 +74,7 @@ sql:
         
 # the configuration files for OAuth clients    
 oauth_clients:
-  - oauth-github.dev.yaml
+  - oauth-github.yaml
 
 authority: ca-config.dev.yaml
 
