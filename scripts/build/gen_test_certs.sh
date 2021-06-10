@@ -133,8 +133,8 @@ echo "ROOT_CA_KEY  = $ROOT_CA_KEY"
 
 if [[ "$ROOTCA" == "YES" && ("$FORCE" == "YES" || ! -f ${ROOT_CA_KEY}) ]]; then echo "*** generating ${ROOT_CA_CERT/.pem/''}"
     trusty-tool \
-        --hsm-cfg=inmem \
-        csr gencert --plain-key --self-sign \
+        --hsm-cfg=${HSM_CONFIG} \
+        csr gencert --self-sign \
         --ca-config=${CA_CONFIG} \
         --profile=ROOT \
         --csr-profile ${CSR_DIR}/${PREFIX}root_ca.json \

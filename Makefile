@@ -5,6 +5,7 @@ SHA := $(shell git rev-parse HEAD)
 export AWS_ACCESS_KEY_ID=notusedbyemulator
 export AWS_SECRET_ACCESS_KEY=notusedbyemulator
 export AWS_DEFAULT_REGION=us-west-2
+export TRUSTY_JWT_SEED=testseed 
 
 export COVERAGE_EXCLUSIONS="vendor|tests|api/v1/pb/gw|main.go|testsuite.go|.pb.go|.pb.gw.go"
 export TRUSTY_DIR=${PROJ_ROOT}

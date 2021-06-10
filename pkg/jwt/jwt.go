@@ -8,6 +8,7 @@ import (
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/go-phorce/dolly/fileutil"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
@@ -118,7 +119,11 @@ func New(cfg *Config) Provider {
 	}
 
 	for _, key := range cfg.Keys {
-		p.keys[key.ID] = certutil.SHA256([]byte(key.Seed))
+		seed, err := fileutil.LoadConfigWithSchema(key.Seed)
+		if err != nil {
+			logger.Panic("failed to load seed: " + err.Error())
+		}
+		p.keys[key.ID] = certutil.SHA256([]byte(seed))
 	}
 
 	if p.kid == "" {
