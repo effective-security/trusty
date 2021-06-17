@@ -132,9 +132,9 @@ func (r *CertificateRequest) Validate() error {
 		return nil
 	}
 
-	if len(r.Names) == 0 {
-		return errors.New("missing subject information")
-	}
+	// if len(r.Names) == 0 {
+	//		return errors.New("missing subject information")
+	//	}
 
 	for _, n := range r.Names {
 		if isNameEmpty(n) {

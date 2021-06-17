@@ -42,6 +42,7 @@ tools:
 	go install github.com/mattn/goreman
 	go install github.com/mattn/goveralls
 	go install golang.org/x/tools/cmd/goimports
+	#go install sigs.k8s.io/controller-tools/cmd/controller-gen
 	# go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
 	# go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
 
@@ -77,7 +78,12 @@ build_tool:
 	echo "*** Building tool"
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/trusty-tool ./cmd/trusty-tool
 
-build: build_trusty build_trustyctl build_tool
+build_kube:
+	echo "*** Building kubeca"
+	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/kubeca ./cmd/kubeca
+	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/kubecertinit ./cmd/kubecertinit
+
+build: build_trusty build_trustyctl build_tool build_kube
 
 change_log:
 	echo "Recent changes:" > ./change_log.txt
@@ -165,6 +171,10 @@ coveralls-github:
 
 docker:
 	docker build --no-cache -f Dockerfile -t ghcr.io/ekspand/trusty .
+
+docker-kubeca:	
+	docker build --no-cache -f Dockerfile.kubeca -t ghcr.io/ekspand/kubeca .
+	docker build --no-cache -f Dockerfile.kubecertinit -t ghcr.io/ekspand/kubecertinit .
 
 docker-compose:
 	docker-compose -f docker-compose.dev.yml up --abort-on-container-exit

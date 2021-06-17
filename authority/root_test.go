@@ -73,8 +73,7 @@ func TestNewRootEx(t *testing.T) {
 	}
 
 	_, _, _, err := authority.NewRoot("ROOT", rootCfg, defprov, &req)
-	require.Error(t, err)
-	assert.Equal(t, "invalid request: missing subject information", err.Error())
+	require.NoError(t, err)
 
 	err = json.Unmarshal([]byte(csrCA), &req)
 	require.NoError(t, err, "invalid csr")
