@@ -125,8 +125,8 @@ jobs:
         file: ./Dockerfile.kubeca
         context: .
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ${{ steps.meta_trusty.outputs.tags }}
-        labels: ${{ steps.meta_trusty.outputs.labels }}
+        tags: ${{ steps.meta_kubeca.outputs.tags }}
+        labels: ${{ steps.meta_kubeca.outputs.labels }}
 
     - name: Docker kubecertinit meta
       id: meta_kubecertinit
@@ -152,8 +152,8 @@ jobs:
         file: ./Dockerfile.kubecertinit
         context: .
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ${{ steps.meta_trusty.outputs.tags }}
-        labels: ${{ steps.meta_trusty.outputs.labels }}
+        tags: ${{ steps.meta_kubecertinit.outputs.tags }}
+        labels: ${{ steps.meta_kubecertinit.outputs.labels }}
 
     - name: Integration Test
       env:
