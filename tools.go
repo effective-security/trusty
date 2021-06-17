@@ -18,6 +18,7 @@ import (
 	_ "golang.org/x/tools/cmd/gorename"
 	_ "golang.org/x/tools/cmd/guru"
 	_ "golang.org/x/tools/cmd/stringer"
+	// _ "sigs.k8s.io/controller-tools/cmd/controller-gen"
 	//_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway"
 	//_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2"
 )

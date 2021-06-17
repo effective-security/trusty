@@ -38,6 +38,11 @@ const (
 	// Verbs: GET
 	// Response: JSON
 	PathForSwagger = "/v1/swagger/:service"
+
+	// PathForMetrics returns metrics.
+	//
+	// Verbs: GET
+	PathForMetrics = "/v1/metrics"
 )
 
 // Auth service API

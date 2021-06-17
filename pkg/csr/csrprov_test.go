@@ -95,7 +95,7 @@ func TestCreateRequestAndExportKey(t *testing.T) {
 		{
 			name:   "empty",
 			req:    &csr.CertificateRequest{},
-			experr: "invalid request: missing subject information",
+			experr: "process request: invalid key request",
 		},
 		{
 			name:   "no key",

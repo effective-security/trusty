@@ -1,6 +1,10 @@
 name: Build
 
-on: [push,pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
 
 jobs:
 
@@ -10,7 +14,9 @@ jobs:
       - name: Dump GitHub context
         env:
           GITHUB_CONTEXT: ${{ toJSON(github) }}
-        run: echo "$GITHUB_CONTEXT"
+        run: |
+          echo "$GITHUB_CONTEXT" && \
+          echo "GITHUB_REF=$GITHUB_REF GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME"
       - name: Repo info
         run: |
           curl -s \
@@ -24,9 +30,10 @@ jobs:
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     env:
-      ITEST_IMAGE_TAG: ${{github.event_name}}-${{ github.event.number }}
+      EVENT_NUMBER: ${{ github.event.number }}
 
     steps:
+
     - name: Install Go
       uses: actions/setup-go@v2
       with:
@@ -65,20 +72,92 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.CR_PAT }}
 
-    - name: Docker ITEST
-      id: docker_build
+    - name: Docker trusty meta
+      id: meta_trusty
+      uses: docker/metadata-action@v3
+      with:
+        # list of Docker images to use as base name for tags
+        images: |
+          ghcr.io/${{ github.repository_owner }}/trusty
+        # generate Docker tags based on the following events/attributes
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          type=sha
+
+    - name: Docker trusty docker/build-push-action@v2
+      id: docker_build_trusty
       uses: docker/build-push-action@v2
       with:
         file: ./Dockerfile
         context: .
         push: true
-        tags: ghcr.io/${{ github.repository_owner }}/trusty:${{ env.ITEST_IMAGE_TAG }}
+        tags: ${{ steps.meta_trusty.outputs.tags }}
+        labels: ${{ steps.meta_trusty.outputs.labels }}
 
-    - name: Image digest
-      run: echo ${{ steps.docker_build.outputs.digest }}
+    - name: Docker kubeca meta
+      id: meta_kubeca
+      uses: docker/metadata-action@v3
+      with:
+        # list of Docker images to use as base name for tags
+        images: |
+          ghcr.io/${{ github.repository_owner }}/kubeca
+        # generate Docker tags based on the following events/attributes
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          type=sha
+
+    - name: Docker kubeca docker_build_kubecertinit
+      # if: ${{ github.ref == 'refs/heads/main' }} && github.event_name == 'push'
+      id: docker_build_kubeca
+      uses: docker/build-push-action@v2
+      with:
+        file: ./Dockerfile.kubeca
+        context: .
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ steps.meta_trusty.outputs.tags }}
+        labels: ${{ steps.meta_trusty.outputs.labels }}
+
+    - name: Docker kubecertinit meta
+      id: meta_kubecertinit
+      uses: docker/metadata-action@v3
+      with:
+        # list of Docker images to use as base name for tags
+        images: |
+          ghcr.io/${{ github.repository_owner }}/kubecertinit
+        # generate Docker tags based on the following events/attributes
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          type=sha
+
+    - name: Docker kubecertinit build
+      #if: ${{ github.ref == 'refs/heads/main' }} && github.event_name == 'push'
+      id: docker_build_kubecertinit
+      uses: docker/build-push-action@v2
+      with:
+        file: ./Dockerfile.kubecertinit
+        context: .
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ steps.meta_trusty.outputs.tags }}
+        labels: ${{ steps.meta_trusty.outputs.labels }}
 
     - name: Integration Test
-      run: make docker-citest
+      env:
+        ITEST_IMAGE_TAG: ${{ fromJSON(steps.meta_trusty.outputs.json).labels['org.opencontainers.image.version'] }}
+      run: |
+        echo "ITEST_IMAGE_TAG=$ITEST_IMAGE_TAG"
+        make docker-citest
 
     - name: coveralls
       # if: github.event_name == 'pull_request'

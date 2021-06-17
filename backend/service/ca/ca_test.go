@@ -120,9 +120,9 @@ func TestProfileInfo(t *testing.T) {
 		{nil, "missing profile parameter"},
 		{&pb.CertProfileInfoRequest{}, "missing profile parameter"},
 		{&pb.CertProfileInfoRequest{Profile: "test_server"}, ""},
-		{&pb.CertProfileInfoRequest{Profile: "test_server", Label: "TrustyCA"}, ""},
-		{&pb.CertProfileInfoRequest{Profile: "test_server", Label: "trustyca"}, ""},
-		{&pb.CertProfileInfoRequest{Profile: "test_server", Label: "trusty"}, `profile "test_server" is served by TrustyCA issuer`},
+		{&pb.CertProfileInfoRequest{Profile: "test_server", Label: "trusty.svc"}, ""},
+		{&pb.CertProfileInfoRequest{Profile: "test_server", Label: "Trusty.Svc"}, ""},
+		{&pb.CertProfileInfoRequest{Profile: "test_server", Label: "trusty"}, `profile "test_server" is served by trusty.svc issuer`},
 		{&pb.CertProfileInfoRequest{Profile: "xxx"}, "profile not found: xxx"},
 	}
 

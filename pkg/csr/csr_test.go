@@ -26,10 +26,6 @@ func TestCertificateRequestValidate(t *testing.T) {
 			err: "",
 		},
 		{
-			r:   &csr.CertificateRequest{},
-			err: "missing subject information",
-		},
-		{
 			r:   &csr.CertificateRequest{Names: []csr.X509Name{{}}},
 			err: "empty name",
 		},
