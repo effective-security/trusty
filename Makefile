@@ -170,11 +170,11 @@ coveralls-github:
 	goveralls -v -coverprofile=coverage.out -service=github -package ./...
 
 docker:
-	docker build --no-cache -f Dockerfile -t ghcr.io/ekspand/trusty .
+	docker build --no-cache -f Dockerfile -t ekspand/trusty .
 
 docker-kubeca:	
-	docker build --no-cache -f Dockerfile.kubeca -t ghcr.io/ekspand/kubeca .
-	docker build --no-cache -f Dockerfile.kubecertinit -t ghcr.io/ekspand/kubecertinit .
+	docker build --no-cache -f Dockerfile.kubeca -t ekspand/kubeca .
+	docker build --no-cache -f Dockerfile.kubecertinit -t ekspand/kubecertinit .
 
 docker-compose:
 	docker-compose -f docker-compose.dev.yml up --abort-on-container-exit

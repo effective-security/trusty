@@ -1,5 +1,12 @@
-FROM ghcr.io/ekspand/trusty-docker-base:latest
+FROM ekspand/trusty-docker-base:latest
 LABEL org.opencontainers.image.source https://github.com/ekspand/trusty
+
+LABEL org.opencontainers.image.authors="Ekspand <denis@ekspand.com>" \
+      org.opencontainers.image.url="https://github.com/ekspand/trusty" \
+      org.opencontainers.image.source="https://github.com/ekspand/trusty" \
+      org.opencontainers.image.documentation="https://github.com/ekspand/trusty" \
+      org.opencontainers.image.vendor="Ekspand" \
+      org.opencontainers.image.description="Trusty CA"
 
 ENV TRUSTY_DIR=/opt/trusty
 ENV PATH=$PATH:$TRUSTY_DIR/bin
