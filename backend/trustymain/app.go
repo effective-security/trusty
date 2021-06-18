@@ -71,6 +71,7 @@ type appFlags struct {
 	clientCertFile      *string
 	clientKeyFile       *string
 	clientTrustedCAFile *string
+	server              *string
 }
 
 // App provides application container
@@ -340,6 +341,7 @@ func (a *App) loadConfig() error {
 	flags.wfeURLs = app.Flag("wfe-listen-url", "URL for the WFE listening end-point").Strings()
 	flags.caURLs = app.Flag("ca-listen-url", "URL for the CA listening end-point").Strings()
 	flags.raURLs = app.Flag("ra-listen-url", "URL for the RA listening end-point").Strings()
+	flags.server = app.Flag("only-server", "ca|ra|wfe|cis - name of the server to run, and disable the others.").String()
 
 	flags.hostNames = app.Flag("host-name", "Set of host names to be used in CSR requests to obtaine a server certificate").Strings()
 	flags.logsDir = app.Flag("logs-dir", "Path to the logs folder.").String()
@@ -401,30 +403,34 @@ func (a *App) loadConfig() error {
 			}
 		}
 
-		switch name {
-		case config.CISServerName:
-			if len(*flags.cisURLs) > 0 {
-				httpCfg.ListenURLs = *flags.cisURLs
-				httpCfg.Disabled = len(httpCfg.ListenURLs) == 1 && httpCfg.ListenURLs[0] == "none"
-			}
+		if *flags.server != "" {
+			httpCfg.Disabled = name != *flags.server
+		} else {
+			switch name {
+			case config.CISServerName:
+				if len(*flags.cisURLs) > 0 {
+					httpCfg.ListenURLs = *flags.cisURLs
+					httpCfg.Disabled = len(httpCfg.ListenURLs) == 1 && httpCfg.ListenURLs[0] == "none"
+				}
 
-		case config.WFEServerName:
-			if len(*flags.wfeURLs) > 0 {
-				httpCfg.ListenURLs = *flags.wfeURLs
-				httpCfg.Disabled = len(httpCfg.ListenURLs) == 1 && httpCfg.ListenURLs[0] == "none"
+			case config.WFEServerName:
+				if len(*flags.wfeURLs) > 0 {
+					httpCfg.ListenURLs = *flags.wfeURLs
+					httpCfg.Disabled = len(httpCfg.ListenURLs) == 1 && httpCfg.ListenURLs[0] == "none"
+				}
+			case config.CAServerName:
+				if len(*flags.caURLs) > 0 {
+					httpCfg.ListenURLs = *flags.caURLs
+					httpCfg.Disabled = len(httpCfg.ListenURLs) == 1 && httpCfg.ListenURLs[0] == "none"
+				}
+			case config.RAServerName:
+				if len(*flags.raURLs) > 0 {
+					httpCfg.ListenURLs = *flags.raURLs
+					httpCfg.Disabled = len(httpCfg.ListenURLs) == 1 && httpCfg.ListenURLs[0] == "none"
+				}
+			default:
+				return errors.Errorf("unknows server name in configuration: %s", name)
 			}
-		case config.CAServerName:
-			if len(*flags.caURLs) > 0 {
-				httpCfg.ListenURLs = *flags.caURLs
-				httpCfg.Disabled = len(httpCfg.ListenURLs) == 1 && httpCfg.ListenURLs[0] == "none"
-			}
-		case config.RAServerName:
-			if len(*flags.raURLs) > 0 {
-				httpCfg.ListenURLs = *flags.raURLs
-				httpCfg.Disabled = len(httpCfg.ListenURLs) == 1 && httpCfg.ListenURLs[0] == "none"
-			}
-		default:
-			return errors.Errorf("unknows server name in configuration: %s", name)
 		}
 	}
 
