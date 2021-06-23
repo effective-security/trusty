@@ -123,7 +123,7 @@ func (r *Request) requestCertificate(ctx context.Context, client MinCertificates
 			return errors.Errorf("certificate signing request not found: " + certificateSigningRequestName)
 		}
 		if err != nil {
-			logger.Errorf("unable to retrieve certificate signing request (%s): %s", certificateSigningRequestName, err)
+			logger.Errorf("unable to retrieve certificate signing request (%s): %v", certificateSigningRequestName, err)
 			time.Sleep(5 * time.Second)
 			continue
 		}

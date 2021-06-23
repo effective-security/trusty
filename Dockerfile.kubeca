@@ -1,8 +1,11 @@
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
 FROM gcr.io/distroless/base-debian10:nonroot
-WORKDIR /
-COPY ./bin/kubeca .
+
+#RUN mkdir -p /app
+COPY ./bin/kubeca /app/kubeca
+WORKDIR /app
+
 USER nonroot:nonroot
 
-ENTRYPOINT ["/kubeca"]
+ENTRYPOINT ["/app/kubeca"]
