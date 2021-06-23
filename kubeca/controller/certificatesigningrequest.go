@@ -18,11 +18,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const (
-	kubecaUsername = "kubeca"
-	kubecaGroup    = "system:kubeca"
-)
-
 // CertificateSigningRequestSigningReconciler reconciles a CertificateSigningRequest object
 type CertificateSigningRequestSigningReconciler struct {
 	client.Client
@@ -43,18 +38,18 @@ func (r *CertificateSigningRequestSigningReconciler) Reconcile(ctx context.Conte
 	if err := r.Client.Get(ctx, req.NamespacedName, &csr); client.IgnoreNotFound(err) != nil {
 		return ctrl.Result{}, fmt.Errorf("error %q getting CSR", err)
 	}
+	json, _ := marshal.EncodeBytes(marshal.PrettyPrint, csr)
 
 	switch {
 	case !csr.DeletionTimestamp.IsZero():
 		log.V(1).Info("ignoring: CSR has been deleted")
 	case csr.Spec.SignerName == "":
-		log.V(1).Info("ignoring: CSR does not have a signer name")
+		log.V(1).Info("ignoring: CSR does not have a signer name: " + string(json))
 	case csr.Status.Certificate != nil:
 		log.V(1).Info("ignoring: CSR has already been signed")
 	case !isCertificateRequestApproved(&csr):
 		log.V(1).Info("ignoring: CSR is not approved")
 	default:
-		json, _ := marshal.EncodeBytes(marshal.PrettyPrint, csr)
 		log.V(1).Info("Received CSR: " + string(json))
 
 		/*
@@ -86,6 +81,9 @@ func (r *CertificateSigningRequestSigningReconciler) Reconcile(ctx context.Conte
 			print.Certificate(b, cert)
 			log.V(1).Info("Signed certificate", "certificate", b.String())
 
+			raw = append(raw, []byte(`\n`)...)
+			raw = append(raw, []byte(issuer.Bundle().CACertsPEM)...)
+
 			patch := client.MergeFrom(csr.DeepCopy())
 			csr.Status.Certificate = raw
 			if err := r.Client.Status().Patch(ctx, &csr, patch); err != nil {
@@ -109,7 +107,6 @@ func (r *CertificateSigningRequestSigningReconciler) findIssuer(signerName strin
 			return issuer, issuerTokens[1]
 		}
 	}
-
 	return nil, ""
 }
 
