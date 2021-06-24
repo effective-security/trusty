@@ -89,6 +89,7 @@ func (s *Service) IsReady() bool {
 
 // Close the subservices and it's resources
 func (s *Service) Close() {
+	logger.KV(xlog.INFO, "closed", ServiceName)
 }
 
 // RegisterRoute adds the Status API endpoints to the overall URL router

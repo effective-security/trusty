@@ -1,6 +1,7 @@
 package cis
 
 import (
+	"context"
 	"sync"
 
 	pb "github.com/ekspand/trusty/api/v1/pb"
@@ -9,6 +10,7 @@ import (
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/pkg/gserver"
+	"github.com/ekspand/trusty/pkg/poller"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
@@ -29,6 +31,8 @@ type Service struct {
 	grpClient     *client.Client
 	ra            client.RAClient
 	lock          sync.RWMutex
+	ctx           context.Context
+	cancel        context.CancelFunc
 }
 
 // Factory returns a factory of the service
@@ -44,6 +48,7 @@ func Factory(server *gserver.Server) interface{} {
 			db:            db,
 			clientFactory: clientFactory,
 		}
+		svc.ctx, svc.cancel = context.WithCancel(context.Background())
 
 		server.AddService(svc)
 	}
@@ -56,14 +61,19 @@ func (s *Service) Name() string {
 
 // IsReady indicates that the service is ready to serve its end-points
 func (s *Service) IsReady() bool {
-	return true
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	return s.ra != nil
 }
 
 // Close the subservices and it's resources
 func (s *Service) Close() {
+	s.cancel()
 	if s.grpClient != nil {
 		s.grpClient.Close()
 	}
+
+	logger.KV(xlog.INFO, "closed", ServiceName)
 }
 
 // RegisterRoute adds the Status API endpoints to the overall URL router
@@ -78,10 +88,17 @@ func (s *Service) RegisterGRPC(r *grpc.Server) {
 // OnStarted is called when the server started and
 // is ready to serve requests
 func (s *Service) OnStarted() error {
-	_, err := s.getRAClient()
-	if err != nil {
-		return errors.Trace(err)
-	}
+	p := poller.New(nil,
+		func(ctx context.Context) (interface{}, error) {
+			c, err := s.getRAClient()
+			if err != nil {
+				return nil, errors.Trace(err)
+			}
+			return c, nil
+		},
+		func(err error) {})
+	p.Start(s.ctx, s.cfg.TrustyClient.DialKeepAliveTimeout)
+	go s.getRAClient()
 	return nil
 }
 
@@ -105,7 +122,9 @@ func (s *Service) getRAClient() (client.RAClient, error) {
 
 	grpClient, err := s.clientFactory.NewClient("ra")
 	if err != nil {
-		logger.Errorf("err=[%v]", errors.Details(err))
+		logger.KV(xlog.ERROR,
+			"status", "failed to get RA client",
+			"err", errors.Details(err))
 		return nil, errors.Trace(err)
 	}
 
@@ -117,5 +136,8 @@ func (s *Service) getRAClient() (client.RAClient, error) {
 	}
 	s.grpClient = grpClient
 	s.ra = grpClient.RAClient()
+
+	logger.KV(xlog.INFO, "status", "created RA client")
+
 	return s.ra, nil
 }
