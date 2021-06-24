@@ -12,6 +12,7 @@ import (
 	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/internal/db/model"
 	"github.com/ekspand/trusty/pkg/gserver"
+	"github.com/ekspand/trusty/pkg/poller"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
@@ -34,6 +35,8 @@ type Service struct {
 	registered    bool
 	cfg           *config.Configuration
 	lock          sync.RWMutex
+	ctx           context.Context
+	cancel        context.CancelFunc
 }
 
 // Factory returns a factory of the service
@@ -50,6 +53,8 @@ func Factory(server *gserver.Server) interface{} {
 			clientFactory: clientFactory,
 		}
 
+		svc.ctx, svc.cancel = context.WithCancel(context.Background())
+
 		server.AddService(svc)
 	}
 }
@@ -63,14 +68,17 @@ func (s *Service) Name() string {
 func (s *Service) IsReady() bool {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
-	return s.registered
+	return s.registered && s.ca != nil
 }
 
 // Close the subservices and it's resources
 func (s *Service) Close() {
+	s.cancel()
+
 	if s.grpClient != nil {
 		s.grpClient.Close()
 	}
+	logger.KV(xlog.INFO, "closed", ServiceName)
 }
 
 // RegisterRoute adds the Status API endpoints to the overall URL router
@@ -90,50 +98,57 @@ func (s *Service) OnStarted() error {
 		return errors.Trace(err)
 	}
 
-	_, err = s.getCAClient()
-	if err != nil {
-		return errors.Trace(err)
-	}
+	p := poller.New(nil,
+		func(ctx context.Context) (interface{}, error) {
+			c, err := s.getCAClient()
+			if err != nil {
+				return nil, errors.Trace(err)
+			}
+			return c, nil
+		},
+		func(err error) {})
+	p.Start(s.ctx, s.cfg.TrustyClient.DialKeepAliveTimeout)
+	go s.getCAClient()
 
 	return nil
 }
 
-func (s *Service) registerRoots(ctx context.Context) error {
-	registerCert := func(trust pb.Trust, location string) error {
-		crt, err := certutil.LoadFromPEM(location)
-		if err != nil {
-			return err
-		}
-		pem, err := certutil.EncodeToPEMString(true, crt)
-		if err != nil {
-			return err
-		}
-		c := &model.RootCertificate{
-			SKID:             hex.EncodeToString(crt.SubjectKeyId),
-			NotBefore:        crt.NotBefore.UTC(),
-			NotAfter:         crt.NotAfter.UTC(),
-			Subject:          crt.Subject.String(),
-			ThumbprintSha256: certutil.SHA256Hex(crt.Raw),
-			Trust:            int(trust),
-			Pem:              pem,
-		}
-		_, err = s.db.RegisterRootCertificate(ctx, c)
-		if err != nil {
-			return err
-		}
-		logger.Infof("trust=%v, subject=%q", trust, c.Subject)
-		return nil
+func (s *Service) registerCert(ctx context.Context, trust pb.Trust, location string) error {
+	crt, err := certutil.LoadFromPEM(location)
+	if err != nil {
+		return err
 	}
+	pem, err := certutil.EncodeToPEMString(true, crt)
+	if err != nil {
+		return err
+	}
+	c := &model.RootCertificate{
+		SKID:             hex.EncodeToString(crt.SubjectKeyId),
+		NotBefore:        crt.NotBefore.UTC(),
+		NotAfter:         crt.NotAfter.UTC(),
+		Subject:          crt.Subject.String(),
+		ThumbprintSha256: certutil.SHA256Hex(crt.Raw),
+		Trust:            int(trust),
+		Pem:              pem,
+	}
+	_, err = s.db.RegisterRootCertificate(ctx, c)
+	if err != nil {
+		return err
+	}
+	logger.Infof("trust=%v, subject=%q", trust, c.Subject)
+	return nil
+}
 
+func (s *Service) registerRoots(ctx context.Context) error {
 	for _, r := range s.cfg.RegistrationAuthority.PrivateRoots {
-		err := registerCert(pb.Trust_Private, r)
+		err := s.registerCert(ctx, pb.Trust_Private, r)
 		if err != nil {
 			logger.Errorf("err=[%v]", errors.ErrorStack(err))
 			return err
 		}
 	}
 	for _, r := range s.cfg.RegistrationAuthority.PublicRoots {
-		err := registerCert(pb.Trust_Public, r)
+		err := s.registerCert(ctx, pb.Trust_Public, r)
 		if err != nil {
 			logger.Errorf("err=[%v]", errors.ErrorStack(err))
 			return err
@@ -167,7 +182,9 @@ func (s *Service) getCAClient() (client.CAClient, error) {
 
 	grpClient, err := s.clientFactory.NewClient("ca")
 	if err != nil {
-		logger.Errorf("err=[%v]", errors.Details(err))
+		logger.KV(xlog.ERROR,
+			"status", "failed to get CA client",
+			"err", errors.Details(err))
 		return nil, errors.Trace(err)
 	}
 	s.lock.Lock()
@@ -178,5 +195,8 @@ func (s *Service) getCAClient() (client.CAClient, error) {
 	}
 	s.grpClient = grpClient
 	s.ca = grpClient.CAClient()
+
+	logger.KV(xlog.INFO, "status", "created CA client")
+
 	return s.ca, nil
 }
