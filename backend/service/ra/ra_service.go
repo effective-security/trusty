@@ -121,21 +121,21 @@ func (s *Service) registerRoots(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		logger.Infof("src=registerRoots, trust=%v, subject=%q", trust, c.Subject)
+		logger.Infof("trust=%v, subject=%q", trust, c.Subject)
 		return nil
 	}
 
 	for _, r := range s.cfg.RegistrationAuthority.PrivateRoots {
 		err := registerCert(pb.Trust_Private, r)
 		if err != nil {
-			logger.Errorf("src=registerRoots, err=[%v]", errors.ErrorStack(err))
+			logger.Errorf("err=[%v]", errors.ErrorStack(err))
 			return err
 		}
 	}
 	for _, r := range s.cfg.RegistrationAuthority.PublicRoots {
 		err := registerCert(pb.Trust_Public, r)
 		if err != nil {
-			logger.Errorf("src=registerRoots, err=[%v]", errors.ErrorStack(err))
+			logger.Errorf("err=[%v]", errors.ErrorStack(err))
 			return err
 		}
 	}
@@ -167,7 +167,7 @@ func (s *Service) getCAClient() (client.CAClient, error) {
 
 	grpClient, err := s.clientFactory.NewClient("ca")
 	if err != nil {
-		logger.Errorf("src=createCAClient, err=[%v]", errors.Details(err))
+		logger.Errorf("err=[%v]", errors.Details(err))
 		return nil, errors.Trace(err)
 	}
 	s.lock.Lock()

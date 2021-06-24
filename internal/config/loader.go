@@ -56,7 +56,7 @@ func DefaultFactory() (*Factory, error) {
 		"/opt/trusty/etc/dev", // for CI test or stage the etc/dev must be after etc/prod
 	}
 
-	logger.Infof("src=DefaultFactory, searchDirs=[%s]", strings.Join(searchDirs, ","))
+	logger.Infof("searchDirs=[%s]", strings.Join(searchDirs, ","))
 
 	return &Factory{
 		searchDirs:  searchDirs,
@@ -132,14 +132,14 @@ func (f *Factory) LoadConfig(configFile string) (*Configuration, error) {
 // LoadConfigForHostName will load the configuration from the named config file for specified host name,
 // apply any overrides, and resolve relative directory locations.
 func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*Configuration, error) {
-	logger.Infof("src=LoadConfigForHostName, file=%s, hostname=%s", configFile, hostnameOverride)
+	logger.Infof("file=%s, hostname=%s", configFile, hostnameOverride)
 
 	configFile, baseDir, err := f.resolveConfigFile(configFile)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
-	logger.Infof("src=LoadConfigForHostName, file=%s, baseDir=%s", configFile, baseDir)
+	logger.Infof("file=%s, baseDir=%s", configFile, baseDir)
 
 	c, err := f.load(configFile, hostnameOverride, baseDir)
 	if err != nil {
@@ -192,7 +192,7 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 	for _, ptr := range dirsToResolve {
 		*ptr, err = resolve.Directory(*ptr, baseDir, false)
 		if err != nil {
-			logger.Warningf("src=LoadConfigForHostName, dir=%q, err=[%v]", *ptr, err.Error())
+			logger.Warningf("dir=%q, err=[%v]", *ptr, err.Error())
 		}
 	}
 
@@ -246,7 +246,7 @@ func (f *Factory) load(configFilename, hostnameOverride, baseDir string) (*Confi
 			if hn == "" {
 				hn, err = os.Hostname()
 				if err != nil {
-					logger.Errorf("src=Load, reason=hostname, err=[%v]", errors.Details(err))
+					logger.Errorf("reason=hostname, err=[%v]", errors.Details(err))
 				}
 			}
 		}
@@ -319,7 +319,7 @@ func (f *Factory) resolveConfigFile(configFile string) (absConfigFile, baseDir s
 		absConfigFile, err = resolve.File(configFile, absDir)
 		if err == nil && absConfigFile != "" {
 			baseDir = absDir
-			logger.Infof("src=resolveConfigFile, resolved=%q", absConfigFile)
+			logger.Infof("resolved=%q", absConfigFile)
 			return
 		}
 	}
@@ -370,7 +370,7 @@ func doSubstituteEnvVars(v reflect.Value, variables map[string]string) {
 		return
 	}
 
-	// logger.Infof("src=doSubstituteEnvVars, kind=%v, type=%v", v.Kind(), v.Type())
+	// logger.Infof("kind=%v, type=%v", v.Kind(), v.Type())
 
 	switch v.Kind() {
 	case reflect.Struct:
@@ -389,7 +389,7 @@ func doSubstituteEnvVars(v reflect.Value, variables map[string]string) {
 		doSubstituteEnvVars(v.Elem(), variables)
 	case reflect.Map:
 		if v.Type().String() == "map[string]string" {
-			// logger.Warningf("src=doSubstituteEnvVars, t=%v", v.Interface())
+			// logger.Warningf("t=%v", v.Interface())
 			m := v.Interface().(map[string]string)
 			for k, v := range m {
 				m[k] = resolveEnvVars(v, variables)
@@ -401,6 +401,5 @@ func doSubstituteEnvVars(v reflect.Value, variables map[string]string) {
 			}
 		}
 	default:
-		// logger.Warningf("src=doSubstituteEnvVars, skipping")
 	}
 }

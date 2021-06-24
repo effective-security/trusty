@@ -12,10 +12,13 @@ import (
 
 	"github.com/ekspand/trusty/kubeca/controller"
 	"github.com/ekspand/trusty/pkg/awskmscrypto"
+	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 )
 
 func main() {
+	xlog.GetFormatter().WithCaller(true)
+
 	cryptoprov.Register("SoftHSM", cryptoprov.Crypto11Loader)
 	cryptoprov.Register("PKCS11", cryptoprov.Crypto11Loader)
 	cryptoprov.Register("AWSKMS", awskmscrypto.KmsLoader)

@@ -287,7 +287,7 @@ func LoadConfig(path string) (*Config, error) {
 	}
 
 	if cfg.Profiles["default"] == nil {
-		logger.Infof("src=LoadConfig, reason=no_default_profile")
+		logger.Infof("reason=no_default_profile")
 		cfg.Profiles["default"] = DefaultCertProfile()
 	}
 

@@ -199,7 +199,7 @@ func CreateIssuer(cfg *IssuerConfig, certBytes, intCAbytes, rootBytes []byte, si
 		keyHash[h] = certutil.Digest(h, publicKeyInfo.PublicKey.RightAlign())
 		nameHash[h] = certutil.Digest(h, bundle.Cert.RawSubject)
 
-		logger.Infof("src=NewIssuer, label=%s, alg=%s, keyHash=%s, nameHash=%s",
+		logger.Infof("label=%s, alg=%s, keyHash=%s, nameHash=%s",
 			label, certutil.HashAlgoToStr(h), hex.EncodeToString(keyHash[h]), hex.EncodeToString(nameHash[h]))
 	}
 
@@ -407,7 +407,7 @@ func (ca *Issuer) sign(template *x509.Certificate) ([]byte, error) {
 		return nil, errors.Annotatef(err, "create certificate")
 	}
 
-	logger.Infof("src=sign, serial=%d, CN=%q, URI=%v, DNS=%v, Email=%v",
+	logger.Infof("serial=%d, CN=%q, URI=%v, DNS=%v, Email=%v",
 		template.SerialNumber, template.Subject.CommonName, template.URIs, template.DNSNames, template.EmailAddresses)
 
 	cert := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
@@ -467,7 +467,7 @@ func (ca *Issuer) fillTemplate(template *x509.Certificate, profile *CertProfile,
 	template.BasicConstraintsValid = true
 	template.IsCA = profile.CAConstraint.IsCA
 	if template.IsCA {
-		logger.Noticef("src=issuer, subject=%q, is_ca=true, MaxPathLen=%d", template.Subject.String(), profile.CAConstraint.MaxPathLen)
+		logger.Noticef("subject=%q, is_ca=true, MaxPathLen=%d", template.Subject.String(), profile.CAConstraint.MaxPathLen)
 		template.MaxPathLen = profile.CAConstraint.MaxPathLen
 		template.MaxPathLenZero = template.MaxPathLen == 0
 		template.DNSNames = nil

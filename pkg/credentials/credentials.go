@@ -46,12 +46,10 @@ type bundle struct {
 }
 
 func (b *bundle) TransportCredentials() grpccredentials.TransportCredentials {
-	logger.Debugf("src=TransportCredentials")
 	return b.tc
 }
 
 func (b *bundle) PerRPCCredentials() grpccredentials.PerRPCCredentials {
-	logger.Debugf("src=PerRPCCredentials")
 	return b.rc
 }
 
@@ -72,12 +70,10 @@ func newTransportCredential(cfg *tls.Config) *transportCredential {
 }
 
 func (tc *transportCredential) ClientHandshake(ctx context.Context, authority string, rawConn net.Conn) (net.Conn, grpccredentials.AuthInfo, error) {
-	logger.Debugf("src=ClientHandshake")
 	return tc.gtc.ClientHandshake(ctx, authority, rawConn)
 }
 
 func (tc *transportCredential) ServerHandshake(rawConn net.Conn) (net.Conn, grpccredentials.AuthInfo, error) {
-	logger.Debugf("src=ServerHandshake")
 	return tc.gtc.ServerHandshake(rawConn)
 }
 
@@ -106,7 +102,6 @@ func newPerRPCCredential() *perRPCCredential { return &perRPCCredential{} }
 func (rc *perRPCCredential) RequireTransportSecurity() bool { return false }
 
 func (rc *perRPCCredential) GetRequestMetadata(ctx context.Context, s ...string) (map[string]string, error) {
-	logger.Debugf("src=GetRequestMetadata")
 	rc.authTokenMu.RLock()
 	authToken := rc.authToken
 	rc.authTokenMu.RUnlock()
@@ -119,7 +114,6 @@ func (rc *perRPCCredential) GetRequestMetadata(ctx context.Context, s ...string)
 }
 
 func (b *bundle) UpdateAuthToken(token string) {
-	logger.Debugf("src=UpdateAuthToken")
 	if b.rc == nil {
 		return
 	}

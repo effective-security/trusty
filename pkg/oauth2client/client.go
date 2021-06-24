@@ -49,7 +49,7 @@ func LoadConfig(file string) (*Config, error) {
 
 // Load returns new Provider
 func Load(cfgfile string) (*Client, error) {
-	logger.Infof("src=Load, file=%q", cfgfile)
+	logger.Infof("file=%q", cfgfile)
 
 	cfg, err := LoadConfig(cfgfile)
 	if err != nil {
@@ -83,7 +83,7 @@ func New(cfg *Config) (*Client, error) {
 		p.verifyKey = verifyKey
 	}
 
-	logger.Infof("src=New, provider=%q, audience=%q, issuer=%q", cfg.ProviderID, cfg.Audience, cfg.Issuer)
+	logger.Infof("provider=%q, audience=%q, issuer=%q", cfg.ProviderID, cfg.Audience, cfg.Issuer)
 
 	return p, nil
 }

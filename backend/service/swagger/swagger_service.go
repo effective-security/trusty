@@ -75,7 +75,7 @@ func (s *Service) swagger() rest.Handle {
 		}
 		sw, err := ioutil.ReadFile(f)
 		if err != nil {
-			logger.Errorf("src=swagger, err=[%v]", errors.Details(err))
+			logger.Errorf("err=[%v]", errors.Details(err))
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to load swagger file: "+f).WithCause(err))
 			return
 		}

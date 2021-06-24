@@ -7,9 +7,12 @@ import (
 	"os"
 
 	"github.com/ekspand/trusty/kubeca/certinit"
+	"github.com/go-phorce/dolly/xlog"
 )
 
 func main() {
+	xlog.GetFormatter().WithCaller(true)
+
 	var kubeConfig string
 	r := &certinit.Request{}
 	flag.StringVar(&kubeConfig, "kubeconfig", "", "(optional) path to kubeconfig file")

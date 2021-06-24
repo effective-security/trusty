@@ -10,6 +10,7 @@ import (
 	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-logr/logr"
 	"github.com/go-phorce/dolly/xhttp/marshal"
+	"github.com/go-phorce/dolly/xlog"
 	capi "k8s.io/api/certificates/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -33,7 +34,7 @@ type CertificateSigningRequestSigningReconciler struct {
 
 // Reconcile implementation
 func (r *CertificateSigningRequestSigningReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log := r.Log.WithValues("certificatesigningrequest", req.NamespacedName)
+	log := logger.WithValues("certificatesigningrequest", req.NamespacedName)
 	var csr capi.CertificateSigningRequest
 	if err := r.Client.Get(ctx, req.NamespacedName, &csr); client.IgnoreNotFound(err) != nil {
 		return ctrl.Result{}, fmt.Errorf("error %q getting CSR", err)
@@ -42,15 +43,15 @@ func (r *CertificateSigningRequestSigningReconciler) Reconcile(ctx context.Conte
 
 	switch {
 	case !csr.DeletionTimestamp.IsZero():
-		log.V(1).Info("ignoring: CSR has been deleted")
+		log.Info("ignoring: CSR has been deleted")
 	case csr.Spec.SignerName == "":
-		log.V(1).Info("ignoring: CSR does not have a signer name: " + string(json))
+		log.Info("ignoring: CSR does not have a signer name: " + string(json))
 	case csr.Status.Certificate != nil:
-		log.V(1).Info("ignoring: CSR has already been signed")
+		log.Info("ignoring: CSR has already been signed")
 	case !isCertificateRequestApproved(&csr):
-		log.V(1).Info("ignoring: CSR is not approved")
+		log.Info("ignoring: CSR is not approved")
 	default:
-		log.V(1).Info("Received CSR: " + string(json))
+		log.Info("Received CSR: " + string(json))
 
 		/*
 			// TODO: check
@@ -73,13 +74,15 @@ func (r *CertificateSigningRequestSigningReconciler) Reconcile(ctx context.Conte
 			}
 			cert, raw, err := issuer.Sign(signReq)
 			if err != nil {
-				log.V(1).Error(err, "unable to sign")
+				logger.KV(xlog.ERROR,
+					"reason", "unable to sign",
+					"err", err)
 				return ctrl.Result{}, fmt.Errorf("error auto signing CSR: %v", err)
 			}
 
 			b := new(strings.Builder)
 			print.Certificate(b, cert)
-			log.V(1).Info("Signed certificate", "certificate", b.String())
+			log.KV(xlog.NOTICE, "status", "signed", "certificate", b.String())
 
 			raw = append(raw, []byte(`\n`)...)
 			raw = append(raw, []byte(issuer.Bundle().CACertsPEM)...)
@@ -87,12 +90,14 @@ func (r *CertificateSigningRequestSigningReconciler) Reconcile(ctx context.Conte
 			patch := client.MergeFrom(csr.DeepCopy())
 			csr.Status.Certificate = raw
 			if err := r.Client.Status().Patch(ctx, &csr, patch); err != nil {
-				log.V(1).Error(err, "unable to patch status")
+				logger.KV(xlog.ERROR,
+					"reason", "unable to patch status",
+					"err", err)
 				return ctrl.Result{}, fmt.Errorf("error patching CSR: %v", err)
 			}
 			r.EventRecorder.Event(&csr, v1.EventTypeNormal, "Signed", "The CSR has been signed")
 		} else {
-			log.V(1).Info("ignoring: issuer not found for " + csr.Spec.SignerName)
+			log.Info("ignoring: issuer not found for " + csr.Spec.SignerName)
 		}
 	}
 	return ctrl.Result{}, nil

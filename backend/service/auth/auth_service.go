@@ -146,7 +146,7 @@ func (s *Service) AuthURLHandler() rest.Handle {
 			URL: conf.AuthCodeURL(base64.RawURLEncoding.EncodeToString(js), oauth2ResponseType, responseMode, nonce),
 		}
 
-		logger.Tracef("src=getGithubURL, reqRedirectURL=%q, confRedirectURL=%q, deviceID=%s, url=%q",
+		logger.Tracef("reqRedirectURL=%q, confRedirectURL=%q, deviceID=%s, url=%q",
 			redirectURL[0], conf.RedirectURL, deviceID[0], res.URL)
 
 		marshal.WriteJSON(w, r, res)
@@ -196,13 +196,13 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 		token, err := conf.Exchange(ctx, code[0])
 		if err != nil {
 			err = errors.Trace(err)
-			logger.Debugf("src=githubCallbackHandler, reason=Exchange, confRedirectURL=%q, AuthURL=%q, TokenURL=%q, sec=%q, err=%q",
+			logger.Debugf("reason=Exchange, confRedirectURL=%q, AuthURL=%q, TokenURL=%q, sec=%q, err=%q",
 				conf.RedirectURL, o.AuthURL, o.TokenURL, o.ClientSecret, err.Error())
 			marshal.WriteJSON(w, r, httperror.WithForbidden("authorization failed: %s", err.Error()).WithCause(err))
 			return
 		}
 
-		logger.Debugf("src=githubCallbackHandler, redirectURL=%q, deviceID=%s, token=[%+v]",
+		logger.Debugf("redirectURL=%q, deviceID=%s, token=[%+v]",
 			oauthStatus.RedirectURL, oauthStatus.DeviceID, *token)
 
 		if !token.Valid() {
@@ -255,7 +255,7 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 		if oauthStatus.DeviceID == s.server.Hostname() {
 			// on the same host where the server is running on, allow for 8 hours
 			validFor = 8 * 60 * time.Minute
-			logger.Noticef("src=githubCallbackHandler, device=%s, email=%s, token_valid_for=%v",
+			logger.Noticef("device=%s, email=%s, token_valid_for=%v",
 				oauthStatus.DeviceID, uemail, validFor)
 		}
 

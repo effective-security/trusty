@@ -12,7 +12,7 @@ import (
 func (s *Service) GetRoots(ctx context.Context, _ *empty.Empty) (*pb.RootsResponse, error) {
 	roots, err := s.db.GetRootCertificates(ctx)
 	if err != nil {
-		logger.Errorf("src=Roots, err=[%v]", errors.ErrorStack(err))
+		logger.Errorf("err=[%v]", errors.ErrorStack(err))
 		return nil, errors.Annotatef(err, "unable to query root certificates")
 	}
 

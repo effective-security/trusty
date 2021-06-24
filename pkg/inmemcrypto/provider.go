@@ -26,7 +26,7 @@ type inMemProv struct {
 
 // registerKey registers key for the given id in HSM
 func (h *inMemProv) registerKey(keyID string, pvk crypto.PrivateKey) {
-	logger.Tracef("src=registerKey, id=%s", keyID)
+	logger.Tracef("id=%s", keyID)
 	h.keyIDToPvk[keyID] = pvk
 }
 

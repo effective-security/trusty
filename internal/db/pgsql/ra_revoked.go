@@ -20,7 +20,7 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 	}
 
 	crt := &revoked.Certificate
-	logger.Debugf("src=RegisterRevokedCertificate, subject=%q, skid=%s, ikid=%s", crt.Subject, crt.SKID, crt.IKID)
+	logger.Debugf("subject=%q, skid=%s, ikid=%s", crt.Subject, crt.SKID, crt.IKID)
 
 	res := new(model.RevokedCertificate)
 
@@ -68,11 +68,11 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 func (p *Provider) RemoveRevokedCertificate(ctx context.Context, id int64) error {
 	_, err := p.db.ExecContext(ctx, `DELETE FROM revoked WHERE id=$1;`, id)
 	if err != nil {
-		logger.Errorf("src=RemoveRevokedCertificate, err=[%s]", errors.Details(err))
+		logger.Errorf("err=[%s]", errors.Details(err))
 		return errors.Trace(err)
 	}
 
-	logger.Noticef("src=RemoveRevokedCertificate, id=%d", id)
+	logger.Noticef("id=%d", id)
 
 	return nil
 }

@@ -109,7 +109,7 @@ type Provider interface {
 
 // Migrate performs the db migration
 func Migrate(migrationsDir string, db *sql.DB) error {
-	logger.Tracef("src=Migrate, reason=load, directory=%q", migrationsDir)
+	logger.Tracef("reason=load, directory=%q", migrationsDir)
 	if _, err := os.Stat(migrationsDir); err != nil {
 		return errors.Annotatef(err, "directory %q inaccessible", migrationsDir)
 	}
@@ -132,9 +132,9 @@ func Migrate(migrationsDir string, db *sql.DB) error {
 		return errors.Trace(err)
 	}
 	if err == migrate.ErrNilVersion {
-		logger.Tracef("src=Migrate, reason=initial_state, version=nil")
+		logger.Tracef("reason=initial_state, version=nil")
 	} else {
-		logger.Tracef("src=Migrate, reason=initial_state, version=%d", version)
+		logger.Tracef("reason=initial_state, version=%d", version)
 	}
 
 	err = m.Up()
@@ -146,7 +146,7 @@ func Migrate(migrationsDir string, db *sql.DB) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
-	logger.Infof("src=Migrate, reason=current_state, version=%d", version)
+	logger.Infof("reason=current_state, version=%d", version)
 
 	return nil
 }

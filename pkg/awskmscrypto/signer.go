@@ -35,7 +35,7 @@ type Signer struct {
 
 // NewSigner creates new signer
 func NewSigner(keyID string, label string, signingAlgorithms []string, publicKey crypto.PublicKey, kmsClient KmsClient) crypto.Signer {
-	logger.Debugf("src=NewSigner, id=%s, label=%q, algos=%v", keyID, label, signingAlgorithms)
+	logger.Debugf("id=%s, label=%q, algos=%v", keyID, label, signingAlgorithms)
 	return &Signer{
 		keyID:             keyID,
 		label:             label,

@@ -105,7 +105,7 @@ func (s *Service) getRAClient() (client.RAClient, error) {
 
 	grpClient, err := s.clientFactory.NewClient("ra")
 	if err != nil {
-		logger.Errorf("src=createRAClient, err=[%v]", errors.Details(err))
+		logger.Errorf("err=[%v]", errors.Details(err))
 		return nil, errors.Trace(err)
 	}
 

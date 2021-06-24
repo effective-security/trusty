@@ -157,11 +157,11 @@ func (a *App) Close() error {
 		if closer != nil {
 			err := closer.Close()
 			if err != nil {
-				logger.Errorf("src=Close, err=[%v]", err.Error())
+				logger.Errorf("err=[%v]", err.Error())
 			}
 		}
 	}
-	logger.Warning("src=Close, status=closed")
+	logger.Warning("status=closed")
 
 	return nil
 }
@@ -216,7 +216,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 	}
 
 	ver := version.Current().String()
-	logger.Infof("src=Run, hostname=%s, ip=%s, version=%s", hostname, ipaddr, ver)
+	logger.Infof("hostname=%s, ip=%s, version=%s", hostname, ipaddr, ver)
 
 	if a.flags.cpu != nil {
 		err = a.initCPUProfiler(*a.flags.cpu)
@@ -237,7 +237,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 
 	isDryRun := a.flags.dryRun != nil && *a.flags.dryRun
 	if isDryRun {
-		logger.Info("src=Run, status=exit_on_dry_run")
+		logger.Info("status=exit_on_dry_run")
 		return nil
 	}
 
@@ -245,14 +245,14 @@ func (a *App) Run(startedCh chan<- bool) error {
 		if !svcCfg.Disabled {
 			httpServer, err := gserver.Start(name, svcCfg, a.container, ServiceFactories)
 			if err != nil {
-				logger.Errorf("src=Run, reason=Start, server=%s, err=[%v]", name, errors.ErrorStack(err))
+				logger.Errorf("reason=Start, server=%s, err=[%v]", name, errors.ErrorStack(err))
 
 				a.stopServers()
 				return errors.Trace(err)
 			}
 			a.servers[httpServer.Name()] = httpServer
 		} else {
-			logger.Infof("src=Run, reason=skip_disabled, server=%s", name)
+			logger.Infof("reason=skip_disabled, server=%s", name)
 		}
 	}
 
@@ -261,10 +261,10 @@ func (a *App) Run(startedCh chan<- bool) error {
 		var svc gserver.Service
 		return disco.ForEach(&svc, func(key string) error {
 			if onstarted, ok := svc.(gserver.StartSubcriber); ok {
-				logger.Infof("src=Run, onstarted=running, key=%s, service=%s", key, svc.Name())
+				logger.Infof("onstarted=running, key=%s, service=%s", key, svc.Name())
 				return onstarted.OnStarted()
 			}
-			logger.Infof("src=Run, onstarted=skipped, key=%s, service=%s", key, svc.Name())
+			logger.Infof("onstarted=skipped, key=%s, service=%s", key, svc.Name())
 			return nil
 		})
 	})
@@ -287,7 +287,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 
 	// Block until a signal is received.
 	sig := <-a.sigs
-	logger.Warningf("src=Run, status=shuting_down, sig=%v", sig)
+	logger.Warningf("status=shuting_down, sig=%v", sig)
 
 	a.stopServers()
 
@@ -299,9 +299,9 @@ func (a *App) Run(startedCh chan<- bool) error {
 	if sig == syscall.SIGUSR2 {
 		select {
 		case <-time.After(time.Second * 15):
-			logger.Info("src=Run, status=SIGUSR2, waiting=SIGTERM")
+			logger.Info("status=SIGUSR2, waiting=SIGTERM")
 		case sig = <-a.sigs:
-			logger.Infof("src=Run, status=exiting, reason=received_signal, sig=%v", sig)
+			logger.Infof("status=exiting, reason=received_signal, sig=%v", sig)
 		}
 	}
 
@@ -362,7 +362,7 @@ func (a *App) loadConfig() error {
 	if err != nil {
 		return errors.Annotatef(err, "failed to load configuration %q", *flags.cfgFile)
 	}
-	logger.Infof("src=loadConfig, status=loaded, cfg=%q", *flags.cfgFile)
+	logger.Infof("status=loaded, cfg=%q", *flags.cfgFile)
 	a.cfg = cfg
 
 	if *flags.logsDir != "" {
@@ -453,7 +453,7 @@ func (a *App) initLogs() error {
 
 		logRotate, err := logrotate.Initialize(cfg.Logs.Directory, cfg.ServiceName, cfg.Logs.MaxAgeDays, cfg.Logs.MaxSizeMb, true, sink)
 		if err != nil {
-			logger.Errorf("src=initLogs, reason=logrotate, folder=%q, err=[%s]", cfg.Logs.Directory, errors.ErrorStack(err))
+			logger.Errorf("reason=logrotate, folder=%q, err=[%s]", cfg.Logs.Directory, errors.ErrorStack(err))
 			return errors.Annotate(err, "failed to initialize log rotate")
 		}
 		a.OnClose(logRotate)
@@ -471,12 +471,12 @@ func (a *App) initLogs() error {
 			} else {
 				xlog.SetPackageLogLevel(ll.Repo, ll.Package, l)
 			}
-			logger.Infof("src=initLogs, logger=%q, level=%v", ll.Repo, l)
+			logger.Infof("logger=%q, level=%v", ll.Repo, l)
 		}
 	}
-	logger.Infof("src=initLogs, status=service_starting, version='%v', args=%v",
+	logger.Infof("status=service_starting, version='%v', args=%v",
 		version.Current(), os.Args)
-
+	xlog.GetFormatter().WithCaller(true)
 	return nil
 }
 
@@ -487,7 +487,7 @@ func (a *App) initCPUProfiler(file string) error {
 		if err != nil {
 			return errors.Annotate(err, "unable to create CPU profile")
 		}
-		logger.Infof("src=initCPUProfiler, status=starting_cpu_profiling, file=%q", file)
+		logger.Infof("status=starting_cpu_profiling, file=%q", file)
 
 		pprof.StartCPUProfile(cpuf)
 		a.OnClose(&cpuProfileCloser{file: file})

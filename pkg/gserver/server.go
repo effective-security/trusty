@@ -117,7 +117,7 @@ func Start(
 		e.disco = d
 		iden, err := roles.New(&cfg.IdentityMap, jwtParser)
 		if err != nil {
-			logger.Errorf("src=Start, err=[%v]", errors.Details(err))
+			logger.Errorf("err=[%v]", errors.Details(err))
 			return err
 		}
 
@@ -169,7 +169,7 @@ func newServer(
 	ipaddr, err := netutil.GetLocalIP()
 	if err != nil {
 		ipaddr = "127.0.0.1"
-		logger.Errorf("src=newServer, reason=unable_determine_ipaddr, use=%q, err=[%v]", ipaddr, errors.ErrorStack(err))
+		logger.Errorf("reason=unable_determine_ipaddr, use=%q, err=[%v]", ipaddr, errors.ErrorStack(err))
 	}
 	hostname, _ := os.Hostname()
 
@@ -192,12 +192,12 @@ func newServer(
 		}
 		err = container.Invoke(sf(e))
 		if err != nil {
-			return nil, errors.Annotatef(err, "src=newServer, reason=factory, server=%q, service=%s",
+			return nil, errors.Annotatef(err, "reason=factory, server=%q, service=%s",
 				name, svc)
 		}
 	}
 
-	logger.Tracef("src=newServer, status=configuring_listeners, server=%s", name)
+	logger.Tracef("status=configuring_listeners, server=%s", name)
 
 	e.sctxs, err = configureListeners(cfg)
 	if err != nil {
@@ -226,7 +226,7 @@ func (e *Server) serveClients() (err error) {
 
 func (e *Server) errHandler(err error) {
 	if err != nil {
-		logger.Infof("src=errHandler, err=[%v]", errors.ErrorStack(err))
+		logger.Infof("err=[%v]", errors.ErrorStack(err))
 	}
 	select {
 	case <-e.stopc:
@@ -243,7 +243,7 @@ func (e *Server) errHandler(err error) {
 // Client requests will be terminated with request timeout.
 // After timeout, enforce remaning requests be closed immediately.
 func (e *Server) Close() {
-	logger.Infof("src=Close, server=%s", e.Name())
+	logger.Infof("server=%s", e.Name())
 	e.closeOnce.Do(func() { close(e.stopc) })
 
 	// close client requests with request timeout
@@ -321,7 +321,7 @@ func (e *Server) Configuration() *config.HTTPServer {
 
 // AddService to the server
 func (e *Server) AddService(svc Service) {
-	logger.Noticef("src=AddService, server=%s, service=%s",
+	logger.Noticef("server=%s, service=%s",
 		e.Name(), svc.Name())
 
 	e.services[svc.Name()] = svc

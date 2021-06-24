@@ -94,7 +94,7 @@ func (info *TLSInfo) ServerTLSWithReloader() (*tls.Config, error) {
 		return nil, errors.Trace(err)
 	}
 
-	logger.Infof("src=ServerTLSWithReloader, %s", info.String())
+	logger.Infof(info.String())
 
 	info.tlsReloader, err = tlsconfig.NewKeypairReloader(
 		info.CertFile,

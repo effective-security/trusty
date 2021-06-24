@@ -19,7 +19,7 @@ func (p *Provider) RegisterRootCertificate(ctx context.Context, crt *model.RootC
 		return nil, errors.Trace(err)
 	}
 
-	logger.Debugf("src=RegisterRootCertificate, subject=%q, skid=%s", crt.Subject, crt.SKID)
+	logger.Debugf("subject=%q, skid=%s", crt.Subject, crt.SKID)
 
 	res := new(model.RootCertificate)
 
