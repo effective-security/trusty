@@ -97,7 +97,7 @@ func (c *Provider) GenerateKeyAndRequest(req *CertificateRequest) (csrPEM []byte
 		return
 	}
 
-	logger.Tracef("src=GenerateKeyAndRequest, algo=%s, size=%d",
+	logger.Tracef("algo=%s, size=%d",
 		req.KeyRequest.Algo(), req.KeyRequest.Size())
 
 	priv, err = req.KeyRequest.Generate()
@@ -113,7 +113,7 @@ func (c *Provider) GenerateKeyAndRequest(req *CertificateRequest) (csrPEM []byte
 		return
 	}
 
-	logger.Tracef("src=GenerateKeyAndRequest, key_id=%q, label=%q", keyID, label)
+	logger.Tracef("key_id=%q, label=%q", keyID, label)
 	var template = x509.CertificateRequest{
 		Subject:            req.Name(),
 		SignatureAlgorithm: req.KeyRequest.SigAlgo(),
@@ -123,7 +123,7 @@ func (c *Provider) GenerateKeyAndRequest(req *CertificateRequest) (csrPEM []byte
 		if strings.Contains(san, "://") {
 			u, err := url.Parse(san)
 			if err != nil {
-				logger.Errorf("src=SetSAN, uri=%q, err=%q", san, err.Error())
+				logger.Errorf("uri=%q, err=%q", san, err.Error())
 			}
 			template.URIs = append(template.URIs, u)
 		} else if ip := net.ParseIP(san); ip != nil {

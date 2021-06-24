@@ -13,7 +13,7 @@ require (
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/go-logr/logr v0.4.0
 	github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba
-	github.com/go-phorce/dolly v0.6.1-0.20210611164526-b3b996cf9563
+	github.com/go-phorce/dolly v0.7.1-0.20210623231650-eaa3ec8efd75
 	github.com/gogo/googleapis v1.4.1
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang-migrate/migrate v3.5.4+incompatible

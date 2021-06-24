@@ -130,7 +130,7 @@ func (r *Request) requestCertificate(ctx context.Context, client MinCertificates
 
 		certificate = csr.Status.Certificate
 		if len(certificate) > 0 {
-			logger.Printf("got certificate:\n%s", certificate)
+			logger.Infof("got certificate:\n%s", certificate)
 			break
 		}
 
@@ -149,7 +149,7 @@ func (r *Request) requestCertificate(ctx context.Context, client MinCertificates
 		return errors.Annotate(err, "unable to save certificate")
 	}
 
-	logger.Printf("wrote %s", certFile)
+	logger.Infof("wrote %s", certFile)
 
 	return nil
 }

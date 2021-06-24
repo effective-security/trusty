@@ -19,7 +19,7 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 		return nil, errors.Trace(err)
 	}
 
-	logger.Debugf("src=RegisterCertificate, subject=%q, skid=%s", crt.Subject, crt.SKID)
+	logger.Debugf("subject=%q, skid=%s", crt.Subject, crt.SKID)
 
 	res := new(model.Certificate)
 

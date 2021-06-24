@@ -101,7 +101,7 @@ func configureListeners(cfg *config.HTTPServer) (sctxs map[string]*serveCtx, err
 		// clean up on error
 		for _, sctx := range sctxs {
 			if sctx.listener != nil {
-				logger.Infof("src=configureListeners, reason=error, network=%s, address=%s, err=%q",
+				logger.Infof("reason=error, network=%s, address=%s, err=%q",
 					sctx.network, sctx.addr, err.Error())
 				sctx.listener.Close()
 			}
@@ -120,7 +120,7 @@ func configureListeners(cfg *config.HTTPServer) (sctxs map[string]*serveCtx, err
 			return nil, errors.Errorf("TLS key/cert must be provided for the url %s with HTTPS scheme", u.String())
 		}
 		if (u.Scheme == "http" || u.Scheme == "unix") && tlsInfo != nil {
-			logger.Warningf("src=configureListeners, reason=tls_without_https_scheme, url=%s",
+			logger.Warningf("reason=tls_without_https_scheme, url=%s",
 				u.String())
 		}
 
@@ -153,7 +153,7 @@ func configureListeners(cfg *config.HTTPServer) (sctxs map[string]*serveCtx, err
 			continue
 		}
 
-		logger.Infof("src=configureListeners, status=listen, network=%s, address=%s",
+		logger.Infof("status=listen, network=%s, address=%s",
 			sctx.network, sctx.addr)
 
 		if sctx.listener, err = net.Listen(sctx.network, sctx.addr); err != nil {
@@ -179,7 +179,7 @@ func configureListeners(cfg *config.HTTPServer) (sctxs map[string]*serveCtx, err
 func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 	//<-s.ReadyNotify()
 
-	logger.Infof("src=serve, status=ready_to_serve, service=%s, network=%s, address=%q",
+	logger.Infof("status=ready_to_serve, service=%s, network=%s, address=%q",
 		s.Name(), sctx.network, sctx.addr)
 
 	var gsSecure *grpc.Server
@@ -219,7 +219,7 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 
 		sctx.serversC <- &servers{grpc: gsInsecure, http: srv}
 
-		logger.Warningf("src=serve, reason=insecure, service=%s, address=%q", s.Name(), sctx.addr)
+		logger.Warningf("reason=insecure, service=%s, address=%q", s.Name(), sctx.addr)
 	}
 
 	if sctx.secure {
@@ -244,7 +244,7 @@ func (sctx *serveCtx) serve(s *Server, errHandler func(error)) (err error) {
 		sctx.serversC <- &servers{secure: true, grpc: gsSecure, http: srv}
 	}
 
-	logger.Infof("src=serve, status=serving, service=%s, address=%s, secure=%t, insecure=%t",
+	logger.Infof("status=serving, service=%s, address=%s, secure=%t, insecure=%t",
 		s.Name(), sctx.listener.Addr().String(), sctx.secure, sctx.insecure)
 
 	close(sctx.serversC)
@@ -284,7 +284,7 @@ func configureHandlers(s *Server, handler http.Handler) http.Handler {
 func restRouter(s *Server) rest.Router {
 	var router rest.Router
 	if s.cfg.CORS.GetEnabled() {
-		logger.Noticef("src=restRouter, server=%s, CORS=enabled", s.name)
+		logger.Noticef("server=%s, CORS=enabled", s.name)
 		cors := &rest.CORSOptions{
 			AllowedOrigins: s.cfg.CORS.AllowedOrigins,
 			AllowedMethods: s.cfg.CORS.AllowedMethods,
@@ -300,12 +300,12 @@ func restRouter(s *Server) rest.Router {
 
 	for name, svc := range s.services {
 		if registrator, ok := svc.(RouteRegistrator); ok {
-			logger.Infof("src=restRouter, status=RouteRegistrator, server=%s, service=%s",
+			logger.Infof("status=RouteRegistrator, server=%s, service=%s",
 				s.Name(), name)
 
 			registrator.RegisterRoute(router)
 		} else {
-			logger.Infof("src=restRouter, status=not_supported_RouteRegistrator, server=%s, service=%s",
+			logger.Infof("status=not_supported_RouteRegistrator, server=%s, service=%s",
 				s.Name(), name)
 		}
 	}
@@ -341,12 +341,12 @@ func grpcServer(s *Server, tls *tls.Config, gopts ...grpc.ServerOption) *grpc.Se
 
 	for name, svc := range s.services {
 		if registrator, ok := svc.(GRPCRegistrator); ok {
-			logger.Infof("src=grpcServer, status=RegisterGRPC, server=%s, service=%s",
+			logger.Infof("status=RegisterGRPC, server=%s, service=%s",
 				s.Name(), name)
 
 			registrator.RegisterGRPC(grpcServer)
 		} else {
-			logger.Infof("src=grpcServer, status=not_supported_RegisterGRPC, server=%s, service=%s",
+			logger.Infof("status=not_supported_RegisterGRPC, server=%s, service=%s",
 				s.Name(), name)
 		}
 	}

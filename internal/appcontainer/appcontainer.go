@@ -235,7 +235,7 @@ func provideAuditor(cfg *config.Configuration, r CloseRegistrator) (audit.Audito
 		var err error
 		auditor, err = fauditor.New(cfg.ServiceName+".log", cfg.Audit.Directory, cfg.Audit.MaxAgeDays, cfg.Audit.MaxSizeMb)
 		if err != nil {
-			logger.Errorf("src=provideAuditor, reason=auditor, err=[%v]", errors.ErrorStack(err))
+			logger.Errorf("reason=auditor, err=[%v]", errors.ErrorStack(err))
 			return nil, errors.Annotate(err, "failed to create Auditor")
 		}
 	} else {
@@ -272,7 +272,7 @@ func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
 	cryptoprov.Register("AWSKMS", awskmscrypto.KmsLoader)
 	crypto, err := cryptoprov.Load(cfg.CryptoProv.Default, cfg.CryptoProv.Providers)
 	if err != nil {
-		logger.Errorf("src=provideCrypto, default=%s, providers=%v, err=[%v]",
+		logger.Errorf("default=%s, providers=%v, err=[%v]",
 			cfg.CryptoProv.Default, cfg.CryptoProv.Providers,
 			errors.ErrorStack(err))
 		return nil, errors.Trace(err)

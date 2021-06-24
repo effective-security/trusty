@@ -127,7 +127,7 @@ func (p *Provider) GenerateRSAKey(label string, bits int, purpose int) (crypto.P
 	keyID := aws.StringValue(resp.KeyMetadata.KeyId)
 	arn := aws.StringValue(resp.KeyMetadata.Arn)
 
-	logger.Infof("src=GenerateRSAKey, arn=%q, id=%q, label=%q",
+	logger.Infof("arn=%q, id=%q, label=%q",
 		arn,
 		keyID,
 		label,
@@ -178,7 +178,7 @@ func (p *Provider) GenerateECDSAKey(label string, curve elliptic.Curve) (crypto.
 	keyID := aws.StringValue(resp.KeyMetadata.KeyId)
 	arn := aws.StringValue(resp.KeyMetadata.Arn)
 
-	logger.Infof("src=GenerateRSAKey, arn=%q, id=%q, label=%q",
+	logger.Infof("arn=%q, id=%q, label=%q",
 		arn,
 		keyID,
 		label,
@@ -283,7 +283,7 @@ func (p *Provider) DestroyKeyPairOnSlot(slotID uint, keyID string) error {
 	if err != nil {
 		return errors.Annotatef(err, "failed to schedule key deletion: %s", keyID)
 	}
-	logger.Noticef("src=DestroyKeyPairOnSlot, id=%s, deletion_time=%v",
+	logger.Noticef("id=%s, deletion_time=%v",
 		keyID, aws.TimeValue(resp.DeletionDate).Format(time.RFC3339))
 
 	return nil

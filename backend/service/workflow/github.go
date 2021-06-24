@@ -53,7 +53,7 @@ func (s *Service) SyncGithubRepos(ctx context.Context, w http.ResponseWriter, us
 	if err != nil {
 		return errors.Trace(err)
 	}
-	logger.Debugf("src=SyncGithubRepos, user=%s, repos=%d", user.Email, len(list))
+	logger.Debugf("user=%s, repos=%d", user.Email, len(list))
 	json, err := marshal.EncodeBytes(marshal.PrettyPrint, list)
 	if err != nil {
 		return errors.Annotate(err, "failed to encode")
@@ -76,7 +76,7 @@ func (s *Service) SyncGithubOrgs(ctx context.Context, w http.ResponseWriter, use
 	if err != nil {
 		return errors.Trace(err)
 	}
-	logger.Debugf("src=SyncGithubOrgs, user=%s, orgs=%d", user.Email, len(list))
+	logger.Debugf("user=%s, orgs=%d", user.Email, len(list))
 
 	res := &v1.OrgsResponse{
 		Orgs: make([]v1.Organization, 0),
@@ -88,14 +88,14 @@ func (s *Service) SyncGithubOrgs(ctx context.Context, w http.ResponseWriter, use
 		if org.GetRole() == "admin" && org.GetState() == "active" {
 			wg.Add(1)
 
-			logger.Debugf("src=SyncGithubOrgs, user=%s, login=%s, id=%d", user.Email, org.Organization.GetLogin(), org.Organization.GetID())
+			logger.Debugf("user=%s, login=%s, id=%d", user.Email, org.Organization.GetLogin(), org.Organization.GetID())
 
 			go func(login string) {
 				defer wg.Done()
 
 				o, _, err := client.Organizations.Get(ctx, login)
 				if err != nil {
-					logger.Errorf("src=SyncGithubOrgs, user=%s, orgs=%s, err=[%v]", user.Email, login, errors.Details(err))
+					logger.Errorf("user=%s, orgs=%s, err=[%v]", user.Email, login, errors.Details(err))
 					return
 				}
 
@@ -115,14 +115,14 @@ func (s *Service) SyncGithubOrgs(ctx context.Context, w http.ResponseWriter, use
 					UpdatedAt:    o.GetCreatedAt(),
 				})
 				if err != nil {
-					logger.Errorf("src=SyncGithubOrgs, user=%s, orgs=%s, err=[%v]", user.Email, login, errors.Details(err))
+					logger.Errorf("user=%s, orgs=%s, err=[%v]", user.Email, login, errors.Details(err))
 					return
 				}
 				ch <- mo.ToDto()
 
 				_, err = s.db.AddOrgMember(ctx, mo.ID, user.ID, "admin", v1.ProviderGithub)
 				if err != nil {
-					logger.Errorf("src=SyncGithubOrgs, user=%s, orgs=%s, err=[%v]", user.Email, login, errors.Details(err))
+					logger.Errorf("user=%s, orgs=%s, err=[%v]", user.Email, login, errors.Details(err))
 				}
 			}(org.Organization.GetLogin())
 		}

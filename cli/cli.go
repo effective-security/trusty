@@ -336,7 +336,7 @@ func (cli *Cli) Client(svc string) (*client.Client, error) {
 		if (tlsCA == "" || tlsKey == "") && cfg != nil {
 			tlsCA = cfg.TrustyClient.ClientTLS.TrustedCAFile
 		}
-		logger.Debugf("src=Client, tls-cert=%s, tls-trusted-ca=%s", tlsCert, tlsCA)
+		logger.Debugf("tls-cert=%s, tls-trusted-ca=%s", tlsCert, tlsCA)
 		tlscfg, err = tlsconfig.NewClientTLSFromFiles(
 			tlsCert,
 			tlsKey,

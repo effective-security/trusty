@@ -35,7 +35,7 @@ func NewDiscovery() Discovery {
 func (d *disco) Register(server string, service interface{}) error {
 	typ := reflect.TypeOf(service)
 
-	logger.Infof("src=Register, server=%s, type=%v", server, typ)
+	logger.Infof("server=%s, type=%v", server, typ)
 	key := fmt.Sprintf("%s/%s", server, typ.String())
 
 	if _, ok := d.reg[key]; ok {
@@ -58,7 +58,7 @@ func (d *disco) Find(v interface{}) error {
 		return errors.Errorf("a pointer to interface is required, invalid type: %v", rv)
 	}
 
-	logger.Debugf("src=Find, type=%v", rv.String())
+	logger.Debugf("type=%v", rv.String())
 
 	rv = rv.Elem()
 	if !rv.IsValid() || rv.Kind() != reflect.Interface {

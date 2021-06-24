@@ -127,7 +127,7 @@ func (p *provider) IdentityFromRequest(r *http.Request) (identity.Identity, erro
 	if p.config.TLS.Enabled && r.TLS != nil && len(r.TLS.PeerCertificates) > 0 {
 		id, err := p.tlsIdentity(r.TLS)
 		if err == nil {
-			logger.Debugf("src=IdentityFromRequest, type=TLS, role=%v", id)
+			logger.Debugf("type=TLS, role=%v", id)
 			return id, nil
 		}
 	}
@@ -153,7 +153,7 @@ func (p *provider) IdentityFromContext(ctx context.Context) (identity.Identity, 
 			if ok && len(si.State.PeerCertificates) > 0 {
 				id, err := p.tlsIdentity(&si.State)
 				if err == nil {
-					logger.Debugf("src=IdentityFromContext, type=TLS, role=%v", id)
+					logger.Debugf("type=TLS, role=%v", id)
 					return id, nil
 				}
 			}
@@ -171,7 +171,7 @@ func (p *provider) jwtIdentity(auth string) (identity.Identity, error) {
 	if role == "" {
 		role = p.config.JWT.DefaultAuthenticatedRole
 	}
-	logger.Debugf("src=jwtIdentity, role=%s, subject=%s, id=%s",
+	logger.Debugf("role=%s, subject=%s, id=%s",
 		role, token.Subject, token.Id)
 	return identity.NewIdentity(role, token.Subject, token.Id), nil
 }
@@ -184,7 +184,7 @@ func (p *provider) tlsIdentity(TLS *tls.ConnectionState) (identity.Identity, err
 		if role == "" {
 			role = p.config.TLS.DefaultAuthenticatedRole
 		}
-		logger.Debugf("src=tlsIdentity, spifee=%s, role=%s", spifee, role)
+		logger.Debugf("spifee=%s, role=%s", spifee, role)
 		return identity.NewIdentity(role, peer.Subject.CommonName, ""), nil
 	}
 

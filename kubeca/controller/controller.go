@@ -8,12 +8,13 @@ import (
 
 	// +kubebuilder:scaffold:imports
 	"github.com/ekspand/trusty/authority"
+	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 )
 
 var (
 	scheme = runtime.NewScheme()
-	log    = ctrl.Log.WithName("controller")
+	logger = xlog.NewPackageLogger("github.com/ekspand/trusty/kubeca", "controller")
 )
 
 const controllerName = "CSRSigningReconciler"
@@ -44,43 +45,59 @@ func StartCertificateSigningRequestController(f *CertificateSigningRequestContro
 		LeaderElectionID:   f.LeaderElectionID,
 	})
 	if err != nil {
-		log.Error(err, "unable to start manager")
+		logger.KV(xlog.ERROR,
+			"reason", "unable to start manager",
+			"err", err)
 		return err
 	}
 
 	crypto, err := cryptoprov.Load(f.HsmCfgPath, nil)
 	if err != nil {
-		log.Error(err, "unable to load HSM config", "config", f.HsmCfgPath)
+		logger.KV(xlog.ERROR,
+			"reason", "unable to load HSM config",
+			"config", f.HsmCfgPath,
+			"err", err)
 		return err
 	}
 
 	caCfg, err := authority.LoadConfig(f.CaCfgPath)
 	if err != nil {
-		log.Error(err, "unable to load CA config", "config", f.CaCfgPath)
+		logger.KV(xlog.ERROR,
+			"reason", "unable to load CA config",
+			"config", f.CaCfgPath,
+			"err", err)
 		return err
 	}
 
 	ca, err := authority.NewAuthority(caCfg, crypto)
 	if err != nil {
-		log.Error(err, "unable to create CA")
+		logger.KV(xlog.ERROR,
+			"reason", "unable to create CA",
+			"err", err)
 		return err
 	}
 	if err := (&CertificateSigningRequestSigningReconciler{
 		Client:        mgr.GetClient(),
-		Log:           ctrl.Log.WithName("controllers").WithName(controllerName),
+		Log:           ctrl.Log.WithName(controllerName),
 		Scheme:        mgr.GetScheme(),
 		Authority:     ca,
 		EventRecorder: mgr.GetEventRecorderFor(controllerName),
 	}).SetupWithManager(mgr); err != nil {
-		log.Error(err, "unable to create Controller", "controller", controllerName)
+		logger.KV(xlog.ERROR,
+			"reason", "unable to create Controller",
+			"controller", controllerName,
+			"err", err)
 		return err
 
 	}
 	// +kubebuilder:scaffold:builder
 
-	log.Info("starting controller")
+	logger.Info("starting controller")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		log.Error(err, "unable to start controller", "controller", controllerName)
+		logger.KV(xlog.ERROR,
+			"reason", "unable to start controller",
+			"controller", controllerName,
+			"err", err)
 		return err
 	}
 	return nil

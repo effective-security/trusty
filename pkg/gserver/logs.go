@@ -87,7 +87,7 @@ func logUnaryRequestStats(ctx context.Context, info *grpc.UnaryServerInfo, start
 
 func newStreamInterceptor(s *Server) grpc.StreamServerInterceptor {
 	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-		logger.Debugf("src=newStreamInterceptor, method=%s", info.FullMethod)
+		logger.Debugf("method=%s", info.FullMethod)
 		return handler(srv, ss)
 	}
 }

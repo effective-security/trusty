@@ -35,7 +35,7 @@ func NewAuthority(cfg *Config, crypto *cryptoprov.Crypto) (*Authority, error) {
 
 	for _, isscfg := range cfg.Authority.Issuers {
 		if isscfg.GetDisabled() {
-			logger.Infof("src=NewAuthority, reason=disabled, issuer=%s", isscfg.Label)
+			logger.Infof("reason=disabled, issuer=%s", isscfg.Label)
 			continue
 		}
 
