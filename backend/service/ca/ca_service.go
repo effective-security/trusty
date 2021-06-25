@@ -19,7 +19,7 @@ var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", 
 type Service struct {
 	server *gserver.Server
 	ca     *authority.Authority
-	db     db.Provider
+	db     db.CertsDb
 }
 
 // Factory returns a factory of the service
@@ -28,7 +28,7 @@ func Factory(server *gserver.Server) interface{} {
 		logger.Panic("status.Factory: invalid parameter")
 	}
 
-	return func(ca *authority.Authority, db db.Provider) {
+	return func(ca *authority.Authority, db db.CertsDb) {
 		svc := &Service{
 			server: server,
 			ca:     ca,

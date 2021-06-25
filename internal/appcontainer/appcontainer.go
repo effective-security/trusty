@@ -49,7 +49,7 @@ type ProvideCryptoFn func(cfg *config.Configuration) (*cryptoprov.Crypto, error)
 type ProvideAuthorityFn func(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*authority.Authority, error)
 
 // ProvideDbFn defines DB provider
-type ProvideDbFn func(cfg *config.Configuration) (db.Provider, error)
+type ProvideDbFn func(cfg *config.Configuration) (db.OrgsDb, db.CertsDb, error)
 
 // ProvideClientFactoryFn defines client.Facroty provider
 type ProvideClientFactoryFn func(cfg *config.Configuration) (client.Factory, error)
@@ -292,7 +292,7 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*au
 	return ca, nil
 }
 
-func provideDB(cfg *config.Configuration) (db.Provider, error) {
+func provideDB(cfg *config.Configuration) (db.OrgsDb, db.CertsDb, error) {
 	var idGenerator = sonyflake.NewSonyflake(sonyflake.Settings{
 		StartTime: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
 		/* TODO: machine ID from config
@@ -304,9 +304,9 @@ func provideDB(cfg *config.Configuration) (db.Provider, error) {
 
 	d, err := db.New(cfg.SQL.Driver, cfg.SQL.DataSource, cfg.SQL.MigrationsDir, idGenerator.NextID)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, nil, errors.Trace(err)
 	}
-	return d, nil
+	return d, d, nil
 }
 
 func provideClientFactory(cfg *config.Configuration) (client.Factory, error) {

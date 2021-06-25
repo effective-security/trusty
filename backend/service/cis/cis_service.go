@@ -25,7 +25,7 @@ var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", 
 // Service defines the Status service
 type Service struct {
 	server        *gserver.Server
-	db            db.Provider
+	db            db.CertsDb
 	cfg           *config.Configuration
 	clientFactory client.Factory
 	grpClient     *client.Client
@@ -41,7 +41,7 @@ func Factory(server *gserver.Server) interface{} {
 		logger.Panic("status.Factory: invalid parameter")
 	}
 
-	return func(cfg *config.Configuration, db db.Provider, clientFactory client.Factory) {
+	return func(cfg *config.Configuration, db db.CertsDb, clientFactory client.Factory) {
 		svc := &Service{
 			server:        server,
 			cfg:           cfg,

@@ -8,8 +8,14 @@ import (
 	v1 "github.com/ekspand/trusty/api/v1"
 	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/pkg/csr"
+	"github.com/go-phorce/dolly/metrics"
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc/codes"
+)
+
+var (
+	keyForCertIssued  = []string{"cert", "issued"}
+	keyForCertRevoked = []string{"cert", "revoked"}
 )
 
 // ProfileInfo returns the certificate profile info
@@ -120,7 +126,13 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 		return nil, v1.NewError(codes.Internal, "failed to sign certificate request: "+err.Error())
 	}
 
-	// TODO: metrics
+	tags := []metrics.Tag{
+		{Name: "profile", Value: req.Profile},
+		{Name: "issuer", Value: ca.Label()},
+	}
+
+	metrics.IncrCounter(keyForCertIssued, 1, tags...)
+
 	// TODO: Audit
 	// TODO: Registration
 
