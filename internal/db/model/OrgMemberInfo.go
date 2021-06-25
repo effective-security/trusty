@@ -9,10 +9,10 @@ import (
 
 // OrgMemberInfo provides Org membership information for a user
 type OrgMemberInfo struct {
-	MembershipID int64          `db:"id"`
-	OrgID        int64          `db:"orgid"`
+	MembershipID uint64         `db:"id"`
+	OrgID        uint64         `db:"orgid"`
 	OrgName      string         `db:"org_name"`
-	UserID       int64          `db:"user_id"`
+	UserID       uint64         `db:"user_id"`
 	Name         string         `db:"name"`
 	Email        string         `db:"email"`
 	Role         sql.NullString `db:"role"`
@@ -22,10 +22,10 @@ type OrgMemberInfo struct {
 // ToDto converts model to v1.TeamMemberInfo DTO
 func (o *OrgMemberInfo) ToDto() *v1.OrgMemberInfo {
 	m := &v1.OrgMemberInfo{
-		MembershipID: strconv.FormatUint(uint64(o.MembershipID), 10),
-		OrgID:        strconv.FormatUint(uint64(o.OrgID), 10),
+		MembershipID: strconv.FormatUint(o.MembershipID, 10),
+		OrgID:        strconv.FormatUint(o.OrgID, 10),
 		OrgName:      o.OrgName,
-		UserID:       strconv.FormatUint(uint64(o.UserID), 10),
+		UserID:       strconv.FormatUint(o.UserID, 10),
 		Name:         o.Name,
 		Email:        o.Email,
 	}

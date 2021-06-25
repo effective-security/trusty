@@ -53,5 +53,5 @@ message RegisterCertificateRequest {
 // GetCertificateRequest specifies certificate request
 message GetCertificateRequest {
     // Id provides the ID of the Certificate to return
-    int64 id = 1;
+    uint64 id = 1;
 }

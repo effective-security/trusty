@@ -191,12 +191,12 @@
       "properties": {
         "id": {
           "type": "string",
-          "format": "int64",
+          "format": "uint64",
           "title": "Id of the certificate"
         },
         "org_id": {
           "type": "string",
-          "format": "int64",
+          "format": "uint64",
           "title": "OrgId of the certificate, only used with Org scope"
         },
         "skid": {

@@ -116,11 +116,11 @@ func TestOrgMembership(t *testing.T) {
 }
 
 func TestRepository(t *testing.T) {
-	id := int64(1001)
+
 	u := &model.Repository{
 		ID:         1000,
 		OrgID:      2000,
-		ExternalID: model.NullInt64(&id),
+		ExternalID: 1001,
 		Name:       "n1",
 		Email:      "e1",
 		Company:    "c1",
@@ -129,24 +129,23 @@ func TestRepository(t *testing.T) {
 	}
 	dto := u.ToDto()
 	assert.Equal(t, "1000", dto.ID)
+	assert.Equal(t, "2000", dto.OrgID)
 	assert.Equal(t, "1001", dto.ExternalID)
 	assert.Equal(t, u.Type, dto.Type)
 	assert.Equal(t, u.Name, dto.Name)
 	assert.Equal(t, u.Email, dto.Email)
 	assert.Equal(t, u.Company, dto.Company)
 	assert.Equal(t, u.AvatarURL, dto.AvatarURL)
-}
 
-func TestNullInt64(t *testing.T) {
-	v := model.NullInt64(nil)
-	require.NotNil(t, v)
-	assert.False(t, v.Valid)
-
-	i := int64(10000)
-	v = model.NullInt64(&i)
-	require.NotNil(t, v)
-	assert.True(t, v.Valid)
-	assert.Equal(t, i, v.Int64)
+	u = &model.Repository{
+		ID:         1000,
+		OrgID:      2000,
+		ExternalID: 0,
+	}
+	dto = u.ToDto()
+	assert.Equal(t, "1000", dto.ID)
+	assert.Equal(t, "2000", dto.OrgID)
+	assert.Equal(t, "", dto.ExternalID)
 }
 
 func NullTime(t *testing.T) {
@@ -169,6 +168,7 @@ func TestString(t *testing.T) {
 	v = model.String(&s)
 	assert.Equal(t, s, v)
 }
+
 func TestID(t *testing.T) {
 	_, err := model.ID("")
 	require.Error(t, err)
@@ -178,7 +178,7 @@ func TestID(t *testing.T) {
 
 	v, err := model.ID("1234567")
 	require.NoError(t, err)
-	assert.Equal(t, int64(1234567), v)
+	assert.Equal(t, uint64(1234567), v)
 }
 
 type validator struct {

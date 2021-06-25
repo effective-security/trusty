@@ -229,7 +229,7 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 		}
 
 		user := &model.User{
-			ExternalID:   model.NullInt64(ghu.ID),
+			ExternalID:   uint64(ghu.GetID()),
 			Provider:     v1.ProviderGithub,
 			Login:        model.String(ghu.Login),
 			Name:         model.String(ghu.Name),

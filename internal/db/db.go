@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/ekspand/trusty/internal/db/model"
 	"github.com/ekspand/trusty/internal/db/pgsql"
@@ -33,17 +34,17 @@ type IDGenerator interface {
 // OrgsReadOnlyDb defines an interface for Read operations on Orgs
 type OrgsReadOnlyDb interface {
 	// GetUser returns User
-	GetUser(ctx context.Context, id int64) (*model.User, error)
+	GetUser(ctx context.Context, id uint64) (*model.User, error)
 	// GetOrg returns Organization
-	GetOrg(ctx context.Context, id int64) (*model.Organization, error)
+	GetOrg(ctx context.Context, id uint64) (*model.Organization, error)
 	// GetRepo returns Repository
-	GetRepo(ctx context.Context, id int64) (*model.Repository, error)
+	GetRepo(ctx context.Context, id uint64) (*model.Repository, error)
 	// GetOrgMembers returns list of membership info
-	GetOrgMembers(ctx context.Context, orgID int64) ([]*model.OrgMemberInfo, error)
+	GetOrgMembers(ctx context.Context, orgID uint64) ([]*model.OrgMemberInfo, error)
 	// GetUserMemberships returns list of membership info
-	GetUserMemberships(ctx context.Context, userID int64) ([]*model.OrgMemberInfo, error)
+	GetUserMemberships(ctx context.Context, userID uint64) ([]*model.OrgMemberInfo, error)
 	// GetUserOrgs returns list of orgs
-	GetUserOrgs(ctx context.Context, userID int64) ([]*model.Organization, error)
+	GetUserOrgs(ctx context.Context, userID uint64) ([]*model.Organization, error)
 }
 
 // OrgsDb defines an interface for CRUD operations on Orgs
@@ -55,18 +56,18 @@ type OrgsDb interface {
 	// UpdateOrg inserts or updates Organization
 	UpdateOrg(ctx context.Context, org *model.Organization) (*model.Organization, error)
 	// RemoveOrg deletes org and all its members
-	RemoveOrg(ctx context.Context, id int64) error
+	RemoveOrg(ctx context.Context, id uint64) error
 
 	// UpdateRepo inserts or updates Repository
 	UpdateRepo(ctx context.Context, repo *model.Repository) (*model.Repository, error)
 	// TODO: RemoveRepo
 
 	// AddOrgMember adds a user to Org
-	AddOrgMember(ctx context.Context, orgID, userID int64, role, membershipSource string) (*model.OrgMembership, error)
+	AddOrgMember(ctx context.Context, orgID, userID uint64, role, membershipSource string) (*model.OrgMembership, error)
 	// RemoveOrgMembers removes users from the org
-	RemoveOrgMembers(ctx context.Context, orgID int64, all bool) ([]*model.OrgMembership, error)
+	RemoveOrgMembers(ctx context.Context, orgID uint64, all bool) ([]*model.OrgMembership, error)
 	// RemoveOrgMember remove users from the org
-	RemoveOrgMember(ctx context.Context, orgID, memberID int64) (*model.OrgMembership, error)
+	RemoveOrgMember(ctx context.Context, orgID, memberID uint64) (*model.OrgMembership, error)
 }
 
 // CertsReadonlyDb defines an interface for Read operations on Certs
@@ -74,11 +75,11 @@ type CertsReadonlyDb interface {
 	// GetRootCertificatesr returns list of Root certs
 	GetRootCertificates(ctx context.Context) (model.RootCertificates, error)
 	// GetCertificates returns Certificates
-	GetCertificates(ctx context.Context, orgID int64) (model.Certificates, error)
+	GetCertificates(ctx context.Context, orgID uint64) (model.Certificates, error)
 	// GetCertificate returns registered Certificate
-	GetCertificate(ctx context.Context, id int64) (*model.Certificate, error)
+	GetCertificate(ctx context.Context, id uint64) (*model.Certificate, error)
 	// GetRevokedCertificatesForOrg returns list of Org's revoked certificates
-	GetRevokedCertificatesForOrg(ctx context.Context, orgID int64) (model.RevokedCertificates, error)
+	GetRevokedCertificatesForOrg(ctx context.Context, orgID uint64) (model.RevokedCertificates, error)
 }
 
 // CertsDb defines an interface for CRUD operations on Certs
@@ -88,17 +89,20 @@ type CertsDb interface {
 	// RegisterRootCertificate registers Root Cert
 	RegisterRootCertificate(ctx context.Context, crt *model.RootCertificate) (*model.RootCertificate, error)
 	// RemoveRootCertificate removes Root Cert
-	RemoveRootCertificate(ctx context.Context, id int64) error
+	RemoveRootCertificate(ctx context.Context, id uint64) error
 
 	// RegisterCertificate registers Certificate
 	RegisterCertificate(ctx context.Context, crt *model.Certificate) (*model.Certificate, error)
 	// RemoveCertificate removes Certificate
-	RemoveCertificate(ctx context.Context, id int64) error
+	RemoveCertificate(ctx context.Context, id uint64) error
 
 	// RegisterRevokedCertificate registers revoked Certificate
 	RegisterRevokedCertificate(ctx context.Context, revoked *model.RevokedCertificate) (*model.RevokedCertificate, error)
 	// RemoveRevokedCertificate removes revoked Certificate
-	RemoveRevokedCertificate(ctx context.Context, id int64) error
+	RemoveRevokedCertificate(ctx context.Context, id uint64) error
+
+	// RevokeCertificate removes Certificate and creates RevokedCertificate
+	RevokeCertificate(ctx context.Context, crt *model.Certificate, at time.Time, reason int) (*model.RevokedCertificate, error)
 }
 
 // Provider provides complete DB access

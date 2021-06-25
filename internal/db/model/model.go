@@ -29,15 +29,6 @@ func Validate(m interface{}) error {
 	return nil
 }
 
-// NullInt64 from *int64
-func NullInt64(val *int64) sql.NullInt64 {
-	if val == nil {
-		return sql.NullInt64{Valid: false}
-	}
-
-	return sql.NullInt64{Int64: *val, Valid: true}
-}
-
 // NullTime from *time.Time
 func NullTime(val *time.Time) sql.NullTime {
 	if val == nil {
@@ -56,8 +47,8 @@ func String(val *string) string {
 }
 
 // ID returns id from the string
-func ID(id string) (int64, error) {
-	i64, err := strconv.ParseInt(id, 10, 64)
+func ID(id string) (uint64, error) {
+	i64, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
 		return 0, errors.Trace(err)
 	}

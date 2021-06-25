@@ -2,16 +2,23 @@ package pgsql
 
 import (
 	"context"
+	"time"
 
 	"github.com/ekspand/trusty/internal/db/model"
+	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
 )
 
 // RegisterRevokedCertificate registers revoked Certificate
 func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *model.RevokedCertificate) (*model.RevokedCertificate, error) {
-	id, err := p.NextID()
-	if err != nil {
-		return nil, errors.Trace(err)
+	id := revoked.Certificate.ID
+	var err error
+
+	if id == 0 {
+		id, err = p.NextID()
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
 	}
 
 	err = model.Validate(revoked)
@@ -65,7 +72,7 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 }
 
 // RemoveRevokedCertificate removes revoked Certificate
-func (p *Provider) RemoveRevokedCertificate(ctx context.Context, id int64) error {
+func (p *Provider) RemoveRevokedCertificate(ctx context.Context, id uint64) error {
 	_, err := p.db.ExecContext(ctx, `DELETE FROM revoked WHERE id=$1;`, id)
 	if err != nil {
 		logger.Errorf("err=[%s]", errors.Details(err))
@@ -78,7 +85,7 @@ func (p *Provider) RemoveRevokedCertificate(ctx context.Context, id int64) error
 }
 
 // GetRevokedCertificatesForOrg returns list of Org's revoked certificates
-func (p *Provider) GetRevokedCertificatesForOrg(ctx context.Context, orgID int64) (model.RevokedCertificates, error) {
+func (p *Provider) GetRevokedCertificatesForOrg(ctx context.Context, orgID uint64) (model.RevokedCertificates, error) {
 
 	res, err := p.db.QueryContext(ctx, `
 		SELECT
@@ -124,4 +131,44 @@ func (p *Provider) GetRevokedCertificatesForOrg(ctx context.Context, orgID int64
 	}
 
 	return list, nil
+}
+
+// RevokeCertificate removes Certificate and creates RevokedCertificate
+func (p *Provider) RevokeCertificate(ctx context.Context, crt *model.Certificate, at time.Time, reason int) (*model.RevokedCertificate, error) {
+	err := model.Validate(crt)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	revoked := &model.RevokedCertificate{
+		Certificate: *crt,
+		RevokedAt:   at,
+		Reason:      reason,
+	}
+
+	logger.KV(xlog.NOTICE, "subject", crt.Subject, "skid", crt.SKID, "ikid", crt.IKID)
+
+	tx, err := p.DB().BeginTx(ctx, nil)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	err = p.RemoveCertificate(ctx, crt.ID)
+	if err != nil {
+		tx.Rollback()
+		return nil, errors.Trace(err)
+	}
+
+	revoked, err = p.RegisterRevokedCertificate(ctx, revoked)
+	if err != nil {
+		tx.Rollback()
+		return nil, errors.Trace(err)
+	}
+	// Finally, if no errors are recieved from the queries, commit the transaction
+	// this applies the above changes to our database
+	err = tx.Commit()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return revoked, nil
 }

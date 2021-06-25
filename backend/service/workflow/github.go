@@ -100,7 +100,7 @@ func (s *Service) SyncGithubOrgs(ctx context.Context, w http.ResponseWriter, use
 				}
 
 				mo, err := s.db.UpdateOrg(ctx, &model.Organization{
-					ExternalID:   o.GetID(),
+					ExternalID:   uint64(o.GetID()),
 					Provider:     v1.ProviderGithub,
 					Login:        o.GetLogin(),
 					AvatarURL:    o.GetAvatarURL(),
