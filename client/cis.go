@@ -13,7 +13,7 @@ type CIClient interface {
 	// GetRoots returns the root CAs
 	GetRoots(ctx context.Context, in *empty.Empty) (*pb.RootsResponse, error)
 	// GetCertificate returns the certificate
-	GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.GetCertificateResponse, error)
+	GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error)
 }
 
 type cisClient struct {
@@ -42,7 +42,7 @@ func (c *cisClient) GetRoots(ctx context.Context, in *empty.Empty) (*pb.RootsRes
 }
 
 // GetCertificate returns the certificate
-func (c *cisClient) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.GetCertificateResponse, error) {
+func (c *cisClient) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error) {
 	return c.remote.GetCertificate(ctx, in, c.callOpts...)
 }
 
@@ -65,6 +65,6 @@ func (c *retryCIClient) GetRoots(ctx context.Context, in *empty.Empty, opts ...g
 }
 
 // GetCertificate returns the certificate
-func (c *retryCIClient) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest, opts ...grpc.CallOption) (*pb.GetCertificateResponse, error) {
+func (c *retryCIClient) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
 	return c.cis.GetCertificate(ctx, in, opts...)
 }

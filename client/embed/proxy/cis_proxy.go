@@ -23,6 +23,6 @@ func (s *cisSrv2C) GetRoots(ctx context.Context, in *empty.Empty, opts ...grpc.C
 }
 
 // Roots returns the root CAs
-func (s *cisSrv2C) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest, opts ...grpc.CallOption) (*pb.GetCertificateResponse, error) {
+func (s *cisSrv2C) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
 	return s.srv.GetCertificate(ctx, in)
 }

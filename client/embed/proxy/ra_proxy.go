@@ -28,6 +28,11 @@ func (s *raSrv2C) RegisterRoot(ctx context.Context, in *pb.RegisterRootRequest, 
 }
 
 // RegisterRoot registers certificate
-func (s *raSrv2C) RegisterCertificate(ctx context.Context, in *pb.RegisterCertificateRequest, opts ...grpc.CallOption) (*pb.CertificatesResponse, error) {
+func (s *raSrv2C) RegisterCertificate(ctx context.Context, in *pb.RegisterCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
 	return s.srv.RegisterCertificate(ctx, in)
+}
+
+// GetCertificate returns certificate
+func (s *raSrv2C) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
+	return s.srv.GetCertificate(ctx, in)
 }

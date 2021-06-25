@@ -7,9 +7,12 @@ import (
 
 	v1 "github.com/ekspand/trusty/api/v1"
 	pb "github.com/ekspand/trusty/api/v1/pb"
+	"github.com/ekspand/trusty/internal/db/model"
 	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/go-phorce/dolly/metrics"
+	"github.com/go-phorce/dolly/xlog"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/juju/errors"
 	"google.golang.org/grpc/codes"
 )
 
@@ -92,7 +95,7 @@ func (s *Service) Issuers(context.Context, *empty.Empty) (*pb.IssuersInfoRespons
 }
 
 // SignCertificate returns the certificate
-func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRequest) (*pb.CertificateBundle, error) {
+func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRequest) (*pb.CertificateResponse, error) {
 	if req == nil || req.Profile == "" {
 		return nil, v1.NewError(codes.InvalidArgument, "missing profile")
 	}
@@ -121,9 +124,12 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 		SAN:     req.San,
 	}
 
-	_, pem, err := ca.Sign(cr)
+	cert, pem, err := ca.Sign(cr)
 	if err != nil {
-		return nil, v1.NewError(codes.Internal, "failed to sign certificate request: "+err.Error())
+		logger.KV(xlog.ERROR,
+			"status", "failed to sign certificate",
+			"err", errors.Details(err))
+		return nil, v1.NewError(codes.Internal, "failed to sign certificate request")
 	}
 
 	tags := []metrics.Tag{
@@ -133,17 +139,23 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 
 	metrics.IncrCounter(keyForCertIssued, 1, tags...)
 
-	// TODO: Audit
-	// TODO: Registration
+	mcert := model.NewCertificate(cert, req.OrgId, req.Profile, string(pem), ca.PEM())
+	mcert, err = s.db.RegisterCertificate(ctx, mcert)
+	if err != nil {
+		logger.KV(xlog.ERROR,
+			"status", "failed to register certificate",
+			"err", errors.Details(err))
 
-	res := &pb.CertificateBundle{
-		Certificate:   string(pem),
-		Intermediates: ca.PEM(),
-		Root:          ca.Bundle().RootCertPEM,
+		return nil, v1.NewError(codes.Internal, "failed to register certificate")
 	}
+	logger.KV(xlog.NOTICE,
+		"status", "signed certificate",
+		"id", mcert.ID,
+		"subject", mcert.Subject,
+	)
 
-	if req.WithBundle {
-		res.Certificate += "\n" + ca.PEM()
+	res := &pb.CertificateResponse{
+		Certificate: mcert.ToDTO(),
 	}
 
 	return res, nil

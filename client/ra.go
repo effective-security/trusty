@@ -17,7 +17,10 @@ type RAClient interface {
 	RegisterRoot(ctx context.Context, in *pb.RegisterRootRequest) (*pb.RootsResponse, error)
 
 	// RegisterRoot registers certificate
-	RegisterCertificate(ctx context.Context, in *pb.RegisterCertificateRequest) (*pb.CertificatesResponse, error)
+	RegisterCertificate(ctx context.Context, in *pb.RegisterCertificateRequest) (*pb.CertificateResponse, error)
+
+	// GetCertificate returns certificate
+	GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error)
 }
 
 type raClient struct {
@@ -51,8 +54,13 @@ func (c *raClient) RegisterRoot(ctx context.Context, in *pb.RegisterRootRequest)
 }
 
 // RegisterRoot registers certificate
-func (c *raClient) RegisterCertificate(ctx context.Context, in *pb.RegisterCertificateRequest) (*pb.CertificatesResponse, error) {
+func (c *raClient) RegisterCertificate(ctx context.Context, in *pb.RegisterCertificateRequest) (*pb.CertificateResponse, error) {
 	return c.remote.RegisterCertificate(ctx, in, c.callOpts...)
+}
+
+// GetCertificate returns the certificate
+func (c *raClient) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error) {
+	return c.remote.GetCertificate(ctx, in, c.callOpts...)
 }
 
 type retryRAClient struct {
@@ -79,6 +87,11 @@ func (c *retryRAClient) RegisterRoot(ctx context.Context, in *pb.RegisterRootReq
 }
 
 // RegisterRoot registers certificate
-func (c *retryRAClient) RegisterCertificate(ctx context.Context, in *pb.RegisterCertificateRequest, opts ...grpc.CallOption) (*pb.CertificatesResponse, error) {
+func (c *retryRAClient) RegisterCertificate(ctx context.Context, in *pb.RegisterCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
 	return c.ra.RegisterCertificate(ctx, in, opts...)
+}
+
+// GetCertificate returns the certificate
+func (c *retryRAClient) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
+	return c.ra.GetCertificate(ctx, in, opts...)
 }

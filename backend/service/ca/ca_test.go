@@ -14,7 +14,9 @@ import (
 	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/client/embed"
 	"github.com/ekspand/trusty/internal/config"
+	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/ekspand/trusty/pkg/gserver"
+	"github.com/ekspand/trusty/pkg/inmemcrypto"
 	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
@@ -29,11 +31,6 @@ var (
 const (
 	projFolder = "../../../"
 )
-
-// serviceFactories provides map of trustyserver.ServiceFactory
-var serviceFactories = map[string]gserver.ServiceFactory{
-	ca.ServiceName: ca.Factory,
-}
 
 func TestMain(m *testing.M) {
 	var err error
@@ -137,8 +134,6 @@ func TestProfileInfo(t *testing.T) {
 	}
 }
 
-const testcst = "-----BEGIN CERTIFICATE REQUEST-----\nMIICtTCCAZ0CAQAwQzELMAkGA1UEBhMCVVMxCzAJBgNVBAcTAldBMRMwEQYDVQQK\nEwp0cnVzdHkuY29tMRIwEAYDVQQDEwlsb2NhbGhvc3QwggEiMA0GCSqGSIb3DQEB\nAQUAA4IBDwAwggEKAoIBAQD9NDVA9BFS6JXT2qEPWP8iyk2GZP6hrNkSfko9giyl\nenejnl9pTthJVe5wzi72ozQBa1zHetNDkNvb5B26dGHoJRxg/bj2BTI+TcxIjAVf\nV1FmOiFUqXYklGA/27ownmF29IQSbt3Qd8ed3/cZ5bDlLcNjxkjng9YD5JMqPNW+\nnQvarX1b7KuxZs/fGUyHa1kqbG3dC1Lrq//c/cXbS01OsTC1Vivzihs/dATprw7U\nU08vTCOF4k4+aeIiw9VJX4vxOFsgIS6oZIHLgXHb58XWKkAA/tV6B9VEpzU7ULkZ\nI5Smh6flYreEvoeKOIdB/u1WkTEXGlqptFRQJKN5sYQJAgMBAAGgLTArBgkqhkiG\n9w0BCQ4xHjAcMBoGA1UdEQQTMBGCCWxvY2FsaG9zdIcEfwAAATANBgkqhkiG9w0B\nAQsFAAOCAQEAv4goV8TZ0UFyuhoNH133QdxNhQ51SWbJCgKZeaXxN/J4fWGvhuol\ncHUANjl6OvZA+4JxX/i42OTfQh7NOvCgAlWAdlC4ms7RuE/SPNubKEGJWAmPq+zO\nCTF3WPM6tgMoEWA26plX6IdYZ53cA5RmI6I7piWGD2xnTU2Qpvt1Fy4zGiliJMKD\nXmu581SFSSu15kiFAxTn/o4vy6a0L0PWC8AxIV+DM9nUyZVzBD3KXH4lBZEP+CGZ\n5Evw7r5fKoL6HWuItgP3x+HRjtKfZglnLXtl2ATpFFeQ8gUHYJkgh7zzlpx6w2UZ\nyYuweVkHvc44P+ptqdpTfyGWnzVIBLAoJg==\n-----END CERTIFICATE REQUEST-----\n"
-
 func TestSignCertificate(t *testing.T) {
 	_, err := authorityClient.SignCertificate(context.Background(), nil)
 	require.Error(t, err)
@@ -181,13 +176,32 @@ func TestSignCertificate(t *testing.T) {
 		RequestFormat: pb.EncodingFormat_PEM,
 	})
 	require.Error(t, err)
-	assert.Equal(t, "failed to sign certificate request: unable to parse PEM", err.Error())
+	assert.Equal(t, "failed to sign certificate request", err.Error())
 
-	_, err = authorityClient.SignCertificate(context.Background(), &pb.SignCertificateRequest{
+	res, err := authorityClient.SignCertificate(context.Background(), &pb.SignCertificateRequest{
 		Profile:       "test_server",
-		Request:       testcst,
+		Request:       string(generateCSR()),
 		RequestFormat: pb.EncodingFormat_PEM,
-		WithBundle:    true,
 	})
 	require.NoError(t, err)
+
+	// Signed cert must be registered in DB
+
+	svc := trustyServer.Service("ca").(*ca.Service)
+	crt, err := svc.GetCertificate(context.Background(), res.Certificate.Id)
+	require.NoError(t, err)
+	assert.Equal(t, res.Certificate.String(), crt.String())
+}
+
+func generateCSR() []byte {
+	prov := csr.NewProvider(inmemcrypto.NewProvider())
+	req := prov.NewSigningCertificateRequest("label", "ECDSA", 256, "localhost", []csr.X509Name{
+		{
+			O:  "org1",
+			OU: "unit1",
+		},
+	}, []string{"127.0.0.1", "localhost"})
+
+	csrPEM, _, _, _ := prov.GenerateKeyAndRequest(req)
+	return csrPEM
 }

@@ -98,9 +98,15 @@ func (s *testSuite) TestProfile() {
 }
 
 func (s *testSuite) TestSign() {
-	expectedResponse := new(pb.CertificateBundle)
-	err := loadJSON("testdata/sign.json", expectedResponse)
-	s.Require().NoError(err)
+	expectedResponse := &pb.CertificateResponse{
+		Certificate: &pb.Certificate{
+			Id:         1234,
+			OrgId:      1,
+			Profile:    "server",
+			Pem:        "cert pem",
+			IssuersPem: "issuers pem",
+		},
+	}
 
 	s.MockAuthority = &mockpb.MockCAServer{
 		Err:   nil,
@@ -113,7 +119,7 @@ func (s *testSuite) TestSign() {
 	req := "notreal"
 	empty := ""
 	san := []string{}
-	err = s.Run(ca.Sign, &ca.SignFlags{
+	err := s.Run(ca.Sign, &ca.SignFlags{
 		Profile:     &profile,
 		Request:     &req,
 		Token:       &empty,

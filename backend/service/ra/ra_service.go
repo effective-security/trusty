@@ -2,7 +2,6 @@ package ra
 
 import (
 	"context"
-	"encoding/hex"
 	"sync"
 
 	pb "github.com/ekspand/trusty/api/v1/pb"
@@ -122,15 +121,7 @@ func (s *Service) registerCert(ctx context.Context, trust pb.Trust, location str
 	if err != nil {
 		return err
 	}
-	c := &model.RootCertificate{
-		SKID:             hex.EncodeToString(crt.SubjectKeyId),
-		NotBefore:        crt.NotBefore.UTC(),
-		NotAfter:         crt.NotAfter.UTC(),
-		Subject:          crt.Subject.String(),
-		ThumbprintSha256: certutil.SHA256Hex(crt.Raw),
-		Trust:            int(trust),
-		Pem:              pem,
-	}
+	c := model.NewRootCertificate(crt, int(trust), pem)
 	_, err = s.db.RegisterRootCertificate(ctx, c)
 	if err != nil {
 		return err

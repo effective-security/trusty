@@ -24,7 +24,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/pbGetCertificateResponse"
+              "$ref": "#/definitions/pbCertificateResponse"
             }
           },
           "default": {
@@ -37,9 +37,11 @@
         "parameters": [
           {
             "name": "id",
+            "description": "Id provides the ID of the Certificate to return",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "format": "int64"
           }
         ],
         "tags": [
@@ -134,7 +136,7 @@
       },
       "title": "Certificate provides X509 Certificate information"
     },
-    "pbGetCertificateResponse": {
+    "pbCertificateResponse": {
       "type": "object",
       "properties": {
         "certificate": {

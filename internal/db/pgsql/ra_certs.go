@@ -71,61 +71,46 @@ func (p *Provider) RemoveCertificate(ctx context.Context, id int64) error {
 	return nil
 }
 
-// GetCertificatesForUser returns list of certs
-func (p *Provider) GetCertificatesForUser(ctx context.Context, userID int64) (model.Certificates, error) {
-
-	res, err := p.db.QueryContext(ctx, `
+// GetCertificate returns registered Certificate
+func (p *Provider) GetCertificate(ctx context.Context, id int64) (*model.Certificate, error) {
+	c := new(model.Certificate)
+	err := p.db.QueryRowContext(ctx, `
 		SELECT
-			certificates.id,certificates.org_id,
-			certificates.skid,certificates.ikid,certificates.serial_number,
-			certificates.not_before,certificates.no_tafter,
-			certificates.subject,certificates.issuer,
-			certificates.sha256,
-			certificates.pem,certificates.issuers_pem,
-			certificates.profile
-		FROM
-			certificates
-		LEFT JOIN orgmembers ON certificates.org_id = orgmembers.org_id
-		WHERE orgmembers.user_id = $1
+			id,org_id,skid,ikid,serial_number,
+			not_before,no_tafter,
+			subject,issuer,
+			sha256,
+			pem,issuers_pem,
+			profile
+		FROM certificates
+		WHERE id = $1
 		;
-		`, userID)
+		`, id).Scan(
+		&c.ID,
+		&c.OrgID,
+		&c.SKID,
+		&c.IKID,
+		&c.SerialNumber,
+		&c.NotBefore,
+		&c.NotAfter,
+		&c.Subject,
+		&c.Issuer,
+		&c.ThumbprintSha256,
+		&c.Pem,
+		&c.IssuersPem,
+		&c.Profile,
+	)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	defer res.Close()
+	c.NotAfter = c.NotAfter.UTC()
+	c.NotBefore = c.NotBefore.UTC()
 
-	list := make([]*model.Certificate, 0, 100)
-
-	for res.Next() {
-		r := new(model.Certificate)
-		err = res.Scan(
-			&r.ID,
-			&r.OrgID,
-			&r.SKID,
-			&r.IKID,
-			&r.SerialNumber,
-			&r.NotBefore,
-			&r.NotAfter,
-			&r.Subject,
-			&r.Issuer,
-			&r.ThumbprintSha256,
-			&r.Pem,
-			&r.IssuersPem,
-			&r.Profile,
-		)
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
-		r.NotAfter = r.NotAfter.UTC()
-		r.NotBefore = r.NotBefore.UTC()
-		list = append(list, r)
-	}
-
-	return list, nil
+	return c, nil
 }
 
-// GetCertificatesForOrg returns list of Org certs
-func (p *Provider) GetCertificatesForOrg(ctx context.Context, orgID int64) (model.Certificates, error) {
+// GetCertificates returns list of Org certs
+func (p *Provider) GetCertificates(ctx context.Context, orgID int64) (model.Certificates, error) {
 
 	res, err := p.db.QueryContext(ctx, `
 		SELECT

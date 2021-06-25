@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/backend/service/ra"
 	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/client/embed"
@@ -89,4 +90,10 @@ func TestRoots(t *testing.T) {
 	res, err := raClient.GetRoots(context.Background(), &empty.Empty{})
 	require.NoError(t, err)
 	assert.NotEmpty(t, res.Roots)
+}
+
+func TestGetCertificate(t *testing.T) {
+	_, err := raClient.GetCertificate(context.Background(), &pb.GetCertificateRequest{Id: 123})
+	require.Error(t, err)
+	assert.Equal(t, "unable to get certificate", err.Error())
 }

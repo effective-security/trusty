@@ -133,7 +133,7 @@ start-local-kms:
 	LKMS_CONTAINER_STATE=$$(echo $$(docker inspect -f "{{.State.Running}}" trusty-unittest-local-kms 2>/dev/null || echo "missing") | sed -e 's/^[ \t]*//'); \
 	if [ "$$LKMS_CONTAINER_STATE" = "missing" ]; then \
 		docker pull nsmithuk/local-kms && \
-		docker run --network host \
+		docker run \
 			-d -e 'PORT=4599' \
 			-p 4599:4599 \
 			--name trusty-unittest-local-kms \
@@ -148,7 +148,7 @@ start-sql:
 	CONTAINER_STATE=$$(echo $$(docker inspect -f "{{.State.Running}}" trusty-unittest-postgres 2>/dev/null || echo "missing") | sed -e 's/^[ \t]*//'); \
 	if [ "$$CONTAINER_STATE" = "missing" ]; then \
 		docker pull ekspand/docker-centos7-postgres:latest && \
-		docker run --network host \
+		docker run \
 			-d -p 5432:5432 \
 			-e 'POSTGRES_USER=postgres' -e 'POSTGRES_PASSWORD=postgres' \
 			-v ${PROJ_ROOT}/scripts/sql/postgres:/scripts/pgsql \
@@ -222,3 +222,15 @@ start-grafana:
 		--name trusty-grafana \
 		grafana/grafana ;\
 	elif [ "$$CONTAINER_STATE" = "false" ]; then docker start trusty-grafana; fi;
+
+start-pgadmin:
+	CONTAINER_STATE=$$(echo $$(docker inspect -f "{{.State.Running}}" trusty-pgadmin 2>/dev/null || echo "missing") | sed -e 's/^[ \t]*//'); \
+	if [ "$$CONTAINER_STATE" = "missing" ]; then \
+		docker pull dpage/pgadmin4 && \
+		docker run \
+			-e 'PGADMIN_DEFAULT_EMAIL=admin@trusty.com' \
+			-e 'PGADMIN_DEFAULT_PASSWORD=trusty' \
+			-d -p 8888:80 \
+			--name trusty-pgadmin \
+			dpage/pgadmin4 ;\
+	elif [ "$$CONTAINER_STATE" = "false" ]; then docker start trusty-pgadmin; fi;

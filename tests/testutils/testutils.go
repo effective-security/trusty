@@ -11,8 +11,7 @@ import (
 )
 
 var (
-	nextPort = int32(17891) + rand.Int31n(5000)
-	//testDirPath = filepath.Join(os.TempDir(), "tests", "trusty", guid.MustCreate())
+	nextPort = int32(os.Getpid()%10000) + int32(17891) + rand.Int31n(1000)
 )
 
 // CreateURLs returns URL with a random port
