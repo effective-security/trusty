@@ -13,7 +13,7 @@ type RevokedCertificate struct {
 type RevokedCertificates []*RevokedCertificate
 
 // Find a cert by ID
-func (list RevokedCertificates) Find(id int64) *RevokedCertificate {
+func (list RevokedCertificates) Find(id uint64) *RevokedCertificate {
 	for _, m := range list {
 		if m.Certificate.ID == id {
 			return m

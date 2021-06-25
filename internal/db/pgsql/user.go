@@ -54,7 +54,7 @@ func (p *Provider) LoginUser(ctx context.Context, user *model.User) (*model.User
 }
 
 // GetUser returns user
-func (p *Provider) GetUser(ctx context.Context, id int64) (*model.User, error) {
+func (p *Provider) GetUser(ctx context.Context, id uint64) (*model.User, error) {
 	user := new(model.User)
 
 	err := p.db.QueryRowContext(ctx,

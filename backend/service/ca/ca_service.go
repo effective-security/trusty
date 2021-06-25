@@ -95,7 +95,7 @@ func (s *Service) registerIssuers(ctx context.Context) error {
 }
 
 // GetCertificate returns Certificate
-func (s *Service) GetCertificate(ctx context.Context, id int64) (*pb.Certificate, error) {
+func (s *Service) GetCertificate(ctx context.Context, id uint64) (*pb.Certificate, error) {
 	c, err := s.db.GetCertificate(ctx, id)
 	if err != nil {
 		return nil, errors.Trace(err)

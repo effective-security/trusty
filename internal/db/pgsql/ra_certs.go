@@ -59,7 +59,7 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 }
 
 // RemoveCertificate removes Cert
-func (p *Provider) RemoveCertificate(ctx context.Context, id int64) error {
+func (p *Provider) RemoveCertificate(ctx context.Context, id uint64) error {
 	_, err := p.db.ExecContext(ctx, `DELETE FROM certificates WHERE id=$1;`, id)
 	if err != nil {
 		logger.Errorf("api=RemoveCertificate, err=[%s]", errors.Details(err))
@@ -72,7 +72,7 @@ func (p *Provider) RemoveCertificate(ctx context.Context, id int64) error {
 }
 
 // GetCertificate returns registered Certificate
-func (p *Provider) GetCertificate(ctx context.Context, id int64) (*model.Certificate, error) {
+func (p *Provider) GetCertificate(ctx context.Context, id uint64) (*model.Certificate, error) {
 	c := new(model.Certificate)
 	err := p.db.QueryRowContext(ctx, `
 		SELECT
@@ -110,7 +110,7 @@ func (p *Provider) GetCertificate(ctx context.Context, id int64) (*model.Certifi
 }
 
 // GetCertificates returns list of Org certs
-func (p *Provider) GetCertificates(ctx context.Context, orgID int64) (model.Certificates, error) {
+func (p *Provider) GetCertificates(ctx context.Context, orgID uint64) (model.Certificates, error) {
 
 	res, err := p.db.QueryContext(ctx, `
 		SELECT

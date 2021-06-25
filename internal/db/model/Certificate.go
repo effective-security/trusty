@@ -11,8 +11,8 @@ import (
 
 // Certificate provides X509 Cert information
 type Certificate struct {
-	ID               int64     `db:"id"`
-	OrgID            int64     `db:"org_id"`
+	ID               uint64    `db:"id"`
+	OrgID            uint64    `db:"org_id"`
 	SKID             string    `db:"skid"`
 	IKID             string    `db:"ikid"`
 	SerialNumber     string    `db:"serial_number"`
@@ -68,7 +68,7 @@ func CertificateFromPB(r *pb.Certificate) *Certificate {
 }
 
 // NewCertificate returns Certificate
-func NewCertificate(r *x509.Certificate, orgID int64, profile, pem, issuersPem string) *Certificate {
+func NewCertificate(r *x509.Certificate, orgID uint64, profile, pem, issuersPem string) *Certificate {
 	return &Certificate{
 		//ID:               r.Id,
 		OrgID:            orgID,
@@ -96,7 +96,7 @@ func (list Certificates) ToDTO() []*pb.Certificate {
 }
 
 // Find a cert by ID
-func (list Certificates) Find(id int64) *Certificate {
+func (list Certificates) Find(id uint64) *Certificate {
 	for _, m := range list {
 		if m.ID == id {
 			return m

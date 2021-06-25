@@ -11,7 +11,7 @@ import (
 
 // RootCertificate provides X509 Root Certificate information
 type RootCertificate struct {
-	ID               int64     `db:"id"`
+	ID               uint64    `db:"id"`
 	SKID             string    `db:"skid"`
 	NotBefore        time.Time `db:"not_before"`
 	NotAfter         time.Time `db:"no_tafter"`
@@ -62,7 +62,7 @@ func (list RootCertificates) ToDTO() []*pb.RootCertificate {
 }
 
 // Find a cert by ID
-func (list RootCertificates) Find(id int64) *RootCertificate {
+func (list RootCertificates) Find(id uint64) *RootCertificate {
 	for _, m := range list {
 		if m.ID == id {
 			return m

@@ -9,10 +9,10 @@ import (
 
 // OrgMembership provides Org membership information for a user
 type OrgMembership struct {
-	ID      int64          `db:"id"`
-	OrgID   int64          `db:"orgid"`
+	ID      uint64         `db:"id"`
+	OrgID   uint64         `db:"orgid"`
 	OrgName string         `db:"org_name"`
-	UserID  int64          `db:"user_id"`
+	UserID  uint64         `db:"user_id"`
 	Role    sql.NullString `db:"role"`
 	Source  sql.NullString `db:"source"`
 }
@@ -20,10 +20,10 @@ type OrgMembership struct {
 // ToDto converts model to v1.OrgMembership DTO
 func (o *OrgMembership) ToDto() *v1.OrgMembership {
 	m := &v1.OrgMembership{
-		ID:      strconv.FormatUint(uint64(o.ID), 10),
-		OrgID:   strconv.FormatUint(uint64(o.OrgID), 10),
+		ID:      strconv.FormatUint(o.ID, 10),
+		OrgID:   strconv.FormatUint(o.OrgID, 10),
 		OrgName: o.OrgName,
-		UserID:  strconv.FormatUint(uint64(o.UserID), 10),
+		UserID:  strconv.FormatUint(o.UserID, 10),
 	}
 
 	if o.Role.Valid {

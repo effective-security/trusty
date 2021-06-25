@@ -57,9 +57,8 @@ func TestRegisterCertificate(t *testing.T) {
 	email1 := fmt.Sprintf("test1%d@ekspand.com", id)
 	name := fmt.Sprintf("org-%d", id)
 
-	uid := int64(id)
 	or := &model.Organization{
-		ExternalID: uid,
+		ExternalID: id,
 		Provider:   v1.ProviderGithub,
 		Name:       name,
 		Login:      email1,
@@ -132,6 +131,17 @@ func TestRegisterCertificate(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, r4)
 	assert.Equal(t, *r, *r4)
+
+	revoked, err := provider.RevokeCertificate(ctx, r4, time.Now(), 0)
+	require.NoError(t, err)
+	assert.Equal(t, revoked.Certificate, *r4)
+
+	_, err = provider.GetCertificate(ctx, r2.ID)
+	require.Error(t, err)
+	assert.Equal(t, "sql: no rows in result set", err.Error())
+
+	err = provider.RemoveRevokedCertificate(ctx, revoked.Certificate.ID)
+	require.NoError(t, err)
 }
 
 func TestRegisterRevokedCertificate(t *testing.T) {
@@ -142,9 +152,8 @@ func TestRegisterRevokedCertificate(t *testing.T) {
 	email1 := fmt.Sprintf("test1%d@ekspand.com", id)
 	name := fmt.Sprintf("org-%d", id)
 
-	uid := int64(id)
 	or := &model.Organization{
-		ExternalID: uid,
+		ExternalID: id,
 		Provider:   v1.ProviderGithub,
 		Name:       name,
 		Login:      email1,

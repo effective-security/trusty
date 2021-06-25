@@ -19,9 +19,8 @@ func TestUpdateOrg(t *testing.T) {
 	login := fmt.Sprintf("test%d", id)
 	email := login + "@trusty.com"
 
-	uid := int64(id)
 	o := &model.Organization{
-		ExternalID: uid,
+		ExternalID: id,
 		Provider:   v1.ProviderGithub,
 		Name:       name,
 		Login:      login,
@@ -68,10 +67,9 @@ func TestRepositoryOrg(t *testing.T) {
 	login := fmt.Sprintf("test%d", id)
 	email := login + "@trusty.com"
 
-	uid := int64(id)
 	o := &model.Repository{
-		OrgID:      uid,
-		ExternalID: model.NullInt64(&uid),
+		OrgID:      id,
+		ExternalID: id,
 		Provider:   v1.ProviderGithub,
 		Name:       name,
 		Email:      email,
@@ -108,9 +106,8 @@ func Test_Membership(t *testing.T) {
 	email2 := fmt.Sprintf("test2%d@ekspand.com", id)
 	name := fmt.Sprintf("org-%d", id)
 
-	uid := int64(id)
 	o := &model.Organization{
-		ExternalID: uid,
+		ExternalID: id,
 		Provider:   v1.ProviderGithub,
 		Name:       name,
 		Login:      email1,
@@ -193,7 +190,7 @@ func Test_Membership(t *testing.T) {
 	assert.Equal(t, len(list), len(oldMembers))
 }
 
-func findOrgMember(list []*model.OrgMemberInfo, userID int64) *model.OrgMemberInfo {
+func findOrgMember(list []*model.OrgMemberInfo, userID uint64) *model.OrgMemberInfo {
 	for _, m := range list {
 		if m.UserID == userID {
 			return m
@@ -202,7 +199,7 @@ func findOrgMember(list []*model.OrgMemberInfo, userID int64) *model.OrgMemberIn
 	return nil
 }
 
-func findUser(list []*model.User, userID int64) *model.User {
+func findUser(list []*model.User, userID uint64) *model.User {
 	for _, m := range list {
 		if m.ID == userID {
 			return m
@@ -211,7 +208,7 @@ func findUser(list []*model.User, userID int64) *model.User {
 	return nil
 }
 
-func findOrg(list []*model.Organization, orgID int64) *model.Organization {
+func findOrg(list []*model.Organization, orgID uint64) *model.Organization {
 	for _, m := range list {
 		if m.ID == orgID {
 			return m

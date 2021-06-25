@@ -50,7 +50,7 @@ func (p *Provider) RegisterRootCertificate(ctx context.Context, crt *model.RootC
 }
 
 // RemoveRootCertificate removes Root Cert
-func (p *Provider) RemoveRootCertificate(ctx context.Context, id int64) error {
+func (p *Provider) RemoveRootCertificate(ctx context.Context, id uint64) error {
 	_, err := p.db.ExecContext(ctx, `DELETE FROM roots WHERE id=$1;`, id)
 	if err != nil {
 		logger.Errorf("api=RemoveRootCertificate, err=[%s]", errors.Details(err))

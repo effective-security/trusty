@@ -21,7 +21,7 @@ $$ language 'plpgsql';
 CREATE TABLE IF NOT EXISTS public.users
 (
     id bigint NOT NULL,
-    extern_id bigint NULL,
+    extern_id bigint NOT NULL,
     provider character varying(16) COLLATE pg_catalog."default" NOT NULL,
     login character varying(64) COLLATE pg_catalog."default" NOT NULL,
     name character varying(64) COLLATE pg_catalog."default" NOT NULL,
@@ -33,8 +33,7 @@ CREATE TABLE IF NOT EXISTS public.users
     token_expires_at timestamp with time zone,
     login_count integer,
     last_login_at timestamp with time zone,
-    CONSTRAINT users_pkey PRIMARY KEY (id),
-    CONSTRAINT users_provider_id UNIQUE (extern_id, provider)
+    CONSTRAINT users_pkey PRIMARY KEY (id)
 )
 WITH (
     OIDS = FALSE
@@ -136,7 +135,7 @@ CREATE TABLE IF NOT EXISTS public.repos
 (
     id bigint NOT NULL,
     org_id bigint NOT NULL,
-    extern_id bigint NULL,
+    extern_id bigint NOT NULL,
     provider character varying(16) COLLATE pg_catalog."default" NOT NULL,
     name character varying(64) COLLATE pg_catalog."default" NOT NULL,
     email character varying(160) COLLATE pg_catalog."default" NOT NULL,

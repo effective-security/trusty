@@ -22,7 +22,7 @@ enum EncodingFormat {
 // Root provides X509 Root Cert information
 message RootCertificate  {
     // Id of the certificate
-    int64 id = 1;
+    uint64 id = 1;
     // Skid provides Subject Key Identifier
     string skid = 2;
     // NotBefore is the time when the validity period starts
@@ -42,9 +42,9 @@ message RootCertificate  {
 // Certificate provides X509 Certificate information
 message Certificate  {
     // Id of the certificate
-    int64 id = 1;
+    uint64 id = 1;
     // OrgId of the certificate, only used with Org scope
-    int64 org_id = 2 [json_name="org_id"];
+    uint64 org_id = 2 [json_name="org_id"];
     // Skid provides Subject Key Identifier
     string skid = 3;
     // Ikid provides Issuer Key Identifier

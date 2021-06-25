@@ -57,7 +57,7 @@ func (p *Provider) UpdateOrg(ctx context.Context, org *model.Organization) (*mod
 }
 
 // GetOrg returns Organization
-func (p *Provider) GetOrg(ctx context.Context, id int64) (*model.Organization, error) {
+func (p *Provider) GetOrg(ctx context.Context, id uint64) (*model.Organization, error) {
 	res := new(model.Organization)
 
 	err := p.db.QueryRowContext(ctx,
@@ -88,7 +88,7 @@ func (p *Provider) GetOrg(ctx context.Context, id int64) (*model.Organization, e
 }
 
 // RemoveOrg deletes org and all its members
-func (p *Provider) RemoveOrg(ctx context.Context, id int64) error {
+func (p *Provider) RemoveOrg(ctx context.Context, id uint64) error {
 	_, err := p.db.ExecContext(ctx, `DELETE FROM orgmembers WHERE org_id=$1;`, id)
 	if err != nil {
 		logger.Errorf("api=RemoveOrg, err=[%s]", errors.Details(err))
@@ -147,7 +147,7 @@ func (p *Provider) UpdateRepo(ctx context.Context, repo *model.Repository) (*mod
 }
 
 // GetRepo returns Repository
-func (p *Provider) GetRepo(ctx context.Context, id int64) (*model.Repository, error) {
+func (p *Provider) GetRepo(ctx context.Context, id uint64) (*model.Repository, error) {
 	res := new(model.Repository)
 
 	err := p.db.QueryRowContext(ctx,
@@ -175,7 +175,7 @@ func (p *Provider) GetRepo(ctx context.Context, id int64) (*model.Repository, er
 }
 
 // AddOrgMember adds a user to Org
-func (p *Provider) AddOrgMember(ctx context.Context, orgID, userID int64, role, membershipSource string) (*model.OrgMembership, error) {
+func (p *Provider) AddOrgMember(ctx context.Context, orgID, userID uint64, role, membershipSource string) (*model.OrgMembership, error) {
 	id, err := p.NextID()
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -209,7 +209,7 @@ func (p *Provider) AddOrgMember(ctx context.Context, orgID, userID int64, role, 
 }
 
 // GetOrgMembers returns list of membership info
-func (p *Provider) GetOrgMembers(ctx context.Context, orgID int64) ([]*model.OrgMemberInfo, error) {
+func (p *Provider) GetOrgMembers(ctx context.Context, orgID uint64) ([]*model.OrgMemberInfo, error) {
 
 	res, err := p.db.QueryContext(ctx, `
 		SELECT
@@ -259,7 +259,7 @@ func (p *Provider) GetOrgMembers(ctx context.Context, orgID int64) ([]*model.Org
 }
 
 // RemoveOrgMembers removes users from the org
-func (p *Provider) RemoveOrgMembers(ctx context.Context, orgID int64, all bool) ([]*model.OrgMembership, error) {
+func (p *Provider) RemoveOrgMembers(ctx context.Context, orgID uint64, all bool) ([]*model.OrgMembership, error) {
 	var sql string
 	if all {
 		sql = `DELETE FROM orgmembers
@@ -298,7 +298,7 @@ func (p *Provider) RemoveOrgMembers(ctx context.Context, orgID int64, all bool) 
 }
 
 // RemoveOrgMember remove users from the org
-func (p *Provider) RemoveOrgMember(ctx context.Context, orgID, memberID int64) (*model.OrgMembership, error) {
+func (p *Provider) RemoveOrgMember(ctx context.Context, orgID, memberID uint64) (*model.OrgMembership, error) {
 	m := new(model.OrgMembership)
 
 	err := p.db.QueryRowContext(ctx,
@@ -321,7 +321,7 @@ func (p *Provider) RemoveOrgMember(ctx context.Context, orgID, memberID int64) (
 }
 
 // GetUserMemberships returns list of membership info
-func (p *Provider) GetUserMemberships(ctx context.Context, userID int64) ([]*model.OrgMemberInfo, error) {
+func (p *Provider) GetUserMemberships(ctx context.Context, userID uint64) ([]*model.OrgMemberInfo, error) {
 	res, err := p.db.QueryContext(ctx, `
 		SELECT
 			orgmembers.id,
@@ -369,7 +369,7 @@ func (p *Provider) GetUserMemberships(ctx context.Context, userID int64) ([]*mod
 }
 
 // GetUserOrgs returns list of orgs
-func (p *Provider) GetUserOrgs(ctx context.Context, userID int64) ([]*model.Organization, error) {
+func (p *Provider) GetUserOrgs(ctx context.Context, userID uint64) ([]*model.Organization, error) {
 	q, err := p.db.QueryContext(ctx, `
 			SELECT
 				orgs.id,

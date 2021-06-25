@@ -86,7 +86,7 @@ message SignCertificateRequest {
     // Token provides the authorization token for the request
     string token = 6;
     // OrgId provides the ID of Organization that certificate belongs to
-    int64 OrgId = 7;
+    uint64 OrgId = 7;
 }
 
 message CertificateResponse {
