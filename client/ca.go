@@ -13,7 +13,7 @@ type CAClient interface {
 	// ProfileInfo returns the certificate profile info
 	ProfileInfo(ctx context.Context, in *pb.CertProfileInfoRequest) (*pb.CertProfileInfo, error)
 	// SignCertificate returns the certificate
-	SignCertificate(ctx context.Context, in *pb.SignCertificateRequest) (*pb.CertificateBundle, error)
+	SignCertificate(ctx context.Context, in *pb.SignCertificateRequest) (*pb.CertificateResponse, error)
 	// Issuers returns the issuing CAs
 	Issuers(ctx context.Context) (*pb.IssuersInfoResponse, error)
 }
@@ -44,7 +44,7 @@ func (c *authorityClient) ProfileInfo(ctx context.Context, in *pb.CertProfileInf
 }
 
 // SignCertificate returns the certificate
-func (c *authorityClient) SignCertificate(ctx context.Context, in *pb.SignCertificateRequest) (*pb.CertificateBundle, error) {
+func (c *authorityClient) SignCertificate(ctx context.Context, in *pb.SignCertificateRequest) (*pb.CertificateResponse, error) {
 	return c.remote.SignCertificate(ctx, in, c.callOpts...)
 }
 
@@ -72,7 +72,7 @@ func (c *retryCAClient) ProfileInfo(ctx context.Context, in *pb.CertProfileInfoR
 }
 
 // SignCertificate returns the certificate
-func (c *retryCAClient) SignCertificate(ctx context.Context, in *pb.SignCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateBundle, error) {
+func (c *retryCAClient) SignCertificate(ctx context.Context, in *pb.SignCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
 	return c.authority.SignCertificate(ctx, in, opts...)
 }
 

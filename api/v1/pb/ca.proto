@@ -11,26 +11,26 @@ import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 
 service CAService {
-        // ProfileInfo returns the certificate profile info
-        rpc ProfileInfo(CertProfileInfoRequest) returns (CertProfileInfo) {
-            option (google.api.http) = {
-                post: "/v1/ca/csr/profile_info"
-            };
-        }
+    // ProfileInfo returns the certificate profile info
+    rpc ProfileInfo(CertProfileInfoRequest) returns (CertProfileInfo) {
+        option (google.api.http) = {
+            post: "/v1/ca/profile_info"
+        };
+    }
 
-        // SignCertificate returns the certificate
-        rpc SignCertificate(SignCertificateRequest) returns (CertificateBundle) {
-            option (google.api.http) = {
-                post: "/v1/ca/csr/create"
-            };
-        }
+    // Issuers returns the issuing CAs
+    rpc Issuers(google.protobuf.Empty) returns (IssuersInfoResponse) {
+        option (google.api.http) = {
+            get: "/v1/ca/issuers"
+        };
+    }
 
-        // Issuers returns the issuing CAs
-        rpc Issuers(google.protobuf.Empty) returns (IssuersInfoResponse) {
-            option (google.api.http) = {
-                get: "/v1/ca/issuers"
-            };
-        }
+    // SignCertificate returns the certificate
+    rpc SignCertificate(SignCertificateRequest) returns (CertificateResponse) {
+        option (google.api.http) = {
+            post: "/v1/ca/sign"
+        };
+    }
 }
 
 message CertProfileInfoRequest {
@@ -81,10 +81,14 @@ message SignCertificateRequest {
     string profile = 3;
     // IssuerLabel specifies which Issuer to be appointed to sign the request
     string issuer_label = 4;
-    // WithBundle specifies whether to include an "optimal" certificate bundle along with the certificate
-    bool with_bundle = 5;
+    // San specifies Subject Alternative Names
+    repeated string san = 5;
     // Token provides the authorization token for the request
     string token = 6;
-    // San specifies Subject Alternative Names
-    repeated string san = 7;
+    // OrgId provides the ID of Organization that certificate belongs to
+    int64 OrgId = 7;
+}
+
+message CertificateResponse {
+    Certificate certificate = 1;
 }

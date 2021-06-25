@@ -16,15 +16,15 @@
     "application/json"
   ],
   "paths": {
-    "/v1/ca/csr/create": {
-      "post": {
-        "summary": "SignCertificate returns the certificate",
-        "operationId": "CAService_SignCertificate",
+    "/v1/ca/issuers": {
+      "get": {
+        "summary": "Issuers returns the issuing CAs",
+        "operationId": "CAService_Issuers",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/pbCertificateBundle"
+              "$ref": "#/definitions/pbIssuersInfoResponse"
             }
           },
           "default": {
@@ -39,7 +39,7 @@
         ]
       }
     },
-    "/v1/ca/csr/profile_info": {
+    "/v1/ca/profile_info": {
       "post": {
         "summary": "ProfileInfo returns the certificate profile info",
         "operationId": "CAService_ProfileInfo",
@@ -62,15 +62,15 @@
         ]
       }
     },
-    "/v1/ca/issuers": {
-      "get": {
-        "summary": "Issuers returns the issuing CAs",
-        "operationId": "CAService_Issuers",
+    "/v1/ca/sign": {
+      "post": {
+        "summary": "SignCertificate returns the certificate",
+        "operationId": "CAService_SignCertificate",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/pbIssuersInfoResponse"
+              "$ref": "#/definitions/pbCertificateResponse"
             }
           },
           "default": {
@@ -186,23 +186,75 @@
       },
       "title": "CertProfileInfo is the response for an Profile Info API request"
     },
-    "pbCertificateBundle": {
+    "pbCertificate": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64",
+          "title": "Id of the certificate"
+        },
+        "org_id": {
+          "type": "string",
+          "format": "int64",
+          "title": "OrgId of the certificate, only used with Org scope"
+        },
+        "skid": {
+          "type": "string",
+          "title": "Skid provides Subject Key Identifier"
+        },
+        "ikid": {
+          "type": "string",
+          "title": "Ikid provides Issuer Key Identifier"
+        },
+        "serialNumber": {
+          "type": "string",
+          "title": "SerialNumber provides Serial Number"
+        },
+        "not_before": {
+          "type": "string",
+          "format": "date-time",
+          "title": "NotBefore is the time when the validity period starts"
+        },
+        "not_after": {
+          "type": "string",
+          "format": "date-time",
+          "title": "NotAfter is the time when the validity period starts"
+        },
+        "subject": {
+          "type": "string",
+          "title": "Subject name"
+        },
+        "issuer": {
+          "type": "string",
+          "title": "Issuer name"
+        },
+        "sha256": {
+          "type": "string",
+          "title": "SHA256 thnumbprint of the cert"
+        },
+        "profile": {
+          "type": "string",
+          "title": "Profile of the certificate"
+        },
+        "pem": {
+          "type": "string",
+          "title": "Pem encoded certificate"
+        },
+        "issuers_pem": {
+          "type": "string",
+          "title": "IssuersPem provides PEM encoded issuers"
+        }
+      },
+      "title": "Certificate provides X509 Certificate information"
+    },
+    "pbCertificateResponse": {
       "type": "object",
       "properties": {
         "certificate": {
-          "type": "string",
-          "title": "Certificate provides the certificate in PEM format"
-        },
-        "intermediates": {
-          "type": "string",
-          "title": "Intermediates provides the intermediate CA certificates bundle in PEM format"
-        },
-        "root": {
-          "type": "string",
-          "title": "Root provides the Root CA certifica in PEM format"
+          "$ref": "#/definitions/pbCertificate"
         }
-      },
-      "title": "CertificateBundle provides certificate and its issuers"
+      }
     },
     "pbEncodingFormat": {
       "type": "string",

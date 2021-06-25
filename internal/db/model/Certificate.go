@@ -1,9 +1,11 @@
 package model
 
 import (
+	"crypto/x509"
 	"time"
 
 	"github.com/ekspand/trusty/api/v1/pb"
+	"github.com/go-phorce/dolly/xpki/certutil"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -43,6 +45,44 @@ func (r *Certificate) ToDTO() *pb.Certificate {
 		Profile:      r.Profile,
 		Pem:          r.Pem,
 		IssuersPem:   r.IssuersPem,
+	}
+}
+
+// CertificateFromPB returns Certificate
+func CertificateFromPB(r *pb.Certificate) *Certificate {
+	return &Certificate{
+		ID:               r.Id,
+		OrgID:            r.OrgId,
+		SKID:             r.Skid,
+		IKID:             r.Ikid,
+		SerialNumber:     r.SerialNumber,
+		NotBefore:        r.NotBefore.AsTime().UTC(),
+		NotAfter:         r.NotAfter.AsTime().UTC(),
+		Subject:          r.Subject,
+		Issuer:           r.Issuer,
+		ThumbprintSha256: r.Sha256,
+		Profile:          r.Profile,
+		Pem:              r.Pem,
+		IssuersPem:       r.IssuersPem,
+	}
+}
+
+// NewCertificate returns Certificate
+func NewCertificate(r *x509.Certificate, orgID int64, profile, pem, issuersPem string) *Certificate {
+	return &Certificate{
+		//ID:               r.Id,
+		OrgID:            orgID,
+		SKID:             certutil.GetSubjectKeyID(r),
+		IKID:             certutil.GetAuthorityKeyID(r),
+		SerialNumber:     r.SerialNumber.String(),
+		NotBefore:        r.NotBefore.UTC(),
+		NotAfter:         r.NotAfter.UTC(),
+		Subject:          r.Subject.String(),
+		Issuer:           r.Issuer.String(),
+		ThumbprintSha256: certutil.SHA256Hex(r.Raw),
+		Profile:          profile,
+		Pem:              pem,
+		IssuersPem:       issuersPem,
 	}
 }
 

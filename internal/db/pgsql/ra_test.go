@@ -122,15 +122,14 @@ func TestRegisterCertificate(t *testing.T) {
 	require.NotNil(t, r)
 	assert.Equal(t, *r, *r2)
 
-	list, err := provider.GetCertificatesForOrg(ctx, org.ID)
+	list, err := provider.GetCertificates(ctx, org.ID)
 	require.NoError(t, err)
 	r3 := list.Find(r.ID)
 	require.NotNil(t, r3)
 	assert.Equal(t, *r, *r3)
 
-	list, err = provider.GetCertificatesForUser(ctx, user1.ID)
+	r4, err := provider.GetCertificate(ctx, r2.ID)
 	require.NoError(t, err)
-	r4 := list.Find(r.ID)
 	require.NotNil(t, r4)
 	assert.Equal(t, *r, *r4)
 }

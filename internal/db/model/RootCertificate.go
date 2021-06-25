@@ -1,9 +1,11 @@
 package model
 
 import (
+	"crypto/x509"
 	"time"
 
 	pb "github.com/ekspand/trusty/api/v1/pb"
+	"github.com/go-phorce/dolly/xpki/certutil"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -33,6 +35,20 @@ func (r *RootCertificate) ToDTO() *pb.RootCertificate {
 		Sha256:    r.ThumbprintSha256,
 		Trust:     pb.Trust(r.Trust),
 		Pem:       r.Pem,
+	}
+}
+
+// NewRootCertificate returns RootCertificate
+func NewRootCertificate(r *x509.Certificate, trust int, pem string) *RootCertificate {
+	return &RootCertificate{
+		//ID:
+		SKID:             certutil.GetSubjectKeyID(r),
+		NotBefore:        r.NotBefore.UTC(),
+		NotAfter:         r.NotAfter.UTC(),
+		Subject:          r.Subject.String(),
+		ThumbprintSha256: certutil.SHA256Hex(r.Raw),
+		Trust:            trust,
+		Pem:              pem,
 	}
 }
 

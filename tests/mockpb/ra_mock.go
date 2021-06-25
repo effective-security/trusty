@@ -49,9 +49,17 @@ func (m *MockRAServer) RegisterRoot(ctx context.Context, in *pb.RegisterRootRequ
 }
 
 // RegisterCertificate registers certificate
-func (m *MockRAServer) RegisterCertificate(ctx context.Context, in *pb.RegisterCertificateRequest) (*pb.CertificatesResponse, error) {
+func (m *MockRAServer) RegisterCertificate(ctx context.Context, in *pb.RegisterCertificateRequest) (*pb.CertificateResponse, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
-	return m.Resps[0].(*pb.CertificatesResponse), nil
+	return m.Resps[0].(*pb.CertificateResponse), nil
+}
+
+// GetCertificate returns certificate
+func (m *MockRAServer) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error) {
+	if m.Err != nil {
+		return nil, m.Err
+	}
+	return m.Resps[0].(*pb.CertificateResponse), nil
 }

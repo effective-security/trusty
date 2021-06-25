@@ -23,7 +23,7 @@ func (s *caSrv2C) ProfileInfo(ctx context.Context, in *pb.CertProfileInfoRequest
 }
 
 // SignCertificate returns the certificate
-func (s *caSrv2C) SignCertificate(ctx context.Context, in *pb.SignCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateBundle, error) {
+func (s *caSrv2C) SignCertificate(ctx context.Context, in *pb.SignCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
 	return s.srv.SignCertificate(ctx, in)
 }
 

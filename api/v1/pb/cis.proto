@@ -3,8 +3,9 @@ package pb;
 
 option go_package = "github.com/ekspand/trusty/api/v1/pb";
 
-import "pkix.proto";
+//import "pkix.proto";
 import "ra.proto";
+import "ca.proto";
 import "google/protobuf/empty.proto";
 //import "google/protobuf/timestamp.proto";
 // for grpc-gateway
@@ -19,17 +20,9 @@ service CIService {
     }
 
     // GetCertificate returns the certificate
-    rpc GetCertificate(GetCertificateRequest) returns (GetCertificateResponse) {
+    rpc GetCertificate(GetCertificateRequest) returns (CertificateResponse) {
         option (google.api.http) = {
             get: "/v1/cis/certs/{id}"
         };
     }
-}
-
-message GetCertificateRequest {
-    string id = 1;
-}
-
-message GetCertificateResponse {
-    Certificate certificate = 1;
 }

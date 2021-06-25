@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/cli"
@@ -100,14 +101,19 @@ func Sign(c ctl.Control, p interface{}) error {
 		IssuerLabel:   *flags.IssuerLabel,
 		San:           *flags.SAN,
 		Token:         *flags.Token,
-		WithBundle:    true,
 	})
 	if err != nil {
 		return errors.Trace(err)
 	}
 
+	pem := res.Certificate.Pem
+	if !strings.HasSuffix(pem, "\n") {
+		pem += "\n"
+	}
+	pem += res.Certificate.IssuersPem
+
 	if flags.Out != nil && *flags.Out != "" {
-		err = ioutil.WriteFile(*flags.Out, []byte(res.Certificate), 0664)
+		err = ioutil.WriteFile(*flags.Out, []byte(pem), 0664)
 		if err != nil {
 			return errors.Trace(err)
 		}
@@ -115,7 +121,7 @@ func Sign(c ctl.Control, p interface{}) error {
 		ctl.WriteJSON(c.Writer(), res)
 		fmt.Fprint(c.Writer(), "\n")
 	} else {
-		fmt.Fprint(c.Writer(), res.Certificate)
+		fmt.Fprint(c.Writer(), pem)
 		fmt.Fprint(c.Writer(), "\n")
 	}
 

@@ -36,9 +36,9 @@ func (m *MockCIServer) GetRoots(context.Context, *empty.Empty) (*pb.RootsRespons
 }
 
 // GetCertificate returns the certificate
-func (m *MockCIServer) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.GetCertificateResponse, error) {
+func (m *MockCIServer) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
-	return m.Resps[0].(*pb.GetCertificateResponse), nil
+	return m.Resps[0].(*pb.CertificateResponse), nil
 }

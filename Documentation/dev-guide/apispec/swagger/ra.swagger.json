@@ -103,17 +103,13 @@
       },
       "title": "Certificate provides X509 Certificate information"
     },
-    "pbCertificatesResponse": {
+    "pbCertificateResponse": {
       "type": "object",
       "properties": {
-        "certificates": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/pbCertificate"
-          }
+        "certificate": {
+          "$ref": "#/definitions/pbCertificate"
         }
-      },
-      "title": "CertificatesResponse returns Certificates"
+      }
     },
     "pbRootCertificate": {
       "type": "object",

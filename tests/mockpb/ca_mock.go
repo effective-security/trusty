@@ -36,11 +36,11 @@ func (m *MockCAServer) ProfileInfo(context.Context, *pb.CertProfileInfoRequest) 
 }
 
 // SignCertificate returns the certificate
-func (m *MockCAServer) SignCertificate(context.Context, *pb.SignCertificateRequest) (*pb.CertificateBundle, error) {
+func (m *MockCAServer) SignCertificate(context.Context, *pb.SignCertificateRequest) (*pb.CertificateResponse, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
-	return m.Resps[0].(*pb.CertificateBundle), nil
+	return m.Resps[0].(*pb.CertificateResponse), nil
 }
 
 // Issuers returns the issuing CAs

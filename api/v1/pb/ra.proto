@@ -4,6 +4,7 @@ package pb;
 option go_package = "github.com/ekspand/trusty/api/v1/pb";
 
 import "pkix.proto";
+import "ca.proto";
 import "google/protobuf/empty.proto";
 //import "google/protobuf/timestamp.proto";
 // for grpc-gateway
@@ -22,8 +23,12 @@ service RAService {
     }
 
     // RegisterCertificate registers certificate
-    rpc RegisterCertificate(RegisterCertificateRequest) returns (CertificatesResponse) {
+    rpc RegisterCertificate(RegisterCertificateRequest) returns (CertificateResponse) {
     }
+
+    // GetCertificate returns the certificate
+    rpc GetCertificate(GetCertificateRequest) returns (CertificateResponse) {
+    }    
 }
 
 // RootsResponse returns Root Certificates
@@ -43,4 +48,10 @@ message RegisterRootRequest {
 
 message RegisterCertificateRequest {
     Certificate certificate = 1;
+}
+
+// GetCertificateRequest specifies certificate request
+message GetCertificateRequest {
+    // Id provides the ID of the Certificate to return
+    int64 id = 1;
 }
