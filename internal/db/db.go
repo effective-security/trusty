@@ -30,16 +30,13 @@ type IDGenerator interface {
 	NextID() (uint64, error)
 }
 
-// UsersDb defines an interface for CRUD operations on Users and Teams
-type UsersDb interface {
+// OrgsDb defines an interface for CRUD operations on Orgs
+type OrgsDb interface {
+	IDGenerator
 	// LoginUser returns User
 	LoginUser(ctx context.Context, user *model.User) (*model.User, error)
 	// GetUser returns User
 	GetUser(ctx context.Context, id int64) (*model.User, error)
-}
-
-// OrgsDb defines an interface for CRUD operations on Orgs
-type OrgsDb interface {
 	// UpdateOrg inserts or updates Organization
 	UpdateOrg(ctx context.Context, org *model.Organization) (*model.Organization, error)
 	// GetOrg returns Organization
@@ -67,8 +64,9 @@ type OrgsDb interface {
 	GetUserOrgs(ctx context.Context, userID int64) ([]*model.Organization, error)
 }
 
-// RaDb defines an interface for Registration Authority
-type RaDb interface {
+// CertsDb defines an interface for Registration Authority
+type CertsDb interface {
+	IDGenerator
 	// RegisterRootCertificate registers Root Cert
 	RegisterRootCertificate(ctx context.Context, crt *model.RootCertificate) (*model.RootCertificate, error)
 	// RemoveRootCertificate removes Root Cert
@@ -93,18 +91,17 @@ type RaDb interface {
 	GetRevokedCertificatesForOrg(ctx context.Context, orgID int64) (model.RevokedCertificates, error)
 }
 
-// Provider reprOrgtsuserL client instance
+// Provider provides complete DB access
 type Provider interface {
-	UsersDb
+	IDGenerator
 	OrgsDb
-	RaDb
+	CertsDb
 
 	// DB returns underlying DB connection
 	DB() *sql.DB
+
 	// Close connection and release resources
 	Close() (err error)
-	// NextID returns unique ID
-	NextID() (uint64, error)
 }
 
 // Migrate performs the db migration

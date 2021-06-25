@@ -25,7 +25,7 @@ type Service struct {
 	server    *gserver.Server
 	cfg       *config.Configuration
 	oauthProv *oauth2client.Provider
-	db        db.Provider
+	db        db.OrgsDb
 }
 
 // Factory returns a factory of the service
@@ -34,7 +34,7 @@ func Factory(server *gserver.Server) interface{} {
 		logger.Panic("status.Factory: invalid parameter")
 	}
 
-	return func(cfg *config.Configuration, oauthProv *oauth2client.Provider, db db.Provider) error {
+	return func(cfg *config.Configuration, oauthProv *oauth2client.Provider, db db.OrgsDb) error {
 		svc := &Service{
 			server:    server,
 			cfg:       cfg,
