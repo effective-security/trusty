@@ -38,4 +38,9 @@ DROP INDEX IF EXISTS idx_roots_skid;
 DROP INDEX IF EXISTS idx_roots_notafter;
 DROP INDEX IF EXISTS idx_roots_sha256;
 
+DROP TABLE IF EXISTS public.crls;
+DROP INDEX IF EXISTS unique_crls_ikid;
+DROP INDEX IF EXISTS idx_crls_ikid;
+DROP INDEX IF EXISTS idx_crls_next_update;
+
 COMMIT;

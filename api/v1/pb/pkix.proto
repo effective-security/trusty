@@ -76,6 +76,22 @@ message RevokedCertificate {
 	int32 reason = 3;
 }
 
+// Crl provides X509 CRL information
+message Crl  {
+    // Id of the CRL
+    uint64 id = 1;
+    // Ikid provides Issuer Key Identifier
+    string ikid = 2;
+    // ThisUpdate is the time when the CRL was issued
+    google.protobuf.Timestamp this_update = 3 [json_name="this_update"];
+    // NextUpdate is the time for the next update
+    google.protobuf.Timestamp next_update = 4 [json_name="next_update"];
+    // Issuer name
+    string issuer = 5;
+    // PEM encoded CRL
+    string pem =6;
+}
+
 // X509Name specifies X509 Name
 message X509Name {
     string country = 1;

@@ -133,6 +133,55 @@ func (p *Provider) GetRevokedCertificatesForOrg(ctx context.Context, orgID uint6
 	return list, nil
 }
 
+// GetRevokedCertificatesByIssuer returns revoked certificates by a specified issuer
+func (p *Provider) GetRevokedCertificatesByIssuer(ctx context.Context, ikid string) (model.RevokedCertificates, error) {
+
+	res, err := p.db.QueryContext(ctx, `
+		SELECT
+		id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,revoked_at,reason
+		FROM
+			revoked
+		WHERE ikid = $1
+		;
+		`, ikid)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	defer res.Close()
+
+	list := make([]*model.RevokedCertificate, 0, 100)
+
+	for res.Next() {
+		r := new(model.RevokedCertificate)
+		err = res.Scan(
+			&r.Certificate.ID,
+			&r.Certificate.OrgID,
+			&r.Certificate.SKID,
+			&r.Certificate.IKID,
+			&r.Certificate.SerialNumber,
+			&r.Certificate.NotBefore,
+			&r.Certificate.NotAfter,
+			&r.Certificate.Subject,
+			&r.Certificate.Issuer,
+			&r.Certificate.ThumbprintSha256,
+			&r.Certificate.Pem,
+			&r.Certificate.IssuersPem,
+			&r.Certificate.Profile,
+			&r.RevokedAt,
+			&r.Reason,
+		)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		r.Certificate.NotAfter = r.Certificate.NotAfter.UTC()
+		r.Certificate.NotBefore = r.Certificate.NotBefore.UTC()
+		r.RevokedAt = r.RevokedAt.UTC()
+		list = append(list, r)
+	}
+
+	return list, nil
+}
+
 // RevokeCertificate removes Certificate and creates RevokedCertificate
 func (p *Provider) RevokeCertificate(ctx context.Context, crt *model.Certificate, at time.Time, reason int) (*model.RevokedCertificate, error) {
 	err := model.Validate(crt)

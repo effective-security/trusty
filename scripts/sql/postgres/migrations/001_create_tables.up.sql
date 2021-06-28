@@ -329,6 +329,35 @@ SELECT create_constraint_if_not_exists(
     'unique_roots_sha256',
     'ALTER TABLE public.roots ADD CONSTRAINT unique_roots_sha256 UNIQUE USING INDEX idx_roots_sha256;');
 
+CREATE TABLE IF NOT EXISTS public.crls
+(
+    id bigint NOT NULL,
+    ikid character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    this_update timestamp with time zone,
+    next_update timestamp with time zone,
+    issuer character varying(260) COLLATE pg_catalog."default" NOT NULL,
+    pem text COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT crls_pkey PRIMARY KEY (id),
+    CONSTRAINT crls_ikid UNIQUE (ikid)
+)
+WITH (
+    OIDS = FALSE
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_crls_ikid
+    ON public.crls USING btree
+    (ikid COLLATE pg_catalog."default");
+
+CREATE INDEX IF NOT EXISTS idx_crls_next_update
+    ON public.crls USING btree
+    (next_update);
+
+SELECT create_constraint_if_not_exists(
+    'public',
+    'crls',
+    'idx_crls_ikid',
+    'ALTER TABLE public.crls ADD CONSTRAINT unique_crls_ikid UNIQUE USING INDEX idx_crls_ikid;');
+
 --
 --
 --

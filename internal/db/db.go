@@ -80,6 +80,10 @@ type CertsReadonlyDb interface {
 	GetCertificate(ctx context.Context, id uint64) (*model.Certificate, error)
 	// GetRevokedCertificatesForOrg returns list of Org's revoked certificates
 	GetRevokedCertificatesForOrg(ctx context.Context, orgID uint64) (model.RevokedCertificates, error)
+	// GetRevokedCertificatesByIssuer returns revoked certificates by a specified issuer
+	GetRevokedCertificatesByIssuer(ctx context.Context, ikid string) (model.RevokedCertificates, error)
+	// GetCrl returns CRL by a specified issuer
+	GetCrl(ctx context.Context, ikid string) (*model.Crl, error)
 }
 
 // CertsDb defines an interface for CRUD operations on Certs
@@ -100,9 +104,13 @@ type CertsDb interface {
 	RegisterRevokedCertificate(ctx context.Context, revoked *model.RevokedCertificate) (*model.RevokedCertificate, error)
 	// RemoveRevokedCertificate removes revoked Certificate
 	RemoveRevokedCertificate(ctx context.Context, id uint64) error
-
 	// RevokeCertificate removes Certificate and creates RevokedCertificate
 	RevokeCertificate(ctx context.Context, crt *model.Certificate, at time.Time, reason int) (*model.RevokedCertificate, error)
+
+	// RegisterCrl registers CRL
+	RegisterCrl(ctx context.Context, crt *model.Crl) (*model.Crl, error)
+	// RemoveCrl removes CRL
+	RemoveCrl(ctx context.Context, id uint64) error
 }
 
 // Provider provides complete DB access
