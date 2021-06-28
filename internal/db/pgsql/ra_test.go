@@ -222,4 +222,39 @@ func TestRegisterRevokedCertificate(t *testing.T) {
 	r3 := list.Find(r.ID)
 	require.NotNil(t, r3)
 	assert.Equal(t, *mr, *r3)
+
+	list, err = provider.GetRevokedCertificatesByIssuer(ctx, r.IKID)
+	require.NoError(t, err)
+	r4 := list.Find(r.ID)
+	require.NotNil(t, r4)
+	assert.Equal(t, *mr, *r4)
+}
+
+func TestRegisterCrl(t *testing.T) {
+	rc := &model.Crl{
+		IKID:       guid.MustCreate(),
+		Issuer:     "iss",
+		ThisUpdate: time.Now().Add(-time.Hour).UTC(),
+		NextUpdate: time.Now().Add(time.Hour).UTC(),
+		Pem:        "pem",
+	}
+
+	r, err := provider.RegisterCrl(ctx, rc)
+	require.NoError(t, err)
+	require.NotNil(t, r)
+	defer provider.RemoveCrl(ctx, r.ID)
+
+	assert.Equal(t, rc.IKID, r.IKID)
+	assert.Equal(t, rc.Issuer, r.Issuer)
+	assert.Equal(t, rc.Pem, r.Pem)
+	assert.Equal(t, rc.ThisUpdate.Unix(), r.ThisUpdate.Unix())
+	assert.Equal(t, rc.NextUpdate.Unix(), r.NextUpdate.Unix())
+
+	r2, err := provider.GetCrl(ctx, r.IKID)
+	require.NoError(t, err)
+	assert.Equal(t, rc.IKID, r2.IKID)
+	assert.Equal(t, rc.Issuer, r2.Issuer)
+	assert.Equal(t, rc.Pem, r2.Pem)
+	assert.Equal(t, rc.ThisUpdate.Unix(), r2.ThisUpdate.Unix())
+	assert.Equal(t, rc.NextUpdate.Unix(), r2.NextUpdate.Unix())
 }
