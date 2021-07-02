@@ -73,6 +73,8 @@ func TestOrganization(t *testing.T) {
 	assert.Equal(t, u.Location, dto.Location)
 	assert.Equal(t, u.AvatarURL, dto.AvatarURL)
 	assert.Equal(t, u.Type, dto.Type)
+
+	assert.NotEmpty(t, model.ToOrganizationsDto([]*model.Organization{u}))
 }
 
 func TestOrgMemberInfo(t *testing.T) {
@@ -86,6 +88,10 @@ func TestOrgMemberInfo(t *testing.T) {
 		Role:         sql.NullString{String: "role", Valid: true},
 		Source:       sql.NullString{String: "source", Valid: true},
 	}
+
+	assert.Equal(t, "role", u.GetRole())
+	assert.Equal(t, "source", u.GetSource())
+
 	dto := u.ToDto()
 	assert.Equal(t, "999", dto.MembershipID)
 	assert.Equal(t, "1000", dto.OrgID)
@@ -106,6 +112,9 @@ func TestOrgMembership(t *testing.T) {
 		Role:    sql.NullString{String: "role", Valid: true},
 		Source:  sql.NullString{String: "source", Valid: true},
 	}
+	assert.Equal(t, "role", u.GetRole())
+	assert.Equal(t, "source", u.GetSource())
+
 	dto := u.ToDto()
 	assert.Equal(t, "999", dto.ID)
 	assert.Equal(t, "1000", dto.OrgID)

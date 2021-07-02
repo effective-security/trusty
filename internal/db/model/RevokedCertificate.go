@@ -1,12 +1,26 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/ekspand/trusty/api/v1/pb"
+	"google.golang.org/protobuf/types/known/timestamppb"
+)
 
 // RevokedCertificate provides X509 Cert information
 type RevokedCertificate struct {
 	Certificate Certificate
 	RevokedAt   time.Time `db:"revoked_at"`
 	Reason      int       `db:"reason"`
+}
+
+// ToDTO returns DTO
+func (r *RevokedCertificate) ToDTO() *pb.RevokedCertificate {
+	return &pb.RevokedCertificate{
+		Certificate: r.Certificate.ToDTO(),
+		RevokedAt:   timestamppb.New(r.RevokedAt),
+		Reason:      pb.Reason(r.Reason),
+	}
 }
 
 // RevokedCertificates defines a list of RevokedCertificate

@@ -109,6 +109,44 @@ func (p *Provider) GetCertificate(ctx context.Context, id uint64) (*model.Certif
 	return c, nil
 }
 
+// GetCertificateBySKID returns registered Certificate
+func (p *Provider) GetCertificateBySKID(ctx context.Context, skid string) (*model.Certificate, error) {
+	c := new(model.Certificate)
+	err := p.db.QueryRowContext(ctx, `
+			SELECT
+				id,org_id,skid,ikid,serial_number,
+				not_before,no_tafter,
+				subject,issuer,
+				sha256,
+				pem,issuers_pem,
+				profile
+			FROM certificates
+			WHERE skid = $1
+			;
+			`, skid).Scan(
+		&c.ID,
+		&c.OrgID,
+		&c.SKID,
+		&c.IKID,
+		&c.SerialNumber,
+		&c.NotBefore,
+		&c.NotAfter,
+		&c.Subject,
+		&c.Issuer,
+		&c.ThumbprintSha256,
+		&c.Pem,
+		&c.IssuersPem,
+		&c.Profile,
+	)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	c.NotAfter = c.NotAfter.UTC()
+	c.NotBefore = c.NotBefore.UTC()
+
+	return c, nil
+}
+
 // GetCertificates returns list of Org certs
 func (p *Provider) GetCertificates(ctx context.Context, orgID uint64) (model.Certificates, error) {
 

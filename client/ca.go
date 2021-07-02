@@ -16,6 +16,12 @@ type CAClient interface {
 	SignCertificate(ctx context.Context, in *pb.SignCertificateRequest) (*pb.CertificateResponse, error)
 	// Issuers returns the issuing CAs
 	Issuers(ctx context.Context) (*pb.IssuersInfoResponse, error)
+	// GetCertificate returns the certificate
+	GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error)
+	// RevokeCertificate returns the revoked certificate
+	RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error)
+	// PublishCrls returns published CRLs
+	PublishCrls(ctx context.Context, req *pb.PublishCrlsRequest) (*pb.CrlsResponse, error)
 }
 
 type authorityClient struct {
@@ -53,6 +59,21 @@ func (c *authorityClient) Issuers(ctx context.Context) (*pb.IssuersInfoResponse,
 	return c.remote.Issuers(ctx, emptyReq, c.callOpts...)
 }
 
+// GetCertificate returns the certificate
+func (c *authorityClient) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error) {
+	return c.remote.GetCertificate(ctx, in, c.callOpts...)
+}
+
+// RevokeCertificate returns the revoked certificate
+func (c *authorityClient) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error) {
+	return c.remote.RevokeCertificate(ctx, in, c.callOpts...)
+}
+
+// PublishCrls returns published CRLs
+func (c *authorityClient) PublishCrls(ctx context.Context, req *pb.PublishCrlsRequest) (*pb.CrlsResponse, error) {
+	return c.remote.PublishCrls(ctx, req, c.callOpts...)
+}
+
 type retryCAClient struct {
 	authority pb.CAServiceClient
 }
@@ -79,4 +100,19 @@ func (c *retryCAClient) SignCertificate(ctx context.Context, in *pb.SignCertific
 // Issuers returns the issuing CAs
 func (c *retryCAClient) Issuers(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*pb.IssuersInfoResponse, error) {
 	return c.authority.Issuers(ctx, in, opts...)
+}
+
+// GetCertificate returns the certificate
+func (c *retryCAClient) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
+	return c.authority.GetCertificate(ctx, in, opts...)
+}
+
+// RevokeCertificate returns the revoked certificate
+func (c *retryCAClient) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest, opts ...grpc.CallOption) (*pb.RevokedCertificateResponse, error) {
+	return c.authority.RevokeCertificate(ctx, in, opts...)
+}
+
+// PublishCrls returns published CRLs
+func (c *retryCAClient) PublishCrls(ctx context.Context, req *pb.PublishCrlsRequest, opts ...grpc.CallOption) (*pb.CrlsResponse, error) {
+	return c.authority.PublishCrls(ctx, req, opts...)
 }

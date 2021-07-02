@@ -244,6 +244,11 @@ func (e *Server) errHandler(err error) {
 // After timeout, enforce remaning requests be closed immediately.
 func (e *Server) Close() {
 	logger.Infof("server=%s", e.Name())
+
+	for _, svc := range e.services {
+		svc.Close()
+	}
+
 	e.closeOnce.Do(func() { close(e.stopc) })
 
 	// close client requests with request timeout

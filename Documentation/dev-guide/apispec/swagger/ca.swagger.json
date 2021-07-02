@@ -16,6 +16,29 @@
     "application/json"
   ],
   "paths": {
+    "/v1/ca/certs": {
+      "post": {
+        "summary": "GetCertificate returns the certificate",
+        "operationId": "CAService_GetCertificate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbCertificateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "CAService"
+        ]
+      }
+    },
     "/v1/ca/issuers": {
       "get": {
         "summary": "Issuers returns the issuing CAs",
@@ -254,7 +277,53 @@
         "certificate": {
           "$ref": "#/definitions/pbCertificate"
         }
-      }
+      },
+      "title": "CertificateResponse returns Certificate"
+    },
+    "pbCrl": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Id of the CRL"
+        },
+        "ikid": {
+          "type": "string",
+          "title": "Ikid provides Issuer Key Identifier"
+        },
+        "this_update": {
+          "type": "string",
+          "format": "date-time",
+          "title": "ThisUpdate is the time when the CRL was issued"
+        },
+        "next_update": {
+          "type": "string",
+          "format": "date-time",
+          "title": "NextUpdate is the time for the next update"
+        },
+        "issuer": {
+          "type": "string",
+          "title": "Issuer name"
+        },
+        "pem": {
+          "type": "string",
+          "title": "PEM encoded CRL"
+        }
+      },
+      "title": "Crl provides X509 CRL information"
+    },
+    "pbCrlsResponse": {
+      "type": "object",
+      "properties": {
+        "clrs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pbCrl"
+          }
+        }
+      },
+      "title": "CrlsResponse returns published CRLs"
     },
     "pbEncodingFormat": {
       "type": "string",
@@ -298,6 +367,48 @@
         }
       },
       "title": "IssuersInfoResponse provides response for Issuers Info request"
+    },
+    "pbReason": {
+      "type": "string",
+      "enum": [
+        "UNSPECIFIED",
+        "KEY_COMPROMISE",
+        "CA_COMPROMISE",
+        "AFFILIATION_CHANGED",
+        "SUPERSEDED",
+        "CESSATION_OF_OPERATION",
+        "CERTIFICATE_HOLD",
+        "REMOVE_FROM_CRL",
+        "PRIVILEGE_WITHDRAWN",
+        "AA_COMPROMISE"
+      ],
+      "default": "UNSPECIFIED",
+      "title": "Reason specifies Certificate Revocation Reason from RFC 5280\nCRLReason ::= ENUMERATED {\n       unspecified             (0),\n       keyCompromise           (1),\n       cACompromise            (2),\n       affiliationChanged      (3),\n       superseded              (4),\n       cessationOfOperation    (5),\n       certificateHold         (6),\n            -- value 7 is not used\n       removeFromCRL           (8),\n       privilegeWithdrawn      (9),\n       aACompromise           (10) }"
+    },
+    "pbRevokedCertificate": {
+      "type": "object",
+      "properties": {
+        "certificate": {
+          "$ref": "#/definitions/pbCertificate"
+        },
+        "revoked_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "reason": {
+          "$ref": "#/definitions/pbReason"
+        }
+      },
+      "title": "RevokedCertificate provides X509 Cert information"
+    },
+    "pbRevokedCertificateResponse": {
+      "type": "object",
+      "properties": {
+        "revoked": {
+          "$ref": "#/definitions/pbRevokedCertificate"
+        }
+      },
+      "title": "RevokedCertificateResponse returns Revoked Certificate"
     },
     "protobufAny": {
       "type": "object",

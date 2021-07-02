@@ -9,6 +9,7 @@ import (
 	"github.com/ekspand/trusty/internal/db/model"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/go-phorce/dolly/rest"
+	"github.com/go-phorce/dolly/tasks"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
 	"google.golang.org/grpc"
@@ -21,9 +22,10 @@ var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", 
 
 // Service defines the Status service
 type Service struct {
-	server *gserver.Server
-	ca     *authority.Authority
-	db     db.CertsDb
+	server    *gserver.Server
+	ca        *authority.Authority
+	db        db.CertsDb
+	scheduler tasks.Scheduler
 }
 
 // Factory returns a factory of the service
@@ -32,11 +34,12 @@ func Factory(server *gserver.Server) interface{} {
 		logger.Panic("status.Factory: invalid parameter")
 	}
 
-	return func(ca *authority.Authority, db db.CertsDb) {
+	return func(ca *authority.Authority, db db.CertsDb, scheduler tasks.Scheduler) {
 		svc := &Service{
-			server: server,
-			ca:     ca,
-			db:     db,
+			server:    server,
+			ca:        ca,
+			db:        db,
+			scheduler: scheduler,
 		}
 
 		server.AddService(svc)
@@ -92,13 +95,4 @@ func (s *Service) registerIssuers(ctx context.Context) error {
 		}
 	}
 	return nil
-}
-
-// GetCertificate returns Certificate
-func (s *Service) GetCertificate(ctx context.Context, id uint64) (*pb.Certificate, error) {
-	c, err := s.db.GetCertificate(ctx, id)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	return c.ToDTO(), nil
 }
