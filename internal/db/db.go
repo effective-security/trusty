@@ -78,6 +78,8 @@ type CertsReadonlyDb interface {
 	GetCertificates(ctx context.Context, orgID uint64) (model.Certificates, error)
 	// GetCertificate returns registered Certificate
 	GetCertificate(ctx context.Context, id uint64) (*model.Certificate, error)
+	// GetCertificateBySKID returns registered Certificate
+	GetCertificateBySKID(ctx context.Context, skid string) (*model.Certificate, error)
 	// GetRevokedCertificatesForOrg returns list of Org's revoked certificates
 	GetRevokedCertificatesForOrg(ctx context.Context, orgID uint64) (model.RevokedCertificates, error)
 	// GetRevokedCertificatesByIssuer returns revoked certificates by a specified issuer

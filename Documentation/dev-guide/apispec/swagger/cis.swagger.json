@@ -37,11 +37,18 @@
         "parameters": [
           {
             "name": "id",
-            "description": "Id provides the ID of the Certificate to return",
+            "description": "Id specifies certificate ID.\nIf it's not set, then SKID must be provided",
             "in": "path",
             "required": true,
             "type": "string",
             "format": "uint64"
+          },
+          {
+            "name": "skid",
+            "description": "SKID specifies Subject Key ID to search.",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -142,7 +149,8 @@
         "certificate": {
           "$ref": "#/definitions/pbCertificate"
         }
-      }
+      },
+      "title": "CertificateResponse returns Certificate"
     },
     "pbRootCertificate": {
       "type": "object",

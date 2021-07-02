@@ -132,6 +132,11 @@ func TestRegisterCertificate(t *testing.T) {
 	require.NotNil(t, r4)
 	assert.Equal(t, *r, *r4)
 
+	r4, err = provider.GetCertificateBySKID(ctx, r2.SKID)
+	require.NoError(t, err)
+	require.NotNil(t, r4)
+	assert.Equal(t, *r, *r4)
+
 	revoked, err := provider.RevokeCertificate(ctx, r4, time.Now(), 0)
 	require.NoError(t, err)
 	assert.Equal(t, revoked.Certificate, *r4)

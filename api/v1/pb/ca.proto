@@ -31,6 +31,21 @@ service CAService {
             post: "/v1/ca/sign"
         };
     }
+
+    // GetCertificate returns the certificate
+    rpc GetCertificate(GetCertificateRequest) returns (CertificateResponse) {
+        option (google.api.http) = {
+            post: "/v1/ca/certs"
+        };
+    }
+
+    // RevokeCertificate returns the revoked certificate
+    rpc RevokeCertificate(RevokeCertificateRequest) returns (RevokedCertificateResponse) {
+    }
+
+    // PublishCrls returns published CRLs
+    rpc PublishCrls(PublishCrlsRequest) returns (CrlsResponse) {
+    }
 }
 
 message CertProfileInfoRequest {
@@ -71,7 +86,7 @@ message IssuersInfoResponse {
     repeated IssuerInfo issuers = 1;
 }
 
-// SignCertificateRequest specifies certificate request
+// SignCertificateRequest specifies certificate sign request
 message SignCertificateRequest {
     // RequestFormat provides the certificate request format: CSR, CMS
     EncodingFormat request_format = 1;
@@ -86,9 +101,46 @@ message SignCertificateRequest {
     // Token provides the authorization token for the request
     string token = 6;
     // OrgId provides the ID of Organization that certificate belongs to
-    uint64 OrgId = 7;
+    uint64 org_id = 7;
 }
 
+// GetCertificateRequest specifies certificate request by ID or issuer key identifier
+message GetCertificateRequest {
+    // Id specifies certificate ID.
+    // If it's not set, then SKID must be provided
+    uint64 id = 1;
+    // SKID specifies Subject Key ID to search
+    string skid = 2;
+}
+
+// RevokeCertificateRequest specifies revocation request
+message RevokeCertificateRequest {
+    // Id specifies certificate ID.
+    // If it's not set, then SKID must be provided
+    uint64 id = 1;
+    // SKID specifies Subject Key ID to search
+    string skid = 2;
+    // Reason for revocation
+    Reason reason = 3;
+}
+
+// CertificateResponse returns Certificate
 message CertificateResponse {
     Certificate certificate = 1;
+}
+
+// RevokedCertificateResponse returns Revoked Certificate
+message RevokedCertificateResponse {
+    RevokedCertificate revoked = 1;
+}
+
+// PublishCrlsRequest allows to publish CRLs on demand
+message PublishCrlsRequest {
+    // IKID specifies Issuer, or empty to publish for all issuers
+    string ikid = 1;
+}
+
+// CrlsResponse returns published CRLs
+message CrlsResponse {
+    repeated Crl clrs = 1;
 }

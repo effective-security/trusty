@@ -49,9 +49,3 @@ message RegisterRootRequest {
 message RegisterCertificateRequest {
     Certificate certificate = 1;
 }
-
-// GetCertificateRequest specifies certificate request
-message GetCertificateRequest {
-    // Id provides the ID of the Certificate to return
-    uint64 id = 1;
-}

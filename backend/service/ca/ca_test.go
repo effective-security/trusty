@@ -103,6 +103,10 @@ func TestMain(m *testing.M) {
 	os.Exit(rc)
 }
 
+func TestReady(t *testing.T) {
+	assert.True(t, trustyServer.IsReady())
+}
+
 func TestIssuers(t *testing.T) {
 	res, err := authorityClient.Issuers(context.Background())
 	require.NoError(t, err)
@@ -188,9 +192,36 @@ func TestSignCertificate(t *testing.T) {
 	// Signed cert must be registered in DB
 
 	svc := trustyServer.Service("ca").(*ca.Service)
-	crt, err := svc.GetCertificate(context.Background(), res.Certificate.Id)
+	crt, err := svc.GetCertificate(context.Background(),
+		&pb.GetCertificateRequest{Id: res.Certificate.Id})
 	require.NoError(t, err)
-	assert.Equal(t, res.Certificate.String(), crt.String())
+	assert.Equal(t, res.Certificate.String(), crt.Certificate.String())
+
+	crt, err = svc.GetCertificate(context.Background(),
+		&pb.GetCertificateRequest{Skid: res.Certificate.Skid})
+	require.NoError(t, err)
+	assert.Equal(t, res.Certificate.String(), crt.Certificate.String())
+}
+
+func TestPublishCrls(t *testing.T) {
+	ctx := context.Background()
+	certRes, err := authorityClient.SignCertificate(ctx, &pb.SignCertificateRequest{
+		Profile:       "test_server",
+		Request:       string(generateCSR()),
+		RequestFormat: pb.EncodingFormat_PEM,
+	})
+	require.NoError(t, err)
+
+	revRes, err := authorityClient.RevokeCertificate(ctx, &pb.RevokeCertificateRequest{
+		Skid:   certRes.Certificate.Skid,
+		Reason: pb.Reason_CA_COMPROMISE,
+	})
+	require.NoError(t, err)
+	assert.Equal(t, pb.Reason_CA_COMPROMISE, revRes.Revoked.Reason)
+
+	list, err := authorityClient.PublishCrls(ctx, &pb.PublishCrlsRequest{})
+	require.NoError(t, err)
+	require.NotEmpty(t, list)
 }
 
 func generateCSR() []byte {

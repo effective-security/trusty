@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/ekspand/trusty/internal/db/model"
+	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
 )
 
@@ -49,6 +50,7 @@ func (p *Provider) RegisterCrl(ctx context.Context, crl *model.Crl) (*model.Crl,
 		&res.Pem,
 	)
 	if err != nil {
+		logger.KV(xlog.ERROR, "err", errors.Details(err))
 		return nil, errors.Trace(err)
 	}
 	res.ThisUpdate = res.ThisUpdate.UTC()
@@ -60,7 +62,7 @@ func (p *Provider) RegisterCrl(ctx context.Context, crl *model.Crl) (*model.Crl,
 func (p *Provider) RemoveCrl(ctx context.Context, id uint64) error {
 	_, err := p.db.ExecContext(ctx, `DELETE FROM crls WHERE id=$1;`, id)
 	if err != nil {
-		logger.Errorf("err=[%s]", errors.Details(err))
+		logger.KV(xlog.ERROR, "err", errors.Details(err))
 		return errors.Trace(err)
 	}
 
@@ -86,6 +88,7 @@ func (p *Provider) GetCrl(ctx context.Context, ikid string) (*model.Crl, error) 
 		&res.Pem,
 	)
 	if err != nil {
+		logger.KV(xlog.ERROR, "err", errors.Details(err))
 		return nil, errors.Trace(err)
 	}
 	res.ThisUpdate = res.ThisUpdate.UTC()

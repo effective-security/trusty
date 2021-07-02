@@ -31,3 +31,18 @@ func (s *caSrv2C) SignCertificate(ctx context.Context, in *pb.SignCertificateReq
 func (s *caSrv2C) Issuers(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*pb.IssuersInfoResponse, error) {
 	return s.srv.Issuers(ctx, in)
 }
+
+// GetCertificate returns the certificate
+func (s *caSrv2C) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
+	return s.srv.GetCertificate(ctx, in)
+}
+
+// RevokeCertificate returns the revoked certificate
+func (s *caSrv2C) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest, opts ...grpc.CallOption) (*pb.RevokedCertificateResponse, error) {
+	return s.srv.RevokeCertificate(ctx, in)
+}
+
+// PublishCrls returns published CRLs
+func (s *caSrv2C) PublishCrls(ctx context.Context, in *pb.PublishCrlsRequest, opts ...grpc.CallOption) (*pb.CrlsResponse, error) {
+	return s.srv.PublishCrls(ctx, in)
+}
