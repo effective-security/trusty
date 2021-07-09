@@ -280,6 +280,18 @@
       },
       "title": "CertificateResponse returns Certificate"
     },
+    "pbCertificatesResponse": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pbCertificate"
+          }
+        }
+      },
+      "title": "CertificatesResponse returns Certificates list"
+    },
     "pbCrl": {
       "type": "object",
       "properties": {
@@ -409,6 +421,18 @@
         }
       },
       "title": "RevokedCertificateResponse returns Revoked Certificate"
+    },
+    "pbRevokedCertificatesResponse": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pbRevokedCertificate"
+          }
+        }
+      },
+      "title": "RevokedCertificatesResponse returns Revoked Certificates list"
     },
     "protobufAny": {
       "type": "object",

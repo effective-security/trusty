@@ -8,6 +8,7 @@ import (
 
 	v1 "github.com/ekspand/trusty/api/v1"
 	pb "github.com/ekspand/trusty/api/v1/pb"
+	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/internal/db/model"
 	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/go-phorce/dolly/metrics"
@@ -164,15 +165,10 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 
 // PublishCrls returns published CRLs
 func (s *Service) PublishCrls(ctx context.Context, req *pb.PublishCrlsRequest) (*pb.CrlsResponse, error) {
+	logger.KV(xlog.TRACE, "ikid", req.Ikid)
+
 	res := &pb.CrlsResponse{}
 	for _, issuer := range s.ca.Issuers() {
-		if issuer.CrlURL() == "" {
-			logger.KV(xlog.INFO,
-				"issuer_id", issuer.SubjectKID(),
-				"status", "crl_disabled",
-			)
-			continue
-		}
 		if req.Ikid == "" || req.Ikid == issuer.SubjectKID() {
 			crl, err := s.createGenericCRL(ctx, issuer)
 			if err != nil {
@@ -240,4 +236,42 @@ func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificat
 		Revoked: revoked.ToDTO(),
 	}
 	return res, nil
+}
+
+// ListCertificates returns stream of Certificates
+func (s *Service) ListCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.CertificatesResponse, error) {
+	list, err := s.db.ListCertificates(ctx, in.Ikid, int(in.Limit), in.After)
+	if err != nil {
+		logger.KV(xlog.ERROR,
+			"request", in,
+			"err", errors.Details(err),
+		)
+		return nil, v1.NewError(codes.Internal, "unable to list certificates")
+	}
+	res := &pb.CertificatesResponse{
+		List: list.ToDTO(),
+	}
+	return res, nil
+}
+
+// ListRevokedCertificates returns stream of Revoked Certificates
+func (s *Service) ListRevokedCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.RevokedCertificatesResponse, error) {
+	list, err := s.db.ListRevokedCertificates(ctx, in.Ikid, int(in.Limit), in.After)
+	if err != nil {
+		logger.KV(xlog.ERROR,
+			"request", in,
+			"err", errors.Details(err),
+		)
+		return nil, v1.NewError(codes.Internal, "unable to list certificates")
+	}
+	res := &pb.RevokedCertificatesResponse{
+		List: list.ToDTO(),
+	}
+	return res, nil
+}
+
+// Db returns DB
+// Used in Unittests
+func (s *Service) Db() db.CertsDb {
+	return s.db
 }

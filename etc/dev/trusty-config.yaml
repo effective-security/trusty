@@ -262,11 +262,13 @@ servers:
         - /pb.CAService/ProfileInfo
         - /pb.CAService/Issuers
         - /pb.CAService/GetCertificate
+        - /pb.CAService/ListCertificates
+        - /pb.CAService/ListRevokedCertificates
       # allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
       allow:
         - /pb.CAService/SignCertificate:trusty-wfe,trusty-ra,trusty-admin,trusty
-        - /pb.CAService/PublishCrls:trusty-admin,trusty
-        - /pb.CAService/RevokeCertificate:trusty-admin,trusty
+        - /pb.CAService/PublishCrls:trusty-ra,trusty-admin,trusty
+        - /pb.CAService/RevokeCertificate:trusty-ra,trusty-admin,trusty
       # specifies to log allowed access to Any role
       log_allowed_any: false
       # specifies to log allowed access

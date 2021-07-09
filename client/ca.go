@@ -22,6 +22,10 @@ type CAClient interface {
 	RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error)
 	// PublishCrls returns published CRLs
 	PublishCrls(ctx context.Context, req *pb.PublishCrlsRequest) (*pb.CrlsResponse, error)
+	// ListCertificates returns stream of Certificates
+	ListCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.CertificatesResponse, error)
+	// ListRevokedCertificates returns stream of Revoked Certificates
+	ListRevokedCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.RevokedCertificatesResponse, error)
 }
 
 type authorityClient struct {
@@ -74,6 +78,16 @@ func (c *authorityClient) PublishCrls(ctx context.Context, req *pb.PublishCrlsRe
 	return c.remote.PublishCrls(ctx, req, c.callOpts...)
 }
 
+// ListCertificates returns stream of Certificates
+func (c *authorityClient) ListCertificates(ctx context.Context, req *pb.ListByIssuerRequest) (*pb.CertificatesResponse, error) {
+	return c.remote.ListCertificates(ctx, req, c.callOpts...)
+}
+
+// ListRevokedCertificates returns stream of Revoked Certificates
+func (c *authorityClient) ListRevokedCertificates(ctx context.Context, req *pb.ListByIssuerRequest) (*pb.RevokedCertificatesResponse, error) {
+	return c.remote.ListRevokedCertificates(ctx, req, c.callOpts...)
+}
+
 type retryCAClient struct {
 	authority pb.CAServiceClient
 }
@@ -115,4 +129,14 @@ func (c *retryCAClient) RevokeCertificate(ctx context.Context, in *pb.RevokeCert
 // PublishCrls returns published CRLs
 func (c *retryCAClient) PublishCrls(ctx context.Context, req *pb.PublishCrlsRequest, opts ...grpc.CallOption) (*pb.CrlsResponse, error) {
 	return c.authority.PublishCrls(ctx, req, opts...)
+}
+
+// ListCertificates returns stream of Certificates
+func (c *retryCAClient) ListCertificates(ctx context.Context, req *pb.ListByIssuerRequest, opts ...grpc.CallOption) (*pb.CertificatesResponse, error) {
+	return c.authority.ListCertificates(ctx, req, opts...)
+}
+
+// ListRevokedCertificates returns stream of Revoked Certificates
+func (c *retryCAClient) ListRevokedCertificates(ctx context.Context, req *pb.ListByIssuerRequest, opts ...grpc.CallOption) (*pb.RevokedCertificatesResponse, error) {
+	return c.authority.ListRevokedCertificates(ctx, req, opts...)
 }

@@ -26,11 +26,11 @@ func Certificate(w io.Writer, crt *x509.Certificate) {
 	issuedIn := now.Sub(crt.NotBefore.Local()) / time.Minute * time.Minute
 	expiresIn := crt.NotAfter.Local().Sub(now) / time.Minute * time.Minute
 
-	fmt.Fprintf(w, "ID: %s\n", certutil.GetSubjectID(crt))
+	fmt.Fprintf(w, "SKID: %s\n", certutil.GetSubjectKeyID(crt))
+	fmt.Fprintf(w, "IKID: %s\n", certutil.GetAuthorityKeyID(crt))
 	fmt.Fprintf(w, "Subject: %s\n", certutil.NameToString(&crt.Subject))
 	fmt.Fprintf(w, "Serial: %s\n", crt.SerialNumber.String())
 	fmt.Fprintf(w, "Issuer: %s\n", certutil.NameToString(&crt.Issuer))
-	fmt.Fprintf(w, "Issuer ID: %s\n", certutil.GetIssuerID(crt))
 	fmt.Fprintf(w, "Issued: %s (%s ago)\n", crt.NotBefore.Local().String(), issuedIn.String())
 	fmt.Fprintf(w, "Expires: %s (in %s)\n", crt.NotAfter.Local().String(), expiresIn.String())
 	if len(crt.DNSNames) > 0 {

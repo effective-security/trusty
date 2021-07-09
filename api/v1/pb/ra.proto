@@ -36,12 +36,6 @@ message RootsResponse {
     repeated RootCertificate roots = 1;
 }
 
-// CertificatesResponse returns Certificates
-message CertificatesResponse {
-    repeated Certificate certificates = 1;
-}
-
-
 message RegisterRootRequest {
     RootCertificate root = 1;
 }

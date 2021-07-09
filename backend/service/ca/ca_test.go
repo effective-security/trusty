@@ -224,6 +224,111 @@ func TestPublishCrls(t *testing.T) {
 	require.NotEmpty(t, list)
 }
 
+func TestE2E(t *testing.T) {
+	svc := trustyServer.Service("ca").(*ca.Service)
+	//db := svc.Db()
+	ctx := context.Background()
+	count := 50
+
+	res, err := authorityClient.SignCertificate(ctx, &pb.SignCertificateRequest{
+		Profile:       "test_server",
+		Request:       string(generateCSR()),
+		RequestFormat: pb.EncodingFormat_PEM,
+	})
+	require.NoError(t, err)
+
+	ikid := res.Certificate.Ikid
+	lRes, err := authorityClient.ListCertificates(ctx, &pb.ListByIssuerRequest{
+		Limit: 1000,
+		Ikid:  ikid,
+	})
+	require.NoError(t, err)
+	t.Logf("ListCertificates: %d", len(lRes.List))
+
+	for i := 0; i < count; i++ {
+		res, err = authorityClient.SignCertificate(ctx, &pb.SignCertificateRequest{
+			Profile:       "test_server",
+			Request:       string(generateCSR()),
+			RequestFormat: pb.EncodingFormat_PEM,
+		})
+		require.NoError(t, err)
+
+		crtRes, err := svc.GetCertificate(ctx,
+			&pb.GetCertificateRequest{Skid: res.Certificate.Skid})
+		require.NoError(t, err)
+		assert.Equal(t, res.Certificate.String(), crtRes.Certificate.String())
+
+		if i%2 == 0 {
+			if i < count/2 {
+				_, err = authorityClient.RevokeCertificate(ctx, &pb.RevokeCertificateRequest{
+					Id:     crtRes.Certificate.Id,
+					Reason: pb.Reason_KEY_COMPROMISE,
+				})
+				require.NoError(t, err)
+			} else {
+				_, err = authorityClient.RevokeCertificate(ctx, &pb.RevokeCertificateRequest{
+					Skid:   crtRes.Certificate.Skid,
+					Reason: pb.Reason_CESSATION_OF_OPERATION,
+				})
+				require.NoError(t, err)
+			}
+		}
+	}
+
+	last := uint64(0)
+	certsCount := 0
+	for {
+		lRes2, err := authorityClient.ListCertificates(ctx, &pb.ListByIssuerRequest{
+			Limit: 10,
+			After: last,
+			Ikid:  ikid,
+		})
+		require.NoError(t, err)
+		certsCount += len(lRes2.List)
+		last = lRes2.List[len(lRes2.List)-1].Id
+		/*
+			for _, c := range lRes2.List {
+				defer db.RemoveCertificate(ctx, c.Id)
+			}
+		*/
+		if len(lRes2.List) < 10 {
+			break
+		}
+	}
+
+	last = uint64(0)
+	revokedCount := 0
+	for {
+		lRes3, err := authorityClient.ListRevokedCertificates(ctx, &pb.ListByIssuerRequest{
+			Limit: 10,
+			After: last,
+			Ikid:  ikid,
+		})
+		require.NoError(t, err)
+
+		count := len(lRes3.List)
+		revokedCount += count
+
+		if count > 0 {
+			last = lRes3.List[count-1].Certificate.Id
+		}
+		/*
+			for _, c := range lRes3.List {
+				defer db.RemoveRevokedCertificate(ctx, c.Certificate.Id)
+			}
+		*/
+		if len(lRes3.List) < 10 {
+			break
+		}
+	}
+
+	assert.True(t, revokedCount >= count/2)
+	assert.True(t, certsCount >= count/2)
+	assert.True(t, revokedCount+certsCount >= count)
+	assert.True(t, revokedCount+certsCount >= len(lRes.List),
+		"revoked:%d, count:%d, len:%d", revokedCount, certsCount, len(lRes.List))
+}
+
 func generateCSR() []byte {
 	prov := csr.NewProvider(inmemcrypto.NewProvider())
 	req := prov.NewSigningCertificateRequest("label", "ECDSA", 256, "localhost", []csr.X509Name{

@@ -34,9 +34,9 @@ func Test_PrintCerts(t *testing.T) {
 
 	out := w.String()
 	assert.NotContains(t, out, "ERROR:")
-	assert.Contains(t, out, "ID: ")
+	assert.Contains(t, out, "SKID: ")
+	assert.Contains(t, out, "IKID: ")
 	assert.Contains(t, out, "Subject: ")
-	assert.Contains(t, out, "Issuer ID: ")
 	assert.Contains(t, out, "Expires: ")
 	assert.Contains(t, out, "CA: ")
 }

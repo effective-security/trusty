@@ -46,3 +46,13 @@ func (s *caSrv2C) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificat
 func (s *caSrv2C) PublishCrls(ctx context.Context, in *pb.PublishCrlsRequest, opts ...grpc.CallOption) (*pb.CrlsResponse, error) {
 	return s.srv.PublishCrls(ctx, in)
 }
+
+// ListCertificates returns stream of Certificates
+func (s *caSrv2C) ListCertificates(ctx context.Context, req *pb.ListByIssuerRequest, opts ...grpc.CallOption) (*pb.CertificatesResponse, error) {
+	return s.srv.ListCertificates(ctx, req)
+}
+
+// ListRevokedCertificates returns stream of Revoked Certificates
+func (s *caSrv2C) ListRevokedCertificates(ctx context.Context, req *pb.ListByIssuerRequest, opts ...grpc.CallOption) (*pb.RevokedCertificatesResponse, error) {
+	return s.srv.ListRevokedCertificates(ctx, req)
+}

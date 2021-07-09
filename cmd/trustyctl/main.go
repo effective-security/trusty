@@ -69,7 +69,7 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		Action(cli.RegisterAction(auth.Authenticate, loginFlags))
 	loginFlags.NoBrowser = cmdLogin.Flag("no-browser", "disable openning in browser").Bool()
 
-	// ca: issuers|profile|sign
+	// ca: issuers|profile|sign|certs|revoked|publish_crl
 
 	cmdCA := app.Command("ca", "CA operations").
 		PreAction(cli.PopulateControl)
@@ -92,6 +92,25 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	signFlags.Token = signCmd.Flag("token", "authorization token for the request").String()
 	signFlags.SAN = signCmd.Flag("san", "optional SAN").Strings()
 	signFlags.Out = signCmd.Flag("out", "output file name").String()
+
+	listCertsFlags := new(ca.ListCertsFlags)
+	listCertsCmd := cmdCA.Command("certs", "print the certificates").
+		Action(cli.RegisterAction(ca.ListCerts, listCertsFlags))
+	listCertsFlags.Ikid = listCertsCmd.Flag("ikid", "Issuer Key Identifier").Required().String()
+	listCertsFlags.Limit = listCertsCmd.Flag("limit", "max limit of the certificates to print").Int()
+	listCertsFlags.After = listCertsCmd.Flag("after", "the certificate ID for pagination").String()
+
+	rlistCertsFlags := new(ca.ListCertsFlags)
+	revokedCmd := cmdCA.Command("revoked", "print the revoked certificates").
+		Action(cli.RegisterAction(ca.ListRevokedCerts, rlistCertsFlags))
+	rlistCertsFlags.Ikid = revokedCmd.Flag("ikid", "Issuer Key Identifier").Required().String()
+	rlistCertsFlags.Limit = revokedCmd.Flag("limit", "max limit of the certificates to print").Int()
+	rlistCertsFlags.After = revokedCmd.Flag("after", "the certificate ID for pagination").String()
+
+	publishCrlFlags := new(ca.PublishCrlsFlags)
+	publishCrlCmd := cmdCA.Command("publish_crl", "publish CRL").
+		Action(cli.RegisterAction(ca.PublishCrls, publishCrlFlags))
+	publishCrlFlags.Ikid = publishCrlCmd.Flag("ikid", "Issuer Key Identifier").Required().String()
 
 	// cis: roots
 
