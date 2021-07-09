@@ -7,9 +7,9 @@ import (
 	"crypto/x509/pkix"
 	"encoding/base64"
 	"fmt"
+	"math/big"
 	"time"
 
-	"github.com/cloudflare/cfssl/helpers"
 	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/authority"
 	"github.com/ekspand/trusty/internal/db/model"
@@ -21,21 +21,26 @@ func (s *Service) createGenericCRL(ctx context.Context, issuer *authority.Issuer
 	now := time.Now().UTC()
 	expiryTime := now.Add(issuer.CrlExpiry())
 
-	revokedInfoList, err := s.db.GetRevokedCertificatesByIssuer(ctx, issuer.SubjectKID())
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	revokedCerts := make([]pkix.RevokedCertificate, len(revokedInfoList))
-	for idx, ri := range revokedInfoList {
-		// Parse the PEM encoded certificate
-		cert, err := helpers.ParseCertificatePEM([]byte(ri.Certificate.Pem))
+	revokedCerts := make([]pkix.RevokedCertificate, 0, 1000)
+	last := uint64(0)
+	for {
+		revokedInfoList, err := s.db.ListRevokedCertificates(ctx, issuer.SubjectKID(), 0, last)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
+		if len(revokedInfoList) == 0 {
+			break
+		}
 
-		revokedCerts[idx].SerialNumber = cert.SerialNumber
-		revokedCerts[idx].RevocationTime = ri.RevokedAt
+		for _, ri := range revokedInfoList {
+			sn := new(big.Int)
+			sn, _ = sn.SetString(ri.Certificate.SerialNumber, 10)
+			revokedCerts = append(revokedCerts, pkix.RevokedCertificate{
+				SerialNumber:   sn,
+				RevocationTime: ri.RevokedAt,
+			})
+			last = ri.Certificate.ID
+		}
 	}
 
 	crlBytes, err := bundle.Cert.CreateCRL(rand.Reader, issuer.Signer(), revokedCerts, now, expiryTime)

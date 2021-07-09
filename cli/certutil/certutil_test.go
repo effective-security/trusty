@@ -171,11 +171,11 @@ func (s *testSuite) Test_CertInfo() {
 	s.Require().NoError(err)
 
 	s.HasText(`==================================== 3 ====================================`)
-	s.HasText(`ID: 62414b588706192ef655e8bc8c917c8a5149df8c`)
+	s.HasText(`SKID: 62414b588706192ef655e8bc8c917c8a5149df8c`)
+	s.HasText(`IKID: 43071d5866f6d907b5f299ca9db68b040d215990`)
 	s.HasText(`Subject: C=US, L=WA, O=trusty.com, CN=[TEST] Trusty Level 1 CA`)
 	s.HasText(`Serial: 702597793510794676716819367951072878101408931446`)
 	s.HasText(`Issuer: C=US, L=WA, O=trusty.com, CN=[TEST] Trusty Root CA`)
-	s.HasText(`Issuer ID: 43071d5866f6d907b5f299ca9db68b040d215990`)
 
 	s.HasTextInFile(out, `#   Subject: C=US, L=WA, O=trusty.com, CN=[TEST] Trusty Level 1 CA`,
 		`BEGIN CERTIFICATE`)
@@ -245,8 +245,8 @@ func (s *testSuite) Test_ValidateCAs() {
 			rootBundle,
 			[]string{
 				"Subject: C=US, L=WA, O=trusty.com, CN=[TEST] Trusty Level 2 CA",
-				"ID: 7331f9b8c304dcc28ffa30081d4d003e4e1c8abf",
-				"Issuer ID: e27834b5c949943e736288413646d2f3cbea8f5f",
+				"SKID: 7331f9b8c304dcc28ffa30081d4d003e4e1c8abf",
+				"IKID: e27834b5c949943e736288413646d2f3cbea8f5f",
 				"Max Path: 1",
 			},
 		},
@@ -256,8 +256,8 @@ func (s *testSuite) Test_ValidateCAs() {
 			rootBundle,
 			[]string{
 				"Subject: C=US, L=WA, O=trusty.com, CN=[TEST] Trusty Level 1 CA",
-				"ID: e27834b5c949943e736288413646d2f3cbea8f5f",
-				"Issuer ID: 49f1d05cea6da4e337cdb18965fb71db88147b76",
+				"SKID: e27834b5c949943e736288413646d2f3cbea8f5f",
+				"IKID: 49f1d05cea6da4e337cdb18965fb71db88147b76",
 				"Max Path: 1",
 			},
 		},

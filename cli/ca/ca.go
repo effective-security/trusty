@@ -9,6 +9,7 @@ import (
 	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/cli"
 	"github.com/ekspand/trusty/internal/config"
+	"github.com/ekspand/trusty/internal/db/model"
 	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/juju/errors"
@@ -35,6 +36,87 @@ func Issuers(c ctl.Control, _ interface{}) error {
 	} else {
 		print.Issuers(c.Writer(), res.Issuers, true)
 	}
+	return nil
+}
+
+// ListCertsFlags defines flags for ListCerts command
+type ListCertsFlags struct {
+	Ikid  *string
+	Limit *int
+	After *string
+}
+
+// ListCerts prints the certifiates
+func ListCerts(c ctl.Control, p interface{}) error {
+	flags := p.(*ListCertsFlags)
+	cli := c.(*cli.Cli)
+	client, err := cli.Client(config.CAServerName)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	defer client.Close()
+
+	after := uint64(0)
+	if *flags.After != "" {
+		after, err = model.ID(*flags.After)
+		if err != nil {
+			return errors.Annotate(err, "unable to parse --after")
+		}
+	}
+
+	res, err := client.CAClient().ListCertificates(context.Background(), &pb.ListByIssuerRequest{
+		Ikid:  *flags.Ikid,
+		Limit: int64(*flags.Limit),
+		After: after,
+	})
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	if cli.IsJSON() {
+		ctl.WriteJSON(c.Writer(), res)
+		fmt.Fprint(c.Writer(), "\n")
+	} else {
+		print.CertificatesTable(c.Writer(), res.List)
+	}
+
+	return nil
+}
+
+// ListRevokedCerts prints the revoked certifiates
+func ListRevokedCerts(c ctl.Control, p interface{}) error {
+	flags := p.(*ListCertsFlags)
+	cli := c.(*cli.Cli)
+	client, err := cli.Client(config.CAServerName)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	defer client.Close()
+
+	after := uint64(0)
+	if *flags.After != "" {
+		after, err = model.ID(*flags.After)
+		if err != nil {
+			return errors.Annotate(err, "unable to parse --after")
+		}
+	}
+
+	res, err := client.CAClient().ListRevokedCertificates(context.Background(), &pb.ListByIssuerRequest{
+		Ikid:  *flags.Ikid,
+		Limit: int64(*flags.Limit),
+		After: after,
+	})
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	if cli.IsJSON() {
+		ctl.WriteJSON(c.Writer(), res)
+		fmt.Fprint(c.Writer(), "\n")
+	} else {
+		print.RevokedCertificatesTable(c.Writer(), res.List)
+	}
+
 	return nil
 }
 
@@ -128,4 +210,34 @@ func Sign(c ctl.Control, p interface{}) error {
 	return nil
 }
 
-// TODO: PublishCrls
+// PublishCrlsFlags defines flags for PublishCrls command
+type PublishCrlsFlags struct {
+	Ikid *string
+}
+
+// PublishCrls prints the certifiates
+func PublishCrls(c ctl.Control, p interface{}) error {
+	flags := p.(*PublishCrlsFlags)
+	cli := c.(*cli.Cli)
+	client, err := cli.Client(config.CAServerName)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	defer client.Close()
+
+	res, err := client.CAClient().PublishCrls(context.Background(), &pb.PublishCrlsRequest{
+		Ikid: *flags.Ikid,
+	})
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	if cli.IsJSON() {
+		ctl.WriteJSON(c.Writer(), res)
+		fmt.Fprint(c.Writer(), "\n")
+	} else {
+		print.CrlsTable(c.Writer(), res.Clrs)
+	}
+
+	return nil
+}

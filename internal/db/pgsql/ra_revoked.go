@@ -84,8 +84,8 @@ func (p *Provider) RemoveRevokedCertificate(ctx context.Context, id uint64) erro
 	return nil
 }
 
-// GetRevokedCertificatesForOrg returns list of Org's revoked certificates
-func (p *Provider) GetRevokedCertificatesForOrg(ctx context.Context, orgID uint64) (model.RevokedCertificates, error) {
+// GetOrgRevokedCertificates returns list of Org's revoked certificates
+func (p *Provider) GetOrgRevokedCertificates(ctx context.Context, orgID uint64) (model.RevokedCertificates, error) {
 
 	res, err := p.db.QueryContext(ctx, `
 		SELECT
@@ -133,17 +133,30 @@ func (p *Provider) GetRevokedCertificatesForOrg(ctx context.Context, orgID uint6
 	return list, nil
 }
 
-// GetRevokedCertificatesByIssuer returns revoked certificates by a specified issuer
-func (p *Provider) GetRevokedCertificatesByIssuer(ctx context.Context, ikid string) (model.RevokedCertificates, error) {
+// ListRevokedCertificates returns revoked certificates by a specified issuer
+func (p *Provider) ListRevokedCertificates(ctx context.Context, ikid string, limit int, afterID uint64) (model.RevokedCertificates, error) {
+	if limit == 0 {
+		limit = 1000
+	}
 
-	res, err := p.db.QueryContext(ctx, `
-		SELECT
-		id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,revoked_at,reason
+	logger.KV(xlog.DEBUG,
+		"ikid", ikid,
+		"limit", limit,
+		"afterID", afterID,
+	)
+
+	res, err := p.db.QueryContext(ctx,
+		`SELECT
+			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,profile,revoked_at,reason
 		FROM
 			revoked
-		WHERE ikid = $1
+		WHERE 
+			ikid = $1 AND id > $2
+		ORDER BY
+			id ASC
+		LIMIT $3
 		;
-		`, ikid)
+		`, ikid, afterID, limit)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -164,8 +177,6 @@ func (p *Provider) GetRevokedCertificatesByIssuer(ctx context.Context, ikid stri
 			&r.Certificate.Subject,
 			&r.Certificate.Issuer,
 			&r.Certificate.ThumbprintSha256,
-			&r.Certificate.Pem,
-			&r.Certificate.IssuersPem,
 			&r.Certificate.Profile,
 			&r.RevokedAt,
 			&r.Reason,

@@ -26,6 +26,15 @@ func (r *RevokedCertificate) ToDTO() *pb.RevokedCertificate {
 // RevokedCertificates defines a list of RevokedCertificate
 type RevokedCertificates []*RevokedCertificate
 
+// ToDTO returns DTO
+func (list RevokedCertificates) ToDTO() []*pb.RevokedCertificate {
+	dto := make([]*pb.RevokedCertificate, len(list))
+	for i, r := range list {
+		dto[i] = r.ToDTO()
+	}
+	return dto
+}
+
 // Find a cert by ID
 func (list RevokedCertificates) Find(id uint64) *RevokedCertificate {
 	for _, m := range list {

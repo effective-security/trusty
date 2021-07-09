@@ -46,6 +46,14 @@ service CAService {
     // PublishCrls returns published CRLs
     rpc PublishCrls(PublishCrlsRequest) returns (CrlsResponse) {
     }
+
+    // ListCertificates returns stream of Certificates
+    rpc ListCertificates(ListByIssuerRequest) returns (CertificatesResponse) {
+    }
+
+    // ListRevokedCertificates returns stream of Revoked Certificates
+    rpc ListRevokedCertificates(ListByIssuerRequest) returns (RevokedCertificatesResponse) {
+    }
 }
 
 message CertProfileInfoRequest {
@@ -113,6 +121,15 @@ message GetCertificateRequest {
     string skid = 2;
 }
 
+message ListByIssuerRequest {
+    // Limit specifies the limit to return, or ALL if 0
+    int64 limit = 1; 
+    // After specifies certificate ID to start after
+    uint64 after = 2;
+    // IKID specifies Issuer Key ID to search
+    string ikid = 3;
+}
+
 // RevokeCertificateRequest specifies revocation request
 message RevokeCertificateRequest {
     // Id specifies certificate ID.
@@ -129,9 +146,19 @@ message CertificateResponse {
     Certificate certificate = 1;
 }
 
+// CertificatesResponse returns Certificates list
+message CertificatesResponse {
+    repeated Certificate list = 1;
+}
+
 // RevokedCertificateResponse returns Revoked Certificate
 message RevokedCertificateResponse {
     RevokedCertificate revoked = 1;
+}
+
+// RevokedCertificatesResponse returns Revoked Certificates list
+message RevokedCertificatesResponse {
+    repeated RevokedCertificate list = 1;
 }
 
 // PublishCrlsRequest allows to publish CRLs on demand

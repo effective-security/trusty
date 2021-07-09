@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/ekspand/trusty/internal/db/model"
+	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
 )
 
@@ -147,8 +148,8 @@ func (p *Provider) GetCertificateBySKID(ctx context.Context, skid string) (*mode
 	return c, nil
 }
 
-// GetCertificates returns list of Org certs
-func (p *Provider) GetCertificates(ctx context.Context, orgID uint64) (model.Certificates, error) {
+// GetOrgCertificates returns list of Org certs
+func (p *Provider) GetOrgCertificates(ctx context.Context, orgID uint64) (model.Certificates, error) {
 
 	res, err := p.db.QueryContext(ctx, `
 		SELECT
@@ -180,6 +181,62 @@ func (p *Provider) GetCertificates(ctx context.Context, orgID uint64) (model.Cer
 			&r.ThumbprintSha256,
 			&r.Pem,
 			&r.IssuersPem,
+			&r.Profile,
+		)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		r.NotAfter = r.NotAfter.UTC()
+		r.NotBefore = r.NotBefore.UTC()
+		list = append(list, r)
+	}
+
+	return list, nil
+}
+
+// ListCertificates returns list of Certificate info
+func (p *Provider) ListCertificates(ctx context.Context, ikid string, limit int, afterID uint64) (model.Certificates, error) {
+	if limit == 0 {
+		limit = 1000
+	}
+	logger.KV(xlog.DEBUG,
+		"ikid", ikid,
+		"limit", limit,
+		"afterID", afterID,
+	)
+
+	res, err := p.db.QueryContext(ctx,
+		`SELECT
+			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,profile
+		FROM
+			certificates
+		WHERE 
+			ikid = $1 AND id > $2
+		ORDER BY
+			id ASC
+		LIMIT $3
+		;
+		`, ikid, afterID, limit)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	defer res.Close()
+
+	list := make([]*model.Certificate, 0, limit)
+
+	for res.Next() {
+		r := new(model.Certificate)
+		err = res.Scan(
+			&r.ID,
+			&r.OrgID,
+			&r.SKID,
+			&r.IKID,
+			&r.SerialNumber,
+			&r.NotBefore,
+			&r.NotAfter,
+			&r.Subject,
+			&r.Issuer,
+			&r.ThumbprintSha256,
 			&r.Profile,
 		)
 		if err != nil {

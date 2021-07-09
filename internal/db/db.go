@@ -74,18 +74,20 @@ type OrgsDb interface {
 type CertsReadonlyDb interface {
 	// GetRootCertificatesr returns list of Root certs
 	GetRootCertificates(ctx context.Context) (model.RootCertificates, error)
-	// GetCertificates returns Certificates
-	GetCertificates(ctx context.Context, orgID uint64) (model.Certificates, error)
+	// GetOrgCertificates returns Certificates for organization
+	GetOrgCertificates(ctx context.Context, orgID uint64) (model.Certificates, error)
 	// GetCertificate returns registered Certificate
 	GetCertificate(ctx context.Context, id uint64) (*model.Certificate, error)
 	// GetCertificateBySKID returns registered Certificate
 	GetCertificateBySKID(ctx context.Context, skid string) (*model.Certificate, error)
-	// GetRevokedCertificatesForOrg returns list of Org's revoked certificates
-	GetRevokedCertificatesForOrg(ctx context.Context, orgID uint64) (model.RevokedCertificates, error)
-	// GetRevokedCertificatesByIssuer returns revoked certificates by a specified issuer
-	GetRevokedCertificatesByIssuer(ctx context.Context, ikid string) (model.RevokedCertificates, error)
+	// GetOrgRevokedCertificates returns list of Org's revoked certificates
+	GetOrgRevokedCertificates(ctx context.Context, orgID uint64) (model.RevokedCertificates, error)
 	// GetCrl returns CRL by a specified issuer
 	GetCrl(ctx context.Context, ikid string) (*model.Crl, error)
+	// ListRevokedCertificates returns revoked certificates info by a specified issuer
+	ListRevokedCertificates(ctx context.Context, ikid string, limit int, afterID uint64) (model.RevokedCertificates, error)
+	// ListCertificates returns list of Certificate info
+	ListCertificates(ctx context.Context, ikid string, limit int, afterID uint64) (model.Certificates, error)
 }
 
 // CertsDb defines an interface for CRUD operations on Certs

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"time"
 
@@ -163,4 +164,74 @@ func Roots(w io.Writer, roots []*pb.RootCertificate, withPem bool) {
 			fmt.Fprintf(w, "\n%s\n", ci.Pem)
 		}
 	}
+}
+
+// CertificatesTable prints list of Certificates
+func CertificatesTable(w io.Writer, list []*pb.Certificate) {
+	table := tablewriter.NewWriter(w)
+	table.SetBorder(false)
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetHeader([]string{"Id", "OrgId", "SKID", "Serial", "From", "To", "Subject", "Profile"})
+
+	for _, c := range list {
+		table.Append([]string{
+			strconv.FormatUint(c.Id, 10),
+			strconv.FormatUint(c.OrgId, 10),
+			c.Skid,
+			c.SerialNumber,
+			c.NotBefore.AsTime().Local().Format(time.RFC3339),
+			c.NotAfter.AsTime().Local().Format(time.RFC3339),
+			c.Subject,
+			c.Profile,
+		})
+	}
+	table.Render()
+	fmt.Fprintln(w)
+}
+
+// RevokedCertificatesTable prints list of Revoked Certificates
+func RevokedCertificatesTable(w io.Writer, list []*pb.RevokedCertificate) {
+	table := tablewriter.NewWriter(w)
+	table.SetBorder(false)
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetHeader([]string{"Id", "OrgId", "SKID", "Serial", "From", "To", "Subject", "Profile", "Revoked", "Reason"})
+
+	for _, r := range list {
+		c := r.Certificate
+		table.Append([]string{
+			strconv.FormatUint(c.Id, 10),
+			strconv.FormatUint(c.OrgId, 10),
+			c.Skid,
+			c.SerialNumber,
+			c.NotBefore.AsTime().Local().Format(time.RFC3339),
+			c.NotAfter.AsTime().Local().Format(time.RFC3339),
+			c.Subject,
+			c.Profile,
+			r.RevokedAt.AsTime().Local().Format(time.RFC3339),
+			r.Reason.String(),
+		})
+	}
+	table.Render()
+
+	fmt.Fprintln(w)
+}
+
+// CrlsTable prints list of CRL
+func CrlsTable(w io.Writer, list []*pb.Crl) {
+	table := tablewriter.NewWriter(w)
+	table.SetBorder(false)
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetHeader([]string{"Id", "IKID", "This Update", "Next Update", "Issuer"})
+
+	for _, c := range list {
+		table.Append([]string{
+			strconv.FormatUint(c.Id, 10),
+			c.Ikid,
+			c.ThisUpdate.AsTime().Local().Format(time.RFC3339),
+			c.NextUpdate.AsTime().Local().Format(time.RFC3339),
+			c.Issuer,
+		})
+	}
+	table.Render()
+	fmt.Fprintln(w)
 }

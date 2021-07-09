@@ -121,11 +121,22 @@ func TestRegisterCertificate(t *testing.T) {
 	require.NotNil(t, r)
 	assert.Equal(t, *r, *r2)
 
-	list, err := provider.GetCertificates(ctx, org.ID)
+	list, err := provider.GetOrgCertificates(ctx, org.ID)
 	require.NoError(t, err)
 	r3 := list.Find(r.ID)
 	require.NotNil(t, r3)
 	assert.Equal(t, *r, *r3)
+
+	list2, err := provider.ListCertificates(ctx, r3.IKID, 100, 0)
+	require.NoError(t, err)
+	c := list2.Find(r.ID)
+	require.NotNil(t, c)
+	assert.NotEqual(t, *r, *c)
+
+	last := list2[len(list2)-1]
+	list2, err = provider.ListCertificates(ctx, r3.IKID, 100, last.ID)
+	require.NoError(t, err)
+	assert.Empty(t, list2)
 
 	r4, err := provider.GetCertificate(ctx, r2.ID)
 	require.NoError(t, err)
@@ -222,16 +233,20 @@ func TestRegisterRevokedCertificate(t *testing.T) {
 	assert.Equal(t, rc.NotBefore.Unix(), r.NotBefore.Unix())
 	assert.Equal(t, rc.NotAfter.Unix(), r.NotAfter.Unix())
 
-	list, err := provider.GetRevokedCertificatesForOrg(ctx, org.ID)
+	list, err := provider.GetOrgRevokedCertificates(ctx, org.ID)
 	require.NoError(t, err)
 	r3 := list.Find(r.ID)
 	require.NotNil(t, r3)
 	assert.Equal(t, *mr, *r3)
 
-	list, err = provider.GetRevokedCertificatesByIssuer(ctx, r.IKID)
+	list, err = provider.ListRevokedCertificates(ctx, r.IKID, 0, 0)
 	require.NoError(t, err)
 	r4 := list.Find(r.ID)
 	require.NotNil(t, r4)
+	assert.NotEqual(t, *mr, *r4)
+	// Pems are not returned by List
+	mr.Certificate.Pem = ""
+	mr.Certificate.IssuersPem = ""
 	assert.Equal(t, *mr, *r4)
 }
 
@@ -262,4 +277,62 @@ func TestRegisterCrl(t *testing.T) {
 	assert.Equal(t, rc.Pem, r2.Pem)
 	assert.Equal(t, rc.ThisUpdate.Unix(), r2.ThisUpdate.Unix())
 	assert.Equal(t, rc.NextUpdate.Unix(), r2.NextUpdate.Unix())
+}
+
+func TestListCertificate(t *testing.T) {
+	count := 20
+	orgID := uint64(1000)
+	ikid := guid.MustCreate()
+
+	for i := 0; i < count; i++ {
+		rc := &model.Certificate{
+			OrgID:            orgID,
+			SKID:             guid.MustCreate(),
+			IKID:             ikid,
+			SerialNumber:     certutil.RandomString(10),
+			Subject:          "subj",
+			Issuer:           "iss",
+			NotBefore:        time.Now().Add(-time.Hour).UTC(),
+			NotAfter:         time.Now().Add(time.Hour).UTC(),
+			ThumbprintSha256: certutil.RandomString(64),
+			Pem:              "pem",
+			IssuersPem:       "ipem",
+			Profile:          "client",
+		}
+
+		r, err := provider.RegisterCertificate(ctx, rc)
+		require.NoError(t, err)
+		require.NotNil(t, r)
+		defer provider.RemoveCertificate(ctx, r.ID)
+	}
+
+	list, err := provider.ListCertificates(ctx, ikid, 1000, 0)
+	require.NoError(t, err)
+	require.Len(t, list, count)
+
+	first := list[0].ID
+	last := list[count-1].ID
+
+	list2, err := provider.ListCertificates(ctx, ikid, 1000, first)
+	require.NoError(t, err)
+	require.Len(t, list2, count-1)
+	assert.Nil(t, list2.Find(first))
+
+	list3, err := provider.ListCertificates(ctx, ikid, 1000, last)
+	require.NoError(t, err)
+	require.Len(t, list3, 0)
+
+	last = uint64(0)
+	bulk := make([]*model.Certificate, 0, count)
+	for {
+		list3, err = provider.ListCertificates(ctx, ikid, 5, last)
+		require.NoError(t, err)
+		if len(list3) == 0 {
+			break
+		}
+
+		bulk = append(bulk, list3...)
+		last = list3[len(list3)-1].ID
+	}
+	require.Len(t, bulk, count)
 }
