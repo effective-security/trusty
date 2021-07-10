@@ -193,7 +193,6 @@ start-swagger:
 		docker pull swaggerapi/swagger-ui && \
 		docker run \
 		-d -p 8080:8080 \
-		--network host \
 		-e URLS="[ { url: \"http://localhost:7880/v1/swagger/status\", name: \"StatusService\" }, { url: \"http://localhost:7880/v1/swagger/cis\", name: \"CIService\" }, { url: \"https://localhost:7892/v1/swagger/ca\", name: \"CAService\" } ]" \
 		-v ${PROJ_DIR}/Documentation/dev-guide/apispec/swagger:/swagger \
 		--name trusty-swagger \
@@ -205,7 +204,6 @@ start-prometheus:
 	if [ "$$CONTAINER_STATE" = "missing" ]; then \
 		docker pull prom/prometheus && \
 		docker run \
-			--network host \
 			-d  -p 9090:9090 \
 			-v ${PROJ_DIR}/etc/dev/prometheus.yml:/etc/prometheus/prometheus.yml \
 			--name trusty-prometheus \
@@ -217,7 +215,6 @@ start-grafana:
 	if [ "$$CONTAINER_STATE" = "missing" ]; then \
 		docker pull grafana/grafana && \
 		docker run \
-		--network host \
 		-d -p 3000:3000 \
 		--name trusty-grafana \
 		grafana/grafana ;\
