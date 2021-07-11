@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 
 	v1 "github.com/ekspand/trusty/api/v1"
@@ -50,7 +51,11 @@ func Authenticate(c ctl.Control, p interface{}) error {
 	}
 
 	if flags.NoBrowser == nil || !*flags.NoBrowser {
-		err = exec.Command("xdg-open", res.URL).Start()
+		execCommand := "xdg-open"
+		if runtime.GOOS == "darwin" {
+			execCommand = "open"
+		}
+		err = exec.Command(execCommand, res.URL).Start()
 		if err != nil {
 			return errors.Trace(err)
 		}
