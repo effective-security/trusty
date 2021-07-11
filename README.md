@@ -113,3 +113,5 @@ Add the launch configuration to .vscode/launch.json:
     make start-swagger
 
 Open http://localhost:8080
+
+Before runing the above command, make sure trusty is running locally using `bin/trusty` command.
