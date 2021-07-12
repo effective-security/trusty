@@ -3,6 +3,7 @@ module github.com/ekspand/trusty
 go 1.15
 
 require (
+	cloud.google.com/go v0.86.0
 	github.com/aws/aws-sdk-go v1.38.66
 	github.com/cloudflare/cfssl v1.6.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -19,6 +20,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-querystring v1.0.0 // indirect
+	github.com/googleapis/gax-go/v2 v2.0.5
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.4.0
@@ -38,12 +40,14 @@ require (
 	go.uber.org/dig v1.10.0
 	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
-	golang.org/x/net v0.0.0-20210428140749-89ef3d95e781
-	golang.org/x/oauth2 v0.0.0-20210427180440-81ed05c6b58c
+	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420
+	golang.org/x/oauth2 v0.0.0-20210628180205-a41e5a781914
 	golang.org/x/tools v0.1.4
-	google.golang.org/grpc v1.38.0
+	google.golang.org/api v0.50.0
+	google.golang.org/genproto v0.0.0-20210708141623-e76da96a951f
+	google.golang.org/grpc v1.39.0
 	google.golang.org/grpc/examples v0.0.0-20200910201057-6591123024b3 // indirect
-	google.golang.org/protobuf v1.26.0
+	google.golang.org/protobuf v1.27.1
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.21.1
