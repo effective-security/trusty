@@ -26,6 +26,8 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/juju/errors"
 	"golang.org/x/oauth2"
+	googleapioauth2 "google.golang.org/api/oauth2/v2"
+	"google.golang.org/api/option"
 )
 
 // ServiceName provides the Service Name for this package
@@ -41,6 +43,7 @@ const (
 // Service defines the Status service
 type Service struct {
 	GithubBaseURL *url.URL
+	GoogleBaseURL *url.URL
 
 	server    *gserver.Server
 	cfg       *config.Configuration
@@ -72,6 +75,14 @@ func Factory(server *gserver.Server) interface{} {
 			svc.GithubBaseURL = u
 		}
 
+		if cfg.Google.BaseURL != "" {
+			u, err := url.Parse(cfg.Google.BaseURL)
+			if err != nil {
+				return errors.Trace(err)
+			}
+			svc.GoogleBaseURL = u
+		}
+
 		server.AddService(svc)
 		return nil
 	}
@@ -96,6 +107,7 @@ func (s *Service) Close() {
 func (s *Service) RegisterRoute(r rest.Router) {
 	r.GET(v1.PathForAuthURL, s.AuthURLHandler())
 	r.GET(v1.PathForAuthGithubCallback, s.GithubCallbackHandler())
+	r.GET(v1.PathForAuthGoogleCallback, s.GoogleCallbackHandler())
 	r.GET(v1.PathForAuthTokenRefresh, s.RefreshHandler())
 	r.GET(v1.PathForAuthDone, s.AuthDoneHandler())
 }
@@ -121,6 +133,26 @@ func (s *Service) AuthURLHandler() rest.Handle {
 			return
 		}
 
+		provider := ""
+		providerParam, ok := r.URL.Query()["provider"]
+		if !ok || len(providerParam) != 1 || providerParam[0] == "" {
+			// use github oauth2 provider by default
+			provider = v1.ProviderGithub
+		} else {
+			provider = providerParam[0]
+		}
+
+		redirectURLCallback := ""
+		switch provider {
+		case v1.ProviderGithub:
+			redirectURLCallback = v1.PathForAuthGithubCallback
+		case v1.ProviderGoogle:
+			redirectURLCallback = v1.PathForAuthGoogleCallback
+		default:
+			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("invalid oauth2 provider"))
+			return
+		}
+
 		js, _ := json.Marshal(&v1.AuthState{
 			RedirectURL: redirectURL[0],
 			DeviceID:    deviceID[0],
@@ -128,11 +160,11 @@ func (s *Service) AuthURLHandler() rest.Handle {
 		responseMode := oauth2.SetAuthURLParam("response_mode", "query")
 		oauth2ResponseType := oauth2.SetAuthURLParam("response_type", "code")
 
-		o := s.OAuthConfig(v1.ProviderGithub)
+		o := s.OAuthConfig(provider)
 		conf := &oauth2.Config{
 			ClientID:     o.ClientID,
 			ClientSecret: o.ClientSecret,
-			RedirectURL:  s.cfg.TrustyClient.ServerURL[config.WFEServerName][0] + v1.PathForAuthGithubCallback,
+			RedirectURL:  s.cfg.TrustyClient.ServerURL[config.WFEServerName][0] + redirectURLCallback,
 			Scopes:       o.Scopes,
 			Endpoint: oauth2.Endpoint{
 				AuthURL:  o.AuthURL,
@@ -147,8 +179,8 @@ func (s *Service) AuthURLHandler() rest.Handle {
 			URL: conf.AuthCodeURL(base64.RawURLEncoding.EncodeToString(js), oauth2ResponseType, responseMode, nonce),
 		}
 
-		logger.Tracef("reqRedirectURL=%q, confRedirectURL=%q, deviceID=%s, url=%q",
-			redirectURL[0], conf.RedirectURL, deviceID[0], res.URL)
+		logger.Tracef("reqRedirectURL=%q, confRedirectURL=%q, deviceID=%s, provider=%s, url=%q",
+			redirectURL[0], conf.RedirectURL, deviceID[0], provider, res.URL)
 
 		marshal.WriteJSON(w, r, res)
 	}
@@ -267,7 +299,143 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 			return
 		}
 
-		redirect := fmt.Sprintf("%s?code=%s&device_id=%s", oauthStatus.RedirectURL, tokenStr, oauthStatus.DeviceID)
+		redirect := fmt.Sprintf("%s?token=%s&device_id=%s", oauthStatus.RedirectURL, tokenStr, oauthStatus.DeviceID)
+
+		s.server.Audit(
+			ServiceName,
+			evtTokenIssued,
+			user.Email,
+			oauthStatus.DeviceID,
+			0,
+			fmt.Sprintf("ID=%s, ExternalID=%s, email=%s, name=%q",
+				dto.ID, dto.ExternalID, dto.Email, dto.Name),
+		)
+
+		http.Redirect(w, r, redirect, http.StatusSeeOther)
+	}
+}
+
+// GoogleCallbackHandler handles v1.PathForAuthGoogleCallback
+func (s *Service) GoogleCallbackHandler() rest.Handle {
+	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
+		code, ok := r.URL.Query()["code"]
+		if !ok || len(code) != 1 || code[0] == "" {
+			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("missing code parameter"))
+			return
+		}
+
+		state, ok := r.URL.Query()["state"]
+		if !ok || len(state) != 1 || state[0] == "" {
+			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("missing state parameter"))
+			return
+		}
+
+		js, err := base64.RawURLEncoding.DecodeString(state[0])
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("invalid state parameter: %s", err.Error()))
+			return
+		}
+
+		var oauthStatus v1.AuthState
+		if err = json.Unmarshal(js, &oauthStatus); err != nil {
+			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("failed to decode state parameter: %s", err.Error()))
+			return
+		}
+
+		o := s.OAuthConfig(v1.ProviderGoogle)
+		conf := &oauth2.Config{
+			ClientID:     o.ClientID,
+			ClientSecret: o.ClientSecret,
+			RedirectURL:  s.cfg.TrustyClient.ServerURL[config.WFEServerName][0] + v1.PathForAuthGoogleCallback,
+			Scopes:       o.Scopes,
+			Endpoint: oauth2.Endpoint{
+				AuthURL:  o.AuthURL,
+				TokenURL: o.TokenURL,
+			},
+		}
+
+		ctx := context.Background()
+		token, err := conf.Exchange(ctx, code[0])
+		if err != nil {
+			err = errors.Trace(err)
+			logger.Debugf("reason=Exchange, confRedirectURL=%q, AuthURL=%q, TokenURL=%q, sec=%q, err=%q",
+				conf.RedirectURL, o.AuthURL, o.TokenURL, o.ClientSecret, err.Error())
+			marshal.WriteJSON(w, r, httperror.WithForbidden("authorization failed: %s", err.Error()).WithCause(err))
+			return
+		}
+
+		logger.Debugf("redirectURL=%q, deviceID=%s, token=[%+v]",
+			oauthStatus.RedirectURL, oauthStatus.DeviceID, *token)
+
+		if !token.Valid() {
+			marshal.WriteJSON(w, r, httperror.WithForbidden("retreived invalid token"))
+			return
+		}
+
+		opts := []option.ClientOption{option.WithTokenSource(conf.TokenSource(ctx, token))}
+
+		if s.GoogleBaseURL != nil {
+			opts = append(opts, option.WithEndpoint(s.GoogleBaseURL.Scheme+"://"+s.GoogleBaseURL.Host))
+		}
+
+		oauth2service, err := googleapioauth2.NewService(ctx, opts...)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithForbidden("unable to retrieve user info: %s", err.Error()).WithCause(err))
+			return
+		}
+
+		userInfo, err := oauth2service.Userinfo.V2.Me.Get().Do()
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithForbidden("unable to retrieve user info: %s", err.Error()).WithCause(err))
+			return
+		}
+
+		uemail := userInfo.Email
+		if uemail == "" {
+			marshal.WriteJSON(w, r, httperror.WithForbidden("please update your Google profile with valid email"))
+			return
+		}
+
+		user := &model.User{
+			ExternalID:   uint64(0),
+			Provider:     v1.ProviderGoogle,
+			Login:        model.String(&userInfo.Email),
+			Name:         model.String(&userInfo.Name),
+			Email:        uemail,
+			Company:      "",
+			AvatarURL:    model.String(&userInfo.Picture),
+			AccessToken:  token.AccessToken,
+			RefreshToken: token.RefreshToken,
+		}
+
+		if !token.Expiry.IsZero() {
+			user.TokenExpiresAt = model.NullTime(&token.Expiry)
+		}
+
+		user, err = s.db.LoginUser(ctx, user)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithUnexpected("failed to login user: %s", err.Error()).WithCause(err))
+			return
+		}
+
+		dto := user.ToDto()
+		// initial token is valid for 1 min, the client has to refresh it
+		validFor := time.Minute
+		if oauthStatus.DeviceID == s.server.Hostname() {
+			// on the same host where the server is running on, allow for 8 hours
+			validFor = 8 * 60 * time.Minute
+			logger.Noticef("device=%s, email=%s, token_valid_for=%v",
+				oauthStatus.DeviceID, uemail, validFor)
+		}
+
+		audience := s.server.Configuration().IdentityMap.JWT.Audience
+		tokenStr, _, err := s.jwt.SignToken(dto.ID, user.Email, audience, validFor)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithUnexpected("failed to sign JWT: %s", err.Error()).WithCause(err))
+			return
+		}
+
+		redirect := fmt.Sprintf("%s?token=%s&device_id=%s", oauthStatus.RedirectURL, tokenStr, oauthStatus.DeviceID)
 
 		s.server.Audit(
 			ServiceName,
@@ -344,13 +512,13 @@ func (s *Service) RefreshHandler() rest.Handle {
 // AuthDoneHandler handles v1.PathForAuthDone
 func (s *Service) AuthDoneHandler() rest.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
-		code, ok := r.URL.Query()["code"]
-		if !ok || len(code) != 1 || code[0] == "" {
-			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("missing code parameter"))
+		token, ok := r.URL.Query()["token"]
+		if !ok || len(token) != 1 || token[0] == "" {
+			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("missing token parameter"))
 			return
 		}
 
 		w.Header().Set(header.ContentType, header.TextPlain)
-		fmt.Fprintf(w, "Authenticated!\n\nexport TRUSTY_AUTH_TOKEN=%s\n", code[0])
+		fmt.Fprintf(w, "Authenticated!\n\nexport TRUSTY_AUTH_TOKEN=%s\n", token[0])
 	}
 }

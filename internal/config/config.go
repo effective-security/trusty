@@ -65,6 +65,9 @@ type Configuration struct {
 	// Github specifies the configuration for Github client
 	Github Github `json:"github" yaml:"github"`
 
+	// Google specifies the configuration for Google client
+	Google Google `json:"google" yaml:"google"`
+
 	// OAuthClients specifies the configuration files for OAuth clients
 	OAuthClients []string `json:"oauth_clients" yaml:"oauth_clients"`
 }
@@ -85,5 +88,11 @@ type CryptoProv struct {
 // Github specifies the configuration for Github client
 type Github struct {
 	// BaseURL specifies the Github base URL.
+	BaseURL string `json:"base_url" yaml:"base_url"`
+}
+
+// Google specifies the configuration for Google client
+type Google struct {
+	// BaseURL specifies the Google base URL.
 	BaseURL string `json:"base_url" yaml:"base_url"`
 }

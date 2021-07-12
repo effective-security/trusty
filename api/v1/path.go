@@ -73,6 +73,9 @@ const (
 
 	// PathForAuthGithubCallback is auth callback for github
 	PathForAuthGithubCallback = "/v1/auth/github/callback"
+
+	// PathForAuthGoogleCallback is auth callback for google
+	PathForAuthGoogleCallback = "/v1/auth/google/callback"
 )
 
 // Workflow service API
