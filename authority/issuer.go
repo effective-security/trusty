@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/ekspand/trusty/pkg/csr"
+	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
@@ -230,6 +231,8 @@ func CreateIssuer(cfg *IssuerConfig, certBytes, intCAbytes, rootBytes []byte, si
 // Sign signs a new certificate based on the PEM-encoded
 // certificate request with the specified profile.
 func (ca *Issuer) Sign(req csr.SignRequest) (*x509.Certificate, []byte, error) {
+	logger.KV(xlog.TRACE, "req", req)
+
 	profileName := req.Profile
 	if profileName == "" {
 		profileName = "default"
@@ -492,7 +495,7 @@ func (ca *Issuer) fillTemplate(template *x509.Certificate, profile *CertProfile,
 		template.IssuingCertificateURL = []string{issuerURL}
 	}
 	if len(profile.Policies) != 0 {
-		err = addPolicies(template, profile.Policies)
+		err = addPolicies(template, profile.Policies, profile.PoliciesCritical)
 		if err != nil {
 			return errors.Annotatef(err, "invalid profile policies")
 		}

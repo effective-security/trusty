@@ -126,6 +126,18 @@ gen_test_certs:
 		--ca1 --ca2  --bundle --peer --client --force
 	cp $(PROJ_ROOT)/etc/dev/roots/trusty_dev_root_ca.pem /tmp/trusty/certs/trusty_dev_root_ca.pem
 
+gen_martini_certs:
+	echo "*** Running gen_martini_certs"
+	./scripts/build/gen_martini_certs.sh \
+		--hsm-config /tmp/trusty/softhsm/unittest_hsm.json \
+		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.yaml \
+		--out-dir /tmp/trusty/certs \
+		--csr-dir $(PROJ_ROOT)/etc/dev/csr_profile \
+		--prefix martini_ \
+		--root-ca /tmp/trusty/certs/martini_root_ca.pem \
+		--root-ca-key /tmp/trusty/certs/martini_root_ca-key.pem \
+		--root --ca1 --bundle --signer --force
+
 start-local-kms:
 	# Container state will be true (it's already running), false (exists but stopped), or missing (does not exist).
 	# Annoyingly, when there is no such container and Docker returns an error, it also writes a blank line to stdout.

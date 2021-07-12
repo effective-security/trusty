@@ -50,7 +50,7 @@ var (
 // certificate, based on the input config. Go's x509 library allows setting
 // Certificate Policies easily, but does not support nested Policy Qualifiers
 // under those policies. So we need to construct the ASN.1 structure ourselves.
-func addPolicies(template *x509.Certificate, policies []csr.CertificatePolicy) error {
+func addPolicies(template *x509.Certificate, policies []csr.CertificatePolicy, critical bool) error {
 	asn1PolicyList := []policyInformation{}
 
 	for _, policy := range policies {
@@ -75,7 +75,7 @@ func addPolicies(template *x509.Certificate, policies []csr.CertificatePolicy) e
 						Qualifier:         qualifier.Value,
 					})
 			default:
-				return errors.New("Invalid qualifier type in Policies " + qualifier.Type)
+				return errors.New("invalid qualifier type in Policies " + qualifier.Type)
 			}
 		}
 		asn1PolicyList = append(asn1PolicyList, pi)
@@ -88,7 +88,7 @@ func addPolicies(template *x509.Certificate, policies []csr.CertificatePolicy) e
 
 	template.ExtraExtensions = append(template.ExtraExtensions, pkix.Extension{
 		Id:       asn1.ObjectIdentifier{2, 5, 29, 32},
-		Critical: false,
+		Critical: critical,
 		Value:    asn1Bytes,
 	})
 	return nil
