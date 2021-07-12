@@ -122,6 +122,8 @@ type CertificateRequest struct {
 	SAN []string `json:"san" yaml:"san"`
 	// KeyRequest for generated key
 	KeyRequest KeyRequest `json:"key,omitempty" yaml:"key,omitempty"`
+	// Extensions for the cert
+	Extensions []X509Extension `json:"extensions,omitempty" yaml:"extensions,omitempty"`
 }
 
 // Validate provides the default validation logic for certificate

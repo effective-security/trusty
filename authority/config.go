@@ -199,6 +199,8 @@ type CertProfile struct {
 	AllowedCSRFields *csr.AllowedFields `json:"allowed_fields" yaml:"allowed_fields"`
 
 	Policies []csr.CertificatePolicy `json:"policies" yaml:"policies"`
+	// PoliciesCritical specifies to mark Policies as Critical extension
+	PoliciesCritical bool `json:"policies_critical" yaml:"policies_critical"`
 
 	IssuerLabel  string   `json:"issuer_label" yaml:"issuer_label"`
 	AllowedRoles []string `json:"allowed_roles" yaml:"allowed_roles"`

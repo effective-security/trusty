@@ -114,9 +114,10 @@ func GenCert(c ctl.Control, p interface{}) error {
 			san = strings.Split(*flags.SAN, ",")
 		}
 		signReq := csr.SignRequest{
-			SAN:     san,
-			Request: string(csrPEM),
-			Profile: *flags.Profile,
+			SAN:        san,
+			Request:    string(csrPEM),
+			Profile:    *flags.Profile,
+			Extensions: req.Extensions,
 		}
 
 		_, certPEM, err = issuer.Sign(signReq)
