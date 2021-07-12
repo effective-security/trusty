@@ -128,6 +128,16 @@ func Test_authURLHandler(t *testing.T) {
 		assert.Equal(t, "{\"code\":\"invalid_request\",\"message\":\"missing device_id parameter\"}", string(w.Body.Bytes()))
 	})
 
+	t.Run("invalid_provider", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r, err := http.NewRequest(http.MethodGet, v1.PathForAuthURL+"?redirect_url=http://localhost&device_id=1234&provider=invalid", nil)
+		require.NoError(t, err)
+
+		h(w, r, nil)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Equal(t, "{\"code\":\"invalid_request\",\"message\":\"invalid oauth2 provider\"}", string(w.Body.Bytes()))
+	})
+
 	t.Run("url", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r, err := http.NewRequest(http.MethodGet, v1.PathForAuthURL+"?redirect_url=http://localhost&device_id=1234", nil)
@@ -214,6 +224,77 @@ func Test_GithubCallbackHandler(t *testing.T) {
 	})
 }
 
+func Test_GoogleCallbackHandler(t *testing.T) {
+	service := trustyServer.Service(auth.ServiceName).(*auth.Service)
+	require.NotNil(t, service)
+
+	h := service.GoogleCallbackHandler()
+
+	server := servefiles.New(t)
+	server.SetBaseDirs("testdata")
+
+	o := service.OAuthConfig(v1.ProviderGoogle)
+	o.AuthURL = strings.Replace(o.AuthURL, "https://accounts.google.com", server.URL(), 1)
+	o.TokenURL = strings.Replace(o.TokenURL, "https://oauth2.googleapis.com", server.URL(), 1)
+
+	u, err := url.Parse(server.URL() + "/")
+	require.NoError(t, err)
+
+	service.GoogleBaseURL = u
+
+	t.Run("no_code", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r, err := http.NewRequest(http.MethodGet, v1.PathForAuthGoogleCallback, nil)
+		require.NoError(t, err)
+
+		h(w, r, nil)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Equal(t, "{\"code\":\"invalid_request\",\"message\":\"missing code parameter\"}", string(w.Body.Bytes()))
+	})
+
+	t.Run("no_state", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r, err := http.NewRequest(http.MethodGet, v1.PathForAuthGoogleCallback+"?code=abc", nil)
+		require.NoError(t, err)
+
+		h(w, r, nil)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Equal(t, "{\"code\":\"invalid_request\",\"message\":\"missing state parameter\"}", string(w.Body.Bytes()))
+	})
+
+	t.Run("bad_state_decode", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r, err := http.NewRequest(http.MethodGet, v1.PathForAuthGoogleCallback+"?code=abc&state=lll", nil)
+		require.NoError(t, err)
+
+		h(w, r, nil)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Equal(t, "{\"code\":\"invalid_request\",\"message\":\"failed to decode state parameter: invalid character '\\\\u0096' looking for beginning of value\"}", string(w.Body.Bytes()))
+	})
+
+	t.Run("bad_state_base64", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r, err := http.NewRequest(http.MethodGet, v1.PathForAuthGoogleCallback+"?code=abc&state=_", nil)
+		require.NoError(t, err)
+
+		h(w, r, nil)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Equal(t, "{\"code\":\"invalid_request\",\"message\":\"invalid state parameter: illegal base64 data at input byte 0\"}", string(w.Body.Bytes()))
+	})
+
+	t.Run("token", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		// Value of code is not magic. Mock configured in requests.json will ignore code and give back a token.
+		r, err := http.NewRequest(http.MethodGet, v1.PathForAuthGoogleCallback+"?code=9298935ecf8777061ff2&state=eyJyZWRpcmVjdF91cmwiOiJodHRwczovL2xvY2FsaG9zdDo3ODkxL3YxL3N0YXR1cyIsImRldmljZV9pZCI6IjEyMzQifQ", nil)
+		require.NoError(t, err)
+
+		h(w, r, nil)
+		require.Equal(t, http.StatusSeeOther, w.Code)
+		loc := w.Header().Get("Location")
+		assert.NotEmpty(t, loc)
+	})
+}
+
 /* TODO: fix
 func TestRefreshHandler(t *testing.T) {
 	service := trustyServer.Service(auth.ServiceName).(*auth.Service)
@@ -260,7 +341,7 @@ func TestAuthDoneHandler(t *testing.T) {
 	require.NotNil(t, service)
 
 	w := httptest.NewRecorder()
-	r, err := http.NewRequest(http.MethodGet, v1.PathForAuthDone+"?code=9298935ecf8777061ff2&state=eyJyZWRpcmVjdF91cmwiOiJodHRwczovL2xvY2FsaG9zdDo3ODkxL3YxL3N0YXR1cyIsImRldmljZV9pZCI6IjEyMzQifQ", nil)
+	r, err := http.NewRequest(http.MethodGet, v1.PathForAuthDone+"?token=9298935ecf8777061ff2&state=eyJyZWRpcmVjdF91cmwiOiJodHRwczovL2xvY2FsaG9zdDo3ODkxL3YxL3N0YXR1cyIsImRldmljZV9pZCI6IjEyMzQifQ", nil)
 	require.NoError(t, err)
 
 	service.AuthDoneHandler()(w, r, nil)

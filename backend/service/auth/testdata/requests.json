@@ -1,4 +1,6 @@
 {
     "/login/oauth/access_token" : {"file":"token"},
-    "/user" : {"file":"user"}
+    "/user" : {"file":"user"},
+    "/token"  : {"file":"token"},
+    "/userinfo/v2/me?alt=json&prettyPrint=false" : {"file":"google_user"}
 }

@@ -23,6 +23,8 @@ Add this to your ~/.profile
 ```.sh
 export TRUSTY_GITHUB_CLIENT_SECRET=0d...a8
 export TRUSTY_GITHUB_CLIENT_ID=09...71
+export TRUSTY_GOOGLE_CLIENT_SECRET=01...b2
+export TRUSTY_GOOGLE_CLIENT_ID=4a...89
 export TRUSTY_JWT_SEED=g...A
 # export CR_PAT=ghp_M...v
 ```

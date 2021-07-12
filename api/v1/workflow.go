@@ -6,6 +6,9 @@ const (
 	// ProviderGithub specifies name for Github
 	ProviderGithub = "github"
 
+	// ProviderGoogle specifies name for Google APIs
+	ProviderGoogle = "google"
+
 	// RoleAdmin specifies name for Admin role
 	RoleAdmin = "admin"
 )

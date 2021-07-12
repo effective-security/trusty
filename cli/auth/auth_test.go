@@ -31,7 +31,8 @@ func (s *testSuite) TestAuth() {
 	s.Cli.WithServer(server.URL)
 
 	disableBrowser := true
-	err := s.Run(auth.Authenticate, &auth.AuthenticateFlags{NoBrowser: &disableBrowser})
+	provider := "github"
+	err := s.Run(auth.Authenticate, &auth.AuthenticateFlags{NoBrowser: &disableBrowser, Provider: &provider})
 	s.Require().NoError(err)
 	s.HasText("open auth URL in browser:\n")
 }

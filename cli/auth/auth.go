@@ -19,6 +19,7 @@ import (
 // AuthenticateFlags defines flags for Authenticate command
 type AuthenticateFlags struct {
 	NoBrowser *bool
+	Provider  *string
 }
 
 // Authenticate starts authentication
@@ -43,8 +44,12 @@ func Authenticate(c ctl.Control, p interface{}) error {
 		httpClient.WithTLS(tlscfg)
 	}
 
+	if flags.Provider == nil || *flags.Provider == "" {
+		return errors.New("please specify --provider parameter")
+	}
+
 	res := new(v1.AuthStsURLResponse)
-	path := fmt.Sprintf("/v1/auth/url?redirect_url=%s/v1/auth/done&device_id=%s", srv, hn)
+	path := fmt.Sprintf("%s?redirect_url=%s/v1/auth/done&device_id=%s&provider=%s", v1.PathForAuthURL, srv, hn, *flags.Provider)
 	_, _, err := httpClient.Request(context.Background(), "GET", []string{srv}, path, nil, res)
 	if err != nil {
 		return errors.Trace(err)
@@ -59,7 +64,7 @@ func Authenticate(c ctl.Control, p interface{}) error {
 		if err != nil {
 			return errors.Trace(err)
 		}
-		fmt.Fprintf(cli.Writer(), "openning auth URL in browser: %s\n", res.URL)
+		fmt.Fprintf(cli.Writer(), "opening auth URL in browser: %s\n", res.URL)
 	} else {
 		fmt.Fprintf(cli.Writer(), "open auth URL in browser:\n%s\n", res.URL)
 	}

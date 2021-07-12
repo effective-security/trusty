@@ -15,13 +15,6 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/cmd", "trustyctl")
-
-const (
-	rcError   = 1
-	rcSuccess = 0
-)
-
 func main() {
 	// Logs are set to os.Stderr, while output to os.Stdout
 	rc := realMain(os.Args, os.Stdout, os.Stderr)
@@ -68,6 +61,7 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		PreAction(cli.PopulateControl).
 		Action(cli.RegisterAction(auth.Authenticate, loginFlags))
 	loginFlags.NoBrowser = cmdLogin.Flag("no-browser", "disable openning in browser").Bool()
+	loginFlags.Provider = cmdLogin.Flag("provider", "oauth2 provider, should be github or google").Default("github").String()
 
 	// ca: issuers|profile|sign|certs|revoked|publish_crl
 
