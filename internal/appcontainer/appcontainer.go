@@ -10,6 +10,7 @@ import (
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/pkg/awskmscrypto"
+	"github.com/ekspand/trusty/pkg/gcpkmscrypto"
 	"github.com/ekspand/trusty/pkg/jwt"
 	"github.com/ekspand/trusty/pkg/oauth2client"
 	"github.com/go-phorce/dolly/audit"
@@ -270,6 +271,7 @@ func provideOAuth(cfg *config.Configuration) (*oauth2client.Provider, error) {
 
 func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
 	cryptoprov.Register("AWSKMS", awskmscrypto.KmsLoader)
+	cryptoprov.Register("GCPKMS", gcpkmscrypto.KmsLoader)
 	crypto, err := cryptoprov.Load(cfg.CryptoProv.Default, cfg.CryptoProv.Providers)
 	if err != nil {
 		logger.Errorf("default=%s, providers=%v, err=[%v]",

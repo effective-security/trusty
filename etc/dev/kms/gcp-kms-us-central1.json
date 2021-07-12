@@ -1,0 +1,4 @@
+{
+    "Manufacturer" : "GCPKMS",
+    "Attributes": "Keyring=projects/trusty-dev-319216/locations/us-central1/keyRings/trusty"
+}
