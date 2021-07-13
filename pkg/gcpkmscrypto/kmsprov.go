@@ -378,7 +378,7 @@ func (p *Provider) KeyInfo(slotID uint, keyID string, includePublic bool, keyInf
 // ExportKey returns PKCS#11 URI for specified key ID.
 // It does not return key bytes
 func (p *Provider) ExportKey(keyID string) (string, []byte, error) {
-	uri := fmt.Sprintf("pkcs11:manufacturer=%s;id=%s;type=private",
+	uri := fmt.Sprintf("pkcs11:manufacturer=%s;id=%s;serial=1;type=private",
 		ProviderName,
 		keyID,
 	)

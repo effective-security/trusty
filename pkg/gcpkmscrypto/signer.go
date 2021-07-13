@@ -59,7 +59,7 @@ func (s *Signer) Sign(rand io.Reader, digest []byte, opts crypto.SignerOpts) (si
 	digestCRC32C := Crc32c(digest)
 
 	req := &kmspb.AsymmetricSignRequest{
-		Name:         s.prov.keyName(s.KeyID()),
+		Name:         s.prov.keyVersionName(s.KeyID()),
 		Digest:       &kmspb.Digest{},
 		DigestCrc32C: wrapperspb.Int64(int64(digestCRC32C)),
 	}
