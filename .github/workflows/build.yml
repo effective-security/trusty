@@ -54,6 +54,8 @@ jobs:
       env:
         TRUSTY_GITHUB_CLIENT_ID: ${{ secrets.TRUSTY_GITHUB_CLIENT_ID }}
         TRUSTY_GITHUB_CLIENT_SECRET: ${{ secrets.TRUSTY_GITHUB_CLIENT_SECRET }}
+        TRUSTY_GOOGLE_CLIENT_ID: ${{ secrets.TRUSTY_GOOGLE_CLIENT_ID }}
+        TRUSTY_GOOGLE_CLIENT_SECRET: ${{ secrets.TRUSTY_GOOGLE_CLIENT_SECRET }}
       run: make build gen_test_certs start-local-kms start-sql covtest
 
     # TODO: package and upload on release
