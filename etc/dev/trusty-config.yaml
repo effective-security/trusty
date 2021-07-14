@@ -186,6 +186,7 @@ servers:
       # allow any non-authenticated request access to this path and its children
       # /v1/* is allowed
       allow_any:
+        - /
         - /favicon.ico
         - /v1
         - /pb.StatusService
