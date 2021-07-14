@@ -55,9 +55,11 @@ func (s *Service) RegisterRoute(r rest.Router) {
 	r.GET(v1.PathForStatusServer, s.serverStatus())
 	r.GET(v1.PathForStatusCaller, s.callerStatus())
 	r.GET(v1.PathForStatus, s.serverStatus())
+	r.GET("/healthz", s.nodeStatus())
 	r.GET(v1.PathForStatusNode, s.nodeStatus())
 	r.GET(v1.PathForMetrics, s.metricsHandler())
 	r.GET("/metrics", s.metricsHandler())
+	r.GET("/", s.serverStatus())
 }
 
 // RegisterGRPC registers gRPC handler
