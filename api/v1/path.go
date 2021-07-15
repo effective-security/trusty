@@ -53,6 +53,10 @@ const (
 	// PathForAuthURL returns Auth URL
 	//
 	// Verbs: GET
+	// Parameters:
+	//	redirect_url
+	//	device_id
+	//	sts
 	// Response: v1.AuthStsURLResponse
 	PathForAuthURL = "/v1/auth/url"
 

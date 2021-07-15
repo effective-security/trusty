@@ -134,7 +134,7 @@ func (s *Service) AuthURLHandler() rest.Handle {
 		}
 
 		provider := ""
-		providerParam, ok := r.URL.Query()["provider"]
+		providerParam, ok := r.URL.Query()["sts"]
 		if !ok || len(providerParam) != 1 || providerParam[0] == "" {
 			// use github oauth2 provider by default
 			provider = v1.ProviderGithub
@@ -300,6 +300,7 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 		}
 
 		redirect := fmt.Sprintf("%s?token=%s&device_id=%s", oauthStatus.RedirectURL, tokenStr, oauthStatus.DeviceID)
+		logger.KV(xlog.DEBUG, "redirect", redirect)
 
 		s.server.Audit(
 			ServiceName,
@@ -436,6 +437,7 @@ func (s *Service) GoogleCallbackHandler() rest.Handle {
 		}
 
 		redirect := fmt.Sprintf("%s?token=%s&device_id=%s", oauthStatus.RedirectURL, tokenStr, oauthStatus.DeviceID)
+		logger.KV(xlog.DEBUG, "redirect", redirect)
 
 		s.server.Audit(
 			ServiceName,
