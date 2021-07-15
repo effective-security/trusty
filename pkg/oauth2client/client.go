@@ -83,7 +83,7 @@ func New(cfg *Config) (*Client, error) {
 		p.verifyKey = verifyKey
 	}
 
-	logger.Infof("provider=%q, audience=%q, issuer=%q", cfg.ProviderID, cfg.Audience, cfg.Issuer)
+	logger.Infof("sts=%q, audience=%q, issuer=%q", cfg.ProviderID, cfg.Audience, cfg.Issuer)
 
 	return p, nil
 }

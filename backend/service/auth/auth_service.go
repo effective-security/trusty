@@ -133,17 +133,17 @@ func (s *Service) AuthURLHandler() rest.Handle {
 			return
 		}
 
-		provider := ""
+		sts := ""
 		providerParam, ok := r.URL.Query()["sts"]
 		if !ok || len(providerParam) != 1 || providerParam[0] == "" {
 			// use github oauth2 provider by default
-			provider = v1.ProviderGithub
+			sts = v1.ProviderGithub
 		} else {
-			provider = providerParam[0]
+			sts = providerParam[0]
 		}
 
 		redirectURLCallback := ""
-		switch provider {
+		switch sts {
 		case v1.ProviderGithub:
 			redirectURLCallback = v1.PathForAuthGithubCallback
 		case v1.ProviderGoogle:
@@ -160,7 +160,7 @@ func (s *Service) AuthURLHandler() rest.Handle {
 		responseMode := oauth2.SetAuthURLParam("response_mode", "query")
 		oauth2ResponseType := oauth2.SetAuthURLParam("response_type", "code")
 
-		o := s.OAuthConfig(provider)
+		o := s.OAuthConfig(sts)
 		conf := &oauth2.Config{
 			ClientID:     o.ClientID,
 			ClientSecret: o.ClientSecret,
@@ -179,8 +179,8 @@ func (s *Service) AuthURLHandler() rest.Handle {
 			URL: conf.AuthCodeURL(base64.RawURLEncoding.EncodeToString(js), oauth2ResponseType, responseMode, nonce),
 		}
 
-		logger.Tracef("reqRedirectURL=%q, confRedirectURL=%q, deviceID=%s, provider=%s, url=%q",
-			redirectURL[0], conf.RedirectURL, deviceID[0], provider, res.URL)
+		logger.Tracef("reqRedirectURL=%q, confRedirectURL=%q, deviceID=%s, sts=%s, url=%q",
+			redirectURL[0], conf.RedirectURL, deviceID[0], sts, res.URL)
 
 		marshal.WriteJSON(w, r, res)
 	}

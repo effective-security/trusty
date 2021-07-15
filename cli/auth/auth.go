@@ -49,7 +49,7 @@ func Authenticate(c ctl.Control, p interface{}) error {
 	}
 
 	res := new(v1.AuthStsURLResponse)
-	path := fmt.Sprintf("%s?redirect_url=%s/v1/auth/done&device_id=%s&provider=%s", v1.PathForAuthURL, srv, hn, *flags.Provider)
+	path := fmt.Sprintf("%s?redirect_url=%s/v1/auth/done&device_id=%s&sts=%s", v1.PathForAuthURL, srv, hn, *flags.Provider)
 	_, _, err := httpClient.Request(context.Background(), "GET", []string{srv}, path, nil, res)
 	if err != nil {
 		return errors.Trace(err)
