@@ -130,7 +130,7 @@ func Test_authURLHandler(t *testing.T) {
 
 	t.Run("invalid_provider", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		r, err := http.NewRequest(http.MethodGet, v1.PathForAuthURL+"?redirect_url=http://localhost&device_id=1234&provider=invalid", nil)
+		r, err := http.NewRequest(http.MethodGet, v1.PathForAuthURL+"?redirect_url=http://localhost&device_id=1234&sts=invalid", nil)
 		require.NoError(t, err)
 
 		h(w, r, nil)
