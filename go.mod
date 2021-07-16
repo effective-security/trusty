@@ -50,6 +50,7 @@ require (
 	google.golang.org/grpc/examples v0.0.0-20200910201057-6591123024b3 // indirect
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
+	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.21.1
 	k8s.io/apimachinery v0.21.1
