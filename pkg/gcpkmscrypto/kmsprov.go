@@ -262,7 +262,7 @@ func (p *Provider) EnumTokens(currentSlotOnly bool, slotInfoFunc func(slotID uin
 
 // EnumKeys returns list of keys on the slot. For KMS slotID is ignored.
 func (p *Provider) EnumKeys(slotID uint, prefix string, keyInfoFunc func(id, label, typ, class, currentVersionID string, creationTime *time.Time) error) error {
-	logger.Tracef("api=EnumKeys, host=%s, slotID=%d, prefix=%q", p.endpoint, slotID, prefix)
+	logger.Tracef("host=%s, slotID=%d, prefix=%q", p.endpoint, slotID, prefix)
 
 	iter := p.KmsClient.ListCryptoKeys(
 		context.Background(),

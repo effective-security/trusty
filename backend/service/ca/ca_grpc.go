@@ -31,7 +31,7 @@ func (s *Service) ProfileInfo(ctx context.Context, req *pb.CertProfileInfoReques
 
 	ca, err := s.ca.GetIssuerByProfile(req.Profile)
 	if err != nil {
-		logger.Warningf("api=ProfileInfo, reason=no_issuer, profile=%q", req.Profile)
+		logger.Warningf("reason=no_issuer, profile=%q", req.Profile)
 		return nil, v1.NewError(codes.NotFound, "profile not found: %s", req.Profile)
 	}
 

@@ -30,6 +30,7 @@ require (
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/goreman v0.3.7
 	github.com/mattn/goveralls v0.0.9
+	github.com/miekg/dns v1.1.43
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.11.0

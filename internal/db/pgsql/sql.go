@@ -37,7 +37,7 @@ func (p *Provider) Close() (err error) {
 	}
 
 	if err = p.db.Close(); err != nil {
-		logger.Errorf("api=Close, err=[%v]", errors.Details(err))
+		logger.Errorf("err=[%v]", errors.Details(err))
 	} else {
 		p.db = nil
 	}

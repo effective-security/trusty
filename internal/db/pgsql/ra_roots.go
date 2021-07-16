@@ -53,11 +53,11 @@ func (p *Provider) RegisterRootCertificate(ctx context.Context, crt *model.RootC
 func (p *Provider) RemoveRootCertificate(ctx context.Context, id uint64) error {
 	_, err := p.db.ExecContext(ctx, `DELETE FROM roots WHERE id=$1;`, id)
 	if err != nil {
-		logger.Errorf("api=RemoveRootCertificate, err=[%s]", errors.Details(err))
+		logger.Errorf("err=[%s]", errors.Details(err))
 		return errors.Trace(err)
 	}
 
-	logger.Noticef("api=RemoveRootCertificate, id=%d", id)
+	logger.Noticef("id=%d", id)
 
 	return nil
 }
