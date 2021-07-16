@@ -63,11 +63,11 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 func (p *Provider) RemoveCertificate(ctx context.Context, id uint64) error {
 	_, err := p.db.ExecContext(ctx, `DELETE FROM certificates WHERE id=$1;`, id)
 	if err != nil {
-		logger.Errorf("api=RemoveCertificate, err=[%s]", errors.Details(err))
+		logger.Errorf("err=[%s]", errors.Details(err))
 		return errors.Trace(err)
 	}
 
-	logger.Noticef("api=RemoveCertificate, id=%d", id)
+	logger.Noticef("id=%d", id)
 
 	return nil
 }

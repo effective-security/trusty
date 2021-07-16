@@ -91,15 +91,15 @@ func (p *Provider) GetOrg(ctx context.Context, id uint64) (*model.Organization, 
 func (p *Provider) RemoveOrg(ctx context.Context, id uint64) error {
 	_, err := p.db.ExecContext(ctx, `DELETE FROM orgmembers WHERE org_id=$1;`, id)
 	if err != nil {
-		logger.Errorf("api=RemoveOrg, err=[%s]", errors.Details(err))
+		logger.Errorf("err=[%s]", errors.Details(err))
 		return errors.Trace(err)
 	}
 	_, err = p.db.ExecContext(ctx, `DELETE FROM orgs WHERE id=$1;`, id)
 	if err != nil {
-		logger.Errorf("api=RemoveOrg, err=[%s]", errors.Details(err))
+		logger.Errorf("err=[%s]", errors.Details(err))
 		return errors.Trace(err)
 	}
-	logger.Noticef("api=RemoveOrg, id=%d", id)
+	logger.Noticef("id=%d", id)
 
 	return nil
 }
