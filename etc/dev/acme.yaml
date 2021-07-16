@@ -1,0 +1,29 @@
+---
+acme:
+  service:
+    subscriber_agreement_url: ""
+    directory_caa_identity: ""
+    directory_website: ""
+    directory_uri_prefix: https://acme.ekspand.com/v2/acme/directory/
+
+  policy:
+    order_expiry: 10m
+    authz_expiry: 720h
+    pending_authz_expiry: 48h
+    enabled_challenges: ["http-01","tls-alpn-01","dns-01"]
+    reuse_valid_authz: true
+    reuse_pending_authz: true
+    enable_wildcard_domains: true
+
+  domain_validation:
+    issuer_domain: acme.ekspand.com
+    timeout: 30s
+    max_retries: 3
+    allow_loopback_address: true
+    user_agent: ekspand.in
+    account_uri_prefixes:
+    - https://acme.ekspand.com/v2/acme/account/
+    dns_resolvers:
+    - 172.31.0.2:53
+    - 8.8.8.8:53
+    - 8.8.4.4:53
