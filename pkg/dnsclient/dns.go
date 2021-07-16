@@ -149,9 +149,10 @@ func (c *Client) exchangeOne(ctx context.Context, hostname string, qtype uint16)
 		select {
 		case <-ctx.Done():
 			reason := "unknown"
-			if ctx.Err() == context.DeadlineExceeded {
+			err = ctx.Err()
+			if err == context.DeadlineExceeded {
 				reason = "deadline"
-			} else if ctx.Err() == context.Canceled {
+			} else if err == context.Canceled {
 				reason = "canceled"
 			}
 			metrics.IncrCounter(
@@ -162,8 +163,11 @@ func (c *Client) exchangeOne(ctx context.Context, hostname string, qtype uint16)
 				metrics.Tag{Name: "resolver", Value: chosenServer},
 			)
 
-			err = ctx.Err()
-			logger.Errorf("hostname=%q, type=%v, err=[%s]", hostname, qtypeStr, err.Error())
+			if err != nil {
+				logger.Errorf("hostname=%q, type=%v, err=[%s]", hostname, qtypeStr, err.Error())
+			} else {
+				logger.Warningf("hostname=%q, type=%v", hostname, qtypeStr)
+			}
 			return
 		case r := <-ch:
 			if r.err != nil {
