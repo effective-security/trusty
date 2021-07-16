@@ -70,6 +70,9 @@ type Configuration struct {
 
 	// OAuthClients specifies the configuration files for OAuth clients
 	OAuthClients []string `json:"oauth_clients" yaml:"oauth_clients"`
+
+	// Acme specifies the configuration files for ACME provider
+	Acme string `json:"acme" yaml:"acme"`
 }
 
 // CryptoProv specifies the configuration for crypto providers
