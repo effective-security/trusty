@@ -8,8 +8,8 @@ import (
 
 	v1 "github.com/ekspand/trusty/api/v1"
 	pb "github.com/ekspand/trusty/api/v1/pb"
-	"github.com/ekspand/trusty/internal/db"
-	"github.com/ekspand/trusty/internal/db/model"
+	"github.com/ekspand/trusty/internal/db/cadb"
+	"github.com/ekspand/trusty/internal/db/cadb/model"
 	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/go-phorce/dolly/metrics"
 	"github.com/go-phorce/dolly/xlog"
@@ -272,6 +272,6 @@ func (s *Service) ListRevokedCertificates(ctx context.Context, in *pb.ListByIssu
 
 // Db returns DB
 // Used in Unittests
-func (s *Service) Db() db.CertsDb {
+func (s *Service) Db() cadb.CaDb {
 	return s.db
 }

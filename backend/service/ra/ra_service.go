@@ -8,8 +8,8 @@ import (
 	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/client/embed/proxy"
 	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/internal/db"
-	"github.com/ekspand/trusty/internal/db/model"
+	"github.com/ekspand/trusty/internal/db/cadb"
+	"github.com/ekspand/trusty/internal/db/cadb/model"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/pkg/poller"
 	"github.com/go-phorce/dolly/rest"
@@ -27,7 +27,7 @@ var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", 
 // Service defines the Status service
 type Service struct {
 	server        *gserver.Server
-	db            db.CertsDb
+	db            cadb.CaDb
 	clientFactory client.Factory
 	grpClient     *client.Client
 	ca            client.CAClient
@@ -44,7 +44,7 @@ func Factory(server *gserver.Server) interface{} {
 		logger.Panic("status.Factory: invalid parameter")
 	}
 
-	return func(cfg *config.Configuration, db db.CertsDb, clientFactory client.Factory) {
+	return func(cfg *config.Configuration, db cadb.CaDb, clientFactory client.Factory) {
 		svc := &Service{
 			server:        server,
 			cfg:           cfg,

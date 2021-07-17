@@ -12,7 +12,7 @@ import (
 
 	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/authority"
-	"github.com/ekspand/trusty/internal/db/model"
+	"github.com/ekspand/trusty/internal/db/cadb/model"
 	"github.com/juju/errors"
 )
 

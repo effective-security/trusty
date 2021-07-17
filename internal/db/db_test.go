@@ -1,74 +1,61 @@
 package db_test
 
 import (
-	"context"
-	"fmt"
-	"os"
-	"strings"
+	"errors"
 	"testing"
+	"time"
 
-	"github.com/ekspand/trusty/internal/db"
-	"github.com/ekspand/trusty/tests/testutils"
-	"github.com/juju/errors"
+	model "github.com/ekspand/trusty/internal/db"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-var (
-	provider db.Provider
-	ctx      = context.Background()
-)
+func NullTime(t *testing.T) {
+	v := model.NullTime(nil)
+	require.NotNil(t, v)
+	assert.False(t, v.Valid)
 
-const (
-	projFolder = "../../"
-)
-
-func TestMain(m *testing.M) {
-	//xlog.SetGlobalLogLevel(xlog.TRACE)
-
-	cfg, err := testutils.LoadConfig(projFolder, "UNIT_TEST")
-	if err != nil {
-		panic(errors.Trace(err))
-	}
-
-	p, err := db.New(
-		cfg.SQL.Driver,
-		cfg.SQL.DataSource,
-		cfg.SQL.MigrationsDir,
-		testutils.IDGenerator().NextID,
-	)
-	if err != nil {
-		panic(err.Error())
-	}
-	defer p.Close()
-	provider = p
-	// Run the tests
-	rc := m.Run()
-	os.Exit(rc)
+	i := time.Now()
+	v = model.NullTime(&i)
+	require.NotNil(t, v)
+	assert.True(t, v.Valid)
+	assert.Equal(t, i, v.Time)
 }
-func Test_ListTables(t *testing.T) {
-	expectedTables := []string{
-		"'users'",
-	}
-	require.NotNil(t, provider)
-	require.NotNil(t, provider.DB())
-	res, err := provider.DB().Query(fmt.Sprintf(`
-	SELECT
-		tablename
-	FROM
-		pg_catalog.pg_tables
-	WHERE
-		tablename IN (%s);
-	`, strings.Join(expectedTables, ",")))
-	require.NoError(t, err)
-	defer res.Close()
 
-	count := 0
-	var table string
-	for res.Next() {
-		count++
-		err = res.Scan(&table)
-		require.NoError(t, err)
+func TestString(t *testing.T) {
+	v := model.String(nil)
+	assert.Empty(t, v)
+
+	s := "1234"
+	v = model.String(&s)
+	assert.Equal(t, s, v)
+}
+
+func TestID(t *testing.T) {
+	_, err := model.ID("")
+	require.Error(t, err)
+
+	_, err = model.ID("@123")
+	require.Error(t, err)
+
+	v, err := model.ID("1234567")
+	require.NoError(t, err)
+	assert.Equal(t, uint64(1234567), v)
+}
+
+type validator struct {
+	valid bool
+}
+
+func (t validator) Validate() error {
+	if !t.valid {
+		return errors.New("invalid")
 	}
-	assert.Equal(t, len(expectedTables), count)
+	return nil
+}
+
+func TestValidate(t *testing.T) {
+	assert.Error(t, model.Validate(validator{false}))
+	assert.NoError(t, model.Validate(validator{true}))
+	assert.NoError(t, model.Validate(nil))
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/cli"
 	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/internal/db/model"
+	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/juju/errors"
@@ -58,7 +58,7 @@ func ListCerts(c ctl.Control, p interface{}) error {
 
 	after := uint64(0)
 	if *flags.After != "" {
-		after, err = model.ID(*flags.After)
+		after, err = db.ID(*flags.After)
 		if err != nil {
 			return errors.Annotate(err, "unable to parse --after")
 		}
@@ -95,7 +95,7 @@ func ListRevokedCerts(c ctl.Control, p interface{}) error {
 
 	after := uint64(0)
 	if *flags.After != "" {
-		after, err = model.ID(*flags.After)
+		after, err = db.ID(*flags.After)
 		if err != nil {
 			return errors.Annotate(err, "unable to parse --after")
 		}

@@ -11,10 +11,10 @@ LABEL org.opencontainers.image.authors="Ekspand <denis@ekspand.com>" \
 ENV TRUSTY_DIR=/opt/trusty
 ENV PATH=$PATH:$TRUSTY_DIR/bin
 
-RUN mkdir -p $TRUSTY_DIR/bin $TRUSTY_DIR/scripts/sql
+RUN mkdir -p $TRUSTY_DIR/bin $TRUSTY_DIR/sql
 COPY ./bin/trusty* $TRUSTY_DIR/bin/
 COPY ./scripts/build/* $TRUSTY_DIR/bin/
-COPY ./scripts/sql/ $TRUSTY_DIR/scripts/sql/
+COPY ./sql/ $TRUSTY_DIR/sql/
 
 VOLUME ["/var/trusty/certs", "/var/trusty/logs", "/var/trusty/audit"]
 

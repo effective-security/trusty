@@ -28,7 +28,6 @@ clean:
 	go clean
 	rm -rf \
 		./bin \
-		./.rpm \
 		./.gopath \
 		${COVPATH} \
 
@@ -163,18 +162,21 @@ start-sql:
 		docker run \
 			-d -p 5432:5432 \
 			-e 'POSTGRES_USER=postgres' -e 'POSTGRES_PASSWORD=postgres' \
-			-v ${PROJ_ROOT}/scripts/sql/postgres:/scripts/pgsql \
+			-v ${PROJ_ROOT}/sql:/pgsql \
 			--name trusty-unittest-postgres \
 			ekspand/docker-centos7-postgres:latest /start_postgres.sh && \
 		sleep 9; \
 	elif [ "$$CONTAINER_STATE" = "false" ]; then docker start trusty-unittest-postgres && sleep 9; fi;
-	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 5432 -U postgres -a -f /scripts/pgsql/create-trustrydb.sql
-	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 5432 -U postgres -a -f /scripts/pgsql/list-trustrydb.sql
-	echo "host=127.0.0.1 port=5432 user=postgres password=postgres sslmode=disable dbname=trustydb" > etc/dev/sql-conn.txt
+	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 5432 -U postgres -a -f /pgsql/cadb/create.sql
+	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 5432 -U postgres -a -f /pgsql/orgsdb/create.sql
+	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 5432 -U postgres -lqt
+	echo "host=127.0.0.1 port=5432 user=postgres password=postgres sslmode=disable dbname=cadb" > etc/dev/sql-conn-cadb.txt
+	echo "host=127.0.0.1 port=5432 user=postgres password=postgres sslmode=disable dbname=orgsdb" > etc/dev/sql-conn-orgsdb.txt
 
 drop-sql:
 	docker pull ekspand/docker-centos7-postgres:latest
-	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 5432 -U postgres -a -f /scripts/pgsql/drop-trustydb.sql
+	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 5432 -U postgres -a -f /pgsql/cadb/drop.sql
+	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 5432 -U postgres -a -f /pgsql/orgsdb/drop.sql
 	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 5432 -U postgres -lqt
 
 coveralls-github:

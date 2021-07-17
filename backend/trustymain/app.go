@@ -56,7 +56,8 @@ type appFlags struct {
 	isStderr            *bool
 	dryRun              *bool
 	hsmCfg              *string
-	sqlDataSource       *string
+	sqlOrgs             *string
+	sqlCa               *string
 	cryptoProvs         *[]string
 	cisURLs             *[]string
 	wfeURLs             *[]string
@@ -335,7 +336,8 @@ func (a *App) loadConfig() error {
 	flags.dryRun = app.Flag("dry-run", "verify config etc, and do not start the service").Bool()
 	flags.hsmCfg = app.Flag("hsm-cfg", "location of the HSM configuration file").String()
 	flags.cryptoProvs = app.Flag("crypto-prov", "path to additional Crypto provider configurations").Strings()
-	flags.sqlDataSource = app.Flag("sql", "SQL data source").String()
+	flags.sqlOrgs = app.Flag("orgs-sql", "SQL data source for Orgs").String()
+	flags.sqlCa = app.Flag("ca-sql", "SQL data source for CA").String()
 
 	flags.cisURLs = app.Flag("cis-listen-url", "URL for the CIS listening end-point").Strings()
 	flags.wfeURLs = app.Flag("wfe-listen-url", "URL for the WFE listening end-point").Strings()
@@ -374,8 +376,11 @@ func (a *App) loadConfig() error {
 	if *flags.hsmCfg != "" {
 		cfg.CryptoProv.Default = *flags.hsmCfg
 	}
-	if *flags.sqlDataSource != "" {
-		cfg.SQL.DataSource = *flags.sqlDataSource
+	if *flags.sqlOrgs != "" {
+		cfg.OrgsSQL.DataSource = *flags.sqlOrgs
+	}
+	if *flags.sqlCa != "" {
+		cfg.CaSQL.DataSource = *flags.sqlCa
 	}
 	if len(*flags.cryptoProvs) > 0 {
 		cfg.CryptoProv.Providers = *flags.cryptoProvs

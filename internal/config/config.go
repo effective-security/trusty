@@ -43,8 +43,11 @@ type Configuration struct {
 	// CryptoProv specifies the configuration for crypto providers
 	CryptoProv CryptoProv `json:"crypto_provider" yaml:"crypto_provider"`
 
-	// SQL specifies the configuration for SQL provider
-	SQL SQL `json:"sql" yaml:"sql"`
+	// OrgsSQL specifies the configuration for SQL provider
+	OrgsSQL SQL `json:"orgs_sql" yaml:"orgs_sql"`
+
+	// CaSQL specifies the configuration for SQL provider
+	CaSQL SQL `json:"ca_sql" yaml:"ca_sql"`
 
 	// JWT specifies configuration file for the JWT provider
 	JWT string `json:"jwt_provider" yaml:"jwt_provider"`

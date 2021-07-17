@@ -5,7 +5,7 @@ import (
 
 	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/internal/db"
+	"github.com/ekspand/trusty/internal/db/orgsdb"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/pkg/oauth2client"
 	"github.com/go-phorce/dolly/rest"
@@ -25,7 +25,7 @@ type Service struct {
 	server    *gserver.Server
 	cfg       *config.Configuration
 	oauthProv *oauth2client.Provider
-	db        db.OrgsDb
+	db        orgsdb.OrgsDb
 }
 
 // Factory returns a factory of the service
@@ -34,7 +34,7 @@ func Factory(server *gserver.Server) interface{} {
 		logger.Panic("status.Factory: invalid parameter")
 	}
 
-	return func(cfg *config.Configuration, oauthProv *oauth2client.Provider, db db.OrgsDb) error {
+	return func(cfg *config.Configuration, oauthProv *oauth2client.Provider, db orgsdb.OrgsDb) error {
 		svc := &Service{
 			server:    server,
 			cfg:       cfg,

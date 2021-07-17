@@ -12,7 +12,8 @@ import (
 	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/db"
-	"github.com/ekspand/trusty/internal/db/model"
+	"github.com/ekspand/trusty/internal/db/orgsdb"
+	"github.com/ekspand/trusty/internal/db/orgsdb/model"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/pkg/jwt"
 	"github.com/ekspand/trusty/pkg/oauth2client"
@@ -48,7 +49,7 @@ type Service struct {
 	server    *gserver.Server
 	cfg       *config.Configuration
 	oauthProv *oauth2client.Provider
-	db        db.OrgsDb
+	db        orgsdb.OrgsDb
 	jwt       jwt.Provider
 }
 
@@ -58,7 +59,7 @@ func Factory(server *gserver.Server) interface{} {
 		logger.Panic("status.Factory: invalid parameter")
 	}
 
-	return func(cfg *config.Configuration, oauthProv *oauth2client.Provider, sql db.OrgsDb, jwt jwt.Provider) error {
+	return func(cfg *config.Configuration, oauthProv *oauth2client.Provider, sql orgsdb.OrgsDb, jwt jwt.Provider) error {
 		svc := &Service{
 			server:    server,
 			cfg:       cfg,
@@ -254,7 +255,7 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 			return
 		}
 
-		uemail := model.String(ghu.Email)
+		uemail := db.String(ghu.Email)
 		if uemail == "" {
 			marshal.WriteJSON(w, r, httperror.WithForbidden("please update your GitHub profile with valid email"))
 			return
@@ -263,17 +264,17 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 		user := &model.User{
 			ExternalID:   uint64(ghu.GetID()),
 			Provider:     v1.ProviderGithub,
-			Login:        model.String(ghu.Login),
-			Name:         model.String(ghu.Name),
+			Login:        db.String(ghu.Login),
+			Name:         db.String(ghu.Name),
 			Email:        uemail,
-			Company:      model.String(ghu.Company),
-			AvatarURL:    model.String(ghu.AvatarURL),
+			Company:      db.String(ghu.Company),
+			AvatarURL:    db.String(ghu.AvatarURL),
 			AccessToken:  token.AccessToken,
 			RefreshToken: token.RefreshToken,
 		}
 
 		if !token.Expiry.IsZero() {
-			user.TokenExpiresAt = model.NullTime(&token.Expiry)
+			user.TokenExpiresAt = db.NullTime(&token.Expiry)
 		}
 
 		user, err = s.db.LoginUser(ctx, user)
@@ -400,17 +401,17 @@ func (s *Service) GoogleCallbackHandler() rest.Handle {
 		user := &model.User{
 			ExternalID:   uint64(0),
 			Provider:     v1.ProviderGoogle,
-			Login:        model.String(&userInfo.Email),
-			Name:         model.String(&userInfo.Name),
+			Login:        db.String(&userInfo.Email),
+			Name:         db.String(&userInfo.Name),
 			Email:        uemail,
 			Company:      "",
-			AvatarURL:    model.String(&userInfo.Picture),
+			AvatarURL:    db.String(&userInfo.Picture),
 			AccessToken:  token.AccessToken,
 			RefreshToken: token.RefreshToken,
 		}
 
 		if !token.Expiry.IsZero() {
-			user.TokenExpiresAt = model.NullTime(&token.Expiry)
+			user.TokenExpiresAt = db.NullTime(&token.Expiry)
 		}
 
 		user, err = s.db.LoginUser(ctx, user)
@@ -460,7 +461,7 @@ func (s *Service) RefreshHandler() rest.Handle {
 		deviceID := r.Header.Get(header.XDeviceID)
 		idn := ctx.Identity()
 
-		userID, _ := model.ID(idn.UserID())
+		userID, _ := db.ID(idn.UserID())
 		user, err := s.db.GetUser(context.Background(), userID)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithForbidden("user ID %d not found: %s", userID, err.Error()).WithCause(err))
