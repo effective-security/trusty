@@ -5,8 +5,8 @@ import (
 
 	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/authority"
-	"github.com/ekspand/trusty/internal/db"
-	"github.com/ekspand/trusty/internal/db/model"
+	"github.com/ekspand/trusty/internal/db/cadb"
+	"github.com/ekspand/trusty/internal/db/cadb/model"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/tasks"
@@ -24,7 +24,7 @@ var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", 
 type Service struct {
 	server    *gserver.Server
 	ca        *authority.Authority
-	db        db.CertsDb
+	db        cadb.CaDb
 	scheduler tasks.Scheduler
 }
 
@@ -34,7 +34,7 @@ func Factory(server *gserver.Server) interface{} {
 		logger.Panic("status.Factory: invalid parameter")
 	}
 
-	return func(ca *authority.Authority, db db.CertsDb, scheduler tasks.Scheduler) {
+	return func(ca *authority.Authority, db cadb.CaDb, scheduler tasks.Scheduler) {
 		svc := &Service{
 			server:    server,
 			ca:        ca,

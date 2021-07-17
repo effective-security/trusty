@@ -8,7 +8,8 @@ import (
 	"github.com/ekspand/trusty/authority"
 	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/internal/db"
+	"github.com/ekspand/trusty/internal/db/cadb"
+	"github.com/ekspand/trusty/internal/db/orgsdb"
 	"github.com/ekspand/trusty/pkg/awskmscrypto"
 	"github.com/ekspand/trusty/pkg/gcpkmscrypto"
 	"github.com/ekspand/trusty/pkg/jwt"
@@ -49,8 +50,11 @@ type ProvideCryptoFn func(cfg *config.Configuration) (*cryptoprov.Crypto, error)
 // ProvideAuthorityFn defines Crypto provider
 type ProvideAuthorityFn func(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*authority.Authority, error)
 
-// ProvideDbFn defines DB provider
-type ProvideDbFn func(cfg *config.Configuration) (db.OrgsDb, db.CertsDb, error)
+// ProvideOrgsDbFn defines Orgs DB provider
+type ProvideOrgsDbFn func(cfg *config.Configuration) (orgsdb.OrgsDb, error)
+
+// ProvideCaDbFn defines CA DB provider
+type ProvideCaDbFn func(cfg *config.Configuration) (cadb.CaDb, error)
 
 // ProvideClientFactoryFn defines client.Facroty provider
 type ProvideClientFactoryFn func(cfg *config.Configuration) (client.Factory, error)
@@ -70,7 +74,8 @@ type ContainerFactory struct {
 	schedulerProvider     ProvideSchedulerFn
 	cryptoProvider        ProvideCryptoFn
 	authorityProvider     ProvideAuthorityFn
-	dbProvider            ProvideDbFn
+	orgsdbProvider        ProvideOrgsDbFn
+	cadbProvider          ProvideCaDbFn
 	oauthProvider         ProvideOAuthClientsFn
 	jwtProvider           ProvideJwtFn
 	clientFactoryProvider ProvideClientFactoryFn
@@ -93,7 +98,8 @@ func NewContainerFactory(closer CloseRegistrator) *ContainerFactory {
 		WithSchedulerProvider(defaultSchedulerProv).
 		WithCryptoProvider(provideCrypto).
 		WithAuthorityProvider(provideAuthority).
-		WithDbProvider(provideDB).
+		WithOrgsDbProvider(provideOrgsDB).
+		WithCaDbProvider(provideCaDB).
 		WithOAuthClientsProvider(provideOAuth).
 		WithJwtProvider(provideJwt).
 		WithClientFactoryProvider(provideClientFactory)
@@ -135,9 +141,15 @@ func (f *ContainerFactory) WithAuditorProvider(p ProvideAuditorFn) *ContainerFac
 	return f
 }
 
-// WithDbProvider allows to specify custom DB provider
-func (f *ContainerFactory) WithDbProvider(p ProvideDbFn) *ContainerFactory {
-	f.dbProvider = p
+// WithOrgsDbProvider allows to specify custom DB provider
+func (f *ContainerFactory) WithOrgsDbProvider(p ProvideOrgsDbFn) *ContainerFactory {
+	f.orgsdbProvider = p
+	return f
+}
+
+// WithCaDbProvider allows to specify custom DB provider
+func (f *ContainerFactory) WithCaDbProvider(p ProvideCaDbFn) *ContainerFactory {
+	f.cadbProvider = p
 	return f
 }
 
@@ -207,10 +219,16 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 		return nil, errors.Trace(err)
 	}
 
-	err = container.Provide(f.dbProvider)
+	err = container.Provide(f.cadbProvider)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
+
+	err = container.Provide(f.orgsdbProvider)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
 	err = container.Provide(f.clientFactoryProvider)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -294,7 +312,7 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*au
 	return ca, nil
 }
 
-func provideDB(cfg *config.Configuration) (db.OrgsDb, db.CertsDb, error) {
+func provideOrgsDB(cfg *config.Configuration) (orgsdb.OrgsDb, error) {
 	var idGenerator = sonyflake.NewSonyflake(sonyflake.Settings{
 		StartTime: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
 		/* TODO: machine ID from config
@@ -304,11 +322,28 @@ func provideDB(cfg *config.Configuration) (db.OrgsDb, db.CertsDb, error) {
 		*/
 	})
 
-	d, err := db.New(cfg.SQL.Driver, cfg.SQL.DataSource, cfg.SQL.MigrationsDir, idGenerator.NextID)
+	d, err := orgsdb.New(cfg.OrgsSQL.Driver, cfg.OrgsSQL.DataSource, cfg.OrgsSQL.MigrationsDir, idGenerator.NextID)
 	if err != nil {
-		return nil, nil, errors.Trace(err)
+		return nil, errors.Trace(err)
 	}
-	return d, d, nil
+	return d, nil
+}
+
+func provideCaDB(cfg *config.Configuration) (cadb.CaDb, error) {
+	var idGenerator = sonyflake.NewSonyflake(sonyflake.Settings{
+		StartTime: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
+		/* TODO: machine ID from config
+		MachineID: func() (uint16, error) {
+			return uint16(os.Getpid()), nil
+		},
+		*/
+	})
+
+	d, err := cadb.New(cfg.CaSQL.Driver, cfg.CaSQL.DataSource, cfg.CaSQL.MigrationsDir, idGenerator.NextID)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return d, nil
 }
 
 func provideClientFactory(cfg *config.Configuration) (client.Factory, error) {

@@ -2,7 +2,7 @@
 set -e
 
 if [[ -z "$ITEST_IMAGE_TAG" ]]; then
-    export ITEST_IMAGE_TAG=latest
+    export ITEST_IMAGE_TAG=master
 else
     echo "ITEST_IMAGE_TAG=$ITEST_IMAGE_TAG"
     # in CI, sometime the host is reused and errors:

@@ -56,13 +56,21 @@ crypto_provider:
     - SoftHSM
     - Gemalto NV
 
-sql:
+orgs_sql:
   # the driver name: postgres|mysql
   driver: postgres
   # specifies the connection string. It can be prefixed with file:// or env:// to load the source from a file or environment variable.
-  data_source: file://${TRUSTY_CONFIG_DIR}/sql-conn.txt
+  data_source: file://${TRUSTY_CONFIG_DIR}/sql-conn-orgsdb.txt
   # the directory that contains migrations.
-  migrations_dir: ../../../scripts/sql/postgres/migrations
+  migrations_dir: ../../../sql/orgsdb/migrations
+
+ca_sql:
+  # the driver name: postgres|mysql
+  driver: postgres
+  # specifies the connection string. It can be prefixed with file:// or env:// to load the source from a file or environment variable.
+  data_source: file://${TRUSTY_CONFIG_DIR}/sql-conn-cadb.txt
+  # the directory that contains migrations.
+  migrations_dir: ../../../sql/cadb/migrations
 
 # the configuration files for OAuth clients    
 oauth_clients:

@@ -13,6 +13,6 @@ debug
 debug.test
 coverage.out
 change_log.txt
-etc/dev/sql-conn.txt
+etc/dev/sql-conn-*
 vendor/
 etc/dev/roots/trusty_dev_root_ca-key.pem

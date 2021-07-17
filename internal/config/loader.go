@@ -157,7 +157,8 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 
 	// Add to this list all configs that require folder resolution to absolute path
 	dirsToResolve := []*string{
-		&c.SQL.MigrationsDir,
+		&c.OrgsSQL.MigrationsDir,
+		&c.CaSQL.MigrationsDir,
 		&c.Logs.Directory,
 		&c.Audit.Directory,
 	}

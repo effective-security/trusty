@@ -35,9 +35,9 @@ services:
           - trusty-sql.ekspand.com
     volumes:
       # Mounts the volumes from build container to the container in test
-      # docker-compose command runs with ./scripts/integration as CWD, 
-      # the source path in the volume definitions are relative to ./scripts/integration
-      - ../../sql/postgres:/scripts/pgsql
+      # docker-compose command runs with ./sql as CWD, 
+      # the source path in the volume definitions are relative to ./sql
+      - ../../sql:/pgsql
     ports:
       - "5432" # SQL
     environment:
@@ -82,12 +82,14 @@ services:
       - TRUSTY_GITHUB_CLIENT_SECRET=not_used_in_test
       - TRUSTY_GOOGLE_CLIENT_ID=not_used_in_test
       - TRUSTY_GOOGLE_CLIENT_SECRET=not_used_in_test
-      - TRUSTY_SQL_CONN=host=10.77.88.100 port=5432 user=postgres password=postgres sslmode=disable dbname=trustydb
+      - TRUSTY_CA_SQL_CONN=host=10.77.88.100 port=5432 user=postgres password=postgres sslmode=disable dbname=cadb
+      - TRUSTY_ORGS_SQL_CONN=host=10.77.88.100 port=5432 user=postgres password=postgres sslmode=disable dbname=orgsdb
     entrypoint:
       - /bin/bash
       - -c
       - >-
-        /opt/trusty/scripts/sql/postgres/wait_sql.sh 10.77.88.100 5432 postgres postgres echo "SQL is ready" &&
+        /opt/trusty/sql/cadb/wait_sql.sh 10.77.88.100 5432 postgres postgres echo "CA DB is ready" &&
+        /opt/trusty/sql/orgsdb/wait_sql.sh 10.77.88.100 5432 postgres postgres echo "ORGS DB is ready" &&
         mkdir -p /tmp/trusty/softhsm/tokens /tmp/trusty/certs &&
         cp /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem /tmp/trusty/certs/trusty_dev_root_ca.pem &&
         /opt/trusty/bin/config-softhsm.sh
@@ -109,7 +111,8 @@ services:
         /opt/trusty/bin/trusty --std
         --hsm-cfg=/tmp/trusty/softhsm/unittest_hsm.json
         --cfg=/opt/trusty/etc/dev/trusty-config.yaml
-        --sql=env://TRUSTY_SQL_CONN
+        --ca-sql=env://TRUSTY_CA_SQL_CONN
+        --orgs-sql=env://TRUSTY_ORGS_SQL_CONN
         --logs-dir=/var/trusty/logs
         --audit-dir=/var/trusty/audit
         --host-name=10.77.88.101
@@ -153,12 +156,14 @@ services:
       - TRUSTY_GITHUB_CLIENT_SECRET=not_used_in_test
       - TRUSTY_GOOGLE_CLIENT_ID=not_used_in_test
       - TRUSTY_GOOGLE_CLIENT_SECRET=not_used_in_test
-      - TRUSTY_SQL_CONN=host=10.77.88.100 port=5432 user=postgres password=postgres sslmode=disable dbname=trustydb
+      - TRUSTY_CA_SQL_CONN=host=10.77.88.100 port=5432 user=postgres password=postgres sslmode=disable dbname=cadb
+      - TRUSTY_ORGS_SQL_CONN=host=10.77.88.100 port=5432 user=postgres password=postgres sslmode=disable dbname=orgsdb
     entrypoint:
       - /bin/bash
       - -c
       - >-
-        /opt/trusty/scripts/sql/postgres/wait_sql.sh 10.77.88.100 5432 postgres postgres echo "SQL is ready" &&
+        /opt/trusty/sql/cadb/wait_sql.sh 10.77.88.100 5432 postgres postgres echo "CA DB is ready" &&
+        /opt/trusty/sql/orgsdb/wait_sql.sh 10.77.88.100 5432 postgres postgres echo "ORGS DB is ready" &&
         mkdir -p /tmp/trusty/certs &&
         cp /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem /tmp/trusty/certs/trusty_dev_root_ca.pem &&
         /opt/trusty/bin/gen_test_certs.sh
@@ -174,7 +179,8 @@ services:
         /opt/trusty/bin/trusty --std
         --hsm-cfg=/opt/trusty/tests/aws-test-kms.json
         --cfg=/opt/trusty/etc/dev/trusty-config.yaml
-        --sql=env://TRUSTY_SQL_CONN
+        --ca-sql=env://TRUSTY_CA_SQL_CONN
+        --orgs-sql=env://TRUSTY_ORGS_SQL_CONN
         --logs-dir=/var/trusty/logs
         --audit-dir=/var/trusty/audit
         --host-name=10.77.88.102
@@ -217,7 +223,8 @@ services:
       - >-
         mkdir -p /tmp/trusty/softhsm/tokens /tmp/trusty/certs &&
         cp /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem /tmp/trusty/certs/trusty_dev_root_ca.pem &&
-        /opt/trusty/scripts/sql/postgres/create_sql.sh 10.77.88.100 5432 postgres postgres
+        /opt/trusty/sql/cadb/create_sql.sh 10.77.88.100 5432 postgres postgres echo "CA DB is ready" &&
+        /opt/trusty/sql/orgsdb/create_sql.sh 10.77.88.100 5432 postgres postgres echo "ORGS DB is ready" &&
         /opt/trusty/bin/config-softhsm.sh
         --tokens-dir /tmp/trusty/softhsm/tokens
         --pin-file /tmp/trusty/softhsm/trusty_unittest.txt

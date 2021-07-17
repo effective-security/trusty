@@ -197,7 +197,7 @@ fmt:
 	echo "Running Fmt"
 	gofmt -s -l -w ${GOFILES_NOVENDOR}
 
-vet: build
+vet:
 	echo "Running vet"
 	go vet ${BUILD_FLAGS} ./...
 

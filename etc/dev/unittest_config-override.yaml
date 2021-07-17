@@ -13,3 +13,5 @@ servers:
     disabled: false
   ca:
     disabled: false
+  ra:
+    disabled: false
