@@ -5,9 +5,9 @@ import (
 )
 
 // NewChallenge returns an instance of the challenge
-func NewChallenge(authzID string, typ v2acme.IdentifierType) *Challenge {
+func NewChallenge(id, authzID uint64, typ v2acme.IdentifierType) *Challenge {
 	return &Challenge{
-		ID:              GenerateID(),
+		ID:              id,
 		AuthorizationID: authzID,
 		Type:            typ,
 		Status:          v2acme.StatusPending,

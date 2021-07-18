@@ -3,8 +3,6 @@ package orgsdb
 import (
 	"context"
 	"database/sql"
-	"fmt"
-	"os"
 	"strings"
 
 	"github.com/ekspand/trusty/internal/db"
@@ -12,18 +10,16 @@ import (
 	"github.com/ekspand/trusty/internal/db/orgsdb/pgsql"
 	"github.com/go-phorce/dolly/fileutil"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/golang-migrate/migrate"
-	"github.com/golang-migrate/migrate/database/postgres"
 	"github.com/juju/errors"
 
 	// register Postgres driver
 	_ "github.com/lib/pq"
 
 	// register file driver for migration
-	_ "github.com/golang-migrate/migrate/source/file"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/internal", "orgsdb")
+var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/internal/db", "orgsdb")
 
 // IDGenerator defines an interface to generate unique ID accross the cluster
 type IDGenerator interface {
@@ -82,50 +78,6 @@ type Provider interface {
 	Close() (err error)
 }
 
-// Migrate performs the db migration
-func Migrate(migrationsDir string, db *sql.DB) error {
-	logger.Tracef("reason=load, directory=%q", migrationsDir)
-	if _, err := os.Stat(migrationsDir); err != nil {
-		return errors.Annotatef(err, "directory %q inaccessible", migrationsDir)
-	}
-
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	m, err := migrate.NewWithDatabaseInstance(
-		fmt.Sprintf("file://%s", migrationsDir),
-		"postgres",
-		driver)
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	version, _, err := m.Version()
-	if err != nil && err != migrate.ErrNilVersion {
-		return errors.Trace(err)
-	}
-	if err == migrate.ErrNilVersion {
-		logger.Tracef("reason=initial_state, version=nil")
-	} else {
-		logger.Tracef("reason=initial_state, version=%d", version)
-	}
-
-	err = m.Up()
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	version, _, err = m.Version()
-	if err != nil {
-		return errors.Trace(err)
-	}
-	logger.Infof("reason=current_state, version=%d", version)
-
-	return nil
-}
-
 // New creates a Provider instance
 func New(driverName, dataSourceName, migrationsDir string, nextID func() (uint64, error)) (Provider, error) {
 	ds, err := fileutil.LoadConfigWithSchema(dataSourceName)
@@ -134,20 +86,20 @@ func New(driverName, dataSourceName, migrationsDir string, nextID func() (uint64
 	}
 
 	ds = strings.Trim(ds, "\"")
-	db, err := sql.Open(driverName, ds)
+	d, err := sql.Open(driverName, ds)
 	if err != nil {
 		return nil, errors.Annotatef(err, "unable to open DB: %s", driverName)
 	}
 
-	err = db.Ping()
+	err = d.Ping()
 	if err != nil {
 		return nil, errors.Annotatef(err, "unable to ping DB: %s", driverName)
 	}
 
-	err = Migrate(migrationsDir, db)
+	err = db.Migrate(migrationsDir, d)
 	if err != nil && !strings.Contains(err.Error(), "no change") {
 		return nil, errors.Trace(err)
 	}
 
-	return pgsql.New(db, nextID)
+	return pgsql.New(d, nextID)
 }
