@@ -2,11 +2,23 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
+	"os"
 	"strconv"
 	"time"
 
+	"github.com/go-phorce/dolly/xlog"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/juju/errors"
+
+	// register Postgres driver
+	_ "github.com/lib/pq"
+	// register file driver for migration
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
+
+var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/internal", "db")
 
 // Max values for strings
 const (
@@ -59,4 +71,48 @@ func ID(id string) (uint64, error) {
 		return 0, errors.Trace(err)
 	}
 	return i64, nil
+}
+
+// Migrate performs the db migration
+func Migrate(migrationsDir string, db *sql.DB) error {
+	logger.Tracef("reason=load, directory=%q", migrationsDir)
+	if _, err := os.Stat(migrationsDir); err != nil {
+		return errors.Annotatef(err, "directory %q inaccessible", migrationsDir)
+	}
+
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	m, err := migrate.NewWithDatabaseInstance(
+		fmt.Sprintf("file://%s", migrationsDir),
+		"postgres",
+		driver)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	version, _, err := m.Version()
+	if err != nil && err != migrate.ErrNilVersion {
+		return errors.Trace(err)
+	}
+	if err == migrate.ErrNilVersion {
+		logger.Tracef("reason=initial_state, version=nil")
+	} else {
+		logger.Tracef("reason=initial_state, version=%d", version)
+	}
+
+	err = m.Up()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	version, _, err = m.Version()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	logger.Infof("reason=current_state, version=%d", version)
+
+	return nil
 }

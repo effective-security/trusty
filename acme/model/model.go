@@ -44,10 +44,13 @@ func ValidChallenge(name string) bool {
 // Registration objects represent non-public metadata attached to Account object
 type Registration struct {
 	// Unique identifier
-	ID string `json:"id" yaml:"id"`
+	ID uint64 `json:"id" yaml:"id"`
 
 	// ExternalID is external account ID in RA
 	ExternalID string `json:"external_id" yaml:"external_id"`
+
+	// KeyID is hash of the key
+	KeyID string `json:"key_id" yaml:"key_id"`
 
 	// Account key to which the details are attached
 	Key *jose.JSONWebKey `json:"key" yaml:"key"`
@@ -82,7 +85,7 @@ func NewRegistration(
 	}
 
 	return &Registration{
-		ID:        keyID,
+		KeyID:     keyID,
 		Key:       key,
 		Contact:   contact,
 		Agreement: agreement,
@@ -96,19 +99,20 @@ func (r *Registration) ValidateID() error {
 	if err != nil {
 		return errors.Trace(err)
 	}
-	if keyID != r.ID {
-		return errors.Errorf("expected ID %q, got: %q", keyID, r.ID)
+	if keyID != r.KeyID {
+		return errors.Errorf("expected ID %q, got: %q", keyID, r.KeyID)
 	}
 	return nil
 }
 
 // Order represent internal model for ACME Order object
 type Order struct {
-	ID                string          `json:"id" yaml:"id"`
-	RegistrationID    string          `json:"reg_id" yaml:"reg_id"`
-	CreatedAt         int64           `json:"created" yaml:"created"` // UnixNano
+	ID                uint64          `json:"id" yaml:"id"`
+	RegistrationID    uint64          `json:"reg_id" yaml:"reg_id"`
+	NamesHash         string          `json:"names_hash" yaml:"names_hash"`
+	CreatedAt         time.Time       `json:"created_at" yaml:"created_at"`
 	Status            v2acme.Status   `json:"status" yaml:"status"`
-	ExpiresAt         int64           `json:"expires" yaml:"expires"` // UnixNano
+	ExpiresAt         time.Time       `json:"expires_at" yaml:"expires_at"`
 	NotBefore         string          `json:"not_before,omitempty" yaml:"not_before"`
 	NotAfter          string          `json:"not_after,omitempty" yaml:"not_after"`
 	Error             *v2acme.Problem `json:"error,omitempty" yaml:"error"`
@@ -116,23 +120,23 @@ type Order struct {
 	CertificateID     string          `json:"cert_id,omitempty" yaml:"cert_id"`
 	DNSNames          []string        `json:"dns_names" yaml:"dns_names"` // Identifiers with "dns" type
 	ExternalBindingID string          `json:"binding_id" yaml:"binding_id"`
-	ExternalOrderID   int             `json:"external_order_id" yaml:"external_order_id"`
+	ExternalOrderID   uint64          `json:"external_order_id" yaml:"external_order_id"`
 }
 
 // IssuedCertificate provides info about issued certificate
 type IssuedCertificate struct {
-	ID                string `json:"id" yaml:"id"`
-	RegistrationID    string `json:"reg_id" yaml:"reg_id"`
-	OrderID           string `json:"order_id" yaml:"order_id"`
+	ID                uint64 `json:"id" yaml:"id"`
+	RegistrationID    uint64 `json:"reg_id" yaml:"reg_id"`
+	OrderID           uint64 `json:"order_id" yaml:"order_id"`
 	ExternalBindingID string `json:"binding_id" yaml:"binding_id"`
-	ExternalID        int    `json:"external_id" yaml:"external_id"`
-	Certificate       string `json:"pem_cert" yaml:"pem_cert"`
+	ExternalID        uint64 `json:"external_id" yaml:"external_id"`
+	Certificate       string `json:"pem" yaml:"pem"`
 }
 
 // OrderRequest specifies parameters for new Order
 type OrderRequest struct {
 	ExternalBindingID string   `json:"binding_id" yaml:"binding_id"`
-	RegistrationID    string   `json:"reg_id" yaml:"reg_id"`
+	RegistrationID    uint64   `json:"reg_id" yaml:"reg_id"`
 	NotBefore         string   `json:"not_before,omitempty" yaml:"not_before"`
 	NotAfter          string   `json:"not_after,omitempty" yaml:"not_after"`
 	DNSNames          []string `json:"dns_names" yaml:"dns_names"` // Identifiers with "dns" type
@@ -140,13 +144,13 @@ type OrderRequest struct {
 
 // Challenge represent internal model for ACME Challenge object
 type Challenge struct {
-	ID              string                `json:"id" yaml:"id"`
-	AuthorizationID string                `json:"authz_id" yaml:"authz_id"`
+	ID              uint64                `json:"id" yaml:"id"`
+	AuthorizationID uint64                `json:"authz_id" yaml:"authz_id"`
 	Type            v2acme.IdentifierType `json:"type" yaml:"type"`
 	Status          v2acme.Status         `json:"status" yaml:"status"`
 	Error           *v2acme.Problem       `json:"error,omitempty" yaml:"error"`
 	URL             string                `json:"url" yaml:"url"`
-	ValidatedAt     int64                 `json:"validated" yaml:"validated"` // UnixNano
+	ValidatedAt     time.Time             `json:"validated_at" yaml:"validated_at"`
 	// Used by http-01, tls-sni-01, tls-alpn-01 and dns-01 challenges
 	Token string `json:"token,omitempty" yaml:"token"`
 	// expected KeyAuthorization
@@ -190,16 +194,16 @@ type ValidationRecord struct {
 
 // Authorization represent internal model for ACME Authorization object
 type Authorization struct {
-	ID             string            `json:"id" yaml:"id"`
-	RegistrationID string            `json:"reg_id" yaml:"reg_id"`
+	ID             uint64            `json:"id" yaml:"id"`
+	RegistrationID uint64            `json:"reg_id" yaml:"reg_id"`
 	Identifier     v2acme.Identifier `json:"identifier" yaml:"identifier"`
 	Status         v2acme.Status     `json:"status" yaml:"status"`
-	ExpiresAt      int64             `json:"expires" yaml:"expires"` // UnixNano
+	ExpiresAt      time.Time         `json:"expires" yaml:"expires"`
 	Challenges     []Challenge       `json:"challenges" yaml:"challenges"`
 }
 
 // FindChallenge returns index of the found challenge
-func (a *Authorization) FindChallenge(id string) (int, bool) {
+func (a *Authorization) FindChallenge(id uint64) (int, bool) {
 	for i, chall := range a.Challenges {
 		if chall.ID == id {
 			return i, true

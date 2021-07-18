@@ -2,6 +2,7 @@ package model_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -37,7 +38,7 @@ func Test_Registration(t *testing.T) {
 	require.NoError(t, err)
 
 	r := acmemodel.Registration{
-		ID:        keyID,
+		KeyID:     keyID,
 		Key:       &jwk,
 		Contact:   []string{"denis@acme.com"},
 		Agreement: "Agreement",
@@ -139,25 +140,25 @@ func Test_CheckConsistencyForClientOffer(t *testing.T) {
 		err       string
 	}{
 		{
-			challenge: &acmemodel.Challenge{ID: "1", KeyAuthorization: "2", Status: v2acme.StatusPending, Token: "3"},
+			challenge: &acmemodel.Challenge{ID: 1, KeyAuthorization: "2", Status: v2acme.StatusPending, Token: "3"},
 			err:       "response to this challenge was already submitted",
 		},
 		{
-			challenge: &acmemodel.Challenge{ID: "2", KeyAuthorization: "", Status: v2acme.StatusValid, Token: "3"},
+			challenge: &acmemodel.Challenge{ID: 2, KeyAuthorization: "", Status: v2acme.StatusValid, Token: "3"},
 			err:       "invalid token: \"3\"",
 		},
 		{
-			challenge: &acmemodel.Challenge{ID: "3", KeyAuthorization: "", Status: v2acme.StatusPending, Token: "3"},
+			challenge: &acmemodel.Challenge{ID: 3, KeyAuthorization: "", Status: v2acme.StatusPending, Token: "3"},
 			err:       "invalid token: \"3\"",
 		},
 		{
-			challenge: &acmemodel.Challenge{ID: "4", KeyAuthorization: "", Status: v2acme.StatusPending, Token: "EGy1sG21BB3gjJu3fx-R7riQO190mmzH"},
+			challenge: &acmemodel.Challenge{ID: 4, KeyAuthorization: "", Status: v2acme.StatusPending, Token: "EGy1sG21BB3gjJu3fx-R7riQO190mmzH"},
 			err:       "",
 		},
 	}
 
 	for _, tc := range tcases {
-		t.Run(tc.challenge.ID, func(t *testing.T) {
+		t.Run(fmt.Sprintf("%d", tc.challenge.ID), func(t *testing.T) {
 			err := tc.challenge.CheckConsistencyForClientOffer()
 			if tc.err != "" {
 				assert.Error(t, err)
@@ -175,16 +176,16 @@ func Test_CheckConsistencyForValidation(t *testing.T) {
 		err       string
 	}{
 		{
-			challenge: &acmemodel.Challenge{ID: "1", KeyAuthorization: "2", Status: v2acme.StatusPending, Token: "3"},
+			challenge: &acmemodel.Challenge{ID: 1, KeyAuthorization: "2", Status: v2acme.StatusPending, Token: "3"},
 			err:       "invalid token: \"3\"",
 		},
 		{
-			challenge: &acmemodel.Challenge{ID: "2", KeyAuthorization: "", Status: v2acme.StatusValid, Token: "3"},
+			challenge: &acmemodel.Challenge{ID: 2, KeyAuthorization: "", Status: v2acme.StatusValid, Token: "3"},
 			err:       "invalid token: \"3\"", // "challenge is not pending: valid",
 		},
 		{
 			challenge: &acmemodel.Challenge{
-				ID:               "3",
+				ID:               3,
 				Status:           v2acme.StatusPending,
 				Token:            "EGy1sG21BB3gjJu3fx-R7riQO190mmzH",
 				KeyAuthorization: "",
@@ -193,7 +194,7 @@ func Test_CheckConsistencyForValidation(t *testing.T) {
 		},
 		{
 			challenge: &acmemodel.Challenge{
-				ID:               "4",
+				ID:               4,
 				Status:           v2acme.StatusPending,
 				Token:            "EGy1sG21BB3gjJu3fx-R7riQO190mmzH",
 				KeyAuthorization: "EGy1sG21BB3gjJu3fx-R7riQO190mmz.xSmDyoxiYD-u59JJRzxQVCLRcoitjEeEoyTqS-2R3e4",
@@ -202,7 +203,7 @@ func Test_CheckConsistencyForValidation(t *testing.T) {
 		},
 		{
 			challenge: &acmemodel.Challenge{
-				ID:               "5",
+				ID:               5,
 				Status:           v2acme.StatusPending,
 				Token:            "EGy1sG21BB3gjJu3fx-R7riQO190mmzH",
 				KeyAuthorization: "EGy1sG21BB3gjJu3fx-R7riQO190mmzH.xSmDyoxiYD-u59JJRzxQVC",
@@ -211,7 +212,7 @@ func Test_CheckConsistencyForValidation(t *testing.T) {
 		},
 		{
 			challenge: &acmemodel.Challenge{
-				ID:               "6",
+				ID:               6,
 				Status:           v2acme.StatusPending,
 				Token:            "EGy1sG21BB3gjJu3fx-R7riQO190mmzH",
 				KeyAuthorization: "EGy1sG21BB3gjJu3fx-R7riQO190mmzH.xSmDyoxiYD-u59JJRzxQVCLRcoitjEeEoyTqS-2R3e4",
@@ -221,7 +222,7 @@ func Test_CheckConsistencyForValidation(t *testing.T) {
 	}
 
 	for _, tc := range tcases {
-		t.Run(tc.challenge.ID, func(t *testing.T) {
+		t.Run(fmt.Sprintf("%d", tc.challenge.ID), func(t *testing.T) {
 			err := tc.challenge.CheckConsistencyForValidation()
 			if tc.err != "" {
 				require.Error(t, err)
