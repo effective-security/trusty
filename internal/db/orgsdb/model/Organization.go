@@ -23,9 +23,10 @@ type Organization struct {
 	CreatedAt    time.Time `db:"created_at"`
 	UpdatedAt    time.Time `db:"updated_at"`
 	Type         string    `db:"type"`
-	Address      string    `db:"address"`
-	Zip          string    `db:"zip"`
-	State        string    `db:"state"`
+	Street       string    `db:"street_address"`
+	City         string    `db:"city"`
+	PostalCode   string    `db:"postal_code"`
+	Region       string    `db:"region"`
 	Country      string    `db:"country"`
 	Phone        string    `db:"phone"`
 }
@@ -47,9 +48,10 @@ func (u *Organization) ToDto() *v1.Organization {
 		Type:         u.Type,
 		CreatedAt:    u.CreatedAt,
 		UpdatedAt:    u.UpdatedAt,
-		Address:      u.Address,
-		Zip:          u.Zip,
-		State:        u.State,
+		Street:       u.Street,
+		City:         u.City,
+		PostalCode:   u.PostalCode,
+		Region:       u.Region,
 		Country:      u.Country,
 		Phone:        u.Phone,
 	}

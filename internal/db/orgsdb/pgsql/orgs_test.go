@@ -26,16 +26,17 @@ func TestUpdateOrg(t *testing.T) {
 		Login:      login,
 		Email:      email,
 		//BillingEmail: email,
-		Company:   "ekspand",
-		Location:  "Kirkland, WA",
-		Type:      "Organization",
-		CreatedAt: time.Now().UTC(),
-		UpdatedAt: time.Now().UTC(),
-		Address:   "addr",
-		Zip:       "98034",
-		State:     "WA",
-		Country:   "US",
-		Phone:     "4251232323",
+		Company:    "ekspand",
+		Location:   "Kirkland, WA",
+		Type:       "Organization",
+		CreatedAt:  time.Now().UTC(),
+		UpdatedAt:  time.Now().UTC(),
+		Street:     "addr",
+		City:       "city",
+		PostalCode: "98034",
+		Region:     "WA",
+		Country:    "US",
+		Phone:      "4251232323",
 	}
 
 	org, err := provider.UpdateOrg(ctx, o)
@@ -50,9 +51,10 @@ func TestUpdateOrg(t *testing.T) {
 	assert.Equal(t, o.Location, org.Location)
 	assert.Equal(t, o.Type, org.Type)
 	assert.Equal(t, o.Company, org.Company)
-	assert.Equal(t, o.Address, org.Address)
-	assert.Equal(t, o.Zip, org.Zip)
-	assert.Equal(t, o.State, org.State)
+	assert.Equal(t, o.Street, org.Street)
+	assert.Equal(t, o.City, org.City)
+	assert.Equal(t, o.PostalCode, org.PostalCode)
+	assert.Equal(t, o.Region, org.Region)
 	assert.Equal(t, o.Country, org.Country)
 	assert.Equal(t, o.Phone, org.Phone)
 
