@@ -32,6 +32,7 @@ require (
 	github.com/soheilhy/cmux v0.1.4
 	github.com/sony/sonyflake v1.0.0
 	github.com/stretchr/testify v1.7.0
+	github.com/ugorji/go/codec v1.2.6
 	go.uber.org/config v1.4.0
 	go.uber.org/dig v1.10.0
 	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
