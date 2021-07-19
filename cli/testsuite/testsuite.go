@@ -14,7 +14,6 @@ import (
 
 	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/cli"
-	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/tests/mockpb"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/testify/servefiles"
@@ -162,12 +161,13 @@ func (s *Suite) SetupSuite() {
 	s.Cli.Parse(flags)
 	s.Cli.PopulateControl()
 
-	if s.withFileServer {
-		c, err := s.Cli.Client(config.WFEServerName)
-		s.Require().NoError(err)
-		c.Close()
-	}
-
+	/*
+		if s.withFileServer {
+			c, err := s.Cli.Client(config.WFEServerName)
+			s.Require().NoError(err)
+			c.Close()
+		}
+	*/
 }
 
 // TearDownSuite to clean up resources

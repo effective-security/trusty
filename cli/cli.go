@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/ekspand/trusty/client"
+	"github.com/ekspand/trusty/client/httpclient"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/awskmscrypto"
 	"github.com/ekspand/trusty/pkg/gcpkmscrypto"
@@ -358,6 +359,67 @@ func (cli *Cli) Client(svc string) (*client.Client, error) {
 	}
 
 	client, err := client.New(clientCfg)
+	if err != nil {
+		return nil, errors.Annotate(err, "unable to create client")
+	}
+	return client, nil
+}
+
+// HTTPClient returns HTTP client
+func (cli *Cli) HTTPClient() (*httpclient.Client, error) {
+	var err error
+	var tlscfg *tls.Config
+
+	var cfg *config.Configuration
+
+	if cli.flags.serviceConfig != nil && *cli.flags.serviceConfig != "" {
+		err := cli.EnsureServiceConfig()
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+
+		cfg = cli.Config()
+		if cli.Server() == "" && len(cfg.TrustyClient.ServerURL["wfe"]) > 0 {
+			*cli.flags.server = cfg.TrustyClient.ServerURL["wfe"][0]
+		}
+	}
+
+	host := cli.Server()
+	if host == "" {
+		return nil, errors.New("use --server option")
+	}
+
+	if strings.HasPrefix(host, "https://") {
+		var tlsCert, tlsKey, tlsCA string
+		if cli.flags.trustedCAFile != nil {
+			tlsCA = *cli.flags.trustedCAFile
+		}
+		if cli.flags.certFile != nil && *cli.flags.certFile != "" {
+			tlsCert = *cli.flags.certFile
+			tlsKey = *cli.flags.keyFile
+		}
+		if (tlsCert == "" || tlsKey == "") && cfg != nil {
+			tlsCert = cfg.TrustyClient.ClientTLS.CertFile
+			tlsKey = cfg.TrustyClient.ClientTLS.KeyFile
+		}
+		if (tlsCA == "" || tlsKey == "") && cfg != nil {
+			tlsCA = cfg.TrustyClient.ClientTLS.TrustedCAFile
+		}
+		logger.Debugf("tls-cert=%s, tls-trusted-ca=%s", tlsCert, tlsCA)
+		tlscfg, err = tlsconfig.NewClientTLSFromFiles(
+			tlsCert,
+			tlsKey,
+			tlsCA)
+		if err != nil {
+			return nil, errors.Annotate(err, "unable to build TLS configuration")
+		}
+	}
+
+	clientCfg := &httpclient.Config{
+		TLS: tlscfg,
+	}
+
+	client, err := httpclient.New(clientCfg, []string{host})
 	if err != nil {
 		return nil, errors.Annotate(err, "unable to create client")
 	}

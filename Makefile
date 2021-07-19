@@ -7,7 +7,7 @@ export AWS_SECRET_ACCESS_KEY=notusedbyemulator
 export AWS_DEFAULT_REGION=us-west-2
 export TRUSTY_JWT_SEED=testseed 
 
-export COVERAGE_EXCLUSIONS="vendor|tests|api/v1/pb/gw|main.go|testsuite.go|.pb.go|.pb.gw.go"
+export COVERAGE_EXCLUSIONS="vendor|tests|api/v1/pb/gw|main.go|testsuite.go|mocks.go|.pb.go|.pb.gw.go"
 export TRUSTY_DIR=${PROJ_ROOT}
 export GO111MODULE=on
 BUILD_FLAGS=
@@ -82,7 +82,11 @@ build_kube:
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/kubeca ./cmd/kubeca
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/kubecertinit ./cmd/kubecertinit
 
-build: build_trusty build_trustyctl build_tool build_kube
+build_martinictl:
+	echo "*** Building martinictl"
+	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/martinictl ./cmd/martinictl
+
+build: build_trusty build_trustyctl build_tool build_kube build_martinictl
 
 change_log:
 	echo "Recent changes:" > ./change_log.txt
