@@ -135,3 +135,15 @@ const (
 	// Response: CertProfileInfo
 	PathForCAProfileInfo = "/v1/ca/csr/profile_info"
 )
+
+// Martini service API
+const (
+	// PathForMartini is base path for the Martini service
+	PathForMartini = "/v1/ms"
+
+	// PathForMartiniSearchCorps provides Search Open Corporates
+	//
+	// Verbs: GET
+	// Response: SearchOpenCorporatesResponse
+	PathForMartiniSearchCorps = "/v1/ms/search/opencorporates"
+)

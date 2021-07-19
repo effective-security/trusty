@@ -6,8 +6,11 @@ const (
 	// ProviderGithub specifies name for Github
 	ProviderGithub = "github"
 
-	// ProviderGoogle specifies name for Google APIs
+	// ProviderGoogle specifies name for Google
 	ProviderGoogle = "google"
+
+	// ProviderMartini specifies name for Martini
+	ProviderMartini = "martini"
 
 	// RoleAdmin specifies name for Admin role
 	RoleAdmin = "admin"
@@ -29,9 +32,10 @@ type Organization struct {
 	Type         string    `json:"type,omitempty"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
-	Address      string    `json:"address"`
-	Zip          string    `json:"zip"`
-	State        string    `json:"state"`
+	Street       string    `json:"street_address"`
+	City         string    `json:"city"`
+	PostalCode   string    `json:"postal_code"`
+	Region       string    `json:"region"`
 	Country      string    `json:"country"`
 	Phone        string    `json:"phone"`
 }
