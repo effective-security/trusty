@@ -83,6 +83,11 @@ CREATE TABLE IF NOT EXISTS public.orgs
     type character varying(16) COLLATE pg_catalog."default" NOT NULL,
     created_at timestamp with time zone,
     updated_at timestamp with time zone,
+    address character varying(256) COLLATE pg_catalog."default" NULL,
+    zip character varying(16) COLLATE pg_catalog."default" NULL,
+    state character varying(16) COLLATE pg_catalog."default" NULL,
+    country character varying(16) COLLATE pg_catalog."default" NULL,
+    phone character varying(32) COLLATE pg_catalog."default" NULL,
     CONSTRAINT orgs_pkey PRIMARY KEY (id),
     CONSTRAINT orgs_provider_extern_id UNIQUE (provider, extern_id),
     CONSTRAINT orgs_provider_login UNIQUE (provider, login)
@@ -98,6 +103,13 @@ CREATE INDEX IF NOT EXISTS idx_orgs_provider
     ON public.orgs USING btree
     (provider);
 
+CREATE INDEX IF NOT EXISTS idx_orgs_email
+    ON public.orgs USING btree
+    (email);
+
+CREATE INDEX IF NOT EXISTS idx_orgs_phone
+    ON public.orgs USING btree
+    (phone);
 
 --
 -- Org Members

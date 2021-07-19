@@ -154,7 +154,7 @@ func (s *Service) AuthURLHandler() rest.Handle {
 			return
 		}
 
-		js, _ := json.Marshal(&v1.AuthState{
+		js, _ := json.Marshal(&authState{
 			RedirectURL: redirectURL[0],
 			DeviceID:    deviceID[0],
 		})
@@ -208,7 +208,7 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 			return
 		}
 
-		var oauthStatus v1.AuthState
+		var oauthStatus authState
 		if err = json.Unmarshal(js, &oauthStatus); err != nil {
 			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("failed to decode state parameter: %s", err.Error()))
 			return
@@ -338,7 +338,7 @@ func (s *Service) GoogleCallbackHandler() rest.Handle {
 			return
 		}
 
-		var oauthStatus v1.AuthState
+		var oauthStatus authState
 		if err = json.Unmarshal(js, &oauthStatus); err != nil {
 			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("failed to decode state parameter: %s", err.Error()))
 			return
@@ -524,4 +524,10 @@ func (s *Service) AuthDoneHandler() rest.Handle {
 		w.Header().Set(header.ContentType, header.TextPlain)
 		fmt.Fprintf(w, "Authenticated!\n\nexport TRUSTY_AUTH_TOKEN=%s\n", token[0])
 	}
+}
+
+// authState is OAuth state provided by an authenticating client
+type authState struct {
+	RedirectURL string `json:"redirect_url"`
+	DeviceID    string `json:"device_id"`
 }
