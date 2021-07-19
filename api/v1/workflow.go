@@ -29,6 +29,11 @@ type Organization struct {
 	Type         string    `json:"type,omitempty"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
+	Address      string    `json:"address"`
+	Zip          string    `json:"zip"`
+	State        string    `json:"state"`
+	Country      string    `json:"country"`
+	Phone        string    `json:"phone"`
 }
 
 // Repository represents a repository.

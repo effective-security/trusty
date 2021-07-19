@@ -7,12 +7,6 @@ type AuthStsURLResponse struct {
 	URL string `json:"url"`
 }
 
-// AuthState is OAuth state provided by an authenticating client
-type AuthState struct {
-	RedirectURL string `json:"redirect_url"`
-	DeviceID    string `json:"device_id"`
-}
-
 // UserInfo provides basic info about user
 type UserInfo struct {
 	ID         string `json:"id"`
@@ -26,7 +20,7 @@ type UserInfo struct {
 }
 
 // Authorization is returned to the client in token refresh response
-// TODO: add refresf token
+// TODO: add refresh token
 type Authorization struct {
 	Version     string    `json:"version"`
 	DeviceID    string    `json:"device_id"`

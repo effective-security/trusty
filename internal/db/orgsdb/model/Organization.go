@@ -23,6 +23,11 @@ type Organization struct {
 	CreatedAt    time.Time `db:"created_at"`
 	UpdatedAt    time.Time `db:"updated_at"`
 	Type         string    `db:"type"`
+	Address      string    `db:"address"`
+	Zip          string    `db:"zip"`
+	State        string    `db:"state"`
+	Country      string    `db:"country"`
+	Phone        string    `db:"phone"`
 }
 
 // ToDto converts model to v1.Organization DTO
@@ -42,6 +47,11 @@ func (u *Organization) ToDto() *v1.Organization {
 		Type:         u.Type,
 		CreatedAt:    u.CreatedAt,
 		UpdatedAt:    u.UpdatedAt,
+		Address:      u.Address,
+		Zip:          u.Zip,
+		State:        u.State,
+		Country:      u.Country,
+		Phone:        u.Phone,
 	}
 
 	return user

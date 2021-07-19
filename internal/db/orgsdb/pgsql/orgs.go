@@ -25,16 +25,20 @@ func (p *Provider) UpdateOrg(ctx context.Context, org *model.Organization) (*mod
 	res := new(model.Organization)
 
 	err = p.db.QueryRowContext(ctx, `
-			INSERT INTO orgs(id,extern_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at)
-				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,$12,$13,$14)
+			INSERT INTO orgs(id,extern_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at,address,zip,state,country,phone)
+				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,$12,$13,$14,$15,$16,$17,$18,$19)
 			ON CONFLICT (provider,login)
 			DO UPDATE
-				SET name=$5,email=$6,billing_email=$7,company=$8,location=$9,avatar_url=$10,html_url=$11,type=$12,created_at=$13,updated_at=$14
-			RETURNING id,extern_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at
-			;`, id, org.ExternalID, org.Provider, org.Login, org.Name, org.Email, org.BillingEmail, org.Company, org.Location,
+				SET name=$5,email=$6,billing_email=$7,company=$8,location=$9,avatar_url=$10,html_url=$11,type=$12,created_at=$13,updated_at=$14,
+				address=$15,zip=$16,state=$17,country=$18,phone=$19
+			RETURNING id,extern_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at,address,zip,state,country,phone
+			;`, id,
+		org.ExternalID, org.Provider, org.Login, org.Name, org.Email, org.BillingEmail, org.Company, org.Location,
 		org.AvatarURL, org.URL,
 		org.Type,
-		org.CreatedAt, org.UpdatedAt,
+		org.CreatedAt.UTC(),
+		org.UpdatedAt.UTC(),
+		org.Address, org.Zip, org.State, org.Country, org.Phone,
 	).Scan(&res.ID,
 		&res.ExternalID,
 		&res.Provider,
@@ -49,10 +53,17 @@ func (p *Provider) UpdateOrg(ctx context.Context, org *model.Organization) (*mod
 		&res.Type,
 		&res.CreatedAt,
 		&res.UpdatedAt,
+		&res.Address,
+		&res.Zip,
+		&res.State,
+		&res.Country,
+		&res.Phone,
 	)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
+	res.CreatedAt = res.CreatedAt.UTC()
+	res.UpdatedAt = res.UpdatedAt.UTC()
 
 	return res, nil
 }
@@ -62,7 +73,7 @@ func (p *Provider) GetOrg(ctx context.Context, id uint64) (*model.Organization, 
 	res := new(model.Organization)
 
 	err := p.db.QueryRowContext(ctx,
-		`SELECT id,extern_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at
+		`SELECT id,extern_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at,address,zip,state,country,phone
 		FROM orgs
 		WHERE id=$1
 		;`, id,
@@ -80,10 +91,17 @@ func (p *Provider) GetOrg(ctx context.Context, id uint64) (*model.Organization, 
 		&res.Type,
 		&res.CreatedAt,
 		&res.UpdatedAt,
+		&res.Address,
+		&res.Zip,
+		&res.State,
+		&res.Country,
+		&res.Phone,
 	)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
+	res.CreatedAt = res.CreatedAt.UTC()
+	res.UpdatedAt = res.UpdatedAt.UTC()
 
 	return res, nil
 }
