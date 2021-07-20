@@ -113,6 +113,7 @@ gen_test_certs:
 		--out-dir /tmp/trusty/certs \
 		--csr-dir $(PROJ_ROOT)/etc/dev/csr_profile \
 		--prefix $(PROJ_NAME)_untrusted_ \
+		--key-label unittest_ \
 		--root-ca /tmp/trusty/certs/trusty_untrusted_root_ca.pem \
 		--root-ca-key /tmp/trusty/certs/trusty_untrusted_root_ca-key.pem \
 		--root --ca1 --ca2 --bundle --client --force
@@ -124,6 +125,7 @@ gen_test_certs:
 		--out-dir /tmp/trusty/certs \
 		--csr-dir $(PROJ_ROOT)/etc/dev/csr_profile \
 		--prefix $(PROJ_NAME)_dev_ \
+		--key-label test_ \
 		--root-ca $(PROJ_ROOT)/etc/dev/roots/trusty_dev_root_ca.pem \
 		--root-ca-key $(PROJ_ROOT)/etc/dev/roots/trusty_dev_root_ca-key.pem \
 		--ca1 --ca2  --bundle --peer --client --force

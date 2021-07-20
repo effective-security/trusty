@@ -243,7 +243,10 @@ func (p *Provider) EnumTokens(currentSlotOnly bool, slotInfoFunc func(slotID uin
 func (p *Provider) EnumKeys(slotID uint, prefix string, keyInfoFunc func(id, label, typ, class, currentVersionID string, creationTime *time.Time) error) error {
 	logger.Tracef("host=%s, slotID=%d, prefix=%q", p.endpoint, slotID, prefix)
 
-	opts := &kms.ListKeysInput{}
+	limit := int64(1000)
+	opts := &kms.ListKeysInput{
+		Limit: &limit,
+	}
 
 	resp, err := p.kmsClient.ListKeys(opts)
 	if err != nil {
@@ -260,16 +263,23 @@ func (p *Provider) EnumKeys(slotID uint, prefix string, keyInfoFunc func(id, lab
 			continue
 		}
 
-		err = keyInfoFunc(
-			aws.StringValue(k.KeyId),
-			aws.StringValue(ki.KeyMetadata.Description),
-			aws.StringValue(ki.KeyMetadata.KeyUsage),
-			aws.StringValue(ki.KeyMetadata.Origin),
-			aws.StringValue(ki.KeyMetadata.KeyState),
-			ki.KeyMetadata.CreationDate,
-		)
-		if err != nil {
-			return errors.Trace(err)
+		kid := aws.StringValue(k.KeyId)
+		descr := aws.StringValue(ki.KeyMetadata.Description)
+
+		if prefix == "" ||
+			strings.HasPrefix(kid, prefix) ||
+			strings.HasPrefix(descr, prefix) {
+			err = keyInfoFunc(
+				kid,
+				descr,
+				aws.StringValue(ki.KeyMetadata.KeyUsage),
+				aws.StringValue(ki.KeyMetadata.Origin),
+				aws.StringValue(ki.KeyMetadata.KeyState),
+				ki.KeyMetadata.CreationDate,
+			)
+			if err != nil {
+				return errors.Trace(err)
+			}
 		}
 	}
 	return nil

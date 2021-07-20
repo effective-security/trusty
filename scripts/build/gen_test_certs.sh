@@ -5,6 +5,7 @@
 #   --out-dir {dir}     - specifies output folder
 #   --csr-dir {dir}     - specifies folder with CSR templates
 #   --prefix {prefix}   - specifies prefix for files, by default: ${PREFIX}
+#   --key-label {prefix}- specifies prefix for key label, by default empty
 #   --hsm-confg         - specifies HSM provider file
 #   --ca-config         - specifies CA configuration file
 #   --root-ca {cert}    - specifies root CA certificate
@@ -31,13 +32,18 @@ case $key in
     shift # past argument
     shift # past value
     ;;
-    -o|--csr-dir)
+    --csr-dir)
     CSR_DIR="$2"
     shift # past argument
     shift # past value
     ;;
     -p|--prefix)
     PREFIX="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -l|--key-label)
+    KEY_LABEL="$2"
     shift # past argument
     shift # past value
     ;;
@@ -125,20 +131,21 @@ echo "CSR_DIR      = ${CSR_DIR}"
 echo "CA_CONFIG    = ${CA_CONFIG}"
 echo "HSM_CONFIG   = ${HSM_CONFIG}"
 echo "PREFIX       = ${PREFIX}"
+echo "KEY_LABEL    = ${KEY_LABEL}"
 echo "BUNDLE       = ${BUNDLE}"
 echo "FORCE        = ${FORCE}"
 echo "SAN          = ${SAN}"
-echo "ROOT_CA_CERT = $ROOT_CA_CERT"
-echo "ROOT_CA_KEY  = $ROOT_CA_KEY"
+echo "ROOT_CA_CERT = ${ROOT_CA_CERT}"
+echo "ROOT_CA_KEY  = ${ROOT_CA_KEY}"
 
 if [[ "$ROOTCA" == "YES" && ("$FORCE" == "YES" || ! -f ${ROOT_CA_KEY}) ]]; then echo "*** generating ${ROOT_CA_CERT/.pem/''}"
     trusty-tool \
         --hsm-cfg=${HSM_CONFIG} \
         csr gencert --self-sign \
-        --ca-config=${CA_CONFIG} \
-        --profile=ROOT \
+        --ca-config ${CA_CONFIG} \
+        --profile ROOT \
         --csr-profile ${CSR_DIR}/${PREFIX}root_ca.json \
-        --key-label="${PREFIX}root_ca*" \
+        --key-label "${KEY_LABEL}${PREFIX}root_ca*" \
         --out ${ROOT_CA_CERT/.pem/''}
 fi
 
@@ -150,7 +157,7 @@ if [[ "$CA1" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}issuer1_
         --ca-config=${CA_CONFIG} \
         --profile=L1_CA \
         --csr-profile ${CSR_DIR}/${PREFIX}issuer1_ca.json \
-        --key-label="${PREFIX}issuer1_ca*" \
+        --key-label="${KEY_LABEL}${PREFIX}issuer1_ca*" \
         --ca-cert ${ROOT_CA_CERT} \
         --ca-key ${ROOT_CA_KEY} \
         --out ${OUT_DIR}/${PREFIX}issuer1_ca
@@ -164,7 +171,7 @@ if [[ "$CA2" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}issuer2_
         --ca-config=${CA_CONFIG} \
         --profile=L2_CA \
         --csr-profile ${CSR_DIR}/${PREFIX}issuer2_ca.json \
-        --key-label="${PREFIX}issuer2_ca*" \
+        --key-label="${KEY_LABEL}${PREFIX}issuer2_ca*" \
         --ca-cert ${OUT_DIR}/${PREFIX}issuer1_ca.pem \
         --ca-key ${OUT_DIR}/${PREFIX}issuer1_ca-key.pem \
         --out ${OUT_DIR}/${PREFIX}issuer2_ca
@@ -186,7 +193,7 @@ if [[ "$ADMIN" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}admin-
         --ca-cert ${OUT_DIR}/${PREFIX}issuer2_ca.pem \
         --ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
         --csr-profile ${CSR_DIR}/${PREFIX}admin.json \
-        --key-label="${PREFIX}admin*" \
+        --key-label="${KEY_LABEL}${PREFIX}admin*" \
         --out ${OUT_DIR}/${PREFIX}admin
 
         cat ${OUT_DIR}/${PREFIX}cabundle.pem >> ${OUT_DIR}/${PREFIX}admin.pem
@@ -203,7 +210,7 @@ if [[ "$SERVER" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}serve
         --ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
         --csr-profile ${CSR_DIR}/${PREFIX}server.json \
         --SAN=localhost,${SAN},${HOSTNAME} \
-        --key-label="${PREFIX}server*" \
+        --key-label="${KEY_LABEL}${PREFIX}server*" \
         --out ${OUT_DIR}/${PREFIX}server
 
         cat ${OUT_DIR}/${PREFIX}cabundle.pem >> ${OUT_DIR}/${PREFIX}server.pem
@@ -220,7 +227,7 @@ if [[ "$CLIENT" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}clien
         --ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
         --csr-profile ${CSR_DIR}/${PREFIX}client.json \
         --SAN=spifee://trusty/all \
-        --key-label="${PREFIX}client*" \
+        --key-label="${KEY_LABEL}${PREFIX}client*" \
         --out ${OUT_DIR}/${PREFIX}client
 
     cat ${OUT_DIR}/${PREFIX}cabundle.pem >> ${OUT_DIR}/${PREFIX}client.pem
@@ -237,7 +244,7 @@ if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}peer_c
         --ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
         --csr-profile ${CSR_DIR}/${PREFIX}peer_ca.json \
         --SAN=localhost,${SAN},${HOSTNAME},spifee://trusty/ca \
-        --key-label="${PREFIX}peer_ca*" \
+        --key-label="${KEY_LABEL}${PREFIX}peer_ca*" \
         --out ${OUT_DIR}/${PREFIX}peer_ca
 
     cat ${OUT_DIR}/${PREFIX}cabundle.pem >> ${OUT_DIR}/${PREFIX}peer_ca.pem
@@ -254,7 +261,7 @@ if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}peer_r
         --ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
         --csr-profile ${CSR_DIR}/${PREFIX}peer_ra.json \
         --SAN=localhost,${SAN},${HOSTNAME},spifee://trusty/ra \
-        --key-label="${PREFIX}peer_ra*" \
+        --key-label="${KEY_LABEL}${PREFIX}peer_ra*" \
         --out ${OUT_DIR}/${PREFIX}peer_ra
 
     cat ${OUT_DIR}/${PREFIX}cabundle.pem >> ${OUT_DIR}/${PREFIX}peer_ra.pem
@@ -271,7 +278,7 @@ if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}peer_c
         --ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
         --csr-profile ${CSR_DIR}/${PREFIX}peer_cis.json \
         --SAN=localhost,${SAN},${HOSTNAME},spifee://trusty/cis \
-        --key-label="${PREFIX}peer_cis*" \
+        --key-label="${KEY_LABEL}${PREFIX}peer_cis*" \
         --out ${OUT_DIR}/${PREFIX}peer_cis
 
     cat ${OUT_DIR}/${PREFIX}cabundle.pem >> ${OUT_DIR}/${PREFIX}peer_cis.pem
@@ -288,7 +295,7 @@ if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}peer_w
         --ca-key ${OUT_DIR}/${PREFIX}issuer2_ca-key.pem \
         --csr-profile ${CSR_DIR}/${PREFIX}peer_wfe.json \
         --SAN=localhost,${SAN},${HOSTNAME},spifee://trusty/wfe \
-        --key-label="${PREFIX}peer_wfe*" \
+        --key-label="${KEY_LABEL}${PREFIX}peer_wfe*" \
         --out ${OUT_DIR}/${PREFIX}peer_wfe
 
     cat ${OUT_DIR}/${PREFIX}cabundle.pem >> ${OUT_DIR}/${PREFIX}peer_wfe.pem
