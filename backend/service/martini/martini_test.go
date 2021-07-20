@@ -73,8 +73,7 @@ func TestMain(m *testing.M) {
 	container, err := appcontainer.NewContainerFactory(nil).
 		WithConfigurationProvider(func() (*config.Configuration, error) {
 			return cfg, nil
-		}).
-		CreateContainerWithDependencies()
+		}).CreateContainerWithDependencies()
 	if err != nil {
 		panic(errors.Trace(err))
 	}
