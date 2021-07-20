@@ -20,7 +20,7 @@ func TestUpdateOrg(t *testing.T) {
 	email := login + "@trusty.com"
 
 	o := &model.Organization{
-		ExternalID: id,
+		ExternalID: fmt.Sprintf("%d", id+2),
 		Provider:   v1.ProviderGithub,
 		Name:       name,
 		Login:      login,
@@ -119,7 +119,7 @@ func Test_Membership(t *testing.T) {
 	name := fmt.Sprintf("org-%d", id)
 
 	o := &model.Organization{
-		ExternalID: id,
+		ExternalID: fmt.Sprintf("%d", id),
 		Provider:   v1.ProviderGithub,
 		Name:       name,
 		Login:      email1,
@@ -141,14 +141,26 @@ func Test_Membership(t *testing.T) {
 	require.NoError(t, err)
 	assert.Empty(t, oldMembers)
 
-	user1, err := provider.LoginUser(ctx, &model.User{Login: login1, Email: email1, Name: email1})
+	user1, err := provider.LoginUser(ctx, &model.User{
+		Login:      login1,
+		Email:      email1,
+		Name:       email1,
+		ExternalID: fmt.Sprintf("%d", id+1),
+		Provider:   v1.ProviderGoogle,
+	})
 	require.NoError(t, err)
 	assert.NotNil(t, user1)
 	assert.Equal(t, email1, user1.Name)
 	assert.Equal(t, email1, user1.Email)
 	assert.Equal(t, 1, user1.LoginCount)
 
-	user2, err := provider.LoginUser(ctx, &model.User{Login: login2, Email: email2, Name: email2})
+	user2, err := provider.LoginUser(ctx, &model.User{
+		Login:      login2,
+		Email:      email2,
+		Name:       email2,
+		ExternalID: fmt.Sprintf("%d", id+2),
+		Provider:   v1.ProviderGoogle,
+	})
 	require.NoError(t, err)
 	assert.NotNil(t, user2)
 	assert.Equal(t, email2, user2.Name)

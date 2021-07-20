@@ -12,7 +12,7 @@ import (
 // User provides basic user information
 type User struct {
 	ID             uint64       `db:"id"`
-	ExternalID     uint64       `db:"extern_id"`
+	ExternalID     string       `db:"extern_id"`
 	Provider       string       `db:"provider"`
 	Login          string       `db:"login"`
 	Name           string       `db:"name"`
@@ -29,18 +29,15 @@ type User struct {
 // ToDto converts model to v1.User DTO
 func (u *User) ToDto() *v1.UserInfo {
 	user := &v1.UserInfo{
-		ID:        strconv.FormatUint(uint64(u.ID), 10),
-		Provider:  u.Provider,
-		Login:     u.Login,
-		Name:      u.Name,
-		Email:     u.Email,
-		Company:   u.Company,
-		AvatarURL: u.AvatarURL,
+		ID:         strconv.FormatUint(uint64(u.ID), 10),
+		ExternalID: u.ExternalID,
+		Provider:   u.Provider,
+		Login:      u.Login,
+		Name:       u.Name,
+		Email:      u.Email,
+		Company:    u.Company,
+		AvatarURL:  u.AvatarURL,
 		//LoginCount: u.LoginCount,
-	}
-
-	if u.ExternalID != 0 {
-		user.ExternalID = strconv.FormatUint(u.ExternalID, 10)
 	}
 
 	/*

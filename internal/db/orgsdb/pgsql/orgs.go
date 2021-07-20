@@ -20,7 +20,7 @@ func (p *Provider) UpdateOrg(ctx context.Context, org *model.Organization) (*mod
 		return nil, errors.Trace(err)
 	}
 
-	logger.Debugf("extern_id=%d, login=%s", org.ExternalID, org.Login)
+	logger.Debugf("extern_id=%s, login=%s", org.ExternalID, org.Login)
 
 	res := new(model.Organization)
 

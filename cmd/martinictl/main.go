@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/ekspand/trusty/cli"
+	"github.com/ekspand/trusty/cli/auth"
 	"github.com/ekspand/trusty/cli/martini"
 	"github.com/ekspand/trusty/internal/version"
 	"github.com/go-phorce/dolly/ctl"
@@ -33,15 +34,28 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 			App:    app,
 			Output: out,
 		},
-		cli.WithServiceCfg(),
 		cli.WithTLS(),
 		cli.WithServer(""),
 	)
 	defer cli.Close()
 
+	// login
+	prov := "google"
+	loginFlags := &auth.AuthenticateFlags{
+		Provider: &prov,
+	}
+	app.Command("login", "login and obtain authorization token").
+		PreAction(cli.PopulateControl).
+		Action(cli.RegisterAction(auth.Authenticate, loginFlags))
+
+	// use info
+	app.Command("userinfo", "show the user profile").
+		PreAction(cli.PopulateControl).
+		Action(cli.RegisterAction(martini.UserProfile, nil))
+
 	// opencorps
 	searchCorpsFlags := new(martini.SearchCorpsFlags)
-	cmdSearchCorps := app.Command("opencorps", "Search open corporations").
+	cmdSearchCorps := app.Command("opencorps", "search open corporations").
 		PreAction(cli.PopulateControl).
 		Action(cli.RegisterAction(martini.SearchCorps, searchCorpsFlags))
 	searchCorpsFlags.Name = cmdSearchCorps.Flag("name", "corporation name to search").Required().String()

@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"io"
 	"math/rand"
+	"os"
 	"reflect"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/retriable"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
@@ -128,6 +130,11 @@ func New(config *Config, initialHosts []string) (*Client, error) {
 	c.httpClient = retriable.New().
 		WithName("trusty-client").
 		WithTLS(c.config.TLS)
+
+	tk := os.Getenv("TRUSTY_AUTH_TOKEN")
+	if tk != "" && c.config.TLS != nil {
+		c.httpClient.AddHeader(header.Authorization, "Bearer "+tk)
+	}
 
 	return &c, nil
 }

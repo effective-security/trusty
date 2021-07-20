@@ -10,7 +10,7 @@ import (
 // Organization represents an organization account.
 type Organization struct {
 	ID           uint64    `db:"id"`
-	ExternalID   uint64    `db:"extern_id"`
+	ExternalID   string    `db:"extern_id"`
 	Provider     string    `db:"provider"`
 	Login        string    `db:"login"`
 	AvatarURL    string    `db:"avatar_url"`
@@ -35,7 +35,7 @@ type Organization struct {
 func (u *Organization) ToDto() *v1.Organization {
 	user := &v1.Organization{
 		ID:           strconv.FormatUint(u.ID, 10),
-		ExternalID:   strconv.FormatUint(u.ExternalID, 10),
+		ExternalID:   u.ExternalID,
 		Provider:     u.Provider,
 		Login:        u.Login,
 		Name:         u.Name,

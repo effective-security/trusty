@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/internal/db/orgsdb/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -17,21 +18,42 @@ func Test_LoginUser(t *testing.T) {
 	login := fmt.Sprintf("test%d", id)
 	email := login + "@trusty.com"
 
-	u := &model.User{
-		Name:  name,
-		Login: login,
-		Email: email,
+	u1 := &model.User{
+		Provider:   v1.ProviderGithub,
+		Name:       name,
+		Login:      login,
+		Email:      email,
+		ExternalID: fmt.Sprintf("%d", id+13),
+	}
+	u2 := &model.User{
+		Provider:   v1.ProviderGoogle,
+		Name:       name,
+		Login:      login,
+		Email:      email,
+		ExternalID: fmt.Sprintf("%d", id+17),
 	}
 
-	user, err := provider.LoginUser(ctx, u)
+	user, err := provider.LoginUser(ctx, u1)
 	require.NoError(t, err)
 	assert.NotNil(t, user)
 	assert.Equal(t, name, user.Name)
 	assert.Equal(t, email, user.Email)
 	assert.Equal(t, login, user.Login)
+	assert.Equal(t, v1.ProviderGithub, user.Provider)
 	assert.Equal(t, 1, user.LoginCount)
 
-	user2, err := provider.LoginUser(ctx, u)
+	guser, err := provider.LoginUser(ctx, u2)
+	require.NoError(t, err)
+	assert.NotNil(t, guser)
+	assert.Equal(t, name, guser.Name)
+	assert.Equal(t, email, guser.Email)
+	assert.Equal(t, login, guser.Login)
+	assert.Equal(t, v1.ProviderGoogle, guser.Provider)
+	assert.Equal(t, 1, guser.LoginCount)
+
+	require.NotEqual(t, user.ID, guser.ID)
+
+	user2, err := provider.LoginUser(ctx, u1)
 	require.NoError(t, err)
 	assert.NotNil(t, user2)
 	assert.Equal(t, name, user2.Name)
