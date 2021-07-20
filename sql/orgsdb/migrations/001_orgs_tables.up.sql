@@ -21,7 +21,7 @@ $$ language 'plpgsql';
 CREATE TABLE IF NOT EXISTS public.users
 (
     id bigint NOT NULL,
-    extern_id bigint NOT NULL,
+    extern_id character varying(32) COLLATE pg_catalog."default" NOT NULL,
     provider character varying(16) COLLATE pg_catalog."default" NOT NULL,
     login character varying(64) COLLATE pg_catalog."default" NOT NULL,
     name character varying(64) COLLATE pg_catalog."default" NOT NULL,
@@ -33,7 +33,10 @@ CREATE TABLE IF NOT EXISTS public.users
     token_expires_at timestamp with time zone,
     login_count integer,
     last_login_at timestamp with time zone,
-    CONSTRAINT users_pkey PRIMARY KEY (id)
+    CONSTRAINT users_pkey PRIMARY KEY (id),
+    CONSTRAINT users_provider_extern_id UNIQUE (provider, extern_id),
+    CONSTRAINT users_provider_login UNIQUE (provider, login),
+    CONSTRAINT users_provider_email UNIQUE (provider, email)
 )
 WITH (
     OIDS = FALSE
@@ -42,27 +45,32 @@ WITH (
 ALTER TABLE public.users
     OWNER to postgres;
 
-CREATE UNIQUE INDEX IF NOT EXISTS unique_users_email
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_provider_email
     ON public.users USING btree
-    (email COLLATE pg_catalog."default")
+    (provider,email COLLATE pg_catalog."default")
     ;
 
-CREATE UNIQUE INDEX IF NOT EXISTS unique_users_login
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_provider_login
     ON public.users USING btree
-    (login COLLATE pg_catalog."default")
+    (provider,login COLLATE pg_catalog."default")
+    ;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_extern_id
+    ON public.users USING btree
+    (provider,extern_id)
     ;
 
 SELECT create_constraint_if_not_exists(
     'public',
     'users',
-    'unique_users_email',
-    'ALTER TABLE public.users ADD CONSTRAINT unique_users_email UNIQUE USING INDEX unique_users_email;');
+    'unique_users_provider_login',
+    'ALTER TABLE public.users ADD CONSTRAINT unique_users_provider_login UNIQUE USING INDEX idx_users_provider_login;');
 
 SELECT create_constraint_if_not_exists(
     'public',
     'users',
-    'unique_users_login',
-    'ALTER TABLE public.users ADD CONSTRAINT unique_users_login UNIQUE USING INDEX unique_users_login;');
+    'unique_users_provider_email',
+    'ALTER TABLE public.users ADD CONSTRAINT unique_users_provider_email UNIQUE USING INDEX idx_users_provider_email;');
 
 --
 -- ORGANIZATIONS
@@ -70,7 +78,7 @@ SELECT create_constraint_if_not_exists(
 CREATE TABLE IF NOT EXISTS public.orgs
 (
     id bigint NOT NULL,
-    extern_id bigint NOT NULL,
+    extern_id character varying(32) COLLATE pg_catalog."default" NOT NULL,
     provider character varying(16) COLLATE pg_catalog."default" NOT NULL,
     login character varying(64) COLLATE pg_catalog."default" NOT NULL,
     name character varying(64) COLLATE pg_catalog."default" NOT NULL,

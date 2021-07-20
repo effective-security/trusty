@@ -1,0 +1,25 @@
+{
+    "authorization": {
+        "access_token": "removed",
+        "device_id": "",
+        "email": "denis@ekspand.com",
+        "expires_at": "2021-07-20T22:17:57-07:00",
+        "issued_at": "2021-07-20T14:17:57.120759609-07:00",
+        "login": "dissoupov",
+        "name": "Denis Issoupov",
+        "role": "",
+        "token_type": "jwt",
+        "user_id": "82160815427289188",
+        "version": "v1.0"
+    },
+    "profile": {
+        "avatar_url": "https://avatars.githubusercontent.com/u/2558920?v=4",
+        "company": "go-phorce",
+        "email": "denis@ekspand.com",
+        "extern_id": "2558920",
+        "id": "82160815427289188",
+        "login": "dissoupov",
+        "name": "Denis Issoupov",
+        "provider": "github"
+    }
+}

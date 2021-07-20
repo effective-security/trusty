@@ -6,6 +6,7 @@ import (
 
 	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/internal/db/orgsdb/model"
+	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
 )
 
@@ -21,14 +22,20 @@ func (p *Provider) LoginUser(ctx context.Context, user *model.User) (*model.User
 		return nil, errors.Trace(err)
 	}
 
+	logger.KV(xlog.INFO,
+		"provider", user.Provider,
+		"email", user.Email,
+		"extID", user.ExternalID,
+	)
+
 	res := new(model.User)
 
 	err = p.db.QueryRowContext(ctx, `
 		INSERT INTO users(id,extern_id,provider,login,name,email,company,avatar_url,access_token,refresh_token,token_expires_at,login_count,last_login_at)
 			VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-		ON CONFLICT (email)
+		ON CONFLICT (provider,email)
 		DO UPDATE
-			SET access_token=$9, refresh_token=$10, token_expires_at=$11, login_count = users.login_count + 1, last_login_at=$13
+			SET company=$7,avatar_url=$8,access_token=$9, refresh_token=$10, token_expires_at=$11, login_count = users.login_count + 1, last_login_at=$13
 		RETURNING id,extern_id,provider,login,name,email,company,avatar_url,access_token,refresh_token,token_expires_at,login_count,last_login_at
 		;`, id, user.ExternalID, user.Provider, user.Login, user.Name, user.Email, user.Company, user.AvatarURL,
 		user.AccessToken, user.RefreshToken, user.TokenExpiresAt,

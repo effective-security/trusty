@@ -18,7 +18,13 @@ func Test_CtlSuite(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *testSuite) Test_Config() {
+func (s *testSuite) TestUserProfile() {
+	err := s.Run(martini.UserProfile, nil)
+	s.NoError(err)
+	s.HasText("denis@ekspand.com")
+}
+
+func (s *testSuite) TestSearchCorps() {
 	name := "peculiar ventures"
 	jur := ""
 	flags := martini.SearchCorpsFlags{

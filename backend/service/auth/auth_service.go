@@ -262,7 +262,7 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 		}
 
 		user := &model.User{
-			ExternalID:   uint64(ghu.GetID()),
+			ExternalID:   fmt.Sprintf("%d", ghu.GetID()),
 			Provider:     v1.ProviderGithub,
 			Login:        db.String(ghu.Login),
 			Name:         db.String(ghu.Name),
@@ -282,6 +282,7 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("failed to login user: %s", err.Error()).WithCause(err))
 			return
 		}
+		logger.KV(xlog.DEBUG, "user", user)
 
 		dto := user.ToDto()
 		// initial token is valid for 1 min, the client has to refresh it
@@ -399,7 +400,7 @@ func (s *Service) GoogleCallbackHandler() rest.Handle {
 		}
 
 		user := &model.User{
-			ExternalID:   uint64(0),
+			ExternalID:   userInfo.Id,
 			Provider:     v1.ProviderGoogle,
 			Login:        db.String(&userInfo.Email),
 			Name:         db.String(&userInfo.Name),
@@ -419,6 +420,8 @@ func (s *Service) GoogleCallbackHandler() rest.Handle {
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("failed to login user: %s", err.Error()).WithCause(err))
 			return
 		}
+
+		logger.KV(xlog.DEBUG, "user", user)
 
 		dto := user.ToDto()
 		// initial token is valid for 1 min, the client has to refresh it
@@ -461,7 +464,12 @@ func (s *Service) RefreshHandler() rest.Handle {
 		deviceID := r.Header.Get(header.XDeviceID)
 		idn := ctx.Identity()
 
-		userID, _ := db.ID(idn.UserID())
+		userID, err := db.ID(idn.UserID())
+		if err != nil || userID == 0 {
+			marshal.WriteJSON(w, r, httperror.WithForbidden("invalid used"))
+			return
+		}
+
 		user, err := s.db.GetUser(context.Background(), userID)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithForbidden("user ID %d not found: %s", userID, err.Error()).WithCause(err))

@@ -1,6 +1,7 @@
 package workflow
 
 import (
+	"fmt"
 	"net/http"
 	"sync"
 
@@ -100,7 +101,7 @@ func (s *Service) SyncGithubOrgs(ctx context.Context, w http.ResponseWriter, use
 				}
 
 				mo, err := s.db.UpdateOrg(ctx, &model.Organization{
-					ExternalID:   uint64(o.GetID()),
+					ExternalID:   fmt.Sprintf("%d", o.GetID()),
 					Provider:     v1.ProviderGithub,
 					Login:        o.GetLogin(),
 					AvatarURL:    o.GetAvatarURL(),

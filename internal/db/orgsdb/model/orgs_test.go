@@ -37,7 +37,7 @@ func TestUser(t *testing.T) {
 		}
 	}
 
-	u := &model.User{ID: 1000, Name: "n1", Login: "l1", Email: "e1", Company: "c1", AvatarURL: "https://github.com/me"}
+	u := &model.User{ID: 1000, Name: "n1", Login: "l1", Email: "e1", Company: "c1", ExternalID: "exID", AvatarURL: "https://github.com/me"}
 	dto := u.ToDto()
 	assert.Equal(t, "1000", dto.ID)
 	assert.Equal(t, u.Login, dto.Login)
@@ -45,12 +45,13 @@ func TestUser(t *testing.T) {
 	assert.Equal(t, u.Email, dto.Email)
 	assert.Equal(t, u.Company, dto.Company)
 	assert.Equal(t, u.AvatarURL, dto.AvatarURL)
+	assert.Equal(t, u.ExternalID, dto.ExternalID)
 }
 
 func TestOrganization(t *testing.T) {
 	u := &model.Organization{
 		ID:           1000,
-		ExternalID:   1001,
+		ExternalID:   "1001",
 		Name:         "n1",
 		Login:        "l1",
 		Email:        "e1",
