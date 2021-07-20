@@ -11,6 +11,7 @@ import (
 	"github.com/ekspand/trusty/internal/db/cadb"
 	"github.com/ekspand/trusty/internal/db/orgsdb"
 	"github.com/ekspand/trusty/pkg/awskmscrypto"
+	"github.com/ekspand/trusty/pkg/fcc"
 	"github.com/ekspand/trusty/pkg/gcpkmscrypto"
 	"github.com/ekspand/trusty/pkg/jwt"
 	"github.com/ekspand/trusty/pkg/oauth2client"
@@ -59,6 +60,9 @@ type ProvideCaDbFn func(cfg *config.Configuration) (cadb.CaDb, error)
 // ProvideClientFactoryFn defines client.Facroty provider
 type ProvideClientFactoryFn func(cfg *config.Configuration) (client.Factory, error)
 
+// ProvideFCCAPIClientFn defines FCC API Client provider
+type ProvideFCCAPIClientFn func() (fcc.APIClient, error)
+
 // CloseRegistrator provides interface to release resources on close
 type CloseRegistrator interface {
 	OnClose(closer io.Closer)
@@ -79,6 +83,7 @@ type ContainerFactory struct {
 	oauthProvider         ProvideOAuthClientsFn
 	jwtProvider           ProvideJwtFn
 	clientFactoryProvider ProvideClientFactoryFn
+	fccAPIClientProvider  ProvideFCCAPIClientFn
 }
 
 // NewContainerFactory returns an instance of ContainerFactory

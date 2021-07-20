@@ -16,6 +16,8 @@ var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", 
 
 // Service defines the Status service
 type Service struct {
+	FccBaseURL string
+
 	server *gserver.Server
 	cfg    *config.Configuration
 	db     orgsdb.OrgsDb
@@ -56,4 +58,7 @@ func (s *Service) Close() {
 // RegisterRoute adds the Status API endpoints to the overall URL router
 func (s *Service) RegisterRoute(r rest.Router) {
 	r.GET(v1.PathForMartiniSearchCorps, s.SearchCorpsHandler())
+
+	r.GET(v1.PathForMartiniGetFrn, s.GetFrnHandler())
+	r.GET(v1.PathForMartiniSearchDetail, s.SearchDetailHandler())
 }
