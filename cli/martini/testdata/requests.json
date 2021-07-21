@@ -1,4 +1,5 @@
 {
     "/v1/auth/token/refresh" : {"file":"userinfo"},
+    "/v1/ms/orgs" : {"file":"orgs"},
     "/v1/ms/search/opencorporates?name=peculiar+ventures" : {"file":"opencorps"}
 }

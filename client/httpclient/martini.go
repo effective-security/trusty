@@ -27,3 +27,13 @@ func (c *Client) SearchCorps(ctx context.Context, name, jurisdiction string) (*v
 	}
 	return r, err
 }
+
+// Orgs returns user's Orgs
+func (c *Client) Orgs(ctx context.Context) (*v1.OrgsResponse, error) {
+	r := new(v1.OrgsResponse)
+	_, err := c.Get(ctx, v1.PathForMartiniOrgs, r)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return r, nil
+}

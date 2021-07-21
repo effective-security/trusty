@@ -36,3 +36,9 @@ func (s *testSuite) TestSearchCorps() {
 	s.NoError(err)
 	s.HasText("Private Limited Company")
 }
+
+func (s *testSuite) TestOrgs() {
+	err := s.Run(martini.Orgs, nil)
+	s.NoError(err)
+	s.HasText(`"orgs": [`)
+}

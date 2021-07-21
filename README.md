@@ -19,6 +19,7 @@ Trusty is a Certification Authority.
 
 To run or test locally, you need GitHub OAuth secret and a random seed.
 Add this to your ~/.profile
+Note that these secrets can be random if you don't use a specific feature with GCP or Github.
 
 ```.sh
 export TRUSTY_GITHUB_CLIENT_SECRET=0d...a8
