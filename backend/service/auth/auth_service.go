@@ -230,8 +230,8 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 		token, err := conf.Exchange(ctx, code[0])
 		if err != nil {
 			err = errors.Trace(err)
-			logger.Debugf("reason=Exchange, confRedirectURL=%q, AuthURL=%q, TokenURL=%q, sec=%q, err=%q",
-				conf.RedirectURL, o.AuthURL, o.TokenURL, o.ClientSecret, err.Error())
+			logger.Debugf("reason=Exchange, confRedirectURL=%q, AuthURL=%q, TokenURL=%q, sec=%q, err=[%s]",
+				conf.RedirectURL, o.AuthURL, o.TokenURL, o.ClientSecret, errors.Details(err))
 			marshal.WriteJSON(w, r, httperror.WithForbidden("authorization failed: %s", err.Error()).WithCause(err))
 			return
 		}
@@ -361,8 +361,8 @@ func (s *Service) GoogleCallbackHandler() rest.Handle {
 		token, err := conf.Exchange(ctx, code[0])
 		if err != nil {
 			err = errors.Trace(err)
-			logger.Debugf("reason=Exchange, confRedirectURL=%q, AuthURL=%q, TokenURL=%q, sec=%q, err=%q",
-				conf.RedirectURL, o.AuthURL, o.TokenURL, o.ClientSecret, err.Error())
+			logger.Debugf("reason=Exchange, confRedirectURL=%q, AuthURL=%q, TokenURL=%q, sec=%q, err=[%s]",
+				conf.RedirectURL, o.AuthURL, o.TokenURL, o.ClientSecret, errors.Details(err))
 			marshal.WriteJSON(w, r, httperror.WithForbidden("authorization failed: %s", err.Error()).WithCause(err))
 			return
 		}

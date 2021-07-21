@@ -9,6 +9,7 @@ import (
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/httperror"
 	"github.com/go-phorce/dolly/xhttp/marshal"
+	"github.com/juju/errors"
 )
 
 // GetFrnHandler handles v1.PathForMartiniGetFrn
@@ -22,7 +23,7 @@ func (s *Service) GetFrnHandler() rest.Handle {
 		fccClient := fcc.NewAPIClient(s.FccBaseURL)
 		frn, err := fccClient.GetFRN(filerID)
 		if err != nil {
-			logger.Errorf("filerID=%q, err=%q", filerID, err.Error())
+			logger.Errorf("filerID=%q, err=[%s]", filerID, errors.Details(err))
 			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("unable to get FRN response"))
 			return
 		}
@@ -46,7 +47,7 @@ func (s *Service) SearchDetailHandler() rest.Handle {
 		fccClient := fcc.NewAPIClient(s.FccBaseURL)
 		email, err := fccClient.GetEmail(frn)
 		if err != nil {
-			logger.Errorf("frn=%q, err=%q", frn, err.Error())
+			logger.Errorf("frn=%q, err=[%s]", frn, errors.Details(err))
 			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("unable to get email response"))
 			return
 		}
