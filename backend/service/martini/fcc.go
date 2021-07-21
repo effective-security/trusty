@@ -12,8 +12,8 @@ import (
 	"github.com/juju/errors"
 )
 
-// GetFrnHandler handles v1.PathForMartiniGetFrn
-func (s *Service) GetFrnHandler() rest.Handle {
+// FccFrnHandler handles v1.PathForMartiniFccFrn
+func (s *Service) FccFrnHandler() rest.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
 		filerID := api.GetQueryString(r.URL, "filer_id")
 		if filerID == "" {
@@ -21,23 +21,23 @@ func (s *Service) GetFrnHandler() rest.Handle {
 			return
 		}
 		fccClient := fcc.NewAPIClient(s.FccBaseURL)
-		frn, err := fccClient.GetFRN(filerID)
+		fQueryResults, err := fccClient.GetFiler499Results(filerID)
 		if err != nil {
 			logger.Errorf("filerID=%q, err=[%s]", filerID, errors.Details(err))
 			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("unable to get FRN response"))
 			return
 		}
-		res := v1.FccFrnResponse{
-			FRN: frn,
+		res := &v1.FccFrnResponse{
+			Filers: s.Filer499ResultsToDTO(fQueryResults),
 		}
 
-		logger.Tracef("filerID=%q, frn=%q", filerID, frn)
+		logger.Tracef("filerID=%q, res=%q", filerID, res)
 		marshal.WriteJSON(w, r, res)
 	}
 }
 
-// SearchDetailHandler handles v1.PathForMartiniSearchDetail
-func (s *Service) SearchDetailHandler() rest.Handle {
+// FccContactHandler handles v1.PathForMartiniFccContact
+func (s *Service) FccContactHandler() rest.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
 		frn := api.GetQueryString(r.URL, "frn")
 		if frn == "" {
@@ -45,19 +45,93 @@ func (s *Service) SearchDetailHandler() rest.Handle {
 			return
 		}
 		fccClient := fcc.NewAPIClient(s.FccBaseURL)
-		email, err := fccClient.GetEmail(frn)
+		cQueryResults, err := fccClient.GetContactResults(frn)
 		if err != nil {
 			logger.Errorf("frn=%q, err=[%s]", frn, errors.Details(err))
 			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("unable to get email response"))
 			return
 		}
 
-		res := v1.FccSearchDetailResponse{
-			Email: email,
+		res := v1.FccContactResponse{
+			FccContactResult: *s.ContactQueryResultsToDTO(cQueryResults),
 		}
 
-		logger.Tracef("frn=%q, email=%q", frn, email)
+		logger.Tracef("frn=%q, res=%q", frn, res)
 
 		marshal.WriteJSON(w, r, res)
+	}
+}
+
+// Filer499ResultsToDTO converts to v1.FccFrnResponse
+func (s *Service) Filer499ResultsToDTO(fq *fcc.Filer499Results) []v1.Filer {
+	filers := []v1.Filer{}
+
+	for _, f := range fq.Filers {
+		fDTO := v1.Filer{
+			Form499ID: f.Form499ID,
+			FilerIDInfo: v1.FilerIDInfo{
+				RegistrationCurrentAsOf:     f.FilerIDInfo.RegistrationCurrentAsOf.String(),
+				StartDate:                   f.FilerIDInfo.StartDate.String(),
+				USFContributor:              f.FilerIDInfo.USFContributor,
+				LegalName:                   f.FilerIDInfo.LegalName,
+				PrincipalCommunicationsType: f.FilerIDInfo.PrincipalCommunicationsType,
+				HoldingCompany:              f.FilerIDInfo.HoldingCompany,
+				FRN:                         f.FilerIDInfo.FRN,
+				HQAddress: v1.HQAdress{
+					AddressLine: f.FilerIDInfo.HQAddress.AddressLine,
+					City:        f.FilerIDInfo.HQAddress.City,
+					State:       f.FilerIDInfo.HQAddress.State,
+					ZipCode:     f.FilerIDInfo.HQAddress.ZipCode,
+				},
+				CustomerInquiriesAdress: v1.CustomerInquiriesAdress{
+					AddressLine: f.FilerIDInfo.CustomerInquiriesAdress.AddressLine,
+					City:        f.FilerIDInfo.CustomerInquiriesAdress.City,
+					State:       f.FilerIDInfo.CustomerInquiriesAdress.State,
+					ZipCode:     f.FilerIDInfo.CustomerInquiriesAdress.ZipCode,
+				},
+				CustomerInquiriesTelephone: f.FilerIDInfo.CustomerInquiriesTelephone,
+				OtherTradeNames:            f.FilerIDInfo.OtherTradeNames,
+			},
+			AgentForServiceOfProcess: v1.AgentForServiceOfProcess{
+				DCAgent:          f.AgentForServiceOfProcess.DCAgent,
+				DCAgentTelephone: f.AgentForServiceOfProcess.DCAgentTelephone,
+				DCAgentFax:       f.AgentForServiceOfProcess.DCAgentFax,
+				DCAgentEmail:     f.AgentForServiceOfProcess.DCAgentEmail,
+				DCAgentAddress: v1.DCAgentAddress{
+					AddressLine: f.AgentForServiceOfProcess.DCAgentAddress.AddressLines,
+					City:        f.AgentForServiceOfProcess.DCAgentAddress.City,
+					State:       f.AgentForServiceOfProcess.DCAgentAddress.State,
+					ZipCode:     f.AgentForServiceOfProcess.DCAgentAddress.ZipCode,
+				},
+			},
+			FCCRegistrationInformation: v1.FCCRegistrationInformation{
+				ChiefExecutiveOfficer:    f.FCCRegistrationInformation.ChiefExecutiveOfficer,
+				ChairmanOrSeniorOfficer:  f.FCCRegistrationInformation.ChairmanOrSeniorOfficer,
+				PresidentOrSeniorOfficer: f.FCCRegistrationInformation.PresidentOrSeniorOfficer,
+			},
+			JurisdictionStates: f.JurisdictionStates,
+		}
+
+		filers = append(filers, fDTO)
+	}
+
+	return filers
+}
+
+// ContactQueryResultsToDTO converts to v1.FccContactResults
+func (s *Service) ContactQueryResultsToDTO(c *fcc.ContactResults) *v1.FccContactResults {
+	return &v1.FccContactResults{
+		FRN:                 c.FRN,
+		RegistrationDate:    c.RegistrationDate,
+		LastUpdated:         c.LastUpdated,
+		BusinessName:        c.BusinessName,
+		BusinessType:        c.BusinessType,
+		ContactOrganization: c.ContactOrganization,
+		ContactPosition:     c.ContactPosition,
+		ContactName:         c.ContactName,
+		ContactAddress:      c.ContactAddress,
+		ContactEmail:        c.ContactEmail,
+		ContactPhone:        c.ContactPhone,
+		ContactFax:          c.ContactFax,
 	}
 }

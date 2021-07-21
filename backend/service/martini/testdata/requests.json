@@ -1,4 +1,4 @@
 {
-    "/cgb/form499/499results.cfm?FilerID=831188&XML=TRUE" : {"file":"frn.xml"},
-    "/coresWeb/searchDetail.do?frn=0024926677" : {"file":"search_detail.html"}
+    "/cgb/form499/499results.cfm?FilerID=831188&XML=TRUE" : {"file":"fcc_frn.xml"},
+    "/coresWeb/searchDetail.do?frn=0024926677" : {"file":"fcc_contact.html"}
 }

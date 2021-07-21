@@ -60,6 +60,6 @@ func (s *Service) RegisterRoute(r rest.Router) {
 	r.GET(v1.PathForMartiniSearchCorps, s.SearchCorpsHandler())
 	r.GET(v1.PathForMartiniOrgs, s.GetOrgsHandler())
 
-	r.GET(v1.PathForMartiniGetFrn, s.GetFrnHandler())
-	r.GET(v1.PathForMartiniSearchDetail, s.SearchDetailHandler())
+	r.GET(v1.PathForMartiniFccFrn, s.FccFrnHandler())
+	r.GET(v1.PathForMartiniFccContact, s.FccContactHandler())
 }

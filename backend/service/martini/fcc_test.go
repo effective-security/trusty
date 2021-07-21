@@ -18,7 +18,7 @@ func Test_FccFrnHandler(t *testing.T) {
 	service := trustyServer.Service(martini.ServiceName).(*martini.Service)
 	require.NotNil(t, service)
 
-	h := service.GetFrnHandler()
+	h := service.FccFrnHandler()
 
 	server := servefiles.New(t)
 	server.SetBaseDirs("testdata")
@@ -30,7 +30,7 @@ func Test_FccFrnHandler(t *testing.T) {
 
 	t.Run("no_filer_id", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		r, err := http.NewRequest(http.MethodGet, v1.PathForMartiniGetFrn, nil)
+		r, err := http.NewRequest(http.MethodGet, v1.PathForMartiniFccFrn, nil)
 		require.NoError(t, err)
 
 		h(w, r, nil)
@@ -40,7 +40,7 @@ func Test_FccFrnHandler(t *testing.T) {
 
 	t.Run("wrong_filer_id", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		r, err := http.NewRequest(http.MethodGet, v1.PathForMartiniGetFrn+"?filer_id=wrong", nil)
+		r, err := http.NewRequest(http.MethodGet, v1.PathForMartiniFccFrn+"?filer_id=wrong", nil)
 		require.NoError(t, err)
 
 		h(w, r, nil)
@@ -50,7 +50,7 @@ func Test_FccFrnHandler(t *testing.T) {
 
 	t.Run("url", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		r, err := http.NewRequest(http.MethodGet, v1.PathForMartiniGetFrn+"?filer_id=831188", nil)
+		r, err := http.NewRequest(http.MethodGet, v1.PathForMartiniFccFrn+"?filer_id=831188", nil)
 		require.NoError(t, err)
 
 		h(w, r, nil)
@@ -59,15 +59,15 @@ func Test_FccFrnHandler(t *testing.T) {
 		var res v1.FccFrnResponse
 		require.NoError(t, marshal.Decode(w.Body, &res))
 		require.NotNil(t, res)
-		assert.Equal(t, "0024926677", res.FRN)
+		assert.Equal(t, "0024926677", res.Filers[0].FilerIDInfo.FRN)
 	})
 }
 
-func Test_FccSearchDetailHandler(t *testing.T) {
+func Test_FccContactHandler(t *testing.T) {
 	service := trustyServer.Service(martini.ServiceName).(*martini.Service)
 	require.NotNil(t, service)
 
-	h := service.SearchDetailHandler()
+	h := service.FccContactHandler()
 
 	server := servefiles.New(t)
 	server.SetBaseDirs("testdata")
@@ -79,7 +79,7 @@ func Test_FccSearchDetailHandler(t *testing.T) {
 
 	t.Run("no_frn", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		r, err := http.NewRequest(http.MethodGet, v1.PathForMartiniSearchDetail, nil)
+		r, err := http.NewRequest(http.MethodGet, v1.PathForMartiniFccContact, nil)
 		require.NoError(t, err)
 
 		h(w, r, nil)
@@ -89,7 +89,7 @@ func Test_FccSearchDetailHandler(t *testing.T) {
 
 	t.Run("wrong_frn", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		r, err := http.NewRequest(http.MethodGet, v1.PathForMartiniSearchDetail+"?frn=wrong", nil)
+		r, err := http.NewRequest(http.MethodGet, v1.PathForMartiniFccContact+"?frn=wrong", nil)
 		require.NoError(t, err)
 
 		h(w, r, nil)
@@ -99,15 +99,15 @@ func Test_FccSearchDetailHandler(t *testing.T) {
 
 	t.Run("url", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		r, err := http.NewRequest(http.MethodGet, v1.PathForMartiniSearchDetail+"?frn=0024926677", nil)
+		r, err := http.NewRequest(http.MethodGet, v1.PathForMartiniFccContact+"?frn=0024926677", nil)
 		require.NoError(t, err)
 
 		h(w, r, nil)
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		var res v1.FccSearchDetailResponse
+		var res v1.FccContactResponse
 		require.NoError(t, marshal.Decode(w.Body, &res))
 		require.NotNil(t, res)
-		assert.Equal(t, "tara.lyle@veracitynetworks.com", res.Email)
+		assert.Equal(t, "tara.lyle@veracitynetworks.com", res.FccContactResult.ContactEmail)
 	})
 }
