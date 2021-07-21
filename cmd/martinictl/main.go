@@ -66,6 +66,20 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	searchCorpsFlags.Name = cmdSearchCorps.Flag("name", "corporation name to search").Required().String()
 	searchCorpsFlags.Jurisdiction = cmdSearchCorps.Flag("jur", "jurisdition code: us, us_wa, etc").String()
 
+	// fcc frn
+	cmdFCC := app.Command("fcc", "FCC operations").
+		PreAction(cli.PopulateControl)
+
+	fccFRNFlags := new(martini.FccFRNFlags)
+	cmdFRN := cmdFCC.Command("frn", "returns FRN for filer").
+		Action(cli.RegisterAction(martini.FccFRN, fccFRNFlags))
+	fccFRNFlags.FilerID = cmdFRN.Flag("filer", "filer ID").Required().String()
+
+	fccContactFlags := new(martini.FccContactFlags)
+	cmdFccContact := cmdFCC.Command("contact", "returns contact for FRN").
+		Action(cli.RegisterAction(martini.FccContact, fccContactFlags))
+	fccContactFlags.FRN = cmdFccContact.Flag("frn", "FRN to query").Required().String()
+
 	cli.Parse(args)
 	return cli.ReturnCode()
 }

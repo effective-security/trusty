@@ -52,9 +52,7 @@ func (s *Service) FccContactHandler() rest.Handle {
 			return
 		}
 
-		res := v1.FccContactResponse{
-			FccContactResult: *s.ContactQueryResultsToDTO(cQueryResults),
-		}
+		res := s.ContactQueryResultsToDTO(cQueryResults)
 
 		logger.Tracef("frn=%q, res=%q", frn, res)
 
@@ -119,8 +117,8 @@ func (s *Service) Filer499ResultsToDTO(fq *fcc.Filer499Results) []v1.Filer {
 }
 
 // ContactQueryResultsToDTO converts to v1.FccContactResults
-func (s *Service) ContactQueryResultsToDTO(c *fcc.ContactResults) *v1.FccContactResults {
-	return &v1.FccContactResults{
+func (s *Service) ContactQueryResultsToDTO(c *fcc.ContactResults) *v1.FccContactResponse {
+	return &v1.FccContactResponse{
 		FRN:                 c.FRN,
 		RegistrationDate:    c.RegistrationDate,
 		LastUpdated:         c.LastUpdated,

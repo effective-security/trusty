@@ -8,7 +8,7 @@ type FccFrnResponse struct {
 // Filer struct
 type Filer struct {
 	Form499ID                  string                     `json:"form_499_id"`
-	FilerIDInfo                FilerIDInfo                `json:"filer_id_Info"`
+	FilerIDInfo                FilerIDInfo                `json:"filer_id_info"`
 	AgentForServiceOfProcess   AgentForServiceOfProcess   `json:"agent_for_service_of_process"`
 	FCCRegistrationInformation FCCRegistrationInformation `json:"fcc_registration_information"`
 	JurisdictionStates         []string                   `json:"jurisdiction_states"`
@@ -25,7 +25,7 @@ type FilerIDInfo struct {
 	FRN                         string                  `json:"frn"`
 	HQAddress                   HQAdress                `json:"hq_address"`
 	CustomerInquiriesAdress     CustomerInquiriesAdress `json:"customer_inquiries_address"`
-	CustomerInquiriesTelephone  string                  `json:"Customer_Inquiries_telephone"`
+	CustomerInquiriesTelephone  string                  `json:"customer_inquiries_telephone"`
 	OtherTradeNames             []string                `json:"other_trade_names"`
 }
 
@@ -71,11 +71,6 @@ type FCCRegistrationInformation struct {
 
 // FccContactResponse provides response for https://apps.fcc.gov/coresWeb/searchDetail.do?frn=<fnr>
 type FccContactResponse struct {
-	FccContactResult FccContactResults `json:"contact"`
-}
-
-// FccContactResults struct
-type FccContactResults struct {
 	FRN                 string `json:"frn"`
 	RegistrationDate    string `json:"registration_date"`
 	LastUpdated         string `json:"last_updated"`

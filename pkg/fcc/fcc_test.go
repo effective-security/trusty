@@ -162,14 +162,14 @@ func TestParseContactDataFromHTML(t *testing.T) {
 	cQueryResults, err := fcc.ParseContactDataFromHTML([]byte(htmlTest))
 	require.NoError(t, err)
 	require.NotNil(t, cQueryResults)
-	require.Equal(t, "0000010827", cQueryResults.FRN)
-	require.Equal(t, "09/15/2000 08:30:58 AM", cQueryResults.RegistrationDate)
-	require.Equal(t, "04/05/2021 12:12:43 PM", cQueryResults.LastUpdated)
-	require.Equal(t, "Veracity Networks, LLC", cQueryResults.BusinessName)
-	require.Equal(t, "Private Sector\n\t\t\t\t\t\t\t\t\t\t\n\t\n\t,\n\t\t\t\t\t\t\t\t\t\t\n\t          \t\n\t\tLimited Liability Corporation", cQueryResults.BusinessType)
-	require.Equal(t, "357 S. 670 W.\n       \n\nSte 300\n       \n\nLindon, UT 84042\n       \n       \n\nUnited States", cQueryResults.ContactAddress)
-	require.Equal(t, "tara.lyle@veracitynetworks.com", cQueryResults.ContactEmail)
-	require.Equal(t, "", cQueryResults.ContactFax)
+	assert.Equal(t, "0000010827", cQueryResults.FRN)
+	assert.Equal(t, "09/15/2000 08:30:58 AM", cQueryResults.RegistrationDate)
+	assert.Equal(t, "04/05/2021 12:12:43 PM", cQueryResults.LastUpdated)
+	assert.Equal(t, "Veracity Networks, LLC", cQueryResults.BusinessName)
+	assert.Equal(t, "Private Sector, Limited Liability Corporation", cQueryResults.BusinessType)
+	assert.Equal(t, "357 S. 670 W., Ste 300, Lindon, UT 84042, United States", cQueryResults.ContactAddress)
+	assert.Equal(t, "tara.lyle@veracitynetworks.com", cQueryResults.ContactEmail)
+	assert.Equal(t, "", cQueryResults.ContactFax)
 	assert.Equal(t, "", cQueryResults.ContactPhone)
 	assert.Equal(t, "FCC Contact", cQueryResults.ContactPosition)
 	assert.Equal(t, "", cQueryResults.ContactOrganization)
@@ -314,4 +314,12 @@ func TestParseFilerDataFromXML(t *testing.T) {
 	require.Equal(t, "tennessee", jurisdictionState[7])
 	require.Equal(t, "texas", jurisdictionState[8])
 	require.Equal(t, "virginia", jurisdictionState[9])
+}
+
+func TestCanonicalString(t *testing.T) {
+	require.Equal(t, "Private Sector, Limited Liability Corporation",
+		fcc.CanonicalString("Private Sector\n\t\t\t\t\t\t\t\t\t\t\t\t\n\t\n\t,\n\t\t\t\t\t\t\t\t\t\t\t\t\n\t          \t\n\t\tLimited Liability Corporation"))
+
+	require.Equal(t, "241 Applegate Trace, Pelham, AL 35124-2945, United States",
+		fcc.CanonicalString("241 Applegate Trace\n       \n       \n\nPelham, AL 35124-2945\n       \n       \n\nUnited States"))
 }

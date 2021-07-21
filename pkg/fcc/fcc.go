@@ -306,18 +306,18 @@ func ParseContactDataFromHTML(b []byte) (*ContactResults, error) {
 	})
 
 	cQueryResults := ContactResults{
-		FRN:                 strings.TrimSpace(frn),
-		RegistrationDate:    strings.TrimSpace(registrationDate),
-		LastUpdated:         strings.TrimSpace(lastUpdated),
-		BusinessName:        strings.TrimSpace(businessName),
-		BusinessType:        strings.TrimSpace(businessType),
-		ContactOrganization: strings.TrimSpace(contactOrganization),
-		ContactPosition:     strings.TrimSpace(contactPosition),
-		ContactName:         strings.TrimSpace(contactName),
-		ContactAddress:      strings.TrimSpace(contactAddress),
-		ContactEmail:        strings.TrimSpace(contactEmail),
-		ContactPhone:        strings.TrimSpace(contactPhone),
-		ContactFax:          strings.TrimSpace(contactFax),
+		FRN:                 CanonicalString(frn),
+		RegistrationDate:    CanonicalString(registrationDate),
+		LastUpdated:         CanonicalString(lastUpdated),
+		BusinessName:        CanonicalString(businessName),
+		BusinessType:        CanonicalString(businessType),
+		ContactOrganization: CanonicalString(contactOrganization),
+		ContactPosition:     CanonicalString(contactPosition),
+		ContactName:         CanonicalString(contactName),
+		ContactAddress:      CanonicalString(contactAddress),
+		ContactEmail:        CanonicalString(contactEmail),
+		ContactPhone:        CanonicalString(contactPhone),
+		ContactFax:          CanonicalString(contactFax),
 	}
 
 	return &cQueryResults, nil
@@ -338,4 +338,27 @@ func ParseFilerDataFromXML(b []byte) (*Filer499Results, error) {
 		return nil, errors.New("failed to parse FRN from XML")
 	}
 	return &fQueryResults, nil
+}
+
+// CanonicalString returns canonical string value with extra \n and \t removed
+func CanonicalString(val string) string {
+	val = strings.TrimSpace(strings.ReplaceAll(val, "\t", " "))
+	runes := []rune(val)
+	idx := 0
+	prevSpace := false
+	for _, r := range runes {
+		isSpace := (r == ' ' || r == '\n')
+		if isSpace && prevSpace {
+			continue
+		}
+
+		runes[idx] = r
+		idx++
+		prevSpace = isSpace
+	}
+
+	val = string(runes[:idx])
+	val = strings.ReplaceAll(val, "\n,\n", ", ")
+	val = strings.ReplaceAll(val, "\n", ", ")
+	return val
 }

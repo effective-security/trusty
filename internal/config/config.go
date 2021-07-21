@@ -76,6 +76,9 @@ type Configuration struct {
 
 	// Acme specifies the configuration files for ACME provider
 	Acme string `json:"acme" yaml:"acme"`
+
+	// Martini specifies the configuration files for Martini provider
+	Martini string `json:"martini" yaml:"martini"`
 }
 
 // CryptoProv specifies the configuration for crypto providers

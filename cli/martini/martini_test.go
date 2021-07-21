@@ -42,3 +42,23 @@ func (s *testSuite) TestOrgs() {
 	s.NoError(err)
 	s.HasText(`"orgs": [`)
 }
+
+func (s *testSuite) TestFccFRN() {
+	filer := "831188"
+	flags := martini.FccFRNFlags{
+		FilerID: &filer,
+	}
+	err := s.Run(martini.FccFRN, &flags)
+	s.NoError(err)
+	s.HasText(`"dc_agent_email": "jallen@rinioneil.com"`)
+}
+
+func (s *testSuite) TestFccContact() {
+	frn := "0024926677"
+	flags := martini.FccContactFlags{
+		FRN: &frn,
+	}
+	err := s.Run(martini.FccContact, &flags)
+	s.NoError(err)
+	s.HasText(`"contact_email": "mhardeman@lowlatencycomm.com"`)
+}
