@@ -152,4 +152,10 @@ const (
 
 	// PathForMartiniSearchDetail is path to get company details
 	PathForMartiniSearchDetail = "/v1/ms/fcc_search_detail"
+
+	// PathForMartiniOrgs provides orgs the user
+	//
+	// Verbs: GET
+	// Response: v1.OrgsResponse
+	PathForMartiniOrgs = "/v1/ms/orgs"
 )

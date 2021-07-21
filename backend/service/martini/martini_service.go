@@ -58,6 +58,7 @@ func (s *Service) Close() {
 // RegisterRoute adds the Status API endpoints to the overall URL router
 func (s *Service) RegisterRoute(r rest.Router) {
 	r.GET(v1.PathForMartiniSearchCorps, s.SearchCorpsHandler())
+	r.GET(v1.PathForMartiniOrgs, s.GetOrgsHandler())
 
 	r.GET(v1.PathForMartiniGetFrn, s.GetFrnHandler())
 	r.GET(v1.PathForMartiniSearchDetail, s.SearchDetailHandler())

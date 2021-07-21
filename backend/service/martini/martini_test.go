@@ -126,3 +126,22 @@ func TestSearchCorpsHandler(t *testing.T) {
 	assert.Contains(t, hdr.Get(header.ContentType), header.ApplicationJSON)
 	assert.Empty(t, res.Companies)
 }
+
+func TestGetOrgsHandler(t *testing.T) {
+	res := new(v1.OrgsResponse)
+
+	client := retriable.New()
+	ctx := retriable.WithHeaders(context.Background(), jsonContentHeaders)
+	hdr, rc, err := client.Request(ctx,
+		http.MethodGet,
+		[]string{httpAddr},
+		v1.PathForMartiniOrgs,
+		nil,
+		res)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, rc)
+
+	assert.Contains(t, hdr.Get(header.ContentType), header.ApplicationJSON)
+	assert.Empty(t, res.Orgs)
+}

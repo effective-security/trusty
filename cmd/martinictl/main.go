@@ -48,10 +48,15 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		PreAction(cli.PopulateControl).
 		Action(cli.RegisterAction(auth.Authenticate, loginFlags))
 
-	// use info
+	// user info
 	app.Command("userinfo", "show the user profile").
 		PreAction(cli.PopulateControl).
 		Action(cli.RegisterAction(martini.UserProfile, nil))
+
+	// user orgs
+	app.Command("orgs", "show the user's orgs").
+		PreAction(cli.PopulateControl).
+		Action(cli.RegisterAction(martini.Orgs, nil))
 
 	// opencorps
 	searchCorpsFlags := new(martini.SearchCorpsFlags)
