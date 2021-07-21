@@ -37,3 +37,23 @@ func (c *Client) Orgs(ctx context.Context) (*v1.OrgsResponse, error) {
 	}
 	return r, nil
 }
+
+// FccFRN returns Fcc FRN
+func (c *Client) FccFRN(ctx context.Context, filerID string) (*v1.FccFrnResponse, error) {
+	r := new(v1.FccFrnResponse)
+	_, err := c.Get(ctx, v1.PathForMartiniFccFrn+"?filer_id="+filerID, r)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return r, nil
+}
+
+// FccContact returns Fcc FRN Contact
+func (c *Client) FccContact(ctx context.Context, frn string) (*v1.FccContactResponse, error) {
+	r := new(v1.FccContactResponse)
+	_, err := c.Get(ctx, v1.PathForMartiniFccContact+"?frn="+frn, r)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return r, nil
+}

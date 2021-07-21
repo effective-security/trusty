@@ -108,6 +108,6 @@ func Test_FccContactHandler(t *testing.T) {
 		var res v1.FccContactResponse
 		require.NoError(t, marshal.Decode(w.Body, &res))
 		require.NotNil(t, res)
-		assert.Equal(t, "tara.lyle@veracitynetworks.com", res.FccContactResult.ContactEmail)
+		assert.Equal(t, "tara.lyle@veracitynetworks.com", res.ContactEmail)
 	})
 }
