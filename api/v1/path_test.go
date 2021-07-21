@@ -23,6 +23,6 @@ func TestPaths(t *testing.T) {
 	assert.Equal(t, "/v1/wf", v1.PathForWorkflow)
 	assert.Equal(t, "/v1/wf/:provider/repos", v1.PathForWorkflowRepos)
 
-	assert.Equal(t, "/v1/ms/fcc_frn", v1.PathForMartiniGetFrn)
-	assert.Equal(t, "/v1/ms/fcc_search_detail", v1.PathForMartiniSearchDetail)
+	assert.Equal(t, "/v1/ms/fcc_frn", v1.PathForMartiniFccFrn)
+	assert.Equal(t, "/v1/ms/fcc_contact", v1.PathForMartiniFccContact)
 }

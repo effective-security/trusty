@@ -15,52 +15,132 @@ import (
 )
 
 const (
-	fccDefaultBaseURL = "https://apps.fcc.gov"
-	emailHeader       = "Contact Email:"
+	fccDefaultBaseURL         = "https://apps.fcc.gov"
+	frnHeader                 = "FRN:"
+	registrationDateHeader    = "Registration Date:"
+	lastUpdatedHeader         = "Last Updated:"
+	businessNameHeader        = "Business Name:"
+	businessTypeHeader        = "Business Type:"
+	contactOrganizationHeader = "Contact Organization:"
+	contactPositionHeader     = "Contact Position:"
+	contactNameHeader         = "Contact Name:"
+	contactAddressHeader      = "Contact Address:"
+	contactEmailHeader        = "Contact Email:"
+	contactPhoneHeader        = "Contact Phone:"
+	contactFaxHeader          = "Contact Fax:"
 )
 
 // APIClient for FCC related API calls
 type APIClient interface {
-	GetFRN(filerID string) (string, error)
-	GetEmail(frn string) (string, error)
+	GetFiler499Results(filerID string) (*Filer499Results, error)
+	GetContactResults(frn string) (*ContactResults, error)
 }
 
 type apiClientImpl struct {
 	FccBaseURL string
 }
 
-// filer499QueryResults implements Filer499QueryResults interface
-type filer499QueryResults struct {
+// Filer499Results struct
+type Filer499Results struct {
 	XMLName xml.Name `xml:"Filer499QueryResults"`
-	Filers  []filer  `xml:"Filer"`
+	Filers  []Filer  `xml:"Filer"`
 }
 
-// filer struct
-type filer struct {
-	XMLName     xml.Name    `xml:"Filer"`
-	Form499ID   string      `xml:"Form_499_ID"`
-	FilerIDInfo filerIDInfo `xml:"Filer_ID_Info"`
+// Filer struct
+type Filer struct {
+	XMLName                    xml.Name                 `xml:"Filer"`
+	Form499ID                  string                   `xml:"Form_499_ID"`
+	FilerIDInfo                FilerIDInfo              `xml:"Filer_ID_Info"`
+	AgentForServiceOfProcess   AgentForServiceOfProcess `xml:"Agent_for_Service_Of_Process"`
+	FCCRegistrationInformation RegistrationInformation  `xml:"FCC_Registration_information"`
+	JurisdictionStates         []string                 `xml:"jurisdiction_state"`
 }
 
-// filerIDInfo struct
-type filerIDInfo struct {
-	XMLName                     xml.Name `xml:"Filer_ID_Info"`
-	RegistrationCurrentAsOf     string   `xml:"Registration_Current_as_of"`
-	StartDate                   fccDate  `xml:"start_date"`
-	USFContributor              string   `xml:"USF_Contributor"`
-	LegalName                   string   `xml:"Legal_Name"`
-	PrincipalCommunicationsType string   `xml:"Principal_Communications_Type"`
-	HoldingCompany              string   `xml:"holding_company"`
-	FRN                         string   `xml:"FRN"`
+// FilerIDInfo struct
+type FilerIDInfo struct {
+	XMLName                     xml.Name                `xml:"Filer_ID_Info"`
+	RegistrationCurrentAsOf     FCDate                  `xml:"Registration_Current_as_of"`
+	StartDate                   FCDate                  `xml:"start_date"`
+	USFContributor              string                  `xml:"USF_Contributor"`
+	LegalName                   string                  `xml:"Legal_Name"`
+	PrincipalCommunicationsType string                  `xml:"Principal_Communications_Type"`
+	HoldingCompany              string                  `xml:"holding_company"`
+	FRN                         string                  `xml:"FRN"`
+	HQAddress                   HQAdress                `xml:"hq_address"`
+	CustomerInquiriesAdress     CustomerInquiriesAdress `xml:"customer_inquiries_address"`
+	CustomerInquiriesTelephone  string                  `xml:"Customer_Inquiries_telephone"`
+	OtherTradeNames             []string                `xml:"other_trade_name"`
 }
 
-// fccDate struct is custom implementation of date to be able to parse yyyy-mm-dd formal
+// HQAdress struct
+type HQAdress struct {
+	XMLName     xml.Name `xml:"hq_address"`
+	AddressLine string   `xml:"address_line"`
+	City        string   `xml:"city"`
+	State       string   `xml:"state"`
+	ZipCode     string   `xml:"zip_code"`
+}
+
+// CustomerInquiriesAdress struct
+type CustomerInquiriesAdress struct {
+	XMLName     xml.Name `xml:"customer_inquiries_address"`
+	AddressLine string   `xml:"address_line"`
+	City        string   `xml:"city"`
+	State       string   `xml:"state"`
+	ZipCode     string   `xml:"zip_code"`
+}
+
+// AgentForServiceOfProcess struct
+type AgentForServiceOfProcess struct {
+	XMLName          xml.Name       `xml:"Agent_for_Service_Of_Process"`
+	DCAgent          string         `xml:"dc_agent"`
+	DCAgentTelephone string         `xml:"dc_agent_telephone"`
+	DCAgentFax       string         `xml:"dc_agent_fax"`
+	DCAgentEmail     string         `xml:"dc_agent_email"`
+	DCAgentAddress   DCAgentAddress `xml:"dc_agent_address"`
+}
+
+// DCAgentAddress struct
+type DCAgentAddress struct {
+	XMLName      xml.Name `xml:"dc_agent_address"`
+	AddressLines []string `xml:"address_line"`
+	City         string   `xml:"city"`
+	State        string   `xml:"state"`
+	ZipCode      string   `xml:"zip_code"`
+}
+
+// RegistrationInformation struct
+type RegistrationInformation struct {
+	XMLName                  xml.Name `xml:"FCC_Registration_information"`
+	ChiefExecutiveOfficer    string   `xml:"Chief_Executive_Officer"`
+	ChairmanOrSeniorOfficer  string   `xml:"Chairman_or_Senior_Officer"`
+	PresidentOrSeniorOfficer string   `xml:"President_or_Senior_Officer"`
+}
+
+// FCDate struct is custom implementation of date to be able to parse yyyy-mm-dd formal
 // FCC API returns dates in yyyy-mm-dd format that default golang XML decoder does not recognize
-type fccDate struct {
+type FCDate struct {
 	time.Time
 }
 
-func (c *fccDate) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+// ContactResults struct
+type ContactResults struct {
+	FRN                 string `json:"frn"`
+	RegistrationDate    string `json:"registration_date"`
+	LastUpdated         string `json:"last_updated"`
+	BusinessName        string `json:"business_name"`
+	BusinessType        string `json:"business_type"`
+	ContactOrganization string `json:"contact_organization"`
+	ContactPosition     string `json:"contact_position"`
+	ContactName         string `json:"contact_name"`
+	ContactAddress      string `json:"contact_address"`
+	ContactEmail        string `json:"contact_email"`
+	ContactPhone        string `json:"contact_phone"`
+	ContactFax          string `json:"contact_fax"`
+}
+
+// UnmarshalXML is needed to support unmarshalling forcustom date formats
+func (c *FCDate) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	const shortForm = "2006-01-02"
 	var v string
 	d.DecodeElement(&v, &start)
@@ -68,7 +148,7 @@ func (c *fccDate) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	if err != nil {
 		return err
 	}
-	*c = fccDate{parse}
+	*c = FCDate{parse}
 	return nil
 }
 
@@ -92,52 +172,56 @@ func NewAPIClient(baseURL string) APIClient {
 	return c
 }
 
-func (c apiClientImpl) GetFRN(filerID string) (string, error) {
+func (c apiClientImpl) GetFiler499Results(filerID string) (*Filer499Results, error) {
 	httpClient := retriable.New()
 	resFromFcc := new(fccResponseWriter)
 	path := fmt.Sprintf("/cgb/form499/499results.cfm?FilerID=%s&XML=TRUE", filerID)
 	_, statusCode, err := httpClient.Request(context.Background(), "GET", []string{c.FccBaseURL}, path, nil, resFromFcc)
 	if err != nil {
-		return "", errors.Annotatef(err, "failed to execute request, url=%q, path=%q", c.FccBaseURL, path)
+		return nil, errors.Annotatef(err, "failed to execute request, url=%q, path=%q", c.FccBaseURL, path)
 	}
 
 	if statusCode >= 400 {
-		return "", errors.Annotatef(err, "failed to execute request, url=%q, path=%q, statusCode=%d", c.FccBaseURL, path, statusCode)
+		return nil, errors.Annotatef(err, "failed to execute request, url=%q, path=%q, statusCode=%d", c.FccBaseURL, path, statusCode)
 	}
 
-	frn, err := ParseFRNFromXML(resFromFcc.data)
+	fQueryResults, err := ParseFilerDataFromXML(resFromFcc.data)
 	if err != nil {
-		return "", errors.New("failed to parse FRN from XML")
+		return nil, errors.New("failed to parse FRN from XML")
 	}
 
-	return frn, nil
+	return fQueryResults, nil
 }
 
-func (c apiClientImpl) GetEmail(frn string) (string, error) {
+func (c apiClientImpl) GetContactResults(frn string) (*ContactResults, error) {
 	httpClient := retriable.New()
 
 	resFromFcc := new(fccResponseWriter)
 	path := fmt.Sprintf("/coresWeb/searchDetail.do?frn=%s", frn)
 	_, _, err := httpClient.Request(context.Background(), "GET", []string{c.FccBaseURL}, path, nil, resFromFcc)
 	if err != nil {
-		return "", errors.Annotatef(err, "failed to execute request, url=%q, path=%q", c.FccBaseURL, path)
+		return nil, errors.Annotatef(err, "failed to execute request, url=%q, path=%q", c.FccBaseURL, path)
 	}
 
-	email, err := ParseEmailFromHTML(resFromFcc.data)
+	email, err := ParseContactDataFromHTML(resFromFcc.data)
 	if err != nil {
-		return "", errors.Annotatef(err, "failed to parse email from XML result")
+		return nil, errors.Annotatef(err, "failed to parse email from XML result")
 	}
+
 	return email, nil
 }
 
-// ParseEmailFromHTML parses email from HTML returned by FCC search detail API
-func ParseEmailFromHTML(b []byte) (string, error) {
+// ParseContactDataFromHTML parses data from HTML returned by https://apps.fcc.gov/coresWeb/searchDetail.do?frn=<fnr>
+func ParseContactDataFromHTML(b []byte) (*ContactResults, error) {
 	var heading string
-	var email string
+	var frn, registrationDate string
+	var lastUpdated, businessName string
+	var businessType, contactOrganization, contactPosition, contactName string
+	var contactAddress, contactEmail, contactPhone, contactFax string
 	reader := bytes.NewReader(b)
 	doc, err := goquery.NewDocumentFromReader(reader)
 	if err != nil {
-		return "", errors.New("failed to parse email from XML")
+		return nil, errors.New("failed to parse email from XML")
 	}
 
 	// Find each table
@@ -147,32 +231,111 @@ func ParseEmailFromHTML(b []byte) (string, error) {
 				heading = tableheading.Text()
 			})
 
-			if heading == emailHeader {
+			if heading == frnHeader {
 				rowhtml.Find("td").Each(func(indexth int, tablecell *goquery.Selection) {
-					email = tablecell.Text()
+					frn = tablecell.Text()
+				})
+			}
+
+			if heading == registrationDateHeader {
+				rowhtml.Find("td").Each(func(indexth int, tablecell *goquery.Selection) {
+					registrationDate = tablecell.Text()
+				})
+			}
+
+			if heading == lastUpdatedHeader {
+				rowhtml.Find("td").Each(func(indexth int, tablecell *goquery.Selection) {
+					lastUpdated = tablecell.Text()
+				})
+			}
+
+			if heading == businessNameHeader {
+				rowhtml.Find("td").Each(func(indexth int, tablecell *goquery.Selection) {
+					businessName = tablecell.Text()
+				})
+			}
+
+			if heading == businessTypeHeader {
+				rowhtml.Find("td").Each(func(indexth int, tablecell *goquery.Selection) {
+					businessType = tablecell.Text()
+				})
+			}
+
+			if heading == contactOrganizationHeader {
+				rowhtml.Find("td").Each(func(indexth int, tablecell *goquery.Selection) {
+					contactOrganization = tablecell.Text()
+				})
+			}
+
+			if heading == contactPositionHeader {
+				rowhtml.Find("td").Each(func(indexth int, tablecell *goquery.Selection) {
+					contactPosition = tablecell.Text()
+				})
+			}
+
+			if heading == contactNameHeader {
+				rowhtml.Find("td").Each(func(indexth int, tablecell *goquery.Selection) {
+					contactName = tablecell.Text()
+				})
+			}
+
+			if heading == contactAddressHeader {
+				rowhtml.Find("td").Each(func(indexth int, tablecell *goquery.Selection) {
+					contactAddress = tablecell.Text()
+				})
+			}
+
+			if heading == contactEmailHeader {
+				rowhtml.Find("td").Each(func(indexth int, tablecell *goquery.Selection) {
+					contactEmail = tablecell.Text()
+				})
+			}
+
+			if heading == contactPhoneHeader {
+				rowhtml.Find("td").Each(func(indexth int, tablecell *goquery.Selection) {
+					contactPhone = tablecell.Text()
+				})
+			}
+
+			if heading == contactFaxHeader {
+				rowhtml.Find("td").Each(func(indexth int, tablecell *goquery.Selection) {
+					contactFax = tablecell.Text()
 				})
 			}
 		})
 	})
 
-	return strings.TrimSpace(email), nil
+	cQueryResults := ContactResults{
+		FRN:                 strings.TrimSpace(frn),
+		RegistrationDate:    strings.TrimSpace(registrationDate),
+		LastUpdated:         strings.TrimSpace(lastUpdated),
+		BusinessName:        strings.TrimSpace(businessName),
+		BusinessType:        strings.TrimSpace(businessType),
+		ContactOrganization: strings.TrimSpace(contactOrganization),
+		ContactPosition:     strings.TrimSpace(contactPosition),
+		ContactName:         strings.TrimSpace(contactName),
+		ContactAddress:      strings.TrimSpace(contactAddress),
+		ContactEmail:        strings.TrimSpace(contactEmail),
+		ContactPhone:        strings.TrimSpace(contactPhone),
+		ContactFax:          strings.TrimSpace(contactFax),
+	}
+
+	return &cQueryResults, nil
 }
 
-// ParseFRNFromXML parses frn from XML returned by FCC FRN API
-func ParseFRNFromXML(b []byte) (string, error) {
+// ParseFilerDataFromXML parses data from XML returned by https://apps.fcc.gov/cgb/form499/499results.cfm?FilerID=<fillerID>&XML=TRUE
+func ParseFilerDataFromXML(b []byte) (*Filer499Results, error) {
 	reader := bytes.NewReader(b)
 	decoder := xml.NewDecoder(reader)
 	decoder.CharsetReader = charset.NewReaderLabel
-	var fQueryResults filer499QueryResults
+	var fQueryResults Filer499Results
 	err := decoder.Decode(&fQueryResults)
 	if err != nil {
-		return "", errors.Annotatef(err, "failed to unmarshal xml FRN from XML")
+		return nil, errors.Annotatef(err, "failed to unmarshal xml FRN from XML")
 	}
 
 	if fQueryResults.Filers == nil || len(fQueryResults.Filers) == 0 {
-		return "", errors.New("failed to parse FRN from XML")
+		return nil, errors.New("failed to parse FRN from XML")
 	}
-	filersResult := fQueryResults.Filers[0]
-	filerIDInfo := filersResult.FilerIDInfo
-	return filerIDInfo.FRN, nil
+	return &fQueryResults, nil
 }

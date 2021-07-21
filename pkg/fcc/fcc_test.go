@@ -158,10 +158,22 @@ United States
 </html>
 `
 
-func TestParseEmailFromHTML(t *testing.T) {
-	email, err := fcc.ParseEmailFromHTML([]byte(htmlTest))
+func TestParseContactDataFromHTML(t *testing.T) {
+	cQueryResults, err := fcc.ParseContactDataFromHTML([]byte(htmlTest))
 	require.NoError(t, err)
-	assert.Equal(t, "tara.lyle@veracitynetworks.com", email)
+	require.NotNil(t, cQueryResults)
+	require.Equal(t, "0000010827", cQueryResults.FRN)
+	require.Equal(t, "09/15/2000 08:30:58 AM", cQueryResults.RegistrationDate)
+	require.Equal(t, "04/05/2021 12:12:43 PM", cQueryResults.LastUpdated)
+	require.Equal(t, "Veracity Networks, LLC", cQueryResults.BusinessName)
+	require.Equal(t, "Private Sector\n\t\t\t\t\t\t\t\t\t\t\n\t\n\t,\n\t\t\t\t\t\t\t\t\t\t\n\t          \t\n\t\tLimited Liability Corporation", cQueryResults.BusinessType)
+	require.Equal(t, "357 S. 670 W.\n       \n\nSte 300\n       \n\nLindon, UT 84042\n       \n       \n\nUnited States", cQueryResults.ContactAddress)
+	require.Equal(t, "tara.lyle@veracitynetworks.com", cQueryResults.ContactEmail)
+	require.Equal(t, "", cQueryResults.ContactFax)
+	assert.Equal(t, "", cQueryResults.ContactPhone)
+	assert.Equal(t, "FCC Contact", cQueryResults.ContactPosition)
+	assert.Equal(t, "", cQueryResults.ContactOrganization)
+	assert.Equal(t, "Tara Lyle", cQueryResults.ContactName)
 }
 
 var xmlForTest string = `
@@ -228,8 +240,78 @@ var xmlForTest string = `
 </Filer499QueryResults>
 `
 
-func TestParseFRNFromXML(t *testing.T) {
-	frn, err := fcc.ParseFRNFromXML([]byte(xmlForTest))
+func TestParseFilerDataFromXML(t *testing.T) {
+	fQueryResults, err := fcc.ParseFilerDataFromXML([]byte(xmlForTest))
 	require.NoError(t, err)
-	assert.Equal(t, "0024926677", frn)
+	require.Equal(t, 1, len(fQueryResults.Filers))
+	filer := fQueryResults.Filers[0]
+	require.NotNil(t, filer)
+	require.Equal(t, "831188", filer.Form499ID)
+
+	filerIDInfo := filer.FilerIDInfo
+	require.NotNil(t, filerIDInfo)
+	require.Equal(t, "2021-04-01 00:00:00 +0000 UTC", filerIDInfo.RegistrationCurrentAsOf.String())
+	require.Equal(t, "2015-01-12 00:00:00 +0000 UTC", filerIDInfo.StartDate.String())
+	require.Equal(t, "Yes", filerIDInfo.USFContributor)
+	require.Equal(t, "LOW LATENCY COMMUNICATIONS LLC", filerIDInfo.LegalName)
+	require.Equal(t, "Interconnected VoIP", filerIDInfo.PrincipalCommunicationsType)
+	require.Equal(t, "IPIFONY SYSTEMS INC.", filerIDInfo.HoldingCompany)
+	require.Equal(t, "0024926677", filerIDInfo.FRN)
+
+	hqAddress := filerIDInfo.HQAddress
+	require.NotNil(t, hqAddress)
+	require.Equal(t, "241 APPLEGATE TRACE", hqAddress.AddressLine)
+	require.Equal(t, "PELHAM", hqAddress.City)
+	require.Equal(t, "AL", hqAddress.State)
+	require.Equal(t, "35124", hqAddress.ZipCode)
+
+	customerInquiriesAdress := filerIDInfo.CustomerInquiriesAdress
+	require.NotNil(t, customerInquiriesAdress)
+	require.Equal(t, "241 APPLEGATE TRACE", customerInquiriesAdress.AddressLine)
+	require.Equal(t, "PELHAM", customerInquiriesAdress.City)
+	require.Equal(t, "AL", customerInquiriesAdress.State)
+	require.Equal(t, "35124", customerInquiriesAdress.ZipCode)
+
+	require.Equal(t, "2057453970", filerIDInfo.CustomerInquiriesTelephone)
+	otherTradeNames := filerIDInfo.OtherTradeNames
+	require.NotNil(t, otherTradeNames)
+	require.Equal(t, 3, len(otherTradeNames))
+	require.Equal(t, "Low Latency Communications", otherTradeNames[0])
+	require.Equal(t, "String by Low Latency", otherTradeNames[1])
+	require.Equal(t, "Lilac by Low Latency", otherTradeNames[2])
+
+	agentForServiceOfProcess := filer.AgentForServiceOfProcess
+	require.NotNil(t, agentForServiceOfProcess)
+	require.Equal(t, "Jonathan Allen Rini O'Neil, PC", agentForServiceOfProcess.DCAgent)
+	require.Equal(t, "2029553933", agentForServiceOfProcess.DCAgentTelephone)
+	require.Equal(t, "2022962014", agentForServiceOfProcess.DCAgentFax)
+	require.Equal(t, "jallen@rinioneil.com", agentForServiceOfProcess.DCAgentEmail)
+	dcAgentAddress := agentForServiceOfProcess.DCAgentAddress
+	require.NotNil(t, dcAgentAddress)
+	require.Equal(t, 2, len(dcAgentAddress.AddressLines))
+	require.Equal(t, "1200 New Hampshire Ave, NW", dcAgentAddress.AddressLines[0])
+	require.Equal(t, "Suite 600", dcAgentAddress.AddressLines[1])
+	require.Equal(t, "Washington", dcAgentAddress.City)
+	require.Equal(t, "DC", dcAgentAddress.State)
+	require.Equal(t, "20036", dcAgentAddress.ZipCode)
+
+	fccRegistrationInformation := filer.FCCRegistrationInformation
+	require.NotNil(t, fccRegistrationInformation)
+	require.Equal(t, "Daryl Russo", fccRegistrationInformation.ChiefExecutiveOfficer)
+	require.Equal(t, "Matthew Hardeman", fccRegistrationInformation.ChairmanOrSeniorOfficer)
+	require.Equal(t, "Larry Smith", fccRegistrationInformation.PresidentOrSeniorOfficer)
+
+	jurisdictionState := filer.JurisdictionStates
+	require.NotNil(t, fccRegistrationInformation)
+	require.Equal(t, 10, len(jurisdictionState))
+	require.Equal(t, "alabama", jurisdictionState[0])
+	require.Equal(t, "florida", jurisdictionState[1])
+	require.Equal(t, "georgia", jurisdictionState[2])
+	require.Equal(t, "illinois", jurisdictionState[3])
+	require.Equal(t, "louisiana", jurisdictionState[4])
+	require.Equal(t, "north_carolina", jurisdictionState[5])
+	require.Equal(t, "pennsylvania", jurisdictionState[6])
+	require.Equal(t, "tennessee", jurisdictionState[7])
+	require.Equal(t, "texas", jurisdictionState[8])
+	require.Equal(t, "virginia", jurisdictionState[9])
 }
