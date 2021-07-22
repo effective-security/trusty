@@ -116,6 +116,23 @@ func Test_FccContactHandler(t *testing.T) {
 	})
 
 	t.Run("url", func(t *testing.T) {
+		// delete cached
+		service.Db().DeleteFccContactResponse(context.Background(), "0024926677")
+
+		w := httptest.NewRecorder()
+		r, err := http.NewRequest(http.MethodGet, v1.PathForMartiniFccContact+"?frn=0024926677", nil)
+		require.NoError(t, err)
+
+		h(w, r, nil)
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		var res v1.FccContactResponse
+		require.NoError(t, marshal.Decode(w.Body, &res))
+		require.NotNil(t, res)
+		assert.Equal(t, "tara.lyle@veracitynetworks.com", res.ContactEmail)
+	})
+
+	t.Run("cached", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r, err := http.NewRequest(http.MethodGet, v1.PathForMartiniFccContact+"?frn=0024926677", nil)
 		require.NoError(t, err)

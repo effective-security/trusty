@@ -65,6 +65,14 @@ func (s *Service) FccContactHandler() rest.Handle {
 			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("missing frn parameter"))
 			return
 		}
+
+		cached, err := s.db.GetFccContactResponse(r.Context(), frn)
+		if err == nil {
+			w.Header().Set(header.ContentType, header.ApplicationJSON)
+			w.Write([]byte(cached.Response))
+			return
+		}
+
 		fccClient := fcc.NewAPIClient(s.FccBaseURL)
 		cQueryResults, err := fccClient.GetContactResults(frn)
 		if err != nil {
@@ -73,6 +81,12 @@ func (s *Service) FccContactHandler() rest.Handle {
 		}
 
 		res := s.ContactQueryResultsToDTO(cQueryResults)
+
+		js, _ := marshal.EncodeBytes(marshal.DontPrettyPrint, res)
+		_, err = s.db.UpdateFccContactResponse(r.Context(), frn, string(js))
+		if err != nil {
+			logger.Errorf("frn=%q, err=[%s]", frn, errors.Details(err))
+		}
 
 		logger.Tracef("frn=%q, res=%q", frn, res)
 
