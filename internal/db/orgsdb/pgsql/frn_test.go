@@ -1,4 +1,16 @@
-{
+package pgsql_test
+
+import (
+	"strings"
+	"testing"
+
+	v1 "github.com/ekspand/trusty/api/v1"
+	"github.com/go-phorce/dolly/xhttp/marshal"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+const frn831188 = `{
     "filers": [
             {
                 "agent_for_service_of_process": {
@@ -63,4 +75,35 @@
                 ]
             }
     ]
+}`
+
+func TestUpdateFRNResponse(t *testing.T) {
+	res, err := provider.UpdateFRNResponse(ctx, 831188, frn831188)
+	require.NoError(t, err)
+	require.NotNil(t, res)
+	assert.Equal(t, frn831188, res.Response)
+
+	var frn v1.FccFrnResponse
+	require.NoError(t, marshal.Decode(strings.NewReader(res.Response), &frn))
+	require.NotNil(t, frn)
+
+	res, err = provider.UpdateFRNResponse(ctx, 831188, frn831188)
+	require.NoError(t, err)
+	require.NotNil(t, res)
+	assert.Equal(t, frn831188, res.Response)
+
+	res2, err := provider.GetFRNResponse(ctx, 831188)
+	require.NoError(t, err)
+	require.NotNil(t, res2)
+	assert.Equal(t, frn831188, res2.Response)
+
+	res3, err := provider.DeleteFRNResponse(ctx, 831188)
+	require.NoError(t, err)
+	require.NotNil(t, res3)
+	assert.Equal(t, frn831188, res3.Response)
+
+	res2, err = provider.GetFRNResponse(ctx, 831188)
+	require.Error(t, err)
+	assert.Nil(t, res2)
+	assert.Equal(t, "sql: no rows in result set", err.Error())
 }

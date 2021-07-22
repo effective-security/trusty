@@ -64,6 +64,13 @@ type OrgsDb interface {
 	RemoveOrgMembers(ctx context.Context, orgID uint64, all bool) ([]*model.OrgMembership, error)
 	// RemoveOrgMember remove users from the org
 	RemoveOrgMember(ctx context.Context, orgID, memberID uint64) (*model.OrgMembership, error)
+
+	// UpdateFRNResponse updates cached FRN response
+	UpdateFRNResponse(ctx context.Context, filerID uint64, response string) (*model.FccFRNResponse, error)
+	// GetFRNResponse returns cached FRN response
+	GetFRNResponse(ctx context.Context, filerID uint64) (*model.FccFRNResponse, error)
+	// DeleteFRNResponse deletes cached FRN response
+	DeleteFRNResponse(ctx context.Context, filerID uint64) (*model.FccFRNResponse, error)
 }
 
 // Provider provides complete DB access

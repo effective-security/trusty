@@ -1,6 +1,7 @@
 package martini_test
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -45,10 +46,27 @@ func Test_FccFrnHandler(t *testing.T) {
 
 		h(w, r, nil)
 		assert.Equal(t, http.StatusBadRequest, w.Code)
-		assert.Equal(t, "{\"code\":\"invalid_request\",\"message\":\"unable to get FRN response\"}", w.Body.String())
+		assert.Equal(t, "{\"code\":\"invalid_request\",\"message\":\"invalid filer_id parameter\"}", w.Body.String())
 	})
 
 	t.Run("url", func(t *testing.T) {
+		// delete cached
+		service.Db().DeleteFRNResponse(context.Background(), 831188)
+
+		w := httptest.NewRecorder()
+		r, err := http.NewRequest(http.MethodGet, v1.PathForMartiniFccFrn+"?filer_id=831188", nil)
+		require.NoError(t, err)
+
+		h(w, r, nil)
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		var res v1.FccFrnResponse
+		require.NoError(t, marshal.Decode(w.Body, &res))
+		require.NotNil(t, res)
+		assert.Equal(t, "0024926677", res.Filers[0].FilerIDInfo.FRN)
+	})
+
+	t.Run("cached", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r, err := http.NewRequest(http.MethodGet, v1.PathForMartiniFccFrn+"?filer_id=831188", nil)
 		require.NoError(t, err)

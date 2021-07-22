@@ -121,7 +121,7 @@ func TestFccFRN(t *testing.T) {
                                 "chief_executive_officer": "Daryl Russo",
                                 "president_or_senior_officer": "Larry Smith"
                         },
-                        "filer_id_Info": {
+                        "filer_id_info": {
                                 "customer_inquiries_telephone": "2057453970",
                                 "customer_inquiries_address": {
                                         "address_line": "241 APPLEGATE TRACE",
