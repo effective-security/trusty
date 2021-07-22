@@ -71,6 +71,13 @@ type OrgsDb interface {
 	GetFRNResponse(ctx context.Context, filerID uint64) (*model.FccFRNResponse, error)
 	// DeleteFRNResponse deletes cached FRN response
 	DeleteFRNResponse(ctx context.Context, filerID uint64) (*model.FccFRNResponse, error)
+
+	// UpdateFccContactResponse updates cached Contact response
+	UpdateFccContactResponse(ctx context.Context, frn string, response string) (*model.FccContactResponse, error)
+	// GetFccContactResponse returns cached Contact response
+	GetFccContactResponse(ctx context.Context, frn string) (*model.FccContactResponse, error)
+	// DeleteFccContactResponse deletes cached Contact response
+	DeleteFccContactResponse(ctx context.Context, frn string) (*model.FccContactResponse, error)
 }
 
 // Provider provides complete DB access
