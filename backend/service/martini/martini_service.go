@@ -63,3 +63,9 @@ func (s *Service) RegisterRoute(r rest.Router) {
 	r.GET(v1.PathForMartiniFccFrn, s.FccFrnHandler())
 	r.GET(v1.PathForMartiniFccContact, s.FccContactHandler())
 }
+
+// Db returns DB
+// Used in Unittests
+func (s *Service) Db() orgsdb.OrgsDb {
+	return s.db
+}

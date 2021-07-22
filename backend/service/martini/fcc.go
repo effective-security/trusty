@@ -5,8 +5,10 @@ import (
 
 	"github.com/ekspand/trusty/api"
 	v1 "github.com/ekspand/trusty/api/v1"
+	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/pkg/fcc"
 	"github.com/go-phorce/dolly/rest"
+	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/httperror"
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/juju/errors"
@@ -20,18 +22,37 @@ func (s *Service) FccFrnHandler() rest.Handle {
 			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("missing filer_id parameter"))
 			return
 		}
+
+		id, err := db.ID(filerID)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("invalid filer_id parameter").WithCause(err))
+			return
+		}
+
+		cached, err := s.db.GetFRNResponse(r.Context(), id)
+		if err == nil {
+			w.Header().Set(header.ContentType, header.ApplicationJSON)
+			w.Write([]byte(cached.Response))
+			return
+		}
+
 		fccClient := fcc.NewAPIClient(s.FccBaseURL)
 		fQueryResults, err := fccClient.GetFiler499Results(filerID)
 		if err != nil {
-			logger.Errorf("filerID=%q, err=[%s]", filerID, errors.Details(err))
-			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("unable to get FRN response"))
+			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("unable to get FRN response").WithCause(err))
 			return
 		}
 		res := &v1.FccFrnResponse{
 			Filers: s.Filer499ResultsToDTO(fQueryResults),
 		}
 
-		logger.Tracef("filerID=%q, res=%q", filerID, res)
+		js, _ := marshal.EncodeBytes(marshal.DontPrettyPrint, res)
+		_, err = s.db.UpdateFRNResponse(r.Context(), id, string(js))
+		if err != nil {
+			logger.Errorf("filerID=%q, err=[%s]", filerID, errors.Details(err))
+		}
+
+		//logger.Tracef("filerID=%q, res=%q", filerID, res)
 		marshal.WriteJSON(w, r, res)
 	}
 }
@@ -47,8 +68,7 @@ func (s *Service) FccContactHandler() rest.Handle {
 		fccClient := fcc.NewAPIClient(s.FccBaseURL)
 		cQueryResults, err := fccClient.GetContactResults(frn)
 		if err != nil {
-			logger.Errorf("frn=%q, err=[%s]", frn, errors.Details(err))
-			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("unable to get email response"))
+			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("unable to get email response").WithCause(err))
 			return
 		}
 
