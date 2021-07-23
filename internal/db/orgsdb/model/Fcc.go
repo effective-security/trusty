@@ -13,7 +13,7 @@ type FccFRNResponse struct {
 
 // FccContactResponse represents a cached Contact response.
 type FccContactResponse struct {
-	FRN       string    `db:"filer_id"`
+	FRN       string    `db:"frn"`
 	UpdatedAt time.Time `db:"updated_at"`
 	Response  string    `db:"json"`
 }

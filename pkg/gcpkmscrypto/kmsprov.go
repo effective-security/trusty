@@ -43,7 +43,7 @@ var KmsClientFactory = func() (KmsClient, error) {
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create kms client: %v", err)
+		return nil, errors.Annotatef(err, "failed to create kms client")
 	}
 
 	return client, nil

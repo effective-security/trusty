@@ -2,7 +2,6 @@ package dnsclient
 
 import (
 	"errors"
-	"fmt"
 	"net"
 	"os"
 	"strings"
@@ -23,7 +22,7 @@ type Mock struct {
 // LookupTXT is a mock
 func (mock *Mock) LookupTXT(_ context.Context, hostname string) ([]string, []string, error) {
 	if hostname == "_acme-challenge.servfail.com" {
-		return nil, nil, fmt.Errorf("SERVFAIL")
+		return nil, nil, errors.New("SERVFAIL")
 	}
 	if hostname == "_acme-challenge.good-dns01.com" {
 		return []string{mock.KeyAuthorizationFile}, []string{"respect my authority!"}, nil

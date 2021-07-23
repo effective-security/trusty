@@ -87,7 +87,7 @@ func (s *Signer) Sign(rand io.Reader, digest []byte, opts crypto.SignerOpts) (si
 		return nil, errors.Errorf("request corrupted in-transit")
 	}
 	// if result.Name != req.Name {
-	//      return fmt.Errorf("AsymmetricSign: request corrupted in-transit")
+	//      return errors.New("AsymmetricSign: request corrupted in-transit")
 	// }
 	if int64(Crc32c(result.Signature)) != result.SignatureCrc32C.Value {
 		return nil, errors.Errorf("response corrupted in-transit")
