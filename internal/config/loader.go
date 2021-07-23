@@ -171,6 +171,10 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 	for i := range c.OAuthClients {
 		filesToResove = append(filesToResove, &c.OAuthClients[i])
 	}
+	for i := range c.EmailProviders {
+		filesToResove = append(filesToResove, &c.EmailProviders[i])
+	}
+
 	if c.RegistrationAuthority != nil {
 		for i := range c.RegistrationAuthority.PrivateRoots {
 			filesToResove = append(filesToResove, &c.RegistrationAuthority.PrivateRoots[i])

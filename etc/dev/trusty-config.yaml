@@ -85,6 +85,10 @@ oauth_clients:
   - oauth-github.yaml
   - oauth-google.yaml
 
+# the configuration files for email providers 
+email_providers:
+  - email-provider-mailgun.yaml
+
 authority: ca-config.dev.yaml
 
 ra:

@@ -4,6 +4,7 @@ import (
 	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/db/orgsdb"
+	"github.com/ekspand/trusty/pkg/email"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xlog"
@@ -18,9 +19,10 @@ var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", 
 type Service struct {
 	FccBaseURL string
 
-	server *gserver.Server
-	cfg    *config.Configuration
-	db     orgsdb.OrgsDb
+	server    *gserver.Server
+	cfg       *config.Configuration
+	db        orgsdb.OrgsDb
+	emailProv *email.Provider
 }
 
 // Factory returns a factory of the service
@@ -29,11 +31,12 @@ func Factory(server *gserver.Server) interface{} {
 		logger.Panic("status.Factory: invalid parameter")
 	}
 
-	return func(cfg *config.Configuration, db orgsdb.OrgsDb) error {
+	return func(cfg *config.Configuration, db orgsdb.OrgsDb, emailProv *email.Provider) error {
 		svc := &Service{
-			server: server,
-			cfg:    cfg,
-			db:     db,
+			server:    server,
+			cfg:       cfg,
+			db:        db,
+			emailProv: emailProv,
 		}
 
 		server.AddService(svc)

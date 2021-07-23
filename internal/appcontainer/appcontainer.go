@@ -11,6 +11,7 @@ import (
 	"github.com/ekspand/trusty/internal/db/cadb"
 	"github.com/ekspand/trusty/internal/db/orgsdb"
 	"github.com/ekspand/trusty/pkg/awskmscrypto"
+	"github.com/ekspand/trusty/pkg/email"
 	"github.com/ekspand/trusty/pkg/fcc"
 	"github.com/ekspand/trusty/pkg/gcpkmscrypto"
 	"github.com/ekspand/trusty/pkg/jwt"
@@ -44,6 +45,9 @@ type ProvideJwtFn func(cfg *config.Configuration) (jwt.Parser, jwt.Provider, err
 
 // ProvideOAuthClientsFn defines OAuth clients provider
 type ProvideOAuthClientsFn func(cfg *config.Configuration) (*oauth2client.Provider, error)
+
+// ProvideEmailClientsFn defines email clients provider
+type ProvideEmailClientsFn func(cfg *config.Configuration) (*email.Provider, error)
 
 // ProvideCryptoFn defines Crypto provider
 type ProvideCryptoFn func(cfg *config.Configuration) (*cryptoprov.Crypto, error)
@@ -81,6 +85,7 @@ type ContainerFactory struct {
 	orgsdbProvider        ProvideOrgsDbFn
 	cadbProvider          ProvideCaDbFn
 	oauthProvider         ProvideOAuthClientsFn
+	emailProvider         ProvideEmailClientsFn
 	jwtProvider           ProvideJwtFn
 	clientFactoryProvider ProvideClientFactoryFn
 	fccAPIClientProvider  ProvideFCCAPIClientFn
@@ -106,6 +111,7 @@ func NewContainerFactory(closer CloseRegistrator) *ContainerFactory {
 		WithOrgsDbProvider(provideOrgsDB).
 		WithCaDbProvider(provideCaDB).
 		WithOAuthClientsProvider(provideOAuth).
+		WithEmailClientsProvider(provideEmail).
 		WithJwtProvider(provideJwt).
 		WithClientFactoryProvider(provideClientFactory)
 }
@@ -137,6 +143,12 @@ func (f *ContainerFactory) WithJwtProvider(p ProvideJwtFn) *ContainerFactory {
 // WithOAuthClientsProvider allows to specify custom OAuth clients provider
 func (f *ContainerFactory) WithOAuthClientsProvider(p ProvideOAuthClientsFn) *ContainerFactory {
 	f.oauthProvider = p
+	return f
+}
+
+// WithEmailClientsProvider allows to specify custom emailclients provider
+func (f *ContainerFactory) WithEmailClientsProvider(p ProvideEmailClientsFn) *ContainerFactory {
+	f.emailProvider = p
 	return f
 }
 
@@ -239,6 +251,11 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 		return nil, errors.Trace(err)
 	}
 
+	err = container.Provide(f.emailProvider)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
 	return container, nil
 }
 
@@ -286,6 +303,14 @@ func provideJwt(cfg *config.Configuration) (jwt.Parser, jwt.Provider, error) {
 
 func provideOAuth(cfg *config.Configuration) (*oauth2client.Provider, error) {
 	p, err := oauth2client.NewProvider(cfg.OAuthClients)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return p, nil
+}
+
+func provideEmail(cfg *config.Configuration) (*email.Provider, error) {
+	p, err := email.NewProvider(cfg.EmailProviders)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

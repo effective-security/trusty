@@ -74,6 +74,9 @@ type Configuration struct {
 	// OAuthClients specifies the configuration files for OAuth clients
 	OAuthClients []string `json:"oauth_clients" yaml:"oauth_clients"`
 
+	// EmailProviders specifies the configuration files for email providers
+	EmailProviders []string `json:"email_providers" yaml:"email_providers"`
+
 	// Acme specifies the configuration files for ACME provider
 	Acme string `json:"acme" yaml:"acme"`
 
