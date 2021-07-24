@@ -86,6 +86,10 @@ func TestMain(m *testing.M) {
 		panic(errors.Trace(err))
 	}
 
+	// add this to be able launch service when debugging using vscode
+	os.Setenv("TRUSTY_MAILGUN_PRIVATE_KEY", "1234")
+	os.Setenv("TRUSTY_JWT_SEED", "1234")
+
 	trustyServer, err = gserver.Start("martini_test", httpCfg, container, serviceFactories)
 	if err != nil || trustyServer == nil {
 		panic(errors.Trace(err))

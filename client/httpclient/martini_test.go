@@ -148,7 +148,7 @@ func TestFccFRN(t *testing.T) {
                                 "start_date": "2015-01-12 00:00:00 +0000 UTC",
                                 "usf_contributor": "Yes"
                         },
-                        "form_499_id": "831188",
+                        "filer_id": "831188",
                         "jurisdiction_states": [
                                 "alabama",
                                 "florida",
@@ -180,9 +180,8 @@ func TestFccFRN(t *testing.T) {
 	require.NotNil(t, r)
 	assert.Len(t, r.Filers, 1)
 	filer := r.Filers[0]
-	assert.Equal(t, "831188", filer.Form499ID)
+	assert.Equal(t, "831188", filer.FilerID)
 	assert.Equal(t, "0024926677", filer.FilerIDInfo.FRN)
-	assert.Len(t, filer.JurisdictionStates, 10)
 }
 
 func TestFccContact(t *testing.T) {

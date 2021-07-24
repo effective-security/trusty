@@ -250,12 +250,9 @@ func TestParseFilerDataFromXML(t *testing.T) {
 
 	filerIDInfo := filer.FilerIDInfo
 	require.NotNil(t, filerIDInfo)
-	require.Equal(t, "2021-04-01 00:00:00 +0000 UTC", filerIDInfo.RegistrationCurrentAsOf.String())
 	require.Equal(t, "2015-01-12 00:00:00 +0000 UTC", filerIDInfo.StartDate.String())
 	require.Equal(t, "Yes", filerIDInfo.USFContributor)
 	require.Equal(t, "LOW LATENCY COMMUNICATIONS LLC", filerIDInfo.LegalName)
-	require.Equal(t, "Interconnected VoIP", filerIDInfo.PrincipalCommunicationsType)
-	require.Equal(t, "IPIFONY SYSTEMS INC.", filerIDInfo.HoldingCompany)
 	require.Equal(t, "0024926677", filerIDInfo.FRN)
 
 	hqAddress := filerIDInfo.HQAddress
@@ -265,20 +262,7 @@ func TestParseFilerDataFromXML(t *testing.T) {
 	require.Equal(t, "AL", hqAddress.State)
 	require.Equal(t, "35124", hqAddress.ZipCode)
 
-	customerInquiriesAdress := filerIDInfo.CustomerInquiriesAdress
-	require.NotNil(t, customerInquiriesAdress)
-	require.Equal(t, "241 APPLEGATE TRACE", customerInquiriesAdress.AddressLine)
-	require.Equal(t, "PELHAM", customerInquiriesAdress.City)
-	require.Equal(t, "AL", customerInquiriesAdress.State)
-	require.Equal(t, "35124", customerInquiriesAdress.ZipCode)
-
 	require.Equal(t, "2057453970", filerIDInfo.CustomerInquiriesTelephone)
-	otherTradeNames := filerIDInfo.OtherTradeNames
-	require.NotNil(t, otherTradeNames)
-	require.Equal(t, 3, len(otherTradeNames))
-	require.Equal(t, "Low Latency Communications", otherTradeNames[0])
-	require.Equal(t, "String by Low Latency", otherTradeNames[1])
-	require.Equal(t, "Lilac by Low Latency", otherTradeNames[2])
 
 	agentForServiceOfProcess := filer.AgentForServiceOfProcess
 	require.NotNil(t, agentForServiceOfProcess)

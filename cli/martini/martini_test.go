@@ -50,7 +50,7 @@ func (s *testSuite) TestFccFRN() {
 	}
 	err := s.Run(martini.FccFRN, &flags)
 	s.NoError(err)
-	s.HasText(`"dc_agent_email": "jallen@rinioneil.com"`)
+	s.HasText(`"legal_name": "LOW LATENCY COMMUNICATIONS LLC"`)
 }
 
 func (s *testSuite) TestFccContact() {
