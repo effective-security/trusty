@@ -87,7 +87,7 @@ oauth_clients:
 
 # the configuration files for email providers 
 email_providers:
-  - email-provider-mailgun.yaml
+  - ${TRUSTY_CONFIG_DIR}/email-provider-mailgun.yaml
 
 authority: ca-config.dev.yaml
 
