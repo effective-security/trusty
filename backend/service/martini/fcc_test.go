@@ -45,8 +45,9 @@ func Test_FccFrnHandler(t *testing.T) {
 		require.NoError(t, err)
 
 		h(w, r, nil)
-		assert.Equal(t, http.StatusBadRequest, w.Code)
-		assert.Equal(t, "{\"code\":\"invalid_request\",\"message\":\"invalid filer_id parameter\"}", w.Body.String())
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		assert.Equal(t, "{\"code\":\"unexpected\",\"message\":\"request failed: invalid filer ID: strconv.ParseUint: parsing \\\"wrong\\\": invalid syntax\"}",
+			w.Body.String())
 	})
 
 	t.Run("url", func(t *testing.T) {
@@ -111,8 +112,8 @@ func Test_FccContactHandler(t *testing.T) {
 		require.NoError(t, err)
 
 		h(w, r, nil)
-		assert.Equal(t, http.StatusBadRequest, w.Code)
-		assert.Equal(t, "{\"code\":\"invalid_request\",\"message\":\"unable to get email response\"}", w.Body.String())
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		assert.Contains(t, w.Body.String(), "request failed: unable to query FCC: failed to execute request")
 	})
 
 	t.Run("url", func(t *testing.T) {

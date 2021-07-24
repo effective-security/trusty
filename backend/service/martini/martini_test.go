@@ -1,8 +1,12 @@
 package martini_test
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
@@ -12,9 +16,13 @@ import (
 	"github.com/ekspand/trusty/client/embed"
 	"github.com/ekspand/trusty/internal/appcontainer"
 	"github.com/ekspand/trusty/internal/config"
+	"github.com/ekspand/trusty/internal/db"
+	"github.com/ekspand/trusty/internal/db/orgsdb/model"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/xhttp/header"
+	"github.com/go-phorce/dolly/xhttp/identity"
+	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/go-phorce/dolly/xhttp/retriable"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
@@ -144,4 +152,96 @@ func TestGetOrgsHandler(t *testing.T) {
 
 	assert.Contains(t, hdr.Get(header.ContentType), header.ApplicationJSON)
 	assert.Empty(t, res.Orgs)
+}
+
+func TestRegisterOrgHandler(t *testing.T) {
+	ctx := context.Background()
+	svc := trustyServer.Service(martini.ServiceName).(*martini.Service)
+	h := svc.RegisterOrgHandler()
+
+	dbProv := svc.Db()
+	old, err := dbProv.GetOrgByExternalID(ctx, v1.ProviderMartini, "99999999")
+	if err == nil {
+		dbProv.RemoveOrg(ctx, old.ID)
+	}
+
+	user, err := dbProv.LoginUser(ctx, &model.User{
+		Email:      "denis+test@ekspand.com",
+		Name:       "test user",
+		Login:      "denis+test@ekspand.com",
+		ExternalID: "123456",
+		Provider:   v1.ProviderGoogle,
+	})
+	require.NoError(t, err)
+
+	httpReq := &v1.RegisterOrgRequest{
+		FilerID: "123456",
+	}
+
+	js, err := json.Marshal(httpReq)
+	require.NoError(t, err)
+
+	// Register
+	r, err := http.NewRequest(http.MethodPost, v1.PathForMartiniRegisterOrg, bytes.NewReader(js))
+	require.NoError(t, err)
+	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+	w := httptest.NewRecorder()
+	h(w, r, nil)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var res v1.RegisterOrgResponse
+	require.NoError(t, marshal.Decode(w.Body, &res))
+	assert.NotEmpty(t, res.Code)
+
+	orgID, _ := db.ID(res.Org.ID)
+	defer dbProv.RemoveOrg(ctx, orgID)
+
+	//
+	// Already registered
+	//
+
+	r, err = http.NewRequest(http.MethodPost, v1.PathForMartiniRegisterOrg, bytes.NewReader(js))
+	require.NoError(t, err)
+	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+	w = httptest.NewRecorder()
+	h(w, r, nil)
+	require.Equal(t, http.StatusInternalServerError, w.Code)
+
+	//
+	// Validate
+	//
+
+	list, err := dbProv.GetOrgApprovalTokens(ctx, orgID)
+	require.NoError(t, err)
+	require.NotNil(t, list)
+
+	vh := svc.ValidateOrgHandler()
+	for _, token := range list {
+		if token.Used {
+			continue
+		}
+
+		validateReq := &v1.ValidateOrgRequest{
+			Token: token.Token,
+			Code:  token.Code,
+		}
+
+		js, err := json.Marshal(validateReq)
+		require.NoError(t, err)
+
+		// validate
+		r, err := http.NewRequest(http.MethodPost, v1.PathForMartiniValidateOrg, bytes.NewReader(js))
+		require.NoError(t, err)
+		r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+		w := httptest.NewRecorder()
+		vh(w, r, nil)
+		require.Equal(t, http.StatusOK, w.Code)
+
+		var res v1.ValidateOrgResponse
+		require.NoError(t, marshal.Decode(w.Body, &res))
+		assert.Equal(t, "valid", res.Org.Status)
+	}
 }

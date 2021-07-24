@@ -57,3 +57,32 @@ func (c *Client) FccContact(ctx context.Context, frn string) (*v1.FccContactResp
 	}
 	return r, nil
 }
+
+// RegisterOrg starts Org registration flow
+func (c *Client) RegisterOrg(ctx context.Context, filerID string) (*v1.RegisterOrgResponse, error) {
+	req := &v1.RegisterOrgRequest{
+		FilerID: filerID,
+	}
+
+	res := new(v1.RegisterOrgResponse)
+	_, err := c.PostRequest(ctx, v1.PathForMartiniRegisterOrg, req, res)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return res, nil
+}
+
+// ValidateOrg validates Org registration
+func (c *Client) ValidateOrg(ctx context.Context, token, code string) (*v1.ValidateOrgResponse, error) {
+	req := &v1.ValidateOrgRequest{
+		Token: token,
+		Code:  code,
+	}
+
+	res := new(v1.ValidateOrgResponse)
+	_, err := c.PostRequest(ctx, v1.PathForMartiniValidateOrg, req, res)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return res, nil
+}

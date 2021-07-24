@@ -1,6 +1,7 @@
 package martini
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/ekspand/trusty/api"
@@ -8,9 +9,9 @@ import (
 	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/pkg/fcc"
 	"github.com/go-phorce/dolly/rest"
-	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/httperror"
 	"github.com/go-phorce/dolly/xhttp/marshal"
+	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
 )
 
@@ -23,36 +24,13 @@ func (s *Service) FccFrnHandler() rest.Handle {
 			return
 		}
 
-		id, err := db.ID(filerID)
+		res, err := s.getFrnResponse(r.Context(), filerID)
 		if err != nil {
-			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("invalid filer_id parameter").WithCause(err))
+			marshal.WriteJSON(w, r, httperror.WithUnexpected("request failed: "+err.Error()).WithCause(err))
 			return
 		}
 
-		cached, err := s.db.GetFRNResponse(r.Context(), id)
-		if err == nil {
-			w.Header().Set(header.ContentType, header.ApplicationJSON)
-			w.Write([]byte(cached.Response))
-			return
-		}
-
-		fccClient := fcc.NewAPIClient(s.FccBaseURL)
-		fQueryResults, err := fccClient.GetFiler499Results(filerID)
-		if err != nil {
-			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("unable to get FRN response").WithCause(err))
-			return
-		}
-		res := &v1.FccFrnResponse{
-			Filers: s.Filer499ResultsToDTO(fQueryResults),
-		}
-
-		js, _ := marshal.EncodeBytes(marshal.DontPrettyPrint, res)
-		_, err = s.db.UpdateFRNResponse(r.Context(), id, string(js))
-		if err != nil {
-			logger.Errorf("filerID=%q, err=[%s]", filerID, errors.Details(err))
-		}
-
-		//logger.Tracef("filerID=%q, res=%q", filerID, res)
+		logger.KV(xlog.DEBUG, "filerID", filerID, "response", res)
 		marshal.WriteJSON(w, r, res)
 	}
 }
@@ -66,36 +44,90 @@ func (s *Service) FccContactHandler() rest.Handle {
 			return
 		}
 
-		cached, err := s.db.GetFccContactResponse(r.Context(), frn)
-		if err == nil {
-			w.Header().Set(header.ContentType, header.ApplicationJSON)
-			w.Write([]byte(cached.Response))
+		res, err := s.getFccContact(r.Context(), frn)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithUnexpected("request failed: "+err.Error()).WithCause(err))
 			return
 		}
 
-		fccClient := fcc.NewAPIClient(s.FccBaseURL)
-		cQueryResults, err := fccClient.GetContactResults(frn)
-		if err != nil {
-			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("unable to get email response").WithCause(err))
-			return
-		}
-
-		res := s.ContactQueryResultsToDTO(cQueryResults)
-
-		js, _ := marshal.EncodeBytes(marshal.DontPrettyPrint, res)
-		_, err = s.db.UpdateFccContactResponse(r.Context(), frn, string(js))
-		if err != nil {
-			logger.Errorf("frn=%q, err=[%s]", frn, errors.Details(err))
-		}
-
-		logger.Tracef("frn=%q, res=%q", frn, res)
-
+		logger.KV(xlog.DEBUG, "frn", frn, "response", res)
 		marshal.WriteJSON(w, r, res)
 	}
 }
 
-// Filer499ResultsToDTO converts to v1.FccFrnResponse
-func (s *Service) Filer499ResultsToDTO(fq *fcc.Filer499Results) []v1.Filer {
+func (s *Service) getFrnResponse(ctx context.Context, filerID string) (*v1.FccFrnResponse, error) {
+	if filerID == "123456" {
+		res := new(v1.FccFrnResponse)
+		marshal.DecodeBytes([]byte(testFRN), res)
+		return res, nil
+	}
+
+	id, err := db.ID(filerID)
+	if err != nil {
+		return nil, errors.Annotate(err, "invalid filer ID")
+	}
+
+	cached, err := s.db.GetFRNResponse(ctx, id)
+	if err == nil {
+		res := new(v1.FccFrnResponse)
+		err = marshal.DecodeBytes([]byte(cached.Response), res)
+		if err == nil {
+			return res, nil
+		}
+	}
+
+	fccClient := fcc.NewAPIClient(s.FccBaseURL)
+	fQueryResults, err := fccClient.GetFiler499Results(filerID)
+	if err != nil {
+		return nil, errors.Annotate(err, "unable to query FCC")
+	}
+	res := &v1.FccFrnResponse{
+		Filers: filer499ResultsToDTO(fQueryResults),
+	}
+
+	js, _ := marshal.EncodeBytes(marshal.DontPrettyPrint, res)
+	_, err = s.db.UpdateFRNResponse(ctx, id, string(js))
+	if err != nil {
+		logger.Errorf("filerID=%q, err=[%s]", filerID, errors.Details(err))
+	}
+
+	return res, nil
+}
+
+func (s *Service) getFccContact(ctx context.Context, frn string) (*v1.FccContactResponse, error) {
+	if frn == "99999999" {
+		res := new(v1.FccContactResponse)
+		marshal.DecodeBytes([]byte(testContact), res)
+		return res, nil
+	}
+
+	cached, err := s.db.GetFccContactResponse(ctx, frn)
+	if err == nil {
+		res := new(v1.FccContactResponse)
+		err = marshal.DecodeBytes([]byte(cached.Response), res)
+		if err == nil {
+			return res, nil
+		}
+	}
+
+	fccClient := fcc.NewAPIClient(s.FccBaseURL)
+	cQueryResults, err := fccClient.GetContactResults(frn)
+	if err != nil {
+		return nil, errors.Annotate(err, "unable to query FCC")
+	}
+
+	res := contactQueryResultsToDTO(cQueryResults)
+
+	js, _ := marshal.EncodeBytes(marshal.DontPrettyPrint, res)
+	_, err = s.db.UpdateFccContactResponse(ctx, frn, string(js))
+	if err != nil {
+		logger.Errorf("frn=%q, err=[%s]", frn, errors.Details(err))
+	}
+	return res, nil
+}
+
+// filer499ResultsToDTO converts to v1.FccFrnResponse
+func filer499ResultsToDTO(fq *fcc.Filer499Results) []v1.Filer {
 	filers := []v1.Filer{}
 
 	for _, f := range fq.Filers {
@@ -150,8 +182,8 @@ func (s *Service) Filer499ResultsToDTO(fq *fcc.Filer499Results) []v1.Filer {
 	return filers
 }
 
-// ContactQueryResultsToDTO converts to v1.FccContactResults
-func (s *Service) ContactQueryResultsToDTO(c *fcc.ContactResults) *v1.FccContactResponse {
+// contactQueryResultsToDTO converts to v1.FccContactResults
+func contactQueryResultsToDTO(c *fcc.ContactResults) *v1.FccContactResponse {
 	return &v1.FccContactResponse{
 		FRN:                 c.FRN,
 		RegistrationDate:    c.RegistrationDate,
@@ -167,3 +199,85 @@ func (s *Service) ContactQueryResultsToDTO(c *fcc.ContactResults) *v1.FccContact
 		ContactFax:          c.ContactFax,
 	}
 }
+
+const testFRN = `{
+	"filers": [
+			{
+					"agent_for_service_of_process": {
+							"dc_agent": "Jonathan Allen Rini O'Neil, PC",
+							"dc_agent_address": {
+									"address_line": [
+											"1200 New Hampshire Ave, NW",
+											"Suite 600"
+									],
+									"city": "Washington",
+									"state": "DC",
+									"zip_code": "20036"
+							},
+							"dc_agent_email": "jallen@rinioneil.com",
+							"dc_agent_fax": "2022962014",
+							"dc_agent_telephone": "2029553933"
+					},
+					"fcc_registration_information": {
+							"chairman_or_senior_officer": "Matthew Hardeman",
+							"chief_executive_officer": "Daryl Russo",
+							"president_or_senior_officer": "Larry Smith"
+					},
+					"filer_id_info": {
+							"customer_inquiries_address": {
+									"address_line": "241 APPLEGATE TRACE",
+									"city": "PELHAM",
+									"state": "AL",
+									"zip_code": "35124"
+							},
+							"customer_inquiries_telephone": "2057453970",
+							"frn": "99999999",
+							"holding_company": "IPIFONY SYSTEMS INC.",
+							"hq_address": {
+									"address_line": "241 APPLEGATE TRACE",
+									"city": "PELHAM",
+									"state": "AL",
+									"zip_code": "35124"
+							},
+							"legal_name": "LOW LATENCY COMMUNICATIONS LLC",
+							"other_trade_names": [
+									"Low Latency Communications",
+									"String by Low Latency",
+									"Lilac by Low Latency"
+							],
+							"principal_communications_type": "Interconnected VoIP",
+							"registration_current_as_of": "2021-04-01 00:00:00 +0000 UTC",
+							"start_date": "2015-01-12 00:00:00 +0000 UTC",
+							"usf_contributor": "Yes"
+					},
+					"form_499_id": "123456",
+					"jurisdiction_states": [
+							"alabama",
+							"florida",
+							"georgia",
+							"illinois",
+							"louisiana",
+							"north_carolina",
+							"pennsylvania",
+							"tennessee",
+							"texas",
+							"virginia"
+					]
+			}
+	]
+}`
+
+const testContact = `{
+	"business_name": "Low Latency Communications, LLC",
+	"business_type": "Private Sector, Limited Liability Corporation",
+	"contact_address": "241 Applegate Trace, Pelham, AL 35124-2945, United States",
+	"contact_email": "denis+test@ekspand.com",
+	"contact_fax": "",
+	"contact_name": "Mr Matthew D Hardeman",
+	"contact_organization": "Low Latency Communications, LLC",
+	"contact_phone": "",
+	"contact_position": "Secretary",
+	"frn": "99999999",
+	"last_updated": "",
+	"registration_date": "09/29/2015 09:58:00 AM"
+}`

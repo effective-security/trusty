@@ -80,6 +80,21 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		Action(cli.RegisterAction(martini.FccContact, fccContactFlags))
 	fccContactFlags.FRN = cmdFccContact.Flag("frn", "FRN to query").Required().String()
 
+	// org register|validate
+	cmdOrgs := app.Command("org", "Orgs operations").
+		PreAction(cli.PopulateControl)
+
+	orgRegisterFlags := new(martini.RegisterOrgFlags)
+	cmdRegisterOrg := cmdOrgs.Command("register", "registers organization").
+		Action(cli.RegisterAction(martini.RegisterOrg, orgRegisterFlags))
+	orgRegisterFlags.FilerID = cmdRegisterOrg.Flag("filer", "filer ID").Required().String()
+
+	orgValidateFlags := new(martini.ValidateOrgFlags)
+	cmdValidateOrg := cmdOrgs.Command("validate", "validates organization").
+		Action(cli.RegisterAction(martini.ValidateOrg, orgValidateFlags))
+	orgValidateFlags.Token = cmdValidateOrg.Flag("token", "approver's token").Required().String()
+	orgValidateFlags.Code = cmdValidateOrg.Flag("code", "requestor's code").Required().String()
+
 	cli.Parse(args)
 	return cli.ReturnCode()
 }

@@ -200,6 +200,7 @@ servers:
         - /v1
         - /pb.StatusService
         - /v1/auth
+        - /v1/ms/validate_org
       # allow any authenticated request that includes a non empty role
       allow_any_role:
         - /v1/wf

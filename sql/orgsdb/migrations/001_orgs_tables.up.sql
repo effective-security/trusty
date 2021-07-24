@@ -97,6 +97,10 @@ CREATE TABLE IF NOT EXISTS public.orgs
     region character varying(16) COLLATE pg_catalog."default" NULL,
     country character varying(16) COLLATE pg_catalog."default" NULL,
     phone character varying(32) COLLATE pg_catalog."default" NULL,
+    approver_email character varying(160) COLLATE pg_catalog."default" NOT NULL,
+    approver_name character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    status character varying(16) COLLATE pg_catalog."default" NULL,
+    expires_at timestamp with time zone,
     CONSTRAINT orgs_pkey PRIMARY KEY (id),
     CONSTRAINT orgs_provider_extern_id UNIQUE (provider, extern_id),
     CONSTRAINT orgs_provider_login UNIQUE (provider, login)

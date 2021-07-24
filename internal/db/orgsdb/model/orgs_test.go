@@ -155,3 +155,26 @@ func TestRepository(t *testing.T) {
 	assert.Equal(t, "2000", dto.OrgID)
 	assert.Equal(t, "", dto.ExternalID)
 }
+
+func TestApprovalToken(t *testing.T) {
+	tcases := []struct {
+		u   *model.ApprovalToken
+		err string
+	}{
+		{&model.ApprovalToken{}, "invalid ID"},
+		{&model.ApprovalToken{OrgID: 123}, "invalid ID"},
+		{&model.ApprovalToken{OrgID: 123, RequestorID: 234}, "invalid email: \"\""},
+		{&model.ApprovalToken{OrgID: 123, RequestorID: 234, ApproverEmail: "t@t.com"}, "invalid token: \"\""},
+		{&model.ApprovalToken{OrgID: 123, RequestorID: 234, ApproverEmail: "t@t.com", Token: "t123"}, "invalid code: \"\""},
+		{&model.ApprovalToken{OrgID: 123, RequestorID: 234, ApproverEmail: "t@t.com", Token: "t123", Code: "123456"}, ""},
+	}
+	for _, tc := range tcases {
+		err := tc.u.Validate()
+		if tc.err != "" {
+			require.Error(t, err)
+			assert.Equal(t, tc.err, err.Error())
+		} else {
+			assert.NoError(t, err)
+		}
+	}
+}

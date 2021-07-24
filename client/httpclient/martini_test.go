@@ -217,3 +217,101 @@ func TestFccContact(t *testing.T) {
 	assert.Equal(t, "0024926677", r.FRN)
 	assert.Equal(t, "mhardeman@lowlatencycomm.com", r.ContactEmail)
 }
+
+func TestRegisterOrg(t *testing.T) {
+	h := makeTestHandler(t, v1.PathForMartiniRegisterOrg, `{                                   
+        "approver": {                                                                                    
+                "business_name": "Low Latency Communications, LLC",
+                "business_type": "Private Sector, Limited Liability Corporation",
+                "contact_address": "241 Applegate Trace, Pelham, AL 35124-2945, United States",
+                "contact_email": "denis+test@ekspand.com",
+                "contact_fax": "",  
+                "contact_name": "Mr Matthew D Hardeman",
+                "contact_organization": "Low Latency Communications, LLC",
+                "contact_phone": "",
+                "contact_position": "Secretary",    
+                "frn": "99999999",                                                                                                                                                                                
+                "last_updated": "",  
+                "registration_date": "09/29/2015 09:58:00 AM"                                                                                                                                                     
+        },
+        "code": "496017",
+        "org": {                                                                                         
+                "approver_email": "denis+test@ekspand.com",
+                "approver_name": "Mr Matthew D Hardeman",
+                "billing_email": "denis@ekspand.com",
+                "city": "PELHAM",                                                                        
+                "company": "LOW LATENCY COMMUNICATIONS LLC",
+                "created_at": "2021-07-23T23:16:47.699181Z",
+                "email": "denis+test@ekspand.com",                                                       
+                "expires_at": "2022-07-21T11:16:47.699181Z",
+                "extern_id": "99999999",  
+                "id": "82620084182319204",
+                "login": "99999999",                                                                     
+                "name": "LOW LATENCY COMMUNICATIONS LLC",
+                "phone": "2057453970", 
+                "postal_code": "35124",
+                "provider": "martini",
+                "region": "AL",   
+                "status": "pending",                                                                     
+                "street_address": "241 APPLEGATE TRACE",   
+                "updated_at": "2021-07-23T23:16:47.699181Z"
+        }                                           
+}`)
+	server := httptest.NewServer(h)
+	defer server.Close()
+
+	client, err := New(NewConfig(), []string{server.URL})
+	assert.NoError(t, err, "Unexpected error.")
+
+	require.NotPanics(t, func() {
+		// ensure compiles
+		_ = interface{}(client).(API)
+	})
+
+	r, err := client.RegisterOrg(context.Background(), "123456")
+	require.NoError(t, err)
+	require.NotNil(t, r)
+	assert.Equal(t, "496017", r.Code)
+	assert.Equal(t, "pending", r.Org.Status)
+}
+
+func TestValidateOrg(t *testing.T) {
+	h := makeTestHandler(t, v1.PathForMartiniValidateOrg, `{                         
+        "org": {
+                "approver_email": "denis+test@ekspand.com",
+                "approver_name": "Mr Matthew D Hardeman",
+                "billing_email": "denis@ekspand.com",
+                "city": "PELHAM",
+                "company": "LOW LATENCY COMMUNICATIONS LLC",
+                "created_at": "2021-07-23T23:16:47.699181Z",
+                "email": "denis+test@ekspand.com",
+                "expires_at": "2022-07-21T11:16:47.699181Z",
+                "extern_id": "99999999",
+                "id": "82620084182319204",
+                "login": "99999999",
+                "name": "LOW LATENCY COMMUNICATIONS LLC",
+                "phone": "2057453970",
+                "postal_code": "35124",
+                "provider": "martini",
+                "region": "AL",
+                "status": "valid",
+                "street_address": "241 APPLEGATE TRACE",
+                "updated_at": "2021-07-23T23:16:47.699181Z"
+        }
+}`)
+	server := httptest.NewServer(h)
+	defer server.Close()
+
+	client, err := New(NewConfig(), []string{server.URL})
+	assert.NoError(t, err, "Unexpected error.")
+
+	require.NotPanics(t, func() {
+		// ensure compiles
+		_ = interface{}(client).(API)
+	})
+
+	r, err := client.ValidateOrg(context.Background(), "UZTBCIDb6j_aBpZf", "496017")
+	require.NoError(t, err)
+	require.NotNil(t, r)
+	assert.Equal(t, "valid", r.Org.Status)
+}
