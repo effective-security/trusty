@@ -58,7 +58,10 @@ func (s *Service) FccContactHandler() rest.Handle {
 func (s *Service) getFrnResponse(ctx context.Context, filerID string) (*v1.FccFrnResponse, error) {
 	if filerID == "123456" {
 		res := new(v1.FccFrnResponse)
-		marshal.DecodeBytes([]byte(testFRN), res)
+		err := marshal.DecodeBytes([]byte(testFRN), res)
+		if err != nil {
+			return nil, errors.Annotate(err, "failed to decode testFRN")
+		}
 		return res, nil
 	}
 
@@ -132,48 +135,17 @@ func filer499ResultsToDTO(fq *fcc.Filer499Results) []v1.Filer {
 
 	for _, f := range fq.Filers {
 		fDTO := v1.Filer{
-			Form499ID: f.Form499ID,
+			FilerID: f.Form499ID,
 			FilerIDInfo: v1.FilerIDInfo{
-				RegistrationCurrentAsOf:     f.FilerIDInfo.RegistrationCurrentAsOf.String(),
-				StartDate:                   f.FilerIDInfo.StartDate.String(),
-				USFContributor:              f.FilerIDInfo.USFContributor,
-				LegalName:                   f.FilerIDInfo.LegalName,
-				PrincipalCommunicationsType: f.FilerIDInfo.PrincipalCommunicationsType,
-				HoldingCompany:              f.FilerIDInfo.HoldingCompany,
-				FRN:                         f.FilerIDInfo.FRN,
+				LegalName: f.FilerIDInfo.LegalName,
+				FRN:       f.FilerIDInfo.FRN,
 				HQAddress: v1.HQAdress{
 					AddressLine: f.FilerIDInfo.HQAddress.AddressLine,
 					City:        f.FilerIDInfo.HQAddress.City,
 					State:       f.FilerIDInfo.HQAddress.State,
 					ZipCode:     f.FilerIDInfo.HQAddress.ZipCode,
 				},
-				CustomerInquiriesAdress: v1.CustomerInquiriesAdress{
-					AddressLine: f.FilerIDInfo.CustomerInquiriesAdress.AddressLine,
-					City:        f.FilerIDInfo.CustomerInquiriesAdress.City,
-					State:       f.FilerIDInfo.CustomerInquiriesAdress.State,
-					ZipCode:     f.FilerIDInfo.CustomerInquiriesAdress.ZipCode,
-				},
-				CustomerInquiriesTelephone: f.FilerIDInfo.CustomerInquiriesTelephone,
-				OtherTradeNames:            f.FilerIDInfo.OtherTradeNames,
 			},
-			AgentForServiceOfProcess: v1.AgentForServiceOfProcess{
-				DCAgent:          f.AgentForServiceOfProcess.DCAgent,
-				DCAgentTelephone: f.AgentForServiceOfProcess.DCAgentTelephone,
-				DCAgentFax:       f.AgentForServiceOfProcess.DCAgentFax,
-				DCAgentEmail:     f.AgentForServiceOfProcess.DCAgentEmail,
-				DCAgentAddress: v1.DCAgentAddress{
-					AddressLine: f.AgentForServiceOfProcess.DCAgentAddress.AddressLines,
-					City:        f.AgentForServiceOfProcess.DCAgentAddress.City,
-					State:       f.AgentForServiceOfProcess.DCAgentAddress.State,
-					ZipCode:     f.AgentForServiceOfProcess.DCAgentAddress.ZipCode,
-				},
-			},
-			FCCRegistrationInformation: v1.FCCRegistrationInformation{
-				ChiefExecutiveOfficer:    f.FCCRegistrationInformation.ChiefExecutiveOfficer,
-				ChairmanOrSeniorOfficer:  f.FCCRegistrationInformation.ChairmanOrSeniorOfficer,
-				PresidentOrSeniorOfficer: f.FCCRegistrationInformation.PresidentOrSeniorOfficer,
-			},
-			JurisdictionStates: f.JurisdictionStates,
 		}
 
 		filers = append(filers, fDTO)
@@ -203,66 +175,18 @@ func contactQueryResultsToDTO(c *fcc.ContactResults) *v1.FccContactResponse {
 const testFRN = `{
 	"filers": [
 			{
-					"agent_for_service_of_process": {
-							"dc_agent": "Jonathan Allen Rini O'Neil, PC",
-							"dc_agent_address": {
-									"address_line": [
-											"1200 New Hampshire Ave, NW",
-											"Suite 600"
-									],
-									"city": "Washington",
-									"state": "DC",
-									"zip_code": "20036"
-							},
-							"dc_agent_email": "jallen@rinioneil.com",
-							"dc_agent_fax": "2022962014",
-							"dc_agent_telephone": "2029553933"
-					},
-					"fcc_registration_information": {
-							"chairman_or_senior_officer": "Matthew Hardeman",
-							"chief_executive_officer": "Daryl Russo",
-							"president_or_senior_officer": "Larry Smith"
-					},
 					"filer_id_info": {
-							"customer_inquiries_address": {
-									"address_line": "241 APPLEGATE TRACE",
-									"city": "PELHAM",
-									"state": "AL",
-									"zip_code": "35124"
-							},
 							"customer_inquiries_telephone": "2057453970",
 							"frn": "99999999",
-							"holding_company": "IPIFONY SYSTEMS INC.",
 							"hq_address": {
 									"address_line": "241 APPLEGATE TRACE",
 									"city": "PELHAM",
 									"state": "AL",
 									"zip_code": "35124"
 							},
-							"legal_name": "LOW LATENCY COMMUNICATIONS LLC",
-							"other_trade_names": [
-									"Low Latency Communications",
-									"String by Low Latency",
-									"Lilac by Low Latency"
-							],
-							"principal_communications_type": "Interconnected VoIP",
-							"registration_current_as_of": "2021-04-01 00:00:00 +0000 UTC",
-							"start_date": "2015-01-12 00:00:00 +0000 UTC",
-							"usf_contributor": "Yes"
+							"legal_name": "LOW LATENCY COMMUNICATIONS LLC"
 					},
-					"form_499_id": "123456",
-					"jurisdiction_states": [
-							"alabama",
-							"florida",
-							"georgia",
-							"illinois",
-							"louisiana",
-							"north_carolina",
-							"pennsylvania",
-							"tennessee",
-							"texas",
-							"virginia"
-					]
+					"filer_id": "123456"
 			}
 	]
 }`
