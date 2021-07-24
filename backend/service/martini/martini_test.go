@@ -161,6 +161,8 @@ func TestGetOrgsHandler(t *testing.T) {
 func TestRegisterOrgHandler(t *testing.T) {
 	ctx := context.Background()
 	svc := trustyServer.Service(martini.ServiceName).(*martini.Service)
+	// TODO: mock emailer
+	svc.DisableEmail()
 	h := svc.RegisterOrgHandler()
 
 	dbProv := svc.Db()

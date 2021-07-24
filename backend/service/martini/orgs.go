@@ -2,6 +2,7 @@ package martini
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -70,6 +71,18 @@ func (s *Service) ValidateOrgHandler() rest.Handle {
 		res := &v1.ValidateOrgResponse{
 			Org: *org.ToDto(),
 		}
+
+		go func() {
+			err := s.sendEmail(org.Email,
+				"Organization approved",
+				orgApprovedTemplate,
+				res.Org)
+			if err != nil {
+				logger.KV(xlog.ERROR,
+					"email", org.Email,
+					"err", errors.Details(err))
+			}
+		}()
 
 		marshal.WriteJSON(w, r, res)
 	}
@@ -193,7 +206,47 @@ func (s *Service) registerOrg(ctx context.Context, filerID string, requestor *mo
 		"token", token,
 	)
 
-	// TODO: send email
+	addr := fmt.Sprintf("%s, %s, %s, %s",
+		filer.FilerIDInfo.HQAddress.AddressLine,
+		filer.FilerIDInfo.HQAddress.City,
+		filer.FilerIDInfo.HQAddress.ZipCode,
+		filer.FilerIDInfo.HQAddress.State,
+	)
+
+	emailData := &orgValidationEmailTemplate{
+		RequesterName:  requestor.Name,
+		RequesterEmail: requestor.Email,
+		ApproverName:   contactRes.ContactName,
+		ApproverEmail:  contactRes.ContactEmail,
+		Code:           token.Code,
+		Token:          token.Token,
+		Company:        filer.FilerIDInfo.LegalName,
+		Address:        addr,
+	}
+
+	go func() {
+		err := s.sendEmail(requestor.Email,
+			"Organization validation request",
+			requesterEmailTemplate,
+			emailData)
+		if err != nil {
+			logger.KV(xlog.ERROR,
+				"email", requestor.Email,
+				"err", errors.Details(err))
+		}
+	}()
+
+	go func() {
+		err := s.sendEmail(contactRes.ContactEmail,
+			"Organization validation request",
+			approverEmailTemplate,
+			emailData)
+		if err != nil {
+			logger.KV(xlog.ERROR,
+				"email", contactRes.ContactEmail,
+				"err", errors.Details(err))
+		}
+	}()
 
 	return res, nil
 }
@@ -206,3 +259,53 @@ func randomCode() string {
 	}
 	return string(runes[:])
 }
+
+type orgValidationEmailTemplate struct {
+	RequesterName  string
+	RequesterEmail string
+	ApproverName   string
+	ApproverEmail  string
+	Code           string
+	Token          string
+	Company        string
+	Address        string
+}
+
+const requesterEmailTemplate = `
+<h2>Organization validation submitted</h2>
+<p>
+	<div>{{.RequesterName}},</div>
+	<div>The organization validation request has been sent to {{.ApproverName}}, {{.ApproverEmail}}.</div>
+
+    <div>Please provide the approver this code fo complete the validation.</div>
+    <h3>{{.Code}}</h3>
+
+	<div>Thank you for using Martini Security!</div>
+</p>
+`
+
+const approverEmailTemplate = `
+<h2>Organization validation request</h2>
+<p>
+	<div>{{.ApproverName}},</div>
+
+    <div>{{.RequesterName}}, {{.RequesterEmail}} has requested permission to acquire certificates for your organization.</div>
+
+    <h2>{{.Company}}</h2>
+	<h4>{{.Address}}</h4>
+	
+    <div>To authorize this request, enter the Code that was provided you by the requester.</div>
+	<h3>Link: <a href="https://martinisecurity.com/validate/{{.Token}}">Click here to approve</a></h3>
+
+	<div>Thank you for using Martini Security!</div>
+</p>
+`
+
+const orgApprovedTemplate = `
+<h2>Organization validation succeeded!</h2>
+<p>
+	<div>{{.Company}} is approved to request certificates.</div>
+
+	<div>Thank you for using Martini Security!</div>
+</p>
+`

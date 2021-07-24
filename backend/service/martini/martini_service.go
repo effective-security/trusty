@@ -19,10 +19,11 @@ var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", 
 type Service struct {
 	FccBaseURL string
 
-	server    *gserver.Server
-	cfg       *config.Configuration
-	db        orgsdb.OrgsDb
-	emailProv *email.Provider
+	disableEmail bool
+	server       *gserver.Server
+	cfg          *config.Configuration
+	db           orgsdb.OrgsDb
+	emailProv    *email.Provider
 }
 
 // Factory returns a factory of the service
@@ -56,6 +57,12 @@ func (s *Service) IsReady() bool {
 
 // Close the subservices and it's resources
 func (s *Service) Close() {
+}
+
+// DisableEmail is used in unit test
+// TODO: mock Email provider
+func (s *Service) DisableEmail() {
+	s.disableEmail = true
 }
 
 // RegisterRoute adds the Status API endpoints to the overall URL router
