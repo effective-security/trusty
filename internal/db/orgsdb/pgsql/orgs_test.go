@@ -26,17 +26,21 @@ func TestUpdateOrg(t *testing.T) {
 		Login:      login,
 		Email:      email,
 		//BillingEmail: email,
-		Company:    "ekspand",
-		Location:   "Kirkland, WA",
-		Type:       "Organization",
-		CreatedAt:  time.Now().UTC(),
-		UpdatedAt:  time.Now().UTC(),
-		Street:     "addr",
-		City:       "city",
-		PostalCode: "98034",
-		Region:     "WA",
-		Country:    "US",
-		Phone:      "4251232323",
+		Company:       "ekspand",
+		Location:      "Kirkland, WA",
+		Type:          "Organization",
+		CreatedAt:     time.Now().UTC(),
+		UpdatedAt:     time.Now().UTC(),
+		Street:        "addr",
+		City:          "city",
+		PostalCode:    "98034",
+		Region:        "WA",
+		Country:       "US",
+		Phone:         "4251232323",
+		ApproverName:  "approver",
+		ApproverEmail: "denis@ekspand.com",
+		Status:        "pending",
+		ExpiresAt:     time.Now().Add(time.Hour * 8770).UTC(),
 	}
 
 	org, err := provider.UpdateOrg(ctx, o)
@@ -57,6 +61,9 @@ func TestUpdateOrg(t *testing.T) {
 	assert.Equal(t, o.Region, org.Region)
 	assert.Equal(t, o.Country, org.Country)
 	assert.Equal(t, o.Phone, org.Phone)
+	assert.Equal(t, o.ApproverEmail, org.ApproverEmail)
+	assert.Equal(t, o.ApproverName, org.ApproverName)
+	assert.Equal(t, o.Status, org.Status)
 
 	org.Company = "Ekspand"
 	org.BillingEmail = email
@@ -67,8 +74,19 @@ func TestUpdateOrg(t *testing.T) {
 
 	org3, err := provider.GetOrg(ctx, org2.ID)
 	require.NoError(t, err)
-	require.NotNil(t, org2)
+	require.NotNil(t, org3)
 	assert.Equal(t, *org, *org3)
+
+	org.Status = "approved"
+	org4, err := provider.UpdateOrgStatus(ctx, org)
+	require.NoError(t, err)
+	require.NotNil(t, org4)
+	assert.Equal(t, *org, *org4)
+
+	org5, err := provider.GetOrgByExternalID(ctx, o.Provider, o.ExternalID)
+	require.NoError(t, err)
+	require.NotNil(t, org5)
+	assert.Equal(t, *org, *org5)
 }
 
 func TestRepositoryOrg(t *testing.T) {

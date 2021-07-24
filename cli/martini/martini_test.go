@@ -62,3 +62,25 @@ func (s *testSuite) TestFccContact() {
 	s.NoError(err)
 	s.HasText(`"contact_email": "mhardeman@lowlatencycomm.com"`)
 }
+
+func (s *testSuite) TestRegisterOrg() {
+	filer := "123456"
+	flags := martini.RegisterOrgFlags{
+		FilerID: &filer,
+	}
+	err := s.Run(martini.RegisterOrg, &flags)
+	s.NoError(err)
+	s.HasText(`"code": "496017"`)
+}
+
+func (s *testSuite) TestValidateOrg() {
+	code := "123456"
+	token := "UZTBCIDb6j_aBpZf"
+	flags := martini.ValidateOrgFlags{
+		Token: &token,
+		Code:  &code,
+	}
+	err := s.Run(martini.ValidateOrg, &flags)
+	s.NoError(err)
+	s.HasText(`"status": "valid"`)
+}

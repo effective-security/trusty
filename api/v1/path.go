@@ -153,6 +153,18 @@ const (
 	// PathForMartiniFccContact is path to get company details
 	PathForMartiniFccContact = "/v1/ms/fcc_contact"
 
+	// PathForMartiniRegisterOrg provides Org registration
+	//
+	// Verbs: POST
+	// Response: v1.RegisterOrgResponse
+	PathForMartiniRegisterOrg = "/v1/ms/register_org"
+
+	// PathForMartiniOrgs provides Org validation
+	//
+	// Verbs: POST
+	// Response: v1.ValidateOrgResponse
+	PathForMartiniValidateOrg = "/v1/ms/validate_org"
+
 	// PathForMartiniOrgs provides orgs the user
 	//
 	// Verbs: GET

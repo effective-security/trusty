@@ -23,3 +23,26 @@ type OpenCorporatesCompany struct {
 type SearchOpenCorporatesResponse struct {
 	Companies []OpenCorporatesCompany `json:"companies"`
 }
+
+// RegisterOrgRequest specifies a request to register an organization
+type RegisterOrgRequest struct {
+	FilerID string `json:"filer_id"`
+}
+
+// RegisterOrgResponse provides a response for RegisterOrgRequest
+type RegisterOrgResponse struct {
+	Org      Organization       `json:"org"`
+	Approver FccContactResponse `json:"approver"`
+	Code     string             `json:"code"`
+}
+
+// ValidateOrgRequest specifies a request to validate an organization
+type ValidateOrgRequest struct {
+	Token string `json:"token"`
+	Code  string `json:"code"`
+}
+
+// ValidateOrgResponse provides a response for ValidateOrgRequest
+type ValidateOrgResponse struct {
+	Org Organization `json:"org"`
+}

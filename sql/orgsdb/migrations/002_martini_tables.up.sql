@@ -58,6 +58,36 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_fcc_contact_frn
     (frn);
 
 --
+-- Org Tokens
+--
+CREATE TABLE IF NOT EXISTS public.orgtokens
+(
+    id bigint NOT NULL,
+    org_id bigint NOT NULL,
+    requestor_id bigint NOT NULL,
+    approver_email character varying(160) COLLATE pg_catalog."default" NOT NULL,
+    token character varying(16) COLLATE pg_catalog."default" NOT NULL,
+    code character varying(6) COLLATE pg_catalog."default" NOT NULL,
+    used boolean NOT NULL,
+    created_at timestamp with time zone,
+    expires_at timestamp with time zone,
+    used_at timestamp with time zone,
+    CONSTRAINT orgtokens_pkey PRIMARY KEY (id),
+    CONSTRAINT orgtokens_token_code UNIQUE (token, code)
+)
+WITH (
+    OIDS = FALSE
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_orgtokens_token_code
+    ON public.orgtokens USING btree
+    (token,code);
+
+CREATE INDEX IF NOT EXISTS idx_orgtokens_org_id
+    ON public.orgtokens USING btree
+    (org_id);
+
+--
 --
 --
 COMMIT;
