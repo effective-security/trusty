@@ -147,6 +147,33 @@ CREATE INDEX IF NOT EXISTS idx_authorizations_reg_id
     ON public.authorizations USING btree
     (reg_id);
 
+
+--
+-- Nonces
+--
+CREATE TABLE IF NOT EXISTS public.nonces
+(
+    id bigint NOT NULL,
+    nonce character varying(16) COLLATE pg_catalog."default" NOT NULL,
+    used boolean NOT NULL,
+    created_at timestamp with time zone,
+    expires_at timestamp with time zone,
+    used_at timestamp with time zone,
+    CONSTRAINT nonces_pkey PRIMARY KEY (id),
+    CONSTRAINT nonces_nonce UNIQUE (nonce)
+)
+WITH (
+    OIDS = FALSE
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_nonces_nonce
+    ON public.nonces USING btree
+    (nonce);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_nonces_expires_at
+    ON public.nonces USING btree
+    (expires_at);
+
 --
 --
 --

@@ -66,6 +66,13 @@ type CaDb interface {
 	RegisterCrl(ctx context.Context, crt *model.Crl) (*model.Crl, error)
 	// RemoveCrl removes CRL
 	RemoveCrl(ctx context.Context, id uint64) error
+
+	// CreateNonce returns Nonce
+	CreateNonce(ctx context.Context, token *model.Nonce) (*model.Nonce, error)
+	// UseNonce returns Nonce if nonce matches, and was not used
+	UseNonce(ctx context.Context, nonce string) (*model.Nonce, error)
+	// DeleteNonce deletes the nonce
+	DeleteNonce(ctx context.Context, id uint64) error
 }
 
 // Provider provides complete DB access
