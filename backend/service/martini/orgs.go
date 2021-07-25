@@ -40,10 +40,10 @@ func (s *Service) GetOrgsHandler() rest.Handle {
 	}
 }
 
-// ValidateOrgHandler validates Org registration
-func (s *Service) ValidateOrgHandler() rest.Handle {
+// ApproveOrgHandler validates Org registration
+func (s *Service) ApproveOrgHandler() rest.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
-		req := new(v1.ValidateOrgRequest)
+		req := new(v1.ApproveOrgRequest)
 		err := marshal.DecodeBody(w, r, req)
 		if err != nil {
 			return
@@ -68,7 +68,7 @@ func (s *Service) ValidateOrgHandler() rest.Handle {
 			return
 		}
 
-		res := &v1.ValidateOrgResponse{
+		res := &v1.OrgResponse{
 			Org: *org.ToDto(),
 		}
 

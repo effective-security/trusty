@@ -36,13 +36,13 @@ type RegisterOrgResponse struct {
 	Code     string             `json:"code"`
 }
 
-// ValidateOrgRequest specifies a request to validate an organization
-type ValidateOrgRequest struct {
+// ApproveOrgRequest specifies a request to validate an organization
+type ApproveOrgRequest struct {
 	Token string `json:"token"`
 	Code  string `json:"code"`
 }
 
-// ValidateOrgResponse provides a response for ValidateOrgRequest
-type ValidateOrgResponse struct {
+// OrgResponse returns Organization
+type OrgResponse struct {
 	Org Organization `json:"org"`
 }

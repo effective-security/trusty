@@ -76,11 +76,11 @@ func (s *testSuite) TestRegisterOrg() {
 func (s *testSuite) TestValidateOrg() {
 	code := "123456"
 	token := "UZTBCIDb6j_aBpZf"
-	flags := martini.ValidateOrgFlags{
+	flags := martini.ApprovergFlags{
 		Token: &token,
 		Code:  &code,
 	}
-	err := s.Run(martini.ValidateOrg, &flags)
+	err := s.Run(martini.ApproveOrg, &flags)
 	s.NoError(err)
 	s.HasText(`"status": "valid"`)
 }

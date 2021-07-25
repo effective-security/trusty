@@ -47,6 +47,10 @@ type OrgsReadOnlyDb interface {
 	GetFRNResponse(ctx context.Context, filerID uint64) (*model.FccFRNResponse, error)
 	// GetFccContactResponse returns cached Contact response
 	GetFccContactResponse(ctx context.Context, frn string) (*model.FccContactResponse, error)
+	// GetAPIKey returns APIKey and updates its Used time
+	GetAPIKey(ctx context.Context, key string) (*model.APIKey, error)
+	// GetOrgAPIKeys returns all API keys for Organization
+	GetOrgAPIKeys(ctx context.Context, orgID uint64) ([]*model.APIKey, error)
 }
 
 // OrgsDb defines an interface for CRUD operations on Orgs
@@ -92,6 +96,11 @@ type OrgsDb interface {
 	GetOrgApprovalTokens(ctx context.Context, orgID uint64) ([]*model.ApprovalToken, error)
 	// DeleteApprovalToken deletes the token
 	DeleteApprovalToken(ctx context.Context, id uint64) error
+
+	// CreateAPIKey returns APIKey
+	CreateAPIKey(ctx context.Context, token *model.APIKey) (*model.APIKey, error)
+	// DeleteAPIKey deletes the key
+	DeleteAPIKey(ctx context.Context, id uint64) error
 }
 
 // Provider provides complete DB access
