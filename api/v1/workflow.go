@@ -5,15 +5,32 @@ import "time"
 const (
 	// ProviderGithub specifies name for Github
 	ProviderGithub = "github"
-
 	// ProviderGoogle specifies name for Google
 	ProviderGoogle = "google"
-
 	// ProviderMartini specifies name for Martini
 	ProviderMartini = "martini"
+)
 
+const (
 	// RoleAdmin specifies name for Admin role
 	RoleAdmin = "admin"
+)
+
+const (
+	// OrgStatusUnknown is the default status
+	OrgStatusUnknown = "unknown"
+	// OrgStatusPaymentPending is assigned after the Org is registered and the client has to pay
+	OrgStatusPaymentPending = "payment_pending"
+	// OrgStatusPaid specifies that the payment received
+	OrgStatusPaid = "paid"
+	// OrgStatusValidationPending specifies that validation request has been sent
+	OrgStatusValidationPending = "validation_pending"
+	// OrgStatusApproved specifies that Approver has approved the Organization
+	OrgStatusApproved = "approved"
+	// OrgStatusRevoked specifies that validation has beed revoked
+	OrgStatusRevoked = "revoked"
+	// OrgStatusDeactivated specifies that Organization has been deactivated, subsciption cancelled
+	OrgStatusDeactivated = "deactivated"
 )
 
 // Organization represents an organization account.

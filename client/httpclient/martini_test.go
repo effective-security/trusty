@@ -251,7 +251,7 @@ func TestRegisterOrg(t *testing.T) {
                 "postal_code": "35124",
                 "provider": "martini",
                 "region": "AL",   
-                "status": "pending",                                                                     
+                "status": "payment_pending",                                                                     
                 "street_address": "241 APPLEGATE TRACE",   
                 "updated_at": "2021-07-23T23:16:47.699181Z"
         }                                           
@@ -270,11 +270,10 @@ func TestRegisterOrg(t *testing.T) {
 	r, err := client.RegisterOrg(context.Background(), "123456")
 	require.NoError(t, err)
 	require.NotNil(t, r)
-	assert.Equal(t, "496017", r.Code)
-	assert.Equal(t, "pending", r.Org.Status)
+	assert.Equal(t, v1.OrgStatusPaymentPending, r.Org.Status)
 }
 
-func TestValidateOrg(t *testing.T) {
+func TestApproveOrg(t *testing.T) {
 	h := makeTestHandler(t, v1.PathForMartiniApproveOrg, `{                         
         "org": {
                 "approver_email": "denis+test@ekspand.com",
@@ -293,7 +292,7 @@ func TestValidateOrg(t *testing.T) {
                 "postal_code": "35124",
                 "provider": "martini",
                 "region": "AL",
-                "status": "valid",
+                "status": "approved",
                 "street_address": "241 APPLEGATE TRACE",
                 "updated_at": "2021-07-23T23:16:47.699181Z"
         }
@@ -312,5 +311,46 @@ func TestValidateOrg(t *testing.T) {
 	r, err := client.ApproveOrg(context.Background(), "UZTBCIDb6j_aBpZf", "496017")
 	require.NoError(t, err)
 	require.NotNil(t, r)
-	assert.Equal(t, "valid", r.Org.Status)
+	assert.Equal(t, v1.OrgStatusApproved, r.Org.Status)
+}
+
+func TestValidateOrg(t *testing.T) {
+	h := makeTestHandler(t, v1.PathForMartiniValidateOrg, `{                         
+        "org": {
+                "approver_email": "denis+test@ekspand.com",
+                "approver_name": "Mr Matthew D Hardeman",
+                "billing_email": "denis@ekspand.com",
+                "city": "PELHAM",
+                "company": "LOW LATENCY COMMUNICATIONS LLC",
+                "created_at": "2021-07-23T23:16:47.699181Z",
+                "email": "denis+test@ekspand.com",
+                "expires_at": "2022-07-21T11:16:47.699181Z",
+                "extern_id": "99999999",
+                "id": "82620084182319204",
+                "login": "99999999",
+                "name": "LOW LATENCY COMMUNICATIONS LLC",
+                "phone": "2057453970",
+                "postal_code": "35124",
+                "provider": "martini",
+                "region": "AL",
+                "status": "validation_pending",
+                "street_address": "241 APPLEGATE TRACE",
+                "updated_at": "2021-07-23T23:16:47.699181Z"
+        }
+}`)
+	server := httptest.NewServer(h)
+	defer server.Close()
+
+	client, err := New(NewConfig(), []string{server.URL})
+	assert.NoError(t, err, "Unexpected error.")
+
+	require.NotPanics(t, func() {
+		// ensure compiles
+		_ = interface{}(client).(API)
+	})
+
+	r, err := client.ValidateOrg(context.Background(), "82620084182319204")
+	require.NoError(t, err)
+	require.NotNil(t, r)
+	assert.Equal(t, v1.OrgStatusValidationPending, r.Org.Status)
 }

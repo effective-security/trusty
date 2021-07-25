@@ -7,7 +7,6 @@ import (
 	"time"
 
 	v1 "github.com/ekspand/trusty/api/v1"
-	"github.com/ekspand/trusty/api/v2acme"
 	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/internal/db/orgsdb/model"
 	"github.com/go-phorce/dolly/rest"
@@ -61,28 +60,29 @@ func (s *Service) ApproveOrgHandler() rest.Handle {
 			return
 		}
 
-		org.Status = string(v2acme.StatusValid)
-		org, err = s.db.UpdateOrgStatus(r.Context(), org)
-		if err != nil {
-			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to update status").WithCause(err))
-			return
+		if org.Status == v1.OrgStatusValidationPending {
+			org.Status = v1.OrgStatusApproved
+			org, err = s.db.UpdateOrgStatus(r.Context(), org)
+			if err != nil {
+				marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to update status").WithCause(err))
+				return
+			}
+			go func() {
+				err := s.sendEmail(org.Email,
+					"Organization approved",
+					orgApprovedTemplate,
+					org)
+				if err != nil {
+					logger.KV(xlog.ERROR,
+						"email", org.Email,
+						"err", errors.Details(err))
+				}
+			}()
 		}
 
 		res := &v1.OrgResponse{
 			Org: *org.ToDto(),
 		}
-
-		go func() {
-			err := s.sendEmail(org.Email,
-				"Organization approved",
-				orgApprovedTemplate,
-				res.Org)
-			if err != nil {
-				logger.KV(xlog.ERROR,
-					"email", org.Email,
-					"err", errors.Details(err))
-			}
-		}()
 
 		marshal.WriteJSON(w, r, res)
 	}
@@ -117,7 +117,42 @@ func (s *Service) RegisterOrgHandler() rest.Handle {
 	}
 }
 
-func (s *Service) registerOrg(ctx context.Context, filerID string, requestor *model.User) (*v1.RegisterOrgResponse, error) {
+// ValidateOrgHandler sends Validation request to Approver
+func (s *Service) ValidateOrgHandler() rest.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
+		idn := identity.FromRequest(r).Identity()
+		userID, _ := db.ID(idn.UserID())
+
+		req := new(v1.ValidateOrgRequest)
+		err := marshal.DecodeBody(w, r, req)
+		if err != nil {
+			return
+		}
+
+		orgID, err := db.ID(req.OrgID)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithInvalidParam("invalid org_id: %s", req.OrgID))
+			return
+		}
+		ctx := r.Context()
+		user, err := s.db.GetUser(ctx, userID)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithForbidden("user ID %d not found: %s", userID, err.Error()).WithCause(err))
+			return
+		}
+
+		res, err := s.validateOrg(ctx, orgID, user)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithUnexpected("request failed: "+err.Error()).WithCause(err))
+			return
+		}
+
+		logger.KV(xlog.DEBUG, "org_id", req.OrgID, "response", res)
+		marshal.WriteJSON(w, r, res)
+	}
+}
+
+func (s *Service) registerOrg(ctx context.Context, filerID string, requestor *model.User) (*v1.OrgResponse, error) {
 	frmRes, err := s.getFrnResponse(ctx, filerID)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -165,8 +200,8 @@ func (s *Service) registerOrg(ctx context.Context, filerID string, requestor *mo
 		Phone:         filer.FilerIDInfo.CustomerInquiriesTelephone,
 		ApproverEmail: contactRes.ContactEmail,
 		ApproverName:  contactRes.ContactName,
-		Status:        string(v2acme.StatusPending),
-		ExpiresAt:     now.Add(8700 * time.Hour),
+		Status:        v1.OrgStatusPaymentPending,
+		ExpiresAt:     now.Add(96 * time.Hour), // TODO: update with Subscription expiration
 	}
 
 	org, err = s.db.UpdateOrg(ctx, org)
@@ -179,10 +214,42 @@ func (s *Service) registerOrg(ctx context.Context, filerID string, requestor *mo
 		return nil, errors.Annotate(err, "unable to create org")
 	}
 
+	res := &v1.OrgResponse{
+		Org: *org.ToDto(),
+	}
+
+	return res, nil
+}
+
+func (s *Service) validateOrg(ctx context.Context, orgID uint64, requestor *model.User) (*v1.ValidateOrgResponse, error) {
+	org, err := s.db.GetOrg(ctx, orgID)
+	if err != nil {
+		return nil, errors.Annotatef(err, "unable to get organization")
+	}
+
+	// TODO: check user's membership, must be Org admin
+
+	if org.Status != v1.OrgStatusPaid && org.Status != v1.OrgStatusValidationPending {
+		return nil, errors.Errorf("organization status: " + org.Status)
+	}
+
+	contactRes, err := s.getFccContact(ctx, org.ExternalID)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	org.Status = v1.OrgStatusValidationPending
+
+	org, err = s.db.UpdateOrgStatus(ctx, org)
+	if err != nil {
+		return nil, errors.Annotatef(err, "unable to update organization status")
+	}
+
+	now := time.Now()
 	token := &model.ApprovalToken{
 		OrgID:         org.ID,
 		RequestorID:   requestor.ID,
-		ApproverEmail: contactRes.ContactEmail,
+		ApproverEmail: org.ApproverEmail,
 		Token:         certutil.RandomString(16),
 		Code:          randomCode(),
 		Used:          false,
@@ -194,7 +261,7 @@ func (s *Service) registerOrg(ctx context.Context, filerID string, requestor *mo
 		return nil, errors.Annotate(err, "unable to create org")
 	}
 
-	res := &v1.RegisterOrgResponse{
+	res := &v1.ValidateOrgResponse{
 		Org:      *org.ToDto(),
 		Approver: *contactRes,
 		Code:     token.Code,
@@ -207,10 +274,10 @@ func (s *Service) registerOrg(ctx context.Context, filerID string, requestor *mo
 	)
 
 	addr := fmt.Sprintf("%s, %s, %s, %s",
-		filer.FilerIDInfo.HQAddress.AddressLine,
-		filer.FilerIDInfo.HQAddress.City,
-		filer.FilerIDInfo.HQAddress.ZipCode,
-		filer.FilerIDInfo.HQAddress.State,
+		org.Street,
+		org.City,
+		org.PostalCode,
+		org.Region,
 	)
 
 	emailData := &orgValidationEmailTemplate{
@@ -220,33 +287,25 @@ func (s *Service) registerOrg(ctx context.Context, filerID string, requestor *mo
 		ApproverEmail:  contactRes.ContactEmail,
 		Code:           token.Code,
 		Token:          token.Token,
-		Company:        filer.FilerIDInfo.LegalName,
+		Company:        org.Company,
 		Address:        addr,
 	}
 
-	go func() {
-		err := s.sendEmail(requestor.Email,
-			"Organization validation request",
-			requesterEmailTemplate,
-			emailData)
-		if err != nil {
-			logger.KV(xlog.ERROR,
-				"email", requestor.Email,
-				"err", errors.Details(err))
-		}
-	}()
+	err = s.sendEmail(requestor.Email,
+		"Organization validation request",
+		requesterEmailTemplate,
+		emailData)
+	if err != nil {
+		return nil, errors.Annotate(err, "failed to send email to "+requestor.Email)
+	}
 
-	go func() {
-		err := s.sendEmail(contactRes.ContactEmail,
-			"Organization validation request",
-			approverEmailTemplate,
-			emailData)
-		if err != nil {
-			logger.KV(xlog.ERROR,
-				"email", contactRes.ContactEmail,
-				"err", errors.Details(err))
-		}
-	}()
+	err = s.sendEmail(contactRes.ContactEmail,
+		"Organization validation request",
+		approverEmailTemplate,
+		emailData)
+	if err != nil {
+		return nil, errors.Annotate(err, "failed to send email to "+contactRes.ContactEmail)
+	}
 
 	return res, nil
 }

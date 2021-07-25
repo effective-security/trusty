@@ -29,8 +29,13 @@ type RegisterOrgRequest struct {
 	FilerID string `json:"filer_id"`
 }
 
-// RegisterOrgResponse provides a response for RegisterOrgRequest
-type RegisterOrgResponse struct {
+// ValidateOrgRequest specifies a request to send validation to Approver
+type ValidateOrgRequest struct {
+	OrgID string `json:"org_id"`
+}
+
+// ValidateOrgResponse provides a response for ValidateOrgRequest
+type ValidateOrgResponse struct {
 	Org      Organization       `json:"org"`
 	Approver FccContactResponse `json:"approver"`
 	Code     string             `json:"code"`
