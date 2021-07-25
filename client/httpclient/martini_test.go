@@ -275,7 +275,7 @@ func TestRegisterOrg(t *testing.T) {
 }
 
 func TestValidateOrg(t *testing.T) {
-	h := makeTestHandler(t, v1.PathForMartiniValidateOrg, `{                         
+	h := makeTestHandler(t, v1.PathForMartiniApproveOrg, `{                         
         "org": {
                 "approver_email": "denis+test@ekspand.com",
                 "approver_name": "Mr Matthew D Hardeman",
@@ -309,7 +309,7 @@ func TestValidateOrg(t *testing.T) {
 		_ = interface{}(client).(API)
 	})
 
-	r, err := client.ValidateOrg(context.Background(), "UZTBCIDb6j_aBpZf", "496017")
+	r, err := client.ApproveOrg(context.Background(), "UZTBCIDb6j_aBpZf", "496017")
 	require.NoError(t, err)
 	require.NotNil(t, r)
 	assert.Equal(t, "valid", r.Org.Status)

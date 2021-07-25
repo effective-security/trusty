@@ -88,6 +88,31 @@ CREATE INDEX IF NOT EXISTS idx_orgtokens_org_id
     (org_id);
 
 --
+-- API Keys
+--
+CREATE TABLE IF NOT EXISTS public.apikeys
+(
+    id bigint NOT NULL,
+    org_id bigint NOT NULL,
+    key character varying(32) COLLATE pg_catalog."default" NOT NULL,
+    enrollment boolean NOT NULL,
+    management boolean NOT NULL,
+    billing boolean NOT NULL,
+    created_at timestamp with time zone,
+    expires_at timestamp with time zone,
+    used_at timestamp with time zone,
+    CONSTRAINT apikeys_pkey PRIMARY KEY (id),
+    CONSTRAINT apikeys_key UNIQUE (key)
+)
+WITH (
+    OIDS = FALSE
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_apikeys_key
+    ON public.apikeys USING btree
+    (key);
+
+--
 --
 --
 COMMIT;

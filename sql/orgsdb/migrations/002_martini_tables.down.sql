@@ -11,4 +11,7 @@ DROP TABLE IF EXISTS public.orgtokens;
 DROP INDEX IF EXISTS idx_orgtokens_token_code;
 DROP INDEX IF EXISTS idx_orgtokens_org_id;
 
+DROP TABLE IF EXISTS apikeys;
+DROP TABLE IF EXISTS idx_apikeys_key
+
 COMMIT;

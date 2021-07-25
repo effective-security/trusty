@@ -159,15 +159,21 @@ const (
 	// Response: v1.RegisterOrgResponse
 	PathForMartiniRegisterOrg = "/v1/ms/register_org"
 
-	// PathForMartiniOrgs provides Org validation
+	// PathForMartiniApproveOrg provides Org approval
 	//
 	// Verbs: POST
-	// Response: v1.ValidateOrgResponse
-	PathForMartiniValidateOrg = "/v1/ms/validate_org"
+	// Response: v1.OrgResponse
+	PathForMartiniApproveOrg = "/v1/ms/approve_org"
 
 	// PathForMartiniOrgs provides orgs the user
 	//
 	// Verbs: GET
 	// Response: v1.OrgsResponse
 	PathForMartiniOrgs = "/v1/ms/orgs"
+
+	// PathForMartiniOrgAPIKeys provides org API keys
+	//
+	// Verbs: GET
+	// Response: v1.OrgAPIKeysResponse
+	PathForMartiniOrgAPIKeys = "/v1/ms/orgs/:orgID/apikeys"
 )

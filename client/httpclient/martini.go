@@ -72,15 +72,15 @@ func (c *Client) RegisterOrg(ctx context.Context, filerID string) (*v1.RegisterO
 	return res, nil
 }
 
-// ValidateOrg validates Org registration
-func (c *Client) ValidateOrg(ctx context.Context, token, code string) (*v1.ValidateOrgResponse, error) {
-	req := &v1.ValidateOrgRequest{
+// ApproveOrg validates Org registration
+func (c *Client) ApproveOrg(ctx context.Context, token, code string) (*v1.OrgResponse, error) {
+	req := &v1.ApproveOrgRequest{
 		Token: token,
 		Code:  code,
 	}
 
-	res := new(v1.ValidateOrgResponse)
-	_, err := c.PostRequest(ctx, v1.PathForMartiniValidateOrg, req, res)
+	res := new(v1.OrgResponse)
+	_, err := c.PostRequest(ctx, v1.PathForMartiniApproveOrg, req, res)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

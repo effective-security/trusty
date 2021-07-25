@@ -223,22 +223,22 @@ func TestRegisterOrgHandler(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, list)
 
-	vh := svc.ValidateOrgHandler()
+	vh := svc.ApproveOrgHandler()
 	for _, token := range list {
 		if token.Used {
 			continue
 		}
 
-		validateReq := &v1.ValidateOrgRequest{
+		approveReq := &v1.ApproveOrgRequest{
 			Token: token.Token,
 			Code:  token.Code,
 		}
 
-		js, err := json.Marshal(validateReq)
+		js, err := json.Marshal(approveReq)
 		require.NoError(t, err)
 
 		// validate
-		r, err := http.NewRequest(http.MethodPost, v1.PathForMartiniValidateOrg, bytes.NewReader(js))
+		r, err := http.NewRequest(http.MethodPost, v1.PathForMartiniApproveOrg, bytes.NewReader(js))
 		require.NoError(t, err)
 		r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
 
@@ -246,7 +246,7 @@ func TestRegisterOrgHandler(t *testing.T) {
 		vh(w, r, nil)
 		require.Equal(t, http.StatusOK, w.Code)
 
-		var res v1.ValidateOrgResponse
+		var res v1.OrgResponse
 		require.NoError(t, marshal.Decode(w.Body, &res))
 		assert.Equal(t, "valid", res.Org.Status)
 	}

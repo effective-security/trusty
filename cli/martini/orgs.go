@@ -92,15 +92,15 @@ func RegisterOrg(c ctl.Control, p interface{}) error {
 	return nil
 }
 
-// ValidateOrgFlags defines flags for RegisterOrg command
-type ValidateOrgFlags struct {
+// ApprovergFlags defines flags for ApproveOrg command
+type ApprovergFlags struct {
 	Token *string
 	Code  *string
 }
 
-// ValidateOrg validates organization
-func ValidateOrg(c ctl.Control, p interface{}) error {
-	flags := p.(*ValidateOrgFlags)
+// ApproveOrg validates organization
+func ApproveOrg(c ctl.Control, p interface{}) error {
+	flags := p.(*ApprovergFlags)
 	cli := c.(*cli.Cli)
 
 	client, err := cli.HTTPClient()
@@ -108,7 +108,7 @@ func ValidateOrg(c ctl.Control, p interface{}) error {
 		return errors.Trace(err)
 	}
 
-	res, err := client.ValidateOrg(context.Background(), *flags.Token, *flags.Code)
+	res, err := client.ApproveOrg(context.Background(), *flags.Token, *flags.Code)
 	if err != nil {
 		return errors.Trace(err)
 	}
