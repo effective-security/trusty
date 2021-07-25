@@ -70,8 +70,10 @@ func (s *testSuite) TestRegisterOrg() {
 	}
 	err := s.Run(martini.RegisterOrg, &flags)
 	s.NoError(err)
-	s.HasText(`"code": "496017"`)
+	s.HasText(`"status": "payment_pending",`)
 }
+
+// TODO: fix after the payment added
 
 func (s *testSuite) TestValidateOrg() {
 	code := "123456"
@@ -82,5 +84,5 @@ func (s *testSuite) TestValidateOrg() {
 	}
 	err := s.Run(martini.ApproveOrg, &flags)
 	s.NoError(err)
-	s.HasText(`"status": "valid"`)
+	s.HasText(`"status": "approved"`)
 }

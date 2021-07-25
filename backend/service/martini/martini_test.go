@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/backend/service/martini"
@@ -196,9 +197,9 @@ func TestRegisterOrgHandler(t *testing.T) {
 	h(w, r, nil)
 	require.Equal(t, http.StatusOK, w.Code)
 
-	var res v1.RegisterOrgResponse
+	var res v1.OrgResponse
 	require.NoError(t, marshal.Decode(w.Body, &res))
-	assert.NotEmpty(t, res.Code)
+	assert.Equal(t, v1.OrgStatusPaymentPending, res.Org.Status)
 
 	orgID, _ := db.ID(res.Org.ID)
 	defer dbProv.RemoveOrg(ctx, orgID)
@@ -216,19 +217,63 @@ func TestRegisterOrgHandler(t *testing.T) {
 	require.Equal(t, http.StatusInternalServerError, w.Code)
 
 	//
+	// Validate without payment should fail
+	//
+
+	validateReq := &v1.ValidateOrgRequest{
+		OrgID: res.Org.ID,
+	}
+	js, err = json.Marshal(validateReq)
+	require.NoError(t, err)
+
+	r, err = http.NewRequest(http.MethodPost, v1.PathForMartiniValidateOrg, bytes.NewReader(js))
+	require.NoError(t, err)
+	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+	w = httptest.NewRecorder()
+	svc.ValidateOrgHandler()(w, r, nil)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	//
+	// Payment
+	//
+	res.Org.Status = v1.OrgStatusPaid
+	_, err = svc.Db().UpdateOrgStatus(ctx, &model.Organization{
+		ID:            orgID,
+		ApproverName:  res.Org.ApproverName,
+		ApproverEmail: res.Org.ApproverEmail,
+		Status:        v1.OrgStatusPaid,
+		ExpiresAt:     time.Now().Add(8700 * time.Hour),
+	})
+	require.NoError(t, err)
+
+	//
 	// Validate
+	//
+
+	r, err = http.NewRequest(http.MethodPost, v1.PathForMartiniValidateOrg, bytes.NewReader(js))
+	require.NoError(t, err)
+	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+	w = httptest.NewRecorder()
+	svc.ValidateOrgHandler()(w, r, nil)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	//
+	// Approve
 	//
 
 	list, err := dbProv.GetOrgApprovalTokens(ctx, orgID)
 	require.NoError(t, err)
 	require.NotNil(t, list)
 
-	vh := svc.ApproveOrgHandler()
+	ah := svc.ApproveOrgHandler()
 	for _, token := range list {
 		if token.Used {
 			continue
 		}
 
+		//
 		approveReq := &v1.ApproveOrgRequest{
 			Token: token.Token,
 			Code:  token.Code,
@@ -237,17 +282,17 @@ func TestRegisterOrgHandler(t *testing.T) {
 		js, err := json.Marshal(approveReq)
 		require.NoError(t, err)
 
-		// validate
+		// Approve
 		r, err := http.NewRequest(http.MethodPost, v1.PathForMartiniApproveOrg, bytes.NewReader(js))
 		require.NoError(t, err)
 		r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
 
 		w := httptest.NewRecorder()
-		vh(w, r, nil)
+		ah(w, r, nil)
 		require.Equal(t, http.StatusOK, w.Code)
 
 		var res v1.OrgResponse
 		require.NoError(t, marshal.Decode(w.Body, &res))
-		assert.Equal(t, "valid", res.Org.Status)
+		assert.Equal(t, v1.OrgStatusApproved, res.Org.Status)
 	}
 }
