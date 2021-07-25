@@ -18,6 +18,10 @@ DROP INDEX IF EXISTS idx_acmecerts_order_id;
 DROP TABLE IF EXISTS public.authorizations;
 DROP INDEX IF EXISTS idx_authorizations_reg_id;
 
+DROP TABLE IF EXISTS nonces;
+DROP INDEX IF EXISTS idx_nonces_nonce;
+DROP INDEX IF EXISTS idx_nonces_expires_at;
+
 --
 --
 --
