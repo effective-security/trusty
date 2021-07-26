@@ -1,7 +1,7 @@
 # trusty
 
-![Build](https://github.com/ekspand/trusty/workflows/Build/badge.svg?branch=master)
-[![Coverage Status](https://coveralls.io/repos/github/ekspand/trusty/badge.svg?branch=master)](https://coveralls.io/github/ekspand/trusty?branch=master)
+![Build](https://github.com/martinisecurity/trusty/workflows/Build/badge.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/martinisecurity/trusty/badge.svg?branch=master)](https://coveralls.io/github/martinisecurity/trusty?branch=master)
 
 Trusty is a Certification Authority.
 
