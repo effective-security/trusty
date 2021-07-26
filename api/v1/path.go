@@ -181,11 +181,11 @@ const (
 	//
 	// Verbs: GET
 	// Response: v1.OrgAPIKeysResponse
-	PathForMartiniOrgAPIKeys = "/v1/ms/apikeys/:orgID"
+	PathForMartiniOrgAPIKeys = "/v1/ms/apikeys/:org_id"
 
 	// PathForMartiniOrgSubscription provides Org subscription
 	//
 	// Verbs: GET,POST,DELETE
 	// Response: v1.OrgSubscriptionResponse
-	PathForMartiniOrgSubscription = "/v1/ms/subsciption/:orgID"
+	PathForMartiniOrgSubscription = "/v1/ms/subsciption/:org_id"
 )

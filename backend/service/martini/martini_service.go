@@ -71,6 +71,8 @@ func (s *Service) RegisterRoute(r rest.Router) {
 	r.GET(v1.PathForMartiniOrgs, s.GetOrgsHandler())
 	r.POST(v1.PathForMartiniRegisterOrg, s.RegisterOrgHandler())
 	r.POST(v1.PathForMartiniApproveOrg, s.ApproveOrgHandler())
+	r.POST(v1.PathForMartiniValidateOrg, s.ValidateOrgHandler())
+	r.POST(v1.PathForMartiniOrgSubscription, s.CreateSubsciptionHandler())
 
 	r.GET(v1.PathForMartiniFccFrn, s.FccFrnHandler())
 	r.GET(v1.PathForMartiniFccContact, s.FccContactHandler())

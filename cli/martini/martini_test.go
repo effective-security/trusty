@@ -74,8 +74,7 @@ func (s *testSuite) TestRegisterOrg() {
 }
 
 // TODO: fix after the payment added
-
-func (s *testSuite) TestValidateOrg() {
+func (s *testSuite) TestApproveOrg() {
 	code := "123456"
 	token := "UZTBCIDb6j_aBpZf"
 	flags := martini.ApprovergFlags{
@@ -85,4 +84,31 @@ func (s *testSuite) TestValidateOrg() {
 	err := s.Run(martini.ApproveOrg, &flags)
 	s.NoError(err)
 	s.HasText(`"status": "approved"`)
+}
+
+func (s *testSuite) TestValidateOrg() {
+	org := "82923411415760996"
+	flags := martini.ValidateFlags{
+		OrgID: &org,
+	}
+	err := s.Run(martini.ValidateOrg, &flags)
+	s.NoError(err)
+	s.HasText(`"status": "validation_pending",`)
+}
+
+func (s *testSuite) TestSubscribeOrg() {
+	org := "82923411415760996"
+	str := "string"
+	num := 3
+	flags := martini.CreateSubscriptionFlags{
+		OrgID:    &org,
+		CCNumber: &str,
+		CCExpiry: &str,
+		CCCvv:    &str,
+		CCName:   &str,
+		Years:    &num,
+	}
+	err := s.Run(martini.CreateSubscription, &flags)
+	s.NoError(err)
+	s.HasText(`"status": "validation_pending",`)
 }
