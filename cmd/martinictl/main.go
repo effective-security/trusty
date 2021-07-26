@@ -80,7 +80,7 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		Action(cli.RegisterAction(martini.FccContact, fccContactFlags))
 	fccContactFlags.FRN = cmdFccContact.Flag("frn", "FRN to query").Required().String()
 
-	// org register|validate|approve|subscribe
+	// org register|validate|approve|subscribe|keys
 	cmdOrgs := app.Command("org", "Orgs operations").
 		PreAction(cli.PopulateControl)
 
@@ -109,6 +109,11 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	orgSubscribeFlags.CCExpiry = cmdSubscribeOrg.Flag("expiry", "CC expiration date").Required().String()
 	orgSubscribeFlags.CCCvv = cmdSubscribeOrg.Flag("cvv", "CC cvv").Required().String()
 	orgSubscribeFlags.Years = cmdSubscribeOrg.Flag("years", "number of years").Required().Int()
+
+	orgAPIKeysFlags := new(martini.APIKeysFlags)
+	cmdOrgAPIKeys := cmdOrgs.Command("keys", "list API keys").
+		Action(cli.RegisterAction(martini.APIKeys, orgAPIKeysFlags))
+	orgAPIKeysFlags.OrgID = cmdOrgAPIKeys.Flag("org", "organization ID").Required().String()
 
 	cli.Parse(args)
 	return cli.ReturnCode()

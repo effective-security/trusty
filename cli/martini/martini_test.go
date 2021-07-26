@@ -112,3 +112,13 @@ func (s *testSuite) TestSubscribeOrg() {
 	s.NoError(err)
 	s.HasText(`"status": "validation_pending",`)
 }
+
+func (s *testSuite) TestAPIKeys() {
+	org := "82936648303640676"
+	flags := martini.APIKeysFlags{
+		OrgID: &org,
+	}
+	err := s.Run(martini.APIKeys, &flags)
+	s.NoError(err)
+	s.HasText(`"key": "_0zxP8c4AUrj_vnPmGXU_eEbA3AzkTXZ",`)
+}

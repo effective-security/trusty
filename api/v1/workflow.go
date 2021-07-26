@@ -112,3 +112,21 @@ type OrgMemberInfo struct {
 type GetOrgMembershipsResponse struct {
 	Memberships []*OrgMemberInfo `json:"memberships"`
 }
+
+// APIKey provides API key
+type APIKey struct {
+	ID         string    `json:"id"`
+	OrgID      string    `json:"org_id"`
+	Key        string    `json:"key"`
+	Enrollemnt bool      `json:"enrollment"`
+	Management bool      `json:"management"`
+	Billing    bool      `json:"billing"`
+	CreatedAt  time.Time `json:"created_at"`
+	ExpiresAt  time.Time `json:"expires_at"`
+	UsedAt     time.Time `json:"used_at"`
+}
+
+// GetOrgAPIKeysResponse returns Orgs API keys
+type GetOrgAPIKeysResponse struct {
+	Keys []APIKey `json:"keys"`
+}
