@@ -1,8 +1,10 @@
 package model
 
 import (
+	"strconv"
 	"time"
 
+	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/juju/errors"
 )
 
@@ -20,12 +22,36 @@ type APIKey struct {
 }
 
 // Validate returns error if the model is not valid
-func (t *APIKey) Validate() error {
-	if t.OrgID == 0 {
+func (k *APIKey) Validate() error {
+	if k.OrgID == 0 {
 		return errors.Errorf("invalid ID")
 	}
-	if len(t.Key) != 32 {
-		return errors.Errorf("invalid key: %q", t.Key)
+	if len(k.Key) != 32 {
+		return errors.Errorf("invalid key: %q", k.Key)
 	}
 	return nil
+}
+
+// ToDto converts model to v1.APIKey DTO
+func (k *APIKey) ToDto() *v1.APIKey {
+	return &v1.APIKey{
+		ID:         strconv.FormatUint(k.ID, 10),
+		OrgID:      strconv.FormatUint(k.OrgID, 10),
+		Key:        k.Key,
+		Enrollemnt: k.Enrollemnt,
+		Management: k.Management,
+		Billing:    k.Billing,
+		CreatedAt:  k.CreatedAt,
+		ExpiresAt:  k.ExpiresAt,
+		UsedAt:     k.UsedAt,
+	}
+}
+
+// ToAPIKeysDto returns API Keys
+func ToAPIKeysDto(list []*APIKey) []v1.APIKey {
+	res := make([]v1.APIKey, len(list))
+	for i, key := range list {
+		res[i] = *key.ToDto()
+	}
+	return res
 }

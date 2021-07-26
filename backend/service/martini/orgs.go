@@ -39,6 +39,27 @@ func (s *Service) GetOrgsHandler() rest.Handle {
 	}
 }
 
+// GetOrgAPIKeysHandler returns API keys
+func (s *Service) GetOrgAPIKeysHandler() rest.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
+		orgID, err := db.ID(p.ByName("org_id"))
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithInvalidParam("invalid org_id: "+p.ByName("org_id")))
+			return
+		}
+
+		keys, err := s.db.GetOrgAPIKeys(r.Context(), orgID)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to get org API keys").WithCause(err))
+			return
+		}
+		res := &v1.GetOrgAPIKeysResponse{
+			Keys: model.ToAPIKeysDto(keys),
+		}
+		marshal.WriteJSON(w, r, res)
+	}
+}
+
 // ApproveOrgHandler validates Org registration
 func (s *Service) ApproveOrgHandler() rest.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
@@ -48,13 +69,14 @@ func (s *Service) ApproveOrgHandler() rest.Handle {
 			return
 		}
 
-		t, err := s.db.UseApprovalToken(r.Context(), req.Token, req.Code)
+		ctx := r.Context()
+		t, err := s.db.UseApprovalToken(ctx, req.Token, req.Code)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("the code is not valid or already validated").WithCause(err))
 			return
 		}
 
-		org, err := s.db.GetOrg(r.Context(), t.OrgID)
+		org, err := s.db.GetOrg(ctx, t.OrgID)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to find organization").WithCause(err))
 			return
@@ -62,7 +84,7 @@ func (s *Service) ApproveOrgHandler() rest.Handle {
 
 		if org.Status == v1.OrgStatusValidationPending {
 			org.Status = v1.OrgStatusApproved
-			org, err = s.db.UpdateOrgStatus(r.Context(), org)
+			org, err = s.db.UpdateOrgStatus(ctx, org)
 			if err != nil {
 				marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to update status").WithCause(err))
 				return
@@ -78,6 +100,22 @@ func (s *Service) ApproveOrgHandler() rest.Handle {
 						"err", errors.Details(err))
 				}
 			}()
+
+			now := time.Now().UTC()
+			_, err = s.db.CreateAPIKey(ctx, &model.APIKey{
+				OrgID:      org.ID,
+				Key:        certutil.RandomString(32),
+				Enrollemnt: true,
+				//Management: true,
+				//Billing: true,
+				CreatedAt: now,
+				ExpiresAt: org.ExpiresAt,
+			})
+			if err != nil {
+				logger.KV(xlog.ERROR,
+					"email", org.Email,
+					"err", errors.Details(err))
+			}
 		}
 
 		res := &v1.OrgResponse{

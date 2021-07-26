@@ -203,3 +203,35 @@ func CreateSubscription(c ctl.Control, p interface{}) error {
 	*/
 	return nil
 }
+
+// APIKeysFlags defines flags for APIKeys command
+type APIKeysFlags struct {
+	OrgID *string
+}
+
+// APIKeys validates organization
+func APIKeys(c ctl.Control, p interface{}) error {
+	flags := p.(*APIKeysFlags)
+	cli := c.(*cli.Cli)
+
+	client, err := cli.HTTPClient()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	res, err := client.GetOrgAPIKeys(context.Background(), *flags.OrgID)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	ctl.WriteJSON(c.Writer(), res)
+	/*
+		if cli.IsJSON() {
+			ctl.WriteJSON(c.Writer(), res)
+			fmt.Fprint(c.Writer(), "\n")
+		} else {
+			print.APIKeysResponse(c.Writer(), res.List)
+		}
+	*/
+	return nil
+}

@@ -310,4 +310,23 @@ func TestRegisterOrgFullFlow(t *testing.T) {
 		require.NoError(t, marshal.Decode(w.Body, &res))
 		assert.Equal(t, v1.OrgStatusApproved, res.Org.Status)
 	}
+
+	// Keys should be created
+	kp := strings.Replace(v1.PathForMartiniOrgAPIKeys, ":org_id", res.Org.ID, 1)
+	r, err = http.NewRequest(http.MethodGet, kp, nil)
+	require.NoError(t, err)
+	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+	w = httptest.NewRecorder()
+	svc.GetOrgAPIKeysHandler()(w, r, rest.Params{
+		{
+			Key:   "org_id",
+			Value: res.Org.ID,
+		},
+	})
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var kres v1.GetOrgAPIKeysResponse
+	require.NoError(t, marshal.Decode(w.Body, &kres))
+	assert.NotEmpty(t, kres.Keys)
 }

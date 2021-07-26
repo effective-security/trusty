@@ -405,3 +405,37 @@ func TestValidateOrg(t *testing.T) {
 	require.NotNil(t, r)
 	assert.Equal(t, v1.OrgStatusValidationPending, r.Org.Status)
 }
+
+func TestGetOrgAPIKeys(t *testing.T) {
+
+	h := makeTestHandler(t, "/v1/ms/apikeys/123", `{
+        "keys": [
+                {
+                        "billing": false,
+                        "created_at": "2021-07-26T03:41:34.618784Z",
+                        "enrollment": true,
+                        "expires_at": "2021-07-30T03:40:31.112741Z",
+                        "id": "82936648303640676",
+                        "key": "_0zxP8c4AUrj_vnPmGXU_eEbA3AzkTXZ",
+                        "management": false,
+                        "org_id": "82936541768319076",
+                        "used_at": null
+                }
+        ]
+}`)
+	server := httptest.NewServer(h)
+	defer server.Close()
+
+	client, err := New(NewConfig(), []string{server.URL})
+	assert.NoError(t, err, "Unexpected error.")
+
+	require.NotPanics(t, func() {
+		// ensure compiles
+		_ = interface{}(client).(API)
+	})
+
+	r, err := client.GetOrgAPIKeys(context.Background(), "123")
+	require.NoError(t, err)
+	require.NotNil(t, r)
+	assert.Len(t, r.Keys, 1)
+}

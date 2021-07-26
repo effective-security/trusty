@@ -227,3 +227,23 @@ bin/martinictl -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca
 }
 ```
 
+## Get API Keys
+
+```.sh
+bin/martinictl -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pem org keys --org 82936541768319076                  
+{
+        "keys": [
+                {
+                        "billing": false,
+                        "created_at": "2021-07-26T03:41:34.618784Z",
+                        "enrollment": true,
+                        "expires_at": "2021-07-30T03:40:31.112741Z",
+                        "id": "82936648303640676",
+                        "key": "_0zxP8c4AUrj_vnPmGXU_eEbA3AzkTXZ",
+                        "management": false,
+                        "org_id": "82936541768319076",
+                        "used_at": null
+                }
+        ]
+}
+```

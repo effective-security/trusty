@@ -102,6 +102,17 @@ func (c *Client) ValidateOrg(ctx context.Context, orgID string) (*v1.ValidateOrg
 	return res, nil
 }
 
+// GetOrgAPIKeys returns Org API keys
+func (c *Client) GetOrgAPIKeys(ctx context.Context, orgID string) (*v1.GetOrgAPIKeysResponse, error) {
+	path := strings.Replace(v1.PathForMartiniOrgAPIKeys, ":org_id", orgID, 1)
+	res := new(v1.GetOrgAPIKeysResponse)
+	_, err := c.Get(ctx, path, res)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return res, nil
+}
+
 // CreateSubscription pays for Org validation
 func (c *Client) CreateSubscription(ctx context.Context, req *v1.CreateSubscriptionRequest) (*v1.OrgResponse, error) {
 	res := new(v1.OrgResponse)
