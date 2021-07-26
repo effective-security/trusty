@@ -3,6 +3,7 @@ package httpclient
 import (
 	"context"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	v1 "github.com/ekspand/trusty/api/v1"
@@ -219,21 +220,6 @@ func TestFccContact(t *testing.T) {
 
 func TestRegisterOrg(t *testing.T) {
 	h := makeTestHandler(t, v1.PathForMartiniRegisterOrg, `{                                   
-        "approver": {                                                                                    
-                "business_name": "Low Latency Communications, LLC",
-                "business_type": "Private Sector, Limited Liability Corporation",
-                "contact_address": "241 Applegate Trace, Pelham, AL 35124-2945, United States",
-                "contact_email": "denis+test@ekspand.com",
-                "contact_fax": "",  
-                "contact_name": "Mr Matthew D Hardeman",
-                "contact_organization": "Low Latency Communications, LLC",
-                "contact_phone": "",
-                "contact_position": "Secretary",    
-                "frn": "99999999",                                                                                                                                                                                
-                "last_updated": "",  
-                "registration_date": "09/29/2015 09:58:00 AM"                                                                                                                                                     
-        },
-        "code": "496017",
         "org": {                                                                                         
                 "approver_email": "denis+test@ekspand.com",
                 "approver_name": "Mr Matthew D Hardeman",
@@ -271,6 +257,56 @@ func TestRegisterOrg(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, r)
 	assert.Equal(t, v1.OrgStatusPaymentPending, r.Org.Status)
+}
+
+func TestSubscribeOrg(t *testing.T) {
+	subsPath := strings.Replace(v1.PathForMartiniOrgSubscription, ":org_id", "82620084182319204", 1)
+	h := makeTestHandler(t, subsPath, `{                         
+        "org": {
+                "approver_email": "denis+test@ekspand.com",
+                "approver_name": "Mr Matthew D Hardeman",
+                "billing_email": "denis@ekspand.com",
+                "city": "PELHAM",
+                "company": "LOW LATENCY COMMUNICATIONS LLC",
+                "created_at": "2021-07-23T23:16:47.699181Z",
+                "email": "denis+test@ekspand.com",
+                "expires_at": "2022-07-21T11:16:47.699181Z",
+                "extern_id": "99999999",
+                "id": "82620084182319204",
+                "login": "99999999",
+                "name": "LOW LATENCY COMMUNICATIONS LLC",
+                "phone": "2057453970",
+                "postal_code": "35124",
+                "provider": "martini",
+                "region": "AL",
+                "status": "validation_pending",
+                "street_address": "241 APPLEGATE TRACE",
+                "updated_at": "2021-07-23T23:16:47.699181Z"
+        }
+}`)
+	server := httptest.NewServer(h)
+	defer server.Close()
+
+	client, err := New(NewConfig(), []string{server.URL})
+	assert.NoError(t, err, "Unexpected error.")
+
+	require.NotPanics(t, func() {
+		// ensure compiles
+		_ = interface{}(client).(API)
+	})
+
+	req := &v1.CreateSubscriptionRequest{
+		OrgID:             "82620084182319204",
+		CCNumber:          "4445-1234-1234-1234",
+		CCExpiry:          "11/22",
+		CCCvv:             "234",
+		CCName:            "John Doe",
+		SubscriptionYears: 3,
+	}
+	r, err := client.CreateSubscription(context.Background(), req)
+	require.NoError(t, err)
+	require.NotNil(t, r)
+	assert.Equal(t, v1.OrgStatusValidationPending, r.Org.Status)
 }
 
 func TestApproveOrg(t *testing.T) {
@@ -315,27 +351,42 @@ func TestApproveOrg(t *testing.T) {
 }
 
 func TestValidateOrg(t *testing.T) {
-	h := makeTestHandler(t, v1.PathForMartiniValidateOrg, `{                         
-        "org": {
+	h := makeTestHandler(t, v1.PathForMartiniValidateOrg, `{                                   
+        "approver": {                                                                                    
+                "business_name": "Low Latency Communications, LLC",
+                "business_type": "Private Sector, Limited Liability Corporation",
+                "contact_address": "241 Applegate Trace, Pelham, AL 35124-2945, United States",
+                "contact_email": "denis+test@ekspand.com",
+                "contact_fax": "",             
+                "contact_name": "Mr Matthew D Hardeman",
+                "contact_organization": "Low Latency Communications, LLC",
+                "contact_phone": "",
+                "contact_position": "Secretary",    
+                "frn": "99999999",                                                                                                                                                                                
+                "last_updated": "",
+                "registration_date": "09/29/2015 09:58:00 AM"
+        },                                                                                               
+        "code": "210507",                                                                                
+        "org": {                                                                                         
                 "approver_email": "denis+test@ekspand.com",
-                "approver_name": "Mr Matthew D Hardeman",
-                "billing_email": "denis@ekspand.com",
-                "city": "PELHAM",
+                "approver_name": "Mr Matthew D Hardeman",   
+                "billing_email": "denis@ekspand.com",       
+                "city": "PELHAM",                 
                 "company": "LOW LATENCY COMMUNICATIONS LLC",
-                "created_at": "2021-07-23T23:16:47.699181Z",
+                "created_at": "2021-07-26T01:30:04.813442Z",
                 "email": "denis+test@ekspand.com",
-                "expires_at": "2022-07-21T11:16:47.699181Z",
-                "extern_id": "99999999",
-                "id": "82620084182319204",
-                "login": "99999999",
+                "expires_at": "2021-07-30T01:30:04.813442Z",
+                "extern_id": "99999999",                                                                 
+                "id": "82923411415760996",
+                "login": "99999999",   
                 "name": "LOW LATENCY COMMUNICATIONS LLC",
                 "phone": "2057453970",
                 "postal_code": "35124",
-                "provider": "martini",
-                "region": "AL",
+                "provider": "martini",                                                                   
+                "region": "AL",                                                                          
                 "status": "validation_pending",
                 "street_address": "241 APPLEGATE TRACE",
-                "updated_at": "2021-07-23T23:16:47.699181Z"
+                "updated_at": "2021-07-26T01:30:04.813442Z"
         }
 }`)
 	server := httptest.NewServer(h)

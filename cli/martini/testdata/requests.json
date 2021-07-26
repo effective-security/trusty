@@ -5,5 +5,7 @@
     "/v1/ms/fcc_frn?filer_id=831188": {"file":"fccfrn"},
     "/v1/ms/register_org": {"file":"register"},
     "/v1/ms/approve_org": {"file":"approve"},
+    "/v1/ms/validate_org": {"file":"validate"},
+    "/v1/ms/subsciption/82923411415760996": {"file":"subscribe"},
     "/v1/ms/search/opencorporates?name=peculiar+ventures" : {"file":"opencorps"}
 }

@@ -3,6 +3,7 @@ package httpclient
 import (
 	"context"
 	"net/url"
+	"strings"
 
 	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/juju/errors"
@@ -95,6 +96,17 @@ func (c *Client) ValidateOrg(ctx context.Context, orgID string) (*v1.ValidateOrg
 
 	res := new(v1.ValidateOrgResponse)
 	_, err := c.PostRequest(ctx, v1.PathForMartiniValidateOrg, req, res)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return res, nil
+}
+
+// CreateSubscription pays for Org validation
+func (c *Client) CreateSubscription(ctx context.Context, req *v1.CreateSubscriptionRequest) (*v1.OrgResponse, error) {
+	res := new(v1.OrgResponse)
+	path := strings.Replace(v1.PathForMartiniOrgSubscription, ":org_id", req.OrgID, 1)
+	_, err := c.PostRequest(ctx, path, req, res)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

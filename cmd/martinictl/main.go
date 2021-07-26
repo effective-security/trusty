@@ -80,7 +80,7 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		Action(cli.RegisterAction(martini.FccContact, fccContactFlags))
 	fccContactFlags.FRN = cmdFccContact.Flag("frn", "FRN to query").Required().String()
 
-	// org register|validate
+	// org register|validate|approve|subscribe
 	cmdOrgs := app.Command("org", "Orgs operations").
 		PreAction(cli.PopulateControl)
 
@@ -94,6 +94,21 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		Action(cli.RegisterAction(martini.ApproveOrg, orgApproveFlags))
 	orgApproveFlags.Token = cmdApproveOrg.Flag("token", "approver's token").Required().String()
 	orgApproveFlags.Code = cmdApproveOrg.Flag("code", "requestor's code").Required().String()
+
+	orgValidateFlags := new(martini.ValidateFlags)
+	cmdValidateOrg := cmdOrgs.Command("validate", "approve organization validation").
+		Action(cli.RegisterAction(martini.ValidateOrg, orgValidateFlags))
+	orgValidateFlags.OrgID = cmdValidateOrg.Flag("org", "organization ID").Required().String()
+
+	orgSubscribeFlags := new(martini.CreateSubscriptionFlags)
+	cmdSubscribeOrg := cmdOrgs.Command("subscribe", "create subscription").
+		Action(cli.RegisterAction(martini.CreateSubscription, orgSubscribeFlags))
+	orgSubscribeFlags.OrgID = cmdSubscribeOrg.Flag("org", "organization ID").Required().String()
+	orgSubscribeFlags.CCName = cmdSubscribeOrg.Flag("cardholder", "CC cardholder").Required().String()
+	orgSubscribeFlags.CCNumber = cmdSubscribeOrg.Flag("cc", "CC number").Required().String()
+	orgSubscribeFlags.CCExpiry = cmdSubscribeOrg.Flag("expiry", "CC expiration date").Required().String()
+	orgSubscribeFlags.CCCvv = cmdSubscribeOrg.Flag("cvv", "CC cvv").Required().String()
+	orgSubscribeFlags.Years = cmdSubscribeOrg.Flag("years", "number of years").Required().Int()
 
 	cli.Parse(args)
 	return cli.ReturnCode()

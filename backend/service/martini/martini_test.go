@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
-	"time"
 
 	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/backend/service/martini"
@@ -21,6 +21,7 @@ import (
 	"github.com/ekspand/trusty/internal/db/orgsdb/model"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/tests/testutils"
+	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xhttp/marshal"
@@ -159,7 +160,7 @@ func TestGetOrgsHandler(t *testing.T) {
 	assert.Empty(t, res.Orgs)
 }
 
-func TestRegisterOrgHandler(t *testing.T) {
+func TestRegisterOrgFullFlow(t *testing.T) {
 	ctx := context.Background()
 	svc := trustyServer.Service(martini.ServiceName).(*martini.Service)
 	// TODO: mock emailer
@@ -237,15 +238,29 @@ func TestRegisterOrgHandler(t *testing.T) {
 	//
 	// Payment
 	//
-	res.Org.Status = v1.OrgStatusPaid
-	_, err = svc.Db().UpdateOrgStatus(ctx, &model.Organization{
-		ID:            orgID,
-		ApproverName:  res.Org.ApproverName,
-		ApproverEmail: res.Org.ApproverEmail,
-		Status:        v1.OrgStatusPaid,
-		ExpiresAt:     time.Now().Add(8700 * time.Hour),
-	})
+	paymentReq := &v1.CreateSubscriptionRequest{
+		CCNumber:          "4445-1234-1234-1234-1234",
+		CCExpiry:          "11/23",
+		CCCvv:             "266",
+		CCName:            "John Doe",
+		SubscriptionYears: 3,
+	}
+	jsPayment, err := json.Marshal(paymentReq)
 	require.NoError(t, err)
+
+	subsPath := strings.Replace(v1.PathForMartiniOrgSubscription, ":org_id", res.Org.ID, 1)
+	r, err = http.NewRequest(http.MethodPost, subsPath, bytes.NewReader(jsPayment))
+	require.NoError(t, err)
+	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+	w = httptest.NewRecorder()
+	svc.CreateSubsciptionHandler()(w, r, rest.Params{
+		{
+			Key:   "org_id",
+			Value: res.Org.ID,
+		},
+	})
+	require.Equal(t, http.StatusOK, w.Code)
 
 	//
 	// Validate
