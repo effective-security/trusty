@@ -62,6 +62,10 @@ func TestMain(m *testing.M) {
 	var err error
 	xlog.SetPackageLogLevel("github.com/go-phorce/dolly/xhttp", "retriable", xlog.DEBUG)
 
+	// add this to be able launch service when debugging using vscode
+	os.Setenv("TRUSTY_MAILGUN_PRIVATE_KEY", "1234")
+	os.Setenv("TRUSTY_JWT_SEED", "1234")
+
 	cfg, err := testutils.LoadConfig(projFolder, "UNIT_TEST")
 	if err != nil {
 		panic(errors.Trace(err))
@@ -87,10 +91,6 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		panic(errors.Trace(err))
 	}
-
-	// add this to be able launch service when debugging using vscode
-	os.Setenv("TRUSTY_MAILGUN_PRIVATE_KEY", "1234")
-	os.Setenv("TRUSTY_JWT_SEED", "1234")
 
 	trustyServer, err = gserver.Start("martini_test", httpCfg, container, serviceFactories)
 	if err != nil || trustyServer == nil {

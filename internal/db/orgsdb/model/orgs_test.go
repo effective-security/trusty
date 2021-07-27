@@ -184,7 +184,7 @@ func TestAPIKey(t *testing.T) {
 	u := &model.APIKey{
 		ID:         1000,
 		OrgID:      2000,
-		Key:        "12345425",
+		Key:        model.GenerateAPIKey(),
 		Enrollemnt: true,
 		Management: true,
 		Billing:    true,
@@ -192,6 +192,7 @@ func TestAPIKey(t *testing.T) {
 		UsedAt:     now.Add(time.Hour),
 		ExpiresAt:  now.Add(2 * time.Hour),
 	}
+	assert.Len(t, u.Key, 32)
 
 	dto := u.ToDto()
 	assert.Equal(t, "1000", dto.ID)
@@ -226,5 +227,4 @@ func TestAPIKeyValidate(t *testing.T) {
 			assert.NoError(t, err)
 		}
 	}
-
 }

@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/ekspand/trusty/acme"
 	"github.com/ekspand/trusty/authority"
 	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/internal/config"
@@ -67,6 +68,9 @@ type ProvideClientFactoryFn func(cfg *config.Configuration) (client.Factory, err
 // ProvideFCCAPIClientFn defines FCC API Client provider
 type ProvideFCCAPIClientFn func() (fcc.APIClient, error)
 
+// ProvideAcmeFn defines ACMA provider
+type ProvideAcmeFn func(cfg *config.Configuration, db cadb.CaDb) (acme.Controller, error)
+
 // CloseRegistrator provides interface to release resources on close
 type CloseRegistrator interface {
 	OnClose(closer io.Closer)
@@ -89,6 +93,7 @@ type ContainerFactory struct {
 	jwtProvider           ProvideJwtFn
 	clientFactoryProvider ProvideClientFactoryFn
 	fccAPIClientProvider  ProvideFCCAPIClientFn
+	acmeProvider          ProvideAcmeFn
 }
 
 // NewContainerFactory returns an instance of ContainerFactory
@@ -113,6 +118,7 @@ func NewContainerFactory(closer CloseRegistrator) *ContainerFactory {
 		WithOAuthClientsProvider(provideOAuth).
 		WithEmailClientsProvider(provideEmail).
 		WithJwtProvider(provideJwt).
+		WithACMEProvider(provideAcme).
 		WithClientFactoryProvider(provideClientFactory)
 }
 
@@ -125,6 +131,12 @@ func (f *ContainerFactory) WithConfigurationProvider(p ProvideConfigurationFn) *
 // WithDiscoveryProvider allows to specify Discovery
 func (f *ContainerFactory) WithDiscoveryProvider(p ProvideDiscoveryFn) *ContainerFactory {
 	f.discoveryProvider = p
+	return f
+}
+
+// WithACMEProvider allows to specify ACME provider
+func (f *ContainerFactory) WithACMEProvider(p ProvideAcmeFn) *ContainerFactory {
+	f.acmeProvider = p
 	return f
 }
 
@@ -256,6 +268,11 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 		return nil, errors.Trace(err)
 	}
 
+	err = container.Provide(f.acmeProvider)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
 	return container, nil
 }
 
@@ -378,4 +395,13 @@ func provideCaDB(cfg *config.Configuration) (cadb.CaDb, error) {
 
 func provideClientFactory(cfg *config.Configuration) (client.Factory, error) {
 	return client.NewFactory(&cfg.TrustyClient), nil
+}
+
+func provideAcme(cfg *config.Configuration, db cadb.CaDb) (acme.Controller, error) {
+	acmecfg, err := acme.LoadConfig(cfg.Acme)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	return acme.NewProvider(acmecfg, db)
 }

@@ -1,9 +1,17 @@
-package config
+package acme
 
-import "time"
+import (
+	"encoding/json"
+	"io/ioutil"
+	"strings"
+	"time"
 
-// AcmePolicy contains configuration for the ACME Policy.
-type AcmePolicy struct {
+	"github.com/juju/errors"
+	"gopkg.in/yaml.v2"
+)
+
+// PolicyConfig contains configuration for the ACME PolicyConfig.
+type PolicyConfig struct {
 
 	// OrderExpiry specifies duration period for the Order's lifetime.
 	OrderExpiry time.Duration `json:"order_expiry" yaml:"order_expiry"`
@@ -27,8 +35,8 @@ type AcmePolicy struct {
 	EnableWildcardDomains bool `json:"enable_wildcard_domains" yaml:"enable_wildcard_domains"`
 }
 
-// AcmeDV contains configuration for the Domain Validation service.
-type AcmeDV struct {
+// DVConfig contains configuration for the Domain Validation service.
+type DVConfig struct {
 
 	// IssuerDomain specifies the issuer's domain.
 	IssuerDomain string `json:"issuer_domain" yaml:"issuer_domain"`
@@ -58,8 +66,8 @@ type AcmeDV struct {
 	AccountURIPrefixes []string `json:"account_uri_prefixes" yaml:"account_uri_prefixes"`
 }
 
-// AcmeService contains configuration for the ACME service.
-type AcmeService struct {
+// ServiceConfig contains configuration for the ACME service.
+type ServiceConfig struct {
 	// SubscriberAgreementURL specifies optional Agreement URL.
 	SubscriberAgreementURL string `json:"subscriber_agreement_url" yaml:"subscriber_agreement_url"`
 
@@ -73,12 +81,37 @@ type AcmeService struct {
 	DirectoryURIPrefix string `json:"directory_uri_prefix" yaml:"directory_uri_prefix"`
 }
 
-// Acme configuration.
-type Acme struct {
+// Config provides Acme configuration.
+type Config struct {
 	// Service contains configuration for the ACME service.
-	Service AcmeService `json:"service" yaml:"service"`
+	Service ServiceConfig `json:"service" yaml:"service"`
 	// DV contains configuration for the Domain Validation service.
-	DV AcmeDV `json:"domain_validation" yaml:"domain_validation"`
+	DV DVConfig `json:"domain_validation" yaml:"domain_validation"`
 	// Policy contains configuration for the ACME Policy.
-	Policy AcmePolicy `json:"policy" yaml:"policy"`
+	Policy PolicyConfig `json:"policy" yaml:"policy"`
+}
+
+// LoadConfig returns Config
+func LoadConfig(path string) (*Config, error) {
+	if path == "" {
+		return nil, errors.New("invalid path")
+	}
+
+	body, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, errors.Annotate(err, "unable to read configuration file")
+	}
+
+	var cfg = new(Config)
+	if strings.HasSuffix(path, ".json") {
+		err = json.Unmarshal(body, cfg)
+	} else {
+		err = yaml.Unmarshal(body, cfg)
+	}
+
+	if err != nil {
+		return nil, errors.Annotate(err, "failed to unmarshal configuration")
+	}
+
+	return cfg, nil
 }

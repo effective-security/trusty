@@ -1,10 +1,12 @@
 package model
 
 import (
+	"encoding/hex"
 	"strconv"
 	"time"
 
 	v1 "github.com/ekspand/trusty/api/v1"
+	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
 )
 
@@ -54,4 +56,9 @@ func ToAPIKeysDto(list []*APIKey) []v1.APIKey {
 		res[i] = *key.ToDto()
 	}
 	return res
+}
+
+// GenerateAPIKey returns random key
+func GenerateAPIKey() string {
+	return hex.EncodeToString(certutil.Random(16))
 }

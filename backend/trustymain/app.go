@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/ekspand/trusty/backend/service/acme"
 	"github.com/ekspand/trusty/backend/service/auth"
 	"github.com/ekspand/trusty/backend/service/ca"
 	"github.com/ekspand/trusty/backend/service/cis"
@@ -41,6 +42,7 @@ const (
 
 // ServiceFactories provides map of gserver.ServiceFactory
 var ServiceFactories = map[string]gserver.ServiceFactory{
+	acme.ServiceName:     acme.Factory,
 	auth.ServiceName:     auth.Factory,
 	ca.ServiceName:       ca.Factory,
 	ra.ServiceName:       ra.Factory,
