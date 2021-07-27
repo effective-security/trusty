@@ -330,7 +330,7 @@ func (s *Service) validateOrg(ctx context.Context, orgID uint64, requestor *mode
 	}
 
 	err = s.sendEmail(requestor.Email,
-		"Organization validation request",
+		"Organization verification code",
 		requesterEmailTemplate,
 		emailData)
 	if err != nil {
@@ -367,42 +367,3 @@ type orgValidationEmailTemplate struct {
 	Company        string
 	Address        string
 }
-
-const requesterEmailTemplate = `
-<h2>Organization validation submitted</h2>
-<p>
-	<div>{{.RequesterName}},</div>
-	<div>The organization validation request has been sent to {{.ApproverName}}, {{.ApproverEmail}}.</div>
-
-    <div>Please provide the approver this code fo complete the validation.</div>
-    <h3>{{.Code}}</h3>
-
-	<div>Thank you for using Martini Security!</div>
-</p>
-`
-
-const approverEmailTemplate = `
-<h2>Organization validation request</h2>
-<p>
-	<div>{{.ApproverName}},</div>
-
-    <div>{{.RequesterName}}, {{.RequesterEmail}} has requested permission to acquire certificates for your organization.</div>
-
-    <h2>{{.Company}}</h2>
-	<h4>{{.Address}}</h4>
-	
-    <div>To authorize this request, enter the Code that was provided you by the requester.</div>
-	<h3>Link: <a href="https://martinisecurity.com/validate/{{.Token}}">Click here to approve</a></h3>
-
-	<div>Thank you for using Martini Security!</div>
-</p>
-`
-
-const orgApprovedTemplate = `
-<h2>Organization validation succeeded!</h2>
-<p>
-	<div>{{.Company}} is approved to request certificates.</div>
-
-	<div>Thank you for using Martini Security!</div>
-</p>
-`

@@ -20,7 +20,7 @@ func TestRenderUserEmailTemplate(t *testing.T) {
 		Address:        "123 Drive, Kirkland, 98034, WA",
 	}
 
-	body, err := renderEmailTemplate(requesterEmailTemplate, emailData)
+	body, err := renderEmailTemplate(requesterEmailTemplate2, emailData)
 	require.NoError(t, err)
 	assert.Equal(t, `
 <h2>Organization validation submitted</h2>
@@ -35,7 +35,7 @@ func TestRenderUserEmailTemplate(t *testing.T) {
 </p>
 `, body)
 
-	body, err = renderEmailTemplate(approverEmailTemplate, emailData)
+	body, err = renderEmailTemplate(approverEmailTemplate2, emailData)
 	require.NoError(t, err)
 	assert.Equal(t, `
 <h2>Organization validation request</h2>
@@ -60,7 +60,7 @@ func TestRenderApprovedTemplate(t *testing.T) {
 		Company: "IPIPHONY",
 	}
 
-	body, err := renderEmailTemplate(orgApprovedTemplate, emailData)
+	body, err := renderEmailTemplate(orgApprovedTemplate2, emailData)
 	require.NoError(t, err)
 	assert.Equal(t, `
 <h2>Organization validation succeeded!</h2>
@@ -71,3 +71,42 @@ func TestRenderApprovedTemplate(t *testing.T) {
 </p>
 `, body)
 }
+
+const requesterEmailTemplate2 = `
+<h2>Organization validation submitted</h2>
+<p>
+	<div>{{.RequesterName}},</div>
+	<div>The organization validation request has been sent to {{.ApproverName}}, {{.ApproverEmail}}.</div>
+
+    <div>Please provide the approver this code fo complete the validation.</div>
+    <h3>{{.Code}}</h3>
+
+	<div>Thank you for using Martini Security!</div>
+</p>
+`
+
+const approverEmailTemplate2 = `
+<h2>Organization validation request</h2>
+<p>
+	<div>{{.ApproverName}},</div>
+
+    <div>{{.RequesterName}}, {{.RequesterEmail}} has requested permission to acquire certificates for your organization.</div>
+
+    <h2>{{.Company}}</h2>
+	<h4>{{.Address}}</h4>
+	
+    <div>To authorize this request, enter the Code that was provided you by the requester.</div>
+	<h3>Link: <a href="https://martinisecurity.com/validate/{{.Token}}">Click here to approve</a></h3>
+
+	<div>Thank you for using Martini Security!</div>
+</p>
+`
+
+const orgApprovedTemplate2 = `
+<h2>Organization validation succeeded!</h2>
+<p>
+	<div>{{.Company}} is approved to request certificates.</div>
+
+	<div>Thank you for using Martini Security!</div>
+</p>
+`
