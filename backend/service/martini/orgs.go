@@ -104,7 +104,7 @@ func (s *Service) ApproveOrgHandler() rest.Handle {
 			now := time.Now().UTC()
 			_, err = s.db.CreateAPIKey(ctx, &model.APIKey{
 				OrgID:      org.ID,
-				Key:        certutil.RandomString(32),
+				Key:        model.GenerateAPIKey(),
 				Enrollemnt: true,
 				//Management: true,
 				//Billing: true,
