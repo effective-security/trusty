@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-phorce/dolly/xlog"
@@ -71,6 +72,11 @@ func ID(id string) (uint64, error) {
 		return 0, errors.Trace(err)
 	}
 	return i64, nil
+}
+
+// IsNotFoundError returns true, if error is NotFound
+func IsNotFoundError(err error) bool {
+	return strings.HasPrefix(err.Error(), "sql: no rows in result set")
 }
 
 // Migrate performs the db migration

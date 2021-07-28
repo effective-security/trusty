@@ -48,7 +48,9 @@ type OrgsReadOnlyDb interface {
 	// GetFccContactResponse returns cached Contact response
 	GetFccContactResponse(ctx context.Context, frn string) (*model.FccContactResponse, error)
 	// GetAPIKey returns APIKey and updates its Used time
-	GetAPIKey(ctx context.Context, key string) (*model.APIKey, error)
+	GetAPIKey(ctx context.Context, id uint64) (*model.APIKey, error)
+	// FindAPIKey returns APIKey and updates its Used time
+	FindAPIKey(ctx context.Context, key string) (*model.APIKey, error)
 	// GetOrgAPIKeys returns all API keys for Organization
 	GetOrgAPIKeys(ctx context.Context, orgID uint64) ([]*model.APIKey, error)
 }

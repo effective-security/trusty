@@ -102,6 +102,42 @@ func (p *SQLProvider) GetRegistration(ctx context.Context, id uint64) (*model.Re
 	return res, nil
 }
 
+// GetRegistrationByKeyID returns account registration
+func (p *SQLProvider) GetRegistrationByKeyID(ctx context.Context, keyID string) (*model.Registration, error) {
+	res := new(model.Registration)
+	var key string
+	var contact string
+	err := p.db.QueryRowContext(ctx, `
+		SELECT
+			id,external_id,key_id,key,contact,agreement,initial_ip,created_at,status
+		FROM registrations
+		WHERE key_id = $1
+		;
+		`, keyID).Scan(
+		&res.ID,
+		&res.ExternalID,
+		&res.KeyID,
+		&key,
+		&contact,
+		&res.Agreement,
+		&res.InitialIP,
+		&res.CreatedAt,
+		&res.Status,
+	)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	res.CreatedAt = res.CreatedAt.UTC()
+
+	err = json.Unmarshal([]byte(key), &res.Key)
+	if err != nil {
+		return nil, errors.Annotatef(err, "corrupted data")
+	}
+	res.Contact = strings.Split(contact, ",")
+
+	return res, nil
+}
+
 // UpdateOrder updates Order
 func (p *SQLProvider) UpdateOrder(ctx context.Context, order *model.Order) (*model.Order, error) {
 	id, err := p.NextID()

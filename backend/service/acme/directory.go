@@ -13,22 +13,28 @@ const randomDirKeyExplanationLink = "https://community.letsencrypt.org/t/adding-
 
 const (
 	// uriNonces allows to handle HEAD for all paths under /v2/acme
-	uriNonces       = v2acme.BasePath + "/:verb"
-	uriNewNonce     = v2acme.BasePath + "/new-nonce"
-	uriNewAccount   = v2acme.BasePath + "/new-account"
-	uriNewOrder     = v2acme.BasePath + "/new-order"
-	uriKeyChange    = v2acme.BasePath + "/key-change"
-	uriRevokeCert   = v2acme.BasePath + "/revoke-cert"
-	uriAccount      = v2acme.BasePath + "/account"
-	uriAuthz        = v2acme.BasePath + "/authz"
-	uriChallenge    = v2acme.BasePath + "/challenge"
-	uriCert         = v2acme.BasePath + "/cert"
-	uriCertByID     = uriCert + "/:id"
+	uriNonces     = v2acme.BasePath + "/:verb"
+	uriNewNonce   = v2acme.BasePath + "/new-nonce"
+	uriNewAccount = v2acme.BasePath + "/new-account"
+	uriNewOrder   = v2acme.BasePath + "/new-order"
+
+	uriKeyChange  = v2acme.BasePath + "/key-change"
+	uriRevokeCert = v2acme.BasePath + "/revoke-cert"
+
+	// The following URIs should have accountID in URL and
+	// KeyID in the payload
+
+	uriAccountByID = v2acme.BasePath + "/account/:acct_id"
+
+	uriOrders    = uriAccountByID + "/orders"
+	uriOrderByID = uriOrders + "/:id"
+
+	uriAuthzByID = v2acme.BasePath + "/authz/:id"
+	uriChallenge = v2acme.BasePath + "/challenge/:acct_id/:authz_id/:id"
+	uriCert      = v2acme.BasePath + "/cert/:acct_id/:id"
+
 	uriIssuer       = v2acme.BasePath + "/issuer-cert"
-	uriOrder        = v2acme.BasePath + "/order"
-	uriOrderByID    = uriOrder + "/:id"
-	uriFinalize     = v2acme.BasePath + "/finalize"
-	uriFinalizeByID = uriFinalize + "/:id"
+	uriFinalizeByID = v2acme.BasePath + "/finalize/:acct_id/:id"
 )
 
 // DirectoryHandler returns directory
@@ -38,7 +44,7 @@ func (s *Service) DirectoryHandler() rest.Handle {
 
 		cfg := s.controller.Config()
 
-		baseURL := cfg.Service.DirectoryURIPrefix
+		baseURL := cfg.Service.BaseURI
 		if baseURL == "" {
 			baseURL = s.cfg.TrustyClient.ServerURL["wfe"][0]
 		}

@@ -10,6 +10,7 @@ import (
 	"github.com/ekspand/trusty/acme/acmedb"
 	"github.com/ekspand/trusty/acme/model"
 	"github.com/ekspand/trusty/api/v2acme"
+	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
@@ -109,6 +110,11 @@ func Test_SetRegistration(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, c2)
 		assert.Equal(t, *r, *c2)
+
+		c3, err := provider.GetRegistrationByKeyID(ctx, r.KeyID)
+		require.NoError(t, err)
+		require.NotNil(t, c3)
+		assert.Equal(t, *r, *c3)
 	}
 }
 
@@ -123,6 +129,7 @@ func Test_ACMEGetOrder(t *testing.T) {
 	val, err := provider.GetOrder(ctx, 1234, "1234")
 	require.Error(t, err)
 	assert.Equal(t, "sql: no rows in result set", err.Error())
+	assert.True(t, db.IsNotFoundError(err))
 	assert.Nil(t, val)
 
 	list, err := provider.GetOrders(ctx, 123)

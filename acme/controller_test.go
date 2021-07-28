@@ -11,7 +11,7 @@ import (
 func TestNewController(t *testing.T) {
 	cfg, err := acme.LoadConfig(projFolder + "etc/dev/acme.yaml")
 	require.NoError(t, err)
-	assert.NotEmpty(t, cfg.Service.DirectoryURIPrefix)
+	assert.NotEmpty(t, cfg.Service.BaseURI)
 
 	c, err := acme.NewProvider(cfg, nil)
 	require.NoError(t, err)

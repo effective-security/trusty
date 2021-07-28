@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/ekspand/trusty/acme"
+	"github.com/ekspand/trusty/acme/acmedb"
 	"github.com/ekspand/trusty/authority"
 	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/internal/config"
@@ -69,7 +70,7 @@ type ProvideClientFactoryFn func(cfg *config.Configuration) (client.Factory, err
 type ProvideFCCAPIClientFn func() (fcc.APIClient, error)
 
 // ProvideAcmeFn defines ACMA provider
-type ProvideAcmeFn func(cfg *config.Configuration, db cadb.CaDb) (acme.Controller, error)
+type ProvideAcmeFn func(cfg *config.Configuration) (acme.Controller, error)
 
 // CloseRegistrator provides interface to release resources on close
 type CloseRegistrator interface {
@@ -360,15 +361,6 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*au
 }
 
 func provideOrgsDB(cfg *config.Configuration) (orgsdb.OrgsDb, error) {
-	var idGenerator = sonyflake.NewSonyflake(sonyflake.Settings{
-		StartTime: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
-		/* TODO: machine ID from config
-		MachineID: func() (uint16, error) {
-			return uint16(os.Getpid()), nil
-		},
-		*/
-	})
-
 	d, err := orgsdb.New(cfg.OrgsSQL.Driver, cfg.OrgsSQL.DataSource, cfg.OrgsSQL.MigrationsDir, idGenerator.NextID)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -377,15 +369,6 @@ func provideOrgsDB(cfg *config.Configuration) (orgsdb.OrgsDb, error) {
 }
 
 func provideCaDB(cfg *config.Configuration) (cadb.CaDb, error) {
-	var idGenerator = sonyflake.NewSonyflake(sonyflake.Settings{
-		StartTime: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
-		/* TODO: machine ID from config
-		MachineID: func() (uint16, error) {
-			return uint16(os.Getpid()), nil
-		},
-		*/
-	})
-
 	d, err := cadb.New(cfg.CaSQL.Driver, cfg.CaSQL.DataSource, cfg.CaSQL.MigrationsDir, idGenerator.NextID)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -397,11 +380,20 @@ func provideClientFactory(cfg *config.Configuration) (client.Factory, error) {
 	return client.NewFactory(&cfg.TrustyClient), nil
 }
 
-func provideAcme(cfg *config.Configuration, db cadb.CaDb) (acme.Controller, error) {
+func provideAcme(cfg *config.Configuration) (acme.Controller, error) {
 	acmecfg, err := acme.LoadConfig(cfg.Acme)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	db, err := acmedb.New(cfg.CaSQL.Driver, cfg.CaSQL.DataSource, cfg.CaSQL.MigrationsDir, idGenerator.NextID)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
 	return acme.NewProvider(acmecfg, db)
 }
+
+var idGenerator = sonyflake.NewSonyflake(sonyflake.Settings{
+	StartTime: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
+})

@@ -68,7 +68,7 @@ type CaDb interface {
 	RemoveCrl(ctx context.Context, id uint64) error
 
 	// CreateNonce returns Nonce
-	CreateNonce(ctx context.Context, token *model.Nonce) (*model.Nonce, error)
+	CreateNonce(ctx context.Context, nonce *model.Nonce) (*model.Nonce, error)
 	// UseNonce returns Nonce if nonce matches, and was not used
 	UseNonce(ctx context.Context, nonce string) (*model.Nonce, error)
 	// DeleteNonce deletes the nonce
