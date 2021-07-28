@@ -27,6 +27,8 @@ type AcmeDB interface {
 	SetRegistration(ctx context.Context, reg *model.Registration) (*model.Registration, error)
 	// GetRegistration returns account registration
 	GetRegistration(ctx context.Context, id uint64) (*model.Registration, error)
+	// GetRegistrationByKeyID returns account registration
+	GetRegistrationByKeyID(ctx context.Context, keyID string) (*model.Registration, error)
 
 	// UpdateOrder updates Order
 	UpdateOrder(ctx context.Context, order *model.Order) (*model.Order, error)

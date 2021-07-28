@@ -1,20 +1,25 @@
-package acme_test
+package acme
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
+	acmecontroller "github.com/ekspand/trusty/acme"
+	"github.com/ekspand/trusty/acme/acmedb"
 	"github.com/ekspand/trusty/api/v2acme"
-	"github.com/ekspand/trusty/backend/service/acme"
 	"github.com/ekspand/trusty/internal/appcontainer"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/tests/testutils"
+	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
+	"github.com/sony/sonyflake"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -22,6 +27,7 @@ import (
 var (
 	trustyServer *gserver.Server
 	httpAddr     string
+	acmeDir      map[string]string
 )
 
 const (
@@ -30,7 +36,7 @@ const (
 
 // serviceFactories provides map of trustyserver.ServiceFactory
 var serviceFactories = map[string]gserver.ServiceFactory{
-	acme.ServiceName: acme.Factory,
+	ServiceName: Factory,
 }
 
 func TestMain(m *testing.M) {
@@ -50,13 +56,33 @@ func TestMain(m *testing.M) {
 
 	httpCfg := &config.HTTPServer{
 		ListenURLs: []string{httpAddr},
-		Services:   []string{acme.ServiceName},
+		Services:   []string{ServiceName},
+	}
+
+	provideAcme := func(cfg *config.Configuration) (acmecontroller.Controller, error) {
+		acmecfg, err := acmecontroller.LoadConfig(cfg.Acme)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+
+		acmecfg.Service.BaseURI = httpAddr
+		var idGenerator = sonyflake.NewSonyflake(sonyflake.Settings{
+			StartTime: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
+		})
+		db, err := acmedb.New(cfg.CaSQL.Driver, cfg.CaSQL.DataSource, cfg.CaSQL.MigrationsDir, idGenerator.NextID)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+
+		return acmecontroller.NewProvider(acmecfg, db)
 	}
 
 	container, err := appcontainer.NewContainerFactory(nil).
 		WithConfigurationProvider(func() (*config.Configuration, error) {
 			return cfg, nil
-		}).CreateContainerWithDependencies()
+		}).
+		WithACMEProvider(provideAcme).
+		CreateContainerWithDependencies()
 	if err != nil {
 		panic(errors.Trace(err))
 	}
@@ -75,20 +101,56 @@ func TestMain(m *testing.M) {
 	os.Exit(rc)
 }
 
+func TestReady(t *testing.T) {
+	svc := trustyServer.Service(ServiceName).(*Service)
+	assert.True(t, svc.IsReady())
+	assert.NotNil(t, svc.CaDb())
+	assert.NotNil(t, svc.OrgsDb())
+}
+
 func TestDirectory(t *testing.T) {
-	svc := trustyServer.Service(acme.ServiceName).(*acme.Service)
+	dir := getDirectory(t)
+	require.NotEmpty(t, dir)
+	assert.Equal(t, httpAddr+"/v2/acme/new-nonce", dir["newNonce"])
+	assert.Equal(t, httpAddr+"/v2/acme/new-account", dir["newAccount"])
+}
+
+func getDirectory(t *testing.T) map[string]string {
+	if acmeDir == nil {
+		svc := trustyServer.Service(ServiceName).(*Service)
+
+		// Register
+		r, err := http.NewRequest(http.MethodGet, v2acme.PathForDirectoryBase, nil)
+		require.NoError(t, err)
+
+		w := httptest.NewRecorder()
+		svc.DirectoryHandler()(w, r, nil)
+		require.Equal(t, http.StatusOK, w.Code)
+
+		require.NoError(t, marshal.Decode(w.Body, &acmeDir))
+	}
+	return acmeDir
+}
+
+func TestNonceGet(t *testing.T) {
+	svc := trustyServer.Service(ServiceName).(*Service)
+
+	dir := getDirectory(t)
 
 	// Register
-	r, err := http.NewRequest(http.MethodGet, v2acme.PathForDirectoryBase, nil)
+	r, err := http.NewRequest(http.MethodGet, dir["newNonce"], nil)
 	require.NoError(t, err)
 
 	w := httptest.NewRecorder()
-	svc.DirectoryHandler()(w, r, nil)
-	require.Equal(t, http.StatusOK, w.Code)
+	svc.NonceHandler()(w, r, nil)
+	assert.Equal(t, http.StatusNoContent, w.Code)
+	assert.NotEmpty(t, w.Header().Get(header.ReplayNonce))
+}
 
-	var res map[string]interface{}
-	require.NoError(t, marshal.Decode(w.Body, &res))
-	assert.NotEmpty(t, res)
-	assert.Equal(t, "https://localhost:7891/v2/acme/new-nonce", res["newNonce"])
-	assert.Equal(t, "https://localhost:7891/v2/acme/new-account", res["newAccount"])
+func problemDetails(response []byte) string {
+	prob := new(v2acme.Problem)
+	if err := json.Unmarshal(response, prob); err == nil {
+		return prob.Error()
+	}
+	return "unexpected error"
 }

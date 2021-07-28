@@ -1,5 +1,7 @@
 package v2acme
 
+import "encoding/json"
+
 // Status defines the state of a given authorization
 type Status string
 
@@ -70,6 +72,10 @@ type AccountRequest struct {
 	Contact              []string `json:"contact"`
 	TermsOfServiceAgreed bool     `json:"termsOfServiceAgreed"`
 	OnlyReturnExisting   bool     `json:"onlyReturnExisting"`
+
+	// externalAccountBinding (optional, object):
+	// An optional field for binding the new account with an existing non-ACME account (see Section 7.3.4).
+	ExternalAccountBinding json.RawMessage `json:"externalAccountBinding,omitempty"`
 }
 
 // Account is ACME "account" object

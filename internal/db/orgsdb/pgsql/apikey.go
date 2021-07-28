@@ -56,7 +56,38 @@ func (p *Provider) CreateAPIKey(ctx context.Context, token *model.APIKey) (*mode
 }
 
 // GetAPIKey returns APIKey and updates its Used time
-func (p *Provider) GetAPIKey(ctx context.Context, key string) (*model.APIKey, error) {
+func (p *Provider) GetAPIKey(ctx context.Context, id uint64) (*model.APIKey, error) {
+
+	res := new(model.APIKey)
+	now := time.Now().UTC()
+
+	err := p.db.QueryRowContext(ctx, `
+			UPDATE apikeys
+				SET used_at=$2
+			WHERE id=$1
+			RETURNING id,org_id,key,enrollment,management,billing,created_at,expires_at,used_at
+			;`, id, now).
+		Scan(&res.ID,
+			&res.OrgID,
+			&res.Key,
+			&res.Enrollemnt,
+			&res.Management,
+			&res.Billing,
+			&res.CreatedAt,
+			&res.ExpiresAt,
+			&res.UsedAt,
+		)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	res.CreatedAt = res.CreatedAt.UTC()
+	res.UsedAt = res.UsedAt.UTC()
+	res.ExpiresAt = res.ExpiresAt.UTC()
+	return res, nil
+}
+
+// FindAPIKey returns APIKey and updates its Used time
+func (p *Provider) FindAPIKey(ctx context.Context, key string) (*model.APIKey, error) {
 
 	res := new(model.APIKey)
 	now := time.Now().UTC()

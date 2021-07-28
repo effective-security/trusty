@@ -77,8 +77,8 @@ type ServiceConfig struct {
 	// DirectoryWebsite is used for the /directory response's "meta" element's "website" field.
 	DirectoryWebsite string `json:"directory_website" yaml:"directory_website"`
 
-	// DirectoryURIPrefix is used for the CertCentral registration response to determine Directory URI for specified account.
-	DirectoryURIPrefix string `json:"directory_uri_prefix" yaml:"directory_uri_prefix"`
+	// BaseURI specifies public URI.
+	BaseURI string `json:"base_uri" yaml:"base_uri"`
 }
 
 // Config provides Acme configuration.

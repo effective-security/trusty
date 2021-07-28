@@ -3,7 +3,7 @@ service:
   subscriber_agreement_url: ""
   directory_caa_identity: ""
   directory_website: ""
-  directory_uri_prefix: https://localhost:7891
+  base_uri: https://localhost:7891
 
 policy:
   order_expiry: 10m
@@ -14,6 +14,7 @@ policy:
   reuse_pending_authz: true
   enable_wildcard_domains: true
 
+# not used in martini
 domain_validation:
   issuer_domain: martinisecurity.com
   timeout: 30s

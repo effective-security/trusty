@@ -42,11 +42,11 @@ func TestAPIKeys(t *testing.T) {
 	require.Error(t, err)
 	assert.Equal(t, "pq: duplicate key value violates unique constraint \"apikeys_key\"", err.Error())
 
-	_, err = provider.GetAPIKey(ctx, "notfound")
+	_, err = provider.FindAPIKey(ctx, "notfound")
 	require.Error(t, err)
 	assert.Equal(t, "sql: no rows in result set", err.Error())
 
-	m2, err := provider.GetAPIKey(ctx, m.Key)
+	m2, err := provider.FindAPIKey(ctx, m.Key)
 	require.NoError(t, err)
 	assert.Equal(t, m.Key, m2.Key)
 	assert.Equal(t, m.Enrollemnt, m2.Enrollemnt)
@@ -55,6 +55,16 @@ func TestAPIKeys(t *testing.T) {
 	assert.Equal(t, m.CreatedAt.Unix(), m2.CreatedAt.Unix())
 	assert.Equal(t, m.ExpiresAt.Unix(), m2.ExpiresAt.Unix())
 	assert.True(t, m2.UsedAt.After(m.UsedAt))
+
+	m3, err := provider.GetAPIKey(ctx, m2.ID)
+	require.NoError(t, err)
+	assert.Equal(t, m.Key, m3.Key)
+	assert.Equal(t, m.Enrollemnt, m3.Enrollemnt)
+	assert.Equal(t, m.Management, m3.Management)
+	assert.Equal(t, m.Billing, m3.Billing)
+	assert.Equal(t, m.CreatedAt.Unix(), m3.CreatedAt.Unix())
+	assert.Equal(t, m.ExpiresAt.Unix(), m3.ExpiresAt.Unix())
+	assert.True(t, m3.UsedAt.After(m2.UsedAt))
 
 	list, err := provider.GetOrgAPIKeys(ctx, m.OrgID)
 	require.NoError(t, err)
