@@ -79,6 +79,9 @@ type Configuration struct {
 
 	// Acme specifies the configuration files for ACME provider
 	Acme string `json:"acme" yaml:"acme"`
+
+	// PaymentProvider specifies the configuration file for payment provider
+	PaymentProvider string `json:"payment_provider" yaml:"payment_provider"`
 }
 
 // CryptoProv specifies the configuration for crypto providers

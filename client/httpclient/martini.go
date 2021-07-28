@@ -138,8 +138,7 @@ func (c *Client) GetOrgAPIKeys(ctx context.Context, orgID string) (*v1.GetOrgAPI
 // CreateSubscription pays for Org validation
 func (c *Client) CreateSubscription(ctx context.Context, req *v1.CreateSubscriptionRequest) (*v1.OrgResponse, error) {
 	res := new(v1.OrgResponse)
-	path := strings.Replace(v1.PathForMartiniOrgSubscription, ":org_id", req.OrgID, 1)
-	_, _, err := c.PostRequest(ctx, path, req, res)
+	_, _, err := c.PostRequest(ctx, v1.PathForMartiniCreateSubscription, req, res)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

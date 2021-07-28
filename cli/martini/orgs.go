@@ -228,12 +228,8 @@ func ValidateOrg(c ctl.Control, p interface{}) error {
 
 // CreateSubscriptionFlags defines flags for CreateSubscription command
 type CreateSubscriptionFlags struct {
-	OrgID    *string
-	CCNumber *string
-	CCExpiry *string
-	CCCvv    *string
-	CCName   *string
-	Years    *int
+	OrgID *string
+	Years *uint32
 }
 
 // CreateSubscription pays for organization
@@ -248,10 +244,6 @@ func CreateSubscription(c ctl.Control, p interface{}) error {
 
 	req := &v1.CreateSubscriptionRequest{
 		OrgID:             *flags.OrgID,
-		CCNumber:          *flags.CCNumber,
-		CCExpiry:          *flags.CCExpiry,
-		CCCvv:             *flags.CCCvv,
-		CCName:            *flags.CCName,
 		SubscriptionYears: *flags.Years,
 	}
 
@@ -261,6 +253,7 @@ func CreateSubscription(c ctl.Control, p interface{}) error {
 	}
 
 	ctl.WriteJSON(c.Writer(), res)
+
 	/*
 		if cli.IsJSON() {
 			ctl.WriteJSON(c.Writer(), res)
@@ -270,6 +263,7 @@ func CreateSubscription(c ctl.Control, p interface{}) error {
 		}
 	*/
 	return nil
+
 }
 
 // APIKeysFlags defines flags for APIKeys command
