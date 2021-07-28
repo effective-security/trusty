@@ -7,6 +7,7 @@ import (
 	"github.com/ekspand/trusty/internal/db/orgsdb"
 	"github.com/ekspand/trusty/pkg/email"
 	"github.com/ekspand/trusty/pkg/gserver"
+	"github.com/ekspand/trusty/pkg/payment"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xlog"
 )
@@ -26,6 +27,7 @@ type Service struct {
 	db           orgsdb.OrgsDb
 	cadb         cadb.CaReadonlyDb
 	emailProv    *email.Provider
+	paymentProv  payment.Provider
 }
 
 // Factory returns a factory of the service
@@ -34,13 +36,14 @@ func Factory(server *gserver.Server) interface{} {
 		logger.Panic("status.Factory: invalid parameter")
 	}
 
-	return func(cfg *config.Configuration, db orgsdb.OrgsDb, cadb cadb.CaReadonlyDb, emailProv *email.Provider) error {
+	return func(cfg *config.Configuration, db orgsdb.OrgsDb, cadb cadb.CaReadonlyDb, emailProv *email.Provider, paymentProv payment.Provider) error {
 		svc := &Service{
-			server:    server,
-			cfg:       cfg,
-			db:        db,
-			cadb:      cadb,
-			emailProv: emailProv,
+			server:      server,
+			cfg:         cfg,
+			db:          db,
+			cadb:        cadb,
+			emailProv:   emailProv,
+			paymentProv: paymentProv,
 		}
 
 		server.AddService(svc)
@@ -78,7 +81,10 @@ func (s *Service) RegisterRoute(r rest.Router) {
 	r.POST(v1.PathForMartiniRegisterOrg, s.RegisterOrgHandler())
 	r.POST(v1.PathForMartiniApproveOrg, s.ApproveOrgHandler())
 	r.POST(v1.PathForMartiniValidateOrg, s.ValidateOrgHandler())
-	r.POST(v1.PathForMartiniOrgSubscription, s.CreateSubsciptionHandler())
+
+	r.POST(v1.PathForMartiniCreateSubscription, s.CreateSubsciptionHandler())
+	r.POST(v1.PathForMartiniCancelSubscription, s.CancelSubsciptionHandler())
+	r.POST(v1.PathForMartiniStripeWebhook, s.StripeWebhookHandler())
 
 	r.GET(v1.PathForMartiniFccFrn, s.FccFrnHandler())
 	r.GET(v1.PathForMartiniFccContact, s.FccContactHandler())
@@ -94,4 +100,10 @@ func (s *Service) Db() orgsdb.OrgsDb {
 // Used in Unittests
 func (s *Service) CaDb() cadb.CaReadonlyDb {
 	return s.cadb
+}
+
+// PaymentProvider returns paymentProv
+// Used in Unittests
+func (s *Service) PaymentProvider() payment.Provider {
+	return s.paymentProv
 }

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Subscription prices</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link href="css/base.css" rel="stylesheet" />
+    <script src="./prices.js" defer></script>
+  </head>
+  <body>
+    <main>
+      TRUSTY_AUTH_TOKEN
+      <input type="text" id="trustyAuthToken" placeholder="trusty auth token" name="trustyAuthToken" required><br><br>
+      Organization ID
+      <input type="text" id="orgID" placeholder="org id" name="orgID" required><br><br>
+      <h1>Select a plan</h1>
+
+      <div id="price-list" class="price-list">
+        <div>
+          <h3>1 year subscription</h3>
+          <span>
+            10 /
+            USD /
+            annual
+          </span>
+          <button onclick="createSubscription(document.getElementById('orgID').value, 1)">Select</button>
+        </div>
+        <div>
+          <h3>2 years subscription</h3>
+          <span>
+            20 /
+            USD /
+            annual
+          </span>
+          <button onclick="createSubscription(document.getElementById('orgID').value, 2)">Select</button>
+        </div>
+      </div>
+
+    </main>
+  </body>
+</html>

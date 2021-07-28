@@ -14,4 +14,8 @@ DROP INDEX IF EXISTS idx_orgtokens_org_id;
 DROP TABLE IF EXISTS apikeys;
 DROP TABLE IF EXISTS idx_apikeys_key
 
+DROP TABLE IF EXISTS subscriptions;
+DROP INDEX IF EXISTS idx_subscriptions_id_user_id;
+DROP INDEX IF EXISTS idx_subscriptions_external_id;
+
 COMMIT;

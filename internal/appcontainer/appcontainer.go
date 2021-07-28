@@ -18,6 +18,7 @@ import (
 	"github.com/ekspand/trusty/pkg/gcpkmscrypto"
 	"github.com/ekspand/trusty/pkg/jwt"
 	"github.com/ekspand/trusty/pkg/oauth2client"
+	"github.com/ekspand/trusty/pkg/payment"
 	"github.com/go-phorce/dolly/audit"
 	fauditor "github.com/go-phorce/dolly/audit/log"
 	"github.com/go-phorce/dolly/tasks"
@@ -50,6 +51,9 @@ type ProvideOAuthClientsFn func(cfg *config.Configuration) (*oauth2client.Provid
 
 // ProvideEmailClientsFn defines email clients provider
 type ProvideEmailClientsFn func(cfg *config.Configuration) (*email.Provider, error)
+
+// ProvidePaymentProviderFn defines email clients provider
+type ProvidePaymentProviderFn func(cfg *config.Configuration) (payment.Provider, error)
 
 // ProvideCryptoFn defines Crypto provider
 type ProvideCryptoFn func(cfg *config.Configuration) (*cryptoprov.Crypto, error)
@@ -95,6 +99,7 @@ type ContainerFactory struct {
 	clientFactoryProvider ProvideClientFactoryFn
 	fccAPIClientProvider  ProvideFCCAPIClientFn
 	acmeProvider          ProvideAcmeFn
+	paymentProvider       ProvidePaymentProviderFn
 }
 
 // NewContainerFactory returns an instance of ContainerFactory
@@ -120,7 +125,8 @@ func NewContainerFactory(closer CloseRegistrator) *ContainerFactory {
 		WithEmailClientsProvider(provideEmail).
 		WithJwtProvider(provideJwt).
 		WithACMEProvider(provideAcme).
-		WithClientFactoryProvider(provideClientFactory)
+		WithClientFactoryProvider(provideClientFactory).
+		WithPaymentProvider(providePayment)
 }
 
 // WithConfigurationProvider allows to specify configuration
@@ -162,6 +168,12 @@ func (f *ContainerFactory) WithOAuthClientsProvider(p ProvideOAuthClientsFn) *Co
 // WithEmailClientsProvider allows to specify custom emailclients provider
 func (f *ContainerFactory) WithEmailClientsProvider(p ProvideEmailClientsFn) *ContainerFactory {
 	f.emailProvider = p
+	return f
+}
+
+// WithPaymentProvider allows to specify payment provider
+func (f *ContainerFactory) WithPaymentProvider(p ProvidePaymentProviderFn) *ContainerFactory {
+	f.paymentProvider = p
 	return f
 }
 
@@ -264,12 +276,17 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 		return nil, errors.Trace(err)
 	}
 
+	err = container.Provide(f.acmeProvider)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
 	err = container.Provide(f.emailProvider)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
-	err = container.Provide(f.acmeProvider)
+	err = container.Provide(f.paymentProvider)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -329,6 +346,14 @@ func provideOAuth(cfg *config.Configuration) (*oauth2client.Provider, error) {
 
 func provideEmail(cfg *config.Configuration) (*email.Provider, error) {
 	p, err := email.NewProvider(cfg.EmailProviders)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return p, nil
+}
+
+func providePayment(cfg *config.Configuration) (payment.Provider, error) {
+	p, err := payment.NewProvider(cfg.PaymentProvider)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

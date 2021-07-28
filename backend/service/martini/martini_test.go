@@ -3,6 +3,7 @@ package martini_test
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/backend/service/martini"
@@ -32,6 +34,7 @@ import (
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/stripe/stripe-go/v72/webhook"
 )
 
 var (
@@ -66,6 +69,8 @@ func TestMain(m *testing.M) {
 
 	// add this to be able launch service when debugging using vscode
 	os.Setenv("TRUSTY_MAILGUN_PRIVATE_KEY", "1234")
+	os.Setenv("TRUSTY_STRIPE_API_KEY", "sk_test_51JI1BxKfgu58p9BHUJLe7ZgIXWJCnzy4pYiHjSsukbGbozLoFX0RvZrxjlfL6Hge9Vbw6rdbkNuIMl5NeEZN7o8x00UlLEHidR")
+	os.Setenv("TRUSTY_STRIPE_WEBHOOK_SECRET", "1234")
 	os.Setenv("TRUSTY_JWT_SEED", "1234")
 
 	cfg, err := testutils.LoadConfig(projFolder, "UNIT_TEST")
@@ -276,17 +281,13 @@ func TestDenyOrg(t *testing.T) {
 	// Payment
 	//
 	paymentReq := &v1.CreateSubscriptionRequest{
-		CCNumber:          "4445-1234-1234-1234-1234",
-		CCExpiry:          "11/23",
-		CCCvv:             "266",
-		CCName:            "John Doe",
-		SubscriptionYears: 3,
+		OrgID:             res.Org.ID,
+		SubscriptionYears: 2,
 	}
 	jsPayment, err := json.Marshal(paymentReq)
 	require.NoError(t, err)
 
-	subsPath := strings.Replace(v1.PathForMartiniOrgSubscription, ":org_id", res.Org.ID, 1)
-	r, err = http.NewRequest(http.MethodPost, subsPath, bytes.NewReader(jsPayment))
+	r, err = http.NewRequest(http.MethodPost, v1.PathForMartiniCreateSubscription, bytes.NewReader(jsPayment))
 	require.NoError(t, err)
 	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
 
@@ -375,6 +376,172 @@ func TestDenyOrg(t *testing.T) {
 	}
 }
 
+var stripeSampleInvoice = `{
+	"created": 1326853478,
+	"livemode": false,
+	"id": "evt_00000000000000",
+	"type": "invoice.payment_succeeded",
+	"object": "event",
+	"request": null,
+	"pending_webhooks": 1,
+	"api_version": "2020-08-27",
+	"data": {
+	  "object": {
+		"id": "in_00000000000000",
+		"object": "invoice",
+		"account_country": "US",
+		"account_name": "Martini-Test",
+		"account_tax_ids": null,
+		"amount_due": 1500,
+		"amount_paid": 0,
+		"amount_remaining": 1500,
+		"application_fee_amount": null,
+		"attempt_count": 0,
+		"attempted": true,
+		"auto_advance": true,
+		"automatic_tax": {
+		  "enabled": false,
+		  "status": null
+		},
+		"billing_reason": "manual",
+		"charge": "_00000000000000",
+		"collection_method": "charge_automatically",
+		"created": 1628555477,
+		"currency": "usd",
+		"custom_fields": null,
+		"customer": "cus_00000000000000",
+		"customer_address": null,
+		"customer_email": null,
+		"customer_name": null,
+		"customer_phone": null,
+		"customer_shipping": null,
+		"customer_tax_exempt": "none",
+		"customer_tax_ids": [
+		],
+		"default_payment_method": null,
+		"default_source": null,
+		"default_tax_rates": [
+		],
+		"description": null,
+		"discount": null,
+		"discounts": [
+		],
+		"due_date": null,
+		"ending_balance": null,
+		"footer": null,
+		"hosted_invoice_url": null,
+		"invoice_pdf": null,
+		"last_finalization_error": null,
+		"lines": {
+		  "object": "list",
+		  "data": [
+			{
+			  "id": "il_00000000000000",
+			  "object": "line_item",
+			  "amount": 1500,
+			  "currency": "usd",
+			  "description": "My First Invoice Item (created for API docs)",
+			  "discount_amounts": [
+			  ],
+			  "discountable": true,
+			  "discounts": [
+			  ],
+			  "invoice_item": "ii_1JMisDKfgu58p9BHPzC3WqKY",
+			  "livemode": false,
+			  "metadata": {
+			  },
+			  "period": {
+				"end": 1628555477,
+				"start": 1628555477
+			  },
+			  "price": {
+				"id": "price_00000000000000",
+				"object": "price",
+				"active": true,
+				"billing_scheme": "per_unit",
+				"created": 1627888392,
+				"currency": "usd",
+				"livemode": false,
+				"lookup_key": null,
+				"metadata": {
+				},
+				"nickname": null,
+				"product": "prod_00000000000000",
+				"recurring": null,
+				"tax_behavior": "unspecified",
+				"tiers_mode": null,
+				"transform_quantity": null,
+				"type": "one_time",
+				"unit_amount": 1500,
+				"unit_amount_decimal": "1500"
+			  },
+			  "proration": false,
+			  "quantity": 1,
+			  "subscription": "SUBSCRIPTION_ID_PLACEHOLDER",
+			  "tax_amounts": [
+			  ],
+			  "tax_rates": [
+			  ],
+			  "type": "invoiceitem"
+			}
+		  ],
+		  "has_more": false,
+		  "url": "/v1/invoices/in_1JMisDKfgu58p9BH5FGgTmTp/lines"
+		},
+		"livemode": false,
+		"metadata": {
+		},
+		"next_payment_attempt": 1628559077,
+		"number": null,
+		"on_behalf_of": null,
+		"paid": true,
+		"payment_intent": {
+			"id": "PAYMENT_INTENT_ID_PLACEHOLDER"
+		},
+		"payment_settings": {
+		  "payment_method_options": null,
+		  "payment_method_types": null
+		},
+		"period_end": 1628555477,
+		"period_start": 1628555477,
+		"post_payment_credit_notes_amount": 0,
+		"pre_payment_credit_notes_amount": 0,
+		"quote": null,
+		"receipt_number": null,
+		"starting_balance": 0,
+		"statement_descriptor": null,
+		"status": "draft",
+		"status_transitions": {
+		  "finalized_at": null,
+		  "marked_uncollectible_at": null,
+		  "paid_at": null,
+		  "voided_at": null
+		},
+		"subscription":  {
+			"id": "SUBSCRIPTION_ID_PLACEHOLDER"
+		},
+		"subtotal": 1500,
+		"tax": null,
+		"total": 1500,
+		"total_discount_amounts": [
+		],
+		"total_tax_amounts": [
+		],
+		"transfer_data": null,
+		"webhooks_delivered_at": null,
+		"closed": true
+	  }
+	}
+  }`
+
+const (
+	ccNumberPaymentSucceeds = "4242 4242 4242 4242"
+	ccNumberPaymentDeclined = "4000 0000 0000 9995"
+	ccExpMonth              = "08"
+	ccExpYear               = "24"
+	ccCVC                   = "123"
+)
+
 func TestRegisterOrgFullFlow(t *testing.T) {
 	ctx := context.Background()
 	svc := trustyServer.Service(martini.ServiceName).(*martini.Service)
@@ -444,38 +611,87 @@ func TestRegisterOrgFullFlow(t *testing.T) {
 
 	r, err = http.NewRequest(http.MethodPost, v1.PathForMartiniValidateOrg, bytes.NewReader(js))
 	require.NoError(t, err)
-	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
 
+	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
 	w = httptest.NewRecorder()
 	svc.ValidateOrgHandler()(w, r, nil)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
 	//
-	// Payment
+	// create subscription
 	//
 	paymentReq := &v1.CreateSubscriptionRequest{
-		CCNumber:          "4445-1234-1234-1234-1234",
-		CCExpiry:          "11/23",
-		CCCvv:             "266",
-		CCName:            "John Doe",
-		SubscriptionYears: 3,
+		OrgID:             res.Org.ID,
+		SubscriptionYears: 2,
 	}
 	jsPayment, err := json.Marshal(paymentReq)
 	require.NoError(t, err)
 
-	subsPath := strings.Replace(v1.PathForMartiniOrgSubscription, ":org_id", res.Org.ID, 1)
-	r, err = http.NewRequest(http.MethodPost, subsPath, bytes.NewReader(jsPayment))
+	r, err = http.NewRequest(http.MethodPost, v1.PathForMartiniCreateSubscription, bytes.NewReader(jsPayment))
 	require.NoError(t, err)
 	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
 
 	w = httptest.NewRecorder()
-	svc.CreateSubsciptionHandler()(w, r, rest.Params{
-		{
-			Key:   "org_id",
-			Value: res.Org.ID,
-		},
-	})
+	svc.CreateSubsciptionHandler()(w, r, nil)
 	require.Equal(t, http.StatusOK, w.Code)
+	var resSub v1.CreateSubscriptionResponse
+	require.NoError(t, marshal.Decode(w.Body, &resSub))
+	require.Equal(t, uint32(2), resSub.SubscriptionYears)
+	require.Equal(t, res.Org.ID, resSub.OrgID)
+	// 4000$ is the price of the test product create in Stripe
+	// see payment-provider-stripe.yaml config file
+	require.Equal(t, uint64(4000), resSub.PriceAmount)
+	require.Equal(t, "usd", resSub.PriceCurrency)
+	subID, err := db.ID(resSub.OrgID)
+	require.NoError(t, err)
+	subscription, err := dbProv.GetSubscription(ctx, subID, user.ID)
+	require.NoError(t, err)
+	stripeSampleInvoice = strings.Replace(stripeSampleInvoice, "SUBSCRIPTION_ID_PLACEHOLDER", subscription.ExternalID, 2)
+
+	//
+	// process payment
+	//
+
+	// generate payment method and intent
+	paymentProv := svc.PaymentProvider()
+	paymentMethod, err := paymentProv.CreatePaymentMethod(
+		ccNumberPaymentSucceeds,
+		ccExpMonth,
+		ccExpYear,
+		ccCVC,
+	)
+	require.NoError(t, err)
+	paymentIntent, err := paymentProv.CreatePaymentIntent(subscription.CustomerID, paymentMethod.ID, 500)
+	require.NoError(t, err)
+	stripeSampleInvoice = strings.Replace(stripeSampleInvoice, "PAYMENT_INTENT_ID_PLACEHOLDER", paymentIntent.ID, 1)
+	_, err = paymentProv.AttachPaymentMethod(subscription.CustomerID, paymentMethod.ID)
+	require.NoError(t, err)
+
+	// generate webhook signature
+	signatureTime := time.Now().UTC()
+	sigantureTimeUnix := signatureTime.Unix()
+	sig := webhook.ComputeSignature(signatureTime, []byte(stripeSampleInvoice), "1234")
+	require.NotNil(t, sig)
+
+	r, err = http.NewRequest(
+		http.MethodPost,
+		v1.PathForMartiniStripeWebhook,
+		bytes.NewReader([]byte(stripeSampleInvoice)),
+	)
+	require.NoError(t, err)
+	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+	sigHeader := fmt.Sprintf("t=%d,v1=%s", sigantureTimeUnix, hex.EncodeToString(sig))
+	r.Header.Set("Stripe-Signature", sigHeader)
+
+	w = httptest.NewRecorder()
+	svc.StripeWebhookHandler()(w, r, nil)
+	require.Equal(t, http.StatusOK, w.Code)
+	var resWebhook v1.StripeWebhookResponse
+	require.NoError(t, marshal.Decode(w.Body, &resWebhook))
+
+	org, err := dbProv.GetOrg(ctx, subID)
+	require.NoError(t, err)
+	require.Equal(t, v1.OrgStatusValidationPending, org.Status)
 
 	//
 	// Validate
@@ -488,7 +704,6 @@ func TestRegisterOrgFullFlow(t *testing.T) {
 	w = httptest.NewRecorder()
 	svc.ValidateOrgHandler()(w, r, nil)
 	assert.Equal(t, http.StatusOK, w.Code)
-
 	//
 	// Approve
 	//

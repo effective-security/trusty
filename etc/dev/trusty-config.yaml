@@ -91,6 +91,8 @@ email_providers:
 
 acme: ${TRUSTY_CONFIG_DIR}/acme.yaml
 
+payment_provider: ${TRUSTY_CONFIG_DIR}/payment-provider-stripe.yaml
+
 authority: ${TRUSTY_CONFIG_DIR}/ca-config.dev.yaml
 
 ra:

@@ -3,7 +3,6 @@ package httpclient
 import (
 	"context"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	v1 "github.com/ekspand/trusty/api/v1"
@@ -333,8 +332,7 @@ func TestRegisterOrg(t *testing.T) {
 }
 
 func TestSubscribeOrg(t *testing.T) {
-	subsPath := strings.Replace(v1.PathForMartiniOrgSubscription, ":org_id", "82620084182319204", 1)
-	h := makeTestHandler(t, subsPath, `{                         
+	h := makeTestHandler(t, v1.PathForMartiniCreateSubscription, `{                         
         "org": {
                 "approver_email": "denis+test@ekspand.com",
                 "approver_name": "Mr Matthew D Hardeman",
@@ -370,10 +368,6 @@ func TestSubscribeOrg(t *testing.T) {
 
 	req := &v1.CreateSubscriptionRequest{
 		OrgID:             "82620084182319204",
-		CCNumber:          "4445-1234-1234-1234",
-		CCExpiry:          "11/22",
-		CCCvv:             "234",
-		CCName:            "John Doe",
 		SubscriptionYears: 3,
 	}
 	r, err := client.CreateSubscription(context.Background(), req)

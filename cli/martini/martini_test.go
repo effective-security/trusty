@@ -104,15 +104,10 @@ func (s *testSuite) TestValidateOrg() {
 
 func (s *testSuite) TestSubscribeOrg() {
 	org := "82923411415760996"
-	str := "string"
-	num := 3
+	num := uint32(3)
 	flags := martini.CreateSubscriptionFlags{
-		OrgID:    &org,
-		CCNumber: &str,
-		CCExpiry: &str,
-		CCCvv:    &str,
-		CCName:   &str,
-		Years:    &num,
+		OrgID: &org,
+		Years: &num,
 	}
 	err := s.Run(martini.CreateSubscription, &flags)
 	s.NoError(err)

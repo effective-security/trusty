@@ -111,7 +111,36 @@ WITH (
 CREATE UNIQUE INDEX IF NOT EXISTS idx_apikeys_key
     ON public.apikeys USING btree
     (key);
+--
+--  Subscriptions
+--
+CREATE TABLE IF NOT EXISTS public.subscriptions
+(
+    id bigint NOT NULL,
+    external_id character varying(32) COLLATE pg_catalog."default" NOT NULL,
+    user_id bigint NOT NULL,
+    customer_id character varying(32) COLLATE pg_catalog."default" NOT NULL,
+    price_id character varying(32) COLLATE pg_catalog."default" NOT NULL,
+    price_amount bigint NOT NULL,
+    price_currency character varying(32) COLLATE pg_catalog."default" NOT NULL,
+    payment_method_id character varying(32) COLLATE pg_catalog."default" NULL,
+    years bigint NOT NULL,
+    created_at timestamp with time zone,
+    expires_at timestamp with time zone,
+    last_paid_at timestamp with time zone,
+    status character varying(32) COLLATE pg_catalog."default" NOT NULL
+)
+WITH (
+    OIDS = FALSE
+);
 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_subscriptions_id_user_id
+    ON public.subscriptions USING btree
+    (id,user_id);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_subscriptions_external_id
+    ON public.subscriptions USING btree
+    (external_id);
 --
 --
 --

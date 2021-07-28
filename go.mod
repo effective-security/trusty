@@ -38,6 +38,7 @@ require (
 	github.com/soheilhy/cmux v0.1.4
 	github.com/sony/sonyflake v1.0.0
 	github.com/stretchr/testify v1.7.0
+	github.com/stripe/stripe-go/v72 v72.58.0
 	github.com/ugorji/go/codec v1.2.6
 	go.uber.org/config v1.4.0
 	go.uber.org/dig v1.10.0

@@ -195,9 +195,21 @@ const (
 	// Response: v1.OrgAPIKeysResponse
 	PathForMartiniOrgAPIKeys = "/v1/ms/apikeys/:org_id"
 
-	// PathForMartiniOrgSubscription provides Org subscription
+	// PathForMartiniCreateSubscription creates Org subscription
 	//
-	// Verbs: GET,POST,DELETE
-	// Response: v1.OrgSubscriptionResponse
-	PathForMartiniOrgSubscription = "/v1/ms/subsciption/:org_id"
+	// Verbs: POST
+	// Response: v1.CreateSubscriptionResponse
+	PathForMartiniCreateSubscription = "/v1/ms/subscription/create"
+
+	// PathForMartiniCancelSubscription cancels Org subscription
+	//
+	// Verbs: POST
+	// Response: v1.CancelSubscriptionResponse
+	PathForMartiniCancelSubscription = "/v1/ms/subscription/cancel"
+
+	// PathForMartiniStripeWebhook handles Stripe webhook call
+	//
+	// Verbs: POST
+	// Response: v1.StripeWebhookResponse
+	PathForMartiniStripeWebhook = "/v1/ms/stripe_webhook"
 )

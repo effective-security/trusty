@@ -37,7 +37,7 @@ type Organization struct {
 
 // ToDto converts model to v1.Organization DTO
 func (u *Organization) ToDto() *v1.Organization {
-	user := &v1.Organization{
+	org := &v1.Organization{
 		ID:            strconv.FormatUint(u.ID, 10),
 		ExternalID:    u.ExternalID,
 		Provider:      u.Provider,
@@ -64,7 +64,7 @@ func (u *Organization) ToDto() *v1.Organization {
 		ExpiresAt:     u.ExpiresAt,
 	}
 
-	return user
+	return org
 }
 
 // ToOrganizationsDto returns Organizations

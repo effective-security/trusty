@@ -55,6 +55,10 @@ type OrgsReadOnlyDb interface {
 	FindAPIKey(ctx context.Context, key string) (*model.APIKey, error)
 	// GetOrgAPIKeys returns all API keys for Organization
 	GetOrgAPIKeys(ctx context.Context, orgID uint64) ([]*model.APIKey, error)
+	// GetSubscription returns subscription with the given id
+	GetSubscription(ctx context.Context, id, userID uint64) (*model.Subscription, error)
+	// GetSubscriptionByExternalID returns subscription with the given external id
+	GetSubscriptionByExternalID(ctx context.Context, externalID string) (*model.Subscription, error)
 }
 
 // OrgsDb defines an interface for CRUD operations on Orgs
@@ -105,6 +109,15 @@ type OrgsDb interface {
 	CreateAPIKey(ctx context.Context, token *model.APIKey) (*model.APIKey, error)
 	// DeleteAPIKey deletes the key
 	DeleteAPIKey(ctx context.Context, id uint64) error
+
+	// CreateSubscription creates subscription
+	CreateSubscription(ctx context.Context, sub *model.Subscription) (*model.Subscription, error)
+
+	// UpdateSubscriptionStatus updates subscription status
+	UpdateSubscriptionStatus(ctx context.Context, sub *model.Subscription) (*model.Subscription, error)
+
+	// UpdateSubscriptionAndOrgStatus updates status of subscription and org in a single transaction
+	UpdateSubscriptionAndOrgStatus(ctx context.Context, sub *model.Subscription, org *model.Organization) (*model.Subscription, *model.Organization, error)
 }
 
 // Provider provides complete DB access
