@@ -151,7 +151,7 @@ func TestSignCertificate(t *testing.T) {
 
 	_, err = authorityClient.SignCertificate(context.Background(), &pb.SignCertificateRequest{
 		Profile:       "test",
-		Request:       "abcd",
+		Request:       []byte("abcd"),
 		RequestFormat: pb.EncodingFormat_PKCS7,
 	})
 	require.Error(t, err)
@@ -159,7 +159,7 @@ func TestSignCertificate(t *testing.T) {
 
 	_, err = authorityClient.SignCertificate(context.Background(), &pb.SignCertificateRequest{
 		Profile:       "test",
-		Request:       "abcd",
+		Request:       []byte("abcd"),
 		RequestFormat: pb.EncodingFormat_PEM,
 	})
 	require.Error(t, err)
@@ -167,7 +167,7 @@ func TestSignCertificate(t *testing.T) {
 
 	_, err = authorityClient.SignCertificate(context.Background(), &pb.SignCertificateRequest{
 		Profile:       "test_server",
-		Request:       "abcd",
+		Request:       []byte("abcd"),
 		IssuerLabel:   "xxx",
 		RequestFormat: pb.EncodingFormat_PEM,
 	})
@@ -176,7 +176,7 @@ func TestSignCertificate(t *testing.T) {
 
 	_, err = authorityClient.SignCertificate(context.Background(), &pb.SignCertificateRequest{
 		Profile:       "test_server",
-		Request:       "abcd",
+		Request:       []byte("abcd"),
 		RequestFormat: pb.EncodingFormat_PEM,
 	})
 	require.Error(t, err)
@@ -184,7 +184,7 @@ func TestSignCertificate(t *testing.T) {
 
 	res, err := authorityClient.SignCertificate(context.Background(), &pb.SignCertificateRequest{
 		Profile:       "test_server",
-		Request:       string(generateCSR()),
+		Request:       generateCSR(),
 		RequestFormat: pb.EncodingFormat_PEM,
 	})
 	require.NoError(t, err)
@@ -207,7 +207,7 @@ func TestPublishCrls(t *testing.T) {
 	ctx := context.Background()
 	certRes, err := authorityClient.SignCertificate(ctx, &pb.SignCertificateRequest{
 		Profile:       "test_server",
-		Request:       string(generateCSR()),
+		Request:       generateCSR(),
 		RequestFormat: pb.EncodingFormat_PEM,
 	})
 	require.NoError(t, err)
@@ -232,7 +232,7 @@ func TestE2E(t *testing.T) {
 
 	res, err := authorityClient.SignCertificate(ctx, &pb.SignCertificateRequest{
 		Profile:       "test_server",
-		Request:       string(generateCSR()),
+		Request:       generateCSR(),
 		RequestFormat: pb.EncodingFormat_PEM,
 	})
 	require.NoError(t, err)
@@ -248,7 +248,7 @@ func TestE2E(t *testing.T) {
 	for i := 0; i < count; i++ {
 		res, err = authorityClient.SignCertificate(ctx, &pb.SignCertificateRequest{
 			Profile:       "test_server",
-			Request:       string(generateCSR()),
+			Request:       generateCSR(),
 			RequestFormat: pb.EncodingFormat_PEM,
 		})
 		require.NoError(t, err)

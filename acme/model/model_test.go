@@ -100,40 +100,6 @@ func Test_Decoding_AccountRequest(t *testing.T) {
 	})
 }
 
-func Test_Decoding_OrderRequest(t *testing.T) {
-	t.Run("empty", func(t *testing.T) {
-		js := []byte(`{}`)
-		var req v2acme.OrderRequest
-		err := json.Unmarshal(js, &req)
-		require.NoError(t, err)
-		assert.Empty(t, req.Identifiers)
-		assert.Empty(t, req.NotBefore)
-		assert.Empty(t, req.NotAfter)
-	})
-
-	t.Run("identifiers", func(t *testing.T) {
-		js := []byte(`{"identifiers":[{"type":"dns","value":"acme.com"}]}`)
-		var req v2acme.OrderRequest
-		err := json.Unmarshal(js, &req)
-		require.NoError(t, err)
-		assert.Empty(t, req.NotBefore)
-		assert.Empty(t, req.NotAfter)
-		require.Equal(t, 1, len(req.Identifiers))
-		require.Equal(t, v2acme.IdentifierType("dns"), req.Identifiers[0].Type)
-		require.Equal(t, "acme.com", req.Identifiers[0].Value)
-	})
-
-	t.Run("empty", func(t *testing.T) {
-		js := []byte(`{"notBefore":"a","notAfter":"b"}`)
-		var req v2acme.OrderRequest
-		err := json.Unmarshal(js, &req)
-		require.NoError(t, err)
-		assert.Empty(t, req.Identifiers)
-		assert.Equal(t, "a", req.NotBefore)
-		assert.Equal(t, "b", req.NotAfter)
-	})
-}
-
 func Test_CheckConsistencyForClientOffer(t *testing.T) {
 	tcases := []struct {
 		challenge *acmemodel.Challenge

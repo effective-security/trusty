@@ -43,6 +43,11 @@ type Controller interface {
 	UpdateOrder(ctx context.Context, order *model.Order) (*model.Order, error)
 	// UpdateOrderStatus updates "pending" status depending on aggregate Authorization's status
 	UpdateOrderStatus(ctx context.Context, order *model.Order) (*model.Order, error)
+
+	// GetIssuedCertificate returns IssuedCertificate by ID
+	GetIssuedCertificate(ctx context.Context, certID uint64) (*model.IssuedCertificate, error)
+	// PutIssuedCertificate saves issued cert
+	PutIssuedCertificate(ctx context.Context, cert *model.IssuedCertificate) (*model.IssuedCertificate, error)
 }
 
 // Provider represents DB based ACME provider

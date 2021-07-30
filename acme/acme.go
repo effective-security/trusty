@@ -57,10 +57,28 @@ func (d *Provider) UpdateOrder(ctx context.Context, order *model.Order) (*model.
 	return d.db.UpdateOrder(ctx, order)
 }
 
-// NewOrder creates new Order
-func (d *Provider) NewOrder(ctx context.Context, p *model.OrderRequest) (*model.Order, bool, error) {
-	if len(p.Identifiers) < 1 {
-		return nil, false, errors.Errorf("invalid request: identifiers")
+// GetIssuedCertificate returns IssuedCertificate by ID
+func (d *Provider) GetIssuedCertificate(ctx context.Context, certID uint64) (*model.IssuedCertificate, error) {
+	return d.db.GetIssuedCertificate(ctx, certID)
+}
+
+// PutIssuedCertificate saves issued cert
+func (d *Provider) PutIssuedCertificate(ctx context.Context, cert *model.IssuedCertificate) (*model.IssuedCertificate, error) {
+	return d.db.PutIssuedCertificate(ctx, cert)
+}
+
+func (d *Provider) validateOrder(p *model.OrderRequest) error {
+	// for IdentifierTNAuthList, only one is supported
+	if p.HasIdentifier(v2acme.IdentifierTNAuthList) && len(p.Identifiers) != 1 {
+		return errors.Errorf("invalid request: identifiers")
+	}
+
+	// TODO: add support for DNS, add config for supported Identifiers
+	for _, ident := range p.Identifiers {
+		if ident.Type != v2acme.IdentifierTNAuthList {
+			return errors.Errorf("NewOrder request included unsupported type identifier: type %q, value %q",
+				ident.Type, ident.Value)
+		}
 	}
 
 	// TODO:
@@ -72,6 +90,16 @@ func (d *Provider) NewOrder(ctx context.Context, p *model.OrderRequest) (*model.
 			}
 		}
 	*/
+
+	return nil
+}
+
+// NewOrder creates new Order
+func (d *Provider) NewOrder(ctx context.Context, p *model.OrderRequest) (*model.Order, bool, error) {
+	err := d.validateOrder(p)
+	if err != nil {
+		return nil, false, errors.Trace(err)
+	}
 
 	orderID, err := model.GetIDFromIdentifiers(p.Identifiers)
 	if err != nil {

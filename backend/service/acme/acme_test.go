@@ -11,6 +11,7 @@ import (
 	acmecontroller "github.com/ekspand/trusty/acme"
 	"github.com/ekspand/trusty/acme/acmedb"
 	"github.com/ekspand/trusty/api/v2acme"
+	"github.com/ekspand/trusty/backend/service/ca"
 	"github.com/ekspand/trusty/internal/appcontainer"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/pkg/gserver"
@@ -36,7 +37,8 @@ const (
 
 // serviceFactories provides map of trustyserver.ServiceFactory
 var serviceFactories = map[string]gserver.ServiceFactory{
-	ServiceName: Factory,
+	ServiceName:    Factory,
+	ca.ServiceName: ca.Factory,
 }
 
 func TestMain(m *testing.M) {
@@ -56,7 +58,7 @@ func TestMain(m *testing.M) {
 
 	httpCfg := &config.HTTPServer{
 		ListenURLs: []string{httpAddr},
-		Services:   []string{ServiceName},
+		Services:   []string{ServiceName, ca.ServiceName},
 	}
 
 	provideAcme := func(cfg *config.Configuration) (acmecontroller.Controller, error) {
@@ -90,6 +92,18 @@ func TestMain(m *testing.M) {
 	trustyServer, err = gserver.Start("acme_test", httpCfg, container, serviceFactories)
 	if err != nil || trustyServer == nil {
 		panic(errors.Trace(err))
+	}
+
+	svc := trustyServer.Service(ServiceName).(*Service)
+	err = svc.OnStarted()
+	if err != nil {
+		panic(errors.Trace(err))
+	}
+
+	for i := 0; i < 10; i++ {
+		if !svc.IsReady() {
+			time.Sleep(time.Second)
+		}
 	}
 
 	// Run the tests

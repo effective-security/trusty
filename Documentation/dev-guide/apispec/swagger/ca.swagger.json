@@ -434,6 +434,45 @@
       },
       "title": "RevokedCertificatesResponse returns Revoked Certificates list"
     },
+    "pbX509Name": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "locality": {
+          "type": "string"
+        },
+        "organisation": {
+          "type": "string"
+        },
+        "organisationalUnit": {
+          "type": "string"
+        }
+      },
+      "title": "X509Name specifies X509 Name"
+    },
+    "pbX509Subject": {
+      "type": "object",
+      "properties": {
+        "commonName": {
+          "type": "string"
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pbX509Name"
+          }
+        },
+        "serialNumber": {
+          "type": "string"
+        }
+      },
+      "title": "X509Subject specifies X509 Subject"
+    },
     "protobufAny": {
       "type": "object",
       "properties": {

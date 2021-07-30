@@ -106,6 +106,16 @@ type OrderRequest struct {
 	NotAfter    string       `json:"notAfter,omitempty"`
 }
 
+// HasIdentifier returns true if identifier is found
+func (o *OrderRequest) HasIdentifier(typ IdentifierType) bool {
+	for _, i := range o.Identifiers {
+		if i.Type == typ {
+			return true
+		}
+	}
+	return false
+}
+
 // Order object
 // https://ietf-wg-acme.github.io/acme/draft-ietf-acme-acme.html#rfc.section.7.1.3
 type Order struct {

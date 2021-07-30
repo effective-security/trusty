@@ -144,6 +144,16 @@ func (o *Order) Copy() *Order {
 	}
 }
 
+// HasIdentifier returns true if identifier is found
+func (o *Order) HasIdentifier(typ v2acme.IdentifierType) bool {
+	for _, i := range o.Identifiers {
+		if i.Type == typ {
+			return true
+		}
+	}
+	return false
+}
+
 // IssuedCertificate provides info about issued certificate
 type IssuedCertificate struct {
 	ID                uint64 `json:"id" yaml:"id"`
@@ -161,6 +171,16 @@ type OrderRequest struct {
 	NotBefore         time.Time           `json:"not_before,omitempty" yaml:"not_before"`
 	NotAfter          time.Time           `json:"not_after,omitempty" yaml:"not_after"`
 	Identifiers       []v2acme.Identifier `json:"identifiers"  yaml:"identifiers"`
+}
+
+// HasIdentifier returns true if identifier is found
+func (o *OrderRequest) HasIdentifier(typ v2acme.IdentifierType) bool {
+	for _, i := range o.Identifiers {
+		if i.Type == typ {
+			return true
+		}
+	}
+	return false
 }
 
 // Challenge represent internal model for ACME Challenge object

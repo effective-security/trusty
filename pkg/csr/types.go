@@ -83,7 +83,7 @@ func (oid *OID) UnmarshalJSON(data []byte) (err error) {
 	if data[0] != '"' || data[last] != '"' {
 		return errors.New("OID JSON string not wrapped in quotes: " + string(data))
 	}
-	parsedOid, err := parseObjectIdentifier(string(data[1:last]))
+	parsedOid, err := ParseObjectIdentifier(string(data[1:last]))
 	if err != nil {
 		return err
 	}
@@ -99,7 +99,7 @@ func (oid *OID) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 
-	parsedOid, err := parseObjectIdentifier(buf)
+	parsedOid, err := ParseObjectIdentifier(buf)
 	if err != nil {
 		return err
 	}
@@ -112,7 +112,8 @@ func (oid OID) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%v"`, asn1.ObjectIdentifier(oid))), nil
 }
 
-func parseObjectIdentifier(oidString string) (oid asn1.ObjectIdentifier, err error) {
+// ParseObjectIdentifier returns OID
+func ParseObjectIdentifier(oidString string) (oid asn1.ObjectIdentifier, err error) {
 	validOID, err := regexp.MatchString("\\d(\\.\\d+)*", oidString)
 	if err != nil {
 		return

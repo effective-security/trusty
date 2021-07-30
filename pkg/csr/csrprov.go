@@ -7,6 +7,9 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/asn1"
+	"encoding/base64"
 	"encoding/pem"
 	"net"
 	"net/mail"
@@ -117,6 +120,20 @@ func (c *Provider) GenerateKeyAndRequest(req *CertificateRequest) (csrPEM []byte
 	var template = x509.CertificateRequest{
 		Subject:            req.Name(),
 		SignatureAlgorithm: req.KeyRequest.SigAlgo(),
+	}
+
+	for _, ext := range req.Extensions {
+		val, derr := base64.StdEncoding.DecodeString(ext.Value)
+		if derr != nil {
+			err = errors.Annotate(derr, "failed to base64 decode extension value")
+			return
+		}
+
+		template.ExtraExtensions = append(template.Extensions, pkix.Extension{
+			Id:       asn1.ObjectIdentifier(ext.ID),
+			Critical: ext.Critical,
+			Value:    val,
+		})
 	}
 
 	for _, san := range req.SAN {

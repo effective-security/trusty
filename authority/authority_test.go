@@ -210,6 +210,10 @@ func (s *testSuite) TestIssuerSign() {
 					EmailAddresses: true,
 					URIs:           true,
 				},
+				AllowedExtensions: []csr.OID{
+					{1, 3, 6, 1, 5, 5, 7, 1, 1},
+					{2, 5, 29, 17},
+				},
 			},
 			"RestrictedServer": {
 				Usage:        []string{"server auth", "signing", "key encipherment"},
@@ -228,6 +232,7 @@ func (s *testSuite) TestIssuerSign() {
 				},
 				AllowedExtensions: []csr.OID{
 					{1, 3, 6, 1, 5, 5, 7, 1, 1},
+					{2, 5, 29, 17},
 				},
 			},
 			"default": {
@@ -243,6 +248,7 @@ func (s *testSuite) TestIssuerSign() {
 				},
 				AllowedExtensions: []csr.OID{
 					{1, 2, 3},
+					{2, 5, 29, 17},
 				},
 			},
 		},
@@ -429,7 +435,7 @@ func (s *testSuite) TestIssuerSign() {
 		caReq := csr.CertificateRequest{
 			CommonName: "trusty CA",
 			KeyRequest: kr,
-			SAN:        []string{"ca@trusty.com", "trusty.com", "127.0.0.1"},
+			//SAN:        []string{"ca@trusty.com", "trusty.com", "127.0.0.1"},
 			Names: []csr.X509Name{
 				{
 					O: "trusty",
