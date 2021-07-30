@@ -73,6 +73,9 @@ func (s *Service) RegisterRoute(r rest.Router) {
 	r.GET(uriNewNonce, s.NonceHandler())
 
 	r.POST(uriNewAccount, s.NewAccountHandler())
+	r.POST(uriOrderByID, s.GetOrderHandler())
+	r.POST(uriAuthzByID, s.GetAuthorizationHandler())
+	r.POST(uriChallengeByID, s.GetChallengeHandler())
 }
 
 // OrgsDb returns DB

@@ -152,6 +152,7 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 	variables := f.getVariableValues(c)
 	if variables["${TRUSTY_CONFIG_DIR}"] == "" {
 		variables["${TRUSTY_CONFIG_DIR}"] = baseDir
+		os.Setenv("TRUSTY_CONFIG_DIR", baseDir)
 	}
 	substituteEnvVars(&c, variables)
 

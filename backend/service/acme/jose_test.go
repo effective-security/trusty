@@ -196,9 +196,12 @@ func signRequestKeyID(
 
 	signer, err := jose.NewSigner(signerKey, opts)
 	require.NoError(t, err, "Failed to make signer")
+	var js []byte = []byte(`""`)
 
-	js, err := json.Marshal(req)
-	require.NoError(t, err, "Failed to encode")
+	if req != nil {
+		js, err = json.Marshal(req)
+		require.NoError(t, err, "Failed to encode")
+	}
 
 	jws, err := signer.Sign(js)
 	require.NoError(t, err, "Failed to sign req")
@@ -208,6 +211,11 @@ func signRequestKeyID(
 	require.NoError(t, err, "Failed to parse generated JWS")
 
 	return parsedJWS, jwk, body
+}
+
+func getRequestURI(path string) string {
+	t := strings.Split(path, "/v2/acme")
+	return "/v2/acme" + t[1]
 }
 
 func signEABContent(t *testing.T, url, kid string, hmac []byte, privateKey interface{}) string {
@@ -307,9 +315,9 @@ func loadKey(t *testing.T, keyBytes []byte) crypto.Signer {
 // payload, with the protected URL set to the provided signedURL. An HTTP
 // request constructed to the provided path with the encoded JWS body as the
 // POST body is returned.
-func signAndPost(t *testing.T, path, signedURL string, payload interface{}, keyID string, ns jose.NonceSource) *http.Request {
-	_, _, body := signRequestKeyID(t, keyID, nil, signedURL, payload, ns)
-	return makePostRequestWithPath(path, body)
+func signAndPost(t *testing.T, signedURL string, payload interface{}, keyID string, clientKey interface{}, ns jose.NonceSource) *http.Request {
+	_, _, body := signRequestKeyID(t, keyID, clientKey, signedURL, payload, ns)
+	return makePostRequestWithPath(signedURL, body)
 }
 
 func Test_RejectsNone(t *testing.T) {
@@ -744,24 +752,24 @@ func TestValidNonce(t *testing.T) {
 func TestValidPOSTURL(t *testing.T) {
 	// A JWS and HTTP request with no extra headers
 	noHeadersJWS, noHeadersJWSBody := signExtraHeaders(t, nil, randomNonceProvider{})
-	noHeadersRequest := makePostRequestWithPath("test-path", noHeadersJWSBody)
+	noHeadersRequest := makePostRequestWithPath("http://localhost/test-path", noHeadersJWSBody)
 
 	// A JWS and HTTP request with extra headers, but no "url" extra header
 	noURLHeaders := map[jose.HeaderKey]interface{}{
 		"nifty": "swell",
 	}
 	noURLHeaderJWS, noURLHeaderJWSBody := signExtraHeaders(t, noURLHeaders, randomNonceProvider{})
-	noURLHeaderRequest := makePostRequestWithPath("test-path", noURLHeaderJWSBody)
+	noURLHeaderRequest := makePostRequestWithPath("http://localhost/test-path", noURLHeaderJWSBody)
 
 	// A JWS and HTTP request with a mismatched HTTP URL to JWS "url" header
 	wrongURLHeaders := map[jose.HeaderKey]interface{}{
 		"url": "foobar",
 	}
 	wrongURLHeaderJWS, wrongURLHeaderJWSBody := signExtraHeaders(t, wrongURLHeaders, randomNonceProvider{})
-	wrongURLHeaderRequest := makePostRequestWithPath("test-path", wrongURLHeaderJWSBody)
+	wrongURLHeaderRequest := makePostRequestWithPath("http://localhost/test-path", wrongURLHeaderJWSBody)
 
 	correctURLHeaderJWS, _, correctURLHeaderJWSBody := signRequestEmbed(t, nil, "http://localhost/test-path", "", randomNonceProvider{})
-	correctURLHeaderRequest := makePostRequestWithPath("test-path", correctURLHeaderJWSBody)
+	correctURLHeaderRequest := makePostRequestWithPath("http://localhost/test-path", correctURLHeaderJWSBody)
 
 	testCases := []struct {
 		Name           string
@@ -849,19 +857,20 @@ func (randomNonceProvider) Nonce() (string, error) {
 // makePostRequestWithPath creates an http.Request for localhost with method
 // POST, the provided body, and the correct Content-Length. The path provided
 // will be parsed as a URL and used to populate the request URL and RequestURI
-func makePostRequestWithPath(path string, body string) *http.Request {
+func makePostRequestWithPath(uRL string, body string) *http.Request {
 	request := &http.Request{
 		Method:     http.MethodPost,
 		RemoteAddr: "1.1.1.1:8443",
 		Header: map[string][]string{
 			header.ContentLength: {strconv.Itoa(len(body))},
+			header.ContentType:   {header.ApplicationJoseJSON},
 		},
 		Body: makeBody(body),
-		Host: "localhost",
 	}
-	url := mustParseURL(path)
+	url := mustParseURL(uRL)
 	request.URL = url
 	request.RequestURI = url.Path
+	request.Host = url.Host
 	return request
 }
 

@@ -130,8 +130,8 @@ func Test_LoadYAMLOverride(t *testing.T) {
 
 	assert.Equal(t, "postgres", c.OrgsSQL.Driver)
 	assert.NotEqual(t, "file://${TRUSTY_CONFIG_DIR}/sql-conn.txt", c.OrgsSQL.DataSource)
-	assert.Contains(t, c.OrgsSQL.DataSource, "internal/config/testdata/sql-conn-orgsdb.txt") // should be resolved
-	assert.NotEqual(t, "../../sql/orgs/migrations", c.OrgsSQL.MigrationsDir)                 // should be resolved
+	assert.Contains(t, c.OrgsSQL.DataSource, "sql-conn-orgsdb.txt")          // should be resolved
+	assert.NotEqual(t, "../../sql/orgs/migrations", c.OrgsSQL.MigrationsDir) // should be resolved
 
 	require.NotEmpty(t, c.Authority)
 

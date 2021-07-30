@@ -1,6 +1,7 @@
 package acme
 
 import (
+	"bytes"
 	"context"
 	"crypto"
 	"crypto/ecdsa"
@@ -14,6 +15,7 @@ import (
 
 	acmemodel "github.com/ekspand/trusty/acme/model"
 	"github.com/ekspand/trusty/api/v2acme"
+	"github.com/ekspand/trusty/internal/db"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/juju/errors"
 	"gopkg.in/square/go-jose.v2"
@@ -415,9 +417,11 @@ func (s *Service) validJWSForKey(
 	// This caught invalid JSON early and so we preserve this check by explicitly
 	// trying to unmarshal the payload as part of the verification and failing
 	// early if it isn't valid JSON.
-	var parsedBody struct{}
-	if err := json.Unmarshal(payload, &parsedBody); err != nil {
-		return nil, v2acme.MalformedError("Request payload did not parse as JSON").WithSource(err)
+	if !bytes.Equal(payload, []byte(`""`)) {
+		var parsedBody struct{}
+		if err := json.Unmarshal(payload, &parsedBody); err != nil {
+			return nil, v2acme.MalformedError("Request payload did not parse as JSON").WithSource(err)
+		}
 	}
 
 	return payload, nil
@@ -514,13 +518,16 @@ func (s *Service) lookupJWK(
 	}
 
 	header := jws.Signatures[0].Header
-	acctID := path.Base(header.KeyID)
+	acctID, err := db.ID(path.Base(header.KeyID))
+	if err != nil {
+		return nil, nil, v2acme.AccountDoesNotExistError("account %q not found", header.KeyID)
+	}
 
 	// Try to find the account for this account ID
-	account, err := s.controller.GetRegistrationByKeyID(ctx, acctID)
+	account, err := s.controller.GetRegistration(ctx, acctID)
 	if err != nil {
 		// If the account isn't found, return a suitable problem
-		if errors.IsNotFound(err) {
+		if db.IsNotFoundError(err) {
 			return nil, nil, v2acme.AccountDoesNotExistError("account %q not found", header.KeyID)
 		}
 

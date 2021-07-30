@@ -25,11 +25,6 @@ func (s *Service) NewAccountHandler() rest.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
 		s.handleACMEHeaders(w, r)
 
-		if r.Method != http.MethodPost {
-			s.writeProblem(w, r, v2acme.MethodNotAllowedError())
-			return
-		}
-
 		// NewAccount uses `validSelfAuthenticatedPOST` instead of
 		// `validPOSTforAccount` because there is no account to authenticate against
 		// until after it is created.
@@ -166,9 +161,7 @@ func (s *Service) NewAccountHandler() rest.Handle {
 }
 
 func (s *Service) writeAccount(w http.ResponseWriter, r *http.Request, statusCode int, reg *acmemodel.Registration) {
-	baseURL := s.baseURL()
-	acctID := strconv.FormatUint(reg.ID, 10)
-	acctURL := baseURL + strings.Replace(uriAccountByID, ":acct_id", acctID, 1)
+	acctURL := s.baseURL() + fmt.Sprintf(uriAccountByIDFmt, reg.ID)
 	ordersURL := acctURL + "/orders"
 
 	// set location header

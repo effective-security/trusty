@@ -24,17 +24,26 @@ const (
 	// The following URIs should have accountID in URL and
 	// KeyID in the payload
 
-	uriAccountByID = v2acme.BasePath + "/account/:acct_id"
+	uriAccountByID    = v2acme.BasePath + "/account/:acct_id"
+	uriAccountByIDFmt = v2acme.BasePath + "/account/%d"
 
-	uriOrders    = uriAccountByID + "/orders"
-	uriOrderByID = uriOrders + "/:id"
+	uriOrders       = uriAccountByID + "/orders"
+	uriOrderByID    = uriOrders + "/:id"
+	uriOrderByIDFmt = uriAccountByIDFmt + "/orders/%d"
 
-	uriAuthzByID = v2acme.BasePath + "/authz/:id"
-	uriChallenge = v2acme.BasePath + "/challenge/:acct_id/:authz_id/:id"
-	uriCert      = v2acme.BasePath + "/cert/:acct_id/:id"
+	uriFinalizeByID    = uriAccountByID + "/finalize/:id"
+	uriFinalizeByIDFmt = uriAccountByIDFmt + "/finalize/%d"
 
-	uriIssuer       = v2acme.BasePath + "/issuer-cert"
-	uriFinalizeByID = v2acme.BasePath + "/finalize/:acct_id/:id"
+	uriAuthzByID    = uriAccountByID + "/authz/:id"
+	uriAuthzByIDFmt = uriAccountByIDFmt + "/authz/%d"
+
+	uriChallengeByID    = uriAccountByID + "/challenge/:authz_id/:id"
+	uriChallengeByIDFmt = uriAccountByIDFmt + "/challenge/%d/%d"
+
+	uriCertByID    = uriAccountByID + "/cert/:id"
+	uriCertByIDFmt = uriAccountByIDFmt + "/cert/%d"
+
+	uriIssuer = v2acme.BasePath + "/issuer-cert"
 )
 
 // DirectoryHandler returns directory

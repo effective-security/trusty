@@ -176,17 +176,30 @@ func Test_CheckConsistencyForValidation(t *testing.T) {
 		err       string
 	}{
 		{
-			challenge: &acmemodel.Challenge{ID: 1, KeyAuthorization: "2", Status: v2acme.StatusPending, Token: "3"},
-			err:       "invalid token: \"3\"",
+			challenge: &acmemodel.Challenge{
+				ID:               1,
+				KeyAuthorization: "2",
+				Status:           v2acme.StatusPending,
+				Token:            "3",
+				Type:             v2acme.IdentifierDNS,
+			},
+			err: "invalid token: \"3\"",
 		},
 		{
-			challenge: &acmemodel.Challenge{ID: 2, KeyAuthorization: "", Status: v2acme.StatusValid, Token: "3"},
-			err:       "invalid token: \"3\"", // "challenge is not pending: valid",
+			challenge: &acmemodel.Challenge{
+				ID:               2,
+				Type:             v2acme.IdentifierDNS,
+				KeyAuthorization: "",
+				Status:           v2acme.StatusValid,
+				Token:            "3",
+			},
+			err: "invalid token: \"3\"", // "challenge is not pending: valid",
 		},
 		{
 			challenge: &acmemodel.Challenge{
 				ID:               3,
 				Status:           v2acme.StatusPending,
+				Type:             v2acme.IdentifierDNS,
 				Token:            "EGy1sG21BB3gjJu3fx-R7riQO190mmzH",
 				KeyAuthorization: "",
 			},
@@ -196,6 +209,7 @@ func Test_CheckConsistencyForValidation(t *testing.T) {
 			challenge: &acmemodel.Challenge{
 				ID:               4,
 				Status:           v2acme.StatusPending,
+				Type:             v2acme.IdentifierDNS,
 				Token:            "EGy1sG21BB3gjJu3fx-R7riQO190mmzH",
 				KeyAuthorization: "EGy1sG21BB3gjJu3fx-R7riQO190mmz.xSmDyoxiYD-u59JJRzxQVCLRcoitjEeEoyTqS-2R3e4",
 			},
@@ -205,6 +219,7 @@ func Test_CheckConsistencyForValidation(t *testing.T) {
 			challenge: &acmemodel.Challenge{
 				ID:               5,
 				Status:           v2acme.StatusPending,
+				Type:             v2acme.IdentifierDNS,
 				Token:            "EGy1sG21BB3gjJu3fx-R7riQO190mmzH",
 				KeyAuthorization: "EGy1sG21BB3gjJu3fx-R7riQO190mmzH.xSmDyoxiYD-u59JJRzxQVC",
 			},
@@ -214,6 +229,7 @@ func Test_CheckConsistencyForValidation(t *testing.T) {
 			challenge: &acmemodel.Challenge{
 				ID:               6,
 				Status:           v2acme.StatusPending,
+				Type:             v2acme.IdentifierDNS,
 				Token:            "EGy1sG21BB3gjJu3fx-R7riQO190mmzH",
 				KeyAuthorization: "EGy1sG21BB3gjJu3fx-R7riQO190mmzH.xSmDyoxiYD-u59JJRzxQVCLRcoitjEeEoyTqS-2R3e4",
 			},
