@@ -64,6 +64,9 @@ type DVConfig struct {
 
 	// AccountURIPrefixes specifies a list of account URI prefixes for CAA validation.
 	AccountURIPrefixes []string `json:"account_uri_prefixes" yaml:"account_uri_prefixes"`
+
+	// STIPA specific config
+	STIPA STIPA `json:"stipa" yaml:"stipa"`
 }
 
 // ServiceConfig contains configuration for the ACME service.
@@ -79,6 +82,12 @@ type ServiceConfig struct {
 
 	// BaseURI specifies public URI.
 	BaseURI string `json:"base_uri" yaml:"base_uri"`
+}
+
+// STIPA configuration fot trust validation
+type STIPA struct {
+	// CAChain specifies the location of the STI-PA signer
+	CAChain string `json:"ca_chain" yaml:"ca_chain"`
 }
 
 // Config provides Acme configuration.
@@ -111,6 +120,17 @@ func LoadConfig(path string) (*Config, error) {
 
 	if err != nil {
 		return nil, errors.Annotate(err, "failed to unmarshal configuration")
+	}
+
+	// Apply defaults
+	if cfg.Policy.OrderExpiry == 0 {
+		cfg.Policy.OrderExpiry = 72 * time.Hour
+	}
+	if cfg.Policy.AuthzExpiry == 0 {
+		cfg.Policy.AuthzExpiry = 72 * time.Hour
+	}
+	if cfg.Policy.PendingAuthzExpiry == 0 {
+		cfg.Policy.PendingAuthzExpiry = 72 * time.Hour
 	}
 
 	return cfg, nil

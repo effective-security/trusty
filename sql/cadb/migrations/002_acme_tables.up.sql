@@ -73,14 +73,10 @@ CREATE TABLE IF NOT EXISTS public.orders
     created_at timestamp with time zone,
     status character varying(16) COLLATE pg_catalog."default" NOT NULL,
     expires_at timestamp with time zone,
-    not_before character varying(64) COLLATE pg_catalog."default" NOT NULL,
-    not_after character varying(64) COLLATE pg_catalog."default" NOT NULL,
-    error text COLLATE pg_catalog."default" NULL,
-    authorizations text COLLATE pg_catalog."default" NOT NULL,
     cert_id character varying(64) COLLATE pg_catalog."default" NOT NULL,
-    dns_names text COLLATE pg_catalog."default" NOT NULL,
     binding_id character varying(64) COLLATE pg_catalog."default" NOT NULL,
     external_order_id bigint NOT NULL,
+    json text COLLATE pg_catalog."default" NULL,
 
     CONSTRAINT orders_pkey PRIMARY KEY (id),
     CONSTRAINT orders_names_hash UNIQUE (reg_id,names_hash)

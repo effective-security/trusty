@@ -101,6 +101,23 @@ func TestMain(m *testing.M) {
 	os.Exit(rc)
 }
 
+func TestURI(t *testing.T) {
+	assert.Equal(t, "/v2/acme/account/:acct_id", uriAccountByID)
+	assert.Equal(t, "/v2/acme/account/%d", uriAccountByIDFmt)
+
+	assert.Equal(t, "/v2/acme/account/:acct_id/orders/:id", uriOrderByID)
+	assert.Equal(t, "/v2/acme/account/%d/orders/%d", uriOrderByIDFmt)
+
+	assert.Equal(t, "/v2/acme/account/:acct_id/authz/:id", uriAuthzByID)
+	assert.Equal(t, "/v2/acme/account/%d/authz/%d", uriAuthzByIDFmt)
+
+	assert.Equal(t, "/v2/acme/account/:acct_id/challenge/:authz_id/:id", uriChallengeByID)
+	assert.Equal(t, "/v2/acme/account/%d/challenge/%d/%d", uriChallengeByIDFmt)
+
+	assert.Equal(t, "/v2/acme/account/:acct_id/finalize/:id", uriFinalizeByID)
+	assert.Equal(t, "/v2/acme/account/%d/finalize/%d", uriFinalizeByIDFmt)
+}
+
 func TestReady(t *testing.T) {
 	svc := trustyServer.Service(ServiceName).(*Service)
 	assert.True(t, svc.IsReady())

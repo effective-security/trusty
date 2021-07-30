@@ -1,5 +1,0 @@
-emailer:
-  sender_email: no-reply@martinisecurity.com
-  sender_pwd: env://MARTINI_EMAILER_PASSWORD
-  receiver_email: denis@ekspand.com
-

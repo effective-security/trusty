@@ -50,21 +50,11 @@ func TestCreateAccount(t *testing.T) {
 	assert.Contains(t, acct.OrdersURL, v2acme.BasePath+"/account")
 }
 
-func Test_newAccountHandler(t *testing.T) {
+func TestNewAccountHandler(t *testing.T) {
 	svc := trustyServer.Service(ServiceName).(*Service)
 	dir := getDirectory(t)
 	h := svc.NewAccountHandler()
 	url := dir["newAccount"]
-
-	t.Run("GET not signed JWS", func(t *testing.T) {
-		w := httptest.NewRecorder()
-
-		r, err := http.NewRequest(http.MethodGet, url, nil)
-		require.NoError(t, err)
-
-		h(w, r, nil)
-		require.Equal(t, http.StatusMethodNotAllowed, w.Code)
-	})
 
 	t.Run("POST not signed JWS", func(t *testing.T) {
 		w := httptest.NewRecorder()
@@ -83,7 +73,7 @@ func Test_newAccountHandler(t *testing.T) {
 			OnlyReturnExisting: true,
 		}
 
-		r := signAndPost(t, url, url, req, url, svc)
+		r := signAndPost(t, url, req, url, nil, svc)
 		r.Header.Add(header.ContentType, header.ApplicationJoseJSON)
 
 		h(w, r, nil)

@@ -126,7 +126,7 @@ func Test_ACMEGetRegistration(t *testing.T) {
 }
 
 func Test_ACMEGetOrder(t *testing.T) {
-	val, err := provider.GetOrder(ctx, 1234, "1234")
+	val, err := provider.GetOrderByHash(ctx, 1234, "1234")
 	require.Error(t, err)
 	assert.Equal(t, "sql: no rows in result set", err.Error())
 	assert.True(t, db.IsNotFoundError(err))
@@ -212,17 +212,26 @@ func Test_PutIssuedCertificate(t *testing.T) {
 
 func Test_UpdateOrder(t *testing.T) {
 	regID, _ := provider.NextID()
-	names := []string{"host1", "host2"}
-	keyID, err := model.GetIDFromStrings(names)
+	idns := []v2acme.Identifier{
+		{
+			Type:  v2acme.IdentifierDNS,
+			Value: "dns",
+		},
+		{
+			Type:  v2acme.IdentifierTNAuthList,
+			Value: "MAigBhYENzA5Sg==",
+		},
+	}
+	keyID, err := model.GetIDFromIdentifiers(idns)
 	require.NoError(t, err)
 
 	order := &model.Order{
 		RegistrationID:    regID,
 		NamesHash:         keyID,
-		DNSNames:          names,
+		Identifiers:       idns,
 		Status:            v2acme.StatusPending,
-		Authorizations:    []string{"dns1", "telco2"},
-		CertificateID:     "certID",
+		Authorizations:    []uint64{1234, 2345},
+		CertificateID:     123456,
 		ExternalBindingID: "ExternalBindingID",
 		ExternalOrderID:   1234,
 	}
@@ -236,7 +245,7 @@ func Test_UpdateOrder(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, *order, *o3)
 
-	o3, err = provider.GetOrder(ctx, regID, keyID)
+	o3, err = provider.GetOrderByHash(ctx, regID, keyID)
 	require.NoError(t, err)
 	assert.Equal(t, *order, *o3)
 

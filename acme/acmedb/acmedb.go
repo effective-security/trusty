@@ -32,8 +32,10 @@ type AcmeDB interface {
 
 	// UpdateOrder updates Order
 	UpdateOrder(ctx context.Context, order *model.Order) (*model.Order, error)
-	// GetOrder returns Order by ID
-	GetOrder(ctx context.Context, registrationID uint64, namesHash string) (*model.Order, error)
+	// GetOrder returns Order
+	GetOrder(ctx context.Context, id uint64) (*model.Order, error)
+	// GetOrderByHash returns Order by names hash
+	GetOrderByHash(ctx context.Context, registrationID uint64, namesHash string) (*model.Order, error)
 	// GetOrders returns all Orders for specified registration
 	GetOrders(ctx context.Context, regID uint64) ([]*model.Order, error)
 

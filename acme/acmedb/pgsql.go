@@ -150,118 +150,101 @@ func (p *SQLProvider) UpdateOrder(ctx context.Context, order *model.Order) (*mod
 		return nil, errors.Trace(err)
 	}
 
-	logger.Debugf("reg_id=%d, dns=%v", order.RegistrationID, order.DNSNames)
+	logger.Debugf("reg_id=%d, external_id=%v", order.RegistrationID, order.ExternalOrderID)
 
-	res := new(model.Order)
-	var authorizations string
-	var names string
-	var jsError string
+	res := order.Copy()
+	res.ID = 0
 
-	if order.Error != nil {
-		js, err := json.Marshal(order.Error)
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
-		jsError = string(js)
+	js, err := json.Marshal(order)
+	if err != nil {
+		return nil, errors.Trace(err)
 	}
 
 	err = p.db.QueryRowContext(ctx, `
-			INSERT INTO orders(id,reg_id,names_hash,created_at,status,expires_at,not_before,not_after,error,authorizations,cert_id,dns_names,binding_id,external_order_id)
-				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+			INSERT INTO orders(id,reg_id,names_hash,created_at,status,expires_at,cert_id,binding_id,external_order_id,json)
+				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 				ON CONFLICT (reg_id,names_hash)
 			DO UPDATE
-				SET created_at=$4,status=$5,expires_at=$6,not_before=$7,not_after=$8,error=$9,authorizations=$10,cert_id=$11,binding_id=$13,external_order_id=$14
-			RETURNING id,reg_id,names_hash,created_at,status,expires_at,not_before,not_after,error,authorizations,cert_id,dns_names,binding_id,external_order_id
+				SET created_at=$4,status=$5,expires_at=$6,cert_id=$7,binding_id=$8,external_order_id=$9,json=$10
+			RETURNING id
 			;`, id,
 		order.RegistrationID,
 		order.NamesHash,
 		order.CreatedAt.UTC(),
 		order.Status,
 		order.ExpiresAt.UTC(),
-		order.NotBefore,
-		order.NotAfter,
-		jsError,
-		strings.Join(order.Authorizations, ","),
 		order.CertificateID,
-		strings.Join(order.DNSNames, ","),
 		order.ExternalBindingID,
 		order.ExternalOrderID,
-	).Scan(&res.ID,
-		&res.RegistrationID,
-		&res.NamesHash,
-		&res.CreatedAt,
-		&res.Status,
-		&res.ExpiresAt,
-		&res.NotBefore,
-		&res.NotAfter,
-		&jsError,
-		&authorizations,
-		&res.CertificateID,
-		&names,
-		&res.ExternalBindingID,
-		&res.ExternalOrderID,
-	)
+		string(js),
+	).Scan(&res.ID)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	if jsError != "" {
-		err = json.Unmarshal([]byte(jsError), &res.Error)
-		if err != nil {
-			return nil, errors.Annotatef(err, "corrupted data")
-		}
-	}
-	res.DNSNames = strings.Split(names, ",")
-	res.Authorizations = strings.Split(authorizations, ",")
-	res.CreatedAt = res.CreatedAt.UTC()
-	res.ExpiresAt = res.ExpiresAt.UTC()
 
 	return res, nil
 }
 
 // GetOrder returns Order by ID
-func (p *SQLProvider) GetOrder(ctx context.Context, registrationID uint64, namesHash string) (*model.Order, error) {
+func (p *SQLProvider) GetOrder(ctx context.Context, id uint64) (*model.Order, error) {
 	res := new(model.Order)
 
-	var authorizations string
-	var names string
-	var jsError string
+	var js string
 
 	err := p.db.QueryRowContext(ctx, `
 		SELECT
-			id,reg_id,names_hash,created_at,status,expires_at,not_before,not_after,error,authorizations,cert_id,dns_names,binding_id,external_order_id
+			json
 		FROM orders
-		WHERE reg_id = $1 AND names_hash = $2
+		WHERE id = $1
 		;
-		`, registrationID, namesHash).Scan(
-		&res.ID,
-		&res.RegistrationID,
-		&res.NamesHash,
-		&res.CreatedAt,
-		&res.Status,
-		&res.ExpiresAt,
-		&res.NotBefore,
-		&res.NotAfter,
-		&jsError,
-		&authorizations,
-		&res.CertificateID,
-		&names,
-		&res.ExternalBindingID,
-		&res.ExternalOrderID,
-	)
+		`, id).
+		Scan(&js)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
-	if jsError != "" {
-		err = json.Unmarshal([]byte(jsError), &res.Error)
-		if err != nil {
-			return nil, errors.Annotatef(err, "corrupted data")
-		}
+	err = json.Unmarshal([]byte(js), res)
+	if err != nil {
+		return nil, errors.Annotatef(err, "corrupted data")
 	}
-
-	res.DNSNames = strings.Split(names, ",")
-	res.Authorizations = strings.Split(authorizations, ",")
+	res.ID = id
 	res.CreatedAt = res.CreatedAt.UTC()
 	res.ExpiresAt = res.ExpiresAt.UTC()
+	res.NotBefore = res.NotBefore.UTC()
+	res.NotAfter = res.NotAfter.UTC()
+
+	return res, nil
+}
+
+// GetOrderByHash returns Order by hash
+func (p *SQLProvider) GetOrderByHash(ctx context.Context, registrationID uint64, namesHash string) (*model.Order, error) {
+	res := new(model.Order)
+
+	var id uint64
+	var js string
+
+	err := p.db.QueryRowContext(ctx, `
+		SELECT
+			id,json
+		FROM orders
+		WHERE reg_id = $1 AND names_hash = $2
+		;
+		`, registrationID, namesHash).
+		Scan(
+			&id,
+			&js,
+		)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	err = json.Unmarshal([]byte(js), res)
+	if err != nil {
+		return nil, errors.Annotatef(err, "corrupted data")
+	}
+	res.ID = id
+	res.CreatedAt = res.CreatedAt.UTC()
+	res.ExpiresAt = res.ExpiresAt.UTC()
+	res.NotBefore = res.NotBefore.UTC()
+	res.NotAfter = res.NotAfter.UTC()
 
 	return res, nil
 }
@@ -270,7 +253,7 @@ func (p *SQLProvider) GetOrder(ctx context.Context, registrationID uint64, names
 func (p *SQLProvider) GetOrders(ctx context.Context, registrationID uint64) ([]*model.Order, error) {
 	res, err := p.db.QueryContext(ctx, `
 		SELECT
-			id,reg_id,names_hash,created_at,status,expires_at,not_before,not_after,error,authorizations,cert_id,dns_names,binding_id,external_order_id
+			id,json
 		FROM
 			orders
 		WHERE reg_id = $1
@@ -285,39 +268,26 @@ func (p *SQLProvider) GetOrders(ctx context.Context, registrationID uint64) ([]*
 
 	for res.Next() {
 		r := new(model.Order)
-		var authorizations string
-		var names string
-		var jsError string
+		var id uint64
+		var js string
 
 		err = res.Scan(
-			&r.ID,
-			&r.RegistrationID,
-			&r.NamesHash,
-			&r.CreatedAt,
-			&r.Status,
-			&r.ExpiresAt,
-			&r.NotBefore,
-			&r.NotAfter,
-			&jsError,
-			&authorizations,
-			&r.CertificateID,
-			&names,
-			&r.ExternalBindingID,
-			&r.ExternalOrderID,
+			&id,
+			&js,
 		)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
-		if jsError != "" {
-			err = json.Unmarshal([]byte(jsError), &r.Error)
-			if err != nil {
-				return nil, errors.Annotatef(err, "corrupted data")
-			}
+		err = json.Unmarshal([]byte(js), r)
+		if err != nil {
+			return nil, errors.Annotatef(err, "corrupted data")
 		}
-		r.DNSNames = strings.Split(names, ",")
-		r.Authorizations = strings.Split(authorizations, ",")
+		r.ID = id
 		r.CreatedAt = r.CreatedAt.UTC()
 		r.ExpiresAt = r.ExpiresAt.UTC()
+		r.NotBefore = r.NotBefore.UTC()
+		r.NotAfter = r.NotAfter.UTC()
+
 		list = append(list, r)
 	}
 

@@ -27,7 +27,8 @@ type IdentifierType string
 
 // These types are the available identification mechanisms
 const (
-	IdentifierDNS = IdentifierType("dns")
+	IdentifierDNS        = IdentifierType("dns")
+	IdentifierTNAuthList = IdentifierType("TNAuthList")
 )
 
 // An Identifier encodes an identifier that can
@@ -38,6 +39,16 @@ const (
 type Identifier struct {
 	Type  IdentifierType `json:"type"`  // The type of identifier being encoded
 	Value string         `json:"value"` // The identifier itself
+}
+
+// FindIdentifier returns a non negative index, if found
+func FindIdentifier(list []Identifier, val string) int {
+	for i, id := range list {
+		if id.Value == val {
+			return i
+		}
+	}
+	return -1
 }
 
 // DNSIdentifier returns new DNS identifier for specified domain.
@@ -113,6 +124,7 @@ type Order struct {
 // https://ietf-wg-acme.github.io/acme/draft-ietf-acme-acme.html#rfc.section.8
 type Challenge struct {
 	Type        IdentifierType `json:"type"`
+	TKAuthType  string         `json:"tkauth-type,omitempty"`
 	URL         string         `json:"url"`
 	Status      Status         `json:"status"`
 	ValidatedAt string         `json:"validated,omitempty"`

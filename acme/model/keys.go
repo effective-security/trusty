@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/ekspand/trusty/api/v2acme"
 	"github.com/juju/errors"
 	"gopkg.in/square/go-jose.v2"
 )
@@ -38,6 +39,18 @@ func GetIDFromStrings(list []string) (string, error) {
 	h := sha256.New()
 	for _, str := range list {
 		_, err := h.Write([]byte(str))
+		if err != nil {
+			return "", errors.Trace(err)
+		}
+	}
+	return base64.RawURLEncoding.EncodeToString(h.Sum(nil)), nil
+}
+
+// GetIDFromIdentifiers produces Base64-URL-encoded SHA256 digest of a slice
+func GetIDFromIdentifiers(list []v2acme.Identifier) (string, error) {
+	h := sha256.New()
+	for _, idn := range list {
+		_, err := h.Write([]byte(idn.Value))
 		if err != nil {
 			return "", errors.Trace(err)
 		}

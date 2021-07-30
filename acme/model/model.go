@@ -19,6 +19,7 @@ const (
 	ChallengeTypeHTTP01    = "http-01"
 	ChallengeTypeDNS01     = "dns-01"
 	ChallengeTypeTLSALPN01 = "tls-alpn-01"
+	ChallengeTypeSPC       = "spc-token-01"
 )
 
 const (
@@ -107,20 +108,40 @@ func (r *Registration) ValidateID() error {
 
 // Order represent internal model for ACME Order object
 type Order struct {
-	ID                uint64          `json:"id" yaml:"id"`
-	RegistrationID    uint64          `json:"reg_id" yaml:"reg_id"`
-	NamesHash         string          `json:"names_hash" yaml:"names_hash"`
-	CreatedAt         time.Time       `json:"created_at" yaml:"created_at"`
-	Status            v2acme.Status   `json:"status" yaml:"status"`
-	ExpiresAt         time.Time       `json:"expires_at" yaml:"expires_at"`
-	NotBefore         string          `json:"not_before,omitempty" yaml:"not_before"`
-	NotAfter          string          `json:"not_after,omitempty" yaml:"not_after"`
-	Error             *v2acme.Problem `json:"error,omitempty" yaml:"error"`
-	Authorizations    []string        `json:"authorizations" yaml:"authorizations"`
-	CertificateID     string          `json:"cert_id,omitempty" yaml:"cert_id"`
-	DNSNames          []string        `json:"dns_names" yaml:"dns_names"` // Identifiers with "dns" type
-	ExternalBindingID string          `json:"binding_id" yaml:"binding_id"`
-	ExternalOrderID   uint64          `json:"external_order_id" yaml:"external_order_id"`
+	ID                uint64              `json:"id" yaml:"id"`
+	RegistrationID    uint64              `json:"reg_id" yaml:"reg_id"`
+	NamesHash         string              `json:"names_hash" yaml:"names_hash"`
+	CreatedAt         time.Time           `json:"created_at" yaml:"created_at"`
+	Status            v2acme.Status       `json:"status" yaml:"status"`
+	ExpiresAt         time.Time           `json:"expires_at" yaml:"expires_at"`
+	NotBefore         time.Time           `json:"not_before,omitempty" yaml:"not_before"`
+	NotAfter          time.Time           `json:"not_after,omitempty" yaml:"not_after"`
+	Error             *v2acme.Problem     `json:"error,omitempty" yaml:"error"`
+	Authorizations    []uint64            `json:"authorizations" yaml:"authorizations"`
+	CertificateID     uint64              `json:"cert_id,omitempty" yaml:"cert_id"`
+	Identifiers       []v2acme.Identifier `json:"identifiers"  yaml:"identifiers"`
+	ExternalBindingID string              `json:"binding_id" yaml:"binding_id"`
+	ExternalOrderID   uint64              `json:"external_order_id" yaml:"external_order_id"`
+}
+
+// Copy clones the Order
+func (o *Order) Copy() *Order {
+	return &Order{
+		ID:                o.ID,
+		RegistrationID:    o.RegistrationID,
+		NamesHash:         o.NamesHash,
+		CreatedAt:         o.CreatedAt,
+		Status:            o.Status,
+		ExpiresAt:         o.ExpiresAt,
+		NotBefore:         o.NotBefore,
+		NotAfter:          o.NotAfter,
+		Error:             o.Error,
+		Authorizations:    o.Authorizations,
+		CertificateID:     o.CertificateID,
+		Identifiers:       o.Identifiers,
+		ExternalBindingID: o.ExternalBindingID,
+		ExternalOrderID:   o.ExternalOrderID,
+	}
 }
 
 // IssuedCertificate provides info about issued certificate
@@ -135,11 +156,11 @@ type IssuedCertificate struct {
 
 // OrderRequest specifies parameters for new Order
 type OrderRequest struct {
-	ExternalBindingID string   `json:"binding_id" yaml:"binding_id"`
-	RegistrationID    uint64   `json:"reg_id" yaml:"reg_id"`
-	NotBefore         string   `json:"not_before,omitempty" yaml:"not_before"`
-	NotAfter          string   `json:"not_after,omitempty" yaml:"not_after"`
-	DNSNames          []string `json:"dns_names" yaml:"dns_names"` // Identifiers with "dns" type
+	ExternalBindingID string              `json:"binding_id" yaml:"binding_id"`
+	RegistrationID    uint64              `json:"reg_id" yaml:"reg_id"`
+	NotBefore         time.Time           `json:"not_before,omitempty" yaml:"not_before"`
+	NotAfter          time.Time           `json:"not_after,omitempty" yaml:"not_after"`
+	Identifiers       []v2acme.Identifier `json:"identifiers"  yaml:"identifiers"`
 }
 
 // Challenge represent internal model for ACME Challenge object
@@ -304,13 +325,14 @@ func (ch *Challenge) CheckConsistencyForValidation() error {
 		return errors.Errorf("invalid token: %q", ch.Token)
 	}
 
-	parts := strings.Split(ch.KeyAuthorization, ".")
-	if len(parts) != 2 ||
-		!LooksLikeToken(parts[0]) ||
-		len(parts[1]) < 32 {
-		return errors.Errorf("invalid key authorization: %q", ch.KeyAuthorization)
+	if ch.Type == v2acme.IdentifierDNS {
+		parts := strings.Split(ch.KeyAuthorization, ".")
+		if len(parts) != 2 ||
+			!LooksLikeToken(parts[0]) ||
+			len(parts[1]) < 32 {
+			return errors.Errorf("invalid key authorization: %q", ch.KeyAuthorization)
+		}
 	}
-
 	return nil
 }
 
