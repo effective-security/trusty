@@ -341,6 +341,7 @@ func (e *Server) Service(name string) Service {
 func (e *Server) IsReady() bool {
 	for _, ss := range e.services {
 		if !ss.IsReady() {
+			logger.Infof("status=NOT_READY, svc=%s", ss.Name())
 			return false
 		}
 	}

@@ -222,6 +222,8 @@ func Parse(csrBytes []byte) (*x509.Certificate, error) {
 			template.IsCA = constraints.IsCA
 			template.MaxPathLen = constraints.MaxPathLen
 			template.MaxPathLenZero = template.MaxPathLen == 0
+		} else {
+			template.ExtraExtensions = append(template.ExtraExtensions, val)
 		}
 	}
 

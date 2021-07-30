@@ -21,6 +21,7 @@ profiles:
     - ipsec end system
     allowed_extensions:
     - 1.3.6.1.5.5.7.1.1
+    - 2.5.29.17
 
   server:
     issuer_label: L2_CA
@@ -33,6 +34,7 @@ profiles:
     - ipsec end system
     allowed_extensions:
     - 1.3.6.1.5.5.7.1.1
+    - 2.5.29.17
 
   client:
     issuer_label: L2_CA
@@ -45,6 +47,7 @@ profiles:
     - ipsec user
     allowed_extensions:
     - 1.3.6.1.5.5.7.1.1
+    - 2.5.29.17
 
   ROOT:
     expiry: 43800h

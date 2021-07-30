@@ -3,8 +3,12 @@ package acme
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/asn1"
 	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -13,8 +17,11 @@ import (
 	"time"
 
 	"github.com/ekspand/trusty/api/v2acme"
+	"github.com/ekspand/trusty/pkg/csr"
+	"github.com/ekspand/trusty/pkg/inmemcrypto"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
+	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -168,14 +175,98 @@ func TestNewOrderHandler(t *testing.T) {
 		break
 	}
 
-	t.Run("update-order-status", func(t *testing.T) {
+	certURL := ""
+	t.Run("finalize", func(t *testing.T) {
 		require.NotEmpty(t, orderURL)
 
 		order, _ := getOrder(t, acctURL, clientKey1, orderURL)
 		require.NotNil(t, order)
-		assert.Equal(t, string(v2acme.StatusReady), string(order.Status))
+		require.Equal(t, string(v2acme.StatusReady), string(order.Status))
+
+		prov := csr.NewProvider(inmemcrypto.NewProvider())
+		req := &csr.CertificateRequest{
+			KeyRequest: prov.NewKeyRequest("test", "ECDSA", 256, csr.SigningKey),
+			Extensions: []csr.X509Extension{
+				{
+					ID:    csr.OID{1, 3, 6, 1, 5, 5, 7, 1, 26},
+					Value: "MAigBhYENzA5Sg==",
+				},
+			},
+		}
+		csrPEM, _, _, err := prov.GenerateKeyAndRequest(req)
+		require.NoError(t, err)
+		block, _ := pem.Decode([]byte(csrPEM))
+		certRequest, err := x509.ParseCertificateRequest(block.Bytes)
+		require.NoError(t, err)
+
+		parts := strings.Split(order.FinalizeURL, v2acme.BasePath+"/account/")
+		require.Equal(t, 2, len(parts))
+		ids := strings.Split(parts[1], "/")
+		require.Equal(t, 3, len(ids))
+
+		h := svc.FinalizeOrderHandler()
+		w := httptest.NewRecorder()
+
+		creq := v2acme.CertificateRequest{
+			CSR: v2acme.JoseBuffer(base64.RawURLEncoding.EncodeToString(certRequest.Raw)),
+		}
+
+		r := signAndPost(t, order.FinalizeURL, creq, acctURL, clientKey1, svc)
+		h(w, r, rest.Params{
+			{Key: "acct_id", Value: ids[0]},
+			{Key: "id", Value: ids[2]},
+		})
+
+		res := w.Body.Bytes()
+		require.Equal(t, http.StatusOK, w.Code, problemDetails(res))
+
+		order = new(v2acme.Order)
+		err = json.Unmarshal(w.Body.Bytes(), order)
+		require.NoError(t, err)
+
+		assert.Equal(t, string(v2acme.StatusValid), string(order.Status))
+		assert.NotEmpty(t, order.CertificateURL)
+		certURL = order.CertificateURL
 	})
 
+	t.Run("certificate", func(t *testing.T) {
+		require.NotEmpty(t, certURL)
+
+		parts := strings.Split(certURL, v2acme.BasePath+"/account/")
+		require.Equal(t, 2, len(parts))
+		ids := strings.Split(parts[1], "/")
+		require.Equal(t, 3, len(ids))
+
+		h := svc.GetCertHandler()
+		w := httptest.NewRecorder()
+
+		r := signAndPost(t, certURL, nil, acctURL, clientKey1, svc)
+		h(w, r, rest.Params{
+			{Key: "acct_id", Value: ids[0]},
+			{Key: "id", Value: ids[2]},
+		})
+
+		res := w.Body.Bytes()
+		require.Equal(t, http.StatusOK, w.Code, problemDetails(res))
+		require.Equal(t, "application/pem-certificate-chain", w.Header().Get(header.ContentType))
+
+		chain, err := certutil.ParseChainFromPEM(res)
+		require.NoError(t, err)
+		assert.NotEmpty(t, chain)
+
+		cert := chain[0]
+		ext := findExtension(cert.Extensions, asn1.ObjectIdentifier{1, 3, 6, 1, 5, 5, 7, 1, 26})
+		assert.NotNil(t, ext)
+	})
+}
+
+func findExtension(list []pkix.Extension, oid asn1.ObjectIdentifier) []byte {
+	for _, e := range list {
+		if e.Id.Equal(oid) {
+			return e.Value
+		}
+	}
+	return nil
 }
 
 func getOrder(t *testing.T, keyID string, clientKey interface{}, orderURL string) (*v2acme.Order, string) {

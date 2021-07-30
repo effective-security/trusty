@@ -18,7 +18,7 @@ BUILD_FLAGS=
 
 default: help
 
-all: clean folders tools generate hsmconfig build gen_test_certs start-local-kms start-sql test
+all: clean folders tools generate hsmconfig build gen_test_certs gen_martini_certs start-local-kms start-sql test
 
 #
 # clean produced files

@@ -1,7 +1,9 @@
 package ca
 
 import (
+	"bytes"
 	"context"
+	"encoding/pem"
 	"fmt"
 	"strings"
 	"time"
@@ -101,11 +103,37 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 	if req == nil || req.Profile == "" {
 		return nil, v1.NewError(codes.InvalidArgument, "missing profile")
 	}
-	if req.Request == "" {
+	if len(req.Request) == 0 {
 		return nil, v1.NewError(codes.InvalidArgument, "missing request")
 	}
-	if req.RequestFormat != pb.EncodingFormat_PEM {
+
+	var pemReq string
+
+	switch req.RequestFormat {
+	case pb.EncodingFormat_PEM:
+		pemReq = string(req.Request)
+	case pb.EncodingFormat_DER:
+		b := bytes.NewBuffer([]byte{})
+		_ = pem.Encode(b, &pem.Block{Type: "CERTIFICATE REQUEST", Bytes: req.Request})
+		pemReq = string(b.Bytes())
+	default:
 		return nil, v1.NewError(codes.InvalidArgument, "unsupported request_format: %v", req.RequestFormat)
+	}
+
+	var subj *csr.X509Subject
+	if req.Subject != nil {
+		subj = &csr.X509Subject{
+			CommonName: req.Subject.CommonName,
+			Names:      make([]csr.X509Name, len(req.Subject.Names)),
+		}
+		for i, n := range req.Subject.Names {
+			subj.Names[i] = csr.X509Name{
+				C:  n.Country,
+				ST: n.State,
+				O:  n.Organisation,
+				OU: n.OrganisationalUnit,
+			}
+		}
 	}
 
 	ca, err := s.ca.GetIssuerByProfile(req.Profile)
@@ -121,9 +149,12 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 	}
 
 	cr := csr.SignRequest{
-		Request: req.Request,
+		Request: pemReq,
 		Profile: req.Profile,
 		SAN:     req.San,
+		Subject: subj,
+		// TODO:
+		//Extensions: req.E,
 	}
 
 	cert, pem, err := ca.Sign(cr)

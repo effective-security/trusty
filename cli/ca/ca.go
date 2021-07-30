@@ -178,7 +178,7 @@ func Sign(c ctl.Control, p interface{}) error {
 
 	res, err := client.CAClient().SignCertificate(context.Background(), &pb.SignCertificateRequest{
 		RequestFormat: pb.EncodingFormat_PEM,
-		Request:       string(csr),
+		Request:       csr,
 		Profile:       *flags.Profile,
 		IssuerLabel:   *flags.IssuerLabel,
 		San:           *flags.SAN,

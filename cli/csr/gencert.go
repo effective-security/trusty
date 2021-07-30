@@ -75,6 +75,9 @@ func GenCert(c ctl.Control, p interface{}) error {
 	if err != nil {
 		return errors.Annotate(err, "invalid CSR profile")
 	}
+	if flags.SAN != nil && len(*flags.SAN) > 0 {
+		req.SAN = strings.Split(*flags.SAN, ",")
+	}
 
 	// Load ca-config
 	cacfg, err := authority.LoadConfig(*flags.CAConfig)
@@ -109,15 +112,9 @@ func GenCert(c ctl.Control, p interface{}) error {
 			return errors.Annotate(err, "process CSR")
 		}
 
-		var san []string
-		if flags.SAN != nil && len(*flags.SAN) > 0 {
-			san = strings.Split(*flags.SAN, ",")
-		}
 		signReq := csr.SignRequest{
-			SAN:        san,
-			Request:    string(csrPEM),
-			Profile:    *flags.Profile,
-			Extensions: req.Extensions,
+			Request: string(csrPEM),
+			Profile: *flags.Profile,
 		}
 
 		_, certPEM, err = issuer.Sign(signReq)

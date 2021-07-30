@@ -348,22 +348,29 @@ func (ca *Issuer) Sign(req csr.SignRequest) (*x509.Certificate, []byte, error) {
 		safeTemplate.SerialNumber = new(big.Int).SetBytes(serialNumber)
 	}
 
-	if len(req.Extensions) > 0 {
-		for _, ext := range req.Extensions {
-			if !profile.IsAllowedExtention(ext.ID) {
-				return nil, nil, errors.New("extension not allowed: " + ext.ID.String())
-			}
+	for _, ext := range req.Extensions {
+		if !profile.IsAllowedExtention(ext.ID) {
+			return nil, nil, errors.New("extension not allowed: " + ext.ID.String())
+		}
 
-			rawValue, err := hex.DecodeString(ext.Value)
-			if err != nil {
-				return nil, nil, errors.Annotatef(err, "failed to decode extension")
-			}
+		rawValue, err := hex.DecodeString(ext.Value)
+		if err != nil {
+			return nil, nil, errors.Annotatef(err, "failed to decode extension")
+		}
 
-			safeTemplate.ExtraExtensions = append(safeTemplate.ExtraExtensions, pkix.Extension{
-				Id:       asn1.ObjectIdentifier(ext.ID),
-				Critical: ext.Critical,
-				Value:    rawValue,
-			})
+		safeTemplate.ExtraExtensions = append(safeTemplate.ExtraExtensions, pkix.Extension{
+			Id:       asn1.ObjectIdentifier(ext.ID),
+			Critical: ext.Critical,
+			Value:    rawValue,
+		})
+	}
+
+	for _, ext := range csrTemplate.ExtraExtensions {
+		if !profile.IsAllowedExtention(csr.OID(ext.Id)) {
+			return nil, nil, errors.New("extension not allowed: " + ext.Id.String())
+		}
+		if findExtension(safeTemplate.ExtraExtensions, ext.Id) == nil {
+			safeTemplate.ExtraExtensions = append(safeTemplate.ExtraExtensions, ext)
 		}
 	}
 
@@ -387,6 +394,15 @@ func (ca *Issuer) Sign(req csr.SignRequest) (*x509.Certificate, []byte, error) {
 	// TODO: register issued cert
 
 	return crt, signedCertPEM, nil
+}
+
+func findExtension(list []pkix.Extension, oid asn1.ObjectIdentifier) []byte {
+	for _, e := range list {
+		if e.Id.Equal(oid) {
+			return e.Value
+		}
+	}
+	return nil
 }
 
 func (ca *Issuer) sign(template *x509.Certificate) ([]byte, error) {

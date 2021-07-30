@@ -28,7 +28,6 @@ func (s *testSuite) TestNewIssuer() {
 		s.NotEmpty(issuer.OcspURL())
 		s.NotEmpty(issuer.Label())
 		s.NotEmpty(issuer.KeyHash(crypto.SHA1))
-		s.NotNil(issuer.Profile("client"))
 		s.Nil(issuer.Profile("notfound"))
 
 		s.Equal(fmt.Sprintf("http://localhost:7880/v1/crl/%s.crl", issuer.SubjectKID()), issuer.CrlURL())

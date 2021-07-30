@@ -2,14 +2,18 @@ package acme
 
 import (
 	"bytes"
+	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	acmemodel "github.com/ekspand/trusty/acme/model"
 	v1 "github.com/ekspand/trusty/api/v1"
+	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/api/v2acme"
 	"github.com/ekspand/trusty/internal/db"
 	"github.com/go-phorce/dolly/rest"
@@ -40,16 +44,6 @@ func (s *Service) NewOrderHandler() rest.Handle {
 		if len(req.Identifiers) == 0 {
 			s.writeProblem(w, r, v2acme.MalformedError("NewOrder request did not specify any identifiers"))
 			return
-		}
-
-		// check for supported identifiers
-		for _, ident := range req.Identifiers {
-			if ident.Type != v2acme.IdentifierTNAuthList {
-				s.writeProblem(w, r,
-					v2acme.MalformedError("NewOrder request included unsupported type identifier: type %q, value %q",
-						ident.Type, ident.Value))
-				return
-			}
 		}
 
 		// check the Org is approved
@@ -199,6 +193,254 @@ func (s *Service) GetOrderHandler() rest.Handle {
 		}
 
 		s.writeOrder(w, r, http.StatusOK, order)
+	}
+}
+
+// FinalizeOrderHandler handles CSR
+func (s *Service) FinalizeOrderHandler() rest.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
+		s.handleACMEHeaders(w, r)
+		acctID, _ := db.ID(p.ByName("acct_id"))
+		orderID, _ := db.ID(p.ByName("id"))
+
+		if acctID == 0 || orderID == 0 {
+			s.writeProblem(w, r, v2acme.MalformedError("invalid ID: \"%d/%d\"", acctID, orderID))
+			return
+		}
+
+		ctx := r.Context()
+		body, _, account, err := s.ValidPOSTForAccount(ctx, r)
+		if err != nil {
+			s.writeProblem(w, r, err)
+			return
+		}
+
+		if account.ID != acctID {
+			s.writeProblem(w, r, v2acme.UnauthorizedError("user account ID doesn't match account ID in authorization: %q", acctID))
+			return
+		}
+
+		// The authenticated finalize message body should be an encoded CSR
+		var req v2acme.CertificateRequest
+		err = json.Unmarshal(body, &req)
+		if err != nil {
+			s.writeProblem(w, r, v2acme.MalformedError("unable decode finalize order request").WithSource(err))
+			return
+		}
+
+		// Check for a malformed CSR early
+		csrDer, err := base64.RawURLEncoding.DecodeString(string(req.CSR))
+		if err != nil {
+			s.writeProblem(w, r, v2acme.MalformedError("unable to decode CSR").WithSource(err))
+			return
+		}
+		csr, err := x509.ParseCertificateRequest(csrDer)
+		if err != nil {
+			s.writeProblem(w, r, v2acme.MalformedError("unable to parse CSR").WithSource(err))
+			return
+		}
+
+		order, err := s.controller.GetOrder(ctx, orderID)
+		if err != nil {
+			// If the order isn't found, return a suitable problem
+			if db.IsNotFoundError(err) {
+				s.writeProblem(w, r, v2acme.NotFoundError("order %d/%d not found", acctID, orderID))
+			} else {
+				s.writeProblem(w, r, v2acme.ServerInternalError("unable to retreive order %d/%d", acctID, orderID))
+			}
+			return
+		}
+
+		if order.Status == v2acme.StatusInvalid {
+			s.writeProblem(w, r, v2acme.NotFoundError("order %d/%d is invalid: %v", acctID, orderID, order.Error))
+			return
+		}
+
+		now := time.Now().UTC()
+		if order.ExpiresAt.IsZero() || order.ExpiresAt.Before(now) {
+			s.writeProblem(w, r, v2acme.NotFoundError("order %d/%d has expired: %s",
+				acctID, orderID, order.ExpiresAt.Format(time.RFC3339)))
+			return
+		}
+
+		// TODO: verification
+		/*
+			// Dedupe, lowercase and sort both the names from the CSR and the names in the
+			// order.
+			csrNames := acmemodel.UniqueLowerNames(csr.DNSNames)
+			orderNames := acmemodel.UniqueLowerNames(order.DNSNames)
+
+			// Immediately reject the request if the number of names differ
+			if len(orderNames) != len(csrNames) {
+				s.writeProblem(w, r, v2acme.UnauthorizedError("CSR includes different number of names than specifies in the order: [%s]",
+					strings.Join(csrNames, ",")))
+				return
+			}
+
+			// Check that the order names and the CSR names are an exact match
+			for i, name := range orderNames {
+				if name != csrNames[i] {
+					s.writeProblem(w, r, v2acme.UnauthorizedError("CSR is missing Order domain: %q", name))
+					return
+				}
+			}
+		*/
+		if order.Status == v2acme.StatusPending || order.Status == v2acme.StatusReady {
+			// check if update is needed
+			order.Status = v2acme.StatusProcessing
+			orderUpdated, err := s.controller.UpdateOrderStatus(ctx, order)
+			if err != nil {
+				s.writeProblem(w, r, v2acme.ServerInternalError("unable to retreive order %d/%d", acctID, orderID).WithSource(err))
+				return
+			}
+
+			order = orderUpdated
+		}
+
+		if order.Status != v2acme.StatusProcessing {
+			s.writeProblem(w, r, v2acme.NotFoundError("order %d/%d is not ready: %v", acctID, orderID, order.Status))
+			return
+		}
+
+		// TODO:
+		// - request and issue Cert
+		// - update order with Cert and StatusValid
+
+		var subject *pb.X509Subject
+		if order.HasIdentifier(v2acme.IdentifierTNAuthList) {
+			tn, _ := acmemodel.ParseTNEntry(order.Identifiers[0].Value)
+
+			subject = &pb.X509Subject{
+				CommonName: "SHAKEN " + tn.SPC.Code,
+				Names: []*pb.X509Name{
+					{
+						Country:      "US",
+						Organisation: "Entity Name From Registration",
+					},
+				},
+			}
+		} else {
+			/*
+				cn := csr.Subject.CommonName
+				if cn == "" {
+					cn = order.DNSNames[0]
+				}
+
+				san := order.DNSNames
+				if len(san) == 1 && san[0] == cn {
+					san = nil
+				}
+			*/
+		}
+
+		// TODO: post to the Queue
+		ca, err := s.getCAClient()
+		if err != nil {
+			s.writeProblem(w, r, v2acme.ServerInternalError("CA is unavailable %d/%d", acctID, orderID).WithSource(err))
+			return
+		}
+
+		order.Status = v2acme.StatusProcessing
+		order, err = s.controller.UpdateOrder(ctx, order)
+		if err != nil {
+			s.writeProblem(w, r, v2acme.ServerInternalError("unable to update order %d/%d", acctID, orderID).WithSource(err))
+			return
+		}
+
+		orgID, _ := db.ID(account.ExternalID)
+
+		signReq := &pb.SignCertificateRequest{
+			Profile:       "SHAKEN",
+			RequestFormat: pb.EncodingFormat_PEM,
+			Request:       []byte(encodeCSR(csr.Raw)),
+			Subject:       subject,
+			OrgId:         orgID,
+		}
+
+		res, err := ca.SignCertificate(ctx, signReq)
+		if err != nil {
+			s.writeProblem(w, r, v2acme.ServerInternalError("failed to request certificate").WithSource(err))
+			return
+		}
+
+		certPem := strings.TrimSpace(res.Certificate.Pem) + "\n" + strings.TrimSpace(res.Certificate.IssuersPem)
+
+		logger.KV(xlog.DEBUG, "issued", certPem)
+
+		cert, err := s.controller.PutIssuedCertificate(ctx, &acmemodel.IssuedCertificate{
+			ID:             res.Certificate.Id,
+			RegistrationID: order.RegistrationID,
+			OrderID:        order.ID,
+			Certificate:    certPem,
+			ExternalID:     res.Certificate.Id,
+		})
+		if err != nil {
+			s.writeProblem(w, r, v2acme.ServerInternalError("failed to store certificate").WithSource(err))
+			return
+		}
+
+		order.Status = v2acme.StatusValid
+		order.CertificateID = cert.ID
+		order, err = s.controller.UpdateOrder(ctx, order)
+		if err != nil {
+			s.writeProblem(w, r, v2acme.ServerInternalError("unable to update order %d/%d", acctID, orderID).WithSource(err))
+			return
+		}
+
+		// TODO:
+		/*
+			s.server.Audit(
+				ServiceName,
+				evtCSRPosted,
+				account.ExternalID,
+				"",
+				0,
+				fmt.Sprintf("acctID=%s, orderID=%s, CN=%q, DNSNames=[%s]",
+					account.ID, order.ID, cn, strings.Join(san, ",")),
+			)
+		*/
+
+		s.writeOrder(w, r, http.StatusOK, order)
+	}
+}
+
+// GetCertHandler returns certificate
+func (s *Service) GetCertHandler() rest.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
+		s.handleACMEHeaders(w, r)
+		acctID, _ := db.ID(p.ByName("acct_id"))
+		certID, _ := db.ID(p.ByName("id"))
+
+		if acctID == 0 || certID == 0 {
+			s.writeProblem(w, r, v2acme.MalformedError("invalid ID: \"%d/%d\"", acctID, certID))
+			return
+		}
+
+		ctx := r.Context()
+		_, _, account, err := s.ValidPOSTForAccount(ctx, r)
+		if err != nil {
+			s.writeProblem(w, r, err)
+			return
+		}
+
+		if account.ID != acctID {
+			s.writeProblem(w, r, v2acme.UnauthorizedError("user account ID doesn't match account ID in authorization: %q", acctID))
+			return
+		}
+
+		cert, err := s.controller.GetIssuedCertificate(ctx, certID)
+		if err != nil {
+			// If the certificate isn't found, return a suitable problem
+			if db.IsNotFoundError(err) {
+				s.writeProblem(w, r, v2acme.NotFoundError("certificate %d/%d not found", acctID, certID))
+			} else {
+				s.writeProblem(w, r, v2acme.ServerInternalError("unable to retreive certificate %d/%d", acctID, certID))
+			}
+			return
+		}
+
+		w.Header().Set(header.ContentType, "application/pem-certificate-chain")
+		w.Write([]byte(cert.Certificate))
 	}
 }
 

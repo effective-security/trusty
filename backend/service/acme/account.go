@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	acmemodel "github.com/ekspand/trusty/acme/model"
@@ -17,6 +16,7 @@ import (
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xhttp/marshal"
+	"github.com/go-phorce/dolly/xlog"
 	"gopkg.in/square/go-jose.v2"
 )
 
@@ -175,8 +175,7 @@ func (s *Service) writeAccount(w http.ResponseWriter, r *http.Request, statusCod
 		OrdersURL:            ordersURL, // https://xxx.com/v2/acme/account/:acctID/orders
 	}
 
-	logger.Infof("regID=%q, contact=[%s], status=%v",
-		reg.ID, strings.Join(reg.Contact, ","), reg.Status)
+	logger.KV(xlog.DEBUG, "account", reg)
 
 	marshal.WritePlainJSON(w, statusCode, &acct, marshal.PrettyPrint)
 }
