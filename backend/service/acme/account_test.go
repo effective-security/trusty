@@ -32,7 +32,7 @@ func TestCreateAccount(t *testing.T) {
 	org, apikey := createOrg(t)
 	assert.Equal(t, "123456", org.ExternalID)
 
-	hmac, err := base64.RawURLEncoding.DecodeString(apikey.Key)
+	hmac, err := base64.StdEncoding.DecodeString(apikey.Key)
 	require.NoError(t, err)
 
 	url := dir["newAccount"]
@@ -152,7 +152,7 @@ func TestNewAccountHandler(t *testing.T) {
 	org, apikey := createOrg(t)
 	assert.Equal(t, "123456", org.ExternalID)
 
-	hmac, err := base64.RawURLEncoding.DecodeString(apikey.Key)
+	hmac, err := base64.StdEncoding.DecodeString(apikey.Key)
 	require.NoError(t, err)
 
 	t.Run("check for non-existing account", func(t *testing.T) {

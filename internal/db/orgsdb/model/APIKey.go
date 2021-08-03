@@ -1,7 +1,7 @@
 package model
 
 import (
-	"encoding/hex"
+	"encoding/base64"
 	"strconv"
 	"time"
 
@@ -28,7 +28,7 @@ func (k *APIKey) Validate() error {
 	if k.OrgID == 0 {
 		return errors.Errorf("invalid ID")
 	}
-	if len(k.Key) != 32 {
+	if len(k.Key) < 32 || len(k.Key) > 64 {
 		return errors.Errorf("invalid key: %q", k.Key)
 	}
 	return nil
@@ -60,5 +60,5 @@ func ToAPIKeysDto(list []*APIKey) []v1.APIKey {
 
 // GenerateAPIKey returns random key
 func GenerateAPIKey() string {
-	return hex.EncodeToString(certutil.Random(16))
+	return base64.StdEncoding.EncodeToString(certutil.Random(24))
 }

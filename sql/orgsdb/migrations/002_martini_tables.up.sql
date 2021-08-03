@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS public.apikeys
 (
     id bigint NOT NULL,
     org_id bigint NOT NULL,
-    key character varying(32) COLLATE pg_catalog."default" NOT NULL,
+    key character varying(64) COLLATE pg_catalog."default" NOT NULL,
     enrollment boolean NOT NULL,
     management boolean NOT NULL,
     billing boolean NOT NULL,

@@ -10,7 +10,7 @@ import (
 // RefreshToken returns AuthTokenRefreshResponse
 func (c *Client) RefreshToken(ctx context.Context) (*v1.AuthTokenRefreshResponse, error) {
 	r := new(v1.AuthTokenRefreshResponse)
-	_, err := c.Get(ctx, v1.PathForAuthTokenRefresh, r)
+	_, _, err := c.Get(ctx, v1.PathForAuthTokenRefresh, r)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

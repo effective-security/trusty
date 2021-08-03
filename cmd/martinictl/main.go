@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/ekspand/trusty/cli"
+	"github.com/ekspand/trusty/cli/acme"
 	"github.com/ekspand/trusty/cli/auth"
 	"github.com/ekspand/trusty/cli/martini"
 	"github.com/ekspand/trusty/internal/version"
@@ -114,6 +115,29 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	cmdOrgAPIKeys := cmdOrgs.Command("keys", "list API keys").
 		Action(cli.RegisterAction(martini.APIKeys, orgAPIKeysFlags))
 	orgAPIKeysFlags.OrgID = cmdOrgAPIKeys.Flag("org", "organization ID").Required().String()
+
+	// acme account|order
+	cmdAcme := app.Command("acme", "ACME operations").
+		PreAction(cli.PopulateControl)
+
+	acmeAccountFlags := new(acme.GetAccountFlags)
+	cmdAcmeAccount := cmdAcme.Command("account", "show registered account").
+		Action(cli.RegisterAction(acme.GetAccount, acmeAccountFlags))
+	acmeAccountFlags.OrgID = cmdAcmeAccount.Flag("org", "organization ID").Required().String()
+	acmeAccountFlags.EabMAC = cmdAcmeAccount.Flag("key", "EAB MAC key").Required().String()
+
+	acmeRegisterAccountFlags := new(acme.RegisterAccountFlags)
+	cmdAcmeRegister := cmdAcme.Command("register", "register account").
+		Action(cli.RegisterAction(acme.RegisterAccount, acmeRegisterAccountFlags))
+	acmeRegisterAccountFlags.OrgID = cmdAcmeRegister.Flag("org", "organization ID").Required().String()
+	acmeRegisterAccountFlags.EabMAC = cmdAcmeRegister.Flag("key", "EAB MAC key").Required().String()
+	acmeRegisterAccountFlags.Contact = cmdAcmeRegister.Flag("contact", "contact in mailto://name@org.com form").Required().Strings()
+
+	acmeOrderFlags := new(acme.OrderFlags)
+	cmdAcmeOrder := cmdAcme.Command("order", "order certificate").
+		Action(cli.RegisterAction(acme.Order, acmeOrderFlags))
+	acmeOrderFlags.OrgID = cmdAcmeOrder.Flag("org", "Organization ID").Required().String()
+	acmeOrderFlags.SPC = cmdAcmeOrder.Flag("spc", "SPC file").Required().String()
 
 	cli.Parse(args)
 	return cli.ReturnCode()

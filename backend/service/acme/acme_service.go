@@ -96,9 +96,10 @@ func (s *Service) RegisterRoute(r rest.Router) {
 	r.GET(uriNewNonce, s.NonceHandler())
 
 	r.POST(uriNewAccount, s.NewAccountHandler())
+	r.POST(uriOrders, s.NewOrderHandler())
 	r.POST(uriOrderByID, s.GetOrderHandler())
 	r.POST(uriAuthzByID, s.GetAuthorizationHandler())
-	r.POST(uriChallengeByID, s.GetChallengeHandler())
+	r.POST(uriChallengeByID, s.PostChallengeHandler())
 	r.POST(uriFinalizeByID, s.FinalizeOrderHandler())
 	r.POST(uriCertByID, s.GetCertHandler())
 }
