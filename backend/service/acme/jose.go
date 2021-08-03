@@ -417,10 +417,10 @@ func (s *Service) validJWSForKey(
 	// This caught invalid JSON early and so we preserve this check by explicitly
 	// trying to unmarshal the payload as part of the verification and failing
 	// early if it isn't valid JSON.
-	if !bytes.Equal(payload, []byte(`""`)) {
+	if len(payload) > 0 && !bytes.Equal(payload, []byte(`""`)) {
 		var parsedBody struct{}
 		if err := json.Unmarshal(payload, &parsedBody); err != nil {
-			return nil, v2acme.MalformedError("Request payload did not parse as JSON").WithSource(err)
+			return nil, v2acme.MalformedError("request payload did not parse as JSON").WithSource(err)
 		}
 	}
 

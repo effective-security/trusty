@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"math/rand"
+	"net/http"
 	"os"
 	"reflect"
 	"strings"
@@ -40,12 +41,12 @@ type GenericHTTP interface {
 	// Get makes a GET request to he CurrentHost, path should be an absolute URI path, i.e. /foo/bar/baz
 	// the resulting HTTP body will be decoded into the supplied body parameter, and the
 	// http status code returned.
-	Get(ctx context.Context, path string, body interface{}) (int, error)
+	Get(ctx context.Context, path string, body interface{}) (http.Header, int, error)
 
 	// GetResponse makes a GET request to the server, path should be an absolute URI path, i.e. /foo/bar/baz
 	// the resulting HTTP body will be returned into the supplied body parameter, and the
 	// http status code returned.
-	GetResponse(ctx context.Context, path string, body io.Writer) (int, error)
+	GetResponse(ctx context.Context, path string, body io.Writer) (http.Header, int, error)
 
 	// GetFrom is the same as Get but makes the request to the specified host.
 	// The list of hosts in hosts are tried until one succeeds
@@ -53,7 +54,7 @@ type GenericHTTP interface {
 	// part of the cluster.
 	// each host should include all the protocol/host/port preamble, e.g. http://foo.bar:3444
 	// path should be an absolute URI path, i.e. /foo/bar/baz
-	GetFrom(ctx context.Context, hosts []string, path string, body interface{}) (int, error)
+	GetFrom(ctx context.Context, hosts []string, path string, body interface{}) (http.Header, int, error)
 
 	// PostRequest makes an HTTP POST to the supplied path, serializing requestBody to json and sending
 	// that as the HTTP body. the HTTP response will be decoded into reponseBody, and the status
@@ -61,14 +62,14 @@ type GenericHTTP interface {
 	// into a go error, waits & retries for rate limiting errors will be applied based on the
 	// client config.
 	// path should be an absolute URI path, i.e. /foo/bar/baz
-	PostRequest(ctx context.Context, path string, requestBody interface{}, responseBody interface{}) (int, error)
+	PostRequest(ctx context.Context, path string, requestBody interface{}, responseBody interface{}) (http.Header, int, error)
 
 	// PostRequestTo is the same as Post, but to the specified host. [the supplied hosts are
 	// tried in order until one succeeds, or we run out]
 	// each host should include all the protocol/host/port preamble, e.g. http://foo.bar:3444
 	// path should be an absolute URI path, i.e. /foo/bar/baz
 	// if set, the callers identity will be passed to Trusty via the X-Trusty-Identity header
-	PostRequestTo(ctx context.Context, hosts []string, path string, requestBody interface{}, responseBody interface{}) (int, error)
+	PostRequestTo(ctx context.Context, hosts []string, path string, requestBody interface{}, responseBody interface{}) (http.Header, int, error)
 
 	// Post makes an HTTP POST to the supplied path.
 	// The HTTP response will be decoded into reponseBody, and the status
@@ -76,19 +77,19 @@ type GenericHTTP interface {
 	// into a go error, waits & retries for rate limiting errors will be applied based on the
 	// client config.
 	// path should be an absolute URI path, i.e. /foo/bar/baz
-	Post(ctx context.Context, path string, body []byte, responseBody interface{}) (int, error)
+	Post(ctx context.Context, path string, body []byte, responseBody interface{}) (http.Header, int, error)
 
 	// PostTo is the same as Post, but to the specified host. [the supplied hosts are
 	// tried in order until one succeeds, or we run out]
 	// each host should include all the protocol/host/port preamble, e.g. http://foo.bar:3444
 	// path should be an absolute URI path, i.e. /foo/bar/baz
 	// if set, the callers identity will be passed to Trusty via the X-Trusty-Identity header
-	PostTo(ctx context.Context, hosts []string, path string, body []byte, responseBody interface{}) (int, error)
+	PostTo(ctx context.Context, hosts []string, path string, body []byte, responseBody interface{}) (http.Header, int, error)
 
 	// Delete makes a DELETE request to the CurrentHost, path should be an absolute URI path, i.e. /foo/bar/baz
 	// the resulting HTTP body will be decoded into the supplied body parameter, and the
 	// http status code returned.
-	Delete(ctx context.Context, path string, body interface{}) (int, error)
+	Delete(ctx context.Context, path string, body interface{}) (http.Header, int, error)
 }
 
 // Client represents a logical connection to a Trusty cluster,
@@ -99,6 +100,9 @@ type Client struct {
 	hosts      []string
 	config     *Config
 	httpClient *retriable.Client
+
+	noncePath string
+	nonces    []string
 
 	sleeper func(time.Duration)
 }
@@ -154,6 +158,14 @@ func copyStringSlice(src []string) []string {
 	return d
 }
 
+// WithNonce allows to specify a Nonce path
+func (c *Client) WithNonce(noncePath string) *Client {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	c.noncePath = noncePath
+	return c
+}
+
 // CurrentHost returns the cluster member that is currently being used to service requests
 // [typically this is the leader, but is not guaranteed to be so]
 func (c *Client) CurrentHost() string {
@@ -203,7 +215,7 @@ func (c *Client) AddHeader(header, value string) *Client {
 // into a go error, waits & retries for rate limiting errors will be applied based on the
 // client config.
 // path should be an absolute URI path, i.e. /foo/bar/baz
-func (c *Client) PostRequest(ctx context.Context, path string, requestBody interface{}, responseBody interface{}) (int, error) {
+func (c *Client) PostRequest(ctx context.Context, path string, requestBody interface{}, responseBody interface{}) (http.Header, int, error) {
 	return c.PostRequestTo(ctx, c.hosts, path, requestBody, responseBody)
 }
 
@@ -212,13 +224,14 @@ func (c *Client) PostRequest(ctx context.Context, path string, requestBody inter
 // each host should include all the protocol/host/port preamble, e.g. http://foo.bar:3444
 // path should be an absolute URI path, i.e. /foo/bar/baz
 // if set, the callers identity will be passed to Trusty via the X-Trusty-Identity header
-func (c *Client) PostRequestTo(ctx context.Context, hosts []string, path string, requestBody interface{}, responseBody interface{}) (int, error) {
+func (c *Client) PostRequestTo(ctx context.Context, hosts []string, path string, requestBody interface{}, responseBody interface{}) (http.Header, int, error) {
 	body, err := json.Marshal(requestBody)
 	if err != nil {
-		return 0, err
+		return nil, 0, err
 	}
-	_, sc, err := c.httpClient.Request(ctx, "POST", hosts, path, body, responseBody)
-	return sc, err
+	hdr, sc, err := c.httpClient.Request(ctx, "POST", hosts, path, body, responseBody)
+	c.pushNonce(hdr.Get("Replay-Nonce"))
+	return hdr, sc, err
 }
 
 // Post makes an HTTP POST to the supplied path.
@@ -227,9 +240,10 @@ func (c *Client) PostRequestTo(ctx context.Context, hosts []string, path string,
 // into a go error, waits & retries for rate limiting errors will be applied based on the
 // client config.
 // path should be an absolute URI path, i.e. /foo/bar/baz
-func (c *Client) Post(ctx context.Context, path string, body []byte, responseBody interface{}) (int, error) {
-	_, sc, err := c.httpClient.Request(ctx, "POST", c.hosts, path, body, responseBody)
-	return sc, err
+func (c *Client) Post(ctx context.Context, path string, body []byte, responseBody interface{}) (http.Header, int, error) {
+	hdr, sc, err := c.httpClient.Request(ctx, "POST", c.hosts, path, body, responseBody)
+	c.pushNonce(hdr.Get("Replay-Nonce"))
+	return hdr, sc, err
 }
 
 // PostTo is the same as Post, but to the specified host. [the supplied hosts are
@@ -237,17 +251,19 @@ func (c *Client) Post(ctx context.Context, path string, body []byte, responseBod
 // each host should include all the protocol/host/port preamble, e.g. http://foo.bar:3444
 // path should be an absolute URI path, i.e. /foo/bar/baz
 // if set, the callers identity will be passed to Trusty via the X-Trusty-Identity header
-func (c *Client) PostTo(ctx context.Context, hosts []string, path string, body []byte, responseBody interface{}) (int, error) {
-	_, sc, err := c.httpClient.Request(ctx, "POST", hosts, path, body, responseBody)
-	return sc, err
+func (c *Client) PostTo(ctx context.Context, hosts []string, path string, body []byte, responseBody interface{}) (http.Header, int, error) {
+	hdr, sc, err := c.httpClient.Request(ctx, "POST", hosts, path, body, responseBody)
+	c.pushNonce(hdr.Get("Replay-Nonce"))
+	return hdr, sc, err
 }
 
 // GetResponse makes a GET request to the server, path should be an absolute URI path, i.e. /foo/bar/baz
 // the resulting HTTP body will be returned into the supplied body parameter, and the
 // http status code returned.
-func (c *Client) GetResponse(ctx context.Context, path string, body io.Writer) (int, error) {
-	_, sc, err := c.httpClient.Request(ctx, "GET", c.hosts, path, nil, body)
-	return sc, err
+func (c *Client) GetResponse(ctx context.Context, path string, body io.Writer) (http.Header, int, error) {
+	hdr, sc, err := c.httpClient.Request(ctx, "GET", c.hosts, path, nil, body)
+	c.pushNonce(hdr.Get("Replay-Nonce"))
+	return hdr, sc, err
 }
 
 // Get fetches the supplied resource using the current selected cluster member
@@ -257,9 +273,10 @@ func (c *Client) GetResponse(ctx context.Context, path string, body io.Writer) (
 // into an go error.
 // If configured, this call will wait & retry on rate limit and leader election errors
 // path should be an absolute URI path, i.e. /foo/bar/baz
-func (c *Client) Get(ctx context.Context, path string, body interface{}) (int, error) {
-	_, sc, err := c.httpClient.Request(ctx, "GET", c.hosts, path, nil, body)
-	return sc, err
+func (c *Client) Get(ctx context.Context, path string, body interface{}) (http.Header, int, error) {
+	hdr, sc, err := c.httpClient.Request(ctx, "GET", c.hosts, path, nil, body)
+	c.pushNonce(hdr.Get("Replay-Nonce"))
+	return hdr, sc, err
 }
 
 // Delete removes the supplied resource using the current selected cluster member
@@ -269,9 +286,9 @@ func (c *Client) Get(ctx context.Context, path string, body interface{}) (int, e
 // into an go error.
 // If configured, this call will wait & retry on rate limit and leader election errors
 // path should be an absolute URI path, i.e. /foo/bar/baz
-func (c *Client) Delete(ctx context.Context, path string, body interface{}) (int, error) {
-	_, sc, err := c.httpClient.Request(ctx, "DELETE", c.hosts, path, nil, body)
-	return sc, err
+func (c *Client) Delete(ctx context.Context, path string, body interface{}) (http.Header, int, error) {
+	hdr, sc, err := c.httpClient.Request(ctx, "DELETE", c.hosts, path, nil, body)
+	return hdr, sc, err
 }
 
 // GetFrom is the same as Get but makes the request to the specified host.
@@ -280,7 +297,56 @@ func (c *Client) Delete(ctx context.Context, path string, body interface{}) (int
 // part of the cluster.
 // each host should include all the protocol/host/port preamble, e.g. http://foo.bar:3444
 // path should be an absolute URI path, i.e. /foo/bar/baz
-func (c *Client) GetFrom(ctx context.Context, hosts []string, path string, body interface{}) (int, error) {
-	_, sc, err := c.httpClient.Request(ctx, "GET", hosts, path, nil, body)
-	return sc, err
+func (c *Client) GetFrom(ctx context.Context, hosts []string, path string, body interface{}) (http.Header, int, error) {
+	hdr, sc, err := c.httpClient.Request(ctx, "GET", hosts, path, nil, body)
+	c.pushNonce(hdr.Get("Replay-Nonce"))
+	return hdr, sc, err
+}
+
+// popNonce Pops a nonce.
+func (c *Client) popNonce() (string, bool) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	if len(c.nonces) == 0 {
+		return "", false
+	}
+
+	nonce := c.nonces[len(c.nonces)-1]
+	c.nonces = c.nonces[:len(c.nonces)-1]
+	return nonce, true
+}
+
+// pushNonce Pushes a nonce.
+func (c *Client) pushNonce(nonce string) {
+	if nonce != "" {
+		c.lock.Lock()
+		defer c.lock.Unlock()
+		c.nonces = append(c.nonces, nonce)
+	}
+}
+
+// Nonce implement jose.NonceSource.
+func (c *Client) Nonce() (string, error) {
+	if nonce, ok := c.popNonce(); ok {
+		return nonce, nil
+	}
+	logger.Debugf("reason=fetch_nonce")
+	return c.getNonce(context.Background())
+}
+
+func (c *Client) getNonce(ctx context.Context) (string, error) {
+	if c.noncePath == "" {
+		return "", errors.New("Nonce is not configured")
+	}
+	hdr, _, err := c.httpClient.Request(ctx, "HEAD", c.hosts, c.noncePath, nil, nil)
+	if err != nil {
+		return "", errors.Annotatef(err, "failed to get nonce from HTTP HEAD")
+	}
+
+	nonce := hdr.Get("Replay-Nonce")
+	if nonce == "" {
+		return "", errors.New("server did not respond with a proper nonce header")
+	}
+	return nonce, nil
 }

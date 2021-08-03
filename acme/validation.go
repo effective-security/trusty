@@ -133,7 +133,8 @@ func (d *Provider) PerformValidation(ctx context.Context, regID uint64, idn v2ac
 	return nil, errors.Errorf("unsupported challenge type: %s", idn.Type)
 }
 
-type tkClaims struct {
+// TkClaims for SPC
+type TkClaims struct {
 	Exp int64  `json:"exp"`
 	JTI string `json:"jti"`
 	ATC struct {
@@ -155,7 +156,7 @@ func (d *Provider) ValidateTNAuthList(ctx context.Context, regID uint64, idn str
 
 	atc := challenge["atc"]
 
-	claims := &tkClaims{}
+	claims := &TkClaims{}
 
 	parsed, err := jwt.ParseWithClaims(atc, claims, func(token *jwt.Token) (interface{}, error) {
 		return d.stipaChain[0].PublicKey, nil
@@ -166,7 +167,7 @@ func (d *Provider) ValidateTNAuthList(ctx context.Context, regID uint64, idn str
 	if parsed.Header["alg"].(string) != "ES256" {
 		return nil, errors.Annotate(err, "unsupported SPC token alg")
 	}
-	claims, ok := parsed.Claims.(*tkClaims)
+	claims, ok := parsed.Claims.(*TkClaims)
 	if !ok || !parsed.Valid {
 		return nil, errors.Errorf("invalid SPC token")
 	}

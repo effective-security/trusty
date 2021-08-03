@@ -192,7 +192,7 @@ func TestAPIKey(t *testing.T) {
 		UsedAt:     now.Add(time.Hour),
 		ExpiresAt:  now.Add(2 * time.Hour),
 	}
-	assert.Len(t, u.Key, 32)
+	assert.Equal(t, len(u.Key), 32)
 
 	dto := u.ToDto()
 	assert.Equal(t, "1000", dto.ID)
@@ -215,7 +215,7 @@ func TestAPIKeyValidate(t *testing.T) {
 	}{
 		{&model.APIKey{}, "invalid ID"},
 		{&model.APIKey{OrgID: 123}, "invalid key: \"\""},
-		{&model.APIKey{OrgID: 123, Key: "1178234569187236498172364987126394871623984"}, "invalid key: \"1178234569187236498172364987126394871623984\""},
+		{&model.APIKey{OrgID: 123, Key: "11782345691872364981723649871263948716239841178234569187236498172364987126394871623984"}, "invalid key: \"11782345691872364981723649871263948716239841178234569187236498172364987126394871623984\""},
 		{&model.APIKey{OrgID: 123, Key: "01234567890123456789012345678901"}, ""},
 	}
 	for _, tc := range tcases {

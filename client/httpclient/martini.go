@@ -22,7 +22,7 @@ func (c *Client) SearchCorps(ctx context.Context, name, jurisdiction string) (*v
 		u += "&jurisdiction=" + url.QueryEscape(jurisdiction)
 	}
 	r := new(v1.SearchOpenCorporatesResponse)
-	_, err := c.Get(ctx, u, r)
+	_, _, err := c.Get(ctx, u, r)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -32,7 +32,7 @@ func (c *Client) SearchCorps(ctx context.Context, name, jurisdiction string) (*v
 // Orgs returns user's Orgs
 func (c *Client) Orgs(ctx context.Context) (*v1.OrgsResponse, error) {
 	r := new(v1.OrgsResponse)
-	_, err := c.Get(ctx, v1.PathForMartiniOrgs, r)
+	_, _, err := c.Get(ctx, v1.PathForMartiniOrgs, r)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -42,7 +42,7 @@ func (c *Client) Orgs(ctx context.Context) (*v1.OrgsResponse, error) {
 // FccFRN returns Fcc FRN
 func (c *Client) FccFRN(ctx context.Context, filerID string) (*v1.FccFrnResponse, error) {
 	r := new(v1.FccFrnResponse)
-	_, err := c.Get(ctx, v1.PathForMartiniFccFrn+"?filer_id="+filerID, r)
+	_, _, err := c.Get(ctx, v1.PathForMartiniFccFrn+"?filer_id="+filerID, r)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -52,7 +52,7 @@ func (c *Client) FccFRN(ctx context.Context, filerID string) (*v1.FccFrnResponse
 // FccContact returns Fcc FRN Contact
 func (c *Client) FccContact(ctx context.Context, frn string) (*v1.FccContactResponse, error) {
 	r := new(v1.FccContactResponse)
-	_, err := c.Get(ctx, v1.PathForMartiniFccContact+"?frn="+frn, r)
+	_, _, err := c.Get(ctx, v1.PathForMartiniFccContact+"?frn="+frn, r)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -66,7 +66,7 @@ func (c *Client) RegisterOrg(ctx context.Context, filerID string) (*v1.OrgRespon
 	}
 
 	res := new(v1.OrgResponse)
-	_, err := c.PostRequest(ctx, v1.PathForMartiniRegisterOrg, req, res)
+	_, _, err := c.PostRequest(ctx, v1.PathForMartiniRegisterOrg, req, res)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -81,7 +81,7 @@ func (c *Client) ApproveOrg(ctx context.Context, token, code string) (*v1.OrgRes
 	}
 
 	res := new(v1.OrgResponse)
-	_, err := c.PostRequest(ctx, v1.PathForMartiniApproveOrg, req, res)
+	_, _, err := c.PostRequest(ctx, v1.PathForMartiniApproveOrg, req, res)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -95,7 +95,7 @@ func (c *Client) ValidateOrg(ctx context.Context, orgID string) (*v1.ValidateOrg
 	}
 
 	res := new(v1.ValidateOrgResponse)
-	_, err := c.PostRequest(ctx, v1.PathForMartiniValidateOrg, req, res)
+	_, _, err := c.PostRequest(ctx, v1.PathForMartiniValidateOrg, req, res)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -106,7 +106,7 @@ func (c *Client) ValidateOrg(ctx context.Context, orgID string) (*v1.ValidateOrg
 func (c *Client) GetOrgAPIKeys(ctx context.Context, orgID string) (*v1.GetOrgAPIKeysResponse, error) {
 	path := strings.Replace(v1.PathForMartiniOrgAPIKeys, ":org_id", orgID, 1)
 	res := new(v1.GetOrgAPIKeysResponse)
-	_, err := c.Get(ctx, path, res)
+	_, _, err := c.Get(ctx, path, res)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -117,7 +117,7 @@ func (c *Client) GetOrgAPIKeys(ctx context.Context, orgID string) (*v1.GetOrgAPI
 func (c *Client) CreateSubscription(ctx context.Context, req *v1.CreateSubscriptionRequest) (*v1.OrgResponse, error) {
 	res := new(v1.OrgResponse)
 	path := strings.Replace(v1.PathForMartiniOrgSubscription, ":org_id", req.OrgID, 1)
-	_, err := c.PostRequest(ctx, path, req, res)
+	_, _, err := c.PostRequest(ctx, path, req, res)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

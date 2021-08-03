@@ -1,5 +1,5 @@
 {
-    "common_name": "Martini SHAKEN Level 1 CA",
+    "common_name": "Martini Security SHAKEN G1",
     "key": {
         "algo": "ecdsa",
         "size": 256
@@ -8,8 +8,8 @@
         {
             "C": "US",
             "ST": "WA",
-            "L": "Kirkland",
-            "O": "Martini"
+            "L": "Seattle",
+            "O": "Martini Security, LLC."
         }
     ]
 }

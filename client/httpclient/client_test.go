@@ -90,14 +90,14 @@ func Test_GetTriesHostList(t *testing.T) {
 
 	get := func(hosts ...string) string {
 		var res map[string]string
-		if _, err := client.GetFrom(context.Background(), hosts, "/", &res); err != nil {
+		if _, _, err := client.GetFrom(context.Background(), hosts, "/", &res); err != nil {
 			t.Fatalf("GetFrom returned error %v", err)
 		}
 		return res["sid"]
 	}
 	post := func(hosts ...string) string {
 		var res map[string]string
-		_, err := client.PostRequestTo(context.Background(), hosts, "/", nil, &res)
+		_, _, err := client.PostRequestTo(context.Background(), hosts, "/", nil, &res)
 		require.NoError(t, err)
 		return res["sid"]
 	}
@@ -115,7 +115,7 @@ func Test_GetTriesHostList(t *testing.T) {
 	s3.Close()
 	verify("s2", s1.URL, s3.URL, s2.URL)
 	s2.Close()
-	_, err = client.Get(context.Background(), "/", nil)
+	_, _, err = client.Get(context.Background(), "/", nil)
 	require.Error(t, err, "Get with all hosts down should return an error")
 }
 

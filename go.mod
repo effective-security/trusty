@@ -5,15 +5,15 @@ go 1.15
 require (
 	cloud.google.com/go v0.86.0
 	github.com/PuerkitoBio/goquery v1.7.1
-	github.com/aws/aws-sdk-go v1.38.66
+	github.com/aws/aws-sdk-go v1.40.8
 	github.com/cloudflare/cfssl v1.6.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/facebookgo/ensure v0.0.0-20200202191622-63f1cf65ac4c // indirect
 	github.com/facebookgo/subset v0.0.0-20200203212716-c811ad88dec4 // indirect
-	github.com/go-acme/lego v2.7.2+incompatible // indirect
+	github.com/go-acme/lego v2.7.2+incompatible
 	github.com/go-logr/logr v0.4.0
 	github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba
-	github.com/go-phorce/dolly v0.8.0
+	github.com/go-phorce/dolly v0.8.2
 	github.com/gogo/googleapis v1.4.1
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang-migrate/migrate/v4 v4.14.1
