@@ -1,9 +1,9 @@
 # Martini API
 
-`martinictl` provides access to Martini API.
+`martini` provides access to Martini API.
 
 ```.sh                                                            
-usage: martinictl [<flags>] <command> [<args> ...]
+usage: martini [<flags>] <command> [<args> ...]
 
 A command-line utility for Martini API.
 
@@ -66,7 +66,7 @@ but this is not recommended for security reasons.
 To start the flow, a user must authenticate.
 
 ```.sh
-bin/martinictl -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pem login
+bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pem login
 ```
 
 then export the token obtained from the previous command:
@@ -78,13 +78,13 @@ export TRUSTY_AUTH_TOKEN=eyJhXXX
 ## Organizations
 
 ```.sh
-bin/martinictl -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pem orgs
+bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pem orgs
 ```
 
 ## Start Organization registration flow
 
 ```.sh
-bin/martinictl -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pem org register --filer=123456
+bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pem org register --filer=123456
 {
         "approver": {
                 "business_name": "Low Latency Communications, LLC",
@@ -127,7 +127,7 @@ bin/martinictl -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca
 ## Subscribe
 
 ```.sh
-bin/martinictl -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pem org subscribe --org 82923411415760996 --cardholder "Denis Issoupov" --cc 4445-1234-1234-1234 --expiry 11/22 --cvv 266 --years 3
+bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pem org subscribe --org 82923411415760996 --cardholder "Denis Issoupov" --cc 4445-1234-1234-1234 --expiry 11/22 --cvv 266 --years 3
 
 {
         "org": {
@@ -157,7 +157,7 @@ bin/martinictl -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca
 ## Submit for Organization validation
 
 ```.sh
-bin/martinictl -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pem org validate --org 82923411415760996
+bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pem org validate --org 82923411415760996
 {
         "approver": {
                 "business_name": "Low Latency Communications, LLC",
@@ -201,7 +201,7 @@ bin/martinictl -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca
 ## Approve Organization registration
 
 ```.sh
-bin/martinictl -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pem org approve --token nNwZipSV2rAPkbsZ --code 191161
+bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pem org approve --token nNwZipSV2rAPkbsZ --code 191161
 {
         "org": {
                 "approver_email": "denis+test@ekspand.com",
@@ -230,7 +230,7 @@ bin/martinictl -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca
 ## Get API Keys
 
 ```.sh
-bin/martinictl -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pem org keys --org 82936541768319076                  
+bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pem org keys --org 82936541768319076                  
 {
         "keys": [
                 {
@@ -246,4 +246,33 @@ bin/martinictl -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca
                 }
         ]
 }
+```
+
+## Register ACME account
+
+```.sh
+bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pem acme register --org 84350577525391460 --key sJgHnIOI96okZ9+7N4OfqZl/27V/phF/ --contact denis@ekspand.com
+{
+        "account_url": "https://localhost:7891/v2/acme/account/84350771084132452",
+        "fingerprint": "SHA256 CC:9D:59:F2:92:91:76:FF:37:C1:60:FC:91:FC:BB:B2:A7:7C:7F:93:D7:D4:26:9D:AA:B9:82:BC:8D:EE:11:25",
+        "org_id": "84350577525391460",
+        "registration": {
+                "contact": [
+                        "denis@ekspand.com"
+                ],
+                "orders": "https://localhost:7891/v2/acme/account/84350771084132452/orders",
+                "status": "valid",
+                "termsOfServiceAgreed": true
+        }
+}
+```
+
+## Request certificate 
+
+```.sh
+ bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pem acme order --org 84350577525391460 --spc /tmp/spc                                                       
+
+certificate: /home/dissoupov/.mrtsec/certificates/ddadd515eb4e758f7a8a18a4093574dacdac4cf2.pem
+key: /home/dissoupov/.mrtsec/certificates/ddadd515eb4e758f7a8a18a4093574dacdac4cf2.key
+
 ```

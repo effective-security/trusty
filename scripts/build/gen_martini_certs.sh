@@ -65,10 +65,6 @@ case $key in
     CA1=YES
     shift # past argument
     ;;
-    --signer)
-    SIGNER=YES
-    shift # past argument
-    ;;
     --force)
     FORCE=YES
     shift # past argument
@@ -141,18 +137,3 @@ if [[ "$BUNDLE" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}cabun
     cat ${OUT_DIR}/${PREFIX}issuer1_ca.pem >> ${OUT_DIR}/${PREFIX}cabundle.pem
 fi
 
-if [[ "$SIGNER" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}signer-key.pem) ]]; then
-    echo "*** generating signer cert"
-    trusty-tool \
-        --hsm-cfg=${HSM_CONFIG} \
-        csr gencert \
-        --ca-config=${CA_CONFIG} \
-        --profile=SHAKEN \
-        --ca-cert ${OUT_DIR}/${PREFIX}issuer1_ca.pem \
-        --ca-key ${OUT_DIR}/${PREFIX}issuer1_ca-key.pem \
-        --csr-profile ${CSR_DIR}/${PREFIX}signer.json \
-        --key-label="${PREFIX}signer*" \
-        --out ${OUT_DIR}/${PREFIX}signer
-
-    cat ${OUT_DIR}/${PREFIX}cabundle.pem >> ${OUT_DIR}/${PREFIX}signer.pem
-fi

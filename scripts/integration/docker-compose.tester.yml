@@ -117,7 +117,7 @@ services:
         --prefix martini_
         --root-ca /tmp/trusty/certs/martini_root_ca.pem
         --root-ca-key /tmp/trusty/certs/martini_root_ca-key.pem
-        --root --ca1 --bundle --signer --force &&
+        --root --ca1 --bundle --force &&
         /opt/trusty/bin/trusty --std
         --hsm-cfg=/tmp/trusty/softhsm/unittest_hsm.json
         --cfg=/opt/trusty/etc/dev/trusty-config.yaml
@@ -195,7 +195,7 @@ services:
         --prefix martini_
         --root-ca /tmp/trusty/certs/martini_root_ca.pem
         --root-ca-key /tmp/trusty/certs/martini_root_ca-key.pem
-        --root --ca1 --bundle --signer --force &&
+        --root --ca1 --bundle --force &&
         /opt/trusty/bin/trusty --std
         --hsm-cfg=/opt/trusty/tests/aws-test-kms.json
         --cfg=/opt/trusty/etc/dev/trusty-config.yaml

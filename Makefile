@@ -82,11 +82,11 @@ build_kube:
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/kubeca ./cmd/kubeca
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/kubecertinit ./cmd/kubecertinit
 
-build_martinictl:
-	echo "*** Building martinictl"
-	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/martinictl ./cmd/martinictl
+build_martini:
+	echo "*** Building martini"
+	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/martini ./cmd/martini
 
-build: build_trusty build_trustyctl build_tool build_kube build_martinictl
+build: build_trusty build_trustyctl build_tool build_kube build_martini
 
 change_log:
 	echo "Recent changes:" > ./change_log.txt
@@ -141,7 +141,7 @@ gen_martini_certs:
 		--prefix martini_ \
 		--root-ca /tmp/trusty/certs/martini_root_ca.pem \
 		--root-ca-key /tmp/trusty/certs/martini_root_ca-key.pem \
-		--root --ca1 --bundle --signer --force
+		--root --ca1 --bundle --force
 
 start-local-kms:
 	# Container state will be true (it's already running), false (exists but stopped), or missing (does not exist).
