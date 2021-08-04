@@ -24,11 +24,11 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	formatter := xlog.NewColorFormatter(errout, true)
 	xlog.SetFormatter(formatter)
 
-	app := ctl.NewApplication("martinictl", "A command-line utility for Martini API.").
+	app := ctl.NewApplication("martini", "A command-line utility for Martini API.").
 		UsageWriter(out).
 		Writer(out).
 		ErrorWriter(errout).
-		Version(fmt.Sprintf("martinictl %v", version.Current().String()))
+		Version(fmt.Sprintf("martini %v", version.Current().String()))
 
 	cli := cli.New(
 		&ctl.ControlDefinition{

@@ -2,7 +2,6 @@ package authority_test
 
 import (
 	"crypto"
-	"fmt"
 
 	"github.com/ekspand/trusty/authority"
 )
@@ -25,13 +24,12 @@ func (s *testSuite) TestNewIssuer() {
 		s.NotNil(issuer.Bundle())
 		s.NotNil(issuer.Signer())
 		s.NotEmpty(issuer.PEM())
-		s.NotEmpty(issuer.OcspURL())
 		s.NotEmpty(issuer.Label())
 		s.NotEmpty(issuer.KeyHash(crypto.SHA1))
 		s.Nil(issuer.Profile("notfound"))
 
-		s.Equal(fmt.Sprintf("http://localhost:7880/v1/crl/%s.crl", issuer.SubjectKID()), issuer.CrlURL())
-		s.Equal(fmt.Sprintf("http://localhost:7880/v1/certs/%s.crt", issuer.SubjectKID()), issuer.AiaURL())
+		//s.Equal(fmt.Sprintf("http://localhost:7880/v1/crl/%s.crl", issuer.SubjectKID()), issuer.CrlURL())
+		//s.Equal(fmt.Sprintf("http://localhost:7880/v1/certs/%s.crt", issuer.SubjectKID()), issuer.AiaURL())
 		//s.NotNil(issuer.AIAExtension("server"))
 		//s.Nil(issuer.AIAExtension("not_supported"))
 	}

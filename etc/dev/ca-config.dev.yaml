@@ -1,9 +1,9 @@
 ---
 authority:
   default_aia: 
-    issuer_url: http://localhost:7880/v1/certs/${ISSUER_ID}.crt
-    crl_url: http://localhost:7880/v1/crl/${ISSUER_ID}.crl
-    ocsp_url: http://localhost:7880/v1/ocsp
+    issuer_url:
+    crl_url:
+    ocsp_url:
     # value in 72h format for duration of CRL next update time
     crl_expiry: 12h
     # value in 8h format for duration of CRL renewal before next update time
@@ -17,6 +17,10 @@ authority:
     label: trusty.svc
     # specifies type: tls|codesign|timestamp|ocsp|spiffe|trusty
     type: trusty
+    aia:
+      issuer_url: http://localhost:7880/v1/certs/${ISSUER_ID}.crt
+      crl_url: http://localhost:7880/v1/crl/${ISSUER_ID}.crl
+      ocsp_url: http://localhost:7880/v1/ocsp
     cert: /tmp/trusty/certs/trusty_dev_issuer2_ca.pem
     key: /tmp/trusty/certs/trusty_dev_issuer2_ca-key.pem
     # location of the CA bundle file
