@@ -43,6 +43,12 @@ func (s *testSuite) TestOrgs() {
 	s.HasText(`"orgs": [`)
 }
 
+func (s *testSuite) TestCerts() {
+	err := s.Run(martini.Certificates, nil)
+	s.NoError(err)
+	s.HasText(`"certificates": [`)
+}
+
 func (s *testSuite) TestFccFRN() {
 	filer := "831188"
 	flags := martini.FccFRNFlags{

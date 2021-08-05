@@ -3,6 +3,7 @@ package martini
 import (
 	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/internal/config"
+	"github.com/ekspand/trusty/internal/db/cadb"
 	"github.com/ekspand/trusty/internal/db/orgsdb"
 	"github.com/ekspand/trusty/pkg/email"
 	"github.com/ekspand/trusty/pkg/gserver"
@@ -23,6 +24,7 @@ type Service struct {
 	server       *gserver.Server
 	cfg          *config.Configuration
 	db           orgsdb.OrgsDb
+	cadb         cadb.CaReadonlyDb
 	emailProv    *email.Provider
 }
 
@@ -32,11 +34,12 @@ func Factory(server *gserver.Server) interface{} {
 		logger.Panic("status.Factory: invalid parameter")
 	}
 
-	return func(cfg *config.Configuration, db orgsdb.OrgsDb, emailProv *email.Provider) error {
+	return func(cfg *config.Configuration, db orgsdb.OrgsDb, cadb cadb.CaReadonlyDb, emailProv *email.Provider) error {
 		svc := &Service{
 			server:    server,
 			cfg:       cfg,
 			db:        db,
+			cadb:      cadb,
 			emailProv: emailProv,
 		}
 
@@ -69,6 +72,7 @@ func (s *Service) DisableEmail() {
 func (s *Service) RegisterRoute(r rest.Router) {
 	r.GET(v1.PathForMartiniSearchCorps, s.SearchCorpsHandler())
 	r.GET(v1.PathForMartiniOrgs, s.GetOrgsHandler())
+	r.GET(v1.PathForMartiniCerts, s.GetCertsHandler())
 	r.GET(v1.PathForMartiniOrgAPIKeys, s.GetOrgAPIKeysHandler())
 	r.POST(v1.PathForMartiniRegisterOrg, s.RegisterOrgHandler())
 	r.POST(v1.PathForMartiniApproveOrg, s.ApproveOrgHandler())
@@ -83,4 +87,10 @@ func (s *Service) RegisterRoute(r rest.Router) {
 // Used in Unittests
 func (s *Service) Db() orgsdb.OrgsDb {
 	return s.db
+}
+
+// CaDb returns CaReadonlyDb
+// Used in Unittests
+func (s *Service) CaDb() cadb.CaReadonlyDb {
+	return s.cadb
 }

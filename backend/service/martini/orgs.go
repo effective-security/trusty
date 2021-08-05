@@ -18,6 +18,36 @@ import (
 	"github.com/juju/errors"
 )
 
+// GetCertsHandler returns user's certs
+func (s *Service) GetCertsHandler() rest.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
+		ctx := identity.FromRequest(r)
+		idn := ctx.Identity()
+
+		userID, _ := db.ID(idn.UserID())
+		orgs, err := s.db.GetUserOrgs(r.Context(), userID)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to get orgs: %s", err.Error()).WithCause(err))
+			return
+		}
+
+		res := new(v1.CertificatesResponse)
+
+		for _, org := range orgs {
+			certs, err := s.cadb.GetOrgCertificates(r.Context(), org.ID)
+			if err != nil {
+				marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to get orgs: %s", err.Error()).WithCause(err))
+				return
+			}
+			for _, c := range certs {
+				res.Certificates = append(res.Certificates, v1.Certificate(*c.ToDTO()))
+			}
+		}
+
+		marshal.WriteJSON(w, r, res)
+	}
+}
+
 // GetOrgsHandler returns user's orgs
 func (s *Service) GetOrgsHandler() rest.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {

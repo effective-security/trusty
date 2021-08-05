@@ -39,6 +39,16 @@ func (c *Client) Orgs(ctx context.Context) (*v1.OrgsResponse, error) {
 	return r, nil
 }
 
+// Certificates returns user's Certificates
+func (c *Client) Certificates(ctx context.Context) (*v1.CertificatesResponse, error) {
+	r := new(v1.CertificatesResponse)
+	_, _, err := c.Get(ctx, v1.PathForMartiniCerts, r)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return r, nil
+}
+
 // FccFRN returns Fcc FRN
 func (c *Client) FccFRN(ctx context.Context, filerID string) (*v1.FccFrnResponse, error) {
 	r := new(v1.FccFrnResponse)

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -21,6 +22,7 @@ import (
 	"github.com/ekspand/trusty/internal/db/orgsdb/model"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/tests/testutils"
+	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/identity"
@@ -158,6 +160,41 @@ func TestGetOrgsHandler(t *testing.T) {
 
 	assert.Contains(t, hdr.Get(header.ContentType), header.ApplicationJSON)
 	assert.Empty(t, res.Orgs)
+}
+
+func TestGetCertsHandler(t *testing.T) {
+	ctx := context.Background()
+	svc := trustyServer.Service(martini.ServiceName).(*martini.Service)
+
+	db := svc.Db()
+	id, _ := db.NextID()
+
+	g := guid.MustCreate()
+	_, err := svc.Db().UpdateOrg(ctx, &model.Organization{
+		ID:         id,
+		ExternalID: strconv.FormatUint(id, 10),
+		Provider:   v1.ProviderMartini,
+		Login:      g,
+		Email:      g + "@trusty.com",
+	})
+	require.NoError(t, err)
+
+	res := new(v1.CertificatesResponse)
+
+	client := retriable.New()
+	ctx = retriable.WithHeaders(ctx, jsonContentHeaders)
+	hdr, rc, err := client.Request(ctx,
+		http.MethodGet,
+		[]string{httpAddr},
+		v1.PathForMartiniCerts,
+		nil,
+		res)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, rc)
+
+	assert.Contains(t, hdr.Get(header.ContentType), header.ApplicationJSON)
+	assert.Empty(t, res.Certificates)
 }
 
 func TestRegisterOrgFullFlow(t *testing.T) {

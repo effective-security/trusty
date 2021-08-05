@@ -61,6 +61,32 @@ func Orgs(c ctl.Control, _ interface{}) error {
 	return nil
 }
 
+// Certificates prints the user's Certificates
+func Certificates(c ctl.Control, _ interface{}) error {
+	cli := c.(*cli.Cli)
+
+	client, err := cli.HTTPClient()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	res, err := client.Certificates(context.Background())
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	ctl.WriteJSON(c.Writer(), res)
+	/*
+		if cli.IsJSON() {
+			ctl.WriteJSON(c.Writer(), res)
+			fmt.Fprint(c.Writer(), "\n")
+		} else {
+			print.Orgs(c.Writer(), res.List)
+		}
+	*/
+	return nil
+}
+
 // RegisterOrgFlags defines flags for RegisterOrg command
 type RegisterOrgFlags struct {
 	FilerID *string

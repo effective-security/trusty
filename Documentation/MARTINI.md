@@ -276,3 +276,9 @@ certificate: /home/dissoupov/.mrtsec/certificates/ddadd515eb4e758f7a8a18a4093574
 key: /home/dissoupov/.mrtsec/certificates/ddadd515eb4e758f7a8a18a4093574dacdac4cf2.key
 
 ```
+
+## List Certificates
+
+```.sh
+bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pem certificates
+```

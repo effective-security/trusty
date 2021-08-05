@@ -171,11 +171,17 @@ const (
 	// Response: v1.OrgResponse
 	PathForMartiniApproveOrg = "/v1/ms/approve_org"
 
-	// PathForMartiniOrgs provides orgs the user
+	// PathForMartiniOrgs provides orgs the user belongs to
 	//
 	// Verbs: GET
 	// Response: v1.OrgsResponse
 	PathForMartiniOrgs = "/v1/ms/orgs"
+
+	// PathForMartiniCerts provides certs from all orgs the user belongs to
+	//
+	// Verbs: GET
+	// Response: v1.certsResponse
+	PathForMartiniCerts = "/v1/ms/certificates"
 
 	// PathForMartiniOrgAPIKeys provides org API keys
 	//
