@@ -20,23 +20,18 @@ service CAService {
 
     // Issuers returns the issuing CAs
     rpc Issuers(google.protobuf.Empty) returns (IssuersInfoResponse) {
-        option (google.api.http) = {
-            get: "/v1/ca/issuers"
-        };
     }
 
     // SignCertificate returns the certificate
     rpc SignCertificate(SignCertificateRequest) returns (CertificateResponse) {
-        option (google.api.http) = {
-            post: "/v1/ca/sign"
-        };
     }
 
     // GetCertificate returns the certificate
     rpc GetCertificate(GetCertificateRequest) returns (CertificateResponse) {
-        option (google.api.http) = {
-            post: "/v1/ca/certs"
-        };
+    }
+
+    // GetOrgCertificates returns the Org certificates
+    rpc GetOrgCertificates(GetOrgCertificatesRequest) returns (CertificatesResponse) {
     }
 
     // RevokeCertificate returns the revoked certificate
@@ -114,13 +109,19 @@ message SignCertificateRequest {
     uint64 org_id = 8;
 }
 
-// GetCertificateRequest specifies certificate request by ID or issuer key identifier
+// GetCertificateRequest specifies a certificate request by ID or issuer key identifier
 message GetCertificateRequest {
     // Id specifies certificate ID.
     // If it's not set, then SKID must be provided
     uint64 id = 1;
     // SKID specifies Subject Key ID to search
     string skid = 2;
+}
+
+// GetOrgsCertificatesRequest specifies a certificates request by Org ID
+message GetOrgCertificatesRequest {
+    // OrgId specifies the Org ID.
+    uint64 org_id = 1;
 }
 
 message ListByIssuerRequest {

@@ -68,6 +68,11 @@ func (c *authorityClient) GetCertificate(ctx context.Context, in *pb.GetCertific
 	return c.remote.GetCertificate(ctx, in, c.callOpts...)
 }
 
+// GetOrgCertificates returns the Org certificates
+func (c *authorityClient) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest) (*pb.CertificatesResponse, error) {
+	return c.remote.GetOrgCertificates(ctx, in)
+}
+
 // RevokeCertificate returns the revoked certificate
 func (c *authorityClient) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error) {
 	return c.remote.RevokeCertificate(ctx, in, c.callOpts...)
@@ -119,6 +124,11 @@ func (c *retryCAClient) Issuers(ctx context.Context, in *empty.Empty, opts ...gr
 // GetCertificate returns the certificate
 func (c *retryCAClient) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
 	return c.authority.GetCertificate(ctx, in, opts...)
+}
+
+// GetOrgCertificates returns the Org certificates
+func (c *retryCAClient) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest, opts ...grpc.CallOption) (*pb.CertificatesResponse, error) {
+	return c.authority.GetOrgCertificates(ctx, in)
 }
 
 // RevokeCertificate returns the revoked certificate

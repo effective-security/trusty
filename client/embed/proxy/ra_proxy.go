@@ -36,3 +36,8 @@ func (s *raSrv2C) RegisterCertificate(ctx context.Context, in *pb.RegisterCertif
 func (s *raSrv2C) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
 	return s.srv.GetCertificate(ctx, in)
 }
+
+// GetOrgCertificates returns the Org certificates
+func (s *raSrv2C) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest, opts ...grpc.CallOption) (*pb.CertificatesResponse, error) {
+	return s.srv.GetOrgCertificates(ctx, in)
+}

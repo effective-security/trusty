@@ -190,7 +190,7 @@ var file_ra_proto_rawDesc = []byte{
 	0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x31, 0x0a, 0x0b, 0x63, 0x65, 0x72,
 	0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0f,
 	0x2e, 0x70, 0x62, 0x2e, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x52,
-	0x0b, 0x63, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x32, 0xb0, 0x02, 0x0a,
+	0x0b, 0x63, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x32, 0x81, 0x03, 0x0a,
 	0x09, 0x52, 0x41, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x4b, 0x0a, 0x08, 0x47, 0x65,
 	0x74, 0x52, 0x6f, 0x6f, 0x74, 0x73, 0x12, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e,
 	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x11,
@@ -209,10 +209,15 @@ var file_ra_proto_rawDesc = []byte{
 	0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x12, 0x19, 0x2e, 0x70, 0x62, 0x2e, 0x47,
 	0x65, 0x74, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x52, 0x65, 0x71,
 	0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x70, 0x62, 0x2e, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66,
-	0x69, 0x63, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42,
-	0x25, 0x5a, 0x23, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x65, 0x6b,
-	0x73, 0x70, 0x61, 0x6e, 0x64, 0x2f, 0x74, 0x72, 0x75, 0x73, 0x74, 0x79, 0x2f, 0x61, 0x70, 0x69,
-	0x2f, 0x76, 0x31, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x69, 0x63, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12,
+	0x4f, 0x0a, 0x12, 0x47, 0x65, 0x74, 0x4f, 0x72, 0x67, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69,
+	0x63, 0x61, 0x74, 0x65, 0x73, 0x12, 0x1d, 0x2e, 0x70, 0x62, 0x2e, 0x47, 0x65, 0x74, 0x4f, 0x72,
+	0x67, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x73, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x1a, 0x18, 0x2e, 0x70, 0x62, 0x2e, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66,
+	0x69, 0x63, 0x61, 0x74, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00,
+	0x42, 0x25, 0x5a, 0x23, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x65,
+	0x6b, 0x73, 0x70, 0x61, 0x6e, 0x64, 0x2f, 0x74, 0x72, 0x75, 0x73, 0x74, 0x79, 0x2f, 0x61, 0x70,
+	0x69, 0x2f, 0x76, 0x31, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -236,7 +241,9 @@ var file_ra_proto_goTypes = []interface{}{
 	(*Certificate)(nil),                // 4: pb.Certificate
 	(*empty.Empty)(nil),                // 5: google.protobuf.Empty
 	(*GetCertificateRequest)(nil),      // 6: pb.GetCertificateRequest
-	(*CertificateResponse)(nil),        // 7: pb.CertificateResponse
+	(*GetOrgCertificatesRequest)(nil),  // 7: pb.GetOrgCertificatesRequest
+	(*CertificateResponse)(nil),        // 8: pb.CertificateResponse
+	(*CertificatesResponse)(nil),       // 9: pb.CertificatesResponse
 }
 var file_ra_proto_depIdxs = []int32{
 	3, // 0: pb.RootsResponse.roots:type_name -> pb.RootCertificate
@@ -246,12 +253,14 @@ var file_ra_proto_depIdxs = []int32{
 	1, // 4: pb.RAService.RegisterRoot:input_type -> pb.RegisterRootRequest
 	2, // 5: pb.RAService.RegisterCertificate:input_type -> pb.RegisterCertificateRequest
 	6, // 6: pb.RAService.GetCertificate:input_type -> pb.GetCertificateRequest
-	0, // 7: pb.RAService.GetRoots:output_type -> pb.RootsResponse
-	0, // 8: pb.RAService.RegisterRoot:output_type -> pb.RootsResponse
-	7, // 9: pb.RAService.RegisterCertificate:output_type -> pb.CertificateResponse
-	7, // 10: pb.RAService.GetCertificate:output_type -> pb.CertificateResponse
-	7, // [7:11] is the sub-list for method output_type
-	3, // [3:7] is the sub-list for method input_type
+	7, // 7: pb.RAService.GetOrgCertificates:input_type -> pb.GetOrgCertificatesRequest
+	0, // 8: pb.RAService.GetRoots:output_type -> pb.RootsResponse
+	0, // 9: pb.RAService.RegisterRoot:output_type -> pb.RootsResponse
+	8, // 10: pb.RAService.RegisterCertificate:output_type -> pb.CertificateResponse
+	8, // 11: pb.RAService.GetCertificate:output_type -> pb.CertificateResponse
+	9, // 12: pb.RAService.GetOrgCertificates:output_type -> pb.CertificatesResponse
+	8, // [8:13] is the sub-list for method output_type
+	3, // [3:8] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name
 	3, // [3:3] is the sub-list for extension extendee
 	0, // [0:3] is the sub-list for field type_name
@@ -342,6 +351,8 @@ type RAServiceClient interface {
 	RegisterCertificate(ctx context.Context, in *RegisterCertificateRequest, opts ...grpc.CallOption) (*CertificateResponse, error)
 	// GetCertificate returns the certificate
 	GetCertificate(ctx context.Context, in *GetCertificateRequest, opts ...grpc.CallOption) (*CertificateResponse, error)
+	// GetOrgCertificates returns the Org certificates
+	GetOrgCertificates(ctx context.Context, in *GetOrgCertificatesRequest, opts ...grpc.CallOption) (*CertificatesResponse, error)
 }
 
 type rAServiceClient struct {
@@ -388,6 +399,15 @@ func (c *rAServiceClient) GetCertificate(ctx context.Context, in *GetCertificate
 	return out, nil
 }
 
+func (c *rAServiceClient) GetOrgCertificates(ctx context.Context, in *GetOrgCertificatesRequest, opts ...grpc.CallOption) (*CertificatesResponse, error) {
+	out := new(CertificatesResponse)
+	err := c.cc.Invoke(ctx, "/pb.RAService/GetOrgCertificates", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RAServiceServer is the server API for RAService service.
 type RAServiceServer interface {
 	// GetRoots returns the root certificates
@@ -398,6 +418,8 @@ type RAServiceServer interface {
 	RegisterCertificate(context.Context, *RegisterCertificateRequest) (*CertificateResponse, error)
 	// GetCertificate returns the certificate
 	GetCertificate(context.Context, *GetCertificateRequest) (*CertificateResponse, error)
+	// GetOrgCertificates returns the Org certificates
+	GetOrgCertificates(context.Context, *GetOrgCertificatesRequest) (*CertificatesResponse, error)
 }
 
 // UnimplementedRAServiceServer can be embedded to have forward compatible implementations.
@@ -415,6 +437,9 @@ func (*UnimplementedRAServiceServer) RegisterCertificate(context.Context, *Regis
 }
 func (*UnimplementedRAServiceServer) GetCertificate(context.Context, *GetCertificateRequest) (*CertificateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCertificate not implemented")
+}
+func (*UnimplementedRAServiceServer) GetOrgCertificates(context.Context, *GetOrgCertificatesRequest) (*CertificatesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOrgCertificates not implemented")
 }
 
 func RegisterRAServiceServer(s *grpc.Server, srv RAServiceServer) {
@@ -493,6 +518,24 @@ func _RAService_GetCertificate_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RAService_GetOrgCertificates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOrgCertificatesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RAServiceServer).GetOrgCertificates(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.RAService/GetOrgCertificates",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RAServiceServer).GetOrgCertificates(ctx, req.(*GetOrgCertificatesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _RAService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "pb.RAService",
 	HandlerType: (*RAServiceServer)(nil),
@@ -512,6 +555,10 @@ var _RAService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCertificate",
 			Handler:    _RAService_GetCertificate_Handler,
+		},
+		{
+			MethodName: "GetOrgCertificates",
+			Handler:    _RAService_GetOrgCertificates_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
