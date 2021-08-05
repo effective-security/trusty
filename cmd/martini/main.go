@@ -59,6 +59,11 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		PreAction(cli.PopulateControl).
 		Action(cli.RegisterAction(martini.Orgs, nil))
 
+	// user certs
+	app.Command("certificates", "show the user's certificates").
+		PreAction(cli.PopulateControl).
+		Action(cli.RegisterAction(martini.Certificates, nil))
+
 	// opencorps
 	searchCorpsFlags := new(martini.SearchCorpsFlags)
 	cmdSearchCorps := app.Command("opencorps", "search open corporations").

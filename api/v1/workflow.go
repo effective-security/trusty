@@ -1,6 +1,10 @@
 package v1
 
-import "time"
+import (
+	"time"
+
+	"github.com/ekspand/trusty/api/v1/pb"
+)
 
 const (
 	// ProviderGithub specifies name for Github
@@ -129,4 +133,12 @@ type APIKey struct {
 // GetOrgAPIKeysResponse returns Orgs API keys
 type GetOrgAPIKeysResponse struct {
 	Keys []APIKey `json:"keys"`
+}
+
+// Certificate defines x509 certificate
+type Certificate pb.Certificate
+
+// CertificatesResponse returns a list of certificates for the user
+type CertificatesResponse struct {
+	Certificates []Certificate `json:"certificates"`
 }

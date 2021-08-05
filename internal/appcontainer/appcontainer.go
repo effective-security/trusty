@@ -58,10 +58,10 @@ type ProvideCryptoFn func(cfg *config.Configuration) (*cryptoprov.Crypto, error)
 type ProvideAuthorityFn func(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*authority.Authority, error)
 
 // ProvideOrgsDbFn defines Orgs DB provider
-type ProvideOrgsDbFn func(cfg *config.Configuration) (orgsdb.OrgsDb, error)
+type ProvideOrgsDbFn func(cfg *config.Configuration) (orgsdb.OrgsDb, orgsdb.OrgsReadOnlyDb, error)
 
 // ProvideCaDbFn defines CA DB provider
-type ProvideCaDbFn func(cfg *config.Configuration) (cadb.CaDb, error)
+type ProvideCaDbFn func(cfg *config.Configuration) (cadb.CaDb, cadb.CaReadonlyDb, error)
 
 // ProvideClientFactoryFn defines client.Facroty provider
 type ProvideClientFactoryFn func(cfg *config.Configuration) (client.Factory, error)
@@ -360,20 +360,20 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*au
 	return ca, nil
 }
 
-func provideOrgsDB(cfg *config.Configuration) (orgsdb.OrgsDb, error) {
+func provideOrgsDB(cfg *config.Configuration) (orgsdb.OrgsDb, orgsdb.OrgsReadOnlyDb, error) {
 	d, err := orgsdb.New(cfg.OrgsSQL.Driver, cfg.OrgsSQL.DataSource, cfg.OrgsSQL.MigrationsDir, idGenerator.NextID)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, nil, errors.Trace(err)
 	}
-	return d, nil
+	return d, d, nil
 }
 
-func provideCaDB(cfg *config.Configuration) (cadb.CaDb, error) {
+func provideCaDB(cfg *config.Configuration) (cadb.CaDb, cadb.CaReadonlyDb, error) {
 	d, err := cadb.New(cfg.CaSQL.Driver, cfg.CaSQL.DataSource, cfg.CaSQL.MigrationsDir, idGenerator.NextID)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, nil, errors.Trace(err)
 	}
-	return d, nil
+	return d, d, nil
 }
 
 func provideClientFactory(cfg *config.Configuration) (client.Factory, error) {
