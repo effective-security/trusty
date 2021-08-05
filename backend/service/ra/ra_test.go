@@ -97,3 +97,9 @@ func TestGetCertificate(t *testing.T) {
 	require.Error(t, err)
 	assert.Equal(t, "unable to get certificate", err.Error())
 }
+
+func TestGetOrgCertificates(t *testing.T) {
+	res, err := raClient.GetOrgCertificates(context.Background(), &pb.GetOrgCertificatesRequest{OrgId: 123})
+	require.NoError(t, err)
+	assert.Empty(t, res.List)
+}

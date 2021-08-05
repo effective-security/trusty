@@ -224,6 +224,19 @@ func TestPublishCrls(t *testing.T) {
 	require.NotEmpty(t, list)
 }
 
+func TestGetCert(t *testing.T) {
+	svc := trustyServer.Service("ca").(*ca.Service)
+	ctx := context.Background()
+	list, err := svc.GetOrgCertificates(ctx,
+		&pb.GetOrgCertificatesRequest{OrgId: 1111111})
+	require.NoError(t, err)
+	assert.Empty(t, list.List)
+
+	_, err = svc.GetCertificate(ctx,
+		&pb.GetCertificateRequest{Skid: "notfound"})
+	require.Error(t, err)
+}
+
 func TestE2E(t *testing.T) {
 	svc := trustyServer.Service("ca").(*ca.Service)
 	//db := svc.Db()
@@ -234,6 +247,7 @@ func TestE2E(t *testing.T) {
 		Profile:       "test_server",
 		Request:       generateCSR(),
 		RequestFormat: pb.EncodingFormat_PEM,
+		OrgId:         123456,
 	})
 	require.NoError(t, err)
 
@@ -250,8 +264,14 @@ func TestE2E(t *testing.T) {
 			Profile:       "test_server",
 			Request:       generateCSR(),
 			RequestFormat: pb.EncodingFormat_PEM,
+			OrgId:         123456,
 		})
 		require.NoError(t, err)
+
+		list, err := svc.GetOrgCertificates(ctx,
+			&pb.GetOrgCertificatesRequest{OrgId: 123456})
+		require.NoError(t, err)
+		assert.NotEmpty(t, list.List)
 
 		crtRes, err := svc.GetCertificate(ctx,
 			&pb.GetCertificateRequest{Skid: res.Certificate.Skid})

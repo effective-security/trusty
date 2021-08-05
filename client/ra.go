@@ -12,15 +12,14 @@ import (
 type RAClient interface {
 	// GetRoots returns the root CAs
 	GetRoots(ctx context.Context, in *empty.Empty) (*pb.RootsResponse, error)
-
 	// RegisterRoot registers root CA
 	RegisterRoot(ctx context.Context, in *pb.RegisterRootRequest) (*pb.RootsResponse, error)
-
 	// RegisterRoot registers certificate
 	RegisterCertificate(ctx context.Context, in *pb.RegisterCertificateRequest) (*pb.CertificateResponse, error)
-
 	// GetCertificate returns certificate
 	GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error)
+	// GetOrgCertificates returns the Org certificates
+	GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest) (*pb.CertificatesResponse, error)
 }
 
 type raClient struct {
@@ -63,6 +62,11 @@ func (c *raClient) GetCertificate(ctx context.Context, in *pb.GetCertificateRequ
 	return c.remote.GetCertificate(ctx, in, c.callOpts...)
 }
 
+// GetOrgCertificates returns the Org certificates
+func (c *raClient) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest) (*pb.CertificatesResponse, error) {
+	return c.remote.GetOrgCertificates(ctx, in)
+}
+
 type retryRAClient struct {
 	ra pb.RAServiceClient
 }
@@ -94,4 +98,9 @@ func (c *retryRAClient) RegisterCertificate(ctx context.Context, in *pb.Register
 // GetCertificate returns the certificate
 func (c *retryRAClient) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
 	return c.ra.GetCertificate(ctx, in, opts...)
+}
+
+// GetOrgCertificates returns the Org certificates
+func (c *retryRAClient) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest, opts ...grpc.CallOption) (*pb.CertificatesResponse, error) {
+	return c.ra.GetOrgCertificates(ctx, in)
 }

@@ -28,7 +28,11 @@ service RAService {
 
     // GetCertificate returns the certificate
     rpc GetCertificate(GetCertificateRequest) returns (CertificateResponse) {
-    }    
+    }
+
+    // GetOrgCertificates returns the Org certificates
+    rpc GetOrgCertificates(GetOrgCertificatesRequest) returns (CertificatesResponse) {
+    }
 }
 
 // RootsResponse returns Root Certificates

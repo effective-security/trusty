@@ -112,6 +112,18 @@
       },
       "title": "CertificateResponse returns Certificate"
     },
+    "pbCertificatesResponse": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pbCertificate"
+          }
+        }
+      },
+      "title": "CertificatesResponse returns Certificates list"
+    },
     "pbRootCertificate": {
       "type": "object",
       "properties": {

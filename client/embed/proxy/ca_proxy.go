@@ -37,6 +37,11 @@ func (s *caSrv2C) GetCertificate(ctx context.Context, in *pb.GetCertificateReque
 	return s.srv.GetCertificate(ctx, in)
 }
 
+// GetOrgCertificates returns the Org certificates
+func (s *caSrv2C) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest, opts ...grpc.CallOption) (*pb.CertificatesResponse, error) {
+	return s.srv.GetOrgCertificates(ctx, in)
+}
+
 // RevokeCertificate returns the revoked certificate
 func (s *caSrv2C) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest, opts ...grpc.CallOption) (*pb.RevokedCertificateResponse, error) {
 	return s.srv.RevokeCertificate(ctx, in)

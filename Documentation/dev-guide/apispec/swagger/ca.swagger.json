@@ -16,52 +16,6 @@
     "application/json"
   ],
   "paths": {
-    "/v1/ca/certs": {
-      "post": {
-        "summary": "GetCertificate returns the certificate",
-        "operationId": "CAService_GetCertificate",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/pbCertificateResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "CAService"
-        ]
-      }
-    },
-    "/v1/ca/issuers": {
-      "get": {
-        "summary": "Issuers returns the issuing CAs",
-        "operationId": "CAService_Issuers",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/pbIssuersInfoResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "CAService"
-        ]
-      }
-    },
     "/v1/ca/profile_info": {
       "post": {
         "summary": "ProfileInfo returns the certificate profile info",
@@ -71,29 +25,6 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbCertProfileInfo"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "CAService"
-        ]
-      }
-    },
-    "/v1/ca/sign": {
-      "post": {
-        "summary": "SignCertificate returns the certificate",
-        "operationId": "CAService_SignCertificate",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/pbCertificateResponse"
             }
           },
           "default": {

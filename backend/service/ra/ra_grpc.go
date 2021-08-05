@@ -55,3 +55,19 @@ func (s *Service) GetCertificate(ctx context.Context, in *pb.GetCertificateReque
 	}
 	return res, nil
 }
+
+// GetOrgCertificates returns the Org certificates
+func (s *Service) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest) (*pb.CertificatesResponse, error) {
+	list, err := s.db.GetOrgCertificates(ctx, in.OrgId)
+	if err != nil {
+		logger.KV(xlog.ERROR,
+			"request", in,
+			"err", errors.Details(err),
+		)
+		return nil, v1.NewError(codes.Internal, "unable to get certificates")
+	}
+	res := &pb.CertificatesResponse{
+		List: list.ToDTO(),
+	}
+	return res, nil
+}
