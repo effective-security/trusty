@@ -3,15 +3,23 @@ package auth
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
 	"os"
 	"os/exec"
+	"path"
 	"runtime"
 	"strings"
+	"sync"
 
 	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/cli"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/rest/tlsconfig"
+	"github.com/go-phorce/dolly/xhttp/header"
+	"github.com/go-phorce/dolly/xhttp/httperror"
+	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/go-phorce/dolly/xhttp/retriable"
 	"github.com/juju/errors"
 )
@@ -47,9 +55,50 @@ func Authenticate(c ctl.Control, p interface{}) error {
 	if flags.Provider == nil || *flags.Provider == "" {
 		return errors.New("please specify --provider parameter")
 	}
+	noBrowser := flags.NoBrowser == nil || !*flags.NoBrowser
+
+	var wg sync.WaitGroup
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		defer wg.Done()
+		token, ok := r.URL.Query()["token"]
+		if !ok || len(token) != 1 || token[0] == "" {
+			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("missing token parameter"))
+			return
+		}
+
+		w.Header().Set(header.ContentType, header.TextPlain)
+		fmt.Fprintf(w, "Authenticated! You can close the browser now.\n\nexport TRUSTY_AUTH_TOKEN=%s\n", token[0])
+
+		dirname, err := os.UserHomeDir()
+		if err != nil {
+			fmt.Fprintf(cli.Writer(), "unable to determine home folder: %s", err.Error())
+			return
+		}
+
+		folder := path.Join(dirname, ".config", "trusty")
+		os.MkdirAll(folder, 0755)
+		err = ioutil.WriteFile(path.Join(folder, ".token"), []byte(token[0]), 0600)
+		if err != nil {
+			fmt.Fprintf(cli.Writer(), "unable to store token: %s", err.Error())
+			return
+		}
+	}
+	http.HandleFunc("/", handler)
+
+	if !noBrowser {
+		wg.Add(1)
+		go func() {
+			log.Fatal(http.ListenAndServe(":38989", nil))
+		}()
+	}
 
 	res := new(v1.AuthStsURLResponse)
-	path := fmt.Sprintf("%s?redirect_url=%s/v1/auth/done&device_id=%s&sts=%s", v1.PathForAuthURL, srv, hn, *flags.Provider)
+	var path string
+	if noBrowser {
+		path = fmt.Sprintf("%s?redirect_url=%s/v1/auth/done&device_id=%s&sts=%s", v1.PathForAuthURL, srv, hn, *flags.Provider)
+	} else {
+		path = fmt.Sprintf("%s?redirect_url=http://localhost:38989&device_id=%s&sts=%s", v1.PathForAuthURL, hn, *flags.Provider)
+	}
 	_, _, err := httpClient.Request(context.Background(), "GET", []string{srv}, path, nil, res)
 	if err != nil {
 		return errors.Trace(err)
@@ -64,7 +113,7 @@ func Authenticate(c ctl.Control, p interface{}) error {
 		if err != nil {
 			return errors.Trace(err)
 		}
-		fmt.Fprintf(cli.Writer(), "opening auth URL in browser: %s\n", res.URL)
+		wg.Wait()
 	} else {
 		fmt.Fprintf(cli.Writer(), "open auth URL in browser:\n%s\n", res.URL)
 	}

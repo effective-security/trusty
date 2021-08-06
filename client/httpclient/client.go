@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"path"
 	"reflect"
 	"strings"
 	"sync"
@@ -138,9 +139,28 @@ func New(config *Config, initialHosts []string) (*Client, error) {
 	tk := os.Getenv("TRUSTY_AUTH_TOKEN")
 	if tk != "" && c.config.TLS != nil {
 		c.httpClient.AddHeader(header.Authorization, "Bearer "+tk)
+	} else {
+		tk, err := loadTrustyToken()
+		if err == nil {
+			c.httpClient.AddHeader(header.Authorization, "Bearer "+tk)
+		}
 	}
 
 	return &c, nil
+}
+
+func loadTrustyToken() (string, error) {
+	dirname, err := os.UserHomeDir()
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	file := path.Join(dirname, ".config", "trusty", ".token")
+	t, err := os.ReadFile(file)
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	return string(t), nil
 }
 
 func shuffle(s []string) {
