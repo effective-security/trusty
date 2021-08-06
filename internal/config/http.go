@@ -191,3 +191,13 @@ func (c *CORS) GetEnabled() bool {
 func (c *CORS) GetDebug() bool {
 	return c != nil && c.Debug != nil && *c.Debug
 }
+
+// GetAllowCredentials flag
+func (c *CORS) GetAllowCredentials() bool {
+	return c != nil && c.AllowCredentials != nil && *c.AllowCredentials
+}
+
+// GetOptionsPassthrough flag
+func (c *CORS) GetOptionsPassthrough() bool {
+	return c != nil && c.OptionsPassthrough != nil && *c.OptionsPassthrough
+}
