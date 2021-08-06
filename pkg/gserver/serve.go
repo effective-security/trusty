@@ -21,6 +21,7 @@ import (
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/juju/errors"
+	"github.com/rs/cors"
 	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
@@ -278,25 +279,28 @@ func configureHandlers(s *Server, handler http.Handler) http.Handler {
 	// role/contextID wrapper
 	handler = identity.NewContextHandler(handler, s.identity.IdentityFromRequest)
 
+	if s.cfg.CORS.GetEnabled() {
+		logger.Noticef("server=%s, CORS=enabled", s.name)
+		co := cors.New(cors.Options{
+			AllowedOrigins: s.cfg.CORS.AllowedOrigins,
+			//AllowOriginFunc:        s.cfg.CORS.AllowOriginFunc,
+			//AllowOriginRequestFunc: s.cfg.CORS.AllowOriginRequestFunc,
+			AllowedMethods:     s.cfg.CORS.AllowedMethods,
+			AllowedHeaders:     s.cfg.CORS.AllowedHeaders,
+			ExposedHeaders:     s.cfg.CORS.ExposedHeaders,
+			MaxAge:             s.cfg.CORS.MaxAge,
+			AllowCredentials:   s.cfg.CORS.GetAllowCredentials(),
+			OptionsPassthrough: s.cfg.CORS.GetOptionsPassthrough(),
+			Debug:              s.cfg.CORS.GetDebug(),
+		})
+		handler = co.Handler(handler)
+	}
+
 	return handler
 }
 
 func restRouter(s *Server) rest.Router {
-	var router rest.Router
-	if s.cfg.CORS.GetEnabled() {
-		logger.Noticef("server=%s, CORS=enabled", s.name)
-		cors := &rest.CORSOptions{
-			AllowedOrigins: s.cfg.CORS.AllowedOrigins,
-			AllowedMethods: s.cfg.CORS.AllowedMethods,
-			AllowedHeaders: s.cfg.CORS.AllowedHeaders,
-			ExposedHeaders: s.cfg.CORS.ExposedHeaders,
-			MaxAge:         s.cfg.CORS.MaxAge,
-			Debug:          s.cfg.CORS.GetDebug(),
-		}
-		router = rest.NewRouterWithCORS(notFoundHandler, cors)
-	} else {
-		router = rest.NewRouter(notFoundHandler)
-	}
+	router := rest.NewRouter(notFoundHandler)
 
 	for name, svc := range s.services {
 		if registrator, ok := svc.(RouteRegistrator); ok {
