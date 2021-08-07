@@ -140,64 +140,6 @@ func (s *testSuite) TestSign() {
 	s.Require().NoError(err)
 }
 
-func (s *testSuite) TestListCerts() {
-	expectedResponse := new(pb.CertificatesResponse)
-	err := loadJSON("testdata/certs.json", expectedResponse)
-	s.Require().NoError(err)
-
-	s.MockAuthority = &mockpb.MockCAServer{
-		Err:   nil,
-		Resps: []proto.Message{expectedResponse},
-	}
-	srv := s.SetupMockGRPC()
-	defer srv.Stop()
-
-	limit := 3
-	after := "80126629526896740"
-	ikid := "401456c5ce07f25ba068e2d191921e807ad486e4"
-	err = s.Run(ca.ListCerts, &ca.ListCertsFlags{
-		Ikid:  &ikid,
-		Limit: &limit,
-		After: &after,
-	})
-	s.Require().NoError(err)
-
-	if s.Cli.IsJSON() {
-		s.HasText("list\": [")
-	} else {
-		s.HasText("        ID         | ORGID |")
-	}
-}
-
-func (s *testSuite) TestRevokedListCerts() {
-	expectedResponse := new(pb.RevokedCertificatesResponse)
-	err := loadJSON("testdata/revoked.json", expectedResponse)
-	s.Require().NoError(err)
-
-	s.MockAuthority = &mockpb.MockCAServer{
-		Err:   nil,
-		Resps: []proto.Message{expectedResponse},
-	}
-	srv := s.SetupMockGRPC()
-	defer srv.Stop()
-
-	limit := 3
-	after := "80126629526896740"
-	ikid := "401456c5ce07f25ba068e2d191921e807ad486e4"
-	err = s.Run(ca.ListRevokedCerts, &ca.ListCertsFlags{
-		Ikid:  &ikid,
-		Limit: &limit,
-		After: &after,
-	})
-	s.Require().NoError(err)
-
-	if s.Cli.IsJSON() {
-		s.HasText("list\": [")
-	} else {
-		s.HasText("REVOKED", "REASON")
-	}
-}
-
 func loadJSON(filename string, v interface{}) error {
 	cfr, err := os.Open(filename)
 	if err != nil {

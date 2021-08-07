@@ -4,20 +4,13 @@ package pb;
 option go_package = "github.com/ekspand/trusty/api/v1/pb";
 
 import "pkix.proto";
-import "ca.proto";
-import "google/protobuf/empty.proto";
+//import "google/protobuf/empty.proto";
 //import "google/protobuf/timestamp.proto";
+
 // for grpc-gateway
 import "google/api/annotations.proto";
 
 service RAService {
-    // GetRoots returns the root certificates
-    rpc GetRoots(google.protobuf.Empty) returns (RootsResponse) {
-        option (google.api.http) = {
-            get: "/v1/ra/roots"
-        };
-    }
-
     // RegisterRoot registers root CA
     rpc RegisterRoot(RegisterRootRequest) returns (RootsResponse) {
     }
@@ -26,18 +19,9 @@ service RAService {
     rpc RegisterCertificate(RegisterCertificateRequest) returns (CertificateResponse) {
     }
 
-    // GetCertificate returns the certificate
-    rpc GetCertificate(GetCertificateRequest) returns (CertificateResponse) {
+    // RevokeCertificate returns the revoked certificate
+    rpc RevokeCertificate(RevokeCertificateRequest) returns (RevokedCertificateResponse) {
     }
-
-    // GetOrgCertificates returns the Org certificates
-    rpc GetOrgCertificates(GetOrgCertificatesRequest) returns (CertificatesResponse) {
-    }
-}
-
-// RootsResponse returns Root Certificates
-message RootsResponse {
-    repeated RootCertificate roots = 1;
 }
 
 message RegisterRootRequest {
@@ -46,4 +30,15 @@ message RegisterRootRequest {
 
 message RegisterCertificateRequest {
     Certificate certificate = 1;
+}
+
+// RevokeCertificateRequest specifies revocation request
+message RevokeCertificateRequest {
+    // Id specifies certificate ID.
+    // If it's not set, then SKID must be provided
+    uint64 id = 1;
+    // SKID specifies Subject Key ID to search
+    string skid = 2;
+    // Reason for revocation
+    Reason reason = 3;
 }

@@ -80,6 +80,12 @@ func (s *Service) OnStarted() error {
 	return nil
 }
 
+// CaDb returns DB
+// Used in Unittests
+func (s *Service) CaDb() cadb.CaDb {
+	return s.db
+}
+
 func (s *Service) registerIssuers(ctx context.Context) error {
 	for _, ca := range s.ca.Issuers() {
 		bundle := ca.Bundle()

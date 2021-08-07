@@ -3,9 +3,7 @@ package pb;
 
 option go_package = "github.com/ekspand/trusty/api/v1/pb";
 
-//import "pkix.proto";
-import "ra.proto";
-import "ca.proto";
+import "pkix.proto";
 import "google/protobuf/empty.proto";
 //import "google/protobuf/timestamp.proto";
 // for grpc-gateway
@@ -25,4 +23,43 @@ service CIService {
             get: "/v1/cis/certs/{id}"
         };
     }
+
+    // GetOrgCertificates returns the Org certificates
+    rpc GetOrgCertificates(GetOrgCertificatesRequest) returns (CertificatesResponse) {
+        option (google.api.http) = {
+            get: "/v1/cis/certs"
+        };
+    }
+
+    // ListCertificates returns stream of Certificates
+    rpc ListCertificates(ListByIssuerRequest) returns (CertificatesResponse) {
+    }
+
+    // ListRevokedCertificates returns stream of Revoked Certificates
+    rpc ListRevokedCertificates(ListByIssuerRequest) returns (RevokedCertificatesResponse) {
+    }
+}
+
+// GetCertificateRequest specifies a certificate request by ID or issuer key identifier
+message GetCertificateRequest {
+    // Id specifies certificate ID.
+    // If it's not set, then SKID must be provided
+    uint64 id = 1;
+    // SKID specifies Subject Key ID to search
+    string skid = 2;
+}
+
+// GetOrgsCertificatesRequest specifies a certificates request by Org ID
+message GetOrgCertificatesRequest {
+    // OrgId specifies the Org ID.
+    uint64 org_id = 1;
+}
+
+message ListByIssuerRequest {
+    // Limit specifies the limit to return, or ALL if 0
+    int64 limit = 1; 
+    // After specifies certificate ID to start after
+    uint64 after = 2;
+    // IKID specifies Issuer Key ID to search
+    string ikid = 3;
 }

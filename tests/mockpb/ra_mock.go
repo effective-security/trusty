@@ -5,7 +5,6 @@ import (
 
 	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/gogo/protobuf/proto"
-	"github.com/golang/protobuf/ptypes/empty"
 )
 
 // MockRAServer for testing
@@ -32,14 +31,6 @@ func (m *MockRAServer) SetError(err error) {
 	m.Err = err
 }
 
-// GetRoots returns the root CAs
-func (m *MockRAServer) GetRoots(context.Context, *empty.Empty) (*pb.RootsResponse, error) {
-	if m.Err != nil {
-		return nil, m.Err
-	}
-	return m.Resps[0].(*pb.RootsResponse), nil
-}
-
 // RegisterRoot registers root CA
 func (m *MockRAServer) RegisterRoot(ctx context.Context, in *pb.RegisterRootRequest) (*pb.RootsResponse, error) {
 	if m.Err != nil {
@@ -56,10 +47,10 @@ func (m *MockRAServer) RegisterCertificate(ctx context.Context, in *pb.RegisterC
 	return m.Resps[0].(*pb.CertificateResponse), nil
 }
 
-// GetCertificate returns certificate
-func (m *MockRAServer) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error) {
+// RevokeCertificate returns the revoked certificate
+func (m *MockRAServer) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
-	return m.Resps[0].(*pb.CertificateResponse), nil
+	return m.Resps[0].(*pb.RevokedCertificateResponse), nil
 }

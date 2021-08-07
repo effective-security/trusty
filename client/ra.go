@@ -4,22 +4,17 @@ import (
 	"context"
 
 	pb "github.com/ekspand/trusty/api/v1/pb"
-	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
 )
 
 // RAClient client interface
 type RAClient interface {
-	// GetRoots returns the root CAs
-	GetRoots(ctx context.Context, in *empty.Empty) (*pb.RootsResponse, error)
 	// RegisterRoot registers root CA
 	RegisterRoot(ctx context.Context, in *pb.RegisterRootRequest) (*pb.RootsResponse, error)
 	// RegisterRoot registers certificate
 	RegisterCertificate(ctx context.Context, in *pb.RegisterCertificateRequest) (*pb.CertificateResponse, error)
-	// GetCertificate returns certificate
-	GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error)
-	// GetOrgCertificates returns the Org certificates
-	GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest) (*pb.CertificatesResponse, error)
+	// RevokeCertificate returns the revoked certificate
+	RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error)
 }
 
 type raClient struct {
@@ -42,11 +37,6 @@ func NewRAClientFromProxy(proxy pb.RAServiceClient) RAClient {
 	}
 }
 
-// Roots returns the root CAs
-func (c *raClient) GetRoots(ctx context.Context, in *empty.Empty) (*pb.RootsResponse, error) {
-	return c.remote.GetRoots(ctx, in, c.callOpts...)
-}
-
 // RegisterRoot registers root CA
 func (c *raClient) RegisterRoot(ctx context.Context, in *pb.RegisterRootRequest) (*pb.RootsResponse, error) {
 	return c.remote.RegisterRoot(ctx, in, c.callOpts...)
@@ -57,14 +47,9 @@ func (c *raClient) RegisterCertificate(ctx context.Context, in *pb.RegisterCerti
 	return c.remote.RegisterCertificate(ctx, in, c.callOpts...)
 }
 
-// GetCertificate returns the certificate
-func (c *raClient) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error) {
-	return c.remote.GetCertificate(ctx, in, c.callOpts...)
-}
-
-// GetOrgCertificates returns the Org certificates
-func (c *raClient) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest) (*pb.CertificatesResponse, error) {
-	return c.remote.GetOrgCertificates(ctx, in)
+// RevokeCertificate returns the revoked certificate
+func (c *raClient) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error) {
+	return c.remote.RevokeCertificate(ctx, in, c.callOpts...)
 }
 
 type retryRAClient struct {
@@ -80,11 +65,6 @@ func RetryRAClient(conn *grpc.ClientConn) pb.RAServiceClient {
 	}
 }
 
-// GetRoots returns the root CAs
-func (c *retryRAClient) GetRoots(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*pb.RootsResponse, error) {
-	return c.ra.GetRoots(ctx, in, opts...)
-}
-
 // RegisterRoot registers root CA
 func (c *retryRAClient) RegisterRoot(ctx context.Context, in *pb.RegisterRootRequest, opts ...grpc.CallOption) (*pb.RootsResponse, error) {
 	return c.ra.RegisterRoot(ctx, in, opts...)
@@ -95,12 +75,7 @@ func (c *retryRAClient) RegisterCertificate(ctx context.Context, in *pb.Register
 	return c.ra.RegisterCertificate(ctx, in, opts...)
 }
 
-// GetCertificate returns the certificate
-func (c *retryRAClient) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
-	return c.ra.GetCertificate(ctx, in, opts...)
-}
-
-// GetOrgCertificates returns the Org certificates
-func (c *retryRAClient) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest, opts ...grpc.CallOption) (*pb.CertificatesResponse, error) {
-	return c.ra.GetOrgCertificates(ctx, in)
+// RevokeCertificate returns the revoked certificate
+func (c *retryRAClient) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest, opts ...grpc.CallOption) (*pb.RevokedCertificateResponse, error) {
+	return c.ra.RevokeCertificate(ctx, in, opts...)
 }

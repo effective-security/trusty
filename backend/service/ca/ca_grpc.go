@@ -6,11 +6,9 @@ import (
 	"encoding/pem"
 	"fmt"
 	"strings"
-	"time"
 
 	v1 "github.com/ekspand/trusty/api/v1"
 	pb "github.com/ekspand/trusty/api/v1/pb"
-	"github.com/ekspand/trusty/internal/db/cadb"
 	"github.com/ekspand/trusty/internal/db/cadb/model"
 	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/go-phorce/dolly/metrics"
@@ -21,8 +19,7 @@ import (
 )
 
 var (
-	keyForCertIssued  = []string{"cert", "issued"}
-	keyForCertRevoked = []string{"cert", "revoked"}
+	keyForCertIssued = []string{"cert", "issued"}
 )
 
 // ProfileInfo returns the certificate profile info
@@ -115,7 +112,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 	case pb.EncodingFormat_DER:
 		b := bytes.NewBuffer([]byte{})
 		_ = pem.Encode(b, &pem.Block{Type: "CERTIFICATE REQUEST", Bytes: req.Request})
-		pemReq = string(b.Bytes())
+		pemReq = b.String()
 	default:
 		return nil, v1.NewError(codes.InvalidArgument, "unsupported request_format: %v", req.RequestFormat)
 	}
@@ -213,112 +210,4 @@ func (s *Service) PublishCrls(ctx context.Context, req *pb.PublishCrlsRequest) (
 		}
 	}
 	return res, nil
-}
-
-// GetCertificate returns Certificate
-func (s *Service) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error) {
-	var crt *model.Certificate
-	var err error
-	if in.Id != 0 {
-		crt, err = s.db.GetCertificate(ctx, in.Id)
-	} else {
-		crt, err = s.db.GetCertificateBySKID(ctx, in.Skid)
-	}
-	if err != nil {
-		logger.KV(xlog.ERROR,
-			"request", in,
-			"err", errors.Details(err),
-		)
-		return nil, v1.NewError(codes.Internal, "unable to find certificate")
-	}
-	res := &pb.CertificateResponse{
-		Certificate: crt.ToDTO(),
-	}
-	return res, nil
-}
-
-// GetOrgCertificates returns the Org certificates
-func (s *Service) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest) (*pb.CertificatesResponse, error) {
-	list, err := s.db.GetOrgCertificates(ctx, in.OrgId)
-	if err != nil {
-		logger.KV(xlog.ERROR,
-			"request", in,
-			"err", errors.Details(err),
-		)
-		return nil, v1.NewError(codes.Internal, "unable to get certificates")
-	}
-	res := &pb.CertificatesResponse{
-		List: list.ToDTO(),
-	}
-	return res, nil
-}
-
-// RevokeCertificate returns the revoked certificate
-func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error) {
-	var crt *model.Certificate
-	var err error
-	if in.Id != 0 {
-		crt, err = s.db.GetCertificate(ctx, in.Id)
-	} else {
-		crt, err = s.db.GetCertificateBySKID(ctx, in.Skid)
-	}
-	if err != nil {
-		logger.KV(xlog.ERROR,
-			"request", in,
-			"err", errors.Details(err),
-		)
-		return nil, v1.NewError(codes.Internal, "unable to find certificate")
-	}
-
-	revoked, err := s.db.RevokeCertificate(ctx, crt, time.Now().UTC(), int(in.Reason))
-	if err != nil {
-		logger.KV(xlog.ERROR,
-			"request", in,
-			"err", errors.Details(err),
-		)
-		return nil, v1.NewError(codes.Internal, "unable to revoke certificate")
-	}
-
-	res := &pb.RevokedCertificateResponse{
-		Revoked: revoked.ToDTO(),
-	}
-	return res, nil
-}
-
-// ListCertificates returns stream of Certificates
-func (s *Service) ListCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.CertificatesResponse, error) {
-	list, err := s.db.ListCertificates(ctx, in.Ikid, int(in.Limit), in.After)
-	if err != nil {
-		logger.KV(xlog.ERROR,
-			"request", in,
-			"err", errors.Details(err),
-		)
-		return nil, v1.NewError(codes.Internal, "unable to list certificates")
-	}
-	res := &pb.CertificatesResponse{
-		List: list.ToDTO(),
-	}
-	return res, nil
-}
-
-// ListRevokedCertificates returns stream of Revoked Certificates
-func (s *Service) ListRevokedCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.RevokedCertificatesResponse, error) {
-	list, err := s.db.ListRevokedCertificates(ctx, in.Ikid, int(in.Limit), in.After)
-	if err != nil {
-		logger.KV(xlog.ERROR,
-			"request", in,
-			"err", errors.Details(err),
-		)
-		return nil, v1.NewError(codes.Internal, "unable to list certificates")
-	}
-	res := &pb.RevokedCertificatesResponse{
-		List: list.ToDTO(),
-	}
-	return res, nil
-}
-
-// Db returns DB
-// Used in Unittests
-func (s *Service) Db() cadb.CaDb {
-	return s.db
 }
