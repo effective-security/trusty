@@ -1068,6 +1068,493 @@ func (x *CertProfile) GetAllowedFields() *CSRAllowedFields {
 	return nil
 }
 
+// CertProfileInfo is the response for an Profile Info API request
+type CertProfileInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Issuer  string       `protobuf:"bytes,1,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	Profile *CertProfile `protobuf:"bytes,3,opt,name=profile,proto3" json:"profile,omitempty"`
+}
+
+func (x *CertProfileInfo) Reset() {
+	*x = CertProfileInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_pkix_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CertProfileInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CertProfileInfo) ProtoMessage() {}
+
+func (x *CertProfileInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_pkix_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CertProfileInfo.ProtoReflect.Descriptor instead.
+func (*CertProfileInfo) Descriptor() ([]byte, []int) {
+	return file_pkix_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *CertProfileInfo) GetIssuer() string {
+	if x != nil {
+		return x.Issuer
+	}
+	return ""
+}
+
+func (x *CertProfileInfo) GetProfile() *CertProfile {
+	if x != nil {
+		return x.Profile
+	}
+	return nil
+}
+
+// CertificateBundle provides certificate and its issuers
+type CertificateBundle struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Certificate provides the certificate in PEM format
+	Certificate string `protobuf:"bytes,1,opt,name=certificate,proto3" json:"certificate,omitempty"`
+	// Intermediates provides the intermediate CA certificates bundle in PEM format
+	Intermediates string `protobuf:"bytes,2,opt,name=intermediates,proto3" json:"intermediates,omitempty"`
+	// Root provides the Root CA certifica in PEM format
+	Root string `protobuf:"bytes,3,opt,name=root,proto3" json:"root,omitempty"`
+}
+
+func (x *CertificateBundle) Reset() {
+	*x = CertificateBundle{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_pkix_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CertificateBundle) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CertificateBundle) ProtoMessage() {}
+
+func (x *CertificateBundle) ProtoReflect() protoreflect.Message {
+	mi := &file_pkix_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CertificateBundle.ProtoReflect.Descriptor instead.
+func (*CertificateBundle) Descriptor() ([]byte, []int) {
+	return file_pkix_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *CertificateBundle) GetCertificate() string {
+	if x != nil {
+		return x.Certificate
+	}
+	return ""
+}
+
+func (x *CertificateBundle) GetIntermediates() string {
+	if x != nil {
+		return x.Intermediates
+	}
+	return ""
+}
+
+func (x *CertificateBundle) GetRoot() string {
+	if x != nil {
+		return x.Root
+	}
+	return ""
+}
+
+// RootsResponse returns Root Certificates
+type RootsResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Roots []*RootCertificate `protobuf:"bytes,1,rep,name=roots,proto3" json:"roots,omitempty"`
+}
+
+func (x *RootsResponse) Reset() {
+	*x = RootsResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_pkix_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RootsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RootsResponse) ProtoMessage() {}
+
+func (x *RootsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkix_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RootsResponse.ProtoReflect.Descriptor instead.
+func (*RootsResponse) Descriptor() ([]byte, []int) {
+	return file_pkix_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *RootsResponse) GetRoots() []*RootCertificate {
+	if x != nil {
+		return x.Roots
+	}
+	return nil
+}
+
+// CertificateResponse returns Certificate
+type CertificateResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Certificate *Certificate `protobuf:"bytes,1,opt,name=certificate,proto3" json:"certificate,omitempty"`
+}
+
+func (x *CertificateResponse) Reset() {
+	*x = CertificateResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_pkix_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CertificateResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CertificateResponse) ProtoMessage() {}
+
+func (x *CertificateResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkix_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CertificateResponse.ProtoReflect.Descriptor instead.
+func (*CertificateResponse) Descriptor() ([]byte, []int) {
+	return file_pkix_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *CertificateResponse) GetCertificate() *Certificate {
+	if x != nil {
+		return x.Certificate
+	}
+	return nil
+}
+
+// CertificatesResponse returns Certificates list
+type CertificatesResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	List []*Certificate `protobuf:"bytes,1,rep,name=list,proto3" json:"list,omitempty"`
+}
+
+func (x *CertificatesResponse) Reset() {
+	*x = CertificatesResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_pkix_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CertificatesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CertificatesResponse) ProtoMessage() {}
+
+func (x *CertificatesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkix_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CertificatesResponse.ProtoReflect.Descriptor instead.
+func (*CertificatesResponse) Descriptor() ([]byte, []int) {
+	return file_pkix_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *CertificatesResponse) GetList() []*Certificate {
+	if x != nil {
+		return x.List
+	}
+	return nil
+}
+
+// RevokedCertificateResponse returns Revoked Certificate
+type RevokedCertificateResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Revoked *RevokedCertificate `protobuf:"bytes,1,opt,name=revoked,proto3" json:"revoked,omitempty"`
+}
+
+func (x *RevokedCertificateResponse) Reset() {
+	*x = RevokedCertificateResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_pkix_proto_msgTypes[14]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RevokedCertificateResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevokedCertificateResponse) ProtoMessage() {}
+
+func (x *RevokedCertificateResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkix_proto_msgTypes[14]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevokedCertificateResponse.ProtoReflect.Descriptor instead.
+func (*RevokedCertificateResponse) Descriptor() ([]byte, []int) {
+	return file_pkix_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *RevokedCertificateResponse) GetRevoked() *RevokedCertificate {
+	if x != nil {
+		return x.Revoked
+	}
+	return nil
+}
+
+// RevokedCertificatesResponse returns Revoked Certificates list
+type RevokedCertificatesResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	List []*RevokedCertificate `protobuf:"bytes,1,rep,name=list,proto3" json:"list,omitempty"`
+}
+
+func (x *RevokedCertificatesResponse) Reset() {
+	*x = RevokedCertificatesResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_pkix_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RevokedCertificatesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevokedCertificatesResponse) ProtoMessage() {}
+
+func (x *RevokedCertificatesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkix_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevokedCertificatesResponse.ProtoReflect.Descriptor instead.
+func (*RevokedCertificatesResponse) Descriptor() ([]byte, []int) {
+	return file_pkix_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *RevokedCertificatesResponse) GetList() []*RevokedCertificate {
+	if x != nil {
+		return x.List
+	}
+	return nil
+}
+
+// CrlsResponse returns published CRLs
+type CrlsResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Clrs []*Crl `protobuf:"bytes,1,rep,name=clrs,proto3" json:"clrs,omitempty"`
+}
+
+func (x *CrlsResponse) Reset() {
+	*x = CrlsResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_pkix_proto_msgTypes[16]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CrlsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CrlsResponse) ProtoMessage() {}
+
+func (x *CrlsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkix_proto_msgTypes[16]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CrlsResponse.ProtoReflect.Descriptor instead.
+func (*CrlsResponse) Descriptor() ([]byte, []int) {
+	return file_pkix_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *CrlsResponse) GetClrs() []*Crl {
+	if x != nil {
+		return x.Clrs
+	}
+	return nil
+}
+
+// IssuerInfo provides Issuer information
+type IssuerInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Certificate provides the certificate in PEM format
+	Certificate string `protobuf:"bytes,1,opt,name=certificate,proto3" json:"certificate,omitempty"`
+	// Intermediates provides the intermediate CA certificates bundle in PEM format
+	Intermediates string `protobuf:"bytes,2,opt,name=intermediates,proto3" json:"intermediates,omitempty"`
+	// Root provides the Root CA certificate in PEM format
+	Root string `protobuf:"bytes,3,opt,name=root,proto3" json:"root,omitempty"`
+	// Label specifies the Issuer's label
+	Label string `protobuf:"bytes,4,opt,name=label,proto3" json:"label,omitempty"`
+}
+
+func (x *IssuerInfo) Reset() {
+	*x = IssuerInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_pkix_proto_msgTypes[17]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *IssuerInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IssuerInfo) ProtoMessage() {}
+
+func (x *IssuerInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_pkix_proto_msgTypes[17]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IssuerInfo.ProtoReflect.Descriptor instead.
+func (*IssuerInfo) Descriptor() ([]byte, []int) {
+	return file_pkix_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *IssuerInfo) GetCertificate() string {
+	if x != nil {
+		return x.Certificate
+	}
+	return ""
+}
+
+func (x *IssuerInfo) GetIntermediates() string {
+	if x != nil {
+		return x.Intermediates
+	}
+	return ""
+}
+
+func (x *IssuerInfo) GetRoot() string {
+	if x != nil {
+		return x.Root
+	}
+	return ""
+}
+
+func (x *IssuerInfo) GetLabel() string {
+	if x != nil {
+		return x.Label
+	}
+	return ""
+}
+
 var File_pkix_proto protoreflect.FileDescriptor
 
 var file_pkix_proto_rawDesc = []byte{
@@ -1201,29 +1688,75 @@ var file_pkix_proto_rawDesc = []byte{
 	0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x64, 0x5f, 0x66, 0x69, 0x65, 0x6c, 0x64, 0x73, 0x18, 0x0c, 0x20,
 	0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x70, 0x62, 0x2e, 0x43, 0x53, 0x52, 0x41, 0x6c, 0x6c, 0x6f,
 	0x77, 0x65, 0x64, 0x46, 0x69, 0x65, 0x6c, 0x64, 0x73, 0x52, 0x0d, 0x61, 0x6c, 0x6c, 0x6f, 0x77,
-	0x65, 0x64, 0x46, 0x69, 0x65, 0x6c, 0x64, 0x73, 0x2a, 0x29, 0x0a, 0x05, 0x54, 0x72, 0x75, 0x73,
-	0x74, 0x12, 0x07, 0x0a, 0x03, 0x41, 0x6e, 0x79, 0x10, 0x00, 0x12, 0x0a, 0x0a, 0x06, 0x50, 0x75,
-	0x62, 0x6c, 0x69, 0x63, 0x10, 0x01, 0x12, 0x0b, 0x0a, 0x07, 0x50, 0x72, 0x69, 0x76, 0x61, 0x74,
-	0x65, 0x10, 0x02, 0x2a, 0x2d, 0x0a, 0x0e, 0x45, 0x6e, 0x63, 0x6f, 0x64, 0x69, 0x6e, 0x67, 0x46,
-	0x6f, 0x72, 0x6d, 0x61, 0x74, 0x12, 0x07, 0x0a, 0x03, 0x50, 0x45, 0x4d, 0x10, 0x00, 0x12, 0x07,
-	0x0a, 0x03, 0x44, 0x45, 0x52, 0x10, 0x01, 0x12, 0x09, 0x0a, 0x05, 0x50, 0x4b, 0x43, 0x53, 0x37,
-	0x10, 0x02, 0x2a, 0xdc, 0x01, 0x0a, 0x06, 0x52, 0x65, 0x61, 0x73, 0x6f, 0x6e, 0x12, 0x0f, 0x0a,
-	0x0b, 0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x00, 0x12, 0x12,
-	0x0a, 0x0e, 0x4b, 0x45, 0x59, 0x5f, 0x43, 0x4f, 0x4d, 0x50, 0x52, 0x4f, 0x4d, 0x49, 0x53, 0x45,
-	0x10, 0x01, 0x12, 0x11, 0x0a, 0x0d, 0x43, 0x41, 0x5f, 0x43, 0x4f, 0x4d, 0x50, 0x52, 0x4f, 0x4d,
-	0x49, 0x53, 0x45, 0x10, 0x02, 0x12, 0x17, 0x0a, 0x13, 0x41, 0x46, 0x46, 0x49, 0x4c, 0x49, 0x41,
-	0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x43, 0x48, 0x41, 0x4e, 0x47, 0x45, 0x44, 0x10, 0x03, 0x12, 0x0e,
-	0x0a, 0x0a, 0x53, 0x55, 0x50, 0x45, 0x52, 0x53, 0x45, 0x44, 0x45, 0x44, 0x10, 0x04, 0x12, 0x1a,
-	0x0a, 0x16, 0x43, 0x45, 0x53, 0x53, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x4f, 0x46, 0x5f, 0x4f,
-	0x50, 0x45, 0x52, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x10, 0x05, 0x12, 0x14, 0x0a, 0x10, 0x43, 0x45,
-	0x52, 0x54, 0x49, 0x46, 0x49, 0x43, 0x41, 0x54, 0x45, 0x5f, 0x48, 0x4f, 0x4c, 0x44, 0x10, 0x06,
-	0x12, 0x13, 0x0a, 0x0f, 0x52, 0x45, 0x4d, 0x4f, 0x56, 0x45, 0x5f, 0x46, 0x52, 0x4f, 0x4d, 0x5f,
-	0x43, 0x52, 0x4c, 0x10, 0x08, 0x12, 0x17, 0x0a, 0x13, 0x50, 0x52, 0x49, 0x56, 0x49, 0x4c, 0x45,
-	0x47, 0x45, 0x5f, 0x57, 0x49, 0x54, 0x48, 0x44, 0x52, 0x41, 0x57, 0x4e, 0x10, 0x09, 0x12, 0x11,
-	0x0a, 0x0d, 0x41, 0x41, 0x5f, 0x43, 0x4f, 0x4d, 0x50, 0x52, 0x4f, 0x4d, 0x49, 0x53, 0x45, 0x10,
-	0x0a, 0x42, 0x25, 0x5a, 0x23, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f,
-	0x65, 0x6b, 0x73, 0x70, 0x61, 0x6e, 0x64, 0x2f, 0x74, 0x72, 0x75, 0x73, 0x74, 0x79, 0x2f, 0x61,
-	0x70, 0x69, 0x2f, 0x76, 0x31, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x64, 0x46, 0x69, 0x65, 0x6c, 0x64, 0x73, 0x22, 0x54, 0x0a, 0x0f, 0x43, 0x65, 0x72, 0x74,
+	0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x16, 0x0a, 0x06, 0x69,
+	0x73, 0x73, 0x75, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x69, 0x73, 0x73,
+	0x75, 0x65, 0x72, 0x12, 0x29, 0x0a, 0x07, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x18, 0x03,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x0f, 0x2e, 0x70, 0x62, 0x2e, 0x43, 0x65, 0x72, 0x74, 0x50, 0x72,
+	0x6f, 0x66, 0x69, 0x6c, 0x65, 0x52, 0x07, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x22, 0x6f,
+	0x0a, 0x11, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x42, 0x75, 0x6e,
+	0x64, 0x6c, 0x65, 0x12, 0x20, 0x0a, 0x0b, 0x63, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61,
+	0x74, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x63, 0x65, 0x72, 0x74, 0x69, 0x66,
+	0x69, 0x63, 0x61, 0x74, 0x65, 0x12, 0x24, 0x0a, 0x0d, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6d, 0x65,
+	0x64, 0x69, 0x61, 0x74, 0x65, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x69, 0x6e,
+	0x74, 0x65, 0x72, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x65, 0x73, 0x12, 0x12, 0x0a, 0x04, 0x72,
+	0x6f, 0x6f, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x72, 0x6f, 0x6f, 0x74, 0x22,
+	0x3a, 0x0a, 0x0d, 0x52, 0x6f, 0x6f, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x12, 0x29, 0x0a, 0x05, 0x72, 0x6f, 0x6f, 0x74, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32,
+	0x13, 0x2e, 0x70, 0x62, 0x2e, 0x52, 0x6f, 0x6f, 0x74, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69,
+	0x63, 0x61, 0x74, 0x65, 0x52, 0x05, 0x72, 0x6f, 0x6f, 0x74, 0x73, 0x22, 0x48, 0x0a, 0x13, 0x43,
+	0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x12, 0x31, 0x0a, 0x0b, 0x63, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74,
+	0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0f, 0x2e, 0x70, 0x62, 0x2e, 0x43, 0x65, 0x72,
+	0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x52, 0x0b, 0x63, 0x65, 0x72, 0x74, 0x69, 0x66,
+	0x69, 0x63, 0x61, 0x74, 0x65, 0x22, 0x3b, 0x0a, 0x14, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69,
+	0x63, 0x61, 0x74, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x23, 0x0a,
+	0x04, 0x6c, 0x69, 0x73, 0x74, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0f, 0x2e, 0x70, 0x62,
+	0x2e, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x52, 0x04, 0x6c, 0x69,
+	0x73, 0x74, 0x22, 0x4e, 0x0a, 0x1a, 0x52, 0x65, 0x76, 0x6f, 0x6b, 0x65, 0x64, 0x43, 0x65, 0x72,
+	0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x12, 0x30, 0x0a, 0x07, 0x72, 0x65, 0x76, 0x6f, 0x6b, 0x65, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x16, 0x2e, 0x70, 0x62, 0x2e, 0x52, 0x65, 0x76, 0x6f, 0x6b, 0x65, 0x64, 0x43, 0x65,
+	0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x52, 0x07, 0x72, 0x65, 0x76, 0x6f, 0x6b,
+	0x65, 0x64, 0x22, 0x49, 0x0a, 0x1b, 0x52, 0x65, 0x76, 0x6f, 0x6b, 0x65, 0x64, 0x43, 0x65, 0x72,
+	0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x12, 0x2a, 0x0a, 0x04, 0x6c, 0x69, 0x73, 0x74, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32,
+	0x16, 0x2e, 0x70, 0x62, 0x2e, 0x52, 0x65, 0x76, 0x6f, 0x6b, 0x65, 0x64, 0x43, 0x65, 0x72, 0x74,
+	0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x52, 0x04, 0x6c, 0x69, 0x73, 0x74, 0x22, 0x2b, 0x0a,
+	0x0c, 0x43, 0x72, 0x6c, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x1b, 0x0a,
+	0x04, 0x63, 0x6c, 0x72, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x07, 0x2e, 0x70, 0x62,
+	0x2e, 0x43, 0x72, 0x6c, 0x52, 0x04, 0x63, 0x6c, 0x72, 0x73, 0x22, 0x7e, 0x0a, 0x0a, 0x49, 0x73,
+	0x73, 0x75, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x20, 0x0a, 0x0b, 0x63, 0x65, 0x72, 0x74,
+	0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x63,
+	0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x12, 0x24, 0x0a, 0x0d, 0x69, 0x6e,
+	0x74, 0x65, 0x72, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x65, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x0d, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x74, 0x65, 0x73,
+	0x12, 0x12, 0x0a, 0x04, 0x72, 0x6f, 0x6f, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04,
+	0x72, 0x6f, 0x6f, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x61, 0x62, 0x65, 0x6c, 0x18, 0x04, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x05, 0x6c, 0x61, 0x62, 0x65, 0x6c, 0x2a, 0x29, 0x0a, 0x05, 0x54, 0x72,
+	0x75, 0x73, 0x74, 0x12, 0x07, 0x0a, 0x03, 0x41, 0x6e, 0x79, 0x10, 0x00, 0x12, 0x0a, 0x0a, 0x06,
+	0x50, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x10, 0x01, 0x12, 0x0b, 0x0a, 0x07, 0x50, 0x72, 0x69, 0x76,
+	0x61, 0x74, 0x65, 0x10, 0x02, 0x2a, 0x2d, 0x0a, 0x0e, 0x45, 0x6e, 0x63, 0x6f, 0x64, 0x69, 0x6e,
+	0x67, 0x46, 0x6f, 0x72, 0x6d, 0x61, 0x74, 0x12, 0x07, 0x0a, 0x03, 0x50, 0x45, 0x4d, 0x10, 0x00,
+	0x12, 0x07, 0x0a, 0x03, 0x44, 0x45, 0x52, 0x10, 0x01, 0x12, 0x09, 0x0a, 0x05, 0x50, 0x4b, 0x43,
+	0x53, 0x37, 0x10, 0x02, 0x2a, 0xdc, 0x01, 0x0a, 0x06, 0x52, 0x65, 0x61, 0x73, 0x6f, 0x6e, 0x12,
+	0x0f, 0x0a, 0x0b, 0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x00,
+	0x12, 0x12, 0x0a, 0x0e, 0x4b, 0x45, 0x59, 0x5f, 0x43, 0x4f, 0x4d, 0x50, 0x52, 0x4f, 0x4d, 0x49,
+	0x53, 0x45, 0x10, 0x01, 0x12, 0x11, 0x0a, 0x0d, 0x43, 0x41, 0x5f, 0x43, 0x4f, 0x4d, 0x50, 0x52,
+	0x4f, 0x4d, 0x49, 0x53, 0x45, 0x10, 0x02, 0x12, 0x17, 0x0a, 0x13, 0x41, 0x46, 0x46, 0x49, 0x4c,
+	0x49, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x43, 0x48, 0x41, 0x4e, 0x47, 0x45, 0x44, 0x10, 0x03,
+	0x12, 0x0e, 0x0a, 0x0a, 0x53, 0x55, 0x50, 0x45, 0x52, 0x53, 0x45, 0x44, 0x45, 0x44, 0x10, 0x04,
+	0x12, 0x1a, 0x0a, 0x16, 0x43, 0x45, 0x53, 0x53, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x4f, 0x46,
+	0x5f, 0x4f, 0x50, 0x45, 0x52, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x10, 0x05, 0x12, 0x14, 0x0a, 0x10,
+	0x43, 0x45, 0x52, 0x54, 0x49, 0x46, 0x49, 0x43, 0x41, 0x54, 0x45, 0x5f, 0x48, 0x4f, 0x4c, 0x44,
+	0x10, 0x06, 0x12, 0x13, 0x0a, 0x0f, 0x52, 0x45, 0x4d, 0x4f, 0x56, 0x45, 0x5f, 0x46, 0x52, 0x4f,
+	0x4d, 0x5f, 0x43, 0x52, 0x4c, 0x10, 0x08, 0x12, 0x17, 0x0a, 0x13, 0x50, 0x52, 0x49, 0x56, 0x49,
+	0x4c, 0x45, 0x47, 0x45, 0x5f, 0x57, 0x49, 0x54, 0x48, 0x44, 0x52, 0x41, 0x57, 0x4e, 0x10, 0x09,
+	0x12, 0x11, 0x0a, 0x0d, 0x41, 0x41, 0x5f, 0x43, 0x4f, 0x4d, 0x50, 0x52, 0x4f, 0x4d, 0x49, 0x53,
+	0x45, 0x10, 0x0a, 0x42, 0x25, 0x5a, 0x23, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
+	0x6d, 0x2f, 0x65, 0x6b, 0x73, 0x70, 0x61, 0x6e, 0x64, 0x2f, 0x74, 0x72, 0x75, 0x73, 0x74, 0x79,
+	0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x31, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x33,
 }
 
 var (
@@ -1239,41 +1772,57 @@ func file_pkix_proto_rawDescGZIP() []byte {
 }
 
 var file_pkix_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_pkix_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_pkix_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_pkix_proto_goTypes = []interface{}{
-	(Trust)(0),                  // 0: pb.Trust
-	(EncodingFormat)(0),         // 1: pb.EncodingFormat
-	(Reason)(0),                 // 2: pb.Reason
-	(*RootCertificate)(nil),     // 3: pb.RootCertificate
-	(*Certificate)(nil),         // 4: pb.Certificate
-	(*RevokedCertificate)(nil),  // 5: pb.RevokedCertificate
-	(*Crl)(nil),                 // 6: pb.Crl
-	(*X509Name)(nil),            // 7: pb.X509Name
-	(*X509Subject)(nil),         // 8: pb.X509Subject
-	(*CAConstraint)(nil),        // 9: pb.CAConstraint
-	(*CSRAllowedFields)(nil),    // 10: pb.CSRAllowedFields
-	(*CertProfile)(nil),         // 11: pb.CertProfile
-	(*timestamp.Timestamp)(nil), // 12: google.protobuf.Timestamp
+	(Trust)(0),                          // 0: pb.Trust
+	(EncodingFormat)(0),                 // 1: pb.EncodingFormat
+	(Reason)(0),                         // 2: pb.Reason
+	(*RootCertificate)(nil),             // 3: pb.RootCertificate
+	(*Certificate)(nil),                 // 4: pb.Certificate
+	(*RevokedCertificate)(nil),          // 5: pb.RevokedCertificate
+	(*Crl)(nil),                         // 6: pb.Crl
+	(*X509Name)(nil),                    // 7: pb.X509Name
+	(*X509Subject)(nil),                 // 8: pb.X509Subject
+	(*CAConstraint)(nil),                // 9: pb.CAConstraint
+	(*CSRAllowedFields)(nil),            // 10: pb.CSRAllowedFields
+	(*CertProfile)(nil),                 // 11: pb.CertProfile
+	(*CertProfileInfo)(nil),             // 12: pb.CertProfileInfo
+	(*CertificateBundle)(nil),           // 13: pb.CertificateBundle
+	(*RootsResponse)(nil),               // 14: pb.RootsResponse
+	(*CertificateResponse)(nil),         // 15: pb.CertificateResponse
+	(*CertificatesResponse)(nil),        // 16: pb.CertificatesResponse
+	(*RevokedCertificateResponse)(nil),  // 17: pb.RevokedCertificateResponse
+	(*RevokedCertificatesResponse)(nil), // 18: pb.RevokedCertificatesResponse
+	(*CrlsResponse)(nil),                // 19: pb.CrlsResponse
+	(*IssuerInfo)(nil),                  // 20: pb.IssuerInfo
+	(*timestamp.Timestamp)(nil),         // 21: google.protobuf.Timestamp
 }
 var file_pkix_proto_depIdxs = []int32{
-	12, // 0: pb.RootCertificate.not_before:type_name -> google.protobuf.Timestamp
-	12, // 1: pb.RootCertificate.not_after:type_name -> google.protobuf.Timestamp
+	21, // 0: pb.RootCertificate.not_before:type_name -> google.protobuf.Timestamp
+	21, // 1: pb.RootCertificate.not_after:type_name -> google.protobuf.Timestamp
 	0,  // 2: pb.RootCertificate.trust:type_name -> pb.Trust
-	12, // 3: pb.Certificate.not_before:type_name -> google.protobuf.Timestamp
-	12, // 4: pb.Certificate.not_after:type_name -> google.protobuf.Timestamp
+	21, // 3: pb.Certificate.not_before:type_name -> google.protobuf.Timestamp
+	21, // 4: pb.Certificate.not_after:type_name -> google.protobuf.Timestamp
 	4,  // 5: pb.RevokedCertificate.certificate:type_name -> pb.Certificate
-	12, // 6: pb.RevokedCertificate.revoked_at:type_name -> google.protobuf.Timestamp
+	21, // 6: pb.RevokedCertificate.revoked_at:type_name -> google.protobuf.Timestamp
 	2,  // 7: pb.RevokedCertificate.reason:type_name -> pb.Reason
-	12, // 8: pb.Crl.this_update:type_name -> google.protobuf.Timestamp
-	12, // 9: pb.Crl.next_update:type_name -> google.protobuf.Timestamp
+	21, // 8: pb.Crl.this_update:type_name -> google.protobuf.Timestamp
+	21, // 9: pb.Crl.next_update:type_name -> google.protobuf.Timestamp
 	7,  // 10: pb.X509Subject.names:type_name -> pb.X509Name
 	9,  // 11: pb.CertProfile.ca_constraint:type_name -> pb.CAConstraint
 	10, // 12: pb.CertProfile.allowed_fields:type_name -> pb.CSRAllowedFields
-	13, // [13:13] is the sub-list for method output_type
-	13, // [13:13] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	11, // 13: pb.CertProfileInfo.profile:type_name -> pb.CertProfile
+	3,  // 14: pb.RootsResponse.roots:type_name -> pb.RootCertificate
+	4,  // 15: pb.CertificateResponse.certificate:type_name -> pb.Certificate
+	4,  // 16: pb.CertificatesResponse.list:type_name -> pb.Certificate
+	5,  // 17: pb.RevokedCertificateResponse.revoked:type_name -> pb.RevokedCertificate
+	5,  // 18: pb.RevokedCertificatesResponse.list:type_name -> pb.RevokedCertificate
+	6,  // 19: pb.CrlsResponse.clrs:type_name -> pb.Crl
+	20, // [20:20] is the sub-list for method output_type
+	20, // [20:20] is the sub-list for method input_type
+	20, // [20:20] is the sub-list for extension type_name
+	20, // [20:20] is the sub-list for extension extendee
+	0,  // [0:20] is the sub-list for field type_name
 }
 
 func init() { file_pkix_proto_init() }
@@ -1390,6 +1939,114 @@ func file_pkix_proto_init() {
 				return nil
 			}
 		}
+		file_pkix_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CertProfileInfo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_pkix_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CertificateBundle); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_pkix_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RootsResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_pkix_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CertificateResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_pkix_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CertificatesResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_pkix_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RevokedCertificateResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_pkix_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RevokedCertificatesResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_pkix_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CrlsResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_pkix_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*IssuerInfo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -1397,7 +2054,7 @@ func file_pkix_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_pkix_proto_rawDesc,
 			NumEnums:      3,
-			NumMessages:   9,
+			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

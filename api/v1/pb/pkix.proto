@@ -197,3 +197,61 @@ message CertProfile {
     // TODO
 	// Policies []csr.CertificatePolicy `json:"policies"`
 }
+
+// CertProfileInfo is the response for an Profile Info API request
+message CertProfileInfo {
+    string issuer = 1;
+    CertProfile profile = 3;
+}
+
+// CertificateBundle provides certificate and its issuers
+message CertificateBundle {
+    // Certificate provides the certificate in PEM format
+    string certificate = 1;
+    // Intermediates provides the intermediate CA certificates bundle in PEM format
+    string intermediates = 2;
+    // Root provides the Root CA certifica in PEM format
+    string root = 3;
+}
+
+// RootsResponse returns Root Certificates
+message RootsResponse {
+    repeated RootCertificate roots = 1;
+}
+
+// CertificateResponse returns Certificate
+message CertificateResponse {
+    Certificate certificate = 1;
+}
+
+// CertificatesResponse returns Certificates list
+message CertificatesResponse {
+    repeated Certificate list = 1;
+}
+
+// RevokedCertificateResponse returns Revoked Certificate
+message RevokedCertificateResponse {
+    RevokedCertificate revoked = 1;
+}
+
+// RevokedCertificatesResponse returns Revoked Certificates list
+message RevokedCertificatesResponse {
+    repeated RevokedCertificate list = 1;
+}
+
+// CrlsResponse returns published CRLs
+message CrlsResponse {
+    repeated Crl clrs = 1;
+}
+
+// IssuerInfo provides Issuer information
+message IssuerInfo {
+    // Certificate provides the certificate in PEM format
+    string certificate = 1;
+    // Intermediates provides the intermediate CA certificates bundle in PEM format
+    string intermediates = 2;
+    // Root provides the Root CA certificate in PEM format
+    string root = 3;
+    // Label specifies the Issuer's label
+    string label = 4;
+}

@@ -3,7 +3,6 @@ package pb;
 
 option go_package = "github.com/ekspand/trusty/api/v1/pb";
 
-//import "rpc.proto";
 import "pkix.proto";
 import "google/protobuf/empty.proto";
 // import "google/protobuf/timestamp.proto";
@@ -26,62 +25,14 @@ service CAService {
     rpc SignCertificate(SignCertificateRequest) returns (CertificateResponse) {
     }
 
-    // GetCertificate returns the certificate
-    rpc GetCertificate(GetCertificateRequest) returns (CertificateResponse) {
-    }
-
-    // GetOrgCertificates returns the Org certificates
-    rpc GetOrgCertificates(GetOrgCertificatesRequest) returns (CertificatesResponse) {
-    }
-
-    // RevokeCertificate returns the revoked certificate
-    rpc RevokeCertificate(RevokeCertificateRequest) returns (RevokedCertificateResponse) {
-    }
-
     // PublishCrls returns published CRLs
     rpc PublishCrls(PublishCrlsRequest) returns (CrlsResponse) {
-    }
-
-    // ListCertificates returns stream of Certificates
-    rpc ListCertificates(ListByIssuerRequest) returns (CertificatesResponse) {
-    }
-
-    // ListRevokedCertificates returns stream of Revoked Certificates
-    rpc ListRevokedCertificates(ListByIssuerRequest) returns (RevokedCertificatesResponse) {
     }
 }
 
 message CertProfileInfoRequest {
     string label = 1;
     string profile = 2;
-}
-
-// CertProfileInfo is the response for an Profile Info API request
-message CertProfileInfo {
-    string issuer = 1;
-    CertProfile profile = 3;
-}
-
-// CertificateBundle provides certificate and its issuers
-message CertificateBundle {
-    // Certificate provides the certificate in PEM format
-    string certificate = 1;
-    // Intermediates provides the intermediate CA certificates bundle in PEM format
-    string intermediates = 2;
-    // Root provides the Root CA certifica in PEM format
-    string root = 3;
-}
-
-// IssuerInfo provides Issuer information
-message IssuerInfo {
-    // Certificate provides the certificate in PEM format
-    string certificate = 1;
-    // Intermediates provides the intermediate CA certificates bundle in PEM format
-    string intermediates = 2;
-    // Root provides the Root CA certificate in PEM format
-    string root = 3;
-    // Label specifies the Issuer's label
-    string label = 4;
 }
 
 // IssuersInfoResponse provides response for Issuers Info request
@@ -109,68 +60,8 @@ message SignCertificateRequest {
     uint64 org_id = 8;
 }
 
-// GetCertificateRequest specifies a certificate request by ID or issuer key identifier
-message GetCertificateRequest {
-    // Id specifies certificate ID.
-    // If it's not set, then SKID must be provided
-    uint64 id = 1;
-    // SKID specifies Subject Key ID to search
-    string skid = 2;
-}
-
-// GetOrgsCertificatesRequest specifies a certificates request by Org ID
-message GetOrgCertificatesRequest {
-    // OrgId specifies the Org ID.
-    uint64 org_id = 1;
-}
-
-message ListByIssuerRequest {
-    // Limit specifies the limit to return, or ALL if 0
-    int64 limit = 1; 
-    // After specifies certificate ID to start after
-    uint64 after = 2;
-    // IKID specifies Issuer Key ID to search
-    string ikid = 3;
-}
-
-// RevokeCertificateRequest specifies revocation request
-message RevokeCertificateRequest {
-    // Id specifies certificate ID.
-    // If it's not set, then SKID must be provided
-    uint64 id = 1;
-    // SKID specifies Subject Key ID to search
-    string skid = 2;
-    // Reason for revocation
-    Reason reason = 3;
-}
-
-// CertificateResponse returns Certificate
-message CertificateResponse {
-    Certificate certificate = 1;
-}
-
-// CertificatesResponse returns Certificates list
-message CertificatesResponse {
-    repeated Certificate list = 1;
-}
-
-// RevokedCertificateResponse returns Revoked Certificate
-message RevokedCertificateResponse {
-    RevokedCertificate revoked = 1;
-}
-
-// RevokedCertificatesResponse returns Revoked Certificates list
-message RevokedCertificatesResponse {
-    repeated RevokedCertificate list = 1;
-}
-
 // PublishCrlsRequest allows to publish CRLs on demand
 message PublishCrlsRequest {
     // IKID specifies Issuer, or empty to publish for all issuers
     string ikid = 1;
-}
-
-// CrlsResponse returns published CRLs
-message CrlsResponse {
-    repeated Crl clrs = 1;
 }

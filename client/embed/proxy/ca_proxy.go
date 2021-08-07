@@ -32,32 +32,7 @@ func (s *caSrv2C) Issuers(ctx context.Context, in *empty.Empty, opts ...grpc.Cal
 	return s.srv.Issuers(ctx, in)
 }
 
-// GetCertificate returns the certificate
-func (s *caSrv2C) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
-	return s.srv.GetCertificate(ctx, in)
-}
-
-// GetOrgCertificates returns the Org certificates
-func (s *caSrv2C) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest, opts ...grpc.CallOption) (*pb.CertificatesResponse, error) {
-	return s.srv.GetOrgCertificates(ctx, in)
-}
-
-// RevokeCertificate returns the revoked certificate
-func (s *caSrv2C) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest, opts ...grpc.CallOption) (*pb.RevokedCertificateResponse, error) {
-	return s.srv.RevokeCertificate(ctx, in)
-}
-
 // PublishCrls returns published CRLs
 func (s *caSrv2C) PublishCrls(ctx context.Context, in *pb.PublishCrlsRequest, opts ...grpc.CallOption) (*pb.CrlsResponse, error) {
 	return s.srv.PublishCrls(ctx, in)
-}
-
-// ListCertificates returns stream of Certificates
-func (s *caSrv2C) ListCertificates(ctx context.Context, req *pb.ListByIssuerRequest, opts ...grpc.CallOption) (*pb.CertificatesResponse, error) {
-	return s.srv.ListCertificates(ctx, req)
-}
-
-// ListRevokedCertificates returns stream of Revoked Certificates
-func (s *caSrv2C) ListRevokedCertificates(ctx context.Context, req *pb.ListByIssuerRequest, opts ...grpc.CallOption) (*pb.RevokedCertificatesResponse, error) {
-	return s.srv.ListRevokedCertificates(ctx, req)
 }

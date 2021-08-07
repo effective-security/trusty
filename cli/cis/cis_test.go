@@ -40,7 +40,7 @@ func (s *testSuite) TestRoots() {
 	err := loadJSON("testdata/roots.json", expectedResponse)
 	s.Require().NoError(err)
 
-	s.MockCertInfo = &mockpb.MockCIServer{
+	s.MockCIS = &mockpb.MockCIServer{
 		Err:   nil,
 		Resps: []proto.Message{expectedResponse},
 	}
@@ -93,4 +93,62 @@ func loadJSON(filename string, v interface{}) error {
 		return errors.Trace(err)
 	}
 	return nil
+}
+
+func (s *testSuite) TestListCerts() {
+	expectedResponse := new(pb.CertificatesResponse)
+	err := loadJSON("testdata/certs.json", expectedResponse)
+	s.Require().NoError(err)
+
+	s.MockCIS = &mockpb.MockCIServer{
+		Err:   nil,
+		Resps: []proto.Message{expectedResponse},
+	}
+	srv := s.SetupMockGRPC()
+	defer srv.Stop()
+
+	limit := 3
+	after := "80126629526896740"
+	ikid := "401456c5ce07f25ba068e2d191921e807ad486e4"
+	err = s.Run(cis.ListCerts, &cis.ListCertsFlags{
+		Ikid:  &ikid,
+		Limit: &limit,
+		After: &after,
+	})
+	s.Require().NoError(err)
+
+	if s.Cli.IsJSON() {
+		s.HasText("list\": [")
+	} else {
+		s.HasText("        ID         | ORGID |")
+	}
+}
+
+func (s *testSuite) TestRevokedListCerts() {
+	expectedResponse := new(pb.RevokedCertificatesResponse)
+	err := loadJSON("testdata/revoked.json", expectedResponse)
+	s.Require().NoError(err)
+
+	s.MockCIS = &mockpb.MockCIServer{
+		Err:   nil,
+		Resps: []proto.Message{expectedResponse},
+	}
+	srv := s.SetupMockGRPC()
+	defer srv.Stop()
+
+	limit := 3
+	after := "80126629526896740"
+	ikid := "401456c5ce07f25ba068e2d191921e807ad486e4"
+	err = s.Run(cis.ListRevokedCerts, &cis.ListCertsFlags{
+		Ikid:  &ikid,
+		Limit: &limit,
+		After: &after,
+	})
+	s.Require().NoError(err)
+
+	if s.Cli.IsJSON() {
+		s.HasText("list\": [")
+	} else {
+		s.HasText("REVOKED", "REASON")
+	}
 }

@@ -14,7 +14,7 @@ import (
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/tests/mockpb"
 	"github.com/ekspand/trusty/tests/testutils"
-	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -36,6 +36,7 @@ var serviceFactories = map[string]gserver.ServiceFactory{
 }
 
 func TestMain(m *testing.M) {
+	xlog.GetFormatter().WithCaller(true)
 	var err error
 	//	xlog.SetPackageLogLevel("github.com/go-phorce/dolly/xhttp", "retriable", xlog.DEBUG)
 
@@ -66,13 +67,13 @@ func TestMain(m *testing.M) {
 		panic(errors.Trace(err))
 	}
 
-	trustyServer, err = gserver.Start("ra", httpcfg, container, serviceFactories)
+	trustyServer, err = gserver.Start(config.RAServerName, httpcfg, container, serviceFactories)
 	if err != nil || trustyServer == nil {
 		panic(errors.Trace(err))
 	}
 	raClient = embed.NewRAClient(trustyServer)
 
-	err = trustyServer.Service("ra").(*ra.Service).OnStarted()
+	err = trustyServer.Service(config.RAServerName).(*ra.Service).OnStarted()
 	if err != nil {
 		panic(errors.Trace(err))
 	}
@@ -86,20 +87,24 @@ func TestMain(m *testing.M) {
 	os.Exit(rc)
 }
 
-func TestRoots(t *testing.T) {
-	res, err := raClient.GetRoots(context.Background(), &empty.Empty{})
-	require.NoError(t, err)
-	assert.NotEmpty(t, res.Roots)
-}
-
-func TestGetCertificate(t *testing.T) {
-	_, err := raClient.GetCertificate(context.Background(), &pb.GetCertificateRequest{Id: 123})
+func TestRegisterRoot(t *testing.T) {
+	_, err := raClient.RegisterRoot(context.Background(), &pb.RegisterRootRequest{})
 	require.Error(t, err)
-	assert.Equal(t, "unable to get certificate", err.Error())
+	assert.Equal(t, "not implemented", err.Error())
 }
 
-func TestGetOrgCertificates(t *testing.T) {
-	res, err := raClient.GetOrgCertificates(context.Background(), &pb.GetOrgCertificatesRequest{OrgId: 123})
-	require.NoError(t, err)
-	assert.Empty(t, res.List)
+func TestRegisterCertificate(t *testing.T) {
+	_, err := raClient.RegisterCertificate(context.Background(), &pb.RegisterCertificateRequest{})
+	require.Error(t, err)
+	assert.Equal(t, "not implemented", err.Error())
+}
+
+func TestRevokeCertificate(t *testing.T) {
+	_, err := raClient.RevokeCertificate(context.Background(), &pb.RevokeCertificateRequest{Id: 123})
+	require.Error(t, err)
+	assert.Equal(t, "unable to find certificate", err.Error())
+
+	_, err = raClient.RevokeCertificate(context.Background(), &pb.RevokeCertificateRequest{Skid: "123123"})
+	require.Error(t, err)
+	assert.Equal(t, "unable to find certificate", err.Error())
 }

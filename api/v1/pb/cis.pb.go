@@ -9,6 +9,7 @@ package pb
 import (
 	context "context"
 	reflect "reflect"
+	sync "sync"
 
 	_ "github.com/gogo/googleapis/google/api"
 	empty "github.com/golang/protobuf/ptypes/empty"
@@ -26,16 +27,202 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// GetCertificateRequest specifies a certificate request by ID or issuer key identifier
+type GetCertificateRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Id specifies certificate ID.
+	// If it's not set, then SKID must be provided
+	Id uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// SKID specifies Subject Key ID to search
+	Skid string `protobuf:"bytes,2,opt,name=skid,proto3" json:"skid,omitempty"`
+}
+
+func (x *GetCertificateRequest) Reset() {
+	*x = GetCertificateRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_cis_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetCertificateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCertificateRequest) ProtoMessage() {}
+
+func (x *GetCertificateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_cis_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCertificateRequest.ProtoReflect.Descriptor instead.
+func (*GetCertificateRequest) Descriptor() ([]byte, []int) {
+	return file_cis_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *GetCertificateRequest) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *GetCertificateRequest) GetSkid() string {
+	if x != nil {
+		return x.Skid
+	}
+	return ""
+}
+
+// GetOrgsCertificatesRequest specifies a certificates request by Org ID
+type GetOrgCertificatesRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// OrgId specifies the Org ID.
+	OrgId uint64 `protobuf:"varint,1,opt,name=org_id,json=orgId,proto3" json:"org_id,omitempty"`
+}
+
+func (x *GetOrgCertificatesRequest) Reset() {
+	*x = GetOrgCertificatesRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_cis_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetOrgCertificatesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetOrgCertificatesRequest) ProtoMessage() {}
+
+func (x *GetOrgCertificatesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_cis_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetOrgCertificatesRequest.ProtoReflect.Descriptor instead.
+func (*GetOrgCertificatesRequest) Descriptor() ([]byte, []int) {
+	return file_cis_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *GetOrgCertificatesRequest) GetOrgId() uint64 {
+	if x != nil {
+		return x.OrgId
+	}
+	return 0
+}
+
+type ListByIssuerRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Limit specifies the limit to return, or ALL if 0
+	Limit int64 `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	// After specifies certificate ID to start after
+	After uint64 `protobuf:"varint,2,opt,name=after,proto3" json:"after,omitempty"`
+	// IKID specifies Issuer Key ID to search
+	Ikid string `protobuf:"bytes,3,opt,name=ikid,proto3" json:"ikid,omitempty"`
+}
+
+func (x *ListByIssuerRequest) Reset() {
+	*x = ListByIssuerRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_cis_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListByIssuerRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListByIssuerRequest) ProtoMessage() {}
+
+func (x *ListByIssuerRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_cis_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListByIssuerRequest.ProtoReflect.Descriptor instead.
+func (*ListByIssuerRequest) Descriptor() ([]byte, []int) {
+	return file_cis_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ListByIssuerRequest) GetLimit() int64 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *ListByIssuerRequest) GetAfter() uint64 {
+	if x != nil {
+		return x.After
+	}
+	return 0
+}
+
+func (x *ListByIssuerRequest) GetIkid() string {
+	if x != nil {
+		return x.Ikid
+	}
+	return ""
+}
+
 var File_cis_proto protoreflect.FileDescriptor
 
 var file_cis_proto_rawDesc = []byte{
 	0x0a, 0x09, 0x63, 0x69, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x02, 0x70, 0x62, 0x1a,
-	0x08, 0x72, 0x61, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x08, 0x63, 0x61, 0x2e, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x1a, 0x1b, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x62, 0x75, 0x66, 0x2f, 0x65, 0x6d, 0x70, 0x74, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x1a, 0x1c, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x61, 0x6e, 0x6e,
-	0x6f, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x32, 0xbb,
-	0x01, 0x0a, 0x09, 0x43, 0x49, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x4c, 0x0a, 0x08,
+	0x0a, 0x70, 0x6b, 0x69, 0x78, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x1b, 0x67, 0x6f, 0x6f,
+	0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x65, 0x6d, 0x70,
+	0x74, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x1c, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65,
+	0x2f, 0x61, 0x70, 0x69, 0x2f, 0x61, 0x6e, 0x6e, 0x6f, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x3b, 0x0a, 0x15, 0x47, 0x65, 0x74, 0x43, 0x65, 0x72,
+	0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x02, 0x69, 0x64, 0x12,
+	0x12, 0x0a, 0x04, 0x73, 0x6b, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x73,
+	0x6b, 0x69, 0x64, 0x22, 0x32, 0x0a, 0x19, 0x47, 0x65, 0x74, 0x4f, 0x72, 0x67, 0x43, 0x65, 0x72,
+	0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x12, 0x15, 0x0a, 0x06, 0x6f, 0x72, 0x67, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04,
+	0x52, 0x05, 0x6f, 0x72, 0x67, 0x49, 0x64, 0x22, 0x55, 0x0a, 0x13, 0x4c, 0x69, 0x73, 0x74, 0x42,
+	0x79, 0x49, 0x73, 0x73, 0x75, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x14,
+	0x0a, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x6c,
+	0x69, 0x6d, 0x69, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x61, 0x66, 0x74, 0x65, 0x72, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x04, 0x52, 0x05, 0x61, 0x66, 0x74, 0x65, 0x72, 0x12, 0x12, 0x0a, 0x04, 0x69, 0x6b,
+	0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x69, 0x6b, 0x69, 0x64, 0x32, 0xc1,
+	0x03, 0x0a, 0x09, 0x43, 0x49, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x4c, 0x0a, 0x08,
 	0x47, 0x65, 0x74, 0x52, 0x6f, 0x6f, 0x74, 0x73, 0x12, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
 	0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79,
 	0x1a, 0x11, 0x2e, 0x70, 0x62, 0x2e, 0x52, 0x6f, 0x6f, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f,
@@ -46,25 +233,65 @@ var file_cis_proto_rawDesc = []byte{
 	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x17, 0x2e, 0x70, 0x62, 0x2e, 0x43, 0x65, 0x72,
 	0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
 	0x22, 0x1a, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x14, 0x12, 0x12, 0x2f, 0x76, 0x31, 0x2f, 0x63, 0x69,
-	0x73, 0x2f, 0x63, 0x65, 0x72, 0x74, 0x73, 0x2f, 0x7b, 0x69, 0x64, 0x7d, 0x42, 0x25, 0x5a, 0x23,
-	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x65, 0x6b, 0x73, 0x70, 0x61,
-	0x6e, 0x64, 0x2f, 0x74, 0x72, 0x75, 0x73, 0x74, 0x79, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x76, 0x31,
-	0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x73, 0x2f, 0x63, 0x65, 0x72, 0x74, 0x73, 0x2f, 0x7b, 0x69, 0x64, 0x7d, 0x12, 0x64, 0x0a, 0x12,
+	0x47, 0x65, 0x74, 0x4f, 0x72, 0x67, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74,
+	0x65, 0x73, 0x12, 0x1d, 0x2e, 0x70, 0x62, 0x2e, 0x47, 0x65, 0x74, 0x4f, 0x72, 0x67, 0x43, 0x65,
+	0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x18, 0x2e, 0x70, 0x62, 0x2e, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61,
+	0x74, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x15, 0x82, 0xd3, 0xe4,
+	0x93, 0x02, 0x0f, 0x12, 0x0d, 0x2f, 0x76, 0x31, 0x2f, 0x63, 0x69, 0x73, 0x2f, 0x63, 0x65, 0x72,
+	0x74, 0x73, 0x12, 0x47, 0x0a, 0x10, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66,
+	0x69, 0x63, 0x61, 0x74, 0x65, 0x73, 0x12, 0x17, 0x2e, 0x70, 0x62, 0x2e, 0x4c, 0x69, 0x73, 0x74,
+	0x42, 0x79, 0x49, 0x73, 0x73, 0x75, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
+	0x18, 0x2e, 0x70, 0x62, 0x2e, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65,
+	0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x55, 0x0a, 0x17, 0x4c,
+	0x69, 0x73, 0x74, 0x52, 0x65, 0x76, 0x6f, 0x6b, 0x65, 0x64, 0x43, 0x65, 0x72, 0x74, 0x69, 0x66,
+	0x69, 0x63, 0x61, 0x74, 0x65, 0x73, 0x12, 0x17, 0x2e, 0x70, 0x62, 0x2e, 0x4c, 0x69, 0x73, 0x74,
+	0x42, 0x79, 0x49, 0x73, 0x73, 0x75, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
+	0x1f, 0x2e, 0x70, 0x62, 0x2e, 0x52, 0x65, 0x76, 0x6f, 0x6b, 0x65, 0x64, 0x43, 0x65, 0x72, 0x74,
+	0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x22, 0x00, 0x42, 0x25, 0x5a, 0x23, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d,
+	0x2f, 0x65, 0x6b, 0x73, 0x70, 0x61, 0x6e, 0x64, 0x2f, 0x74, 0x72, 0x75, 0x73, 0x74, 0x79, 0x2f,
+	0x61, 0x70, 0x69, 0x2f, 0x76, 0x31, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x33,
 }
 
+var (
+	file_cis_proto_rawDescOnce sync.Once
+	file_cis_proto_rawDescData = file_cis_proto_rawDesc
+)
+
+func file_cis_proto_rawDescGZIP() []byte {
+	file_cis_proto_rawDescOnce.Do(func() {
+		file_cis_proto_rawDescData = protoimpl.X.CompressGZIP(file_cis_proto_rawDescData)
+	})
+	return file_cis_proto_rawDescData
+}
+
+var file_cis_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_cis_proto_goTypes = []interface{}{
-	(*empty.Empty)(nil),           // 0: google.protobuf.Empty
-	(*GetCertificateRequest)(nil), // 1: pb.GetCertificateRequest
-	(*RootsResponse)(nil),         // 2: pb.RootsResponse
-	(*CertificateResponse)(nil),   // 3: pb.CertificateResponse
+	(*GetCertificateRequest)(nil),       // 0: pb.GetCertificateRequest
+	(*GetOrgCertificatesRequest)(nil),   // 1: pb.GetOrgCertificatesRequest
+	(*ListByIssuerRequest)(nil),         // 2: pb.ListByIssuerRequest
+	(*empty.Empty)(nil),                 // 3: google.protobuf.Empty
+	(*RootsResponse)(nil),               // 4: pb.RootsResponse
+	(*CertificateResponse)(nil),         // 5: pb.CertificateResponse
+	(*CertificatesResponse)(nil),        // 6: pb.CertificatesResponse
+	(*RevokedCertificatesResponse)(nil), // 7: pb.RevokedCertificatesResponse
 }
 var file_cis_proto_depIdxs = []int32{
-	0, // 0: pb.CIService.GetRoots:input_type -> google.protobuf.Empty
-	1, // 1: pb.CIService.GetCertificate:input_type -> pb.GetCertificateRequest
-	2, // 2: pb.CIService.GetRoots:output_type -> pb.RootsResponse
-	3, // 3: pb.CIService.GetCertificate:output_type -> pb.CertificateResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
+	3, // 0: pb.CIService.GetRoots:input_type -> google.protobuf.Empty
+	0, // 1: pb.CIService.GetCertificate:input_type -> pb.GetCertificateRequest
+	1, // 2: pb.CIService.GetOrgCertificates:input_type -> pb.GetOrgCertificatesRequest
+	2, // 3: pb.CIService.ListCertificates:input_type -> pb.ListByIssuerRequest
+	2, // 4: pb.CIService.ListRevokedCertificates:input_type -> pb.ListByIssuerRequest
+	4, // 5: pb.CIService.GetRoots:output_type -> pb.RootsResponse
+	5, // 6: pb.CIService.GetCertificate:output_type -> pb.CertificateResponse
+	6, // 7: pb.CIService.GetOrgCertificates:output_type -> pb.CertificatesResponse
+	6, // 8: pb.CIService.ListCertificates:output_type -> pb.CertificatesResponse
+	7, // 9: pb.CIService.ListRevokedCertificates:output_type -> pb.RevokedCertificatesResponse
+	5, // [5:10] is the sub-list for method output_type
+	0, // [0:5] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -75,20 +302,58 @@ func file_cis_proto_init() {
 	if File_cis_proto != nil {
 		return
 	}
-	file_ra_proto_init()
-	file_ca_proto_init()
+	file_pkix_proto_init()
+	if !protoimpl.UnsafeEnabled {
+		file_cis_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetCertificateRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_cis_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetOrgCertificatesRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_cis_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ListByIssuerRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_cis_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   0,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_cis_proto_goTypes,
 		DependencyIndexes: file_cis_proto_depIdxs,
+		MessageInfos:      file_cis_proto_msgTypes,
 	}.Build()
 	File_cis_proto = out.File
 	file_cis_proto_rawDesc = nil
@@ -112,6 +377,12 @@ type CIServiceClient interface {
 	GetRoots(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*RootsResponse, error)
 	// GetCertificate returns the certificate
 	GetCertificate(ctx context.Context, in *GetCertificateRequest, opts ...grpc.CallOption) (*CertificateResponse, error)
+	// GetOrgCertificates returns the Org certificates
+	GetOrgCertificates(ctx context.Context, in *GetOrgCertificatesRequest, opts ...grpc.CallOption) (*CertificatesResponse, error)
+	// ListCertificates returns stream of Certificates
+	ListCertificates(ctx context.Context, in *ListByIssuerRequest, opts ...grpc.CallOption) (*CertificatesResponse, error)
+	// ListRevokedCertificates returns stream of Revoked Certificates
+	ListRevokedCertificates(ctx context.Context, in *ListByIssuerRequest, opts ...grpc.CallOption) (*RevokedCertificatesResponse, error)
 }
 
 type cIServiceClient struct {
@@ -140,12 +411,45 @@ func (c *cIServiceClient) GetCertificate(ctx context.Context, in *GetCertificate
 	return out, nil
 }
 
+func (c *cIServiceClient) GetOrgCertificates(ctx context.Context, in *GetOrgCertificatesRequest, opts ...grpc.CallOption) (*CertificatesResponse, error) {
+	out := new(CertificatesResponse)
+	err := c.cc.Invoke(ctx, "/pb.CIService/GetOrgCertificates", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cIServiceClient) ListCertificates(ctx context.Context, in *ListByIssuerRequest, opts ...grpc.CallOption) (*CertificatesResponse, error) {
+	out := new(CertificatesResponse)
+	err := c.cc.Invoke(ctx, "/pb.CIService/ListCertificates", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cIServiceClient) ListRevokedCertificates(ctx context.Context, in *ListByIssuerRequest, opts ...grpc.CallOption) (*RevokedCertificatesResponse, error) {
+	out := new(RevokedCertificatesResponse)
+	err := c.cc.Invoke(ctx, "/pb.CIService/ListRevokedCertificates", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CIServiceServer is the server API for CIService service.
 type CIServiceServer interface {
 	// Roots returns the root CAs
 	GetRoots(context.Context, *empty.Empty) (*RootsResponse, error)
 	// GetCertificate returns the certificate
 	GetCertificate(context.Context, *GetCertificateRequest) (*CertificateResponse, error)
+	// GetOrgCertificates returns the Org certificates
+	GetOrgCertificates(context.Context, *GetOrgCertificatesRequest) (*CertificatesResponse, error)
+	// ListCertificates returns stream of Certificates
+	ListCertificates(context.Context, *ListByIssuerRequest) (*CertificatesResponse, error)
+	// ListRevokedCertificates returns stream of Revoked Certificates
+	ListRevokedCertificates(context.Context, *ListByIssuerRequest) (*RevokedCertificatesResponse, error)
 }
 
 // UnimplementedCIServiceServer can be embedded to have forward compatible implementations.
@@ -157,6 +461,15 @@ func (*UnimplementedCIServiceServer) GetRoots(context.Context, *empty.Empty) (*R
 }
 func (*UnimplementedCIServiceServer) GetCertificate(context.Context, *GetCertificateRequest) (*CertificateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCertificate not implemented")
+}
+func (*UnimplementedCIServiceServer) GetOrgCertificates(context.Context, *GetOrgCertificatesRequest) (*CertificatesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOrgCertificates not implemented")
+}
+func (*UnimplementedCIServiceServer) ListCertificates(context.Context, *ListByIssuerRequest) (*CertificatesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListCertificates not implemented")
+}
+func (*UnimplementedCIServiceServer) ListRevokedCertificates(context.Context, *ListByIssuerRequest) (*RevokedCertificatesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListRevokedCertificates not implemented")
 }
 
 func RegisterCIServiceServer(s *grpc.Server, srv CIServiceServer) {
@@ -199,6 +512,60 @@ func _CIService_GetCertificate_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CIService_GetOrgCertificates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOrgCertificatesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CIServiceServer).GetOrgCertificates(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.CIService/GetOrgCertificates",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CIServiceServer).GetOrgCertificates(ctx, req.(*GetOrgCertificatesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CIService_ListCertificates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListByIssuerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CIServiceServer).ListCertificates(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.CIService/ListCertificates",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CIServiceServer).ListCertificates(ctx, req.(*ListByIssuerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CIService_ListRevokedCertificates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListByIssuerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CIServiceServer).ListRevokedCertificates(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.CIService/ListRevokedCertificates",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CIServiceServer).ListRevokedCertificates(ctx, req.(*ListByIssuerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _CIService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "pb.CIService",
 	HandlerType: (*CIServiceServer)(nil),
@@ -210,6 +577,18 @@ var _CIService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCertificate",
 			Handler:    _CIService_GetCertificate_Handler,
+		},
+		{
+			MethodName: "GetOrgCertificates",
+			Handler:    _CIService_GetOrgCertificates_Handler,
+		},
+		{
+			MethodName: "ListCertificates",
+			Handler:    _CIService_ListCertificates_Handler,
+		},
+		{
+			MethodName: "ListRevokedCertificates",
+			Handler:    _CIService_ListRevokedCertificates_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

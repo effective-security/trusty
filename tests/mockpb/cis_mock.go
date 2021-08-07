@@ -42,3 +42,27 @@ func (m *MockCIServer) GetCertificate(ctx context.Context, in *pb.GetCertificate
 	}
 	return m.Resps[0].(*pb.CertificateResponse), nil
 }
+
+// GetOrgCertificates returns the Org certificates
+func (m *MockCIServer) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest) (*pb.CertificatesResponse, error) {
+	if m.Err != nil {
+		return nil, m.Err
+	}
+	return m.Resps[0].(*pb.CertificatesResponse), nil
+}
+
+// ListCertificates returns stream of Certificates
+func (m *MockCIServer) ListCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.CertificatesResponse, error) {
+	if m.Err != nil {
+		return nil, m.Err
+	}
+	return m.Resps[0].(*pb.CertificatesResponse), nil
+}
+
+// ListRevokedCertificates returns stream of Revoked Certificates
+func (m *MockCIServer) ListRevokedCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.RevokedCertificatesResponse, error) {
+	if m.Err != nil {
+		return nil, m.Err
+	}
+	return m.Resps[0].(*pb.RevokedCertificatesResponse), nil
+}

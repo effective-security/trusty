@@ -51,42 +51,10 @@ func (m *MockCAServer) Issuers(context.Context, *empty.Empty) (*pb.IssuersInfoRe
 	return m.Resps[0].(*pb.IssuersInfoResponse), nil
 }
 
-// GetCertificate returns the certificate
-func (m *MockCAServer) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error) {
-	if m.Err != nil {
-		return nil, m.Err
-	}
-	return m.Resps[0].(*pb.CertificateResponse), nil
-}
-
-// RevokeCertificate returns the revoked certificate
-func (m *MockCAServer) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error) {
-	if m.Err != nil {
-		return nil, m.Err
-	}
-	return m.Resps[0].(*pb.RevokedCertificateResponse), nil
-}
-
 // PublishCrls returns published CRLs
 func (m *MockCAServer) PublishCrls(context.Context, *pb.PublishCrlsRequest) (*pb.CrlsResponse, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
 	return m.Resps[0].(*pb.CrlsResponse), nil
-}
-
-// ListCertificates returns stream of Certificates
-func (m *MockCAServer) ListCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.CertificatesResponse, error) {
-	if m.Err != nil {
-		return nil, m.Err
-	}
-	return m.Resps[0].(*pb.CertificatesResponse), nil
-}
-
-// ListRevokedCertificates returns stream of Revoked Certificates
-func (m *MockCAServer) ListRevokedCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.RevokedCertificatesResponse, error) {
-	if m.Err != nil {
-		return nil, m.Err
-	}
-	return m.Resps[0].(*pb.RevokedCertificatesResponse), nil
 }

@@ -38,7 +38,7 @@ type Suite struct {
 
 	MockStatus    *mockpb.MockStatusServer
 	MockAuthority *mockpb.MockCAServer
-	MockCertInfo  *mockpb.MockCIServer
+	MockCIS       *mockpb.MockCIServer
 	MockRA        *mockpb.MockRAServer
 
 	appFlags       []string
@@ -185,7 +185,7 @@ func (s *Suite) SetupMockGRPC() *grpc.Server {
 	pb.RegisterStatusServiceServer(serv, s.MockStatus)
 	pb.RegisterCAServiceServer(serv, s.MockAuthority)
 	pb.RegisterRAServiceServer(serv, s.MockRA)
-	pb.RegisterCIServiceServer(serv, s.MockCertInfo)
+	pb.RegisterCIServiceServer(serv, s.MockCIS)
 
 	var lis net.Listener
 	var err error
