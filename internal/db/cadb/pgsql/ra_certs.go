@@ -21,7 +21,7 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 		return nil, errors.Trace(err)
 	}
 
-	logger.Debugf("subject=%q, skid=%s", crt.Subject, crt.SKID)
+	logger.Debugf("id=%d, subject=%q, skid=%s", id, crt.Subject, crt.SKID)
 
 	res := new(model.Certificate)
 
@@ -53,7 +53,7 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 		&res.Profile,
 	)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.Annotatef(err, "ID=%d, orgID=%d, skid=%s, ikid=%s", id, crt.OrgID, crt.SKID, crt.IKID)
 	}
 	res.NotAfter = res.NotAfter.UTC()
 	res.NotBefore = res.NotBefore.UTC()

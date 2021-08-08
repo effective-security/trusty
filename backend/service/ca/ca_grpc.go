@@ -185,7 +185,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 	)
 
 	res := &pb.CertificateResponse{
-		Certificate: mcert.ToDTO(),
+		Certificate: mcert.ToPB(),
 	}
 
 	return res, nil

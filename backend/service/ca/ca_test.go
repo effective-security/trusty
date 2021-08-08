@@ -199,11 +199,11 @@ func TestSignCertificate(t *testing.T) {
 
 	crt, err := db.GetCertificate(context.Background(), res.Certificate.Id)
 	require.NoError(t, err)
-	assert.Equal(t, res.Certificate.String(), crt.ToDTO().String())
+	assert.Equal(t, res.Certificate.String(), crt.ToPB().String())
 
 	crt, err = db.GetCertificateBySKID(context.Background(), res.Certificate.Skid)
 	require.NoError(t, err)
-	assert.Equal(t, res.Certificate.String(), crt.ToDTO().String())
+	assert.Equal(t, res.Certificate.String(), crt.ToPB().String())
 }
 
 func TestPublishCrls(t *testing.T) {

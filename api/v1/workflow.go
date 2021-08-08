@@ -2,8 +2,6 @@ package v1
 
 import (
 	"time"
-
-	"github.com/ekspand/trusty/api/v1/pb"
 )
 
 const (
@@ -136,7 +134,35 @@ type GetOrgAPIKeysResponse struct {
 }
 
 // Certificate defines x509 certificate
-type Certificate pb.Certificate
+// Certificate provides X509 Certificate information
+type Certificate struct {
+	// ID of the certificate
+	ID uint64 `json:"id,omitempty"`
+	// OrgID of the certificate, only used with Org scope
+	OrgID uint64 `json:"org_id,omitempty"`
+	// Skid provides Subject Key Identifier
+	SKID string `json:"skid,omitempty"`
+	// Ikid provides Issuer Key Identifier
+	IKID string `json:"ikid,omitempty"`
+	// SerialNumber provides Serial Number
+	SerialNumber string `json:"serial_number,omitempty"`
+	// NotBefore is the time when the validity period starts
+	NotBefore time.Time `json:"not_before,omitempty"`
+	// NotAfter is the time when the validity period starts
+	NotAfter time.Time `json:"not_after,omitempty"`
+	// Subject name
+	Subject string `json:"subject,omitempty"`
+	// Issuer name
+	Issuer string `json:"issuer,omitempty"`
+	// SHA256 thnumbprint of the cert
+	Sha256 string `json:"sha256,omitempty"`
+	// Profile of the certificate
+	Profile string `json:"profile,omitempty"`
+	// Pem encoded certificate
+	Pem string `json:"pem,omitempty"`
+	// IssuersPem provides PEM encoded issuers
+	IssuersPem string `json:"issuers_pem,omitempty"`
+}
 
 // CertificatesResponse returns a list of certificates for the user
 type CertificatesResponse struct {

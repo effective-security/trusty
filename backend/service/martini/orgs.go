@@ -40,7 +40,7 @@ func (s *Service) GetCertsHandler() rest.Handle {
 				return
 			}
 			for _, c := range certs {
-				res.Certificates = append(res.Certificates, v1.Certificate(*c.ToDTO()))
+				res.Certificates = append(res.Certificates, *c.ToDTO())
 			}
 		}
 
