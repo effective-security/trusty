@@ -17,7 +17,7 @@ type RevokedCertificate struct {
 // ToDTO returns DTO
 func (r *RevokedCertificate) ToDTO() *pb.RevokedCertificate {
 	return &pb.RevokedCertificate{
-		Certificate: r.Certificate.ToDTO(),
+		Certificate: r.Certificate.ToPB(),
 		RevokedAt:   timestamppb.New(r.RevokedAt),
 		Reason:      pb.Reason(r.Reason),
 	}

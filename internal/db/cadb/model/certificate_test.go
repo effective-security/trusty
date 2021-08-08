@@ -55,7 +55,7 @@ func TestCertificate(t *testing.T) {
 		Pem:              "pem",
 		IssuersPem:       "issuers_pem",
 	}
-	dto := m.ToDTO()
+	dto := m.ToPB()
 	assert.Equal(t, uint64(123), dto.Id)
 	assert.Equal(t, uint64(234), dto.OrgId)
 	assert.Equal(t, m.SKID, dto.Skid)

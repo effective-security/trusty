@@ -4,6 +4,7 @@ import (
 	"crypto/x509"
 	"time"
 
+	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -29,8 +30,8 @@ type Certificate struct {
 // Certificates defines a list of Certificate
 type Certificates []*Certificate
 
-// ToDTO returns DTO
-func (r *Certificate) ToDTO() *pb.Certificate {
+// ToPB returns protobuf
+func (r *Certificate) ToPB() *pb.Certificate {
 	return &pb.Certificate{
 		Id:           r.ID,
 		OrgId:        r.OrgID,
@@ -39,6 +40,25 @@ func (r *Certificate) ToDTO() *pb.Certificate {
 		SerialNumber: r.SerialNumber,
 		NotBefore:    timestamppb.New(r.NotBefore),
 		NotAfter:     timestamppb.New(r.NotAfter),
+		Subject:      r.Subject,
+		Issuer:       r.Issuer,
+		Sha256:       r.ThumbprintSha256,
+		Profile:      r.Profile,
+		Pem:          r.Pem,
+		IssuersPem:   r.IssuersPem,
+	}
+}
+
+// ToDTO returns ToDTO
+func (r *Certificate) ToDTO() *v1.Certificate {
+	return &v1.Certificate{
+		ID:           r.ID,
+		OrgID:        r.OrgID,
+		SKID:         r.SKID,
+		IKID:         r.IKID,
+		SerialNumber: r.SerialNumber,
+		NotBefore:    r.NotBefore.UTC(),
+		NotAfter:     r.NotAfter.UTC(),
 		Subject:      r.Subject,
 		Issuer:       r.Issuer,
 		Sha256:       r.ThumbprintSha256,
@@ -90,7 +110,7 @@ func NewCertificate(r *x509.Certificate, orgID uint64, profile, pem, issuersPem 
 func (list Certificates) ToDTO() []*pb.Certificate {
 	dto := make([]*pb.Certificate, len(list))
 	for i, r := range list {
-		dto[i] = r.ToDTO()
+		dto[i] = r.ToPB()
 	}
 	return dto
 }

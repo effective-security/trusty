@@ -40,8 +40,9 @@ var (
 
 func TestMain(m *testing.M) {
 	xlog.GetFormatter().WithCaller(true)
+	xlog.SetPackageLogLevel("github.com/ekspand/trusty/internal/cadb", "pgsql", xlog.DEBUG)
+
 	var err error
-	//	xlog.SetPackageLogLevel("github.com/go-phorce/dolly/xhttp", "retriable", xlog.DEBUG)
 
 	cfg, err := testutils.LoadConfig(projFolder, "UNIT_TEST")
 	if err != nil {
@@ -140,7 +141,7 @@ func TestE2E(t *testing.T) {
 	ikid := crt.IKID
 	lRes, err := svc.ListCertificates(ctx, &pb.ListByIssuerRequest{Ikid: crt.IKID, Limit: 100, After: 0})
 	require.NoError(t, err)
-	t.Logf("ListCertificates: %d", len(lRes.List))
+	//	t.Logf("ListCertificates: %d", len(lRes.List))
 
 	for i := 0; i < count; i++ {
 		rc := &model.Certificate{
@@ -170,7 +171,7 @@ func TestE2E(t *testing.T) {
 		crtRes, err := svc.GetCertificate(ctx,
 			&pb.GetCertificateRequest{Skid: crt.SKID})
 		require.NoError(t, err)
-		require.Equal(t, crt.ToDTO().String(), crtRes.Certificate.String())
+		require.Equal(t, crt.ToPB().String(), crtRes.Certificate.String())
 
 		if i%2 == 0 {
 			if i < count/2 {

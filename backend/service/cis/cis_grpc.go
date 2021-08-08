@@ -46,7 +46,7 @@ func (s *Service) GetCertificate(ctx context.Context, in *pb.GetCertificateReque
 		return nil, v1.NewError(codes.Internal, "unable to find certificate")
 	}
 	res := &pb.CertificateResponse{
-		Certificate: crt.ToDTO(),
+		Certificate: crt.ToPB(),
 	}
 	return res, nil
 }
