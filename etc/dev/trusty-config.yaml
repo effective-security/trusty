@@ -206,7 +206,7 @@ servers:
         - /favicon.ico
         - /v1
         - /v1/auth
-        - /v1/ms/validate_org
+        - /v1/ms/approve_org
         - /v2/acme
         - /pb.StatusService
       # allow any authenticated request that includes a non empty role
