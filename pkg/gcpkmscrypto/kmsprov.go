@@ -133,7 +133,8 @@ func (p *Provider) GenerateRSAKey(label string, bits int, purpose int) (crypto.P
 		CryptoKey: &kmspb.CryptoKey{
 			Purpose: pbpurpose,
 			VersionTemplate: &kmspb.CryptoKeyVersionTemplate{
-				Algorithm: algorithm,
+				Algorithm:       algorithm,
+				ProtectionLevel: kmspb.ProtectionLevel_HSM,
 			},
 			Labels: map[string]string{
 				"label": label,

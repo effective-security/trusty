@@ -167,6 +167,7 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 	filesToResove := []*string{
 		&c.Authority,
 		&c.JWT,
+		&c.Acme,
 	}
 
 	for i := range c.OAuthClients {
@@ -174,15 +175,6 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 	}
 	for i := range c.EmailProviders {
 		filesToResove = append(filesToResove, &c.EmailProviders[i])
-	}
-
-	if c.RegistrationAuthority != nil {
-		for i := range c.RegistrationAuthority.PrivateRoots {
-			filesToResove = append(filesToResove, &c.RegistrationAuthority.PrivateRoots[i])
-		}
-		for i := range c.RegistrationAuthority.PublicRoots {
-			filesToResove = append(filesToResove, &c.RegistrationAuthority.PublicRoots[i])
-		}
 	}
 
 	optionalFilesToResove := []*string{
@@ -193,6 +185,14 @@ func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string) (*C
 	}
 	for i := range c.CryptoProv.Providers {
 		optionalFilesToResove = append(optionalFilesToResove, &c.CryptoProv.Providers[i])
+	}
+	if c.RegistrationAuthority != nil {
+		for i := range c.RegistrationAuthority.PrivateRoots {
+			optionalFilesToResove = append(optionalFilesToResove, &c.RegistrationAuthority.PrivateRoots[i])
+		}
+		for i := range c.RegistrationAuthority.PublicRoots {
+			optionalFilesToResove = append(optionalFilesToResove, &c.RegistrationAuthority.PublicRoots[i])
+		}
 	}
 
 	for _, ptr := range dirsToResolve {

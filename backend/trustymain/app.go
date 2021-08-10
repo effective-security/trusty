@@ -60,6 +60,8 @@ type appFlags struct {
 	isStderr            *bool
 	dryRun              *bool
 	hsmCfg              *string
+	caCfg               *string
+	acmeCfg             *string
 	sqlOrgs             *string
 	sqlCa               *string
 	cryptoProvs         *[]string
@@ -339,6 +341,8 @@ func (a *App) loadConfig() error {
 	flags.isStderr = app.Flag("std", "output logs to stderr").Bool()
 	flags.dryRun = app.Flag("dry-run", "verify config etc, and do not start the service").Bool()
 	flags.hsmCfg = app.Flag("hsm-cfg", "location of the HSM configuration file").String()
+	flags.caCfg = app.Flag("ca-cfg", "location of the CA configuration file").String()
+	flags.acmeCfg = app.Flag("acme-cfg", "location of the ACME configuration file").String()
 	flags.cryptoProvs = app.Flag("crypto-prov", "path to additional Crypto provider configurations").Strings()
 	flags.sqlOrgs = app.Flag("orgs-sql", "SQL data source for Orgs").String()
 	flags.sqlCa = app.Flag("ca-sql", "SQL data source for CA").String()
@@ -379,6 +383,12 @@ func (a *App) loadConfig() error {
 	}
 	if *flags.hsmCfg != "" {
 		cfg.CryptoProv.Default = *flags.hsmCfg
+	}
+	if *flags.caCfg != "" {
+		cfg.Authority = *flags.caCfg
+	}
+	if *flags.acmeCfg != "" {
+		cfg.Acme = *flags.acmeCfg
 	}
 	if *flags.sqlOrgs != "" {
 		cfg.OrgsSQL.DataSource = *flags.sqlOrgs
