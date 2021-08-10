@@ -2,18 +2,19 @@
 
 #
 # gen_test_certs.sh
-#   --out-dir {dir}     - specifies output folder
-#   --csr-dir {dir}     - specifies folder with CSR templates
-#   --prefix {prefix}   - specifies prefix for files, by default: ${PREFIX}
-#   --hsm-confg         - specifies HSM provider file
-#   --ca-config         - specifies CA configuration file
-#   --root-ca {cert}    - specifies root CA certificate
-#   --root-ca-key {key} - specifies root CA key
-#   --root              - specifies if Root CA certificate and key should be generated
-#   --ca1               - specifies if Level 1 CA certificate and key should be generated
-#   --bundle            - specifies if Int CA Bundle should be created
-#   --san               - specifies SAN for server and peer certs
-#   --force             - specifies to force issuing the cert even if it exists
+#   --out-dir {dir}         - specifies output folder
+#   --out-prefix {prefix}   - specifies prefix for output files
+#   --csr-dir {dir}         - specifies folder with CSR templates
+#   --csr-prefix {prefix}   - specifies prefix for csr files
+#   --hsm-confg             - specifies HSM provider file
+#   --ca-config             - specifies CA configuration file
+#   --root-ca {cert}        - specifies root CA certificate
+#   --root-ca-key {key}     - specifies root CA key
+#   --root                  - specifies if Root CA certificate and key should be generated
+#   --ca                    - specifies if Level 1 CA certificate and key should be generated
+#   --bundle                - specifies if Int CA Bundle should be created
+#   --san                   - specifies SAN for server and peer certs
+#   --force                 - specifies to force issuing the cert even if it exists
 #
 
 POSITIONAL=()
@@ -27,13 +28,18 @@ case $key in
     shift # past argument
     shift # past value
     ;;
+    --out-prefix)
+    OUT_PREFIX="$2"
+    shift # past argument
+    shift # past value
+    ;;
     -o|--csr-dir)
     CSR_DIR="$2"
     shift # past argument
     shift # past value
     ;;
-    -p|--prefix)
-    PREFIX="$2"
+    --csr-prefix)
+    CSR_PREFIX="$2"
     shift # past argument
     shift # past value
     ;;
@@ -61,8 +67,8 @@ case $key in
     ROOTCA=YES
     shift # past argument
     ;;
-    --ca1)
-    CA1=YES
+    --ca)
+    CA=YES
     shift # past argument
     ;;
     --force)
@@ -89,18 +95,18 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 [ -z "$CSR_DIR" ] &&  echo "Specify --csr-dir" && exit 1
 [ -z "$CA_CONFIG" ] && echo "Specify --ca-config" && exit 1
 [ -z "$HSM_CONFIG" ] && echo "Specify --hsm-config" && exit 1
-[ -z "$PREFIX" ] && PREFIX=test_
-[ -z "$ROOT_CA_CERT" ] && ROOT_CA_CERT=${OUT_DIR}/${PREFIX}root_ca.pem
-[ -z "$ROOT_CA_KEY" ] && ROOT_CA_KEY=${OUT_DIR}/${PREFIX}root_ca-key.pem
+[ -z "$ROOT_CA_CERT" ] && ROOT_CA_CERT=${OUT_DIR}/${OUT_PREFIX}root_ca.pem
+[ -z "$ROOT_CA_KEY" ] && ROOT_CA_KEY=${OUT_DIR}/${OUT_PREFIX}root_ca-key.pem
 [ -z "$SAN" ] && SAN=127.0.0.1
 
 HOSTNAME=`hostname`
 
 echo "OUT_DIR      = ${OUT_DIR}"
+echo "OUT_PREFIX   = ${OUT_PREFIX}"
 echo "CSR_DIR      = ${CSR_DIR}"
+echo "CSR_PREFIX   = ${OUT_PREFIX}"
 echo "CA_CONFIG    = ${CA_CONFIG}"
 echo "HSM_CONFIG   = ${HSM_CONFIG}"
-echo "PREFIX       = ${PREFIX}"
 echo "BUNDLE       = ${BUNDLE}"
 echo "FORCE        = ${FORCE}"
 echo "SAN          = ${SAN}"
@@ -113,27 +119,26 @@ if [[ "$ROOTCA" == "YES" && ("$FORCE" == "YES" || ! -f ${ROOT_CA_KEY}) ]]; then 
         csr gencert --self-sign \
         --ca-config=${CA_CONFIG} \
         --profile=SHAKEN_ROOT \
-        --csr-profile ${CSR_DIR}/${PREFIX}root_ca.json \
-        --key-label="${PREFIX}root_ca*" \
+        --csr-profile ${CSR_DIR}/${CSR_PREFIX}root_ca.json \
+        --key-label="${OUT_PREFIX}root_ca*" \
         --out ${ROOT_CA_CERT/.pem/''}
 fi
 
-if [[ "$CA1" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}issuer1_ca-key.pem) ]]; then
-    echo "*** generating CA1 cert"
+if [[ "$CA" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}ca-key.pem) ]]; then
+    echo "*** generating CA cert"
     trusty-tool \
         --hsm-cfg=${HSM_CONFIG} \
         csr gencert \
         --ca-config=${CA_CONFIG} \
         --profile=SHAKEN_L1_CA \
-        --csr-profile ${CSR_DIR}/${PREFIX}issuer1_ca.json \
-        --key-label="${PREFIX}issuer1_ca*" \
+        --csr-profile ${CSR_DIR}/${CSR_PREFIX}ca.json \
+        --key-label="${OUT_PREFIX}ca*" \
         --ca-cert ${ROOT_CA_CERT} \
         --ca-key ${ROOT_CA_KEY} \
-        --out ${OUT_DIR}/${PREFIX}issuer1_ca
+        --out ${OUT_DIR}/${OUT_PREFIX}ca
 fi
 
-if [[ "$BUNDLE" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${PREFIX}cabundle.pem) ]]; then
+if [[ "$BUNDLE" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}cabundle.pem) ]]; then
     echo "*** CA bundle"
-    cat ${OUT_DIR}/${PREFIX}issuer1_ca.pem >> ${OUT_DIR}/${PREFIX}cabundle.pem
+    cat ${OUT_DIR}/${OUT_PREFIX}ca.pem >> ${OUT_DIR}/${OUT_PREFIX}cabundle.pem
 fi
-

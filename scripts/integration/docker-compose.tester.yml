@@ -106,7 +106,8 @@ services:
         --csr-dir /opt/trusty/etc/dev/csr_profile
         --root-ca /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem
         --root-ca-key /opt/trusty/etc/dev/roots/trusty_dev_root_ca-key.pem
-        --prefix trusty_dev_
+        --csr-prefix trusty_dev_
+        --out-prefix trusty_dev_
         --san 10.77.88.101
         --ca1 --ca2 --bundle --client --peer --force &&
         /opt/trusty/bin/gen_martini_certs.sh
@@ -114,10 +115,11 @@ services:
         --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml
         --out-dir /tmp/trusty/certs
         --csr-dir /opt/trusty/etc/dev/csr_profile
-        --prefix martini_
+        --csr-prefix martini_dev_
+        --out-prefix martini_
         --root-ca /tmp/trusty/certs/martini_root_ca.pem
         --root-ca-key /tmp/trusty/certs/martini_root_ca-key.pem
-        --root --ca1 --bundle --force &&
+        --root --ca --bundle --force &&
         /opt/trusty/bin/trusty --std
         --hsm-cfg=/tmp/trusty/softhsm/unittest_hsm.json
         --cfg=/opt/trusty/etc/dev/trusty-config.yaml
@@ -184,7 +186,8 @@ services:
         --csr-dir /opt/trusty/etc/dev/csr_profile
         --root-ca /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem
         --root-ca-key /opt/trusty/etc/dev/roots/trusty_dev_root_ca-key.pem
-        --prefix trusty_dev_
+        --csr-prefix trusty_dev_
+        --out-prefix trusty_dev_
         --san 10.77.88.102
         --ca1 --ca2 --bundle --client --peer --force &&
         /opt/trusty/bin/gen_martini_certs.sh
@@ -192,10 +195,11 @@ services:
         --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml
         --out-dir /tmp/trusty/certs
         --csr-dir /opt/trusty/etc/dev/csr_profile
-        --prefix martini_
+        --csr-prefix martini_dev_
+        --out-prefix martini_
         --root-ca /tmp/trusty/certs/martini_root_ca.pem
         --root-ca-key /tmp/trusty/certs/martini_root_ca-key.pem
-        --root --ca1 --bundle --force &&
+        --root --ca --bundle --force &&
         /opt/trusty/bin/trusty --std
         --hsm-cfg=/opt/trusty/tests/aws-test-kms.json
         --cfg=/opt/trusty/etc/dev/trusty-config.yaml
@@ -259,6 +263,7 @@ services:
         --csr-dir /opt/trusty/etc/dev/csr_profile
         --root-ca /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem
         --root-ca-key /opt/trusty/etc/dev/roots/trusty_dev_root_ca-key.pem
-        --prefix trusty_dev_
+        --csr-prefix trusty_dev_
+        --out-prefix trusty_dev_
         --root --ca1 --ca2 --bundle --client --peer &&
         /opt/trusty/tests/if-trusty-ready.sh /opt/trusty/tests/run.sh
