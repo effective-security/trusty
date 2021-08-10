@@ -12,6 +12,7 @@ import (
 	"github.com/ekspand/trusty/internal/db/cadb/model"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/ekspand/trusty/pkg/poller"
+	"github.com/go-phorce/dolly/fileutil"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
@@ -132,6 +133,10 @@ func (s *Service) registerCert(ctx context.Context, trust pb.Trust, location str
 
 func (s *Service) registerRoots(ctx context.Context) error {
 	for _, r := range s.cfg.RegistrationAuthority.PrivateRoots {
+		if err := fileutil.FileExists(r); err != nil {
+			logger.Warningf("err=[%v]", err.Error())
+			continue
+		}
 		err := s.registerCert(ctx, pb.Trust_Private, r)
 		if err != nil {
 			logger.Errorf("err=[%v]", errors.ErrorStack(err))
@@ -139,6 +144,10 @@ func (s *Service) registerRoots(ctx context.Context) error {
 		}
 	}
 	for _, r := range s.cfg.RegistrationAuthority.PublicRoots {
+		if err := fileutil.FileExists(r); err != nil {
+			logger.Warningf("err=[%v]", err.Error())
+			continue
+		}
 		err := s.registerCert(ctx, pb.Trust_Public, r)
 		if err != nil {
 			logger.Errorf("err=[%v]", errors.ErrorStack(err))

@@ -1,0 +1,16 @@
+{
+    "common_name": "SHAKEN G1",
+    "key": {
+        "algo": "ecdsa",
+        "size": 256
+    },
+    "names": [
+        {
+            "C": "US",
+            "ST": "WA",
+            "L": "Seattle",
+            "OU": "Dev",
+            "O": "Martini Security, LLC."
+        }
+    ]
+}

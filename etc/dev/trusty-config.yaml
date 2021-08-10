@@ -97,8 +97,11 @@ ra:
   # the list of private Root Certs files.
   private_roots:
     - ${TRUSTY_CONFIG_DIR}/roots/trusty_dev_root_ca.pem
+    - ${TRUSTY_CONFIG_DIR}/roots/trusty_root_ca.pem
   # the list of public Root Certs files.
   public_roots:
+    - ${TRUSTY_CONFIG_DIR}/roots/martini_root_ca.pem
+    - ${TRUSTY_CONFIG_DIR}/roots/martini_dev_root_ca.pem
 
 servers:
   cis:
@@ -284,9 +287,7 @@ servers:
       allow_any_role:
         - /pb.CAService/ProfileInfo
         - /pb.CAService/Issuers
-        - /pb.CAService/GetCertificate
-        - /pb.CAService/ListCertificates
-        - /pb.CAService/ListRevokedCertificates
+        - /pb.CIService
       # allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
       allow:
         - /pb.CAService/SignCertificate:trusty-wfe,trusty-ra,trusty-admin,trusty
@@ -391,7 +392,7 @@ servers:
         roles:
           trusty-admin:
           - denis@ekspand.com
-          
+
 trusty_client: 
   client_tls:
     cert: /tmp/trusty/certs/trusty_dev_client.pem
