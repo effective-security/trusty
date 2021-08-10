@@ -197,6 +197,154 @@ func TestGetCertsHandler(t *testing.T) {
 	assert.Empty(t, res.Certificates)
 }
 
+func TestDenyOrg(t *testing.T) {
+	ctx := context.Background()
+	svc := trustyServer.Service(martini.ServiceName).(*martini.Service)
+	// TODO: mock emailer
+	svc.DisableEmail()
+	h := svc.RegisterOrgHandler()
+
+	dbProv := svc.Db()
+	old, err := dbProv.GetOrgByExternalID(ctx, v1.ProviderMartini, "99999999")
+	if err == nil {
+		dbProv.RemoveOrg(ctx, old.ID)
+	}
+
+	user, err := dbProv.LoginUser(ctx, &model.User{
+		Email:      "denis+test@ekspand.com",
+		Name:       "test user",
+		Login:      "denis+test@ekspand.com",
+		ExternalID: "123456",
+		Provider:   v1.ProviderGoogle,
+	})
+	require.NoError(t, err)
+
+	httpReq := &v1.RegisterOrgRequest{
+		FilerID: "123456",
+	}
+
+	js, err := json.Marshal(httpReq)
+	require.NoError(t, err)
+
+	// Register
+	r, err := http.NewRequest(http.MethodPost, v1.PathForMartiniRegisterOrg, bytes.NewReader(js))
+	require.NoError(t, err)
+	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+	w := httptest.NewRecorder()
+	h(w, r, nil)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var res v1.OrgResponse
+	require.NoError(t, marshal.Decode(w.Body, &res))
+	assert.Equal(t, v1.OrgStatusPaymentPending, res.Org.Status)
+
+	orgID, _ := db.ID(res.Org.ID)
+	defer dbProv.RemoveOrg(ctx, orgID)
+
+	//
+	// Payment
+	//
+	paymentReq := &v1.CreateSubscriptionRequest{
+		CCNumber:          "4445-1234-1234-1234-1234",
+		CCExpiry:          "11/23",
+		CCCvv:             "266",
+		CCName:            "John Doe",
+		SubscriptionYears: 3,
+	}
+	jsPayment, err := json.Marshal(paymentReq)
+	require.NoError(t, err)
+
+	subsPath := strings.Replace(v1.PathForMartiniOrgSubscription, ":org_id", res.Org.ID, 1)
+	r, err = http.NewRequest(http.MethodPost, subsPath, bytes.NewReader(jsPayment))
+	require.NoError(t, err)
+	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+	w = httptest.NewRecorder()
+	svc.CreateSubsciptionHandler()(w, r, rest.Params{
+		{
+			Key:   "org_id",
+			Value: res.Org.ID,
+		},
+	})
+	require.Equal(t, http.StatusOK, w.Code)
+
+	//
+	// Validate
+	//
+	validateReq := &v1.ValidateOrgRequest{
+		OrgID: res.Org.ID,
+	}
+	js, err = json.Marshal(validateReq)
+	require.NoError(t, err)
+
+	r, err = http.NewRequest(http.MethodPost, v1.PathForMartiniValidateOrg, bytes.NewReader(js))
+	require.NoError(t, err)
+	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+	w = httptest.NewRecorder()
+	svc.ValidateOrgHandler()(w, r, nil)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	//
+	// Info & Deny
+	//
+
+	list, err := dbProv.GetOrgApprovalTokens(ctx, orgID)
+	require.NoError(t, err)
+	require.NotNil(t, list)
+
+	ah := svc.ApproveOrgHandler()
+	for _, token := range list {
+		if token.Used {
+			continue
+		}
+
+		// Info
+		infoReq := &v1.ApproveOrgRequest{
+			Token:  token.Token,
+			Action: "info",
+		}
+
+		js, err := json.Marshal(infoReq)
+		require.NoError(t, err)
+
+		// info
+		r, err := http.NewRequest(http.MethodPost, v1.PathForMartiniApproveOrg, bytes.NewReader(js))
+		require.NoError(t, err)
+		r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+		w := httptest.NewRecorder()
+		ah(w, r, nil)
+		require.Equal(t, http.StatusOK, w.Code)
+
+		var res v1.OrgResponse
+		require.NoError(t, marshal.Decode(w.Body, &res))
+		assert.Equal(t, v1.OrgStatusValidationPending, res.Org.Status)
+
+		// Deny
+		denyReq := &v1.ApproveOrgRequest{
+			Token:  token.Token,
+			Code:   token.Code,
+			Action: "deny",
+		}
+
+		js, err = json.Marshal(denyReq)
+		require.NoError(t, err)
+
+		r, err = http.NewRequest(http.MethodPost, v1.PathForMartiniApproveOrg, bytes.NewReader(js))
+		require.NoError(t, err)
+		r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+		w = httptest.NewRecorder()
+		ah(w, r, nil)
+		require.Equal(t, http.StatusOK, w.Code)
+
+		require.NoError(t, marshal.Decode(w.Body, &res))
+		assert.Equal(t, v1.OrgStatusDenied, res.Org.Status)
+	}
+}
+
 func TestRegisterOrgFullFlow(t *testing.T) {
 	ctx := context.Background()
 	svc := trustyServer.Service(martini.ServiceName).(*martini.Service)
@@ -327,8 +475,9 @@ func TestRegisterOrgFullFlow(t *testing.T) {
 
 		//
 		approveReq := &v1.ApproveOrgRequest{
-			Token: token.Token,
-			Code:  token.Code,
+			Token:  token.Token,
+			Code:   token.Code,
+			Action: "approve",
 		}
 
 		js, err := json.Marshal(approveReq)

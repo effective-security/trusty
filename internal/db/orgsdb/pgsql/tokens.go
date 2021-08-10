@@ -138,3 +138,71 @@ func (p *Provider) DeleteApprovalToken(ctx context.Context, id uint64) error {
 	}
 	return nil
 }
+
+// GetOrgFromApprovalToken returns Organization byapproval token
+func (p *Provider) GetOrgFromApprovalToken(ctx context.Context, token string) (*model.Organization, error) {
+	res := new(model.Organization)
+
+	err := p.db.QueryRowContext(ctx,
+		`SELECT 
+			orgs.id,
+			orgs.extern_id,
+			orgs.provider,
+			orgs.login,
+			orgs.name,
+			orgs.email,
+			orgs.billing_email,
+			orgs.company,
+			orgs.location,
+			orgs.avatar_url,
+			orgs.html_url,
+			orgs.type,
+			orgs.created_at,
+			orgs.updated_at,
+			orgs.street_address,
+			orgs.city,
+			orgs.postal_code,
+			orgs.region,
+			orgs.country,
+			orgs.phone,
+			orgs.approver_email,
+			orgs.approver_name,
+			orgs.status,
+			orgs.expires_at
+		FROM orgs
+		LEFT JOIN orgtokens ON orgs.ID = orgtokens.org_id
+		WHERE orgtokens.token=$1
+		;`, token,
+	).Scan(&res.ID,
+		&res.ExternalID,
+		&res.Provider,
+		&res.Login,
+		&res.Name,
+		&res.Email,
+		&res.BillingEmail,
+		&res.Company,
+		&res.Location,
+		&res.AvatarURL,
+		&res.URL,
+		&res.Type,
+		&res.CreatedAt,
+		&res.UpdatedAt,
+		&res.Street,
+		&res.City,
+		&res.PostalCode,
+		&res.Region,
+		&res.Country,
+		&res.Phone,
+		&res.ApproverEmail,
+		&res.ApproverName,
+		&res.Status,
+		&res.ExpiresAt,
+	)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	res.CreatedAt = res.CreatedAt.UTC()
+	res.UpdatedAt = res.UpdatedAt.UTC()
+	res.ExpiresAt = res.ExpiresAt.UTC()
+	return res, nil
+}
