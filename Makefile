@@ -106,17 +106,6 @@ hsmconfig:
 
 gen_test_certs:
 	echo "*** Running gen_test_certs"
-	echo "*** generating untrusted CAs"
-	./scripts/build/gen_test_certs.sh \
-		--hsm-config /tmp/trusty/softhsm/unittest_hsm.json \
-		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.yaml \
-		--out-dir /tmp/trusty/certs \
-		--csr-dir $(PROJ_ROOT)/etc/dev/csr_profile \
-		--prefix $(PROJ_NAME)_untrusted_ \
-		--key-label unittest_ \
-		--root-ca /tmp/trusty/certs/trusty_untrusted_root_ca.pem \
-		--root-ca-key /tmp/trusty/certs/trusty_untrusted_root_ca-key.pem \
-		--root --ca1 --ca2 --bundle --client --force
 	echo "*** generating test CAs"
 	tar -xzvf $(PROJ_ROOT)/etc/dev/roots/trusty_dev_root_ca-key.pem.tar.gz -C $(PROJ_ROOT)/etc/dev/roots/
 	./scripts/build/gen_test_certs.sh \
@@ -124,7 +113,8 @@ gen_test_certs:
 		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.yaml \
 		--out-dir /tmp/trusty/certs \
 		--csr-dir $(PROJ_ROOT)/etc/dev/csr_profile \
-		--prefix $(PROJ_NAME)_dev_ \
+		--csr-prefix trusty_dev_ \
+		--out-prefix trusty_dev_ \
 		--key-label test_ \
 		--root-ca $(PROJ_ROOT)/etc/dev/roots/trusty_dev_root_ca.pem \
 		--root-ca-key $(PROJ_ROOT)/etc/dev/roots/trusty_dev_root_ca-key.pem \
@@ -138,10 +128,11 @@ gen_martini_certs:
 		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.yaml \
 		--out-dir /tmp/trusty/certs \
 		--csr-dir $(PROJ_ROOT)/etc/dev/csr_profile \
-		--prefix martini_ \
+		--csr-prefix martini_dev_ \
+		--out-prefix martini_ \
 		--root-ca /tmp/trusty/certs/martini_root_ca.pem \
 		--root-ca-key /tmp/trusty/certs/martini_root_ca-key.pem \
-		--root --ca1 --bundle --force
+		--root --ca --bundle --force
 
 start-local-kms:
 	# Container state will be true (it's already running), false (exists but stopped), or missing (does not exist).

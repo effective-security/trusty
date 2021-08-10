@@ -31,8 +31,8 @@ authority:
     # specifies Issuer's label
     label: SHAKEN_L1_CA
     type: trusty
-    cert: /tmp/trusty/certs/martini_issuer1_ca.pem
-    key: /tmp/trusty/certs/martini_issuer1_ca-key.pem
+    cert: /tmp/trusty/certs/martini_ca.pem
+    key: /tmp/trusty/certs/martini_ca-key.pem
     # location of the CA bundle file
     ca_bundle: /tmp/trusty/certs/martini_cabundle.pem
     # location of the Root CA file

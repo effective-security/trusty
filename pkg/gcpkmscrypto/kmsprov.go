@@ -208,7 +208,8 @@ func (p *Provider) GenerateECDSAKey(label string, curve elliptic.Curve) (crypto.
 		CryptoKey: &kmspb.CryptoKey{
 			Purpose: pbpurpose,
 			VersionTemplate: &kmspb.CryptoKeyVersionTemplate{
-				Algorithm: algorithm,
+				Algorithm:       algorithm,
+				ProtectionLevel: kmspb.ProtectionLevel_HSM,
 			},
 			Labels: map[string]string{
 				"label": label,
