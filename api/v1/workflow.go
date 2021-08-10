@@ -33,6 +33,8 @@ const (
 	OrgStatusRevoked = "revoked"
 	// OrgStatusDeactivated specifies that Organization has been deactivated, subsciption cancelled
 	OrgStatusDeactivated = "deactivated"
+	// OrgStatusDenied specifies that the approver denied the request
+	OrgStatusDenied = "denied"
 )
 
 // Organization represents an organization account.

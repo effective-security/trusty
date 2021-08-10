@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/internal/db/orgsdb/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -14,10 +15,43 @@ func TestApprovalTokens(t *testing.T) {
 	id, err := provider.NextID()
 	require.NoError(t, err)
 
+	name := fmt.Sprintf("user-%d", id)
+	login := fmt.Sprintf("test%d", id)
+	email := login + "@trusty.com"
+
+	o := &model.Organization{
+		ExternalID: fmt.Sprintf("%d", id+2),
+		Provider:   v1.ProviderGithub,
+		Name:       name,
+		Login:      login,
+		Email:      email,
+		//BillingEmail: email,
+		Company:       "ekspand",
+		Location:      "Kirkland, WA",
+		Type:          "Organization",
+		CreatedAt:     time.Now().UTC(),
+		UpdatedAt:     time.Now().UTC(),
+		Street:        "addr",
+		City:          "city",
+		PostalCode:    "98034",
+		Region:        "WA",
+		Country:       "US",
+		Phone:         "4251232323",
+		ApproverName:  "approver",
+		ApproverEmail: "denis@ekspand.com",
+		Status:        "pending",
+		ExpiresAt:     time.Now().Add(time.Hour * 8770).UTC(),
+	}
+
+	org, err := provider.UpdateOrg(ctx, o)
+	require.NoError(t, err)
+	require.NotNil(t, org)
+	defer provider.RemoveOrg(ctx, org.ID)
+
 	token := fmt.Sprintf("t-%d", id)
 
 	m := &model.ApprovalToken{
-		OrgID:         id,
+		OrgID:         org.ID,
 		RequestorID:   id + 1,
 		ApproverEmail: token + "@ekspand.com",
 		Token:         token[:16],
@@ -40,6 +74,11 @@ func TestApprovalTokens(t *testing.T) {
 	assert.Equal(t, m.CreatedAt.Unix(), m1.CreatedAt.Unix())
 	assert.Equal(t, m.ExpiresAt.Unix(), m1.ExpiresAt.Unix())
 	assert.Equal(t, m.UsedAt.Unix(), m1.UsedAt.Unix())
+
+	org2, err := provider.GetOrgFromApprovalToken(ctx, m1.Token)
+	require.NoError(t, err)
+	require.NotNil(t, org2)
+	assert.Equal(t, *org, *org2)
 
 	_, err = provider.CreateApprovalToken(ctx, m)
 	require.Error(t, err)

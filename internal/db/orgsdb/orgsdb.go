@@ -35,6 +35,8 @@ type OrgsReadOnlyDb interface {
 	GetOrg(ctx context.Context, id uint64) (*model.Organization, error)
 	// GetOrgByExternalID returns Organization by external ID
 	GetOrgByExternalID(ctx context.Context, provider, externalID string) (*model.Organization, error)
+	// GetOrgFromApprovalToken returns Organization byapproval token
+	GetOrgFromApprovalToken(ctx context.Context, token string) (*model.Organization, error)
 	// GetRepo returns Repository
 	GetRepo(ctx context.Context, id uint64) (*model.Repository, error)
 	// GetOrgMembers returns list of membership info

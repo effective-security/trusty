@@ -86,8 +86,9 @@ func (c *Client) RegisterOrg(ctx context.Context, filerID string) (*v1.OrgRespon
 // ApproveOrg approves Org registration
 func (c *Client) ApproveOrg(ctx context.Context, token, code string) (*v1.OrgResponse, error) {
 	req := &v1.ApproveOrgRequest{
-		Token: token,
-		Code:  code,
+		Token:  token,
+		Code:   code,
+		Action: "approve",
 	}
 
 	res := new(v1.OrgResponse)

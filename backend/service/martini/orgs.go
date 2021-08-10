@@ -100,29 +100,27 @@ func (s *Service) ApproveOrgHandler() rest.Handle {
 		}
 
 		ctx := r.Context()
-		t, err := s.db.UseApprovalToken(ctx, req.Token, req.Code)
-		if err != nil {
-			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("the code is not valid or already validated").WithCause(err))
-			return
-		}
 
-		org, err := s.db.GetOrg(ctx, t.OrgID)
+		org, err := s.db.GetOrgFromApprovalToken(ctx, req.Token)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to find organization").WithCause(err))
 			return
 		}
 
-		if org.Status == v1.OrgStatusValidationPending {
-			org.Status = v1.OrgStatusApproved
-			org, err = s.db.UpdateOrgStatus(ctx, org)
+		switch req.Action {
+		case "info":
+
+		case "deny":
+			org.Status = v1.OrgStatusDenied
+			err = s.db.RemoveOrg(ctx, org.ID)
 			if err != nil {
-				marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to update status").WithCause(err))
+				marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to delete organization").WithCause(err))
 				return
 			}
 			go func() {
 				err := s.sendEmail(org.Email,
-					"Organization approved",
-					orgApprovedTemplate,
+					"Organization denied",
+					orgDeniedTemplate,
 					org)
 				if err != nil {
 					logger.KV(xlog.ERROR,
@@ -131,20 +129,49 @@ func (s *Service) ApproveOrgHandler() rest.Handle {
 				}
 			}()
 
-			now := time.Now().UTC()
-			_, err = s.db.CreateAPIKey(ctx, &model.APIKey{
-				OrgID:      org.ID,
-				Key:        model.GenerateAPIKey(),
-				Enrollemnt: true,
-				//Management: true,
-				//Billing: true,
-				CreatedAt: now,
-				ExpiresAt: org.ExpiresAt,
-			})
+		case "approve":
+
+			_, err := s.db.UseApprovalToken(ctx, req.Token, req.Code)
 			if err != nil {
-				logger.KV(xlog.ERROR,
-					"email", org.Email,
-					"err", errors.Details(err))
+				marshal.WriteJSON(w, r, httperror.WithInvalidRequest("the code is not valid or already validated").WithCause(err))
+				return
+			}
+
+			if org.Status == v1.OrgStatusValidationPending {
+
+				org.Status = v1.OrgStatusApproved
+				org, err = s.db.UpdateOrgStatus(ctx, org)
+				if err != nil {
+					marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to update status").WithCause(err))
+					return
+				}
+				go func() {
+					err := s.sendEmail(org.Email,
+						"Organization approved",
+						orgApprovedTemplate,
+						org)
+					if err != nil {
+						logger.KV(xlog.ERROR,
+							"email", org.Email,
+							"err", errors.Details(err))
+					}
+				}()
+
+				now := time.Now().UTC()
+				_, err = s.db.CreateAPIKey(ctx, &model.APIKey{
+					OrgID:      org.ID,
+					Key:        model.GenerateAPIKey(),
+					Enrollemnt: true,
+					//Management: true,
+					//Billing: true,
+					CreatedAt: now,
+					ExpiresAt: org.ExpiresAt,
+				})
+				if err != nil {
+					logger.KV(xlog.ERROR,
+						"email", org.Email,
+						"err", errors.Details(err))
+				}
 			}
 		}
 

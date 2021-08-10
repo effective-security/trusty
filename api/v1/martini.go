@@ -41,10 +41,12 @@ type ValidateOrgResponse struct {
 	Code     string             `json:"code"`
 }
 
-// ApproveOrgRequest specifies a request to validate an organization
+// ApproveOrgRequest specifies a request to approve an organization
 type ApproveOrgRequest struct {
 	Token string `json:"token"`
 	Code  string `json:"code"`
+	// Action specifies action: approve|deny|info
+	Action string `json:"action"`
 }
 
 // OrgResponse returns Organization
