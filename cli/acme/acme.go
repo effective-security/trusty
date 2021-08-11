@@ -71,7 +71,7 @@ func GetAccount(c ctl.Control, p interface{}) error {
 		}
 	}
 
-	hm, err := base64.StdEncoding.DecodeString(*flags.EabMAC)
+	hm, err := base64.RawURLEncoding.DecodeString(*flags.EabMAC)
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -153,7 +153,7 @@ func RegisterAccount(c ctl.Control, p interface{}) error {
 		}
 	}
 
-	hm, err := base64.StdEncoding.DecodeString(*flags.EabMAC)
+	hm, err := base64.RawStdEncoding.DecodeString(*flags.EabMAC)
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -268,7 +268,7 @@ func Order(c ctl.Control, p interface{}) error {
 	}
 
 	logger.Debugf("status=submitting_order, url=%s", account.Registration.OrdersURL)
-	order, orderURL, err := ac.Order(ctx, account.Registration, orderReq)
+	order, orderURL, err := ac.Order(ctx, account.Registration.OrdersURL, orderReq)
 	if err != nil {
 		return errors.Trace(err)
 	}
