@@ -36,6 +36,7 @@ func (s *Service) handleACMEHeaders(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set(header.ReplayNonce, nonce)
 		w.Header().Add(header.CacheControl, "public, max-age=0, no-cache")
+		w.Header().Add("Access-Control-Expose-Headers", "Location, Link, Replay-Nonce")
 	}
 }
 
