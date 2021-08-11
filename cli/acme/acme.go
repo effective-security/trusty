@@ -153,9 +153,9 @@ func RegisterAccount(c ctl.Control, p interface{}) error {
 		}
 	}
 
-	hm, err := base64.RawStdEncoding.DecodeString(*flags.EabMAC)
+	hm, err := base64.RawURLEncoding.DecodeString(*flags.EabMAC)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.Annotatef(err, "invalied EAB MAC key")
 	}
 
 	if account.Registration == nil {
@@ -267,8 +267,7 @@ func Order(c ctl.Control, p interface{}) error {
 		},
 	}
 
-	logger.Debugf("status=submitting_order, url=%s", account.Registration.OrdersURL)
-	order, orderURL, err := ac.Order(ctx, account.Registration.OrdersURL, orderReq)
+	order, orderURL, err := ac.Order(ctx, orderReq)
 	if err != nil {
 		return errors.Trace(err)
 	}
