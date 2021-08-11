@@ -65,9 +65,9 @@ func (c *Client) Account(ctx context.Context, orgID string, hmac []byte, contact
 }
 
 // Order submits the order
-func (c *Client) Order(ctx context.Context, acc *v2acme.Account, req *v2acme.OrderRequest) (*v2acme.Order, string, error) {
+func (c *Client) Order(ctx context.Context, url string, req *v2acme.OrderRequest) (*v2acme.Order, string, error) {
 	res := new(v2acme.Order)
-	hdr, _, err := c.signedRequest(ctx, acc.OrdersURL, req, res)
+	hdr, _, err := c.signedRequest(ctx, url, req, res)
 	if err != nil {
 		return nil, "", errors.Trace(err)
 	}

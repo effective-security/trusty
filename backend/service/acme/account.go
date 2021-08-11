@@ -75,7 +75,7 @@ func (s *Service) NewAccountHandler() rest.Handle {
 			return
 		}
 
-		hmac, _ := base64.StdEncoding.DecodeString(apikey.Key)
+		hmac, _ := base64.RawURLEncoding.DecodeString(apikey.Key)
 
 		// validate signature
 		_, err = signed.Verify(hmac)

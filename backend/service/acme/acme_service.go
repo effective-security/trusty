@@ -97,6 +97,7 @@ func (s *Service) RegisterRoute(r rest.Router) {
 
 	r.POST(uriNewAccount, s.NewAccountHandler())
 	r.POST(uriOrders, s.NewOrderHandler())
+	r.POST(uriNewOrder, s.NewOrderHandler())
 	r.POST(uriOrderByID, s.GetOrderHandler())
 	r.POST(uriAuthzByID, s.GetAuthorizationHandler())
 	r.POST(uriChallengeByID, s.PostChallengeHandler())

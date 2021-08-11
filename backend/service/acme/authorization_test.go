@@ -76,7 +76,7 @@ func TestPostChallengeHandlerFailed(t *testing.T) {
 	org, apikey := createOrg(t)
 	assert.Equal(t, "123456", org.ExternalID)
 
-	hmac, err := base64.StdEncoding.DecodeString(apikey.Key)
+	hmac, err := base64.RawURLEncoding.DecodeString(apikey.Key)
 	require.NoError(t, err)
 
 	newAccountURL := dir["newAccount"]

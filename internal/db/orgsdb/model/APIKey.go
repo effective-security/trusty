@@ -60,5 +60,5 @@ func ToAPIKeysDto(list []*APIKey) []v1.APIKey {
 
 // GenerateAPIKey returns random key
 func GenerateAPIKey() string {
-	return base64.StdEncoding.EncodeToString(certutil.Random(24))
+	return base64.RawURLEncoding.EncodeToString(certutil.Random(24))
 }
