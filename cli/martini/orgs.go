@@ -121,21 +121,31 @@ func RegisterOrg(c ctl.Control, p interface{}) error {
 
 // ApprovergFlags defines flags for ApproveOrg command
 type ApprovergFlags struct {
-	Token *string
-	Code  *string
+	Token  *string
+	Code   *string
+	Action *string
 }
 
 // ApproveOrg approves organization
 func ApproveOrg(c ctl.Control, p interface{}) error {
 	flags := p.(*ApprovergFlags)
-	cli := c.(*cli.Cli)
+	cl := c.(*cli.Cli)
 
-	client, err := cli.HTTPClient()
+	client, err := cl.HTTPClient()
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	res, err := client.ApproveOrg(context.Background(), *flags.Token, *flags.Code)
+	action := cli.String(flags.Action)
+	code := cli.String(flags.Code)
+	if action == "approve" && code == "" {
+		return errors.Errorf("approval action requires a code")
+	}
+
+	res, err := client.ApproveOrg(context.Background(),
+		cli.String(flags.Token),
+		code,
+		action)
 	if err != nil {
 		return errors.Trace(err)
 	}

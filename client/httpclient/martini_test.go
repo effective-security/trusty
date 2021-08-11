@@ -384,7 +384,7 @@ func TestApproveOrg(t *testing.T) {
 		_ = interface{}(client).(API)
 	})
 
-	r, err := client.ApproveOrg(context.Background(), "UZTBCIDb6j_aBpZf", "496017")
+	r, err := client.ApproveOrg(context.Background(), "UZTBCIDb6j_aBpZf", "496017", "approve")
 	require.NoError(t, err)
 	require.NotNil(t, r)
 	assert.Equal(t, v1.OrgStatusApproved, r.Org.Status)

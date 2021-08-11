@@ -84,11 +84,11 @@ func (c *Client) RegisterOrg(ctx context.Context, filerID string) (*v1.OrgRespon
 }
 
 // ApproveOrg approves Org registration
-func (c *Client) ApproveOrg(ctx context.Context, token, code string) (*v1.OrgResponse, error) {
+func (c *Client) ApproveOrg(ctx context.Context, token, code, action string) (*v1.OrgResponse, error) {
 	req := &v1.ApproveOrgRequest{
 		Token:  token,
 		Code:   code,
-		Action: "approve",
+		Action: action,
 	}
 
 	res := new(v1.OrgResponse)

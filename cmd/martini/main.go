@@ -101,6 +101,20 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	orgApproveFlags.Token = cmdApproveOrg.Flag("token", "approver's token").Required().String()
 	orgApproveFlags.Code = cmdApproveOrg.Flag("code", "requestor's code").Required().String()
 
+	orgDenyFlags := new(martini.ApprovergFlags)
+	cmdDenyOrg := cmdOrgs.Command("deny", "deny organization validation").
+		Action(cli.RegisterAction(martini.ApproveOrg, orgDenyFlags))
+	orgDenyFlags.Token = cmdDenyOrg.Flag("token", "approver's token").Required().String()
+	deny := "deny"
+	orgDenyFlags.Action = &deny
+
+	orgInfoFlags := new(martini.ApprovergFlags)
+	cmdInfoOrg := cmdOrgs.Command("info", "info organization request").
+		Action(cli.RegisterAction(martini.ApproveOrg, orgInfoFlags))
+	orgInfoFlags.Token = cmdInfoOrg.Flag("token", "approver's token").Required().String()
+	info := "info"
+	orgInfoFlags.Action = &info
+
 	orgValidateFlags := new(martini.ValidateFlags)
 	cmdValidateOrg := cmdOrgs.Command("validate", "approve organization validation").
 		Action(cli.RegisterAction(martini.ValidateOrg, orgValidateFlags))
