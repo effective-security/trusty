@@ -3,7 +3,6 @@ package acme
 import (
 	"bytes"
 	"crypto/x509"
-	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
@@ -228,13 +227,7 @@ func (s *Service) FinalizeOrderHandler() rest.Handle {
 			return
 		}
 
-		// Check for a malformed CSR early
-		csrDer, err := base64.RawURLEncoding.DecodeString(string(req.CSR))
-		if err != nil {
-			s.writeProblem(w, r, v2acme.MalformedError("unable to decode CSR").WithSource(err))
-			return
-		}
-		csr, err := x509.ParseCertificateRequest(csrDer)
+		csr, err := x509.ParseCertificateRequest(req.CSR)
 		if err != nil {
 			s.writeProblem(w, r, v2acme.MalformedError("unable to parse CSR").WithSource(err))
 			return
