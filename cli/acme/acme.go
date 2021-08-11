@@ -344,7 +344,7 @@ func Order(c ctl.Control, p interface{}) error {
 	certRequest, _ := x509.ParseCertificateRequest(block.Bytes)
 
 	creq := v2acme.CertificateRequest{
-		CSR: v2acme.JoseBuffer(base64.RawURLEncoding.EncodeToString(certRequest.Raw)),
+		CSR: certRequest.Raw,
 	}
 
 	order, err = ac.Finalize(ctx, order.FinalizeURL, creq)

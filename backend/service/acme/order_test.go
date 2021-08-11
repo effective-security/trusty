@@ -208,7 +208,7 @@ func TestNewOrderHandler(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		creq := v2acme.CertificateRequest{
-			CSR: v2acme.JoseBuffer(base64.RawURLEncoding.EncodeToString(certRequest.Raw)),
+			CSR: []byte(certRequest.Raw),
 		}
 
 		r := signAndPost(t, order.FinalizeURL, creq, acctURL, clientKey1, svc)
@@ -297,4 +297,12 @@ func getOrder(t *testing.T, keyID string, clientKey interface{}, orderURL string
 	require.NoError(t, err)
 
 	return o, locationURL
+}
+
+func TestDecodeCSR(t *testing.T) {
+	csrDer, err := base64.RawURLEncoding.DecodeString("MIHkMIGLAgEAMAAwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAR4gRKMyQPQDj9c82D101zLCq_sdjt16hTpFGdR-06-hm8RIyVLQIYIWEkW3b4uTaL8B7HnAbWn4dXZYMM5i-3CoCkwJwYJKoZIhvcNAQkOMRowGDAWBggrBgEFBQcBGgQKMAigBhYENzA5SjAKBggqhkjOPQQDAgNIADBFAiBJvglNCRD19uvB_-1FAiCeCRhRgDZf93LlDOoFLzEgVwIhAOCuXi3bvyJOcljMbl__CcMHYAVQS4mW8P50Ct5eU2De")
+	require.NoError(t, err)
+
+	_, err = x509.ParseCertificateRequest(csrDer)
+	require.NoError(t, err)
 }
