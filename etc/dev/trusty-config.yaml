@@ -145,6 +145,9 @@ servers:
         - User-Agent
         - Referer
         - X-Device-ID
+        - Location
+        - Link
+        - Replay-Nonce
         - sec-ch-ua
         - sec-ch-ua-mobile
         - sec-fetch-dest
