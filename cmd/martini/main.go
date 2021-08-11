@@ -86,7 +86,7 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		Action(cli.RegisterAction(martini.FccContact, fccContactFlags))
 	fccContactFlags.FRN = cmdFccContact.Flag("frn", "FRN to query").Required().String()
 
-	// org register|validate|approve|subscribe|keys
+	// org register|validate|approve|subscribe|keys|members
 	cmdOrgs := app.Command("org", "Orgs operations").
 		PreAction(cli.PopulateControl)
 
@@ -136,6 +136,11 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	cmdOrgAPIKeys := cmdOrgs.Command("keys", "list API keys").
 		Action(cli.RegisterAction(martini.APIKeys, orgAPIKeysFlags))
 	orgAPIKeysFlags.OrgID = cmdOrgAPIKeys.Flag("org", "organization ID").Required().String()
+
+	orgMembersFlags := new(martini.OrgMembersFlags)
+	cmdOrgMembers := cmdOrgs.Command("members", "list members").
+		Action(cli.RegisterAction(martini.OrgMembers, orgMembersFlags))
+	orgMembersFlags.OrgID = cmdOrgMembers.Flag("org", "organization ID").Required().String()
 
 	// acme account|order
 	cmdAcme := app.Command("acme", "ACME operations").

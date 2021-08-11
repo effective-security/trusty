@@ -269,6 +269,26 @@ bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pe
 }
 ```
 
+## Get Org members
+
+```.sh
+bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_dev_root_ca.pem org members --org 82936541768319076                  
+{
+    "members": [
+        {
+            "email": "denis@ekspand.com",
+            "membership_id": "85334042257457478",
+            "name": "Denis Issoupov",
+            "org_id": "85334042257391942",
+            "org_name": "LOW LATENCY COMMUNICATIONS LLC",
+            "role": "admin",
+            "source": "martini",
+            "user_id": "85232539848933702"
+        }
+    ]
+}
+```
+
 ## Register ACME account
 
 ```.sh

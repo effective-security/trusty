@@ -39,6 +39,17 @@ func (c *Client) Orgs(ctx context.Context) (*v1.OrgsResponse, error) {
 	return r, nil
 }
 
+// OrgMembers returns org members
+func (c *Client) OrgMembers(ctx context.Context, orgID string) (*v1.OrgMembersResponse, error) {
+	r := new(v1.OrgMembersResponse)
+	mp := strings.Replace(v1.PathForMartiniOrgMembers, ":org_id", orgID, 1)
+	_, _, err := c.Get(ctx, mp, r)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return r, nil
+}
+
 // Certificates returns user's Certificates
 func (c *Client) Certificates(ctx context.Context) (*v1.CertificatesResponse, error) {
 	r := new(v1.CertificatesResponse)

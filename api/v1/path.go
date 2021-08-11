@@ -177,6 +177,12 @@ const (
 	// Response: v1.OrgsResponse
 	PathForMartiniOrgs = "/v1/ms/orgs"
 
+	// PathForMartiniOrgMembers provides orgs the user belongs to
+	//
+	// Verbs: GET|POST
+	// Response: v1.GetOrgMembersResponse
+	PathForMartiniOrgMembers = "/v1/ms/members/:org_id"
+
 	// PathForMartiniCerts provides certs from all orgs the user belongs to
 	//
 	// Verbs: GET

@@ -100,6 +100,10 @@ func TestOrgMemberInfo(t *testing.T) {
 	assert.Equal(t, "email", dto.Email)
 	assert.Equal(t, "role", dto.Role)
 	assert.Equal(t, "source", dto.Source)
+
+	l := model.ToMembertsDto([]*model.OrgMemberInfo{u})
+	require.Len(t, l, 1)
+	assert.Equal(t, *dto, *l[0])
 }
 
 func TestOrgMembership(t *testing.T) {
