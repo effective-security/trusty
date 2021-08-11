@@ -54,3 +54,12 @@ func (o *OrgMemberInfo) GetSource() string {
 	}
 	return ""
 }
+
+// ToMembertsDto returns list of members
+func ToMembertsDto(list []*OrgMemberInfo) []*v1.OrgMemberInfo {
+	res := make([]*v1.OrgMemberInfo, len(list))
+	for i, m := range list {
+		res[i] = m.ToDto()
+	}
+	return res
+}

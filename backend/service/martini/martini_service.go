@@ -72,6 +72,7 @@ func (s *Service) DisableEmail() {
 func (s *Service) RegisterRoute(r rest.Router) {
 	r.GET(v1.PathForMartiniSearchCorps, s.SearchCorpsHandler())
 	r.GET(v1.PathForMartiniOrgs, s.GetOrgsHandler())
+	r.GET(v1.PathForMartiniOrgMembers, s.GetOrgMembersHandler())
 	r.GET(v1.PathForMartiniCerts, s.GetCertsHandler())
 	r.GET(v1.PathForMartiniOrgAPIKeys, s.GetOrgAPIKeysHandler())
 	r.POST(v1.PathForMartiniRegisterOrg, s.RegisterOrgHandler())

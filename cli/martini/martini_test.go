@@ -128,3 +128,13 @@ func (s *testSuite) TestAPIKeys() {
 	s.NoError(err)
 	s.HasText(`"key": "_0zxP8c4AUrj_vnPmGXU_eEbA3AzkTXZ",`)
 }
+
+func (s *testSuite) TestOrgMembers() {
+	org := "85334042257391942"
+	flags := martini.OrgMembersFlags{
+		OrgID: &org,
+	}
+	err := s.Run(martini.OrgMembers, &flags)
+	s.NoError(err)
+	s.HasText(`"name": "Denis Issoupov"`)
+}

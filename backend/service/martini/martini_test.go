@@ -162,6 +162,36 @@ func TestGetOrgsHandler(t *testing.T) {
 	assert.Empty(t, res.Orgs)
 }
 
+func TestGetOrgsMembers(t *testing.T) {
+	svc := trustyServer.Service(martini.ServiceName).(*martini.Service)
+	mp := strings.Replace(v1.PathForMartiniOrgMembers, ":org_id", "23456", 1)
+	r, err := http.NewRequest(http.MethodGet, mp, nil)
+	require.NoError(t, err)
+
+	w := httptest.NewRecorder()
+	svc.GetOrgMembersHandler()(w, r, rest.Params{
+		{
+			Key:   "org_id",
+			Value: "invalid",
+		},
+	})
+	require.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, `{"code":"invalid_parameter","message":"invalid org_id"}`, w.Body.String())
+
+	w = httptest.NewRecorder()
+	svc.GetOrgMembersHandler()(w, r, rest.Params{
+		{
+			Key:   "org_id",
+			Value: "1234567",
+		},
+	})
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var mres v1.OrgMembersResponse
+	require.NoError(t, marshal.Decode(w.Body, &mres))
+	assert.Empty(t, mres.Members)
+}
+
 func TestGetCertsHandler(t *testing.T) {
 	ctx := context.Background()
 	svc := trustyServer.Service(martini.ServiceName).(*martini.Service)
@@ -515,4 +545,23 @@ func TestRegisterOrgFullFlow(t *testing.T) {
 	var kres v1.GetOrgAPIKeysResponse
 	require.NoError(t, marshal.Decode(w.Body, &kres))
 	assert.NotEmpty(t, kres.Keys)
+
+	// Org members
+	mp := strings.Replace(v1.PathForMartiniOrgMembers, ":org_id", res.Org.ID, 1)
+	r, err = http.NewRequest(http.MethodGet, mp, nil)
+	require.NoError(t, err)
+	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+	w = httptest.NewRecorder()
+	svc.GetOrgMembersHandler()(w, r, rest.Params{
+		{
+			Key:   "org_id",
+			Value: res.Org.ID,
+		},
+	})
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var mres v1.OrgMembersResponse
+	require.NoError(t, marshal.Decode(w.Body, &mres))
+	assert.NotEmpty(t, mres.Members)
 }

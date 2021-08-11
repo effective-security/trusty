@@ -74,6 +74,11 @@ func ID(id string) (uint64, error) {
 	return i64, nil
 }
 
+// IDString returns string id
+func IDString(id uint64) string {
+	return strconv.FormatUint(id, 10)
+}
+
 // IsNotFoundError returns true, if error is NotFound
 func IsNotFoundError(err error) bool {
 	return strings.HasPrefix(err.Error(), "sql: no rows in result set")

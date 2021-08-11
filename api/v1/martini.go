@@ -63,3 +63,8 @@ type CreateSubscriptionRequest struct {
 	CCName            string `json:"cc_cardholder"`
 	SubscriptionYears int    `json:"years"`
 }
+
+// OrgMembersResponse returns Orgs members
+type OrgMembersResponse struct {
+	Members []*OrgMemberInfo `json:"members"`
+}

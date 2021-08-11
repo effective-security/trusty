@@ -69,6 +69,31 @@ func (s *Service) GetOrgsHandler() rest.Handle {
 	}
 }
 
+// GetOrgMembersHandler returns org members
+func (s *Service) GetOrgMembersHandler() rest.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
+		_ = identity.FromRequest(r).Identity()
+
+		orgID, err := db.ID(p.ByName("org_id"))
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithInvalidParam("invalid org_id").WithCause(err))
+			return
+		}
+
+		list, err := s.db.GetOrgMembers(r.Context(), orgID)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to get orgs: %s", err.Error()).WithCause(err))
+			return
+		}
+
+		res := v1.OrgMembersResponse{
+			Members: model.ToMembertsDto(list),
+		}
+
+		marshal.WriteJSON(w, r, res)
+	}
+}
+
 // GetOrgAPIKeysHandler returns API keys
 func (s *Service) GetOrgAPIKeysHandler() rest.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {

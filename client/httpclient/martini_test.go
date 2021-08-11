@@ -137,6 +137,39 @@ func TestCerts(t *testing.T) {
 	assert.Equal(t, uint64(84463188229292132), c.ID)
 }
 
+func TestOrgMembers(t *testing.T) {
+
+	h := makeTestHandler(t, "/v1/ms/members/123456", `{
+	"members": [
+		{
+			"email": "denis@ekspand.com",
+			"membership_id": "85334042257457478",
+			"name": "Denis Issoupov",
+			"org_id": "85334042257391942",
+			"org_name": "LOW LATENCY COMMUNICATIONS LLC",
+			"role": "admin",
+			"source": "martini",
+			"user_id": "85232539848933702"
+		}
+	]
+}`)
+	server := httptest.NewServer(h)
+	defer server.Close()
+
+	client, err := New(NewConfig(), []string{server.URL})
+	assert.NoError(t, err, "Unexpected error.")
+
+	require.NotPanics(t, func() {
+		// ensure compiles
+		_ = interface{}(client).(API)
+	})
+
+	r, err := client.OrgMembers(context.Background(), "123456")
+	require.NoError(t, err)
+	require.NotNil(t, r)
+	assert.Len(t, r.Members, 1)
+}
+
 func TestFccFRN(t *testing.T) {
 
 	h := makeTestHandler(t, v1.PathForMartiniFccFrn+"?filer_id=0024926677", `{
