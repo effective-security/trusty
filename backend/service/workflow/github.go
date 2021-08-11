@@ -21,8 +21,9 @@ func (s *Service) githubClient(ctx context.Context, user *model.User) *github.Cl
 	conf := &oauth2.Config{
 		ClientID:     o.ClientID,
 		ClientSecret: o.ClientSecret,
-		RedirectURL:  s.cfg.TrustyClient.ServerURL[config.WFEServerName][0] + v1.PathForAuthGithubCallback,
-		Scopes:       o.Scopes,
+		// TODO: service.GetPublicServerURL(r, v1.PathForAuthGithubCallback).String()
+		RedirectURL: s.cfg.TrustyClient.ServerURL[config.WFEServerName][0] + v1.PathForAuthGithubCallback,
+		Scopes:      o.Scopes,
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  o.AuthURL,
 			TokenURL: o.TokenURL,
