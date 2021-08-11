@@ -436,3 +436,11 @@ func ReadStdin(filename string) ([]byte, error) {
 	}
 	return ioutil.ReadFile(filename)
 }
+
+// String returns string from a pointer
+func String(ptr *string) string {
+	if ptr != nil {
+		return *ptr
+	}
+	return ""
+}

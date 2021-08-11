@@ -55,7 +55,7 @@ func Authenticate(c ctl.Control, p interface{}) error {
 	if flags.Provider == nil || *flags.Provider == "" {
 		return errors.New("please specify --provider parameter")
 	}
-	noBrowser := flags.NoBrowser == nil || !*flags.NoBrowser
+	noBrowser := flags.NoBrowser != nil && !*flags.NoBrowser
 
 	var wg sync.WaitGroup
 	handler := func(w http.ResponseWriter, r *http.Request) {
