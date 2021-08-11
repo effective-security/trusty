@@ -43,9 +43,9 @@ func TestFactory(t *testing.T) {
 	f = client.NewFactory(&config.TrustyClient{
 		ServerURL: map[string][]string{"ca": {"https://host1"}},
 		ClientTLS: config.TLSInfo{
-			CertFile:      "/tmp/trusty/certs/trusty_dev_client.pem",
-			KeyFile:       "/tmp/trusty/certs/trusty_dev_client-key.pem",
-			TrustedCAFile: "/tmp/trusty/certs/trusty_dev_root_ca.pem",
+			CertFile:      "/tmp/trusty/certs/trusty_client.pem",
+			KeyFile:       "/tmp/trusty/certs/trusty_client.key",
+			TrustedCAFile: "/tmp/trusty/certs/trusty_root_ca.pem",
 		},
 	})
 	c, err = f.NewClient("ca")

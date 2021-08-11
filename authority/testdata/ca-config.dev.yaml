@@ -16,12 +16,12 @@ authority:
     label: TrustyCA
     # specifies type: tls|codesign|timestamp|ocsp|spiffe|trusty
     type: trusty
-    cert: /tmp/trusty/certs/trusty_dev_issuer2_ca.pem
-    key: /tmp/trusty/certs/trusty_dev_issuer2_ca-key.pem
+    cert: /tmp/trusty/certs/trusty_l2_ca.pem
+    key: /tmp/trusty/certs/trusty_l2_ca.key
     # location of the CA bundle file
-    ca_bundle: /tmp/trusty/certs/trusty_dev_cabundle.pem
+    ca_bundle: /tmp/trusty/certs/trusty_cabundle.pem
     # location of the Root CA file
-    root_bundle: /tmp/trusty/certs/trusty_dev_root_ca.pem
+    root_bundle: /tmp/trusty/certs/trusty_root_ca.pem
     aia: #empty
       issuer_url:
       crl_url:

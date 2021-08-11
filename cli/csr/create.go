@@ -82,7 +82,7 @@ func SaveCert(baseName string, key, csrPEM, certPEM []byte) error {
 		}
 	}
 	if len(key) > 0 {
-		err = ioutil.WriteFile(baseName+"-key.pem", key, 0600)
+		err = ioutil.WriteFile(baseName+".key", key, 0600)
 		if err != nil {
 			return errors.Trace(err)
 		}

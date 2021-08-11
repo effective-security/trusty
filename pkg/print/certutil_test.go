@@ -23,7 +23,7 @@ import (
 )
 
 func Test_PrintCerts(t *testing.T) {
-	certsRaw, err := ioutil.ReadFile("/tmp/trusty/certs/trusty_dev_peer_wfe.pem")
+	certsRaw, err := ioutil.ReadFile("/tmp/trusty/certs/trusty_peer_wfe.pem")
 	require.NoError(t, err)
 
 	certs, err := helpers.ParseCertificatesPEM(certsRaw)

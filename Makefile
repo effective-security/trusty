@@ -107,19 +107,19 @@ hsmconfig:
 gen_test_certs:
 	echo "*** Running gen_test_certs"
 	echo "*** generating test CAs"
-	tar -xzvf $(PROJ_ROOT)/etc/dev/roots/trusty_dev_root_ca-key.pem.tar.gz -C $(PROJ_ROOT)/etc/dev/roots/
-	./scripts/build/gen_test_certs.sh \
+	tar -xzvf $(PROJ_ROOT)/etc/dev/roots/trusty_root_ca.key.tar.gz -C $(PROJ_ROOT)/etc/dev/roots/
+	./scripts/build/gen_certs.sh \
 		--hsm-config /tmp/trusty/softhsm/unittest_hsm.json \
 		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.yaml \
 		--out-dir /tmp/trusty/certs \
 		--csr-dir $(PROJ_ROOT)/etc/dev/csr_profile \
-		--csr-prefix trusty_dev_ \
-		--out-prefix trusty_dev_ \
+		--csr-prefix trusty_ \
+		--out-prefix trusty_ \
 		--key-label test_ \
-		--root-ca $(PROJ_ROOT)/etc/dev/roots/trusty_dev_root_ca.pem \
-		--root-ca-key $(PROJ_ROOT)/etc/dev/roots/trusty_dev_root_ca-key.pem \
+		--root-ca $(PROJ_ROOT)/etc/dev/roots/trusty_root_ca.pem \
+		--root-ca-key $(PROJ_ROOT)/etc/dev/roots/trusty_root_ca.key \
 		--ca1 --ca2  --bundle --peer --client --force
-	cp $(PROJ_ROOT)/etc/dev/roots/trusty_dev_root_ca.pem /tmp/trusty/certs/trusty_dev_root_ca.pem
+	cp $(PROJ_ROOT)/etc/dev/roots/trusty_root_ca.pem /tmp/trusty/certs/trusty_root_ca.pem
 
 gen_martini_certs:
 	echo "*** Running gen_martini_certs"
@@ -128,10 +128,10 @@ gen_martini_certs:
 		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.yaml \
 		--out-dir /tmp/trusty/certs \
 		--csr-dir $(PROJ_ROOT)/etc/dev/csr_profile \
-		--csr-prefix martini_dev_ \
+		--csr-prefix martini_ \
 		--out-prefix martini_ \
 		--root-ca /tmp/trusty/certs/martini_root_ca.pem \
-		--root-ca-key /tmp/trusty/certs/martini_root_ca-key.pem \
+		--root-ca-key /tmp/trusty/certs/martini_root_ca.key \
 		--root --ca --bundle --force
 
 start-local-kms:

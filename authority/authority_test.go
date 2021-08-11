@@ -13,12 +13,12 @@ import (
 )
 
 const (
-	ca1CertFile    = "/tmp/trusty/certs/trusty_dev_issuer2_ca.pem"
-	ca1KeyFile     = "/tmp/trusty/certs/trusty_dev_issuer2_ca-key.pem"
-	ca2CertFile    = "/tmp/trusty/certs/trusty_dev_issuer2_ca.pem"
-	ca2KeyFile     = "/tmp/trusty/certs/trusty_dev_issuer2_ca-key.pem"
-	caBundleFile   = "/tmp/trusty/certs/trusty_dev_cabundle.pem"
-	rootBundleFile = "/tmp/trusty/certs/trusty_dev_root_ca.pem"
+	ca1CertFile    = "/tmp/trusty/certs/trusty_l1_ca.pem"
+	ca1KeyFile     = "/tmp/trusty/certs/trusty_l1_ca.key"
+	ca2CertFile    = "/tmp/trusty/certs/trusty_l2_ca.pem"
+	ca2KeyFile     = "/tmp/trusty/certs/trusty_l2_ca.key"
+	caBundleFile   = "/tmp/trusty/certs/trusty_cabundle.pem"
+	rootBundleFile = "/tmp/trusty/certs/trusty_root_ca.pem"
 )
 
 var (

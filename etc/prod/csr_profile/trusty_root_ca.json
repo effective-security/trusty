@@ -1,5 +1,5 @@
 {
-    "common_name": "[TEST] Trusty Root CA",
+    "common_name": "Trusty Private Root CA",
     "key": {
         "algo": "ecdsa",
         "size": 384
@@ -8,7 +8,7 @@
         {
             "C": "US",
             "L": "WA",
-            "O": "trusty.com"
+            "O": "trusty.ekspand.com"
         }
     ]
 }

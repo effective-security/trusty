@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# gen_test_certs.sh
+# gen_martini_certs.sh
 #   --out-dir {dir}         - specifies output folder
 #   --out-prefix {prefix}   - specifies prefix for output files
 #   --csr-dir {dir}         - specifies folder with CSR templates
@@ -96,7 +96,7 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 [ -z "$CA_CONFIG" ] && echo "Specify --ca-config" && exit 1
 [ -z "$HSM_CONFIG" ] && echo "Specify --hsm-config" && exit 1
 [ -z "$ROOT_CA_CERT" ] && ROOT_CA_CERT=${OUT_DIR}/${OUT_PREFIX}root_ca.pem
-[ -z "$ROOT_CA_KEY" ] && ROOT_CA_KEY=${OUT_DIR}/${OUT_PREFIX}root_ca-key.pem
+[ -z "$ROOT_CA_KEY" ] && ROOT_CA_KEY=${OUT_DIR}/${OUT_PREFIX}root_ca.key
 [ -z "$SAN" ] && SAN=127.0.0.1
 
 HOSTNAME=`hostname`
@@ -124,7 +124,7 @@ if [[ "$ROOTCA" == "YES" && ("$FORCE" == "YES" || ! -f ${ROOT_CA_KEY}) ]]; then 
         --out ${ROOT_CA_CERT/.pem/''}
 fi
 
-if [[ "$CA" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}ca-key.pem) ]]; then
+if [[ "$CA" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}ca.key) ]]; then
     echo "*** generating CA cert"
     trusty-tool \
         --hsm-cfg=${HSM_CONFIG} \

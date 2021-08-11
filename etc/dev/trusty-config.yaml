@@ -2,7 +2,7 @@
 # specifies the Region / Datacenter where the instance is running
 region: dev
 # specifies the environment where the instance is running: prod|stage|dev
-environment: test
+environment: dev
 # specifies the service name (to be used in logs, metrics, etc)
 service: trusty
 # specifies the cluster name
@@ -96,12 +96,10 @@ authority: ${TRUSTY_CONFIG_DIR}/ca-config.dev.yaml
 ra:
   # the list of private Root Certs files.
   private_roots:
-    - ${TRUSTY_CONFIG_DIR}/roots/trusty_dev_root_ca.pem
     - ${TRUSTY_CONFIG_DIR}/roots/trusty_root_ca.pem
   # the list of public Root Certs files.
   public_roots:
     - ${TRUSTY_CONFIG_DIR}/roots/martini_root_ca.pem
-    - ${TRUSTY_CONFIG_DIR}/roots/martini_dev_root_ca.pem
 
 servers:
   cis:
@@ -185,9 +183,9 @@ servers:
       - https://0.0.0.0:7891
     client_url: https://localhost:7891
     server_tls:
-      cert: /tmp/trusty/certs/trusty_dev_peer_wfe.pem
-      key: /tmp/trusty/certs/trusty_dev_peer_wfe-key.pem
-      trusted_ca: ${TRUSTY_CONFIG_DIR}/roots/trusty_dev_root_ca.pem
+      cert: /tmp/trusty/certs/trusty_peer_wfe.pem
+      key: /tmp/trusty/certs/trusty_peer_wfe.key
+      trusted_ca: ${TRUSTY_CONFIG_DIR}/roots/trusty_root_ca.pem
       # client_cert_auth: true
     services:
       - acme
@@ -259,9 +257,9 @@ servers:
       - https://0.0.0.0:7892
     client_url: https://localhost:7892
     server_tls:
-      cert: /tmp/trusty/certs/trusty_dev_peer_ca.pem
-      key: /tmp/trusty/certs/trusty_dev_peer_ca-key.pem
-      trusted_ca: ${TRUSTY_CONFIG_DIR}/roots/trusty_dev_root_ca.pem
+      cert: /tmp/trusty/certs/trusty_peer_ca.pem
+      key: /tmp/trusty/certs/trusty_peer_ca.key
+      trusted_ca: ${TRUSTY_CONFIG_DIR}/roots/trusty_root_ca.pem
       client_cert_auth: true
     services:
       - status
@@ -333,9 +331,9 @@ servers:
       - https://0.0.0.0:7893
     client_url: https://localhost:7893
     server_tls:
-      cert: /tmp/trusty/certs/trusty_dev_peer_ra.pem
-      key: /tmp/trusty/certs/trusty_dev_peer_ra-key.pem
-      trusted_ca: ${TRUSTY_CONFIG_DIR}/roots/trusty_dev_root_ca.pem
+      cert: /tmp/trusty/certs/trusty_peer_ra.pem
+      key: /tmp/trusty/certs/trusty_peer_ra.key
+      trusted_ca: ${TRUSTY_CONFIG_DIR}/roots/trusty_root_ca.pem
       client_cert_auth: true
     services:
       - status
@@ -398,9 +396,9 @@ servers:
 
 trusty_client: 
   client_tls:
-    cert: /tmp/trusty/certs/trusty_dev_client.pem
-    key: /tmp/trusty/certs/trusty_dev_client-key.pem
-    trusted_ca: ${TRUSTY_CONFIG_DIR}/roots/trusty_dev_root_ca.pem
+    cert: /tmp/trusty/certs/trusty_client.pem
+    key: /tmp/trusty/certs/trusty_client.key
+    trusted_ca: ${TRUSTY_CONFIG_DIR}/roots/trusty_root_ca.pem
   server_url:
     cis: ["http://localhost:7880"]
     wfe: ["https://localhost:7891"]

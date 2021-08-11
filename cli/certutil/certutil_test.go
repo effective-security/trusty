@@ -188,7 +188,7 @@ func (s *testSuite) Test_CertInfo() {
 	s.Require().Error(err)
 	s.Equal("unable to load PEM file: open notfound: no such file or directory", err.Error())
 
-	js := projFolder + "etc/dev/csr_profile/trusty_dev_peer.json"
+	js := projFolder + "etc/dev/csr_profile/trusty_peer.json"
 	err = s.Run(certutil.CertInfo, &certutil.CertInfoFlags{
 		In:  &js,
 		Out: &out,
@@ -312,8 +312,8 @@ func (s *testSuite) Test_ValidateCA_notfound() {
 }
 
 func (s *testSuite) Test_ValidateCA_untrusted() {
-	cert := "/tmp/trusty/certs/trusty_dev_issuer2_ca.pem"
-	caBundle := "/tmp/trusty/certs/trusty_dev_issuer2_ca.pem"
+	cert := "/tmp/trusty/certs/trusty_l2_ca.pem"
+	caBundle := "/tmp/trusty/certs/trusty_l2_ca.pem"
 	rootBundle := "/tmp/trusty/certs/martini_root_ca.pem"
 	err := s.Run(certutil.Validate, &certutil.ValidateFlags{
 		Cert: &cert,
