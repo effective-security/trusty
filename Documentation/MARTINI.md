@@ -33,6 +33,9 @@ Commands:
   orgs
     show the user's orgs
 
+  certificates
+    show the user's certificates
+
   opencorps --name=NAME [<flags>]
     search open corporations
 
@@ -48,11 +51,29 @@ Commands:
   org approve --token=TOKEN --code=CODE
     approve organization validation
 
+  org deny --token=TOKEN
+    deny organization validation
+
+  org info --token=TOKEN
+    info organization request
+
   org validate --org=ORG
     approve organization validation
 
   org subscribe --org=ORG --cardholder=CARDHOLDER --cc=CC --expiry=EXPIRY --cvv=CVV --years=YEARS
     create subscription
+
+  org keys --org=ORG
+    list API keys
+
+  acme account --org=ORG --key=KEY
+    show registered account
+
+  acme register --org=ORG --key=KEY --contact=CONTACT
+    register account
+
+  acme order --org=ORG --spc=SPC
+    order certificate
 
 ```
 

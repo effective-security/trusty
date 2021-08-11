@@ -286,14 +286,9 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 		logger.KV(xlog.DEBUG, "user", user)
 
 		dto := user.ToDto()
-		// initial token is valid for 1 min, the client has to refresh it
-		validFor := time.Minute
-		if oauthStatus.DeviceID == s.server.Hostname() {
-			// on the same host where the server is running on, allow for 8 hours
-			validFor = 8 * 60 * time.Minute
-			logger.Noticef("device=%s, email=%s, token_valid_for=%v",
-				oauthStatus.DeviceID, uemail, validFor)
-		}
+		validFor := 8 * 60 * time.Minute
+		logger.Noticef("device=%s, email=%s, token_valid_for=%v",
+			oauthStatus.DeviceID, uemail, validFor)
 
 		audience := s.server.Configuration().IdentityMap.JWT.Audience
 		tokenStr, _, err := s.jwt.SignToken(dto.ID, user.Email, audience, validFor)
@@ -425,14 +420,9 @@ func (s *Service) GoogleCallbackHandler() rest.Handle {
 		logger.KV(xlog.DEBUG, "user", user)
 
 		dto := user.ToDto()
-		// initial token is valid for 1 min, the client has to refresh it
-		validFor := time.Minute
-		if oauthStatus.DeviceID == s.server.Hostname() {
-			// on the same host where the server is running on, allow for 8 hours
-			validFor = 8 * 60 * time.Minute
-			logger.Noticef("device=%s, email=%s, token_valid_for=%v",
-				oauthStatus.DeviceID, uemail, validFor)
-		}
+		validFor := 8 * 60 * time.Minute
+		logger.Noticef("device=%s, email=%s, token_valid_for=%v",
+			oauthStatus.DeviceID, uemail, validFor)
 
 		audience := s.server.Configuration().IdentityMap.JWT.Audience
 		tokenStr, _, err := s.jwt.SignToken(dto.ID, user.Email, audience, validFor)
