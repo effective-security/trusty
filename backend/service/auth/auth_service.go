@@ -10,6 +10,7 @@ import (
 	"time"
 
 	v1 "github.com/ekspand/trusty/api/v1"
+	"github.com/ekspand/trusty/backend/service"
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/internal/db/orgsdb"
@@ -165,7 +166,7 @@ func (s *Service) AuthURLHandler() rest.Handle {
 		conf := &oauth2.Config{
 			ClientID:     o.ClientID,
 			ClientSecret: o.ClientSecret,
-			RedirectURL:  s.cfg.TrustyClient.ServerURL[config.WFEServerName][0] + redirectURLCallback,
+			RedirectURL:  service.GetPublicServerURL(r, redirectURLCallback).String(),
 			Scopes:       o.Scopes,
 			Endpoint: oauth2.Endpoint{
 				AuthURL:  o.AuthURL,
@@ -218,7 +219,7 @@ func (s *Service) GithubCallbackHandler() rest.Handle {
 		conf := &oauth2.Config{
 			ClientID:     o.ClientID,
 			ClientSecret: o.ClientSecret,
-			RedirectURL:  s.cfg.TrustyClient.ServerURL[config.WFEServerName][0] + v1.PathForAuthGithubCallback,
+			RedirectURL:  service.GetPublicServerURL(r, v1.PathForAuthGithubCallback).String(),
 			Scopes:       o.Scopes,
 			Endpoint: oauth2.Endpoint{
 				AuthURL:  o.AuthURL,
@@ -349,7 +350,7 @@ func (s *Service) GoogleCallbackHandler() rest.Handle {
 		conf := &oauth2.Config{
 			ClientID:     o.ClientID,
 			ClientSecret: o.ClientSecret,
-			RedirectURL:  s.cfg.TrustyClient.ServerURL[config.WFEServerName][0] + v1.PathForAuthGoogleCallback,
+			RedirectURL:  service.GetPublicServerURL(r, v1.PathForAuthGoogleCallback).String(),
 			Scopes:       o.Scopes,
 			Endpoint: oauth2.Endpoint{
 				AuthURL:  o.AuthURL,

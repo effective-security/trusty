@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/ekspand/trusty/api/v2acme"
+	"github.com/ekspand/trusty/backend/service"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/go-phorce/dolly/xpki/certutil"
@@ -55,7 +56,7 @@ func (s *Service) DirectoryHandler() rest.Handle {
 
 		baseURL := cfg.Service.BaseURI
 		if baseURL == "" {
-			baseURL = s.cfg.TrustyClient.ServerURL["wfe"][0]
+			baseURL = service.GetPublicServerURL(r, "").String()
 		}
 
 		directoryEndpoints := map[string]interface{}{
