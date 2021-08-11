@@ -103,7 +103,7 @@ func (s *Service) ApproveOrgHandler() rest.Handle {
 
 		org, err := s.db.GetOrgFromApprovalToken(ctx, req.Token)
 		if err != nil {
-			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to find organization").WithCause(err))
+			marshal.WriteJSON(w, r, httperror.WithNotFound("unable to find organization").WithCause(err))
 			return
 		}
 
@@ -173,6 +173,10 @@ func (s *Service) ApproveOrgHandler() rest.Handle {
 						"err", errors.Details(err))
 				}
 			}
+		default:
+			marshal.WriteJSON(w, r, httperror.WithInvalidParam("invalid action parameter"))
+			return
+
 		}
 
 		res := &v1.OrgResponse{
