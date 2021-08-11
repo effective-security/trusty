@@ -2,6 +2,7 @@
 service: trusty-pod
 region : local
 cluster: ${NODENAME}
+environment: test
 
 # configuration for the logger
 logs:
@@ -151,9 +152,9 @@ servers:
     listen_urls:
       - https://0.0.0.0:7891
     server_tls:
-      cert: /tmp/trusty/certs/trusty_dev_peer_wfe.pem
-      key: /tmp/trusty/certs/trusty_dev_peer_wfe-key.pem
-      trusted_ca: /tmp/trusty/certs/trusty_dev_root_ca.pem
+      cert: /tmp/trusty/certs/trusty_${ENVIRONMENT}_peer_wfe.pem
+      key: /tmp/trusty/certs/trusty_${ENVIRONMENT}_peer_wfe.pem
+      trusted_ca: /tmp/trusty/certs/trusty_${ENVIRONMENT}_root_ca.pem
     services:
       - auth
       - status
@@ -172,9 +173,9 @@ servers:
 
 trusty_client: 
   client_tls:
-    cert: /tmp/trusty/certs/trusty_dev_client.pem
-    key: /tmp/trusty/certs/trusty_dev_client-key.pem
-    trusted_ca: /tmp/trusty/certs/trusty_dev_root_ca.pem
+    cert: /tmp/trusty/certs/trusty_${ENVIRONMENT}_client.pem
+    key: /tmp/trusty/certs/trusty_${ENVIRONMENT}_client.pem
+    trusted_ca: /tmp/trusty/certs/trusty_${ENVIRONMENT}_root_ca.pem
   server_url:
     cis: 
     - http://localhost:7880

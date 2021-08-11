@@ -57,9 +57,9 @@ func TestStartTrustyEmptyHTTPS(t *testing.T) {
 	cfg := &config.HTTPServer{
 		ListenURLs: []string{testutils.CreateURLs("https", ""), testutils.CreateURLs("unixs", "localhost")},
 		ServerTLS: &config.TLSInfo{
-			CertFile:      "/tmp/trusty/certs/trusty_dev_peer_wfe.pem",
-			KeyFile:       "/tmp/trusty/certs/trusty_dev_peer_wfe-key.pem",
-			TrustedCAFile: "/tmp/trusty/certs/trusty_dev_root_ca.pem",
+			CertFile:      "/tmp/trusty/certs/trusty_peer_wfe.pem",
+			KeyFile:       "/tmp/trusty/certs/trusty_peer_wfe.key",
+			TrustedCAFile: "/tmp/trusty/certs/trusty_root_ca.pem",
 		},
 	}
 

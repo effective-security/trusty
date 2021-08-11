@@ -132,6 +132,7 @@ func Test_LoadYAMLOverride(t *testing.T) {
 	assert.NotEqual(t, "file://${TRUSTY_CONFIG_DIR}/sql-conn.txt", c.OrgsSQL.DataSource)
 	assert.Contains(t, c.OrgsSQL.DataSource, "sql-conn-orgsdb.txt")          // should be resolved
 	assert.NotEqual(t, "../../sql/orgs/migrations", c.OrgsSQL.MigrationsDir) // should be resolved
+	assert.NotEqual(t, "../../../etc/dev/ca-config.dev.yaml", c.Authority)
 
 	require.NotEmpty(t, c.Authority)
 

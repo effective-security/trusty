@@ -21,18 +21,18 @@ authority:
       issuer_url: http://localhost:7880/v1/certs/${ISSUER_ID}.crt
       crl_url: http://localhost:7880/v1/crl/${ISSUER_ID}.crl
       ocsp_url: http://localhost:7880/v1/ocsp
-    cert: /tmp/trusty/certs/trusty_dev_issuer2_ca.pem
-    key: /tmp/trusty/certs/trusty_dev_issuer2_ca-key.pem
+    cert: /tmp/trusty/certs/trusty_l2_ca.pem
+    key: /tmp/trusty/certs/trusty_l2_ca.key
     # location of the CA bundle file
-    ca_bundle: /tmp/trusty/certs/trusty_dev_cabundle.pem
+    ca_bundle: /tmp/trusty/certs/trusty_cabundle.pem
     # location of the Root CA file
-    root_bundle: /tmp/trusty/certs/trusty_dev_root_ca.pem
+    root_bundle: /tmp/trusty/certs/trusty_root_ca.pem
   -
     # specifies Issuer's label
     label: SHAKEN_L1_CA
     type: trusty
     cert: /tmp/trusty/certs/martini_ca.pem
-    key: /tmp/trusty/certs/martini_ca-key.pem
+    key: /tmp/trusty/certs/martini_ca.key
     # location of the CA bundle file
     ca_bundle: /tmp/trusty/certs/martini_cabundle.pem
     # location of the Root CA file

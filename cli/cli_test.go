@@ -122,8 +122,8 @@ func TestCLIEnsureClient(t *testing.T) {
 		//PreAction(cli.EnsureClient).
 		Action(cli.RegisterAction(cmdClientAction, nil))
 
-	cert := "/tmp/trusty/certs/trusty_dev_peer.pem"
-	key := "/tmp/trusty/certs/trusty_dev_peer-key.pem"
+	cert := "/tmp/trusty/certs/trusty_peer.pem"
+	key := "/tmp/trusty/certs/trusty_peer.pem"
 
 	/*
 		require.Panics(t, func() {

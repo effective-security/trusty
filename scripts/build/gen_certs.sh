@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# gen_test_certs.sh
+# gen_certs.sh
 #   --out-dir {dir}         - specifies output folder
 #   --out-prefix {prefix}   - specifies prefix for output files
 #   --csr-dir {dir}         - specifies folder with CSR templates
@@ -126,7 +126,7 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 [ -z "$CA_CONFIG" ] && echo "Specify --ca-config" && exit 1
 [ -z "$HSM_CONFIG" ] && echo "Specify --hsm-config" && exit 1
 [ -z "$ROOT_CA_CERT" ] && ROOT_CA_CERT=${OUT_DIR}/${OUT_PREFIX}root_ca.pem
-[ -z "$ROOT_CA_KEY" ] && ROOT_CA_KEY=${OUT_DIR}/${OUT_PREFIX}root_ca-key.pem
+[ -z "$ROOT_CA_KEY" ] && ROOT_CA_KEY=${OUT_DIR}/${OUT_PREFIX}root_ca.key
 [ -z "$SAN" ] && SAN=127.0.0.1
 
 HOSTNAME=`hostname`
@@ -155,49 +155,49 @@ if [[ "$ROOTCA" == "YES" && ("$FORCE" == "YES" || ! -f ${ROOT_CA_KEY}) ]]; then 
         --out ${ROOT_CA_CERT/.pem/''}
 fi
 
-if [[ "$CA1" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}issuer1_ca-key.pem) ]]; then
-    echo "*** generating CA1 cert"
+if [[ "$CA1" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}l1_ca.key) ]]; then
+    echo "*** generating L1 CA cert"
     trusty-tool \
         --hsm-cfg=${HSM_CONFIG} \
         csr gencert \
         --ca-config=${CA_CONFIG} \
         --profile=L1_CA \
-        --csr-profile ${CSR_DIR}/${CSR_PREFIX}issuer1_ca.json \
-        --key-label="${KEY_LABEL}${OUT_PREFIX}issuer1_ca*" \
+        --csr-profile ${CSR_DIR}/${CSR_PREFIX}l1_ca.json \
+        --key-label="${KEY_LABEL}${OUT_PREFIX}l1_ca*" \
         --ca-cert ${ROOT_CA_CERT} \
         --ca-key ${ROOT_CA_KEY} \
-        --out ${OUT_DIR}/${OUT_PREFIX}issuer1_ca
+        --out ${OUT_DIR}/${OUT_PREFIX}l1_ca
 fi
 
-if [[ "$CA2" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}issuer2_ca-key.pem) ]]; then
-    echo "*** generating CA2 cert"
+if [[ "$CA2" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}l2_ca.key) ]]; then
+    echo "*** generating L2 CA cert"
     trusty-tool \
         --hsm-cfg=${HSM_CONFIG} \
         csr gencert \
         --ca-config=${CA_CONFIG} \
         --profile=L2_CA \
-        --csr-profile ${CSR_DIR}/${CSR_PREFIX}issuer2_ca.json \
-        --key-label="${KEY_LABEL}${OUT_PREFIX}issuer2_ca*" \
-        --ca-cert ${OUT_DIR}/${OUT_PREFIX}issuer1_ca.pem \
-        --ca-key ${OUT_DIR}/${OUT_PREFIX}issuer1_ca-key.pem \
-        --out ${OUT_DIR}/${OUT_PREFIX}issuer2_ca
+        --csr-profile ${CSR_DIR}/${CSR_PREFIX}l2_ca.json \
+        --key-label="${KEY_LABEL}${OUT_PREFIX}l2_ca*" \
+        --ca-cert ${OUT_DIR}/${OUT_PREFIX}l1_ca.pem \
+        --ca-key ${OUT_DIR}/${OUT_PREFIX}l1_ca.key \
+        --out ${OUT_DIR}/${OUT_PREFIX}l2_ca
 fi
 
 if [[ "$BUNDLE" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}cabundle.pem) ]]; then
     echo "*** CA bundle"
-    cat ${OUT_DIR}/${OUT_PREFIX}issuer2_ca.pem > ${OUT_DIR}/${OUT_PREFIX}cabundle.pem
-    cat ${OUT_DIR}/${OUT_PREFIX}issuer1_ca.pem >> ${OUT_DIR}/${OUT_PREFIX}cabundle.pem
+    cat ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem > ${OUT_DIR}/${OUT_PREFIX}cabundle.pem
+    cat ${OUT_DIR}/${OUT_PREFIX}l1_ca.pem >> ${OUT_DIR}/${OUT_PREFIX}cabundle.pem
 fi
 
-if [[ "$ADMIN" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}admin-key.pem) ]]; then
+if [[ "$ADMIN" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}admin.key) ]]; then
     echo "*** generating admin cert"
     trusty-tool \
         --hsm-cfg=${HSM_CONFIG} \
         csr gencert --plain-key \
         --ca-config=${CA_CONFIG} \
         --profile=client \
-        --ca-cert ${OUT_DIR}/${OUT_PREFIX}issuer2_ca.pem \
-        --ca-key ${OUT_DIR}/${OUT_PREFIX}issuer2_ca-key.pem \
+        --ca-cert ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem \
+        --ca-key ${OUT_DIR}/${OUT_PREFIX}l2_ca.key \
         --csr-profile ${CSR_DIR}/${CSR_PREFIX}admin.json \
         --key-label="${KEY_LABEL}${OUT_PREFIX}admin*" \
         --out ${OUT_DIR}/${OUT_PREFIX}admin
@@ -205,15 +205,15 @@ if [[ "$ADMIN" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}ad
         cat ${OUT_DIR}/${OUT_PREFIX}cabundle.pem >> ${OUT_DIR}/${OUT_PREFIX}admin.pem
 fi
 
-if [[ "$SERVER" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}server-key.pem) ]]; then
+if [[ "$SERVER" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}server.key) ]]; then
     echo "*** generating server cert"
     trusty-tool \
         --hsm-cfg=${HSM_CONFIG} \
         csr gencert --plain-key \
         --ca-config=${CA_CONFIG} \
         --profile=server \
-        --ca-cert ${OUT_DIR}/${OUT_PREFIX}issuer2_ca.pem \
-        --ca-key ${OUT_DIR}/${OUT_PREFIX}issuer2_ca-key.pem \
+        --ca-cert ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem \
+        --ca-key ${OUT_DIR}/${OUT_PREFIX}l2_ca.key \
         --csr-profile ${CSR_DIR}/${CSR_PREFIX}server.json \
         --SAN=localhost,${SAN},${HOSTNAME} \
         --key-label="${KEY_LABEL}${OUT_PREFIX}server*" \
@@ -222,32 +222,32 @@ if [[ "$SERVER" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}s
         cat ${OUT_DIR}/${OUT_PREFIX}cabundle.pem >> ${OUT_DIR}/${OUT_PREFIX}server.pem
 fi
 
-if [[ "$CLIENT" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}client-key.pem) ]]; then
+if [[ "$CLIENT" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}client.key) ]]; then
     echo "*** generating client cert"
     trusty-tool \
         --hsm-cfg=${HSM_CONFIG} \
         csr gencert --plain-key \
         --ca-config=${CA_CONFIG} \
         --profile=client \
-        --ca-cert ${OUT_DIR}/${OUT_PREFIX}issuer2_ca.pem \
-        --ca-key ${OUT_DIR}/${OUT_PREFIX}issuer2_ca-key.pem \
+        --ca-cert ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem \
+        --ca-key ${OUT_DIR}/${OUT_PREFIX}l2_ca.key \
         --csr-profile ${CSR_DIR}/${CSR_PREFIX}client.json \
-        --SAN=spifee://trusty/all \
+        --SAN=spifee://trusty/client \
         --key-label="${KEY_LABEL}${OUT_PREFIX}client*" \
         --out ${OUT_DIR}/${OUT_PREFIX}client
 
     cat ${OUT_DIR}/${OUT_PREFIX}cabundle.pem >> ${OUT_DIR}/${OUT_PREFIX}client.pem
 fi
 
-if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}peer_ca-key.pem) ]]; then
+if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}peer_ca.key) ]]; then
     echo "*** generating peer_ca cert"
     trusty-tool \
         --hsm-cfg=${HSM_CONFIG} \
         csr gencert --plain-key \
         --ca-config=${CA_CONFIG} \
         --profile=peer \
-        --ca-cert ${OUT_DIR}/${OUT_PREFIX}issuer2_ca.pem \
-        --ca-key ${OUT_DIR}/${OUT_PREFIX}issuer2_ca-key.pem \
+        --ca-cert ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem \
+        --ca-key ${OUT_DIR}/${OUT_PREFIX}l2_ca.key \
         --csr-profile ${CSR_DIR}/${CSR_PREFIX}peer_ca.json \
         --SAN=localhost,${SAN},${HOSTNAME},spifee://trusty/ca \
         --key-label="${KEY_LABEL}${OUT_PREFIX}peer_ca*" \
@@ -256,15 +256,15 @@ if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}pe
     cat ${OUT_DIR}/${OUT_PREFIX}cabundle.pem >> ${OUT_DIR}/${OUT_PREFIX}peer_ca.pem
 fi
 
-if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}peer_ra-key.pem) ]]; then
+if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}peer_ra.key) ]]; then
     echo "*** generating peer_ra cert"
     trusty-tool \
         --hsm-cfg=${HSM_CONFIG} \
         csr gencert --plain-key \
         --ca-config=${CA_CONFIG} \
         --profile=peer \
-        --ca-cert ${OUT_DIR}/${OUT_PREFIX}issuer2_ca.pem \
-        --ca-key ${OUT_DIR}/${OUT_PREFIX}issuer2_ca-key.pem \
+        --ca-cert ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem \
+        --ca-key ${OUT_DIR}/${OUT_PREFIX}l2_ca.key \
         --csr-profile ${CSR_DIR}/${CSR_PREFIX}peer_ra.json \
         --SAN=localhost,${SAN},${HOSTNAME},spifee://trusty/ra \
         --key-label="${KEY_LABEL}${OUT_PREFIX}peer_ra*" \
@@ -273,15 +273,15 @@ if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}pe
     cat ${OUT_DIR}/${OUT_PREFIX}cabundle.pem >> ${OUT_DIR}/${OUT_PREFIX}peer_ra.pem
 fi
 
-if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}peer_cis-key.pem) ]]; then
+if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}peer_cis.key) ]]; then
     echo "*** generating peer_cis cert"
     trusty-tool \
         --hsm-cfg=${HSM_CONFIG} \
         csr gencert --plain-key \
         --ca-config=${CA_CONFIG} \
         --profile=peer \
-        --ca-cert ${OUT_DIR}/${OUT_PREFIX}issuer2_ca.pem \
-        --ca-key ${OUT_DIR}/${OUT_PREFIX}issuer2_ca-key.pem \
+        --ca-cert ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem \
+        --ca-key ${OUT_DIR}/${OUT_PREFIX}l2_ca.key \
         --csr-profile ${CSR_DIR}/${CSR_PREFIX}peer_cis.json \
         --SAN=localhost,${SAN},${HOSTNAME},spifee://trusty/cis \
         --key-label="${KEY_LABEL}${OUT_PREFIX}peer_cis*" \
@@ -290,15 +290,15 @@ if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}pe
     cat ${OUT_DIR}/${OUT_PREFIX}cabundle.pem >> ${OUT_DIR}/${OUT_PREFIX}peer_cis.pem
 fi
 
-if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}peer_wfe-key.pem) ]]; then
+if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}peer_wfe.key) ]]; then
     echo "*** generating peer_wfe cert"
     trusty-tool \
         --hsm-cfg=${HSM_CONFIG} \
         csr gencert --plain-key \
         --ca-config=${CA_CONFIG} \
         --profile=peer \
-        --ca-cert ${OUT_DIR}/${OUT_PREFIX}issuer2_ca.pem \
-        --ca-key ${OUT_DIR}/${OUT_PREFIX}issuer2_ca-key.pem \
+        --ca-cert ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem \
+        --ca-key ${OUT_DIR}/${OUT_PREFIX}l2_ca.key \
         --csr-profile ${CSR_DIR}/${CSR_PREFIX}peer_wfe.json \
         --SAN=localhost,${SAN},${HOSTNAME},spifee://trusty/wfe \
         --key-label="${KEY_LABEL}${OUT_PREFIX}peer_wfe*" \

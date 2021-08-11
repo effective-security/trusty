@@ -58,7 +58,7 @@ func (s *testSuite) TestRootCA() {
 	s.Error(err)
 
 	// test root, to stdout
-	csrFile = projFolder + "etc/dev/csr_profile/trusty_dev_root_ca.json"
+	csrFile = projFolder + "etc/dev/csr_profile/trusty_root_ca.json"
 	label = "test_root"
 	err = s.Run(csr.Root, &csr.RootFlags{
 		CsrProfile: &csrFile,
@@ -78,14 +78,14 @@ func (s *testSuite) TestRootCA() {
 	s.Require().NoError(err)
 
 	cert := output + ".pem"
-	key := output + "-key.pem"
+	key := output + ".key"
 	s.HasTextInFile(cert, "CERTIFICATE")
 	s.HasTextInFile(key, "pkcs11")
 }
 */
 
 func (s *testSuite) TestCreate() {
-	csrFile := projFolder + "etc/dev/csr_profile/trusty_dev_client.json"
+	csrFile := projFolder + "etc/dev/csr_profile/trusty_client.json"
 	label := "cert" + guid.MustCreate()
 	output := ""
 
@@ -105,13 +105,13 @@ func (s *testSuite) TestCreate() {
 	s.Require().NoError(err)
 
 	s.HasTextInFile(output+".csr", "REQUEST")
-	s.HasTextInFile(output+"-key.pem", "pkcs11")
+	s.HasTextInFile(output+".key", "pkcs11")
 }
 
 func (s *testSuite) TestSignCert() {
 	s.createRootCA()
 
-	csrProfile := projFolder + "etc/dev/csr_profile/trusty_dev_server.json"
+	csrProfile := projFolder + "etc/dev/csr_profile/trusty_server.json"
 	caConfig := projFolder + "etc/dev/ca-config.dev.yaml"
 	label := "*"
 	output := filepath.Join(s.tmpdir, label)
@@ -142,7 +142,7 @@ func (s *testSuite) TestSignCert() {
 
 	s.Require().NoError(err)
 	s.HasTextInFile(output+".pem", "CERTIFICATE")
-	s.HasTextInFile(output+"-key.pem", "pkcs11")
+	s.HasTextInFile(output+".key", "pkcs11")
 
 	// to stdout
 	output = ""
@@ -162,7 +162,7 @@ func (s *testSuite) TestSignCert() {
 func (s *testSuite) TestGenCert() {
 	s.createRootCA()
 
-	csrProfile := projFolder + "etc/dev/csr_profile/trusty_dev_server.json"
+	csrProfile := projFolder + "etc/dev/csr_profile/trusty_server.json"
 	caConfig := projFolder + "etc/dev/ca-config.dev.yaml"
 	label := "server" + guid.MustCreate()
 	output := ""
@@ -199,7 +199,7 @@ func (s *testSuite) TestGenCert() {
 	})
 	s.Require().NoError(err)
 	s.HasTextInFile(output+".pem", "CERTIFICATE")
-	s.HasTextInFile(output+"-key.pem", "pkcs11")
+	s.HasTextInFile(output+".key", "pkcs11")
 }
 
 func (s *testSuite) createRootCA() {
@@ -208,7 +208,7 @@ func (s *testSuite) createRootCA() {
 	}
 
 	caConfig := projFolder + "etc/dev/ca-config.bootstrap.yaml"
-	csrProfile := projFolder + "etc/dev/csr_profile/trusty_dev_root_ca.json"
+	csrProfile := projFolder + "etc/dev/csr_profile/trusty_root_ca.json"
 	profile := "ROOT"
 	trueVal := true
 	label := "root" + guid.MustCreate()
@@ -228,7 +228,7 @@ func (s *testSuite) createRootCA() {
 	s.Require().NoError(err)
 
 	s.rootCert = output + ".pem"
-	s.rootKey = output + "-key.pem"
+	s.rootKey = output + ".key"
 	s.HasTextInFile(s.rootCert, "CERTIFICATE")
 	s.HasTextInFile(s.rootKey, "pkcs11")
 }

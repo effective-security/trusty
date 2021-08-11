@@ -5,7 +5,7 @@ cmd="$*"
 
 echo "*** trusty: waiting for certs..."
 
-until [ -f /var/trusty/roots/trusty_root_ca-key.pem ];
+until [ -f /var/trusty/roots/trusty_root_ca.pem ];
 do
   >&2 echo "trusty Root is unavailable - sleeping"
   sleep 1

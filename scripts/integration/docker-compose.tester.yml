@@ -92,22 +92,22 @@ services:
         /opt/trusty/sql/cadb/wait_sql.sh 10.77.88.100 5432 postgres postgres echo "CA DB is ready" &&
         /opt/trusty/sql/orgsdb/wait_sql.sh 10.77.88.100 5432 postgres postgres echo "ORGS DB is ready" &&
         mkdir -p /tmp/trusty/softhsm/tokens /tmp/trusty/certs &&
-        cp /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem /tmp/trusty/certs/trusty_dev_root_ca.pem &&
+        cp /opt/trusty/etc/dev/roots/trusty_root_ca.pem /tmp/trusty/certs/trusty_root_ca.pem &&
         /opt/trusty/bin/config-softhsm.sh
         --tokens-dir /tmp/trusty/softhsm/tokens
         --pin-file /tmp/trusty/softhsm/trusty_unittest.txt
         --generate-pin -s trusty_unittest
         -o /tmp/trusty/softhsm/unittest_hsm.json
         --delete --list-slots --list-object &&
-        /opt/trusty/bin/gen_test_certs.sh
+        /opt/trusty/bin/gen_certs.sh
         --hsm-config /tmp/trusty/softhsm/unittest_hsm.json
         --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml
         --out-dir /tmp/trusty/certs
         --csr-dir /opt/trusty/etc/dev/csr_profile
-        --root-ca /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem
-        --root-ca-key /opt/trusty/etc/dev/roots/trusty_dev_root_ca-key.pem
-        --csr-prefix trusty_dev_
-        --out-prefix trusty_dev_
+        --root-ca /opt/trusty/etc/dev/roots/trusty_root_ca.pem
+        --root-ca-key /opt/trusty/etc/dev/roots/trusty_root_ca.key
+        --csr-prefix trusty_
+        --out-prefix trusty_
         --san 10.77.88.101
         --ca1 --ca2 --bundle --client --peer --force &&
         /opt/trusty/bin/gen_martini_certs.sh
@@ -115,10 +115,10 @@ services:
         --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml
         --out-dir /tmp/trusty/certs
         --csr-dir /opt/trusty/etc/dev/csr_profile
-        --csr-prefix martini_dev_
+        --csr-prefix martini_
         --out-prefix martini_
         --root-ca /tmp/trusty/certs/martini_root_ca.pem
-        --root-ca-key /tmp/trusty/certs/martini_root_ca-key.pem
+        --root-ca-key /tmp/trusty/certs/martini_root_ca.key
         --root --ca --bundle --force &&
         /opt/trusty/bin/trusty --std
         --hsm-cfg=/tmp/trusty/softhsm/unittest_hsm.json
@@ -178,16 +178,16 @@ services:
         /opt/trusty/sql/cadb/wait_sql.sh 10.77.88.100 5432 postgres postgres echo "CA DB is ready" &&
         /opt/trusty/sql/orgsdb/wait_sql.sh 10.77.88.100 5432 postgres postgres echo "ORGS DB is ready" &&
         mkdir -p /tmp/trusty/certs &&
-        cp /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem /tmp/trusty/certs/trusty_dev_root_ca.pem &&
-        /opt/trusty/bin/gen_test_certs.sh
+        cp /opt/trusty/etc/dev/roots/trusty_root_ca.pem /tmp/trusty/certs/trusty_root_ca.pem &&
+        /opt/trusty/bin/gen_certs.sh
         --hsm-config /opt/trusty/tests/aws-test-kms.json
         --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml
         --out-dir /tmp/trusty/certs
         --csr-dir /opt/trusty/etc/dev/csr_profile
-        --root-ca /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem
-        --root-ca-key /opt/trusty/etc/dev/roots/trusty_dev_root_ca-key.pem
-        --csr-prefix trusty_dev_
-        --out-prefix trusty_dev_
+        --root-ca /opt/trusty/etc/dev/roots/trusty_root_ca.pem
+        --root-ca-key /opt/trusty/etc/dev/roots/trusty_root_ca.key
+        --csr-prefix trusty_
+        --out-prefix trusty_
         --san 10.77.88.102
         --ca1 --ca2 --bundle --client --peer --force &&
         /opt/trusty/bin/gen_martini_certs.sh
@@ -195,10 +195,10 @@ services:
         --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml
         --out-dir /tmp/trusty/certs
         --csr-dir /opt/trusty/etc/dev/csr_profile
-        --csr-prefix martini_dev_
+        --csr-prefix martini_
         --out-prefix martini_
         --root-ca /tmp/trusty/certs/martini_root_ca.pem
-        --root-ca-key /tmp/trusty/certs/martini_root_ca-key.pem
+        --root-ca-key /tmp/trusty/certs/martini_root_ca.key
         --root --ca --bundle --force &&
         /opt/trusty/bin/trusty --std
         --hsm-cfg=/opt/trusty/tests/aws-test-kms.json
@@ -247,7 +247,7 @@ services:
       - -c
       - >-
         mkdir -p /tmp/trusty/softhsm/tokens /tmp/trusty/certs &&
-        cp /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem /tmp/trusty/certs/trusty_dev_root_ca.pem &&
+        cp /opt/trusty/etc/dev/roots/trusty_root_ca.pem /tmp/trusty/certs/trusty_root_ca.pem &&
         /opt/trusty/sql/cadb/create_sql.sh 10.77.88.100 5432 postgres postgres echo "CA DB is ready" &&
         /opt/trusty/sql/orgsdb/create_sql.sh 10.77.88.100 5432 postgres postgres echo "ORGS DB is ready" &&
         /opt/trusty/bin/config-softhsm.sh
@@ -256,14 +256,14 @@ services:
         --generate-pin -s trusty_unittest
         -o /tmp/trusty/softhsm/unittest_hsm.json
         --delete --list-slots --list-object &&
-        /opt/trusty/bin/gen_test_certs.sh
+        /opt/trusty/bin/gen_certs.sh
         --hsm-config inmem
         --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml
         --out-dir /tmp/trusty/certs
         --csr-dir /opt/trusty/etc/dev/csr_profile
-        --root-ca /opt/trusty/etc/dev/roots/trusty_dev_root_ca.pem
-        --root-ca-key /opt/trusty/etc/dev/roots/trusty_dev_root_ca-key.pem
-        --csr-prefix trusty_dev_
-        --out-prefix trusty_dev_
+        --root-ca /opt/trusty/etc/dev/roots/trusty_root_ca.pem
+        --root-ca-key /opt/trusty/etc/dev/roots/trusty_root_ca.key
+        --csr-prefix trusty_
+        --out-prefix trusty_
         --root --ca1 --ca2 --bundle --client --peer &&
         /opt/trusty/tests/if-trusty-ready.sh /opt/trusty/tests/run.sh

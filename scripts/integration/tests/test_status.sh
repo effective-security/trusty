@@ -14,25 +14,25 @@ echo "*** trusty status: checking against http endpoint: $TRUSTY_WFE_2"
 echo "*** trusty: checking caller"
 
 /opt/trusty/bin/trustyctl -V -D --cfg /opt/trusty/etc/dev/trusty-config.yaml -s $TRUSTY_WFE_2 \
-    -c /tmp/trusty/certs/trusty_dev_peer_ca.pem \
-    -k /tmp/trusty/certs/trusty_dev_peer_ca-key.pem \
-    -r /tmp/trusty/certs/trusty_dev_root_ca.pem \
+    -c /tmp/trusty/certs/trusty_peer_ca.pem \
+    -k /tmp/trusty/certs/trusty_peer_ca.key \
+    -r /tmp/trusty/certs/trusty_root_ca.pem \
     caller | grep -c "Role | trusty-ca"
 
 /opt/trusty/bin/trustyctl -V -D --cfg /opt/trusty/etc/dev/trusty-config.yaml -s $TRUSTY_WFE_2 \
-    -c /tmp/trusty/certs/trusty_dev_peer_ra.pem \
-    -k /tmp/trusty/certs/trusty_dev_peer_ra-key.pem \
-    -r /tmp/trusty/certs/trusty_dev_root_ca.pem \
+    -c /tmp/trusty/certs/trusty_peer_ra.pem \
+    -k /tmp/trusty/certs/trusty_peer_ra.key \
+    -r /tmp/trusty/certs/trusty_root_ca.pem \
     caller | grep -c "Role | trusty-ra"
 
 /opt/trusty/bin/trustyctl -V -D --cfg /opt/trusty/etc/dev/trusty-config.yaml -s $TRUSTY_WFE_2 \
-    -c /tmp/trusty/certs/trusty_dev_peer_cis.pem \
-    -k /tmp/trusty/certs/trusty_dev_peer_cis-key.pem \
-    -r /tmp/trusty/certs/trusty_dev_root_ca.pem \
+    -c /tmp/trusty/certs/trusty_peer_cis.pem \
+    -k /tmp/trusty/certs/trusty_peer_cis.key \
+    -r /tmp/trusty/certs/trusty_root_ca.pem \
     caller | grep -c "Role | trusty-cis"
 
 /opt/trusty/bin/trustyctl -V -D --cfg /opt/trusty/etc/dev/trusty-config.yaml -s $TRUSTY_WFE_2 \
-    -c /tmp/trusty/certs/trusty_dev_peer_wfe.pem \
-    -k /tmp/trusty/certs/trusty_dev_peer_wfe-key.pem \
-    -r /tmp/trusty/certs/trusty_dev_root_ca.pem \
+    -c /tmp/trusty/certs/trusty_peer_wfe.pem \
+    -k /tmp/trusty/certs/trusty_peer_wfe.key \
+    -r /tmp/trusty/certs/trusty_root_ca.pem \
     caller | grep -c "Role | trusty-wfe"
