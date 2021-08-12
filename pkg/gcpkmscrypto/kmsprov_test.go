@@ -24,7 +24,7 @@ import (
 
 func Test_KmsProvider(t *testing.T) {
 	cfg := &mockTokenCfg{
-		manufacturer: gcpkmscrypto.ProviderName,
+		manufacturer: "GCPKMS-roots",
 		model:        "GCPKMS",
 		atts:         "Keyring=projects/trusty-dev-319216/locations/us-central1/keyRings/trusty-dev",
 	}
@@ -98,14 +98,14 @@ MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEpSwQTzpTI9LFgLtdHAMHl0oEIgwf
 	require.NoError(t, err)
 	require.NotNil(t, prov)
 
-	assert.Equal(t, gcpkmscrypto.ProviderName, prov.Manufacturer())
+	assert.Equal(t, "GCPKMS-roots", prov.Manufacturer())
 	assert.Equal(t, "GCPKMS", prov.Model())
 
 	//	count := 0
 	mgr := prov.(cryptoprov.KeyManager)
 
 	mgr.EnumTokens(false, func(slotID uint, description, label, manufacturer, model, serial string) error {
-		assert.Equal(t, gcpkmscrypto.ProviderName, manufacturer)
+		assert.Equal(t, "GCPKMS-roots", manufacturer)
 		assert.Equal(t, "GCPKMS", model)
 		return nil
 	})
@@ -133,7 +133,7 @@ MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEpSwQTzpTI9LFgLtdHAMHl0oEIgwf
 
 		uri, _, err := prov.ExportKey(keyID)
 		require.NoError(t, err)
-		assert.Contains(t, uri, "pkcs11:manufacturer=")
+		assert.Contains(t, uri, "pkcs11:manufacturer=GCPKMS-roots;")
 
 		signer := pvk.(crypto.Signer)
 		require.NotNil(t, signer)

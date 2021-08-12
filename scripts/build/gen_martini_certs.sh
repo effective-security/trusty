@@ -7,6 +7,7 @@
 #   --csr-dir {dir}         - specifies folder with CSR templates
 #   --csr-prefix {prefix}   - specifies prefix for csr files
 #   --hsm-confg             - specifies HSM provider file
+#   --crypto                - specifies additional HSM provider file
 #   --ca-config             - specifies CA configuration file
 #   --root-ca {cert}        - specifies root CA certificate
 #   --root-ca-key {key}     - specifies root CA key
@@ -50,6 +51,11 @@ case $key in
     ;;
     --hsm-config)
     HSM_CONFIG="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    --crypto)
+    CRYPTO_PROV="--crypto-prov=$2"
     shift # past argument
     shift # past value
     ;;
@@ -107,6 +113,7 @@ echo "CSR_DIR      = ${CSR_DIR}"
 echo "CSR_PREFIX   = ${OUT_PREFIX}"
 echo "CA_CONFIG    = ${CA_CONFIG}"
 echo "HSM_CONFIG   = ${HSM_CONFIG}"
+echo "CRYPTO_PROV  = ${CRYPTO_PROV}"
 echo "BUNDLE       = ${BUNDLE}"
 echo "FORCE        = ${FORCE}"
 echo "SAN          = ${SAN}"
@@ -115,7 +122,7 @@ echo "ROOT_CA_KEY  = $ROOT_CA_KEY"
 
 if [[ "$ROOTCA" == "YES" && ("$FORCE" == "YES" || ! -f ${ROOT_CA_KEY}) ]]; then echo "*** generating ${ROOT_CA_CERT/.pem/''}"
     trusty-tool \
-        --hsm-cfg=${HSM_CONFIG} \
+        --hsm-cfg=${HSM_CONFIG} ${CRYPTO_PROV} \
         csr gencert --self-sign \
         --ca-config=${CA_CONFIG} \
         --profile=SHAKEN_ROOT \
@@ -127,7 +134,7 @@ fi
 if [[ "$CA" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}ca.key) ]]; then
     echo "*** generating CA cert"
     trusty-tool \
-        --hsm-cfg=${HSM_CONFIG} \
+        --hsm-cfg=${HSM_CONFIG} ${CRYPTO_PROV} \
         csr gencert \
         --ca-config=${CA_CONFIG} \
         --profile=SHAKEN_L1_CA \

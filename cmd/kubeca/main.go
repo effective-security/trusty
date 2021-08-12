@@ -24,6 +24,7 @@ func main() {
 	cryptoprov.Register("PKCS11", cryptoprov.Crypto11Loader)
 	cryptoprov.Register("AWSKMS", awskmscrypto.KmsLoader)
 	cryptoprov.Register("GCPKMS", gcpkmscrypto.KmsLoader)
+	cryptoprov.Register("GCPKMS-roots", gcpkmscrypto.KmsLoader)
 
 	f := controller.CertificateSigningRequestControllerFlags{}
 	var debugLogging bool
