@@ -15,3 +15,9 @@ servers:
     disabled: false
   ra:
     disabled: false
+
+ra:
+  publisher:
+    # use gs:// for GCP, or file path 
+    cert_bucket: /tmp/trusty/martini-dev-certs
+    crl_bucket: /tmp/trusty/martini-dev-crls

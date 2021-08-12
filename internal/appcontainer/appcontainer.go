@@ -13,6 +13,7 @@ import (
 	"github.com/ekspand/trusty/internal/db/cadb"
 	"github.com/ekspand/trusty/internal/db/orgsdb"
 	"github.com/ekspand/trusty/pkg/awskmscrypto"
+	"github.com/ekspand/trusty/pkg/certpublisher"
 	"github.com/ekspand/trusty/pkg/email"
 	"github.com/ekspand/trusty/pkg/fcc"
 	"github.com/ekspand/trusty/pkg/gcpkmscrypto"
@@ -76,6 +77,9 @@ type ProvideFCCAPIClientFn func() (fcc.APIClient, error)
 // ProvideAcmeFn defines ACMA provider
 type ProvideAcmeFn func(cfg *config.Configuration) (acme.Controller, error)
 
+// ProvidePublisherFn defines Publisher provider
+type ProvidePublisherFn func(cfg *config.Configuration) (certpublisher.Publisher, error)
+
 // CloseRegistrator provides interface to release resources on close
 type CloseRegistrator interface {
 	OnClose(closer io.Closer)
@@ -100,6 +104,7 @@ type ContainerFactory struct {
 	fccAPIClientProvider  ProvideFCCAPIClientFn
 	acmeProvider          ProvideAcmeFn
 	paymentProvider       ProvidePaymentProviderFn
+	publisherProvider     ProvidePublisherFn
 }
 
 // NewContainerFactory returns an instance of ContainerFactory
@@ -126,7 +131,9 @@ func NewContainerFactory(closer CloseRegistrator) *ContainerFactory {
 		WithJwtProvider(provideJwt).
 		WithACMEProvider(provideAcme).
 		WithClientFactoryProvider(provideClientFactory).
-		WithPaymentProvider(providePayment)
+		WithPaymentProvider(providePayment).
+		WithPublisher(providePublisher).
+		WithClientFactoryProvider(provideClientFactory)
 }
 
 // WithConfigurationProvider allows to specify configuration
@@ -144,6 +151,12 @@ func (f *ContainerFactory) WithDiscoveryProvider(p ProvideDiscoveryFn) *Containe
 // WithACMEProvider allows to specify ACME provider
 func (f *ContainerFactory) WithACMEProvider(p ProvideAcmeFn) *ContainerFactory {
 	f.acmeProvider = p
+	return f
+}
+
+// WithPublisher allows to specify Publisher provider
+func (f *ContainerFactory) WithPublisher(p ProvidePublisherFn) *ContainerFactory {
+	f.publisherProvider = p
 	return f
 }
 
@@ -291,6 +304,11 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 		return nil, errors.Trace(err)
 	}
 
+	err = container.Provide(f.publisherProvider)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
 	return container, nil
 }
 
@@ -417,6 +435,17 @@ func provideAcme(cfg *config.Configuration) (acme.Controller, error) {
 	}
 
 	return acme.NewProvider(acmecfg, db)
+}
+
+func providePublisher(cfg *config.Configuration) (certpublisher.Publisher, error) {
+	pub, err := certpublisher.NewPublisher(&certpublisher.Config{
+		CertsBucket: cfg.RegistrationAuthority.Publisher.CertsBucket,
+		CRLBucket:   cfg.RegistrationAuthority.Publisher.CRLBucket,
+	})
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return pub, err
 }
 
 var idGenerator = sonyflake.NewSonyflake(sonyflake.Settings{

@@ -7,6 +7,7 @@ import (
 	"github.com/ekspand/trusty/authority"
 	"github.com/ekspand/trusty/internal/db/cadb"
 	"github.com/ekspand/trusty/internal/db/cadb/model"
+	"github.com/ekspand/trusty/pkg/certpublisher"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/tasks"
@@ -25,6 +26,7 @@ type Service struct {
 	server    *gserver.Server
 	ca        *authority.Authority
 	db        cadb.CaDb
+	publisher certpublisher.Publisher
 	scheduler tasks.Scheduler
 }
 
@@ -34,11 +36,12 @@ func Factory(server *gserver.Server) interface{} {
 		logger.Panic("status.Factory: invalid parameter")
 	}
 
-	return func(ca *authority.Authority, db cadb.CaDb, scheduler tasks.Scheduler) {
+	return func(ca *authority.Authority, db cadb.CaDb, scheduler tasks.Scheduler, publisher certpublisher.Publisher) {
 		svc := &Service{
 			server:    server,
 			ca:        ca,
 			db:        db,
+			publisher: publisher,
 			scheduler: scheduler,
 		}
 

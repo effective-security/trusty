@@ -3,6 +3,7 @@ package martini
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/ekspand/trusty/api"
 	v1 "github.com/ekspand/trusty/api/v1"
@@ -56,18 +57,31 @@ func (s *Service) FccContactHandler() rest.Handle {
 }
 
 func (s *Service) getFrnResponse(ctx context.Context, filerID string) (*v1.FccFrnResponse, error) {
-	if filerID == "123456" {
-		res := new(v1.FccFrnResponse)
-		err := marshal.DecodeBytes([]byte(testFRN), res)
-		if err != nil {
-			return nil, errors.Annotate(err, "failed to decode testFRN")
-		}
-		return res, nil
-	}
-
 	id, err := db.ID(filerID)
 	if err != nil {
 		return nil, errors.Annotate(err, "invalid filer ID")
+	}
+
+	if id <= 123456 {
+		res := &v1.FccFrnResponse{
+			Filers: []v1.Filer{
+				{
+					FilerID: filerID,
+					FilerIDInfo: v1.FilerIDInfo{
+						CustomerInquiriesTelephone: "2051234567",
+						FRN:                        "0" + filerID,
+						LegalName:                  "TEST COMMUNICATIONS LLC",
+						HQAddress: v1.HQAdress{
+							AddressLine: "241 APPLEGATE TRACE",
+							City:        "PELHAM",
+							State:       "AL",
+							ZipCode:     "35124",
+						},
+					},
+				},
+			},
+		}
+		return res, nil
 	}
 
 	cached, err := s.db.GetFRNResponse(ctx, id)
@@ -98,11 +112,24 @@ func (s *Service) getFrnResponse(ctx context.Context, filerID string) (*v1.FccFr
 }
 
 func (s *Service) getFccContact(ctx context.Context, frn string) (*v1.FccContactResponse, error) {
-	if frn == "99999999" {
-		res := new(v1.FccContactResponse)
-		marshal.DecodeBytes([]byte(testContact), res)
+	if strings.HasPrefix(frn, "0123") {
+		email := testEmails[frn]
+		if email == "" {
+			return nil, errors.Errorf("invalid test code, register your email with denis@martinisecurity.com")
+		}
+		res := &v1.FccContactResponse{
+			BusinessName:        "TEST Communications, LLC",
+			BusinessType:        "Private Sector, Limited Liability Corporation",
+			ContactAddress:      "241 Applegate Trace, Pelham, AL 35124-2945, United States",
+			ContactEmail:        email,
+			ContactName:         "John Doe",
+			ContactOrganization: "TEST Communications, LLC",
+			FRN:                 frn,
+		}
 		return res, nil
 	}
+
+	logger.KV(xlog.TRACE, "frn", frn)
 
 	cached, err := s.db.GetFccContactResponse(ctx, frn)
 	if err == nil {
@@ -172,36 +199,9 @@ func contactQueryResultsToDTO(c *fcc.ContactResults) *v1.FccContactResponse {
 	}
 }
 
-const testFRN = `{
-	"filers": [
-			{
-					"filer_id_info": {
-							"customer_inquiries_telephone": "2057453970",
-							"frn": "99999999",
-							"hq_address": {
-									"address_line": "241 APPLEGATE TRACE",
-									"city": "PELHAM",
-									"state": "AL",
-									"zip_code": "35124"
-							},
-							"legal_name": "LOW LATENCY COMMUNICATIONS LLC"
-					},
-					"filer_id": "123456"
-			}
-	]
-}`
-
-const testContact = `{
-	"business_name": "Low Latency Communications, LLC",
-	"business_type": "Private Sector, Limited Liability Corporation",
-	"contact_address": "241 Applegate Trace, Pelham, AL 35124-2945, United States",
-	"contact_email": "denis+test@ekspand.com",
-	"contact_fax": "",
-	"contact_name": "Mr Matthew D Hardeman",
-	"contact_organization": "Low Latency Communications, LLC",
-	"contact_phone": "",
-	"contact_position": "Secretary",
-	"frn": "99999999",
-	"last_updated": "",
-	"registration_date": "09/29/2015 09:58:00 AM"
-}`
+var testEmails = map[string]string{
+	"0123456": "info+test@martinisecurity.com",
+	"0123111": "denis+test@martinisecurity.com",
+	"0123222": "ryan+test@martinisecurity.com",
+	"0123333": "hayk.baluyan@gmail.com",
+}
