@@ -102,6 +102,10 @@ ra:
   # the list of public Root Certs files.
   public_roots:
     - ${TRUSTY_CONFIG_DIR}/roots/martini_root_ca.pem
+  publisher:
+    # use gs:// for GCP, or file path 
+    cert_bucket: gs://martini-test-certs
+    crl_bucket: gs://martini-test-crls
 
 servers:
   cis:

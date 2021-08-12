@@ -33,6 +33,7 @@ const (
 type Factory struct {
 	nodeInfo    netutil.NodeInfo
 	hostEnvName string
+	environment string
 	searchDirs  []string
 	user        *string
 }
@@ -85,6 +86,12 @@ func NewFactory(nodeInfo netutil.NodeInfo, searchDirs []string) (*Factory, error
 // WithEnvHostname allows to specify Env name for hostname
 func (f *Factory) WithEnvHostname(hostEnvName string) *Factory {
 	f.hostEnvName = hostEnvName
+	return f
+}
+
+// WithEnvironment allows to override environment in Configuration
+func (f *Factory) WithEnvironment(environment string) *Factory {
+	f.environment = environment
 	return f
 }
 

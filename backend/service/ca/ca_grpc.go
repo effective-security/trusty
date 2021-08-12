@@ -188,6 +188,17 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 		Certificate: mcert.ToPB(),
 	}
 
+	if s.publisher != nil {
+		go func() {
+			_, err = s.publisher.PublishCertificate(context.Background(), res.Certificate)
+			if err != nil {
+				logger.KV(xlog.ERROR,
+					"status", "failed to publish certificate",
+					"err", errors.Details(err))
+			}
+		}()
+	}
+
 	return res, nil
 }
 
