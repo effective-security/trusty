@@ -78,6 +78,7 @@ func WithHsmCfg() Option {
 	return optionFunc(func(c *Cli) {
 		app := c.App()
 		c.flags.hsmConfig = app.Flag("hsm-cfg", "HSM provider configuration file").String()
+		c.flags.cryptoProvs = app.Flag("crypto-prov", "path to additional Crypto provider configurations").Strings()
 	})
 }
 
@@ -105,8 +106,9 @@ type Cli struct {
 		// serviceConfig specifies service configuration file
 		serviceConfig *string
 		// hsmConfig specifies HSM configuration file
-		hsmConfig *string
-		plainKey  *bool
+		hsmConfig   *string
+		cryptoProvs *[]string
+		plainKey    *bool
 
 		certFile      *string
 		keyFile       *string
@@ -234,10 +236,15 @@ func (cli *Cli) EnsureCryptoProvider() error {
 		providers = cli.config.CryptoProv.Providers
 	}
 
+	if cli.flags.cryptoProvs != nil && len(*cli.flags.cryptoProvs) > 0 {
+		providers = *cli.flags.cryptoProvs
+	}
+
 	cryptoprov.Register("SoftHSM", cryptoprov.Crypto11Loader)
 	cryptoprov.Register("PKCS11", cryptoprov.Crypto11Loader)
 	cryptoprov.Register("AWSKMS", awskmscrypto.KmsLoader)
 	cryptoprov.Register("GCPKMS", gcpkmscrypto.KmsLoader)
+	cryptoprov.Register("GCPKMS-roots", gcpkmscrypto.KmsLoader)
 
 	if defaultProvider == "inmem" || defaultProvider == "plain" {
 		cli.crypto, err = cryptoprov.New(inmemcrypto.NewProvider(), nil)

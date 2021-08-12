@@ -155,10 +155,18 @@ func (p *Provider) genKey(ctx context.Context, req *kmspb.CreateCryptoKeyRequest
 		"label", label,
 	)
 
+	var pubKeyResp *kmspb.PublicKey
 	// Retrieve public key from KMS
-	pubKeyResp, err := p.KmsClient.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{Name: resp.Name + "/cryptoKeyVersions/1"})
-	if err != nil {
-		return nil, errors.Annotatef(err, "failed to get public key")
+	for i := 0; i < 60; i++ {
+		pubKeyResp, err = p.KmsClient.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{Name: resp.Name + "/cryptoKeyVersions/1"})
+		if err == nil {
+			break
+		}
+
+		if !strings.Contains(err.Error(), "PENDING_GENERATION") {
+			return nil, errors.Annotatef(err, "failed to get public key")
+		}
+		time.Sleep(1 * time.Second)
 	}
 
 	pub, err := parseKeyFromPEM([]byte(pubKeyResp.Pem))
@@ -381,7 +389,7 @@ func (p *Provider) KeyInfo(slotID uint, keyID string, includePublic bool, keyInf
 // It does not return key bytes
 func (p *Provider) ExportKey(keyID string) (string, []byte, error) {
 	uri := fmt.Sprintf("pkcs11:manufacturer=%s;id=%s;serial=1;type=private",
-		ProviderName,
+		p.Manufacturer(),
 		keyID,
 	)
 
