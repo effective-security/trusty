@@ -9,6 +9,7 @@ import (
 	"github.com/ekspand/trusty/cli/acme"
 	"github.com/ekspand/trusty/cli/auth"
 	"github.com/ekspand/trusty/cli/martini"
+	"github.com/ekspand/trusty/cli/status"
 	"github.com/ekspand/trusty/internal/version"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/xlog"
@@ -39,6 +40,18 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		cli.WithServer(""),
 	)
 	defer cli.Close()
+
+	app.Command("status", "show the server status").
+		PreAction(cli.PopulateControl).
+		Action(cli.RegisterAction(status.Server, nil))
+
+	app.Command("version", "show the server version").
+		PreAction(cli.PopulateControl).
+		Action(cli.RegisterAction(status.Version, nil))
+
+	app.Command("caller", "show the caller info").
+		PreAction(cli.PopulateControl).
+		Action(cli.RegisterAction(status.Caller, nil))
 
 	// login
 	prov := "google"
@@ -138,9 +151,12 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		Action(cli.RegisterAction(martini.OrgMembers, orgMembersFlags))
 	orgMembersFlags.OrgID = cmdOrgMembers.Flag("org", "organization ID").Required().String()
 
-	// acme account|order
+	// acme directory|account|register|order
 	cmdAcme := app.Command("acme", "ACME operations").
 		PreAction(cli.PopulateControl)
+
+	cmdAcme.Command("directory", "show ACME directory").
+		Action(cli.RegisterAction(acme.Directory, nil))
 
 	acmeAccountFlags := new(acme.GetAccountFlags)
 	cmdAcmeAccount := cmdAcme.Command("account", "show registered account").
