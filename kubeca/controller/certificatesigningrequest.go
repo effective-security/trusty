@@ -82,13 +82,16 @@ func (r *CertificateSigningRequestSigningReconciler) Reconcile(ctx context.Conte
 
 			b := new(strings.Builder)
 			print.Certificate(b, cert)
-			log.KV(xlog.NOTICE, "status", "signed", "certificate", b.String())
+			log.Noticef("status=signed, certificate=%s", b.String())
 
-			raw = append(raw, []byte(`\n`)...)
-			raw = append(raw, []byte(issuer.Bundle().CACertsPEM)...)
+			if len(issuer.PEM()) > 0 {
+				raw = append(raw, []byte(`\n`)...)
+				raw = append(raw, []byte(issuer.PEM())...)
+			}
 
 			patch := client.MergeFrom(csr.DeepCopy())
-			csr.Status.Certificate = raw
+			csr.Status.Certificate = []byte(strings.TrimSpace(string(raw)))
+
 			if err := r.Client.Status().Patch(ctx, &csr, patch); err != nil {
 				logger.KV(xlog.ERROR,
 					"reason", "unable to patch status",

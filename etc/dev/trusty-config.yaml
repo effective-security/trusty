@@ -409,5 +409,5 @@ trusty_client:
     ca: ["https://localhost:7892"]
     ra: ["https://localhost:7893"]
   dial_timeout: 30s
-  dial_keep_alive_time: 6s
+  dial_keep_alive_time: 300s
   dial_keep_alive_timeout: 30s

@@ -191,7 +191,7 @@ docker-compose:
 
 docker-push: docker
 	[ ! -z ${DOCKER_PASSWORD} ] && echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin || echo "skipping docker login"
-	docker push ekspand/trusty:latest
+	docker push ekspand/trusty:master
 	#[ ! -z ${DOCKER_NUMBER} ] && docker push ekspand/trusty:${DOCKER_NUMBER} || echo "skipping docker version, pushing latest only"
 
 docker-citest:

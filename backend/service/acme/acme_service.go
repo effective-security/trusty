@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/ekspand/trusty/acme"
-	"github.com/ekspand/trusty/api/v1/pb"
+	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/api/v2acme"
 	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/client/embed/proxy"

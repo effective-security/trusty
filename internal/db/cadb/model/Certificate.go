@@ -2,6 +2,7 @@ package model
 
 import (
 	"crypto/x509"
+	"strconv"
 	"time"
 
 	v1 "github.com/ekspand/trusty/api/v1"
@@ -52,8 +53,8 @@ func (r *Certificate) ToPB() *pb.Certificate {
 // ToDTO returns ToDTO
 func (r *Certificate) ToDTO() *v1.Certificate {
 	return &v1.Certificate{
-		ID:           r.ID,
-		OrgID:        r.OrgID,
+		ID:           strconv.FormatUint(r.ID, 10),
+		OrgID:        strconv.FormatUint(r.OrgID, 10),
 		SKID:         r.SKID,
 		IKID:         r.IKID,
 		SerialNumber: r.SerialNumber,

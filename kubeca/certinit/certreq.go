@@ -12,6 +12,8 @@ import (
 
 	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/ekspand/trusty/pkg/inmemcrypto"
+	"github.com/ekspand/trusty/pkg/print"
+	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
 	capi "k8s.io/api/certificates/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -143,6 +145,15 @@ func (r *Request) requestCertificate(ctx context.Context, client MinCertificates
 
 		logger.Infof("certificate signing request (%s) not issued; trying again in 5 seconds", certificateSigningRequestName)
 		time.Sleep(5 * time.Second)
+	}
+
+	chain, err := certutil.ParseChainFromPEM(certificate)
+	if err != nil {
+		logger.Errorf("failed to parse chain: " + errors.Details(err))
+	} else {
+		b := new(strings.Builder)
+		print.Certificates(b, chain)
+		logger.Infof("cert=[%v]", b.String())
 	}
 
 	certFile := path.Join(r.CertDir, "tls.crt")
