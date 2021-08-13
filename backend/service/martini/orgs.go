@@ -31,7 +31,9 @@ func (s *Service) GetCertsHandler() rest.Handle {
 			return
 		}
 
-		res := new(v1.CertificatesResponse)
+		res := &v1.CertificatesResponse{
+			Certificates: make([]v1.Certificate, 0),
+		}
 
 		for _, org := range orgs {
 			certs, err := s.cadb.GetOrgCertificates(r.Context(), org.ID)

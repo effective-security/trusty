@@ -6,6 +6,7 @@ import (
 
 	"github.com/ekspand/trusty/internal/config"
 	"github.com/go-phorce/dolly/rest/tlsconfig"
+	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
 )
 
@@ -84,6 +85,8 @@ func (f *factory) NewClient(svc string, ops ...Option) (*Client, error) {
 		return nil, errors.NotFoundf(svc)
 	}
 
+	logger.KV(xlog.INFO, "host", targetHosts[0], "tls", f.cfg.ClientTLS.String())
+
 	if dops.tlsCfg == nil && strings.HasPrefix(targetHosts[0], "https://") {
 		var tlsCert, tlsKey string
 		tlsCA := f.cfg.ClientTLS.TrustedCAFile
@@ -110,7 +113,7 @@ func (f *factory) NewClient(svc string, ops ...Option) (*Client, error) {
 	}
 	client, err := New(clientCfg)
 	if err != nil {
-		return nil, errors.Annotate(err, "unable to create client")
+		return nil, errors.Annotatef(err, "unable to create client: %v", targetHosts)
 	}
 	return client, nil
 }

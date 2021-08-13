@@ -86,13 +86,16 @@ func configureListeners(cfg *config.HTTPServer) (sctxs map[string]*serveCtx, err
 			PermitWithoutStream: false,
 		}))
 	}
+
+	ka := keepalive.ServerParameters{
+		MaxConnectionIdle: 5 * time.Minute,
+	}
 	if cfg.KeepAlive.Interval > 0 &&
 		cfg.KeepAlive.Timeout > 0 {
-		gopts = append(gopts, grpc.KeepaliveParams(keepalive.ServerParameters{
-			Time:    cfg.KeepAlive.Interval,
-			Timeout: cfg.KeepAlive.Timeout,
-		}))
+		ka.Time = cfg.KeepAlive.Interval
+		ka.Timeout = cfg.KeepAlive.Timeout
 	}
+	gopts = append(gopts, grpc.KeepaliveParams(ka))
 
 	sctxs = make(map[string]*serveCtx)
 	defer func() {

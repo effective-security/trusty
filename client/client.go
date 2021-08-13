@@ -169,6 +169,7 @@ func newClient(cfg *Config) (*Client, error) {
 		}
 	}
 
+	logger.KV(xlog.TRACE, "dial", dialEndpoint)
 	conn, err := client.dial(dialEndpoint, creds, dopts...)
 	if err != nil {
 		client.cancel()

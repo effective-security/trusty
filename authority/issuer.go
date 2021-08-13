@@ -209,7 +209,7 @@ func CreateIssuer(cfg *IssuerConfig, certBytes, intCAbytes, rootBytes []byte, si
 		cabundlePEM = cabundlePEM + "\n" + strings.TrimSpace(bundle.CACertsPEM)
 	}
 
-	return &Issuer{
+	ca := &Issuer{
 		cfg:         *cfg,
 		skid:        certutil.GetSubjectKeyID(bundle.Cert),
 		signer:      signer,
@@ -225,7 +225,9 @@ func CreateIssuer(cfg *IssuerConfig, certBytes, intCAbytes, rootBytes []byte, si
 		crlRenewal:  crlRenewal,
 		crlExpiry:   crlExpiry,
 		ocspExpiry:  ocspExpiry,
-	}, nil
+	}
+	logger.Noticef("issuer=%s, skid=%s, crl_url=%s, ocsp_url=%s", label, ca.skid, ca.crlURL, ca.ocspURL)
+	return ca, nil
 }
 
 // Sign signs a new certificate based on the PEM-encoded

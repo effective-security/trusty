@@ -178,6 +178,9 @@ func (info *TLSInfo) GetClientCertAuth() bool {
 }
 
 func (info *TLSInfo) String() string {
+	if info == nil {
+		return ""
+	}
 	return fmt.Sprintf("cert=%s, key=%s, trusted-ca=%s, client-cert-auth=%v, crl-file=%s",
 		info.CertFile, info.KeyFile, info.TrustedCAFile, info.GetClientCertAuth(), info.CRLFile)
 }

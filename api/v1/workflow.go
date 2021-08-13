@@ -139,9 +139,9 @@ type GetOrgAPIKeysResponse struct {
 // Certificate provides X509 Certificate information
 type Certificate struct {
 	// ID of the certificate
-	ID uint64 `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 	// OrgID of the certificate, only used with Org scope
-	OrgID uint64 `json:"org_id,omitempty"`
+	OrgID string `json:"org_id,omitempty"`
 	// Skid provides Subject Key Identifier
 	SKID string `json:"skid,omitempty"`
 	// Ikid provides Issuer Key Identifier
