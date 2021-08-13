@@ -67,7 +67,8 @@ func (r *Request) requestCertificate(ctx context.Context, client MinCertificates
 	}
 
 	keyFile := path.Join(r.CertDir, "tls.key")
-	if err := ioutil.WriteFile(keyFile, pemKeyBytes, 0600); err != nil {
+	// TODO: for 0600 the POD got access denied
+	if err := ioutil.WriteFile(keyFile, pemKeyBytes, 0644); err != nil {
 		return errors.Annotate(err, "unable to save key")
 	}
 

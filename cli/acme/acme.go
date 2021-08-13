@@ -27,6 +27,32 @@ import (
 
 var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/cli", "acme")
 
+// Directory returns ACME directory
+func Directory(c ctl.Control, _ interface{}) error {
+	cli := c.(*cli.Cli)
+
+	client, err := cli.HTTPClient()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	dir, err := client.Directory(context.Background())
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	ctl.WriteJSON(c.Writer(), dir)
+	/* TODO
+	if cli.IsJSON() {
+		ctl.WriteJSON(c.Writer(), res)
+		fmt.Fprint(c.Writer(), "\n")
+	} else {
+		print.Directory(c.Writer(), account)
+	}
+	*/
+	return nil
+}
+
 // GetAccountFlags for GetAccount command
 type GetAccountFlags struct {
 	OrgID  *string
