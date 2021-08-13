@@ -207,6 +207,18 @@ const (
 	// Response: v1.CancelSubscriptionResponse
 	PathForMartiniCancelSubscription = "/v1/ms/subscription/cancel"
 
+	// PathForMartiniListSubscriptions lists user's subscriptions
+	//
+	// Verbs: GET
+	// Response: v1.ListSubscriptionsResponse
+	PathForMartiniListSubscriptions = "/v1/ms/subscriptions"
+
+	// PathForMartiniSubscriptionsProducts list products
+	//
+	// Verbs: GET
+	// Response: v1.SubscriptionsProductsResponse
+	PathForMartiniSubscriptionsProducts = "/v1/ms/subscriptions/products"
+
 	// PathForMartiniStripeWebhook handles Stripe webhook call
 	//
 	// Verbs: POST

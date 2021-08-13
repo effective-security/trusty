@@ -136,11 +136,31 @@ func (c *Client) GetOrgAPIKeys(ctx context.Context, orgID string) (*v1.GetOrgAPI
 }
 
 // CreateSubscription pays for Org validation
-func (c *Client) CreateSubscription(ctx context.Context, req *v1.CreateSubscriptionRequest) (*v1.OrgResponse, error) {
-	res := new(v1.OrgResponse)
+func (c *Client) CreateSubscription(ctx context.Context, req *v1.CreateSubscriptionRequest) (*v1.CreateSubscriptionResponse, error) {
+	res := new(v1.CreateSubscriptionResponse)
 	_, _, err := c.PostRequest(ctx, v1.PathForMartiniCreateSubscription, req, res)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 	return res, nil
+}
+
+// ListSubscriptions returns user's subscriptions
+func (c *Client) ListSubscriptions(ctx context.Context) (*v1.ListSubscriptionsResponse, error) {
+	r := new(v1.ListSubscriptionsResponse)
+	_, _, err := c.Get(ctx, v1.PathForMartiniListSubscriptions, r)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return r, nil
+}
+
+// ListSubscriptionsProducts returns list of available products
+func (c *Client) ListSubscriptionsProducts(ctx context.Context) (*v1.SubscriptionsProductsResponse, error) {
+	r := new(v1.SubscriptionsProductsResponse)
+	_, _, err := c.Get(ctx, v1.PathForMartiniSubscriptionsProducts, r)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return r, nil
 }

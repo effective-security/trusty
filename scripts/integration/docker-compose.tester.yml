@@ -83,7 +83,7 @@ services:
       - TRUSTY_GOOGLE_CLIENT_ID=not_used_in_test
       - TRUSTY_GOOGLE_CLIENT_SECRET=not_used_in_test
       - TRUSTY_MAILGUN_PRIVATE_KEY=not_used_in_test
-      - TRUSTY_STRIPE_API_KEY=sk_test_51JI1BxKfgu58p9BHUJLe7ZgIXWJCnzy4pYiHjSsukbGbozLoFX0RvZrxjlfL6Hge9Vbw6rdbkNuIMl5NeEZN7o8x00UlLEHidR
+      - TRUSTY_STRIPE_API_KEY=sk_test_123
       - TRUSTY_STRIPE_WEBHOOK_SECRET=not_used_in_test
       - TRUSTY_CA_SQL_CONN=host=10.77.88.100 port=5432 user=postgres password=postgres sslmode=disable dbname=cadb
       - TRUSTY_ORGS_SQL_CONN=host=10.77.88.100 port=5432 user=postgres password=postgres sslmode=disable dbname=orgsdb
@@ -171,7 +171,7 @@ services:
       - TRUSTY_GOOGLE_CLIENT_ID=not_used_in_test
       - TRUSTY_GOOGLE_CLIENT_SECRET=not_used_in_test
       - TRUSTY_MAILGUN_PRIVATE_KEY=not_used_in_test
-      - TRUSTY_STRIPE_API_KEY=sk_test_51JI1BxKfgu58p9BHUJLe7ZgIXWJCnzy4pYiHjSsukbGbozLoFX0RvZrxjlfL6Hge9Vbw6rdbkNuIMl5NeEZN7o8x00UlLEHidR
+      - TRUSTY_STRIPE_API_KEY=sk_test_123
       - TRUSTY_STRIPE_WEBHOOK_SECRET=not_used_in_test
       - TRUSTY_CA_SQL_CONN=host=10.77.88.100 port=5432 user=postgres password=postgres sslmode=disable dbname=cadb
       - TRUSTY_ORGS_SQL_CONN=host=10.77.88.100 port=5432 user=postgres password=postgres sslmode=disable dbname=orgsdb
@@ -245,7 +245,7 @@ services:
       - TRUSTY_GOOGLE_CLIENT_ID=not_used_in_test
       - TRUSTY_GOOGLE_CLIENT_SECRET=not_used_in_test
       - TRUSTY_MAILGUN_PRIVATE_KEY=not_used_in_test
-      - TRUSTY_STRIPE_API_KEY=sk_test_51JI1BxKfgu58p9BHUJLe7ZgIXWJCnzy4pYiHjSsukbGbozLoFX0RvZrxjlfL6Hge9Vbw6rdbkNuIMl5NeEZN7o8x00UlLEHidR
+      - TRUSTY_STRIPE_API_KEY=sk_test_123
       - TRUSTY_STRIPE_WEBHOOK_SECRET=not_used_in_test
       - TRUSTY_JWT_SEED=testseed 
     entrypoint:

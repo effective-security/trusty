@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/ekspand/trusty/internal/config"
+	"github.com/ekspand/trusty/pkg/payment"
 	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/juju/errors"
@@ -26,6 +27,9 @@ var (
 func TestMain(m *testing.M) {
 	_ = os.MkdirAll(testDirPath, 0700)
 	defer os.RemoveAll(testDirPath)
+
+	// Run stripe mocked backend
+	payment.SetStripeMockedBackend()
 
 	// Run the tests
 	rc := m.Run()

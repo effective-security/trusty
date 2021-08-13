@@ -23,6 +23,7 @@ import (
 	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/internal/db/orgsdb/model"
 	"github.com/ekspand/trusty/pkg/gserver"
+	"github.com/ekspand/trusty/pkg/payment"
 	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/rest"
@@ -64,12 +65,15 @@ var serviceFactories = map[string]gserver.ServiceFactory{
 }
 
 func TestMain(m *testing.M) {
+	// Run stripe mocked backend
+	payment.SetStripeMockedBackend()
+
 	var err error
 	xlog.SetPackageLogLevel("github.com/go-phorce/dolly/xhttp", "retriable", xlog.DEBUG)
 
 	// add this to be able launch service when debugging using vscode
 	os.Setenv("TRUSTY_MAILGUN_PRIVATE_KEY", "1234")
-	os.Setenv("TRUSTY_STRIPE_API_KEY", "sk_test_51JI1BxKfgu58p9BHUJLe7ZgIXWJCnzy4pYiHjSsukbGbozLoFX0RvZrxjlfL6Hge9Vbw6rdbkNuIMl5NeEZN7o8x00UlLEHidR")
+	os.Setenv("TRUSTY_STRIPE_API_KEY", "sk_test_123")
 	os.Setenv("TRUSTY_STRIPE_WEBHOOK_SECRET", "1234")
 	os.Setenv("TRUSTY_JWT_SEED", "1234")
 
@@ -281,8 +285,8 @@ func TestDenyOrg(t *testing.T) {
 	// Payment
 	//
 	paymentReq := &v1.CreateSubscriptionRequest{
-		OrgID:             res.Org.ID,
-		SubscriptionYears: 2,
+		OrgID:     res.Org.ID,
+		ProductID: "prod_JrgfS9voqQbu4L",
 	}
 	jsPayment, err := json.Marshal(paymentReq)
 	require.NoError(t, err)
@@ -534,14 +538,6 @@ var stripeSampleInvoice = `{
 	}
   }`
 
-const (
-	ccNumberPaymentSucceeds = "4242 4242 4242 4242"
-	ccNumberPaymentDeclined = "4000 0000 0000 9995"
-	ccExpMonth              = "08"
-	ccExpYear               = "24"
-	ccCVC                   = "123"
-)
-
 func TestRegisterOrgFullFlow(t *testing.T) {
 	ctx := context.Background()
 	svc := trustyServer.Service(martini.ServiceName).(*martini.Service)
@@ -550,7 +546,7 @@ func TestRegisterOrgFullFlow(t *testing.T) {
 	h := svc.RegisterOrgHandler()
 
 	dbProv := svc.Db()
-	old, err := dbProv.GetOrgByExternalID(ctx, v1.ProviderMartini, "99999999")
+	old, err := dbProv.GetOrgByExternalID(ctx, v1.ProviderMartini, "0123456")
 	if err == nil {
 		dbProv.RemoveOrg(ctx, old.ID)
 	}
@@ -621,8 +617,8 @@ func TestRegisterOrgFullFlow(t *testing.T) {
 	// create subscription
 	//
 	paymentReq := &v1.CreateSubscriptionRequest{
-		OrgID:             res.Org.ID,
-		SubscriptionYears: 2,
+		OrgID:     res.Org.ID,
+		ProductID: "prod_JrgfS9voqQbu4L",
 	}
 	jsPayment, err := json.Marshal(paymentReq)
 	require.NoError(t, err)
@@ -636,16 +632,22 @@ func TestRegisterOrgFullFlow(t *testing.T) {
 	require.Equal(t, http.StatusOK, w.Code)
 	var resSub v1.CreateSubscriptionResponse
 	require.NoError(t, marshal.Decode(w.Body, &resSub))
-	require.Equal(t, uint32(2), resSub.SubscriptionYears)
-	require.Equal(t, res.Org.ID, resSub.OrgID)
-	// 4000$ is the price of the test product create in Stripe
-	// see payment-provider-stripe.yaml config file
-	require.Equal(t, uint64(4000), resSub.PriceAmount)
-	require.Equal(t, "usd", resSub.PriceCurrency)
-	subID, err := db.ID(resSub.OrgID)
+	require.Equal(t, res.Org.ID, resSub.Subscription.OrgID)
+	require.Equal(t, uint64(2000), resSub.Subscription.Price)
+	require.Equal(t, "usd", resSub.Subscription.Currency)
+	// expires in 2 years
+	require.True(t, resSub.Subscription.ExpiresAt.Year()-time.Now().UTC().Year() > 1)
+	require.True(t, resSub.Subscription.ExpiresAt.Year()-time.Now().UTC().Year() < 3)
+	require.Equal(t, "pi_1JF0naCWsBdfZPJZe0UeNrDw_secret_8PNI9iNvf5QBSVfOophEFg3v9", resSub.ClientSecret)
+
+	subID, err := db.ID(resSub.Subscription.OrgID)
 	require.NoError(t, err)
 	subscription, err := dbProv.GetSubscription(ctx, subID, user.ID)
 	require.NoError(t, err)
+
+	// unfortunately stripe-mock is stateless and when creating resources it does not store them in memory
+	// hence we are using hardcoded subscription id for testing
+	// https://github.com/stripe/stripe-mock
 	stripeSampleInvoice = strings.Replace(stripeSampleInvoice, "SUBSCRIPTION_ID_PLACEHOLDER", subscription.ExternalID, 2)
 
 	//
@@ -654,14 +656,9 @@ func TestRegisterOrgFullFlow(t *testing.T) {
 
 	// generate payment method and intent
 	paymentProv := svc.PaymentProvider()
-	paymentMethod, err := paymentProv.CreatePaymentMethod(
-		ccNumberPaymentSucceeds,
-		ccExpMonth,
-		ccExpYear,
-		ccCVC,
-	)
+	paymentMethod, err := paymentProv.GetPaymentMethod("pm_1JFlurCWsBdfZPJZ0Xe6Qd2W")
 	require.NoError(t, err)
-	paymentIntent, err := paymentProv.CreatePaymentIntent(subscription.CustomerID, paymentMethod.ID, 500)
+	paymentIntent, err := paymentProv.GetPaymentIntent("pi_1JF0naCWsBdfZPJZe0UeNrDw")
 	require.NoError(t, err)
 	stripeSampleInvoice = strings.Replace(stripeSampleInvoice, "PAYMENT_INTENT_ID_PLACEHOLDER", paymentIntent.ID, 1)
 	_, err = paymentProv.AttachPaymentMethod(subscription.CustomerID, paymentMethod.ID)

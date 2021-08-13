@@ -60,7 +60,7 @@ Commands:
   org validate --org=ORG
     approve organization validation
 
-  org subscribe --org=ORG --cardholder=CARDHOLDER --cc=CC --expiry=EXPIRY --cvv=CVV --years=YEARS
+  org subscribe --org=ORG --product=PRODUCTID
     create subscription
 
   org keys --org=ORG
@@ -148,7 +148,7 @@ bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem or
 ## Subscribe
 
 ```.sh
-bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem org subscribe --org 82923411415760996 --cardholder "Denis Issoupov" --cc 4445-1234-1234-1234 --expiry 11/22 --cvv 266 --years 3
+bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem org subscribe --org 82923411415760996 --product 3
 
 {
         "org": {

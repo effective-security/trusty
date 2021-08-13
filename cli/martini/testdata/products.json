@@ -1,0 +1,16 @@
+{  
+    "products": [
+        {
+            "id": "12",
+            "name": "1 year subscription",
+            "price":100,
+            "currency":"usd"
+        },
+        {
+            "id": "15",
+            "name": "2 years subscription",
+            "price":200,
+            "currency":"usd"
+        }
+    ]
+}

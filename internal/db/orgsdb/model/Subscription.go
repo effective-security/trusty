@@ -17,7 +17,6 @@ type Subscription struct {
 	PriceAmount     uint64    `db:"price_amount"`
 	PriceCurrency   string    `db:"price_currency"`
 	PaymentMethodID string    `db:"payment_method_id"`
-	Years           uint32    `db:"years"`
 	CreatedAt       time.Time `db:"created_at"`
 	ExpiresAt       time.Time `db:"expires_at"`
 	LastPaidAt      time.Time `db:"last_paid_at"`

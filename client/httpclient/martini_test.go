@@ -334,28 +334,16 @@ func TestRegisterOrg(t *testing.T) {
 
 func TestSubscribeOrg(t *testing.T) {
 	h := makeTestHandler(t, v1.PathForMartiniCreateSubscription, `{                         
-        "org": {
-                "approver_email": "denis+test@ekspand.com",
-                "approver_name": "Mr Matthew D Hardeman",
-                "billing_email": "denis@ekspand.com",
-                "city": "PELHAM",
-                "company": "LOW LATENCY COMMUNICATIONS LLC",
-                "created_at": "2021-07-23T23:16:47.699181Z",
-                "email": "denis+test@ekspand.com",
-                "expires_at": "2022-07-21T11:16:47.699181Z",
-                "extern_id": "99999999",
-                "id": "82620084182319204",
-                "login": "99999999",
-                "name": "LOW LATENCY COMMUNICATIONS LLC",
-                "phone": "2057453970",
-                "postal_code": "35124",
-                "provider": "martini",
-                "region": "AL",
-                "status": "validation_pending",
-                "street_address": "241 APPLEGATE TRACE",
-                "updated_at": "2021-07-23T23:16:47.699181Z"
-        }
-}`)
+		"subscription" : {
+			"org_id": "82620084182319204",
+			"status": "validation_pending",
+			"created_at": "2021-07-23T23:16:47.699181Z",
+			"expires_at": "2023-07-23T23:16:47.699181Z",
+			"price":100,
+			"currency":"usd"
+		},
+		"client_secret":"1234"
+	}`)
 	server := httptest.NewServer(h)
 	defer server.Close()
 
@@ -368,13 +356,114 @@ func TestSubscribeOrg(t *testing.T) {
 	})
 
 	req := &v1.CreateSubscriptionRequest{
-		OrgID:             "82620084182319204",
-		SubscriptionYears: 3,
+		OrgID:     "82620084182319204",
+		ProductID: "product_1",
 	}
 	r, err := client.CreateSubscription(context.Background(), req)
 	require.NoError(t, err)
 	require.NotNil(t, r)
-	assert.Equal(t, v1.OrgStatusValidationPending, r.Org.Status)
+	assert.Equal(t, "82620084182319204", r.Subscription.OrgID)
+	assert.Equal(t, "2021-07-23 23:16:47.699181 +0000 UTC", r.Subscription.CreatedAt.String())
+	assert.Equal(t, "2023-07-23 23:16:47.699181 +0000 UTC", r.Subscription.ExpiresAt.String())
+	assert.Equal(t, v1.OrgStatusValidationPending, r.Subscription.Status)
+	assert.Equal(t, uint64(100), r.Subscription.Price)
+	assert.Equal(t, "usd", r.Subscription.Currency)
+	assert.Equal(t, "1234", r.ClientSecret)
+}
+
+func TestListSubscriptions(t *testing.T) {
+	h := makeTestHandler(t, v1.PathForMartiniListSubscriptions, `{  
+		"subscriptions": [
+			{
+				"org_id": "82620084182319204",
+				"status":"validation_pending",
+				"created_at": "2021-07-23T23:16:47.699181Z",
+				"expires_at": "2022-07-23T23:16:47.699181Z",
+				"price":100,
+				"currency":"usd"
+			},
+			{
+				"org_id": "82620084182319205",
+				"status":"payment_pending",
+				"created_at": "2021-07-24T23:16:47.699181Z",
+				"expires_at": "2023-07-24T23:16:47.699181Z",
+				"price":200,
+				"currency":"usd"
+			}
+		]
+	}`)
+	server := httptest.NewServer(h)
+	defer server.Close()
+
+	client, err := New(NewConfig(), []string{server.URL})
+	assert.NoError(t, err, "Unexpected error.")
+
+	require.NotPanics(t, func() {
+		// ensure compiles
+		_ = interface{}(client).(API)
+	})
+
+	r, err := client.ListSubscriptions(context.Background())
+	require.NoError(t, err)
+	require.NotNil(t, r)
+	require.Equal(t, 2, len(r.Subscriptions))
+	assert.Equal(t, "82620084182319204", r.Subscriptions[0].OrgID)
+	assert.Equal(t, "validation_pending", r.Subscriptions[0].Status)
+	assert.Equal(t, "2021-07-23 23:16:47.699181 +0000 UTC", r.Subscriptions[0].CreatedAt.String())
+	assert.Equal(t, "2022-07-23 23:16:47.699181 +0000 UTC", r.Subscriptions[0].ExpiresAt.String())
+	assert.Equal(t, uint64(100), r.Subscriptions[0].Price)
+	assert.Equal(t, "usd", r.Subscriptions[0].Currency)
+
+	assert.Equal(t, "82620084182319205", r.Subscriptions[1].OrgID)
+	assert.Equal(t, "payment_pending", r.Subscriptions[1].Status)
+	assert.Equal(t, "2021-07-24 23:16:47.699181 +0000 UTC", r.Subscriptions[1].CreatedAt.String())
+	assert.Equal(t, "2023-07-24 23:16:47.699181 +0000 UTC", r.Subscriptions[1].ExpiresAt.String())
+	assert.Equal(t, uint64(200), r.Subscriptions[1].Price)
+	assert.Equal(t, "usd", r.Subscriptions[1].Currency)
+}
+
+func TestListSubscriptionsProducts(t *testing.T) {
+	h := makeTestHandler(t, v1.PathForMartiniSubscriptionsProducts, `{  
+		"products": [
+			{
+				"id": "12",
+				"name": "1 year subscription",
+				"price":100,
+				"currency":"usd"
+			},
+			{
+				"id": "15",
+				"name": "2 years subscription",
+				"price":200,
+				"currency":"usd"
+			}
+		]
+		
+}`)
+	server := httptest.NewServer(h)
+	defer server.Close()
+
+	client, err := New(NewConfig(), []string{server.URL})
+	assert.NoError(t, err, "Unexpected error.")
+
+	require.NotPanics(t, func() {
+		// ensure compiles
+		_ = interface{}(client).(API)
+	})
+
+	r, err := client.ListSubscriptionsProducts(context.Background())
+	require.NoError(t, err)
+	require.NotNil(t, r)
+	require.Equal(t, 2, len(r.Products))
+	assert.Equal(t, "12", r.Products[0].ID)
+	assert.Equal(t, "1 year subscription", r.Products[0].Name)
+	assert.Equal(t, uint64(100), r.Products[0].Price)
+	assert.Equal(t, "usd", r.Products[0].Currency)
+
+	assert.Equal(t, "15", r.Products[1].ID)
+	assert.Equal(t, "2 years subscription", r.Products[1].Name)
+	assert.Equal(t, uint64(200), r.Products[1].Price)
+	assert.Equal(t, "usd", r.Products[1].Currency)
 }
 
 func TestApproveOrg(t *testing.T) {

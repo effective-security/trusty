@@ -59,7 +59,7 @@ jobs:
         TRUSTY_MAILGUN_PRIVATE_KEY: ${{ secrets.TRUSTY_MAILGUN_PRIVATE_KEY }}
         TRUSTY_STRIPE_API_KEY: ${{ secrets.TRUSTY_STRIPE_API_KEY }}
         TRUSTY_STRIPE_WEBHOOK_SECRET: ${{ secrets.TRUSTY_STRIPE_WEBHOOK_SECRET }}
-      run: make build gen_test_certs gen_martini_certs start-local-kms start-sql covtest
+      run: make build gen_test_certs gen_martini_certs start-local-kms start-sql start-stripe-mock covtest
 
     # TODO: package and upload on release
     #- name: Upload binaries

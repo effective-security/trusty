@@ -59,6 +59,8 @@ type OrgsReadOnlyDb interface {
 	GetSubscription(ctx context.Context, id, userID uint64) (*model.Subscription, error)
 	// GetSubscriptionByExternalID returns subscription with the given external id
 	GetSubscriptionByExternalID(ctx context.Context, externalID string) (*model.Subscription, error)
+	// ListSubscriptions lists user's subscriptions
+	ListSubscriptions(ctx context.Context, userID uint64) ([]*model.Subscription, error)
 }
 
 // OrgsDb defines an interface for CRUD operations on Orgs

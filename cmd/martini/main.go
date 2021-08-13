@@ -77,6 +77,16 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		PreAction(cli.PopulateControl).
 		Action(cli.RegisterAction(martini.Certificates, nil))
 
+	// user subscriptions
+	app.Command("subscriptions", "show the user's subscriptions").
+		PreAction(cli.PopulateControl).
+		Action(cli.RegisterAction(martini.Subscriptions, nil))
+
+	// products
+	app.Command("products", "show the available products").
+		PreAction(cli.PopulateControl).
+		Action(cli.RegisterAction(martini.Products, nil))
+
 	// opencorps
 	searchCorpsFlags := new(martini.SearchCorpsFlags)
 	cmdSearchCorps := app.Command("opencorps", "search open corporations").
@@ -138,8 +148,8 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	subscribeFlags := new(martini.CreateSubscriptionFlags)
 	cmdSubscribe := cmdOrgs.Command("subscribe", "subscribe to org").
 		Action(cli.RegisterAction(martini.CreateSubscription, subscribeFlags))
-	subscribeFlags.OrgID = cmdSubscribe.Flag("org-id", "org id").String()
-	subscribeFlags.Years = cmdSubscribe.Flag("years", "number of years to subscribe to").Uint32()
+	subscribeFlags.OrgID = cmdSubscribe.Flag("org", "org id").Required().String()
+	subscribeFlags.ProductID = cmdSubscribe.Flag("product", "product id to subscribe to").Required().String()
 
 	orgAPIKeysFlags := new(martini.APIKeysFlags)
 	cmdOrgAPIKeys := cmdOrgs.Command("keys", "list API keys").

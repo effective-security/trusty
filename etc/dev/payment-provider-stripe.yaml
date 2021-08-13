@@ -1,22 +1,3 @@
 ---
 api_key: env://TRUSTY_STRIPE_API_KEY
 webhook_secret: env://TRUSTY_STRIPE_WEBHOOK_SECRET
-# products are created manually beforehand in stripe
-# stripe products can be configured with discount, price, billing cycle and other parameters
-# using stripe dashboard. please see https://stripe.com/docs/billing/prices-guide
-products:
-- name: '1 year subscription'
-  years: 1
-  product_id: 'prod_JzelxeDOstZRlU'
-- name: '2 years subscription'
-  years: 2
-  product_id: 'prod_JzelniJZbz2IHQ'
-- name: '3 years subscription'
-  years: 3
-  product_id: 'prod_K0jeGhZYVjF3Zg'
-- name: '4 years subscription'
-  years: 4
-  product_id: 'prod_K0jgkJZygIu5dk'
-- name: '5 years subscription'
-  years: 5
-  product_id: 'prod_K0jhN9b5SoH0rK'

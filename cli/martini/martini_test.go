@@ -104,14 +104,26 @@ func (s *testSuite) TestValidateOrg() {
 
 func (s *testSuite) TestSubscribeOrg() {
 	org := "82923411415760996"
-	num := uint32(3)
+	productID := "1234"
 	flags := martini.CreateSubscriptionFlags{
-		OrgID: &org,
-		Years: &num,
+		OrgID:     &org,
+		ProductID: &productID,
 	}
 	err := s.Run(martini.CreateSubscription, &flags)
 	s.NoError(err)
-	s.HasText(`"status": "validation_pending",`)
+	s.HasText(`"status": "validation_pending"`)
+}
+
+func (s *testSuite) TestListSubscriptions() {
+	err := s.Run(martini.Subscriptions, nil)
+	s.NoError(err)
+	s.HasText(`validation_pending`)
+}
+
+func (s *testSuite) TestListProducts() {
+	err := s.Run(martini.Products, nil)
+	s.NoError(err)
+	s.HasText(`1 year subscription`)
 }
 
 func (s *testSuite) TestAPIKeys() {
