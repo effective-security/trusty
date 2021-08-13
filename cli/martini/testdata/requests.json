@@ -9,6 +9,8 @@
     "/v1/ms/approve_org": {"file":"approve"},
     "/v1/ms/validate_org": {"file":"validate"},
     "/v1/ms/subscription/create": {"file":"subscribe"},
+    "/v1/ms/subscriptions": {"file":"subscriptions"},
+    "/v1/ms/subscriptions/products": {"file":"products"},
     "/v1/ms/apikeys/82936648303640676": {"file":"keys"},
     "/v1/ms/search/opencorporates?name=peculiar+ventures" : {"file":"opencorps"}
 }

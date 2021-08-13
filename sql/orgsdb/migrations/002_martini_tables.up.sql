@@ -124,7 +124,6 @@ CREATE TABLE IF NOT EXISTS public.subscriptions
     price_amount bigint NOT NULL,
     price_currency character varying(32) COLLATE pg_catalog."default" NOT NULL,
     payment_method_id character varying(32) COLLATE pg_catalog."default" NULL,
-    years bigint NOT NULL,
     created_at timestamp with time zone,
     expires_at timestamp with time zone,
     last_paid_at timestamp with time zone,

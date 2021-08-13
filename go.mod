@@ -14,7 +14,7 @@ require (
 	github.com/go-acme/lego v2.7.2+incompatible
 	github.com/go-logr/logr v0.4.0
 	github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba
-	github.com/go-phorce/dolly v0.8.3-0.20210813175944-8ba8ef6343a7
+	github.com/go-phorce/dolly v0.8.3-0.20210814000628-80a77d105e81
 	github.com/gogo/googleapis v1.4.1
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang-migrate/migrate/v4 v4.14.1

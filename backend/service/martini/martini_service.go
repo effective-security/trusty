@@ -84,6 +84,8 @@ func (s *Service) RegisterRoute(r rest.Router) {
 
 	r.POST(v1.PathForMartiniCreateSubscription, s.CreateSubsciptionHandler())
 	r.POST(v1.PathForMartiniCancelSubscription, s.CancelSubsciptionHandler())
+	r.GET(v1.PathForMartiniListSubscriptions, s.ListSubsciptionsHandler())
+	r.GET(v1.PathForMartiniSubscriptionsProducts, s.SubscriptionsProductsHandler())
 	r.POST(v1.PathForMartiniStripeWebhook, s.StripeWebhookHandler())
 
 	r.GET(v1.PathForMartiniFccFrn, s.FccFrnHandler())

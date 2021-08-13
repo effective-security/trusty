@@ -4,7 +4,7 @@ import (
 	"context"
 	"io/ioutil"
 	"net/http"
-	"strconv"
+	"strings"
 	"time"
 
 	v1 "github.com/ekspand/trusty/api/v1"
@@ -33,7 +33,7 @@ func (s *Service) CreateSubsciptionHandler() rest.Handle {
 		logger.KV(xlog.INFO,
 			"user_id", userID,
 			"org_id", req.OrgID,
-			"subscription_years", req.SubscriptionYears,
+			"product_id", req.ProductID,
 		)
 
 		user, err := s.db.GetUser(r.Context(), userID)
@@ -55,26 +55,29 @@ func (s *Service) CreateSubsciptionHandler() rest.Handle {
 			return
 		}
 
-		subscription, clientSecret, err := s.createSubscription(ctx, user, org, req.SubscriptionYears)
+		subscription, clientSecret, err := s.createSubscription(ctx, user, org, req.ProductID)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to process the subscription").WithCause(err))
 			return
 		}
 
 		org.Status = v1.OrgStatusValidationPending
-		_, err = s.db.UpdateOrgStatus(ctx, org)
+		org, err = s.db.UpdateOrgStatus(ctx, org)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to process the subscription").WithCause(err))
 			return
 		}
 
 		res := &v1.CreateSubscriptionResponse{
-			OrgID:             strconv.FormatUint(subscription.ID, 10),
-			SubscriptionYears: subscription.Years,
-			PriceAmount:       subscription.PriceAmount,
-			PriceCurrency:     subscription.PriceCurrency,
-			Status:            subscription.Status,
-			ClientSecret:      clientSecret,
+			Subscription: v1.Subscription{
+				OrgID:     db.IDString(subscription.ID),
+				Status:    org.Status,
+				CreatedAt: subscription.CreatedAt,
+				ExpiresAt: subscription.ExpiresAt,
+				Price:     subscription.PriceAmount,
+				Currency:  subscription.PriceCurrency,
+			},
+			ClientSecret: clientSecret,
 		}
 		marshal.WriteJSON(w, r, res)
 	}
@@ -136,7 +139,70 @@ func (s *Service) CancelSubsciptionHandler() rest.Handle {
 		}
 
 		res := &v1.CancelSubscriptionResponse{
-			SubscriptionID: strconv.FormatUint(sub.ID, 10),
+			SubscriptionID: db.IDString(sub.ID),
+		}
+		marshal.WriteJSON(w, r, res)
+	}
+}
+
+// ListSubsciptionsHandler lists subscriptions
+func (s *Service) ListSubsciptionsHandler() rest.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
+		idn := identity.FromRequest(r).Identity()
+		userID, _ := db.ID(idn.UserID())
+
+		logger.KV(xlog.INFO, "user_id", userID)
+
+		user, err := s.db.GetUser(r.Context(), userID)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithNotFound("user not found").WithCause(err))
+			return
+		}
+
+		ctx := r.Context()
+		subscriptions, err := s.db.ListSubscriptions(ctx, user.ID)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithInvalidParam("unable to list subscriptions").WithCause(err))
+			return
+		}
+
+		res := &v1.ListSubscriptionsResponse{
+			Subscriptions: []v1.Subscription{},
+		}
+		for _, s := range subscriptions {
+			res.Subscriptions = append(res.Subscriptions, v1.Subscription{
+				OrgID:     db.IDString(s.ID),
+				Status:    s.Status,
+				CreatedAt: s.CreatedAt,
+				ExpiresAt: s.ExpiresAt,
+				Price:     s.PriceAmount,
+				Currency:  s.PriceCurrency,
+			})
+		}
+
+		marshal.WriteJSON(w, r, res)
+	}
+}
+
+// SubscriptionsProductsHandler handles call to list available products for subscriptions
+func (s *Service) SubscriptionsProductsHandler() rest.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
+		products := s.paymentProv.ListProducts()
+		if len(products) == 0 {
+			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to list any products"))
+			return
+		}
+
+		res := &v1.SubscriptionsProductsResponse{
+			Products: []v1.Product{},
+		}
+		for _, p := range products {
+			res.Products = append(res.Products, v1.Product{
+				ID:       p.ID,
+				Name:     p.Name,
+				Price:    uint64(p.PriceAmount),
+				Currency: p.PriceCurrency,
+			})
 		}
 		marshal.WriteJSON(w, r, res)
 	}
@@ -192,7 +258,7 @@ func (s *Service) createSubscription(
 	ctx context.Context,
 	user *model.User,
 	org *model.Organization,
-	years uint32,
+	productID string,
 ) (
 	*model.Subscription,
 	string,
@@ -203,15 +269,17 @@ func (s *Service) createSubscription(
 		return nil, "", errors.Annotatef(err, "unable to create a subscription for user name %s, email %s", user.Name, user.Email)
 	}
 
-	product, err := s.paymentProv.GetProduct(years)
+	product, err := s.paymentProv.GetProduct(productID)
 	if err != nil {
-		return nil, "", errors.Annotatef(err, "unable to get product for years %d", years)
+		return nil, "", errors.Annotatef(err, "unable to get product with id %s", productID)
 	}
 
 	subscription, err := s.paymentProv.CreateSubscription(customer.ID, product.PriceID)
 	if err != nil {
 		return nil, "", errors.Annotatef(err, "unable to create a subscription for customer %s, price %s", customer.ID, product.PriceID)
 	}
+
+	expiryPeriodInYears := subscriptionExpiryPeriodFromProductName(product.Name)
 
 	now := time.Now().UTC()
 	subscriptionModel, err := s.db.CreateSubscription(ctx, &model.Subscription{
@@ -222,13 +290,41 @@ func (s *Service) createSubscription(
 		PriceID:       product.PriceID,
 		PriceAmount:   uint64(product.PriceAmount),
 		PriceCurrency: product.PriceCurrency,
-		Years:         years,
 		CreatedAt:     now,
-		ExpiresAt:     now.AddDate(int(years), 0, 0),
+		ExpiresAt:     now.AddDate(expiryPeriodInYears, 0, 0).UTC(),
 		Status:        subscription.Status,
 	})
 	if err != nil {
 		return nil, "", errors.Annotatef(err, "unable to create a subscription in db for id %d, customer %s, price %s", org.ID, customer.ID, product.PriceID)
 	}
 	return subscriptionModel, subscription.ClientSecret, nil
+}
+
+// subscriptionExpiryPeriodFromProductName derives subscriptions expiry
+// period in years for the given product name
+func subscriptionExpiryPeriodFromProductName(
+	productName string,
+) int {
+	pName := strings.ToLower(productName)
+	if strings.Contains(pName, "1") {
+		return 1
+	}
+
+	if strings.Contains(pName, "2") {
+		return 2
+	}
+
+	if strings.Contains(pName, "3") {
+		return 3
+	}
+
+	if strings.Contains(pName, "4") {
+		return 4
+	}
+
+	if strings.Contains(pName, "5") {
+		return 5
+	}
+
+	return 1
 }

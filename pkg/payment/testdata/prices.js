@@ -1,4 +1,4 @@
-const createSubscription = (orgID,years) => {
+const createSubscription = (orgID,productID) => {
   const trustyAuthToken = document.getElementById('trustyAuthToken').value;
   return fetch('https://localhost:7891/v1/ms/subscription/create', {
     method: 'POST',
@@ -8,7 +8,7 @@ const createSubscription = (orgID,years) => {
     },
     body: JSON.stringify({
       org_id: orgID,
-      years: years,
+      product_id: "prod_K2OpdTIt5JQxoW",
     }),
   })
     .then((response) => response.json())

@@ -3,15 +3,19 @@ package payment
 import (
 	"encoding/json"
 	"io/ioutil"
+	"net/http"
+	"os"
 	"strings"
 
 	"github.com/go-phorce/dolly/fileutil"
 	"github.com/juju/errors"
 	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/customer"
+	"github.com/stripe/stripe-go/v72/form"
 	"github.com/stripe/stripe-go/v72/paymentintent"
 	"github.com/stripe/stripe-go/v72/paymentmethod"
 	"github.com/stripe/stripe-go/v72/price"
+	"github.com/stripe/stripe-go/v72/product"
 	"github.com/stripe/stripe-go/v72/sub"
 	"github.com/stripe/stripe-go/v72/webhook"
 	"gopkg.in/yaml.v2"
@@ -28,13 +32,23 @@ type Provider interface {
 	// CreatePaymentMethod creates a payment method
 	CreatePaymentMethod(ccNumber, ccExpMonth, ccExpYear, ccCVC string) (*Method, error)
 
+	// GetPaymentMethod returns a payment method
+	GetPaymentMethod(id string) (*Method, error)
+
 	// CreatePaymentIntent creates payment intent
 	CreatePaymentIntent(customerID, paymentMethodID string, amount int64) (*Intent, error)
+
+	// GetPaymentIntent returns payment intent
+	GetPaymentIntent(id string) (*Intent, error)
 
 	// AttachPaymentMethod attaches payment method to a customer
 	AttachPaymentMethod(customerID, paymentMethodID string) (*Method, error)
 
-	GetProduct(subscriptionYears uint32) (*Product, error)
+	// GetProduct gets product for the given id
+	GetProduct(id string) (*Product, error)
+
+	// ListProducts lists existing products
+	ListProducts() []Product
 
 	// CreateSubscription creates subscription
 	CreateSubscription(customerID, priceID string) (*Subscription, error)
@@ -52,13 +66,6 @@ type provider struct {
 	products []Product
 }
 
-// ProductConfig specifies products config
-type ProductConfig struct {
-	Name      string `json:"name" yaml:"name"`
-	Years     uint32 `json:"years" yaml:"years"`
-	ProductID string `json:"product_id" yaml:"product_id"`
-}
-
 // Config provides configuration for payment provider
 type Config struct {
 	// APIKey specifies API key
@@ -66,12 +73,9 @@ type Config struct {
 
 	// WebhookSecret specifies webhook secret
 	WebhookSecret string `json:"webhook_secret" yaml:"webhook_secret"`
-
-	// ProductConfig specifies list of product configs
-	ProductConfig []ProductConfig `json:"products" yaml:"products"`
 }
 
-// NewProvider returns provider
+// NewProvider returns payments provider
 func NewProvider(location string) (Provider, error) {
 	p := &provider{}
 	cfg, err := LoadConfig(location)
@@ -91,14 +95,9 @@ func NewProvider(location string) (Provider, error) {
 
 	p.cfg = cfg
 
-	// initialize/propogate products
-	for _, prCfg := range cfg.ProductConfig {
-		price, err := p.getPrice(prCfg.ProductID)
-		if err != nil {
-			return nil, errors.Trace(err)
-		}
-		product := NewProduct(prCfg.Name, price, prCfg.Years)
-		p.products = append(p.products, *product)
+	p.products, err = p.listProducts()
+	if err != nil {
+		return nil, errors.Trace(err)
 	}
 
 	return p, nil
@@ -128,14 +127,14 @@ func LoadConfig(file string) (*Config, error) {
 	return &config, nil
 }
 
-// GetProduct returns product for the given number of subscription years
-func (p *provider) GetProduct(subscriptionYears uint32) (*Product, error) {
+// GetProduct returns product for the given id
+func (p *provider) GetProduct(id string) (*Product, error) {
 	for _, product := range p.products {
-		if product.SubscriptionYears == subscriptionYears {
+		if product.ID == id {
 			return &product, nil
 		}
 	}
-	return nil, errors.Errorf("failed to get product for subscription years %d", subscriptionYears)
+	return nil, errors.Errorf("failed to get product for id %s", id)
 }
 
 // CreateCustomer creates a customer that can later be associated with a subscription
@@ -164,6 +163,7 @@ func (p *provider) GetCustomer(email string) (*Customer, error) {
 	if p.cfg.APIKey == "" {
 		return nil, errors.New("invalid API key")
 	}
+
 	stripe.Key = p.cfg.APIKey
 
 	params := &stripe.CustomerListParams{
@@ -200,6 +200,19 @@ func (p *provider) CreatePaymentMethod(ccNumber, ccExpMonth, ccExpYear, ccCVC st
 	return NewPaymentMethod(pm), nil
 }
 
+// GetPaymentMethod to retrieve payment methods... used mainly for testing
+func (p *provider) GetPaymentMethod(id string) (*Method, error) {
+	if p.cfg.APIKey == "" {
+		return nil, errors.New("invalid API key")
+	}
+	stripe.Key = p.cfg.APIKey
+	pm, err := paymentmethod.Get(id, nil)
+	if err != nil {
+		return nil, errors.Annotatef(err, "failed to get payment method")
+	}
+	return NewPaymentMethod(pm), nil
+}
+
 // AttachPaymentMethod attaches a payment method to a customer
 func (p *provider) AttachPaymentMethod(customerID, paymentMethodID string) (*Method, error) {
 	if p.cfg.APIKey == "" {
@@ -232,6 +245,15 @@ func (p *provider) CreatePaymentIntent(customerID, paymentMethodID string, amoun
 			stripe.String("card"),
 		},
 	})
+	if err != nil {
+		return nil, errors.Annotatef(err, "failed to create a payment intent")
+	}
+	return NewPaymentIntent(pi), nil
+}
+
+// GetPaymentIntent returns a payment intent
+func (p *provider) GetPaymentIntent(id string) (*Intent, error) {
+	pi, err := paymentintent.Get(id, nil)
 	if err != nil {
 		return nil, errors.Annotatef(err, "failed to create a payment intent")
 	}
@@ -288,10 +310,7 @@ func (p *provider) HandleWebhook(body []byte, signatureHeader string) (*Subscrip
 			return nil, errors.Annotatef(err, "error getting invoice payment intent")
 		}
 
-		pi, err := paymentintent.Get(
-			invoice.PaymentIntent.ID,
-			nil,
-		)
+		pi, err := p.GetPaymentIntent(invoice.PaymentIntent.ID)
 		if err != nil {
 			return nil, errors.Annotatef(err, "error getting payment intent object for %s", invoice.PaymentIntent.ID)
 		}
@@ -308,19 +327,74 @@ func (p *provider) HandleWebhook(body []byte, signatureHeader string) (*Subscrip
 	return nil, nil
 }
 
-// getPrice gets price given the product id
-func (p *provider) getPrice(productID string) (*Price, error) {
+// ListProducts returns existing products
+func (p *provider) ListProducts() []Product {
+	return p.products
+}
+
+// listProducts lists existing Stripe products
+func (p *provider) listProducts() ([]Product, error) {
 	if p.cfg.APIKey == "" {
 		return nil, errors.New("invalid API key")
 	}
 	stripe.Key = p.cfg.APIKey
-	params := &stripe.PriceListParams{
-		Product: stripe.String(productID),
+	var products []Product
+	params := &stripe.ProductListParams{
+		Active: stripe.Bool(true),
 	}
-	params.Filters.AddFilter("limit", "", "1")
-	i := price.List(params)
+	i := product.List(params)
 	for i.Next() {
-		return NewPrice(i.Price()), nil
+		productID := i.Product().ID
+		paramsForPrice := &stripe.PriceListParams{
+			Product: stripe.String(productID),
+		}
+
+		var prc *Price
+		params.Filters.AddFilter("limit", "", "1")
+		iPrice := price.List(paramsForPrice)
+		for iPrice.Next() {
+			prc = NewPrice(iPrice.Price())
+		}
+
+		if prc == nil {
+			return nil, errors.Errorf("unable to fetch price for product ID %s", productID)
+		}
+		prd := NewProduct(i.Product().ID, i.Product().Name, prc)
+		products = append(products, *prd)
 	}
-	return nil, errors.Errorf("failed to get price object with id %s", productID)
+	return products, nil
+}
+
+// SetStripeMockedBackend is used to set Stripe mock backend for running unit tests
+func SetStripeMockedBackend() {
+	// Enable strict mode on form encoding so that we'll panic if any kind of
+	// malformed param struct is detected
+	form.Strict = true
+
+	port := os.Getenv("STRIPE_MOCK_PORT")
+	if port == "" {
+		port = "12111"
+	}
+
+	// stripe-mock's certificate for localhost is self-signed so configure a
+	// specialized client that skips the certificate authority check.
+	trport := &http.Transport{}
+
+	httpClient := &http.Client{
+		Transport: trport,
+	}
+
+	// Configure a backend for stripe-mock and set it for both the API and
+	// Uploads (unlike the real Stripe API, stripe-mock supports both these
+	// backends).
+	stripeMockBackend := stripe.GetBackendWithConfig(
+		stripe.APIBackend,
+		&stripe.BackendConfig{
+			URL:           stripe.String("http://localhost:" + port),
+			HTTPClient:    httpClient,
+			LeveledLogger: stripe.DefaultLeveledLogger,
+		},
+	)
+	stripe.SetBackend(stripe.APIBackend, stripeMockBackend)
+	stripe.SetBackend(stripe.UploadsBackend, stripeMockBackend)
 }

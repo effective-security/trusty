@@ -228,8 +228,8 @@ func ValidateOrg(c ctl.Control, p interface{}) error {
 
 // CreateSubscriptionFlags defines flags for CreateSubscription command
 type CreateSubscriptionFlags struct {
-	OrgID *string
-	Years *uint32
+	OrgID     *string
+	ProductID *string
 }
 
 // CreateSubscription pays for organization
@@ -243,8 +243,8 @@ func CreateSubscription(c ctl.Control, p interface{}) error {
 	}
 
 	req := &v1.CreateSubscriptionRequest{
-		OrgID:             *flags.OrgID,
-		SubscriptionYears: *flags.Years,
+		OrgID:     *flags.OrgID,
+		ProductID: *flags.ProductID,
 	}
 
 	res, err := client.CreateSubscription(context.Background(), req)

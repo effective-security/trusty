@@ -18,7 +18,7 @@ BUILD_FLAGS=
 
 default: help
 
-all: clean folders tools generate hsmconfig build gen_test_certs gen_martini_certs start-local-kms start-sql test
+all: clean folders tools generate hsmconfig build gen_test_certs gen_martini_certs start-local-kms start-sql start-stripe-mock test
 
 #
 # clean produced files
@@ -169,6 +169,21 @@ start-sql:
 	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 5432 -U postgres -lqt
 	echo "host=127.0.0.1 port=5432 user=postgres password=postgres sslmode=disable dbname=cadb" > etc/dev/sql-conn-cadb.txt
 	echo "host=127.0.0.1 port=5432 user=postgres password=postgres sslmode=disable dbname=orgsdb" > etc/dev/sql-conn-orgsdb.txt
+
+start-stripe-mock:
+	# Container state will be true (it's already running), false (exists but stopped), or missing (does not exist).
+	# Annoyingly, when there is no such container and Docker returns an error, it also writes a blank line to stdout.
+	# Hence the sed to trim whitespace.
+	CONTAINER_STATE=$$(echo $$(docker inspect -f "{{.State.Running}}" stripe-mock 2>/dev/null || echo "missing") | sed -e 's/^[ \t]*//'); \
+	if [ "$$CONTAINER_STATE" = "missing" ]; then \
+		docker pull stripemock/stripe-mock:latest && \
+		docker run \
+			-d -p 12111-12112:12111-12112  \
+			-v ${PROJ_ROOT}/pkg/payment/testdata:/testdata \
+			--name stripe-mock \
+			stripemock/stripe-mock:latest -fixtures testdata/fixtures3.json && \
+		sleep 1; \
+	elif [ "$$CONTAINER_STATE" = "false" ]; then docker start stripe-mock && sleep 1; fi;
 
 drop-sql:
 	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 5432 -U postgres -a -f /trusty_sql/cadb/drop.sql

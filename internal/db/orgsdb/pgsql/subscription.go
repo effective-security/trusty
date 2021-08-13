@@ -18,13 +18,13 @@ func (p *Provider) CreateSubscription(ctx context.Context, s *model.Subscription
 	res := new(model.Subscription)
 
 	err = p.db.QueryRowContext(ctx, `
-			INSERT INTO subscriptions(id,external_id,user_id,customer_id,price_id,price_amount,price_currency,payment_method_id,years,created_at,expires_at,last_paid_at,status)
-				VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+			INSERT INTO subscriptions(id,external_id,user_id,customer_id,price_id,price_amount,price_currency,payment_method_id,created_at,expires_at,last_paid_at,status)
+				VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
 			ON CONFLICT (id,user_id)
 			DO UPDATE
-				SET external_id=$2,customer_id=$4,price_id=$5,price_amount=$6,price_currency=$7,payment_method_id=$8,years=$9,created_at=$10,expires_at=$11,last_paid_at=$12,
-				status=$13
-			RETURNING id,external_id,user_id,customer_id,price_id,price_amount,price_currency,payment_method_id,years,created_at,expires_at,last_paid_at,status
+				SET external_id=$2,customer_id=$4,price_id=$5,price_amount=$6,price_currency=$7,payment_method_id=$8,created_at=$9,expires_at=$10,last_paid_at=$11,
+				status=$12
+			RETURNING id,external_id,user_id,customer_id,price_id,price_amount,price_currency,payment_method_id,created_at,expires_at,last_paid_at,status
 			;`, s.ID,
 		s.ExternalID,
 		s.UserID,
@@ -33,7 +33,6 @@ func (p *Provider) CreateSubscription(ctx context.Context, s *model.Subscription
 		s.PriceAmount,
 		s.PriceCurrency,
 		s.PaymentMethodID,
-		s.Years,
 		s.CreatedAt.UTC(),
 		s.ExpiresAt.UTC(),
 		s.LastPaidAt.UTC(),
@@ -46,7 +45,6 @@ func (p *Provider) CreateSubscription(ctx context.Context, s *model.Subscription
 		&res.PriceAmount,
 		&res.PriceCurrency,
 		&res.PaymentMethodID,
-		&res.Years,
 		&res.CreatedAt,
 		&res.ExpiresAt,
 		&res.LastPaidAt,
@@ -116,7 +114,7 @@ func (p *Provider) GetSubscription(ctx context.Context, id, userID uint64) (*mod
 	res := new(model.Subscription)
 
 	err := p.db.QueryRowContext(ctx,
-		`SELECT id,external_id,user_id,customer_id,price_id,price_amount,price_currency,payment_method_id,years,created_at,expires_at,last_paid_at,status
+		`SELECT id,external_id,user_id,customer_id,price_id,price_amount,price_currency,payment_method_id,created_at,expires_at,last_paid_at,status
 		FROM subscriptions
 		WHERE id=$1 and user_id=$2
 		;`, id, userID,
@@ -128,7 +126,6 @@ func (p *Provider) GetSubscription(ctx context.Context, id, userID uint64) (*mod
 		&res.PriceAmount,
 		&res.PriceCurrency,
 		&res.PaymentMethodID,
-		&res.Years,
 		&res.CreatedAt,
 		&res.ExpiresAt,
 		&res.LastPaidAt,
@@ -149,7 +146,7 @@ func (p *Provider) GetSubscriptionByExternalID(ctx context.Context, externalID s
 	res := new(model.Subscription)
 
 	err := p.db.QueryRowContext(ctx,
-		`SELECT id,external_id,user_id,customer_id,price_id,price_amount,price_currency,payment_method_id,years,created_at,expires_at,last_paid_at,status
+		`SELECT id,external_id,user_id,customer_id,price_id,price_amount,price_currency,payment_method_id,created_at,expires_at,last_paid_at,status
 		FROM subscriptions
 		WHERE external_id=$1
 		;`, externalID,
@@ -161,7 +158,6 @@ func (p *Provider) GetSubscriptionByExternalID(ctx context.Context, externalID s
 		&res.PriceAmount,
 		&res.PriceCurrency,
 		&res.PaymentMethodID,
-		&res.Years,
 		&res.CreatedAt,
 		&res.ExpiresAt,
 		&res.LastPaidAt,
@@ -174,4 +170,61 @@ func (p *Provider) GetSubscriptionByExternalID(ctx context.Context, externalID s
 	res.ExpiresAt = res.ExpiresAt.UTC()
 	res.LastPaidAt = res.LastPaidAt.UTC()
 	return res, nil
+}
+
+// ListSubscriptions returns list of user's subscriptions
+func (p *Provider) ListSubscriptions(ctx context.Context, userID uint64) ([]*model.Subscription, error) {
+	res, err := p.db.QueryContext(ctx,
+		`SELECT 
+			subscriptions.id,
+			subscriptions.external_id,
+			subscriptions.user_id,
+			subscriptions.customer_id,
+			subscriptions.price_id,
+			subscriptions.price_amount,
+			subscriptions.price_currency,
+			subscriptions.payment_method_id,
+			subscriptions.created_at,
+			subscriptions.expires_at,
+			subscriptions.last_paid_at,
+			orgs.status
+		FROM
+			subscriptions
+		LEFT JOIN orgs ON subscriptions.id = orgs.id
+		WHERE user_id=$1
+		;`, userID,
+	)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	list := make([]*model.Subscription, 0, 100)
+	for res.Next() {
+		s := new(model.Subscription)
+		err = res.Scan(
+			&s.ID,
+			&s.ExternalID,
+			&s.UserID,
+			&s.CustomerID,
+			&s.PriceID,
+			&s.PriceAmount,
+			&s.PriceCurrency,
+			&s.PaymentMethodID,
+			&s.CreatedAt,
+			&s.ExpiresAt,
+			&s.LastPaidAt,
+			&s.Status,
+		)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+
+		s.CreatedAt = s.CreatedAt.UTC()
+		s.ExpiresAt = s.ExpiresAt.UTC()
+		s.LastPaidAt = s.LastPaidAt.UTC()
+
+		list = append(list, s)
+	}
+
+	return list, nil
 }
