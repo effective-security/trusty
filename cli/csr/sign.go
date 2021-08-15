@@ -25,6 +25,14 @@ type SignFlags struct {
 	SAN *string
 	// Profile specifies the profile name from ca-config
 	Profile *string
+
+	// AiaURL specifies AIA URL
+	AiaURL *string
+	// OcspURL specifies OCSP URL
+	OcspURL *string
+	// CrlURL specifies CRL URL
+	CrlURL *string
+
 	// Output specifies the optional prefix for output files,
 	// if not set, the output will be printed to STDOUT only
 	Output *string
@@ -56,8 +64,13 @@ func Sign(c ctl.Control, p interface{}) error {
 	}
 
 	isscfg := &authority.IssuerConfig{
-		CertFile: *flags.CACert,
-		KeyFile:  *flags.CAKey,
+		CertFile: cli.String(flags.CACert),
+		KeyFile:  cli.String(flags.CAKey),
+		AIA: &authority.AIAConfig{
+			AiaURL:  cli.String(flags.AiaURL),
+			OcspURL: cli.String(flags.OcspURL),
+			CrlURL:  cli.String(flags.CrlURL),
+		},
 		Profiles: cacfg.Profiles,
 	}
 

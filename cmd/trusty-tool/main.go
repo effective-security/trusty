@@ -81,6 +81,9 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	signCSRFlags.Profile = cmdSignCSR.Flag("profile", "certificate profile").Required().String()
 	signCSRFlags.SAN = cmdSignCSR.Flag("SAN", "coma separated list of SAN to be added to certificate").String()
 	signCSRFlags.Output = cmdSignCSR.Flag("out", "specifies the optional prefix for output files").String()
+	signCSRFlags.CrlURL = cmdSignCSR.Flag("crl-url", "specifies the CRL URL in the signed certificate").String()
+	signCSRFlags.OcspURL = cmdSignCSR.Flag("ocsp-url", "specifies the OCSP URL in the signed certificate").String()
+	signCSRFlags.AiaURL = cmdSignCSR.Flag("aia-url", "specifies the AIA URL in the signed certificate").String()
 
 	genCertFlags := new(csr.GenCertFlags)
 	cmdGenCertCSR := cmdCSR.Command("gencert", "creates certificate with provided CA key").
