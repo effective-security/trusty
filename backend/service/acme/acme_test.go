@@ -20,7 +20,6 @@ import (
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
-	"github.com/sony/sonyflake"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -68,10 +67,7 @@ func TestMain(m *testing.M) {
 		}
 
 		acmecfg.Service.BaseURI = httpAddr
-		var idGenerator = sonyflake.NewSonyflake(sonyflake.Settings{
-			StartTime: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
-		})
-		db, err := acmedb.New(cfg.CaSQL.Driver, cfg.CaSQL.DataSource, cfg.CaSQL.MigrationsDir, idGenerator.NextID)
+		db, err := acmedb.New(cfg.CaSQL.Driver, cfg.CaSQL.DataSource, cfg.CaSQL.MigrationsDir, testutils.IDGenerator().NextID)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}

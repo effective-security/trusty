@@ -270,6 +270,7 @@ func (f *Factory) load(configFilename, hostnameOverride, baseDir string) (*Confi
 			if err != nil {
 				return nil, errors.Annotatef(err, "failed to resolve file")
 			}
+			logger.KV(xlog.INFO, "hostname", hn, "override", override)
 			ops = append(ops, yamlcfg.File(override))
 		}
 	}
