@@ -145,3 +145,12 @@ func (s *testSuite) TestOrgMembers() {
 	s.NoError(err)
 	s.HasText(`"name": "Denis Issoupov"`)
 }
+
+func (s *testSuite) TestDeleteOrg() {
+	org := "123456"
+	flags := martini.DeleteOrgFlags{
+		OrgID: &org,
+	}
+	err := s.Run(martini.DeleteOrg, &flags)
+	s.NoError(err)
+}

@@ -124,6 +124,20 @@ func (c *Client) ValidateOrg(ctx context.Context, orgID string) (*v1.ValidateOrg
 	return res, nil
 }
 
+// DeleteOrg deletes Org
+func (c *Client) DeleteOrg(ctx context.Context, orgID string) error {
+	req := &v1.DeleteOrgRequest{
+		OrgID: orgID,
+	}
+
+	var res struct{}
+	_, _, err := c.PostRequest(ctx, v1.PathForMartiniDeleteOrg, req, &res)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	return nil
+}
+
 // GetOrgAPIKeys returns Org API keys
 func (c *Client) GetOrgAPIKeys(ctx context.Context, orgID string) (*v1.GetOrgAPIKeysResponse, error) {
 	path := strings.Replace(v1.PathForMartiniOrgAPIKeys, ":org_id", orgID, 1)

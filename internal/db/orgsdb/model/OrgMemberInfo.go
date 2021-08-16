@@ -63,3 +63,13 @@ func ToMembertsDto(list []*OrgMemberInfo) []*v1.OrgMemberInfo {
 	}
 	return res
 }
+
+// FindOrgMemberInfo returns OrgMemberInfo if found, or nil otherwise
+func FindOrgMemberInfo(list []*OrgMemberInfo, userID uint64) *OrgMemberInfo {
+	for _, m := range list {
+		if m.UserID == userID {
+			return m
+		}
+	}
+	return nil
+}
