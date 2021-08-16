@@ -116,9 +116,25 @@ func TestRegisterCertificate(t *testing.T) {
 	require.NotNil(t, r4)
 	assert.Equal(t, *r, *r4)
 
+	cc, err := provider.GetCertsCount(ctx)
+	require.NoError(t, err)
+	assert.Greater(t, cc, uint64(0))
+
+	cr, err := provider.GetRevokedCount(ctx)
+	require.NoError(t, err)
+	assert.Greater(t, cr, uint64(0))
+
 	revoked, err := provider.RevokeCertificate(ctx, r4, time.Now(), 0)
 	require.NoError(t, err)
 	assert.Equal(t, revoked.Certificate, *r4)
+
+	cc2, err := provider.GetCertsCount(ctx)
+	require.NoError(t, err)
+	assert.Greater(t, cc, cc2)
+
+	cr2, err := provider.GetRevokedCount(ctx)
+	require.NoError(t, err)
+	assert.Greater(t, cr2, cr)
 
 	_, err = provider.GetCertificate(ctx, r2.ID)
 	require.Error(t, err)

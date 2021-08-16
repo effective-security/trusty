@@ -39,6 +39,11 @@ type CaReadonlyDb interface {
 	ListRevokedCertificates(ctx context.Context, ikid string, limit int, afterID uint64) (model.RevokedCertificates, error)
 	// ListCertificates returns list of Certificate info
 	ListCertificates(ctx context.Context, ikid string, limit int, afterID uint64) (model.Certificates, error)
+
+	// GetCertsCount returns number of certs
+	GetCertsCount(ctx context.Context) (uint64, error)
+	// GetRevokedCount returns number of revoked certs
+	GetRevokedCount(ctx context.Context) (uint64, error)
 }
 
 // CaDb defines an interface for CRUD operations on Certs
