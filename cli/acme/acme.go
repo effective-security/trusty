@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/x509"
 	"encoding/base64"
-	"encoding/hex"
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
@@ -111,7 +110,7 @@ func GetAccount(c ctl.Control, p interface{}) error {
 
 		reg, keyID, err := ac.Account(context.Background(), *flags.OrgID, hm, nil)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.Annotatef(err, "unable to retrieve account")
 		}
 
 		account.AccountURL = keyID
@@ -390,7 +389,7 @@ func Order(c ctl.Control, p interface{}) error {
 	if err != nil {
 		return errors.Annotatef(err, "failed to parse certificate")
 	}
-	basename := hex.EncodeToString(crt.SubjectKeyId)
+	basename := getCertBasename(crt)
 
 	crtFile, keyFile, err := accountsStorage.SaveCert(basename, key, csrPEM, []byte(certPEM))
 	if err != nil {
@@ -400,6 +399,13 @@ func Order(c ctl.Control, p interface{}) error {
 	fmt.Fprintf(cli.Writer(), "certificate: %s\nkey: %s\n", crtFile, keyFile)
 
 	return nil
+}
+
+func getCertBasename(crt *x509.Certificate) string {
+	sn := base64.RawURLEncoding.EncodeToString(crt.SerialNumber.Bytes()[:9])
+	ikid := certutil.GetAuthorityKeyID(crt)
+
+	return fmt.Sprintf("%s-%s", ikid[:4], sn)
 }
 
 func createNonExistingFolder(path string) error {

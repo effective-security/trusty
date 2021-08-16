@@ -88,6 +88,9 @@ type Configuration struct {
 
 	// CertsMonitor specifies the configuration for cert monitor
 	CertsMonitor CertsMonitor `json:"certs_monitor" yaml:"certs_monitor"`
+
+	// Martini specifies Martini configuration.
+	Martini Martini `json:"martini" yaml:"martini"`
 }
 
 // CryptoProv specifies the configuration for crypto providers
@@ -133,4 +136,9 @@ type Task struct {
 
 	// Args specifies parameters for the task.
 	Args []string `json:"args" yaml:"args"`
+}
+
+// Martini specifies configuration.
+type Martini struct {
+	WebAppHost string `json:"web_app_host" yaml:"web_app_host"`
 }

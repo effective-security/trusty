@@ -23,15 +23,24 @@ func Test_CtlSuite(t *testing.T) {
 
 func (s *testSuite) prepDirectory() {
 	dir := `{                                                                                                                                                                                                                 
-		"keyChange": "https://localhost:7891/v2/acme/key-change",                                                                                                                                                         "newAccount": "https://localhost:7891/v2/acme/new-account",                                                                                                                                               
-		"newNonce": "https://localhost:7891/v2/acme/new-nonce",                                                                                                                                                   
-		"newOrder": "https://localhost:7891/v2/acme/new-order",                                                                                                                                                   
-		"revokeCert": "https://localhost:7891/v2/acme/revoke-cert"                                                                                                                                                
-	}`
+	"keyChange": "https://localhost:7891/v2/acme/key-change",
+	"newAccount": "https://localhost:7891/v2/acme/new-account",
+	"newNonce": "https://localhost:7891/v2/acme/new-nonce",
+	"newOrder": "https://localhost:7891/v2/acme/new-order",
+	"revokeCert": "https://localhost:7891/v2/acme/revoke-cert"
+}`
 	dir = strings.ReplaceAll(dir, "https://localhost:7891", s.ServerURL)
 	os.Remove("testdata/directory.json")
 	err := os.WriteFile("testdata/directory.json", []byte(dir), 0644)
 	s.Require().NoError(err)
+}
+
+func (s *testSuite) TestDirectory() {
+	s.prepDirectory()
+
+	err := s.Run(acme.Directory, nil)
+	s.Require().NoError(err)
+	s.HasText(`newOrder`)
 }
 
 func (s *testSuite) TestGetAccount() {

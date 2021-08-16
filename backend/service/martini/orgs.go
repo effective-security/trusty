@@ -415,6 +415,7 @@ func (s *Service) validateOrg(ctx context.Context, orgID uint64, requestor *mode
 		Token:          token.Token,
 		Company:        org.Company,
 		Address:        addr,
+		Hostname:       s.cfg.Martini.WebAppHost,
 	}
 
 	err = s.sendEmail(requestor.Email,
@@ -454,4 +455,5 @@ type orgValidationEmailTemplate struct {
 	Token          string
 	Company        string
 	Address        string
+	Hostname       string
 }
