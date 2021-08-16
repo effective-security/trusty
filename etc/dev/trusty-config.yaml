@@ -95,6 +95,10 @@ payment_provider: ${TRUSTY_CONFIG_DIR}/payment-provider-stripe.yaml
 
 authority: ${TRUSTY_CONFIG_DIR}/ca-config.dev.yaml
 
+tasks:
+  - name: certsmonitor
+    schedule: "every 30 minutes"
+
 ra:
   # the list of private Root Certs files.
   private_roots:
