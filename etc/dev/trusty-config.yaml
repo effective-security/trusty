@@ -97,7 +97,9 @@ authority: ${TRUSTY_CONFIG_DIR}/ca-config.dev.yaml
 
 tasks:
   - name: certsmonitor
-    schedule: "every 30 minutes"
+    schedule: "every 10 minutes"
+  - name: stats
+    schedule: "every 13 minutes"
 
 martini:
   web_app_host: localhost:4200

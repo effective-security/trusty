@@ -75,4 +75,8 @@ func Test_LoginUser(t *testing.T) {
 		require.NoError(t, err)
 		require.NotEmpty(t, list)
 	*/
+
+	c, err := provider.GetUsersCount(ctx)
+	require.NoError(t, err)
+	assert.Greater(t, c, uint64(0))
 }

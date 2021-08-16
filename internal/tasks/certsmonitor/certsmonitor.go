@@ -116,7 +116,10 @@ func Factory(
 			return errors.Annotatef(err, "unable to schedule a job on schedule: %q", task.schedule)
 		}
 
-		s.Add(job.Do(task.name, task.run))
+		t := job.Do(task.name, task.run)
+		s.Add(t)
+		// execute immideately
+		go t.Run()
 		return nil
 	}
 }

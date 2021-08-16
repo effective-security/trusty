@@ -87,6 +87,10 @@ func TestUpdateOrg(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, org5)
 	assert.Equal(t, *org, *org5)
+
+	c, err := provider.GetOrgsCount(ctx)
+	require.NoError(t, err)
+	assert.Greater(t, c, uint64(0))
 }
 
 func TestRepositoryOrg(t *testing.T) {
