@@ -378,6 +378,23 @@ func TestDenyOrg(t *testing.T) {
 		require.NoError(t, marshal.Decode(w.Body, &res))
 		assert.Equal(t, v1.OrgStatusDenied, res.Org.Status)
 	}
+
+	// Delete
+	{
+		deleteReq := &v1.DeleteOrgRequest{
+			OrgID: res.Org.ID,
+		}
+		js, err = json.Marshal(deleteReq)
+		require.NoError(t, err)
+
+		r, err = http.NewRequest(http.MethodPost, v1.PathForMartiniDeleteOrg, bytes.NewReader(js))
+		require.NoError(t, err)
+		r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+		w = httptest.NewRecorder()
+		svc.ValidateOrgHandler()(w, r, nil)
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+	}
 }
 
 var stripeSampleInvoice = `{
@@ -776,4 +793,23 @@ func TestRegisterOrgFullFlow(t *testing.T) {
 	var mres v1.OrgMembersResponse
 	require.NoError(t, marshal.Decode(w.Body, &mres))
 	assert.NotEmpty(t, mres.Members)
+
+	//
+	// Delete
+	//
+	{
+		deleteReq := &v1.DeleteOrgRequest{
+			OrgID: res.Org.ID,
+		}
+		js, err = json.Marshal(deleteReq)
+		require.NoError(t, err)
+
+		r, err = http.NewRequest(http.MethodPost, v1.PathForMartiniDeleteOrg, bytes.NewReader(js))
+		require.NoError(t, err)
+		r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+		w = httptest.NewRecorder()
+		svc.ValidateOrgHandler()(w, r, nil)
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+	}
 }

@@ -171,6 +171,12 @@ const (
 	// Response: v1.OrgResponse
 	PathForMartiniApproveOrg = "/v1/ms/approve_org"
 
+	// PathForMartiniDeleteOrg provides Org deletion
+	//
+	// Verbs: POST
+	// Response: v1.OrgResponse
+	PathForMartiniDeleteOrg = "/v1/ms/delete_org"
+
 	// PathForMartiniOrgs provides orgs the user belongs to
 	//
 	// Verbs: GET

@@ -243,6 +243,62 @@ func (s *Service) RegisterOrgHandler() rest.Handle {
 	}
 }
 
+// DeleteOrgHandler stardestroys the Org
+func (s *Service) DeleteOrgHandler() rest.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
+		idn := identity.FromRequest(r).Identity()
+		userID, _ := db.ID(idn.UserID())
+
+		req := new(v1.DeleteOrgRequest)
+		err := marshal.DecodeBody(w, r, req)
+		if err != nil {
+			return
+		}
+
+		orgID, err := db.ID(req.OrgID)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("invalid org_id: "+err.Error()))
+			return
+		}
+
+		logger.KV(xlog.NOTICE, "org_id", req.OrgID, "user_id", userID)
+
+		list, err := s.db.GetUserMemberships(r.Context(), userID)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithForbidden("user ID %d not found: %s", userID, err.Error()).WithCause(err))
+			return
+		}
+
+		m := model.FindOrgMemberInfo(list, userID)
+		role := ""
+		if m != nil {
+			role = m.Role.String
+		}
+		if role != "owner" && role != "admin" {
+			marshal.WriteJSON(w, r, httperror.WithForbidden("only owner or administrator can destroy organization, role=%q", role))
+			return
+		}
+
+		org, err := s.db.GetOrg(r.Context(), orgID)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithNotFound("org ID %d not found: %s", orgID, err.Error()).WithCause(err))
+			return
+		}
+
+		if org.Status == v1.OrgStatusPaid {
+			marshal.WriteJSON(w, r, httperror.WithForbidden("please cancel subscription: %d", org.ID))
+			return
+		}
+
+		err = s.db.RemoveOrg(r.Context(), orgID)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to delete organization: %s", err.Error()).WithCause(err))
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
 // ValidateOrgHandler sends Validation request to Approver
 func (s *Service) ValidateOrgHandler() rest.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {

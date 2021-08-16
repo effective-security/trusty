@@ -109,7 +109,7 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		Action(cli.RegisterAction(martini.FccContact, fccContactFlags))
 	fccContactFlags.FRN = cmdFccContact.Flag("frn", "FRN to query").Required().String()
 
-	// org register|validate|approve|subscribe|keys|members
+	// org register|validate|approve|subscribe|keys|members|delete
 	cmdOrgs := app.Command("org", "Orgs operations").
 		PreAction(cli.PopulateControl)
 
@@ -160,6 +160,11 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	cmdOrgMembers := cmdOrgs.Command("members", "list members").
 		Action(cli.RegisterAction(martini.OrgMembers, orgMembersFlags))
 	orgMembersFlags.OrgID = cmdOrgMembers.Flag("org", "organization ID").Required().String()
+
+	orgDeleteFlags := new(martini.DeleteOrgFlags)
+	cmdOrgDelete := cmdOrgs.Command("delete", "delete organization").
+		Action(cli.RegisterAction(martini.DeleteOrg, orgDeleteFlags))
+	orgDeleteFlags.OrgID = cmdOrgDelete.Flag("org", "organization ID").Required().String()
 
 	// acme directory|account|register|order
 	cmdAcme := app.Command("acme", "ACME operations").

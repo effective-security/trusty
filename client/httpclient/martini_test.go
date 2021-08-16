@@ -2,6 +2,7 @@ package httpclient
 
 import (
 	"context"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -595,4 +596,24 @@ func TestGetOrgAPIKeys(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, r)
 	assert.Len(t, r.Keys, 1)
+}
+
+func TestDeleteOrg(t *testing.T) {
+	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	server := httptest.NewServer(h)
+	defer server.Close()
+
+	client, err := New(NewConfig(), []string{server.URL})
+	assert.NoError(t, err, "Unexpected error.")
+
+	require.NotPanics(t, func() {
+		// ensure compiles
+		_ = interface{}(client).(API)
+	})
+
+	err = client.DeleteOrg(context.Background(), "123456")
+	require.NoError(t, err)
 }

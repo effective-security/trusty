@@ -58,3 +58,8 @@ type OrgResponse struct {
 type OrgMembersResponse struct {
 	Members []*OrgMemberInfo `json:"members"`
 }
+
+// DeleteOrgRequest specifies a request to delete organization
+type DeleteOrgRequest struct {
+	OrgID string `json:"org_id"`
+}

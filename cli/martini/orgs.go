@@ -2,6 +2,7 @@ package martini
 
 import (
 	"context"
+	"fmt"
 
 	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/cli"
@@ -295,5 +296,30 @@ func APIKeys(c ctl.Control, p interface{}) error {
 			print.APIKeysResponse(c.Writer(), res.List)
 		}
 	*/
+	return nil
+}
+
+// DeleteOrgFlags defines flags for DeleteOrg command
+type DeleteOrgFlags struct {
+	OrgID *string
+}
+
+// DeleteOrg deletes organization
+func DeleteOrg(c ctl.Control, p interface{}) error {
+	flags := p.(*DeleteOrgFlags)
+	cli := c.(*cli.Cli)
+
+	client, err := cli.HTTPClient()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	err = client.DeleteOrg(context.Background(), *flags.OrgID)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	fmt.Fprint(c.Writer(), "Deleted\n")
+
 	return nil
 }
