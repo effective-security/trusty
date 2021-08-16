@@ -14,6 +14,7 @@ func TestRenderUserEmailTemplate(t *testing.T) {
 		RequesterEmail: "hayk.baluyan@gmail.com",
 		ApproverName:   "Denis Issoupov",
 		ApproverEmail:  "denis@ekspand.com",
+		Hostname:       "app.dev.martinisecurity.com",
 		Code:           "123456",
 		Token:          "abcd-1234-5678",
 		Company:        "IPIPHONY",
@@ -48,7 +49,7 @@ func TestRenderUserEmailTemplate(t *testing.T) {
 	<h4>123 Drive, Kirkland, 98034, WA</h4>
 	
     <div>To authorize this request, enter the Code that was provided you by the requester.</div>
-	<h3>Link: <a href="https://martinisecurity.com/validate/abcd-1234-5678">Click here to approve</a></h3>
+	<h3>Link: <a href="https://app.dev.martinisecurity.com/validate/abcd-1234-5678">Click here to approve</a></h3>
 
 	<div>Thank you for using Martini Security!</div>
 </p>
@@ -96,7 +97,7 @@ const approverEmailTemplate2 = `
 	<h4>{{.Address}}</h4>
 	
     <div>To authorize this request, enter the Code that was provided you by the requester.</div>
-	<h3>Link: <a href="https://martinisecurity.com/validate/{{.Token}}">Click here to approve</a></h3>
+	<h3>Link: <a href="https://{{.Hostname}}/validate/{{.Token}}">Click here to approve</a></h3>
 
 	<div>Thank you for using Martini Security!</div>
 </p>

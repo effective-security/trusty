@@ -99,6 +99,9 @@ tasks:
   - name: certsmonitor
     schedule: "every 30 minutes"
 
+martini:
+  web_app_host: localhost:4200
+
 ra:
   # the list of private Root Certs files.
   private_roots:

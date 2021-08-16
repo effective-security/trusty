@@ -66,7 +66,7 @@ const approverEmailTemplate = `
                               <p style="font-style: normal; font-weight: normal; font-size: 15px; line-height: 25px; letter-spacing: 0.4px;  margin-bottom: 15px;">
                                 To approve this request you need to follow link below and enter the code that was provided you by the requestor.
                               </p>
-                              <a href="https://martinisecurity.com/validate/{{.Token}}" target="_blank" style="-ms-text-size-adjust: none; -webkit-text-size-adjust: none; box-sizing: border-box;cursor: pointer; text-decoration: none; text-size-adjust: none; word-break: break-all;">
+                              <a href="https://{{.Hostname}}/validate/{{.Token}}" target="_blank" style="-ms-text-size-adjust: none; -webkit-text-size-adjust: none; box-sizing: border-box;cursor: pointer; text-decoration: none; text-size-adjust: none; word-break: break-all;">
                                 <p style="font-style: normal; font-weight: normal; font-size: 15px; line-height: 25px; letter-spacing: 0.4px; text-decoration-line: underline; color: #377FF4; margin-bottom: 40px;">
                                     Approve request here
                                 </p>
