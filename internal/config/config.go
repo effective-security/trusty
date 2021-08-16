@@ -82,6 +82,12 @@ type Configuration struct {
 
 	// PaymentProvider specifies the configuration file for payment provider
 	PaymentProvider string `json:"payment_provider" yaml:"payment_provider"`
+
+	// Tasks specifies array of tasks
+	Tasks []Task `json:"tasks" yaml:"tasks"`
+
+	// CertsMonitor specifies the configuration for cert monitor
+	CertsMonitor CertsMonitor `json:"certs_monitor" yaml:"certs_monitor"`
 }
 
 // CryptoProv specifies the configuration for crypto providers
@@ -107,4 +113,24 @@ type Github struct {
 type Google struct {
 	// BaseURL specifies the Google base URL.
 	BaseURL string `json:"base_url" yaml:"base_url"`
+}
+
+// CertsMonitor specifies configurations for monitoring certs expiry
+type CertsMonitor struct {
+
+	// Locations specifies the list of files to monitor. It may have a prefix with cert type, in format {type}:{location}
+	Locations []string `json:"locations" yaml:"locations"`
+}
+
+// Task specifies configuration of a single task.
+type Task struct {
+
+	// Name specifies the name of the task.
+	Name string `json:"name" yaml:"name"`
+
+	// Schedule specifies the schedule of this task.
+	Schedule string `json:"schedule" yaml:"schedule"`
+
+	// Args specifies parameters for the task.
+	Args []string `json:"args" yaml:"args"`
 }

@@ -22,6 +22,8 @@ import (
 	"github.com/ekspand/trusty/backend/service/workflow"
 	"github.com/ekspand/trusty/internal/appcontainer"
 	"github.com/ekspand/trusty/internal/config"
+	trustyTasks "github.com/ekspand/trusty/internal/tasks"
+	"github.com/ekspand/trusty/internal/tasks/certsmonitor"
 	"github.com/ekspand/trusty/internal/version"
 	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/go-phorce/dolly/metrics"
@@ -51,6 +53,10 @@ var ServiceFactories = map[string]gserver.ServiceFactory{
 	workflow.ServiceName: workflow.Factory,
 	swagger.ServiceName:  swagger.Factory,
 	martini.ServiceName:  martini.Factory,
+}
+
+var taskFactories = map[string]trustyTasks.Factory{
+	certsmonitor.TaskName: certsmonitor.Factory,
 }
 
 // appFlags specifies application flags
@@ -263,6 +269,13 @@ func (a *App) Run(startedCh chan<- bool) error {
 		}
 	}
 
+	err = a.scheduleTasks()
+	if err != nil {
+		a.stopServers()
+		return errors.Trace(err)
+	}
+	a.scheduler.Start()
+
 	// Notify services
 	err = a.container.Invoke(func(disco appcontainer.Discovery) error {
 		var svc gserver.Service
@@ -283,10 +296,6 @@ func (a *App) Run(startedCh chan<- bool) error {
 	if startedCh != nil {
 		// notify
 		startedCh <- true
-	}
-
-	if a.scheduler != nil {
-		a.scheduler.Start()
 	}
 
 	// register for signals, and wait to be shutdown
@@ -558,4 +567,27 @@ func (a *App) setupMetrics() error {
 
 	return nil
 
+}
+
+func (a *App) scheduleTasks() error {
+	err := a.container.Invoke(func(scheduler tasks.Scheduler) error {
+		a.scheduler = scheduler
+		return nil
+	})
+	if err != nil {
+		return errors.Annotatef(err, "failed to create scheduler")
+	}
+	for _, task := range a.cfg.Tasks {
+		tf := taskFactories[task.Name]
+		if tf == nil {
+			return errors.Errorf("api=scheduleTasks, reason=not_registered, task=%q", task.Name)
+		}
+
+		err := a.container.Invoke(tf(a.scheduler, task.Name, task.Schedule, task.Args...))
+		if err != nil {
+			return errors.Annotatef(err, "failed to create a task: %q", task.Name)
+		}
+		logger.KV(xlog.INFO, "task", task.Name, "schedule", task.Schedule)
+	}
+	return nil
 }
