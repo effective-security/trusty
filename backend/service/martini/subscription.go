@@ -61,7 +61,7 @@ func (s *Service) CreateSubsciptionHandler() rest.Handle {
 			return
 		}
 
-		org.Status = v1.OrgStatusValidationPending
+		org.Status = v1.OrgStatusPaymentPending
 		org, err = s.db.UpdateOrgStatus(ctx, org)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to create subscription for org %d", org.ID).WithCause(err))
@@ -218,15 +218,15 @@ func (s *Service) StripeWebhookHandler() rest.Handle {
 			return
 		}
 
-		subscriptionFromStripe, err := s.paymentProv.HandleWebhook(b, r.Header.Get("Stripe-Signature"))
+		paymentIntent, err := s.paymentProv.HandleWebhook(b, r.Header.Get("Stripe-Signature"))
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("invalid request").WithCause(err))
 			return
 		}
 
 		ctx := r.Context()
-		if subscriptionFromStripe != nil {
-			sub, err := s.db.GetSubscriptionByExternalID(ctx, subscriptionFromStripe.ID)
+		if paymentIntent != nil {
+			sub, err := s.db.GetSubscriptionByExternalID(ctx, paymentIntent.ID)
 			if err != nil {
 				marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to handle webhook call").WithCause(err))
 				return
@@ -239,7 +239,7 @@ func (s *Service) StripeWebhookHandler() rest.Handle {
 			}
 
 			if org.Status != v1.OrgStatusApproved {
-				org.Status = v1.OrgStatusValidationPending
+				org.Status = v1.OrgStatusPaid
 			}
 
 			_, _, err = s.db.UpdateSubscriptionAndOrgStatus(ctx, sub, org)
@@ -275,7 +275,7 @@ func (s *Service) createSubscription(
 		return nil, "", errors.Annotatef(err, "unable to get product with id %s", productID)
 	}
 
-	subscription, err := s.paymentProv.CreateSubscription(customer.ID, product.PriceID)
+	paymentIntent, err := s.paymentProv.CreatePaymentIntent(customer.ID, product.PriceAmount)
 	if err != nil {
 		return nil, "", errors.Annotatef(err, "unable to create a subscription for customer %s, price %s", customer.ID, product.PriceID)
 	}
@@ -285,7 +285,7 @@ func (s *Service) createSubscription(
 	now := time.Now().UTC()
 	subscriptionModel, err := s.db.CreateSubscription(ctx, &model.Subscription{
 		ID:            org.ID,
-		ExternalID:    subscription.ID,
+		ExternalID:    paymentIntent.ID,
 		UserID:        user.ID,
 		CustomerID:    customer.ID,
 		PriceID:       product.PriceID,
@@ -293,12 +293,12 @@ func (s *Service) createSubscription(
 		PriceCurrency: product.PriceCurrency,
 		CreatedAt:     now,
 		ExpiresAt:     now.AddDate(expiryPeriodInYears, 0, 0).UTC(),
-		Status:        subscription.Status,
+		Status:        paymentIntent.Status,
 	})
 	if err != nil {
 		return nil, "", errors.Annotatef(err, "unable to create a subscription in db for id %d, customer %s, price %s", org.ID, customer.ID, product.PriceID)
 	}
-	return subscriptionModel, subscription.ClientSecret, nil
+	return subscriptionModel, paymentIntent.ClientSecret, nil
 }
 
 // subscriptionExpiryPeriodFromProductName derives subscriptions expiry

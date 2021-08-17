@@ -236,6 +236,172 @@ func TestGetCertsHandler(t *testing.T) {
 	assert.Empty(t, res.Certificates)
 }
 
+var stripeSamplePaymentIntent = `{
+	"id": "evt_3JPbIJKfgu58p9BH0IPqHiCg",
+	"object": "event",
+	"api_version": "2020-08-27",
+	"created": 1629241343,
+	"data": {
+		"object": {
+		"id": "PAYMENT_INTENT_ID_PLACEHOLDER",
+		"object": "payment_intent",
+		"amount": 10000,
+		"amount_capturable": 0,
+		"amount_received": 10000,
+		"application": null,
+		"application_fee_amount": null,
+		"canceled_at": null,
+		"cancellation_reason": null,
+		"capture_method": "automatic",
+		"charges": {
+			"object": "list",
+			"data": [
+			{
+				"id": "ch_3JPbIJKfgu58p9BH0YcLfpf5",
+				"object": "charge",
+				"amount": 10000,
+				"amount_captured": 10000,
+				"amount_refunded": 0,
+				"application": null,
+				"application_fee": null,
+				"application_fee_amount": null,
+				"balance_transaction": "txn_3JPbIJKfgu58p9BH0u2XBe60",
+				"billing_details": {
+				"address": {
+					"city": null,
+					"country": null,
+					"line1": null,
+					"line2": null,
+					"postal_code": "52525",
+					"state": null
+				},
+				"email": null,
+				"name": "Hayk Baluyan",
+				"phone": null
+				},
+				"calculated_statement_descriptor": "MY HAYK BUSINESS",
+				"captured": true,
+				"created": 1629241342,
+				"currency": "usd",
+				"customer": "cus_K3ijK03LZW3Qbg",
+				"description": null,
+				"destination": null,
+				"dispute": null,
+				"disputed": false,
+				"failure_code": null,
+				"failure_message": null,
+				"fraud_details": {
+				},
+				"invoice": null,
+				"livemode": false,
+				"metadata": {
+				},
+				"on_behalf_of": null,
+				"order": null,
+				"outcome": {
+				"network_status": "approved_by_network",
+				"reason": null,
+				"risk_level": "normal",
+				"risk_score": 31,
+				"seller_message": "Payment complete.",
+				"type": "authorized"
+				},
+				"paid": true,
+				"payment_intent": "pi_3JPbIJKfgu58p9BH03FP53pm",
+				"payment_method": "pm_1JPbIYKfgu58p9BHA6f0Z8kS",
+				"payment_method_details": {
+				"card": {
+					"brand": "visa",
+					"checks": {
+					"address_line1_check": null,
+					"address_postal_code_check": "pass",
+					"cvc_check": "pass"
+					},
+					"country": "US",
+					"exp_month": 12,
+					"exp_year": 2025,
+					"fingerprint": "ApAd87Afto3qMo3g",
+					"funding": "credit",
+					"installments": null,
+					"last4": "4242",
+					"network": "visa",
+					"three_d_secure": null,
+					"wallet": null
+				},
+				"type": "card"
+				},
+				"receipt_email": null,
+				"receipt_number": null,
+				"receipt_url": "https://pay.stripe.com/receipts/acct_1JI1BxKfgu58p9BH/ch_3JPbIJKfgu58p9BH0YcLfpf5/rcpt_K3ikwGiPIOyvMKLuheQ08Q2ku0POxDE",
+				"refunded": false,
+				"refunds": {
+				"object": "list",
+				"data": [
+				],
+				"has_more": false,
+				"total_count": 0,
+				"url": "/v1/charges/ch_3JPbIJKfgu58p9BH0YcLfpf5/refunds"
+				},
+				"review": null,
+				"shipping": null,
+				"source": null,
+				"source_transfer": null,
+				"statement_descriptor": null,
+				"statement_descriptor_suffix": null,
+				"status": "succeeded",
+				"transfer_data": null,
+				"transfer_group": null
+			}
+			],
+			"has_more": false,
+			"total_count": 1,
+			"url": "/v1/charges?payment_intent=pi_3JPbIJKfgu58p9BH03FP53pm"
+		},
+		"client_secret": "pi_3JPbIJKfgu58p9BH03FP53pm_secret_48HGU9vPOMfNoANxvxaC0CG4p",
+		"confirmation_method": "automatic",
+		"created": 1629241327,
+		"currency": "usd",
+		"customer": "cus_K3ijK03LZW3Qbg",
+		"description": null,
+		"invoice": null,
+		"last_payment_error": null,
+		"livemode": false,
+		"metadata": {
+		},
+		"next_action": null,
+		"on_behalf_of": null,
+		"payment_method": "pm_1JPbIYKfgu58p9BHA6f0Z8kS",
+		"payment_method_options": {
+			"card": {
+			"installments": null,
+			"network": null,
+			"request_three_d_secure": "automatic"
+			}
+		},
+		"payment_method_types": [
+			"card"
+		],
+		"receipt_email": null,
+		"review": null,
+		"setup_future_usage": "off_session",
+		"shipping": null,
+		"source": null,
+		"statement_descriptor": null,
+		"statement_descriptor_suffix": null,
+		"status": "succeeded",
+		"transfer_data": null,
+		"transfer_group": null
+		}
+	},
+	"livemode": false,
+	"pending_webhooks": 1,
+	"request": {
+		"id": "req_YHdhxTLnQPjjZL",
+		"idempotency_key": null
+	},
+	"type": "payment_intent.succeeded"
+}`
+
 func TestDenyOrg(t *testing.T) {
 	ctx := context.Background()
 	svc := trustyServer.Service(martini.ServiceName).(*martini.Service)
@@ -281,28 +447,11 @@ func TestDenyOrg(t *testing.T) {
 	orgID, _ := db.ID(res.Org.ID)
 	defer dbProv.RemoveOrg(ctx, orgID)
 
-	//
-	// Payment
-	//
-	paymentReq := &v1.CreateSubscriptionRequest{
-		OrgID:     res.Org.ID,
-		ProductID: "prod_JrgfS9voqQbu4L",
-	}
-	jsPayment, err := json.Marshal(paymentReq)
+	org, err := dbProv.GetOrg(ctx, orgID)
 	require.NoError(t, err)
-
-	r, err = http.NewRequest(http.MethodPost, v1.PathForMartiniCreateSubscription, bytes.NewReader(jsPayment))
+	org.Status = v1.OrgStatusPaid
+	_, err = dbProv.UpdateOrgStatus(ctx, org)
 	require.NoError(t, err)
-	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
-
-	w = httptest.NewRecorder()
-	svc.CreateSubsciptionHandler()(w, r, rest.Params{
-		{
-			Key:   "org_id",
-			Value: res.Org.ID,
-		},
-	})
-	require.Equal(t, http.StatusOK, w.Code)
 
 	//
 	// Validate
@@ -396,164 +545,6 @@ func TestDenyOrg(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, w.Code)
 	}
 }
-
-var stripeSampleInvoice = `{
-	"created": 1326853478,
-	"livemode": false,
-	"id": "evt_00000000000000",
-	"type": "invoice.payment_succeeded",
-	"object": "event",
-	"request": null,
-	"pending_webhooks": 1,
-	"api_version": "2020-08-27",
-	"data": {
-	  "object": {
-		"id": "in_00000000000000",
-		"object": "invoice",
-		"account_country": "US",
-		"account_name": "Martini-Test",
-		"account_tax_ids": null,
-		"amount_due": 1500,
-		"amount_paid": 0,
-		"amount_remaining": 1500,
-		"application_fee_amount": null,
-		"attempt_count": 0,
-		"attempted": true,
-		"auto_advance": true,
-		"automatic_tax": {
-		  "enabled": false,
-		  "status": null
-		},
-		"billing_reason": "manual",
-		"charge": "_00000000000000",
-		"collection_method": "charge_automatically",
-		"created": 1628555477,
-		"currency": "usd",
-		"custom_fields": null,
-		"customer": "cus_00000000000000",
-		"customer_address": null,
-		"customer_email": null,
-		"customer_name": null,
-		"customer_phone": null,
-		"customer_shipping": null,
-		"customer_tax_exempt": "none",
-		"customer_tax_ids": [
-		],
-		"default_payment_method": null,
-		"default_source": null,
-		"default_tax_rates": [
-		],
-		"description": null,
-		"discount": null,
-		"discounts": [
-		],
-		"due_date": null,
-		"ending_balance": null,
-		"footer": null,
-		"hosted_invoice_url": null,
-		"invoice_pdf": null,
-		"last_finalization_error": null,
-		"lines": {
-		  "object": "list",
-		  "data": [
-			{
-			  "id": "il_00000000000000",
-			  "object": "line_item",
-			  "amount": 1500,
-			  "currency": "usd",
-			  "description": "My First Invoice Item (created for API docs)",
-			  "discount_amounts": [
-			  ],
-			  "discountable": true,
-			  "discounts": [
-			  ],
-			  "invoice_item": "ii_1JMisDKfgu58p9BHPzC3WqKY",
-			  "livemode": false,
-			  "metadata": {
-			  },
-			  "period": {
-				"end": 1628555477,
-				"start": 1628555477
-			  },
-			  "price": {
-				"id": "price_00000000000000",
-				"object": "price",
-				"active": true,
-				"billing_scheme": "per_unit",
-				"created": 1627888392,
-				"currency": "usd",
-				"livemode": false,
-				"lookup_key": null,
-				"metadata": {
-				},
-				"nickname": null,
-				"product": "prod_00000000000000",
-				"recurring": null,
-				"tax_behavior": "unspecified",
-				"tiers_mode": null,
-				"transform_quantity": null,
-				"type": "one_time",
-				"unit_amount": 1500,
-				"unit_amount_decimal": "1500"
-			  },
-			  "proration": false,
-			  "quantity": 1,
-			  "subscription": "SUBSCRIPTION_ID_PLACEHOLDER",
-			  "tax_amounts": [
-			  ],
-			  "tax_rates": [
-			  ],
-			  "type": "invoiceitem"
-			}
-		  ],
-		  "has_more": false,
-		  "url": "/v1/invoices/in_1JMisDKfgu58p9BH5FGgTmTp/lines"
-		},
-		"livemode": false,
-		"metadata": {
-		},
-		"next_payment_attempt": 1628559077,
-		"number": null,
-		"on_behalf_of": null,
-		"paid": true,
-		"payment_intent": {
-			"id": "PAYMENT_INTENT_ID_PLACEHOLDER"
-		},
-		"payment_settings": {
-		  "payment_method_options": null,
-		  "payment_method_types": null
-		},
-		"period_end": 1628555477,
-		"period_start": 1628555477,
-		"post_payment_credit_notes_amount": 0,
-		"pre_payment_credit_notes_amount": 0,
-		"quote": null,
-		"receipt_number": null,
-		"starting_balance": 0,
-		"statement_descriptor": null,
-		"status": "draft",
-		"status_transitions": {
-		  "finalized_at": null,
-		  "marked_uncollectible_at": null,
-		  "paid_at": null,
-		  "voided_at": null
-		},
-		"subscription":  {
-			"id": "SUBSCRIPTION_ID_PLACEHOLDER"
-		},
-		"subtotal": 1500,
-		"tax": null,
-		"total": 1500,
-		"total_discount_amounts": [
-		],
-		"total_tax_amounts": [
-		],
-		"transfer_data": null,
-		"webhooks_delivered_at": null,
-		"closed": true
-	  }
-	}
-  }`
 
 func TestRegisterOrgFullFlow(t *testing.T) {
 	ctx := context.Background()
@@ -650,7 +641,7 @@ func TestRegisterOrgFullFlow(t *testing.T) {
 	var resSub v1.CreateSubscriptionResponse
 	require.NoError(t, marshal.Decode(w.Body, &resSub))
 	require.Equal(t, res.Org.ID, resSub.Subscription.OrgID)
-	require.Equal(t, uint64(2000), resSub.Subscription.Price)
+	require.Equal(t, uint64(20), resSub.Subscription.Price)
 	require.Equal(t, "usd", resSub.Subscription.Currency)
 	// expires in 2 years
 	require.True(t, resSub.Subscription.ExpiresAt.Year()-time.Now().UTC().Year() > 1)
@@ -662,35 +653,26 @@ func TestRegisterOrgFullFlow(t *testing.T) {
 	subscription, err := dbProv.GetSubscription(ctx, subID, user.ID)
 	require.NoError(t, err)
 
-	// unfortunately stripe-mock is stateless and when creating resources it does not store them in memory
-	// hence we are using hardcoded subscription id for testing
-	// https://github.com/stripe/stripe-mock
-	stripeSampleInvoice = strings.Replace(stripeSampleInvoice, "SUBSCRIPTION_ID_PLACEHOLDER", subscription.ExternalID, 2)
+	org, err := dbProv.GetOrg(ctx, subID)
+	require.NoError(t, err)
+	require.Equal(t, v1.OrgStatusPaymentPending, org.Status)
 
-	//
 	// process payment
 	//
 
 	// generate payment method and intent
-	paymentProv := svc.PaymentProvider()
-	paymentMethod, err := paymentProv.GetPaymentMethod("pm_1JFlurCWsBdfZPJZ0Xe6Qd2W")
-	require.NoError(t, err)
-	paymentIntent, err := paymentProv.GetPaymentIntent("pi_1JF0naCWsBdfZPJZe0UeNrDw")
-	require.NoError(t, err)
-	stripeSampleInvoice = strings.Replace(stripeSampleInvoice, "PAYMENT_INTENT_ID_PLACEHOLDER", paymentIntent.ID, 1)
-	_, err = paymentProv.AttachPaymentMethod(subscription.CustomerID, paymentMethod.ID)
-	require.NoError(t, err)
+	stripeSamplePaymentIntent = strings.Replace(stripeSamplePaymentIntent, "PAYMENT_INTENT_ID_PLACEHOLDER", subscription.ExternalID, 1)
 
 	// generate webhook signature
 	signatureTime := time.Now().UTC()
 	sigantureTimeUnix := signatureTime.Unix()
-	sig := webhook.ComputeSignature(signatureTime, []byte(stripeSampleInvoice), "1234")
+	sig := webhook.ComputeSignature(signatureTime, []byte(stripeSamplePaymentIntent), "1234")
 	require.NotNil(t, sig)
 
 	r, err = http.NewRequest(
 		http.MethodPost,
 		v1.PathForMartiniStripeWebhook,
-		bytes.NewReader([]byte(stripeSampleInvoice)),
+		bytes.NewReader([]byte(stripeSamplePaymentIntent)),
 	)
 	require.NoError(t, err)
 	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
@@ -703,9 +685,9 @@ func TestRegisterOrgFullFlow(t *testing.T) {
 	var resWebhook v1.StripeWebhookResponse
 	require.NoError(t, marshal.Decode(w.Body, &resWebhook))
 
-	org, err := dbProv.GetOrg(ctx, subID)
+	org, err = dbProv.GetOrg(ctx, subID)
 	require.NoError(t, err)
-	require.Equal(t, v1.OrgStatusValidationPending, org.Status)
+	require.Equal(t, v1.OrgStatusPaid, org.Status)
 
 	//
 	// Validate

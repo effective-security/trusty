@@ -32,17 +32,11 @@ type Provider interface {
 	// GetCustomer returns customer given their email
 	GetCustomer(email string) (*Customer, error)
 
-	// CreatePaymentMethod creates a payment method
-	CreatePaymentMethod(ccNumber, ccExpMonth, ccExpYear, ccCVC string) (*Method, error)
-
 	// GetPaymentMethod returns a payment method
 	GetPaymentMethod(id string) (*Method, error)
 
 	// CreatePaymentIntent creates payment intent
-	CreatePaymentIntent(customerID, paymentMethodID string, amount int64) (*Intent, error)
-
-	// GetPaymentIntent returns payment intent
-	GetPaymentIntent(id string) (*Intent, error)
+	CreatePaymentIntent(customerID string, amount int64) (*Intent, error)
 
 	// AttachPaymentMethod attaches payment method to a customer
 	AttachPaymentMethod(customerID, paymentMethodID string) (*Method, error)
@@ -60,7 +54,7 @@ type Provider interface {
 	CancelSubscription(subscriptionID string) (*Subscription, error)
 
 	// HandlerWebhook handles stripe webhook call
-	HandleWebhook(body []byte, signatureHeader string) (*Subscription, error)
+	HandleWebhook(body []byte, signatureHeader string) (*Intent, error)
 }
 
 // provider implements payment processing
@@ -109,7 +103,7 @@ func NewProvider(location string) (Provider, error) {
 // LoadConfig returns configuration loaded from a file
 func LoadConfig(file string) (*Config, error) {
 	if file == "" {
-		return &Config{}, nil
+		return nil, errors.Errorf("unable to config from empty location")
 	}
 
 	b, err := ioutil.ReadFile(file)
@@ -181,28 +175,6 @@ func (p *provider) GetCustomer(email string) (*Customer, error) {
 	return nil, errors.Errorf("a valid customer with email %s not found", email)
 }
 
-// CreatePaymentMethod to create payment methods... used mainly for testing
-func (p *provider) CreatePaymentMethod(ccNumber, ccExpMonth, ccExpYear, ccCVC string) (*Method, error) {
-	if p.cfg.APIKey == "" {
-		return nil, errors.New("invalid API key")
-	}
-	stripe.Key = p.cfg.APIKey
-	params := &stripe.PaymentMethodParams{
-		Card: &stripe.PaymentMethodCardParams{
-			Number:   stripe.String(ccNumber),
-			ExpMonth: stripe.String(ccExpMonth),
-			ExpYear:  stripe.String(ccExpYear),
-			CVC:      stripe.String(ccCVC),
-		},
-		Type: stripe.String("card"),
-	}
-	pm, err := paymentmethod.New(params)
-	if err != nil {
-		return nil, errors.Annotatef(err, "failed to create payment method")
-	}
-	return NewPaymentMethod(pm), nil
-}
-
 // GetPaymentMethod to retrieve payment methods... used mainly for testing
 func (p *provider) GetPaymentMethod(id string) (*Method, error) {
 	if p.cfg.APIKey == "" {
@@ -237,26 +209,18 @@ func (p *provider) AttachPaymentMethod(customerID, paymentMethodID string) (*Met
 }
 
 // CreatePaymentIntent creates payment intent
-func (p *provider) CreatePaymentIntent(customerID, paymentMethodID string, amount int64) (*Intent, error) {
+func (p *provider) CreatePaymentIntent(customerID string, amount int64) (*Intent, error) {
+	if p.cfg.APIKey == "" {
+		return nil, errors.New("invalid API key")
+	}
+	stripe.Key = p.cfg.APIKey
+
 	pi, err := paymentintent.New(&stripe.PaymentIntentParams{
-		PaymentMethod:    stripe.String(paymentMethodID),
 		Customer:         stripe.String(customerID),
-		Amount:           stripe.Int64(amount),
+		Amount:           stripe.Int64(amount * 100),
 		SetupFutureUsage: stripe.String("off_session"),
 		Currency:         stripe.String(string(stripe.CurrencyUSD)),
-		PaymentMethodTypes: []*string{
-			stripe.String("card"),
-		},
 	})
-	if err != nil {
-		return nil, errors.Annotatef(err, "failed to create a payment intent")
-	}
-	return NewPaymentIntent(pi), nil
-}
-
-// GetPaymentIntent returns a payment intent
-func (p *provider) GetPaymentIntent(id string) (*Intent, error) {
-	pi, err := paymentintent.Get(id, nil)
 	if err != nil {
 		return nil, errors.Annotatef(err, "failed to create a payment intent")
 	}
@@ -269,6 +233,7 @@ func (p *provider) CreateSubscription(customerID, priceID string) (*Subscription
 		return nil, errors.New("invalid API key")
 	}
 	stripe.Key = p.cfg.APIKey
+
 	subscriptionParams := &stripe.SubscriptionParams{
 		Customer: stripe.String(customerID),
 		Items: []*stripe.SubscriptionItemsParams{
@@ -288,6 +253,11 @@ func (p *provider) CreateSubscription(customerID, priceID string) (*Subscription
 
 // CancelSubscription cancels subscription
 func (p *provider) CancelSubscription(subscriptionID string) (*Subscription, error) {
+	if p.cfg.APIKey == "" {
+		return nil, errors.New("invalid API key")
+	}
+	stripe.Key = p.cfg.APIKey
+
 	s, err := sub.Cancel(subscriptionID, nil)
 	if err != nil {
 		return nil, errors.Annotatef(err, "failed to cancel subscription with id %s", subscriptionID)
@@ -296,36 +266,20 @@ func (p *provider) CancelSubscription(subscriptionID string) (*Subscription, err
 }
 
 // HandleWebhook handles webhook call
-func (p *provider) HandleWebhook(body []byte, signatureHeader string) (*Subscription, error) {
+func (p *provider) HandleWebhook(body []byte, signatureHeader string) (*Intent, error) {
 	event, err := webhook.ConstructEvent(body, signatureHeader, p.cfg.WebhookSecret)
 	if err != nil {
 		return nil, errors.Annotatef(err, "failed to construct webhook event")
 	}
 
-	if event.Type == "invoice.payment_succeeded" {
-		var invoice stripe.Invoice
-		err := json.Unmarshal(event.Data.Raw, &invoice)
+	if event.Type == "payment_intent.succeeded" {
+		var paymentIntent stripe.PaymentIntent
+		err := json.Unmarshal(event.Data.Raw, &paymentIntent)
 		if err != nil {
-			return nil, errors.Annotatef(err, "error parsing webhook JSON")
+			return nil, errors.Annotatef(err, "error parsing webhook JSON for event type %s", event.Type)
 		}
 
-		if invoice.PaymentIntent == nil {
-			return nil, errors.Annotatef(err, "error getting invoice payment intent")
-		}
-
-		pi, err := p.GetPaymentIntent(invoice.PaymentIntent.ID)
-		if err != nil {
-			return nil, errors.Annotatef(err, "error getting payment intent object for %s", invoice.PaymentIntent.ID)
-		}
-
-		params := &stripe.SubscriptionParams{
-			DefaultPaymentMethod: stripe.String(pi.PaymentMethod.ID),
-		}
-		s, err := sub.Update(invoice.Subscription.ID, params)
-		if err != nil {
-			return nil, errors.Annotatef(err, "error updating subscription with ID %s", invoice.Subscription.ID)
-		}
-		return NewSubscription(s), nil
+		return NewPaymentIntent(&paymentIntent), nil
 	}
 	return nil, nil
 }
