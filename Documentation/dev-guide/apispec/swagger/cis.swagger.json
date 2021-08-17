@@ -172,6 +172,13 @@
         "issuers_pem": {
           "type": "string",
           "title": "IssuersPem provides PEM encoded issuers"
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Locations of published certificate"
         }
       },
       "title": "Certificate provides X509 Certificate information"

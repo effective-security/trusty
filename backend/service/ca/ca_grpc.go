@@ -169,7 +169,19 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 
 	metrics.IncrCounter(keyForCertIssued, 1, tags...)
 
-	mcert := model.NewCertificate(cert, req.OrgId, req.Profile, string(pem), ca.PEM())
+	mcert := model.NewCertificate(cert, req.OrgId, req.Profile, string(pem), ca.PEM(), nil)
+
+	if s.publisher != nil {
+		location, err := s.publisher.PublishCertificate(context.Background(), mcert.ToPB())
+		if err != nil {
+			logger.KV(xlog.ERROR,
+				"status", "failed to publish certificate",
+				"err", errors.Details(err))
+			return nil, v1.NewError(codes.Internal, "failed to publish certificate")
+		}
+		mcert.Locations = append(mcert.Locations, location)
+	}
+
 	mcert, err = s.db.RegisterCertificate(ctx, mcert)
 	if err != nil {
 		logger.KV(xlog.ERROR,
@@ -183,22 +195,9 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 		"id", mcert.ID,
 		"subject", mcert.Subject,
 	)
-
 	res := &pb.CertificateResponse{
 		Certificate: mcert.ToPB(),
 	}
-
-	if s.publisher != nil {
-		go func() {
-			_, err = s.publisher.PublishCertificate(context.Background(), res.Certificate)
-			if err != nil {
-				logger.KV(xlog.ERROR,
-					"status", "failed to publish certificate",
-					"err", errors.Details(err))
-			}
-		}()
-	}
-
 	return res, nil
 }
 

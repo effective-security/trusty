@@ -2,6 +2,7 @@ package pgsql
 
 import (
 	"context"
+	"strings"
 
 	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/internal/db/cadb/model"
@@ -24,20 +25,21 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 	logger.Debugf("id=%d, subject=%q, skid=%s", id, crt.Subject, crt.SKID)
 
 	res := new(model.Certificate)
-
+	var locations string
 	err = p.db.QueryRowContext(ctx, `
-			INSERT INTO certificates(id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile)
-				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+			INSERT INTO certificates(id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,locations)
+				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 			ON CONFLICT (sha256)
 			DO UPDATE
-				SET org_id=$2,issuers_pem=$12
-			RETURNING id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile
+				SET org_id=$2,issuers_pem=$12,locations=$14
+			RETURNING id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,locations
 			;`, id, crt.OrgID, crt.SKID, crt.IKID, crt.SerialNumber,
 		crt.NotBefore, crt.NotAfter,
 		crt.Subject, crt.Issuer,
 		crt.ThumbprintSha256,
 		crt.Pem, crt.IssuersPem,
 		crt.Profile,
+		strings.Join(crt.Locations, ","),
 	).Scan(&res.ID,
 		&res.OrgID,
 		&res.SKID,
@@ -51,12 +53,14 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 		&res.Pem,
 		&res.IssuersPem,
 		&res.Profile,
+		&locations,
 	)
 	if err != nil {
 		return nil, errors.Annotatef(err, "ID=%d, orgID=%d, skid=%s, ikid=%s", id, crt.OrgID, crt.SKID, crt.IKID)
 	}
 	res.NotAfter = res.NotAfter.UTC()
 	res.NotBefore = res.NotBefore.UTC()
+	res.Locations = strings.Split(locations, ",")
 	return res, nil
 }
 
@@ -76,6 +80,7 @@ func (p *Provider) RemoveCertificate(ctx context.Context, id uint64) error {
 // GetCertificate returns registered Certificate
 func (p *Provider) GetCertificate(ctx context.Context, id uint64) (*model.Certificate, error) {
 	c := new(model.Certificate)
+	var locations string
 	err := p.db.QueryRowContext(ctx, `
 		SELECT
 			id,org_id,skid,ikid,serial_number,
@@ -83,7 +88,8 @@ func (p *Provider) GetCertificate(ctx context.Context, id uint64) (*model.Certif
 			subject,issuer,
 			sha256,
 			pem,issuers_pem,
-			profile
+			profile,
+			locations
 		FROM certificates
 		WHERE id = $1
 		;
@@ -101,19 +107,21 @@ func (p *Provider) GetCertificate(ctx context.Context, id uint64) (*model.Certif
 		&c.Pem,
 		&c.IssuersPem,
 		&c.Profile,
+		&locations,
 	)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 	c.NotAfter = c.NotAfter.UTC()
 	c.NotBefore = c.NotBefore.UTC()
-
+	c.Locations = strings.Split(locations, ",")
 	return c, nil
 }
 
 // GetCertificateBySKID returns registered Certificate
 func (p *Provider) GetCertificateBySKID(ctx context.Context, skid string) (*model.Certificate, error) {
 	c := new(model.Certificate)
+	var locations string
 	err := p.db.QueryRowContext(ctx, `
 			SELECT
 				id,org_id,skid,ikid,serial_number,
@@ -121,7 +129,8 @@ func (p *Provider) GetCertificateBySKID(ctx context.Context, skid string) (*mode
 				subject,issuer,
 				sha256,
 				pem,issuers_pem,
-				profile
+				profile,
+				locations
 			FROM certificates
 			WHERE skid = $1
 			;
@@ -139,13 +148,14 @@ func (p *Provider) GetCertificateBySKID(ctx context.Context, skid string) (*mode
 		&c.Pem,
 		&c.IssuersPem,
 		&c.Profile,
+		&locations,
 	)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 	c.NotAfter = c.NotAfter.UTC()
 	c.NotBefore = c.NotBefore.UTC()
-
+	c.Locations = strings.Split(locations, ",")
 	return c, nil
 }
 
@@ -154,7 +164,7 @@ func (p *Provider) GetOrgCertificates(ctx context.Context, orgID uint64) (model.
 
 	res, err := p.db.QueryContext(ctx, `
 		SELECT
-			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile
+			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,locations
 		FROM
 			certificates
 		WHERE org_id = $1
@@ -169,6 +179,7 @@ func (p *Provider) GetOrgCertificates(ctx context.Context, orgID uint64) (model.
 
 	for res.Next() {
 		r := new(model.Certificate)
+		var locations string
 		err = res.Scan(
 			&r.ID,
 			&r.OrgID,
@@ -183,12 +194,14 @@ func (p *Provider) GetOrgCertificates(ctx context.Context, orgID uint64) (model.
 			&r.Pem,
 			&r.IssuersPem,
 			&r.Profile,
+			&locations,
 		)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
 		r.NotAfter = r.NotAfter.UTC()
 		r.NotBefore = r.NotBefore.UTC()
+		r.Locations = strings.Split(locations, ",")
 		list = append(list, r)
 	}
 
@@ -208,7 +221,7 @@ func (p *Provider) ListCertificates(ctx context.Context, ikid string, limit int,
 
 	res, err := p.db.QueryContext(ctx,
 		`SELECT
-			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,profile
+			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,profile,locations
 		FROM
 			certificates
 		WHERE 
@@ -227,6 +240,7 @@ func (p *Provider) ListCertificates(ctx context.Context, ikid string, limit int,
 
 	for res.Next() {
 		r := new(model.Certificate)
+		var locations string
 		err = res.Scan(
 			&r.ID,
 			&r.OrgID,
@@ -239,12 +253,14 @@ func (p *Provider) ListCertificates(ctx context.Context, ikid string, limit int,
 			&r.Issuer,
 			&r.ThumbprintSha256,
 			&r.Profile,
+			&locations,
 		)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
 		r.NotAfter = r.NotAfter.UTC()
 		r.NotBefore = r.NotBefore.UTC()
+		r.Locations = strings.Split(locations, ",")
 		list = append(list, r)
 	}
 

@@ -164,6 +164,8 @@ type Certificate struct {
 	Pem string `json:"pem,omitempty"`
 	// IssuersPem provides PEM encoded issuers
 	IssuersPem string `json:"issuers_pem,omitempty"`
+	// Locations of the published
+	Locations []string `json:"locations"`
 }
 
 // CertificatesResponse returns a list of certificates for the user
