@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/go-phorce/dolly/fileutil"
@@ -20,6 +21,8 @@ import (
 	"github.com/stripe/stripe-go/v72/webhook"
 	"gopkg.in/yaml.v2"
 )
+
+const metadataYearsKey = "years"
 
 // Provider implements provider interface
 type Provider interface {
@@ -344,7 +347,12 @@ func (p *provider) listProducts() ([]Product, error) {
 	}
 	i := product.List(params)
 	for i.Next() {
-		productID := i.Product().ID
+		prod := i.Product()
+		years, err := p.yearsFromMetadata(prod.Metadata)
+		if err != nil {
+			return nil, errors.Annotatef(err, "unable to fetch years from metadata")
+		}
+		productID := prod.ID
 		paramsForPrice := &stripe.PriceListParams{
 			Product: stripe.String(productID),
 		}
@@ -359,10 +367,24 @@ func (p *provider) listProducts() ([]Product, error) {
 		if prc == nil {
 			return nil, errors.Errorf("unable to fetch price for product ID %s", productID)
 		}
-		prd := NewProduct(i.Product().ID, i.Product().Name, prc)
+		prd := NewProduct(i.Product().ID, i.Product().Name, years, prc)
 		products = append(products, *prd)
 	}
 	return products, nil
+}
+
+// yearsFromMetadata returns years from metadata
+func (p *provider) yearsFromMetadata(d map[string]string) (int64, error) {
+	metadataYears, ok := d[metadataYearsKey]
+	if !ok {
+		return 0, errors.Errorf("metadata not found for key %q, please add it to the product", metadataYearsKey)
+	}
+
+	years, err := strconv.ParseInt(metadataYears, 10, 64)
+	if err != nil {
+		return 0, errors.Errorf("failed to convert metadata for key %q and value %q to integer", metadataYearsKey, metadataYears)
+	}
+	return years, nil
 }
 
 // SetStripeMockedBackend is used to set Stripe mock backend for running unit tests

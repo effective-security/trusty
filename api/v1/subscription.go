@@ -58,6 +58,8 @@ type Product struct {
 	Price uint64 `json:"price"`
 	// Currency currency of the price
 	Currency string `json:"currency"`
+	// Years of the subscription
+	Years uint64 `json:"years"`
 }
 
 // SubscriptionsProductsResponse specifies response when getting available products

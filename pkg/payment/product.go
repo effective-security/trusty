@@ -12,15 +12,18 @@ type Product struct {
 	PriceAmount int64
 	// PriceCurrency is the price currency of the product
 	PriceCurrency string
+	// Years of the subscription
+	Years int64
 }
 
 // NewProduct product constructor
-func NewProduct(id string, name string, p *Price) *Product {
+func NewProduct(id string, name string, years int64, p *Price) *Product {
 	return &Product{
 		ID:            id,
 		Name:          name,
 		PriceID:       p.ID,
 		PriceAmount:   p.Amount,
 		PriceCurrency: p.Currency,
+		Years:         years,
 	}
 }

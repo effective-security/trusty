@@ -202,6 +202,7 @@ func (s *Service) SubscriptionsProductsHandler() rest.Handle {
 				Name:     p.Name,
 				Price:    uint64(p.PriceAmount),
 				Currency: p.PriceCurrency,
+				Years:    uint64(p.Years),
 			})
 		}
 		marshal.WriteJSON(w, r, res)
