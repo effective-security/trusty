@@ -24,6 +24,15 @@ Commands:
   help [<command>...]
     Show help.
 
+  status
+    show the server status
+
+  version
+    show the server version
+
+  caller
+    show the caller info
+
   login
     login and obtain authorization token
 
@@ -35,6 +44,12 @@ Commands:
 
   certificates
     show the user's certificates
+
+  subscriptions
+    show the user's subscriptions
+
+  products
+    show the available products
 
   opencorps --name=NAME [<flags>]
     search open corporations
@@ -60,11 +75,23 @@ Commands:
   org validate --org=ORG
     approve organization validation
 
-  org subscribe --org=ORG --product=PRODUCTID
-    create subscription
+  org subscribe --org=ORG --product=PRODUCT
+    subscribe to org
 
   org keys --org=ORG
     list API keys
+
+  org members --org=ORG
+    list members
+
+  org delete --org=ORG
+    delete organization
+
+  org pay --client-secret=CLIENT-SECRET --stripe-key=STRIPE-KEY [<flags>]
+    pay for org
+
+  acme directory
+    show ACME directory
 
   acme account --org=ORG --key=KEY
     show registered account
@@ -74,7 +101,6 @@ Commands:
 
   acme order --org=ORG --spc=SPC
     order certificate
-
 ```
 
 For testing, the caller has to specify a trusted root certificate by providing
@@ -151,28 +177,25 @@ bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem or
 bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem org subscribe --org 82923411415760996 --product 3
 
 {
-        "org": {
-                "approver_email": "denis+test@ekspand.com",
-                "approver_name": "Mr Matthew D Hardeman",
-                "billing_email": "denis@ekspand.com",
-                "city": "PELHAM",
-                "company": "LOW LATENCY COMMUNICATIONS LLC",
-                "created_at": "2021-07-26T01:30:04.813442Z",
-                "email": "denis+test@ekspand.com",
-                "expires_at": "2021-07-30T01:30:04.813442Z",
-                "extern_id": "99999999",
-                "id": "82923411415760996",
-                "login": "99999999",
-                "name": "LOW LATENCY COMMUNICATIONS LLC",
-                "phone": "2057453970",
-                "postal_code": "35124",
-                "provider": "martini",
-                "region": "AL",
-                "status": "validation_pending",
-                "street_address": "241 APPLEGATE TRACE",
-                "updated_at": "2021-07-26T01:30:04.813442Z"
+        "client_secret": "pi_3JPe0NKfgu58p9BH1Lu3Xqrr_secret_bYkh64vZLXHubuueYobMvYKnS",
+        "subscription": {
+                "created_at": "2021-08-18T01:55:47.827818Z",
+                "currency": "usd",
+                "expires_at": "2022-08-18T01:55:47.827818Z",
+                "org_id": "86257988775444491",
+                "price": 100,
+                "status": "payment_pending"
         }
 }
+```
+
+## Pay for org
+
+```.sh
+bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem org pay --stripe-key <stripe publishable key> --client-secret <client secret from the response of subscribe command>
+
+This will open a browser page where you can choose to enter payment method (card) details to make a payment.
+
 ```
 
 ## Submit for Organization validation
@@ -322,4 +345,16 @@ key: /home/dissoupov/.mrtsec/certificates/ddadd515eb4e758f7a8a18a4093574dacdac4c
 
 ```.sh
 bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem certificates
+```
+
+## List Subscriptions
+
+```.sh
+bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem subscriptions
+```
+
+## List Products
+
+```.sh
+bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem products
 ```

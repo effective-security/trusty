@@ -166,6 +166,13 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		Action(cli.RegisterAction(martini.DeleteOrg, orgDeleteFlags))
 	orgDeleteFlags.OrgID = cmdOrgDelete.Flag("org", "organization ID").Required().String()
 
+	orgPayFlags := new(martini.PayOrgFlags)
+	cmdOrgPay := cmdOrgs.Command("pay", "pay for org").
+		Action(cli.RegisterAction(martini.PayOrg, orgPayFlags))
+	orgPayFlags.StripeKey = cmdOrgPay.Flag("stripe-key", "Stripe publishable key").Required().String()
+	orgPayFlags.ClientSecret = cmdOrgPay.Flag("client-secret", "client secret after subscription is created").Required().String()
+	orgPayFlags.NoBrowser = cmdOrgPay.Flag("no-browser", "disable openning in browser").Bool()
+
 	// acme directory|account|register|order
 	cmdAcme := app.Command("acme", "ACME operations").
 		PreAction(cli.PopulateControl)

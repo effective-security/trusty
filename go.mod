@@ -34,6 +34,7 @@ require (
 	github.com/mattn/goveralls v0.0.9
 	github.com/miekg/dns v1.1.43
 	github.com/olekukonko/tablewriter v0.0.4
+	github.com/pkg/browser v0.0.0-20210706143420-7d21f8c997e2 // indirect
 	github.com/prometheus/client_golang v1.11.0
 	github.com/rs/cors v1.8.0
 	github.com/rvflash/opencorporates v0.0.5

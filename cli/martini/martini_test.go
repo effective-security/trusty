@@ -154,3 +154,16 @@ func (s *testSuite) TestDeleteOrg() {
 	err := s.Run(martini.DeleteOrg, &flags)
 	s.NoError(err)
 }
+
+func (s *testSuite) TestPayOrg() {
+	stripeKey := "1234"
+	clientSecret := "6789"
+	noBrowser := true
+	flags := martini.PayOrgFlags{
+		StripeKey:    &stripeKey,
+		ClientSecret: &clientSecret,
+		NoBrowser:    &noBrowser,
+	}
+	err := s.Run(martini.PayOrg, &flags)
+	s.NoError(err)
+}
