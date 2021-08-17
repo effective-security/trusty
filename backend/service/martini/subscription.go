@@ -57,14 +57,14 @@ func (s *Service) CreateSubsciptionHandler() rest.Handle {
 
 		subscription, clientSecret, err := s.createSubscription(ctx, user, org, req.ProductID)
 		if err != nil {
-			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to process the subscription").WithCause(err))
+			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to create subscription for org %d and product %q", org.ID, req.ProductID).WithCause(err))
 			return
 		}
 
 		org.Status = v1.OrgStatusValidationPending
 		org, err = s.db.UpdateOrgStatus(ctx, org)
 		if err != nil {
-			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to process the subscription").WithCause(err))
+			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to create subscription for org %d", org.ID).WithCause(err))
 			return
 		}
 
@@ -162,7 +162,7 @@ func (s *Service) ListSubsciptionsHandler() rest.Handle {
 		ctx := r.Context()
 		subscriptions, err := s.db.ListSubscriptions(ctx, user.ID)
 		if err != nil {
-			marshal.WriteJSON(w, r, httperror.WithInvalidParam("unable to list subscriptions").WithCause(err))
+			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to list subscriptions for user %d", user.ID).WithCause(err))
 			return
 		}
 
