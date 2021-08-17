@@ -213,7 +213,13 @@ func (p *Provider) GetOrgByExternalID(ctx context.Context, provider, externalID 
 
 // RemoveOrg deletes org and all its members
 func (p *Provider) RemoveOrg(ctx context.Context, id uint64) error {
-	_, err := p.db.ExecContext(ctx, `DELETE FROM orgmembers WHERE org_id=$1;`, id)
+
+	tx, err := p.db.BeginTx(ctx, nil)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	_, err = p.db.ExecContext(ctx, `DELETE FROM orgmembers WHERE org_id=$1;`, id)
 	if err != nil {
 		logger.Errorf("err=[%s]", errors.Details(err))
 		return errors.Trace(err)
@@ -223,6 +229,19 @@ func (p *Provider) RemoveOrg(ctx context.Context, id uint64) error {
 		logger.Errorf("err=[%s]", errors.Details(err))
 		return errors.Trace(err)
 	}
+	_, err = p.db.ExecContext(ctx, `DELETE FROM subscriptions WHERE id=$1;`, id)
+	if err != nil {
+		logger.Errorf("err=[%s]", errors.Details(err))
+		return errors.Trace(err)
+	}
+
+	// Finally, if no errors are recieved from the queries, commit the transaction
+	// this applies the above changes to our database
+	err = tx.Commit()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
 	logger.Noticef("id=%d", id)
 
 	return nil

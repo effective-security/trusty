@@ -272,7 +272,7 @@ func (s *Service) DeleteOrgHandler() rest.Handle {
 		m := model.FindOrgMemberInfo(list, userID)
 		role := ""
 		if m != nil {
-			role = m.Role.String
+			role = m.Role
 		}
 		if role != "owner" && role != "admin" {
 			marshal.WriteJSON(w, r, httperror.WithForbidden("only owner or administrator can destroy organization, role=%q", role))
@@ -295,6 +295,8 @@ func (s *Service) DeleteOrgHandler() rest.Handle {
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to delete organization: %s", err.Error()).WithCause(err))
 			return
 		}
+		// TODO: delete / revoke issued certs for the Org?
+
 		w.WriteHeader(http.StatusNoContent)
 	}
 }

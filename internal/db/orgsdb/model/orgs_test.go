@@ -1,7 +1,6 @@
 package model_test
 
 import (
-	"database/sql"
 	"fmt"
 	"testing"
 
@@ -84,12 +83,9 @@ func TestOrgMemberInfo(t *testing.T) {
 		UserID:       1001,
 		Name:         "name",
 		Email:        "email",
-		Role:         sql.NullString{String: "role", Valid: true},
-		Source:       sql.NullString{String: "source", Valid: true},
+		Role:         "role",
+		Source:       "source",
 	}
-
-	assert.Equal(t, "role", u.GetRole())
-	assert.Equal(t, "source", u.GetSource())
 
 	dto := u.ToDto()
 	assert.Equal(t, "999", dto.MembershipID)
@@ -112,11 +108,9 @@ func TestOrgMembership(t *testing.T) {
 		OrgID:   1000,
 		OrgName: "org_name",
 		UserID:  1001,
-		Role:    sql.NullString{String: "role", Valid: true},
-		Source:  sql.NullString{String: "source", Valid: true},
+		Role:    "role",
+		Source:  "source",
 	}
-	assert.Equal(t, "role", u.GetRole())
-	assert.Equal(t, "source", u.GetSource())
 
 	dto := u.ToDto()
 	assert.Equal(t, "999", dto.ID)

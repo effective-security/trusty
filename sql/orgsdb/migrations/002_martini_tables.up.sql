@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS public.fcc_contact
 (
     id bigint NOT NULL,
     frn character varying(16) COLLATE pg_catalog."default" NOT NULL,
-    json text COLLATE pg_catalog."default" NULL,
+    json text COLLATE pg_catalog."default" NOT NULL,
     updated_at timestamp with time zone,
     CONSTRAINT fcc_contact_pkey PRIMARY KEY (id),
     CONSTRAINT fcc_contact_frn UNIQUE (frn)
@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS public.subscriptions
     price_id character varying(32) COLLATE pg_catalog."default" NOT NULL,
     price_amount bigint NOT NULL,
     price_currency character varying(32) COLLATE pg_catalog."default" NOT NULL,
-    payment_method_id character varying(32) COLLATE pg_catalog."default" NULL,
+    payment_method_id character varying(32) COLLATE pg_catalog."default" NOT NULL,
     created_at timestamp with time zone,
     expires_at timestamp with time zone,
     last_paid_at timestamp with time zone,
