@@ -125,3 +125,31 @@ func Test_CreateSubscription(t *testing.T) {
 	require.Equal(t, "pi_1JF0naCWsBdfZPJZe0UeNrDw_secret_8PNI9iNvf5QBSVfOophEFg3v9", subscription.ClientSecret)
 	require.Equal(t, "active", subscription.Status)
 }
+
+func Test_yearsFromMetadata(t *testing.T) {
+	os.Setenv("TRUSTY_STRIPE_API_KEY", "sk_test_123")
+	os.Setenv("TRUSTY_STRIPE_WEBHOOK_SECRET", "1234")
+	prov, err := NewProvider("testdata/stripe.yaml")
+	require.NoError(t, err)
+	p, ok := prov.(*provider)
+	require.True(t, ok)
+
+	metaWithCorrectYears := map[string]string{
+		"years": "5",
+	}
+	years, err := p.yearsFromMetadata(metaWithCorrectYears)
+	require.NoError(t, err)
+	require.Equal(t, int64(5), years)
+
+	metaWithIncorrectYears := map[string]string{
+		"years": "5ab",
+	}
+	_, err = p.yearsFromMetadata(metaWithIncorrectYears)
+	require.Error(t, err)
+
+	metaWithNoYears := map[string]string{
+		"years_inocrrect": "5",
+	}
+	_, err = p.yearsFromMetadata(metaWithNoYears)
+	require.Error(t, err)
+}

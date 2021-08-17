@@ -430,13 +430,15 @@ func TestListSubscriptionsProducts(t *testing.T) {
 				"id": "12",
 				"name": "1 year subscription",
 				"price":100,
-				"currency":"usd"
+				"currency":"usd",
+				"years": 3
 			},
 			{
 				"id": "15",
 				"name": "2 years subscription",
 				"price":200,
-				"currency":"usd"
+				"currency":"usd",
+				"years": 4
 			}
 		]
 		
@@ -460,11 +462,13 @@ func TestListSubscriptionsProducts(t *testing.T) {
 	assert.Equal(t, "1 year subscription", r.Products[0].Name)
 	assert.Equal(t, uint64(100), r.Products[0].Price)
 	assert.Equal(t, "usd", r.Products[0].Currency)
+	assert.Equal(t, uint64(3), r.Products[0].Years)
 
 	assert.Equal(t, "15", r.Products[1].ID)
 	assert.Equal(t, "2 years subscription", r.Products[1].Name)
 	assert.Equal(t, uint64(200), r.Products[1].Price)
 	assert.Equal(t, "usd", r.Products[1].Currency)
+	assert.Equal(t, uint64(4), r.Products[1].Years)
 }
 
 func TestApproveOrg(t *testing.T) {
