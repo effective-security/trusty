@@ -191,13 +191,13 @@ func Test_Membership(t *testing.T) {
 
 	ms, err := provider.AddOrgMember(ctx, org.ID, user1.ID, "admin", v1.ProviderGithub)
 	require.NoError(t, err)
-	assert.Equal(t, "admin", ms.GetRole())
+	assert.Equal(t, "admin", ms.Role)
 	assert.Equal(t, user1.ID, ms.UserID)
 	assert.Equal(t, org.ID, ms.OrgID)
 
 	ms, err = provider.AddOrgMember(ctx, org.ID, user2.ID, "user", v1.ProviderGithub)
 	require.NoError(t, err)
-	assert.Equal(t, "user", ms.GetRole())
+	assert.Equal(t, "user", ms.Role)
 	assert.Equal(t, user2.ID, ms.UserID)
 	assert.Equal(t, org.ID, ms.OrgID)
 
@@ -221,13 +221,13 @@ func Test_Membership(t *testing.T) {
 
 	removed, err := provider.RemoveOrgMember(ctx, org.ID, user2.ID)
 	require.NoError(t, err)
-	assert.Equal(t, "user", removed.GetRole())
+	assert.Equal(t, "user", removed.Role)
 	assert.Equal(t, user2.ID, removed.UserID)
 	assert.Equal(t, org.ID, removed.OrgID)
 
 	ms, err = provider.AddOrgMember(ctx, org.ID, user2.ID, "user", v1.ProviderGithub)
 	require.NoError(t, err)
-	assert.Equal(t, "user", ms.GetRole())
+	assert.Equal(t, "user", ms.Role)
 	assert.Equal(t, user2.ID, ms.UserID)
 	assert.Equal(t, org.ID, ms.OrgID)
 

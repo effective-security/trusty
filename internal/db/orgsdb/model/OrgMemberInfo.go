@@ -1,7 +1,6 @@
 package model
 
 import (
-	"database/sql"
 	"strconv"
 
 	v1 "github.com/ekspand/trusty/api/v1"
@@ -9,14 +8,14 @@ import (
 
 // OrgMemberInfo provides Org membership information for a user
 type OrgMemberInfo struct {
-	MembershipID uint64         `db:"id"`
-	OrgID        uint64         `db:"orgid"`
-	OrgName      string         `db:"org_name"`
-	UserID       uint64         `db:"user_id"`
-	Name         string         `db:"name"`
-	Email        string         `db:"email"`
-	Role         sql.NullString `db:"role"`
-	Source       sql.NullString `db:"source"`
+	MembershipID uint64 `db:"id"`
+	OrgID        uint64 `db:"orgid"`
+	OrgName      string `db:"org_name"`
+	UserID       uint64 `db:"user_id"`
+	Name         string `db:"name"`
+	Email        string `db:"email"`
+	Role         string `db:"role"`
+	Source       string `db:"source"`
 }
 
 // ToDto converts model to v1.TeamMemberInfo DTO
@@ -28,31 +27,11 @@ func (o *OrgMemberInfo) ToDto() *v1.OrgMemberInfo {
 		UserID:       strconv.FormatUint(o.UserID, 10),
 		Name:         o.Name,
 		Email:        o.Email,
+		Role:         o.Role,
+		Source:       o.Source,
 	}
 
-	if o.Role.Valid {
-		m.Role = o.Role.String
-	}
-	if o.Source.Valid {
-		m.Source = o.Source.String
-	}
 	return m
-}
-
-// GetRole returns Role value
-func (o *OrgMemberInfo) GetRole() string {
-	if o.Role.Valid {
-		return o.Role.String
-	}
-	return ""
-}
-
-// GetSource returns Source value
-func (o *OrgMemberInfo) GetSource() string {
-	if o.Source.Valid {
-		return o.Source.String
-	}
-	return ""
 }
 
 // ToMembertsDto returns list of members
