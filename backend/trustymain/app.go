@@ -96,6 +96,7 @@ type App struct {
 	closers   []io.Closer
 	closed    bool
 	lock      sync.RWMutex
+	hostname  string
 
 	args             []string
 	flags            *appFlags
@@ -215,7 +216,8 @@ func (a *App) Run(startedCh chan<- bool) error {
 	if err != nil {
 		return errors.Annotate(err, "unable to resolve local IP")
 	}
-	hostname, err := os.Hostname()
+
+	a.hostname, err = os.Hostname()
 	if err != nil {
 		return errors.Annotate(err, "unable to resolve hostname")
 	}
@@ -231,7 +233,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 	}
 
 	ver := version.Current().String()
-	logger.Infof("hostname=%s, ip=%s, version=%s", hostname, ipaddr, ver)
+	logger.Infof("hostname=%s, ip=%s, version=%s", a.hostname, ipaddr, ver)
 
 	if a.flags.cpu != nil {
 		err = a.initCPUProfiler(*a.flags.cpu)
@@ -556,9 +558,18 @@ func (a *App) setupMetrics() error {
 
 	if sink != nil {
 		cfg := &metrics.Config{
-			ServiceName:    cfg.ServiceName,
-			EnableHostname: true,
-			FilterDefault:  true,
+			ServiceName:          cfg.ServiceName,
+			HostName:             a.hostname,
+			EnableHostname:       true,
+			EnableHostnameLabel:  true,
+			EnableServiceLabel:   true,
+			FilterDefault:        true,
+			EnableRuntimeMetrics: true,
+			GlobalTags: []metrics.Tag{
+				{Name: "env", Value: cfg.Environment},
+				{Name: "region", Value: cfg.Region},
+				{Name: "cluster_id", Value: cfg.ClusterName},
+			},
 		}
 		prov, err := metrics.NewGlobal(cfg, sink)
 		if err != nil {
@@ -568,7 +579,6 @@ func (a *App) setupMetrics() error {
 	}
 
 	return nil
-
 }
 
 func (a *App) scheduleTasks() error {
