@@ -28,6 +28,7 @@ type publisher struct {
 
 // NewPublisher returns new Publisher
 func NewPublisher(cfg *Config) (Publisher, error) {
+	logger.KV(xlog.INFO, "cert_bucket", cfg.CertsBucket, "crl_bucket", cfg.CRLBucket)
 	return &publisher{cfg}, nil
 }
 

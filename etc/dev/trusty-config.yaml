@@ -113,8 +113,8 @@ ra:
     - ${TRUSTY_CONFIG_DIR}/roots/martini_root_ca.pem
   publisher:
     # use gs:// for GCP, or file path 
-    cert_bucket: gs://martini-test-certs
-    crl_bucket: gs://martini-test-crls
+    cert_bucket: /tmp/trusty/martini-dev-certs
+    crl_bucket: /tmp/trusty/martini-dev-crls
 
 servers:
   cis:

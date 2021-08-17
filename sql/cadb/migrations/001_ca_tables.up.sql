@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS public.certificates
     pem text COLLATE pg_catalog."default" NOT NULL,
     issuers_pem text COLLATE pg_catalog."default" NOT NULL,
     profile character varying(32) COLLATE pg_catalog."default" NOT NULL,
+    -- locations text COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT certificates_pkey PRIMARY KEY (id),
     CONSTRAINT certificates_skid UNIQUE (skid),
     CONSTRAINT certificates_sha256 UNIQUE (sha256),

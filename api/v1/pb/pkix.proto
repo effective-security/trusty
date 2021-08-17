@@ -93,6 +93,8 @@ message Certificate  {
     string pem = 12;
     // IssuersPem provides PEM encoded issuers
     string issuers_pem = 13 [json_name="issuers_pem"];
+    // Locations of published certificate
+    repeated string locations = 14;
 }
 
 // RevokedCertificate provides X509 Cert information

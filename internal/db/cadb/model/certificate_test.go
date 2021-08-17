@@ -54,6 +54,7 @@ func TestCertificate(t *testing.T) {
 		Profile:          "profile",
 		Pem:              "pem",
 		IssuersPem:       "issuers_pem",
+		Locations:        []string{"1"},
 	}
 	dto := m.ToPB()
 	assert.Equal(t, uint64(123), dto.Id)
@@ -69,6 +70,7 @@ func TestCertificate(t *testing.T) {
 	assert.Equal(t, m.Profile, dto.Profile)
 	assert.Equal(t, m.Pem, dto.Pem)
 	assert.Equal(t, m.IssuersPem, dto.IssuersPem)
+	assert.Equal(t, m.Locations, dto.Locations)
 
 	m2 := model.CertificateFromPB(dto)
 	assert.Equal(t, *m, *m2)
@@ -81,7 +83,7 @@ func TestCertificate(t *testing.T) {
 
 	crt, err := certutil.ParseFromPEM([]byte(testCrt))
 	require.NoError(t, err)
-	m4 := model.NewCertificate(crt, 123, "ca", testCrt, testCrt)
+	m4 := model.NewCertificate(crt, 123, "ca", testCrt, testCrt, nil)
 	assert.Equal(t, uint64(0), m4.ID)
 }
 

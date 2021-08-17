@@ -26,6 +26,7 @@ type Certificate struct {
 	Profile          string    `db:"profile"`
 	Pem              string    `db:"pem"`
 	IssuersPem       string    `db:"issuers_pem"`
+	Locations        []string  `db:"locations"`
 }
 
 // Certificates defines a list of Certificate
@@ -47,6 +48,7 @@ func (r *Certificate) ToPB() *pb.Certificate {
 		Profile:      r.Profile,
 		Pem:          r.Pem,
 		IssuersPem:   r.IssuersPem,
+		Locations:    r.Locations,
 	}
 }
 
@@ -66,6 +68,7 @@ func (r *Certificate) ToDTO() *v1.Certificate {
 		Profile:      r.Profile,
 		Pem:          r.Pem,
 		IssuersPem:   r.IssuersPem,
+		Locations:    r.Locations,
 	}
 }
 
@@ -85,11 +88,12 @@ func CertificateFromPB(r *pb.Certificate) *Certificate {
 		Profile:          r.Profile,
 		Pem:              r.Pem,
 		IssuersPem:       r.IssuersPem,
+		Locations:        r.Locations,
 	}
 }
 
 // NewCertificate returns Certificate
-func NewCertificate(r *x509.Certificate, orgID uint64, profile, pem, issuersPem string) *Certificate {
+func NewCertificate(r *x509.Certificate, orgID uint64, profile, pem, issuersPem string, locations []string) *Certificate {
 	return &Certificate{
 		//ID:               r.Id,
 		OrgID:            orgID,
@@ -104,6 +108,7 @@ func NewCertificate(r *x509.Certificate, orgID uint64, profile, pem, issuersPem 
 		Profile:          profile,
 		Pem:              pem,
 		IssuersPem:       issuersPem,
+		Locations:        locations,
 	}
 }
 

@@ -83,11 +83,15 @@ func TestRegisterCertificate(t *testing.T) {
 	assert.Equal(t, rc.Profile, r.Profile)
 	assert.Equal(t, rc.NotBefore.Unix(), r.NotBefore.Unix())
 	assert.Equal(t, rc.NotAfter.Unix(), r.NotAfter.Unix())
+	assert.Empty(t, rc.Locations, 3)
 
-	r2, err := provider.RegisterCertificate(ctx, rc)
+	r.Locations = []string{"1", "2", "3"}
+
+	r2, err := provider.RegisterCertificate(ctx, r)
 	require.NoError(t, err)
 	require.NotNil(t, r)
 	assert.Equal(t, *r, *r2)
+	assert.Len(t, r2.Locations, 3)
 
 	list, err := provider.GetOrgCertificates(ctx, orgID)
 	require.NoError(t, err)
@@ -122,10 +126,11 @@ func TestRegisterCertificate(t *testing.T) {
 
 	cr, err := provider.GetRevokedCount(ctx)
 	require.NoError(t, err)
-	assert.Greater(t, cr, uint64(0))
+	assert.GreaterOrEqual(t, cr, uint64(0))
 
 	revoked, err := provider.RevokeCertificate(ctx, r4, time.Now(), 0)
 	require.NoError(t, err)
+	revoked.Certificate.Locations = r.Locations
 	assert.Equal(t, revoked.Certificate, *r4)
 
 	cc2, err := provider.GetCertsCount(ctx)
