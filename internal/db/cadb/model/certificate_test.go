@@ -45,7 +45,7 @@ func TestCertificate(t *testing.T) {
 		OrgID:            234,
 		SKID:             "skid",
 		IKID:             "ikid",
-		SerialNumber:     "serial_number",
+		SerialNumber:     "1231234123121232",
 		NotBefore:        nb.UTC(),
 		NotAfter:         na.UTC(),
 		Subject:          "subject",
@@ -71,6 +71,9 @@ func TestCertificate(t *testing.T) {
 	assert.Equal(t, m.Pem, dto.Pem)
 	assert.Equal(t, m.IssuersPem, dto.IssuersPem)
 	assert.Equal(t, m.Locations, dto.Locations)
+
+	fn := m.FileName()
+	assert.Contains(t, fn, "/")
 
 	m2 := model.CertificateFromPB(dto)
 	assert.Equal(t, *m, *m2)

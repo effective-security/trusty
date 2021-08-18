@@ -170,16 +170,17 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 	metrics.IncrCounter(keyForCertIssued, 1, tags...)
 
 	mcert := model.NewCertificate(cert, req.OrgId, req.Profile, string(pem), ca.PEM(), nil)
+	fn := mcert.FileName()
+	mcert.Locations = append(mcert.Locations, s.cfg.RegistrationAuthority.Publisher.BaseURL+"/"+fn)
 
 	if s.publisher != nil {
-		location, err := s.publisher.PublishCertificate(context.Background(), mcert.ToPB())
+		_, err := s.publisher.PublishCertificate(context.Background(), mcert.ToPB(), fn)
 		if err != nil {
 			logger.KV(xlog.ERROR,
 				"status", "failed to publish certificate",
 				"err", errors.Details(err))
 			return nil, v1.NewError(codes.Internal, "failed to publish certificate")
 		}
-		mcert.Locations = append(mcert.Locations, location)
 	}
 
 	mcert, err = s.db.RegisterCertificate(ctx, mcert)

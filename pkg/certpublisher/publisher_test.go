@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/ekspand/trusty/api/v1/pb"
+	"github.com/ekspand/trusty/internal/db/cadb/model"
 	"github.com/ekspand/trusty/pkg/certpublisher"
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/fileutil"
@@ -41,12 +42,15 @@ func TestProvider(t *testing.T) {
 	sn = sn.SetBytes(certutil.Random(20))
 
 	ctx := context.Background()
-	fn, err := p.PublishCertificate(ctx, &pb.Certificate{
+
+	cm := &model.Certificate{
 		Pem:          "test",
-		Skid:         guid.MustCreate(),
-		Ikid:         guid.MustCreate(),
+		SKID:         guid.MustCreate(),
+		IKID:         guid.MustCreate(),
 		SerialNumber: sn.String(),
-	})
+	}
+
+	fn, err := p.PublishCertificate(ctx, cm.ToPB(), cm.FileName())
 	require.NoError(t, err)
 
 	assert.NoError(t, fileutil.FileExists(fn))

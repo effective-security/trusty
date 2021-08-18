@@ -13,6 +13,7 @@ type RegistrationAuthority struct {
 
 // CertPublisher ontains configuration info for Publisher
 type CertPublisher struct {
+	BaseURL     string `json:"base_url" yaml:"base_url"`
 	CertsBucket string `json:"cert_bucket" yaml:"cert_bucket"`
 	CRLBucket   string `json:"crl_bucket" yaml:"crl_bucket"`
 }
