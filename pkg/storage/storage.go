@@ -105,10 +105,10 @@ func (reader *WrappedReader) Close() error {
 	readerError := reader.Reader.Close()
 	connError := reader.Conn.Close()
 	if readerError != nil {
-		return readerError
+		return errors.Trace(readerError)
 	}
 	if connError != nil {
-		return connError
+		return errors.Trace(connError)
 	}
 	return nil
 }
@@ -124,7 +124,7 @@ func (writer *WrappedWriter) Close() error {
 	writerError := writer.Writer.Close()
 	connError := writer.Conn.Close()
 	if writerError != nil {
-		return writerError
+		return errors.Trace(writerError)
 	}
 	return connError
 }
@@ -157,7 +157,7 @@ func GetReaderFromConn(ctx context.Context, path string, conn ReadWriteConnectio
 func GetWriterFromPath(ctx context.Context, path string, options ...*Options) (*WrappedWriter, error) {
 	conn, err := ConnectionFromPath(path, options...)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.Annotatef(err, "failed to create connection: %s", path)
 	}
 	return GetWriterFromConn(ctx, path, conn)
 }
@@ -167,7 +167,7 @@ func GetWriterFromConn(ctx context.Context, path string, conn ReadWriteConnectio
 	writer, err := conn.GetWriter(ctx, path)
 	if err != nil {
 		conn.Close()
-		return nil, errors.Trace(err)
+		return nil, errors.Annotatef(err, "failed to create writer: %s", path)
 	}
 	return &WrappedWriter{
 		Conn:   conn,
@@ -181,12 +181,12 @@ func GetWriterFromConn(ctx context.Context, path string, conn ReadWriteConnectio
 func DeletePath(ctx context.Context, path string, options ...*Options) error {
 	conn, err := ConnectionFromPath(path, options...)
 	if err != nil {
-		return err
+		return errors.Trace(err)
 	}
 	deleteError := conn.Delete(ctx, path)
 	closeError := conn.Close()
 	if deleteError != nil {
-		return deleteError
+		return errors.Trace(deleteError)
 	}
 	return closeError
 }
@@ -201,7 +201,7 @@ func ReadFile(ctx context.Context, path string, options ...*Options) ([]byte, er
 	defer reader.Close()
 	ret, err := ioutil.ReadAll(reader)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.Annotatef(err, "failed to read: %s", path)
 	}
 	return ret, nil
 }
@@ -218,10 +218,10 @@ func WriteFile(ctx context.Context, path string, data []byte, options ...*Option
 	defer writer.Close()
 	n, err := writer.Write(data)
 	if err != nil {
-		return n, errors.Trace(err)
+		return n, errors.Annotatef(err, "failed to write: %s", path)
 	}
 	if n != len(data) {
-		err = io.ErrShortWrite
+		err = errors.Trace(io.ErrShortWrite)
 	}
 	return n, err
 }

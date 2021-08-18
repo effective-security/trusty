@@ -97,6 +97,35 @@ func TestOrgs(t *testing.T) {
 	assert.Equal(t, "TELCO", org.Name)
 }
 
+func TestOrg(t *testing.T) {
+	h := makeTestHandler(t, "/v1/ms/orgs/123123", `{
+        "org": {
+				"id": "123",
+				"extern_id": "1234",
+				"provider": "martini",
+				"name": "TELCO"
+			}
+}`)
+	server := httptest.NewServer(h)
+	defer server.Close()
+
+	client, err := New(NewConfig(), []string{server.URL})
+	assert.NoError(t, err, "Unexpected error.")
+
+	require.NotPanics(t, func() {
+		// ensure compiles
+		_ = interface{}(client).(API)
+	})
+
+	r, err := client.Org(context.Background(), "123123")
+	require.NoError(t, err)
+	require.NotNil(t, r)
+	assert.Equal(t, "123", r.Org.ID)
+	assert.Equal(t, "1234", r.Org.ExternalID)
+	assert.Equal(t, v1.ProviderMartini, r.Org.Provider)
+	assert.Equal(t, "TELCO", r.Org.Name)
+}
+
 func TestCerts(t *testing.T) {
 
 	h := makeTestHandler(t, v1.PathForMartiniCerts, `{

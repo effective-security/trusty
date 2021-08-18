@@ -236,172 +236,6 @@ func TestGetCertsHandler(t *testing.T) {
 	assert.Empty(t, res.Certificates)
 }
 
-var stripeSamplePaymentIntent = `{
-	"id": "evt_3JPbIJKfgu58p9BH0IPqHiCg",
-	"object": "event",
-	"api_version": "2020-08-27",
-	"created": 1629241343,
-	"data": {
-		"object": {
-		"id": "PAYMENT_INTENT_ID_PLACEHOLDER",
-		"object": "payment_intent",
-		"amount": 10000,
-		"amount_capturable": 0,
-		"amount_received": 10000,
-		"application": null,
-		"application_fee_amount": null,
-		"canceled_at": null,
-		"cancellation_reason": null,
-		"capture_method": "automatic",
-		"charges": {
-			"object": "list",
-			"data": [
-			{
-				"id": "ch_3JPbIJKfgu58p9BH0YcLfpf5",
-				"object": "charge",
-				"amount": 10000,
-				"amount_captured": 10000,
-				"amount_refunded": 0,
-				"application": null,
-				"application_fee": null,
-				"application_fee_amount": null,
-				"balance_transaction": "txn_3JPbIJKfgu58p9BH0u2XBe60",
-				"billing_details": {
-				"address": {
-					"city": null,
-					"country": null,
-					"line1": null,
-					"line2": null,
-					"postal_code": "52525",
-					"state": null
-				},
-				"email": null,
-				"name": "Hayk Baluyan",
-				"phone": null
-				},
-				"calculated_statement_descriptor": "MY HAYK BUSINESS",
-				"captured": true,
-				"created": 1629241342,
-				"currency": "usd",
-				"customer": "cus_K3ijK03LZW3Qbg",
-				"description": null,
-				"destination": null,
-				"dispute": null,
-				"disputed": false,
-				"failure_code": null,
-				"failure_message": null,
-				"fraud_details": {
-				},
-				"invoice": null,
-				"livemode": false,
-				"metadata": {
-				},
-				"on_behalf_of": null,
-				"order": null,
-				"outcome": {
-				"network_status": "approved_by_network",
-				"reason": null,
-				"risk_level": "normal",
-				"risk_score": 31,
-				"seller_message": "Payment complete.",
-				"type": "authorized"
-				},
-				"paid": true,
-				"payment_intent": "pi_3JPbIJKfgu58p9BH03FP53pm",
-				"payment_method": "pm_1JPbIYKfgu58p9BHA6f0Z8kS",
-				"payment_method_details": {
-				"card": {
-					"brand": "visa",
-					"checks": {
-					"address_line1_check": null,
-					"address_postal_code_check": "pass",
-					"cvc_check": "pass"
-					},
-					"country": "US",
-					"exp_month": 12,
-					"exp_year": 2025,
-					"fingerprint": "ApAd87Afto3qMo3g",
-					"funding": "credit",
-					"installments": null,
-					"last4": "4242",
-					"network": "visa",
-					"three_d_secure": null,
-					"wallet": null
-				},
-				"type": "card"
-				},
-				"receipt_email": null,
-				"receipt_number": null,
-				"receipt_url": "https://pay.stripe.com/receipts/acct_1JI1BxKfgu58p9BH/ch_3JPbIJKfgu58p9BH0YcLfpf5/rcpt_K3ikwGiPIOyvMKLuheQ08Q2ku0POxDE",
-				"refunded": false,
-				"refunds": {
-				"object": "list",
-				"data": [
-				],
-				"has_more": false,
-				"total_count": 0,
-				"url": "/v1/charges/ch_3JPbIJKfgu58p9BH0YcLfpf5/refunds"
-				},
-				"review": null,
-				"shipping": null,
-				"source": null,
-				"source_transfer": null,
-				"statement_descriptor": null,
-				"statement_descriptor_suffix": null,
-				"status": "succeeded",
-				"transfer_data": null,
-				"transfer_group": null
-			}
-			],
-			"has_more": false,
-			"total_count": 1,
-			"url": "/v1/charges?payment_intent=pi_3JPbIJKfgu58p9BH03FP53pm"
-		},
-		"client_secret": "pi_3JPbIJKfgu58p9BH03FP53pm_secret_48HGU9vPOMfNoANxvxaC0CG4p",
-		"confirmation_method": "automatic",
-		"created": 1629241327,
-		"currency": "usd",
-		"customer": "cus_K3ijK03LZW3Qbg",
-		"description": null,
-		"invoice": null,
-		"last_payment_error": null,
-		"livemode": false,
-		"metadata": {
-		},
-		"next_action": null,
-		"on_behalf_of": null,
-		"payment_method": "pm_1JPbIYKfgu58p9BHA6f0Z8kS",
-		"payment_method_options": {
-			"card": {
-			"installments": null,
-			"network": null,
-			"request_three_d_secure": "automatic"
-			}
-		},
-		"payment_method_types": [
-			"card"
-		],
-		"receipt_email": null,
-		"review": null,
-		"setup_future_usage": "off_session",
-		"shipping": null,
-		"source": null,
-		"statement_descriptor": null,
-		"statement_descriptor_suffix": null,
-		"status": "succeeded",
-		"transfer_data": null,
-		"transfer_group": null
-		}
-	},
-	"livemode": false,
-	"pending_webhooks": 1,
-	"request": {
-		"id": "req_YHdhxTLnQPjjZL",
-		"idempotency_key": null
-	},
-	"type": "payment_intent.succeeded"
-}`
-
 func TestDenyOrg(t *testing.T) {
 	ctx := context.Background()
 	svc := trustyServer.Service(martini.ServiceName).(*martini.Service)
@@ -505,6 +339,23 @@ func TestDenyOrg(t *testing.T) {
 		var res v1.OrgResponse
 		require.NoError(t, marshal.Decode(w.Body, &res))
 		assert.Equal(t, v1.OrgStatusValidationPending, res.Org.Status)
+
+		// Get org
+		{
+			p := strings.Replace(v1.PathForMartiniOrgByID, ":org_id", res.Org.ID, 1)
+			r, err = http.NewRequest(http.MethodGet, p, nil)
+			require.NoError(t, err)
+			r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+			w = httptest.NewRecorder()
+			svc.GetOrgHandler()(w, r, rest.Params{
+				{
+					Key:   "org_id",
+					Value: res.Org.ID,
+				},
+			})
+			assert.Equal(t, http.StatusOK, w.Code)
+		}
 
 		// Deny
 		denyReq := &v1.ApproveOrgRequest{
@@ -777,6 +628,25 @@ func TestRegisterOrgFullFlow(t *testing.T) {
 	assert.NotEmpty(t, mres.Members)
 
 	//
+	// Get
+	//
+	{
+		p := strings.Replace(v1.PathForMartiniOrgByID, ":org_id", res.Org.ID, 1)
+		r, err = http.NewRequest(http.MethodGet, p, nil)
+		require.NoError(t, err)
+		r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+		w = httptest.NewRecorder()
+		svc.GetOrgHandler()(w, r, rest.Params{
+			{
+				Key:   "org_id",
+				Value: res.Org.ID,
+			},
+		})
+		assert.Equal(t, http.StatusOK, w.Code)
+	}
+
+	//
 	// Delete
 	//
 	{
@@ -795,3 +665,169 @@ func TestRegisterOrgFullFlow(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, w.Code)
 	}
 }
+
+var stripeSamplePaymentIntent = `{
+	"id": "evt_3JPbIJKfgu58p9BH0IPqHiCg",
+	"object": "event",
+	"api_version": "2020-08-27",
+	"created": 1629241343,
+	"data": {
+		"object": {
+		"id": "PAYMENT_INTENT_ID_PLACEHOLDER",
+		"object": "payment_intent",
+		"amount": 10000,
+		"amount_capturable": 0,
+		"amount_received": 10000,
+		"application": null,
+		"application_fee_amount": null,
+		"canceled_at": null,
+		"cancellation_reason": null,
+		"capture_method": "automatic",
+		"charges": {
+			"object": "list",
+			"data": [
+			{
+				"id": "ch_3JPbIJKfgu58p9BH0YcLfpf5",
+				"object": "charge",
+				"amount": 10000,
+				"amount_captured": 10000,
+				"amount_refunded": 0,
+				"application": null,
+				"application_fee": null,
+				"application_fee_amount": null,
+				"balance_transaction": "txn_3JPbIJKfgu58p9BH0u2XBe60",
+				"billing_details": {
+				"address": {
+					"city": null,
+					"country": null,
+					"line1": null,
+					"line2": null,
+					"postal_code": "52525",
+					"state": null
+				},
+				"email": null,
+				"name": "Hayk Baluyan",
+				"phone": null
+				},
+				"calculated_statement_descriptor": "MY HAYK BUSINESS",
+				"captured": true,
+				"created": 1629241342,
+				"currency": "usd",
+				"customer": "cus_K3ijK03LZW3Qbg",
+				"description": null,
+				"destination": null,
+				"dispute": null,
+				"disputed": false,
+				"failure_code": null,
+				"failure_message": null,
+				"fraud_details": {
+				},
+				"invoice": null,
+				"livemode": false,
+				"metadata": {
+				},
+				"on_behalf_of": null,
+				"order": null,
+				"outcome": {
+				"network_status": "approved_by_network",
+				"reason": null,
+				"risk_level": "normal",
+				"risk_score": 31,
+				"seller_message": "Payment complete.",
+				"type": "authorized"
+				},
+				"paid": true,
+				"payment_intent": "pi_3JPbIJKfgu58p9BH03FP53pm",
+				"payment_method": "pm_1JPbIYKfgu58p9BHA6f0Z8kS",
+				"payment_method_details": {
+				"card": {
+					"brand": "visa",
+					"checks": {
+					"address_line1_check": null,
+					"address_postal_code_check": "pass",
+					"cvc_check": "pass"
+					},
+					"country": "US",
+					"exp_month": 12,
+					"exp_year": 2025,
+					"fingerprint": "ApAd87Afto3qMo3g",
+					"funding": "credit",
+					"installments": null,
+					"last4": "4242",
+					"network": "visa",
+					"three_d_secure": null,
+					"wallet": null
+				},
+				"type": "card"
+				},
+				"receipt_email": null,
+				"receipt_number": null,
+				"receipt_url": "https://pay.stripe.com/receipts/acct_1JI1BxKfgu58p9BH/ch_3JPbIJKfgu58p9BH0YcLfpf5/rcpt_K3ikwGiPIOyvMKLuheQ08Q2ku0POxDE",
+				"refunded": false,
+				"refunds": {
+				"object": "list",
+				"data": [
+				],
+				"has_more": false,
+				"total_count": 0,
+				"url": "/v1/charges/ch_3JPbIJKfgu58p9BH0YcLfpf5/refunds"
+				},
+				"review": null,
+				"shipping": null,
+				"source": null,
+				"source_transfer": null,
+				"statement_descriptor": null,
+				"statement_descriptor_suffix": null,
+				"status": "succeeded",
+				"transfer_data": null,
+				"transfer_group": null
+			}
+			],
+			"has_more": false,
+			"total_count": 1,
+			"url": "/v1/charges?payment_intent=pi_3JPbIJKfgu58p9BH03FP53pm"
+		},
+		"client_secret": "pi_3JPbIJKfgu58p9BH03FP53pm_secret_48HGU9vPOMfNoANxvxaC0CG4p",
+		"confirmation_method": "automatic",
+		"created": 1629241327,
+		"currency": "usd",
+		"customer": "cus_K3ijK03LZW3Qbg",
+		"description": null,
+		"invoice": null,
+		"last_payment_error": null,
+		"livemode": false,
+		"metadata": {
+		},
+		"next_action": null,
+		"on_behalf_of": null,
+		"payment_method": "pm_1JPbIYKfgu58p9BHA6f0Z8kS",
+		"payment_method_options": {
+			"card": {
+			"installments": null,
+			"network": null,
+			"request_three_d_secure": "automatic"
+			}
+		},
+		"payment_method_types": [
+			"card"
+		],
+		"receipt_email": null,
+		"review": null,
+		"setup_future_usage": "off_session",
+		"shipping": null,
+		"source": null,
+		"statement_descriptor": null,
+		"statement_descriptor_suffix": null,
+		"status": "succeeded",
+		"transfer_data": null,
+		"transfer_group": null
+		}
+	},
+	"livemode": false,
+	"pending_webhooks": 1,
+	"request": {
+		"id": "req_YHdhxTLnQPjjZL",
+		"idempotency_key": null
+	},
+	"type": "payment_intent.succeeded"
+}`

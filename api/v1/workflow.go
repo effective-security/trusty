@@ -92,6 +92,11 @@ type OrgsResponse struct {
 	Orgs []Organization `json:"orgs"`
 }
 
+// OrgResponse returns an organization
+type OrgResponse struct {
+	Org Organization `json:"org"`
+}
+
 // OrgMembership provides Org membership information for a user
 type OrgMembership struct {
 	ID      string `json:"id"`

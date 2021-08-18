@@ -323,3 +323,36 @@ func DeleteOrg(c ctl.Control, p interface{}) error {
 
 	return nil
 }
+
+// GetOrgFlags defines flags for GetOrg command
+type GetOrgFlags struct {
+	OrgID *string
+}
+
+// GetOrg returns organization
+func GetOrg(c ctl.Control, p interface{}) error {
+	flags := p.(*GetOrgFlags)
+	cl := c.(*cli.Cli)
+
+	client, err := cl.HTTPClient()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	res, err := client.Org(context.Background(), cli.String(flags.OrgID))
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	ctl.WriteJSON(c.Writer(), res)
+	/*
+		if cli.IsJSON() {
+			ctl.WriteJSON(c.Writer(), res)
+			fmt.Fprint(c.Writer(), "\n")
+		} else {
+			print.Org(c.Writer(), res.List)
+		}
+	*/
+
+	return nil
+}

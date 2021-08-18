@@ -72,20 +72,23 @@ Commands:
   org info --token=TOKEN
     info organization request
 
-  org validate --org=ORG
+  org validate --id=ID
     approve organization validation
 
-  org subscribe --org=ORG --product=PRODUCT
+  org subscribe --id=ID --product=PRODUCT
     subscribe to org
 
-  org keys --org=ORG
+  org keys --id=ID
     list API keys
 
-  org members --org=ORG
+  org members --id=ID
     list members
 
-  org delete --org=ORG
+  org delete --id=ID
     delete organization
+
+  org get --id=ID
+    show the organization
 
   org pay --stripe-key=STRIPE-KEY --client-secret=CLIENT-SECRET [<flags>]
     pay for org
@@ -101,7 +104,6 @@ Commands:
 
   acme order --org=ORG --spc=SPC
     order certificate
-
 ```
 
 For testing, the caller has to specify a trusted root certificate by providing
@@ -160,7 +162,7 @@ bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem or
 ## Subscribe
 
 ```.sh
-bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem org subscribe --org 82923411415760996 --product prod_K3K7AZCkE3E0nF
+bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem org subscribe --id 82923411415760996 --product prod_K3K7AZCkE3E0nF
 
 {
         "client_secret": "pi_3JPe0NKfgu58p9BH1Lu3Xqrr_secret_bYkh64vZLXHubuueYobMvYKnS",
@@ -187,7 +189,7 @@ This will open a browser page where you can choose to enter payment method (card
 ## Submit for Organization validation
 
 ```.sh
-bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem org validate --org 82923411415760996
+bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem org validate --id 82923411415760996
 {
         "approver": {
                 "business_name": "Low Latency Communications, LLC",
@@ -260,7 +262,7 @@ bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem or
 ## Get API Keys
 
 ```.sh
-bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem org keys --org 82936541768319076                  
+bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem org keys --id 82936541768319076                  
 {
         "keys": [
                 {
@@ -281,7 +283,7 @@ bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem or
 ## Get Org members
 
 ```.sh
-bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem org members --org 82936541768319076                  
+bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem org members --id 82936541768319076                  
 {
     "members": [
         {

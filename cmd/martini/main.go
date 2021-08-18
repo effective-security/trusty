@@ -109,7 +109,7 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		Action(cli.RegisterAction(martini.FccContact, fccContactFlags))
 	fccContactFlags.FRN = cmdFccContact.Flag("frn", "FRN to query").Required().String()
 
-	// org register|validate|approve|subscribe|keys|members|delete
+	// org register|validate|approve|subscribe|keys|members|delete|get
 	cmdOrgs := app.Command("org", "Orgs operations").
 		PreAction(cli.PopulateControl)
 
@@ -143,28 +143,33 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	orgValidateFlags := new(martini.ValidateFlags)
 	cmdValidateOrg := cmdOrgs.Command("validate", "approve organization validation").
 		Action(cli.RegisterAction(martini.ValidateOrg, orgValidateFlags))
-	orgValidateFlags.OrgID = cmdValidateOrg.Flag("org", "organization ID").Required().String()
+	orgValidateFlags.OrgID = cmdValidateOrg.Flag("id", "organization ID").Required().String()
 
 	subscribeFlags := new(martini.CreateSubscriptionFlags)
 	cmdSubscribe := cmdOrgs.Command("subscribe", "subscribe to org").
 		Action(cli.RegisterAction(martini.CreateSubscription, subscribeFlags))
-	subscribeFlags.OrgID = cmdSubscribe.Flag("org", "org id").Required().String()
+	subscribeFlags.OrgID = cmdSubscribe.Flag("id", "organization ID").Required().String()
 	subscribeFlags.ProductID = cmdSubscribe.Flag("product", "product id to subscribe to").Required().String()
 
 	orgAPIKeysFlags := new(martini.APIKeysFlags)
 	cmdOrgAPIKeys := cmdOrgs.Command("keys", "list API keys").
 		Action(cli.RegisterAction(martini.APIKeys, orgAPIKeysFlags))
-	orgAPIKeysFlags.OrgID = cmdOrgAPIKeys.Flag("org", "organization ID").Required().String()
+	orgAPIKeysFlags.OrgID = cmdOrgAPIKeys.Flag("id", "organization ID").Required().String()
 
 	orgMembersFlags := new(martini.OrgMembersFlags)
 	cmdOrgMembers := cmdOrgs.Command("members", "list members").
 		Action(cli.RegisterAction(martini.OrgMembers, orgMembersFlags))
-	orgMembersFlags.OrgID = cmdOrgMembers.Flag("org", "organization ID").Required().String()
+	orgMembersFlags.OrgID = cmdOrgMembers.Flag("id", "organization ID").Required().String()
 
 	orgDeleteFlags := new(martini.DeleteOrgFlags)
 	cmdOrgDelete := cmdOrgs.Command("delete", "delete organization").
 		Action(cli.RegisterAction(martini.DeleteOrg, orgDeleteFlags))
-	orgDeleteFlags.OrgID = cmdOrgDelete.Flag("org", "organization ID").Required().String()
+	orgDeleteFlags.OrgID = cmdOrgDelete.Flag("id", "organization ID").Required().String()
+
+	orgGetFlags := new(martini.GetOrgFlags)
+	cmdOrgGet := cmdOrgs.Command("get", "show the organization").
+		Action(cli.RegisterAction(martini.GetOrg, orgGetFlags))
+	orgGetFlags.OrgID = cmdOrgGet.Flag("id", "organization ID").Required().String()
 
 	orgPayFlags := new(martini.PayOrgFlags)
 	cmdOrgPay := cmdOrgs.Command("pay", "pay for org").
