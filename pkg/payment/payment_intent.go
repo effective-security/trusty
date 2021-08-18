@@ -8,15 +8,18 @@ import (
 type Intent struct {
 	// ID of the payment intent object
 	ID string
-	// PaymentMethod is the payment method
-	PaymentMethod Method
+	// ClientSecret of the subscription
+	ClientSecret string
+	// Status of the subscription
+	Status string
 }
 
 // NewPaymentIntent payment intent constructor
 func NewPaymentIntent(p *stripe.PaymentIntent) *Intent {
 
 	return &Intent{
-		ID:            p.ID,
-		PaymentMethod: *NewPaymentMethod(p.PaymentMethod),
+		ID:           p.ID,
+		ClientSecret: p.ClientSecret,
+		Status:       string(p.Status),
 	}
 }

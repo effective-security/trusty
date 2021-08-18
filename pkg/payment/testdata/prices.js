@@ -8,7 +8,7 @@ const createSubscription = (orgID,productID) => {
     },
     body: JSON.stringify({
       org_id: orgID,
-      product_id: "prod_K2OpdTIt5JQxoW",
+      product_id: "prod_K3iL1beZmejhvG",
     }),
   })
     .then((response) => response.json())
