@@ -20,5 +20,9 @@ VOLUME ["/var/trusty/certs", "/var/trusty/logs", "/var/trusty/audit"]
 
 EXPOSE 7880 7891 7892 7893
 
+RUN groupadd -g 1000 -o nonroot
+RUN useradd -r -u 1000 -g nonroot nonroot
+USER nonroot:nonroot
+
 # Define default command.
 CMD ["$TRUSTY_DIR/bin/trusty"]
