@@ -2,6 +2,8 @@ package model
 
 import (
 	"crypto/x509"
+	"encoding/base64"
+	"math/big"
 	"strconv"
 	"time"
 
@@ -50,6 +52,23 @@ func (r *Certificate) ToPB() *pb.Certificate {
 		IssuersPem:   r.IssuersPem,
 		Locations:    r.Locations,
 	}
+}
+
+// FileName returns  a generated file name for publisher,
+// in {IKID[:4] / Base64(sn[:9])} format
+func (r *Certificate) FileName() string {
+	sn := r.SerialNumber[:12]
+	n := new(big.Int)
+	n, ok := n.SetString(r.SerialNumber, 10)
+	if ok {
+		b := n.Bytes()
+		l := len(b)
+		if l > 9 {
+			l = 9
+		}
+		sn = base64.RawURLEncoding.EncodeToString(b[:l])
+	}
+	return r.IKID[:4] + "/" + sn
 }
 
 // ToDTO returns ToDTO

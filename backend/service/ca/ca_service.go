@@ -5,6 +5,7 @@ import (
 
 	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/authority"
+	"github.com/ekspand/trusty/internal/config"
 	"github.com/ekspand/trusty/internal/db/cadb"
 	"github.com/ekspand/trusty/internal/db/cadb/model"
 	"github.com/ekspand/trusty/pkg/certpublisher"
@@ -28,6 +29,7 @@ type Service struct {
 	db        cadb.CaDb
 	publisher certpublisher.Publisher
 	scheduler tasks.Scheduler
+	cfg       *config.Configuration
 }
 
 // Factory returns a factory of the service
@@ -36,8 +38,9 @@ func Factory(server *gserver.Server) interface{} {
 		logger.Panic("status.Factory: invalid parameter")
 	}
 
-	return func(ca *authority.Authority, db cadb.CaDb, scheduler tasks.Scheduler, publisher certpublisher.Publisher) {
+	return func(cfg *config.Configuration, ca *authority.Authority, db cadb.CaDb, scheduler tasks.Scheduler, publisher certpublisher.Publisher) {
 		svc := &Service{
+			cfg:       cfg,
 			server:    server,
 			ca:        ca,
 			db:        db,

@@ -114,6 +114,7 @@ ra:
   public_roots:
     - ${TRUSTY_CONFIG_DIR}/roots/martini_root_ca.pem
   publisher:
+    base_url: https://mrtsec.io
     # use gs:// for GCP, or file path 
     cert_bucket: /tmp/trusty/martini-dev-certs
     crl_bucket: /tmp/trusty/martini-dev-crls

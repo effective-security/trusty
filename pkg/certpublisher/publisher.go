@@ -2,9 +2,7 @@ package certpublisher
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
-	"math/big"
 
 	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/pkg/storage"
@@ -17,7 +15,7 @@ var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "certpublish
 // Publisher interface
 type Publisher interface {
 	// PublishCertificate publishes issued cert
-	PublishCertificate(context.Context, *pb.Certificate) (string, error)
+	PublishCertificate(context.Context, *pb.Certificate, string) (string, error)
 	// PublishCRL publishes issued CRL
 	PublishCRL(context.Context, *pb.Crl) (string, error)
 }
@@ -33,23 +31,16 @@ func NewPublisher(cfg *Config) (Publisher, error) {
 }
 
 // PublishCertificate publishes issued cert
-func (p *publisher) PublishCertificate(ctx context.Context, cert *pb.Certificate) (string, error) {
-	sn := cert.SerialNumber[:12]
-	n := new(big.Int)
-	n, ok := n.SetString(cert.SerialNumber, 10)
-	if ok {
-		sn = base64.RawURLEncoding.EncodeToString(n.Bytes()[:9])
-	}
+func (p *publisher) PublishCertificate(ctx context.Context, cert *pb.Certificate, filename string) (string, error) {
+	location := fmt.Sprintf("%s/%s", p.cfg.CertsBucket, filename)
 
-	fileName := fmt.Sprintf("%s/%s/%s", p.cfg.CertsBucket, cert.Ikid[:4], sn)
+	logger.KV(xlog.INFO, "location", location)
 
-	logger.KV(xlog.INFO, "location", fileName)
-
-	_, err := storage.WriteFile(ctx, fileName, []byte(cert.Pem))
+	_, err := storage.WriteFile(ctx, location, []byte(cert.Pem))
 	if err != nil {
-		return "", errors.Annotatef(err, "unable to write file to: "+fileName)
+		return "", errors.Annotatef(err, "unable to write file to: "+location)
 	}
-	return fileName, nil
+	return location, nil
 }
 
 // PublishCRL publishes issued CRL
