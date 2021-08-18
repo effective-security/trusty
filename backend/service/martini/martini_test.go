@@ -11,6 +11,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -666,6 +667,200 @@ func TestRegisterOrgFullFlow(t *testing.T) {
 		svc.ValidateOrgHandler()(w, r, nil)
 		assert.Equal(t, http.StatusInternalServerError, w.Code)
 	}
+}
+
+func TestPollingPaymentStatus_Successful(t *testing.T) {
+	ctx := context.Background()
+	svc := trustyServer.Service(martini.ServiceName).(*martini.Service)
+	// TODO: mock emailer
+	svc.DisableEmail()
+	h := svc.RegisterOrgHandler()
+
+	dbProv := svc.Db()
+	old, err := dbProv.GetOrgByExternalID(ctx, v1.ProviderMartini, "0123456")
+	if err == nil {
+		dbProv.RemoveOrg(ctx, old.ID)
+	}
+
+	sub, err := dbProv.GetSubscriptionByExternalID(ctx, "pi_1JF0naCWsBdfZPJZe0UeNrDw")
+	if err == nil {
+		dbProv.RemoveSubscription(ctx, sub.ID)
+	}
+
+	user, err := dbProv.LoginUser(ctx, &model.User{
+		Email:      "denis+test@ekspand.com",
+		Name:       "test user",
+		Login:      "denis+test@ekspand.com",
+		ExternalID: "123456",
+		Provider:   v1.ProviderGoogle,
+	})
+	require.NoError(t, err)
+
+	httpReq := &v1.RegisterOrgRequest{
+		FilerID: "123456",
+	}
+
+	js, err := json.Marshal(httpReq)
+	require.NoError(t, err)
+
+	// Register
+	r, err := http.NewRequest(http.MethodPost, v1.PathForMartiniRegisterOrg, bytes.NewReader(js))
+	require.NoError(t, err)
+	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+	w := httptest.NewRecorder()
+	h(w, r, nil)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var res v1.OrgResponse
+	require.NoError(t, marshal.Decode(w.Body, &res))
+	assert.Equal(t, v1.OrgStatusPaymentPending, res.Org.Status)
+
+	orgID, _ := db.ID(res.Org.ID)
+	defer dbProv.RemoveOrg(ctx, orgID)
+
+	sub, err = dbProv.CreateSubscription(ctx, &model.Subscription{
+		ID:              orgID,
+		ExternalID:      "pi_1JF0naCWsBdfZPJZe0UeNrDw",
+		UserID:          user.ID,
+		CustomerID:      "123",
+		PriceID:         "123",
+		PriceAmount:     uint64(10),
+		PriceCurrency:   "usd",
+		PaymentMethodID: "123",
+		CreatedAt:       time.Now().UTC(),
+		ExpiresAt:       time.Now().UTC().AddDate(2, 0, 0),
+		LastPaidAt:      time.Now().UTC(),
+		Status:          "payment_processing",
+	})
+	require.NoError(t, err)
+
+	org, err := dbProv.GetOrg(ctx, orgID)
+	require.NoError(t, err)
+
+	org.Status = v1.OrgStatusPaymentProcessing
+	_, err = dbProv.UpdateOrgStatus(ctx, org)
+	require.NoError(t, err)
+
+	doneCh := make(chan bool, 1)
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		doneCh, err = svc.OnSubscriptionCreated(sub)
+		require.NoError(t, err)
+
+		select {
+		case done := <-doneCh:
+			require.True(t, done)
+			break
+		case <-time.After(6 * time.Second):
+			require.Fail(t, "test must finish within the timeout specified in config")
+			break
+		}
+	}()
+	wg.Wait()
+
+	sub, err = dbProv.GetSubscription(ctx, sub.ID, user.ID)
+	require.NoError(t, err)
+	require.Equal(t, "succeeded", sub.Status)
+
+	org, err = dbProv.GetOrg(ctx, sub.ID)
+	require.NoError(t, err)
+	require.Equal(t, "paid", org.Status)
+}
+
+func TestPollingPaymentStatus_TimeoutExceeded(t *testing.T) {
+	ctx := context.Background()
+	svc := trustyServer.Service(martini.ServiceName).(*martini.Service)
+	// TODO: mock emailer
+	svc.DisableEmail()
+	h := svc.RegisterOrgHandler()
+
+	dbProv := svc.Db()
+	old, err := dbProv.GetOrgByExternalID(ctx, v1.ProviderMartini, "0123456")
+	if err == nil {
+		dbProv.RemoveOrg(ctx, old.ID)
+	}
+
+	sub, err := dbProv.GetSubscriptionByExternalID(ctx, "pi_1JF0naCWsBdfZPJZe0UeNrDw")
+	if err == nil {
+		dbProv.RemoveSubscription(ctx, sub.ID)
+	}
+
+	user, err := dbProv.LoginUser(ctx, &model.User{
+		Email:      "denis+test@ekspand.com",
+		Name:       "test user",
+		Login:      "denis+test@ekspand.com",
+		ExternalID: "123456",
+		Provider:   v1.ProviderGoogle,
+	})
+	require.NoError(t, err)
+
+	httpReq := &v1.RegisterOrgRequest{
+		FilerID: "123456",
+	}
+
+	js, err := json.Marshal(httpReq)
+	require.NoError(t, err)
+
+	// Register
+	r, err := http.NewRequest(http.MethodPost, v1.PathForMartiniRegisterOrg, bytes.NewReader(js))
+	require.NoError(t, err)
+	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+	w := httptest.NewRecorder()
+	h(w, r, nil)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var res v1.OrgResponse
+	require.NoError(t, marshal.Decode(w.Body, &res))
+	assert.Equal(t, v1.OrgStatusPaymentPending, res.Org.Status)
+
+	orgID, _ := db.ID(res.Org.ID)
+	defer dbProv.RemoveOrg(ctx, orgID)
+
+	sub, err = dbProv.CreateSubscription(ctx, &model.Subscription{
+		ID:              orgID,
+		ExternalID:      "pi_1JF0naCWsBdfZPJZe0UeNrDw",
+		UserID:          user.ID,
+		CustomerID:      "123",
+		PriceID:         "123",
+		PriceAmount:     uint64(10),
+		PriceCurrency:   "usd",
+		PaymentMethodID: "123",
+		CreatedAt:       time.Now().UTC(),
+		ExpiresAt:       time.Now().UTC().AddDate(2, 0, 0),
+		LastPaidAt:      time.Now().UTC(),
+		Status:          "payment_processing",
+	})
+	require.NoError(t, err)
+
+	doneCh := make(chan bool, 1)
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		doneCh, err = svc.OnSubscriptionCreated(sub)
+		require.NoError(t, err)
+
+		select {
+		case done := <-doneCh:
+			// context timeout exceeded
+			require.False(t, done)
+		case <-time.After(6 * time.Second):
+			require.Fail(t, "test must finish within the timeout specified in config")
+		}
+	}()
+	wg.Wait()
+
+	sub, err = dbProv.GetSubscription(ctx, sub.ID, user.ID)
+	require.NoError(t, err)
+	require.Equal(t, "payment_processing", sub.Status)
+
+	org, err := dbProv.GetOrg(ctx, sub.ID)
+	require.NoError(t, err)
+	require.Equal(t, "payment_pending", org.Status)
 }
 
 var stripeSamplePaymentIntent = `{

@@ -280,7 +280,10 @@ func (s *Service) createSubscription(
 		return nil, "", errors.Annotatef(err, "unable to create a subscription in db for id %d, customer %s, price %s", org.ID, customer.ID, product.PriceID)
 	}
 
-	s.onSubscriptionCreated(subscriptionModel)
+	_, err = s.OnSubscriptionCreated(subscriptionModel)
+	if err != nil {
+		return nil, "", errors.Annotatef(err, "unable to poll for payment status id %d", subscriptionModel.ID)
+	}
 
 	return subscriptionModel, paymentIntent.ClientSecret, nil
 }
@@ -333,11 +336,14 @@ func (s *Service) handlePaymentIntentEvent(
 	return nil
 }
 
-// onSubscriptionCreated is called when a subscription is created
+// OnSubscriptionCreated is called when a subscription is created
 // it checks and updates payment status
-func (s *Service) onSubscriptionCreated(
+// doneCh specifies whether payment status was updated successfully
+func (s *Service) OnSubscriptionCreated(
 	sub *model.Subscription,
-) error {
+) (chan bool, error) {
+	doneCh := make(chan bool, 1)
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(s.cfg.Martini.PollPaymentStatusTimeout))
 
 	p := poller.New(nil,
@@ -370,10 +376,12 @@ func (s *Service) onSubscriptionCreated(
 			}
 			if org.Status == v1.OrgStatusPaid {
 				cancel()
+				doneCh <- true
 			}
-			return nil, nil
+			return org.Status, nil
 		},
 		func(err error) {
+			doneCh <- false
 			logger.KV(xlog.ERROR,
 				"sub_id", sub.ID,
 				"sub_external_id", sub.ExternalID,
@@ -382,7 +390,7 @@ func (s *Service) onSubscriptionCreated(
 		})
 	p.Start(ctx, time.Duration(s.cfg.Martini.PollPaymentStatusInterval))
 
-	return nil
+	return doneCh, nil
 }
 
 // subscriptionExpiryPeriodFromProductName derives subscriptions expiry

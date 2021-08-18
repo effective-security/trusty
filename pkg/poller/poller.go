@@ -46,7 +46,8 @@ func (p *Poller) Start(ctx context.Context, period time.Duration) {
 				ticker.Stop()
 				return
 			case <-ticker.C:
-				ctx2, cancel := context.WithTimeout(ctx, period)
+				deadline, _ := ctx.Deadline()
+				ctx2, cancel := context.WithTimeout(ctx, time.Until(deadline))
 				p.Poll(ctx2)
 				cancel()
 			}

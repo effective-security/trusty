@@ -212,23 +212,6 @@ func TestSubscription(t *testing.T) {
 	_, err = provider.CreateSubscription(ctx, m3)
 	require.NoError(t, err)
 
-	userID2, err := provider.NextID()
-	require.NoError(t, err)
-	_, err = provider.CreateSubscription(ctx, &model.Subscription{
-		ID:              o1.ID,
-		ExternalID:      certutil.RandomString(32),
-		UserID:          userID2,
-		CustomerID:      customerID,
-		PriceID:         priceID,
-		PriceAmount:     12,
-		PriceCurrency:   "USD",
-		PaymentMethodID: paymentMethodID,
-		CreatedAt:       now.UTC(),
-		ExpiresAt:       now.UTC().AddDate(2, 0, 0),
-		Status:          "incomplete",
-	})
-	require.NoError(t, err)
-
 	userID3, err := provider.NextID()
 	require.NoError(t, err)
 	_, err = provider.CreateSubscription(ctx, &model.Subscription{
@@ -253,4 +236,26 @@ func TestSubscription(t *testing.T) {
 	require.Equal(t, now.UTC().Unix(), subs[0].CreatedAt.Unix())
 	require.Equal(t, now.UTC().Unix(), subs[1].CreatedAt.Unix())
 	require.Equal(t, now.UTC().Unix(), subs[2].CreatedAt.Unix())
+
+	userID2, err := provider.NextID()
+	require.NoError(t, err)
+	subUser2, err := provider.CreateSubscription(ctx, &model.Subscription{
+		ID:              o1.ID,
+		ExternalID:      certutil.RandomString(32),
+		UserID:          userID2,
+		CustomerID:      customerID,
+		PriceID:         priceID,
+		PriceAmount:     12,
+		PriceCurrency:   "USD",
+		PaymentMethodID: paymentMethodID,
+		CreatedAt:       now.UTC(),
+		ExpiresAt:       now.UTC().AddDate(2, 0, 0),
+		Status:          "incomplete",
+	})
+	require.NoError(t, err)
+
+	err = provider.RemoveSubscription(ctx, subUser2.ID)
+	require.NoError(t, err)
+	_, err = provider.GetSubscription(ctx, subUser2.ID, userID2)
+	require.Error(t, err)
 }
