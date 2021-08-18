@@ -261,8 +261,6 @@ github.com/go-openapi/swag v0.19.2/go.mod h1:POnQmlKehdgb5mhVOsnJFsivZCEZ/vjK9gh
 github.com/go-openapi/swag v0.19.5/go.mod h1:POnQmlKehdgb5mhVOsnJFsivZCEZ/vjK9gh66Z9tfKk=
 github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba h1:I45RdP92/rYpHoHrHBGRKl1Sp1xw5VFNUQJWHX2Tz/c=
 github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba/go.mod h1:UZQo6+h5O8HW6TPt7HaXd4Nc234FYx5aFvw9RKL2IUk=
-github.com/go-phorce/dolly v0.8.3-0.20210814000628-80a77d105e81 h1:jgsuQ1RPnWb7Xio2zlC2Jswfe2+BYEHZ713fm75YERg=
-github.com/go-phorce/dolly v0.8.3-0.20210814000628-80a77d105e81/go.mod h1:UW9/DzsdVcxah4MpLK5oHXfqMPoqN7gd/8LNvqZ97Zg=
 github.com/go-phorce/dolly v0.8.3-0.20210817024110-08faa34b2113 h1:LMLrGulo57MD211U8a7HrcTWRPjfPjRsOo2WO2TLGAM=
 github.com/go-phorce/dolly v0.8.3-0.20210817024110-08faa34b2113/go.mod h1:UW9/DzsdVcxah4MpLK5oHXfqMPoqN7gd/8LNvqZ97Zg=
 github.com/go-playground/locales v0.12.1/go.mod h1:IUMDtCfWo/w/mtMfIE/IG2K+Ey3ygWanZIBtBW0W2TM=

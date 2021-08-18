@@ -61,10 +61,10 @@ func (s *Service) CreateSubsciptionHandler() rest.Handle {
 			return
 		}
 
-		org.Status = v1.OrgStatusPaymentPending
+		org.Status = v1.OrgStatusPaymentProcessing
 		org, err = s.db.UpdateOrgStatus(ctx, org)
 		if err != nil {
-			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to create subscription for org %d", org.ID).WithCause(err))
+			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to create subscription, status updated failed for org %d", org.ID).WithCause(err))
 			return
 		}
 
@@ -220,7 +220,7 @@ func (s *Service) StripeWebhookHandler() rest.Handle {
 
 		paymentIntent, err := s.paymentProv.HandleWebhook(b, r.Header.Get("Stripe-Signature"))
 		if err != nil {
-			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("invalid request").WithCause(err))
+			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("webhook: invalid request").WithCause(err))
 			return
 		}
 
@@ -228,13 +228,13 @@ func (s *Service) StripeWebhookHandler() rest.Handle {
 		if paymentIntent != nil {
 			sub, err := s.db.GetSubscriptionByExternalID(ctx, paymentIntent.ID)
 			if err != nil {
-				marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to handle webhook call").WithCause(err))
+				marshal.WriteJSON(w, r, httperror.WithUnexpected("webhook: unable to find subscription: %s", paymentIntent.ID).WithCause(err))
 				return
 			}
 
 			org, err := s.db.GetOrg(ctx, sub.ID)
 			if err != nil {
-				marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to handle webhook call").WithCause(err))
+				marshal.WriteJSON(w, r, httperror.WithUnexpected("webhook: unable to get org by subscription: %d", sub.ID).WithCause(err))
 				return
 			}
 
@@ -244,7 +244,7 @@ func (s *Service) StripeWebhookHandler() rest.Handle {
 
 			_, _, err = s.db.UpdateSubscriptionAndOrgStatus(ctx, sub, org)
 			if err != nil {
-				marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to handle webhook call").WithCause(err))
+				marshal.WriteJSON(w, r, httperror.WithUnexpected("webhook: unable to update org %d", org.ID).WithCause(err))
 				return
 			}
 

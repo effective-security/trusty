@@ -23,6 +23,8 @@ const (
 	OrgStatusUnknown = "unknown"
 	// OrgStatusPaymentPending is assigned after the Org is registered and the client has to pay
 	OrgStatusPaymentPending = "payment_pending"
+	// OrgStatusPaymentProcessing is assigned after the subscription is created and payment posted
+	OrgStatusPaymentProcessing = "payment_processing"
 	// OrgStatusPaid specifies that the payment received
 	OrgStatusPaid = "paid"
 	// OrgStatusValidationPending specifies that validation request has been sent
