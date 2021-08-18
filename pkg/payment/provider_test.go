@@ -117,7 +117,7 @@ func Test_CfgApiKey_Empty(t *testing.T) {
 	_, err = prov.CreatePaymentIntent("id", int64(10))
 	require.Error(t, err)
 
-	_, err = prov.CreateSubscription("id", "id2")
+	_, err = prov.GetPaymentIntent("id")
 	require.Error(t, err)
 
 	_, err = prov.CancelSubscription("id")
@@ -152,6 +152,17 @@ func Test_CreatePaymentIntent(t *testing.T) {
 	require.NotEmpty(t, paymentMethod.ID)
 
 	pi, err := prov.CreatePaymentIntent(c.ID, 100)
+	require.NoError(t, err)
+	require.NotEmpty(t, pi.ID)
+}
+
+func Test_GetPaymentIntent(t *testing.T) {
+	os.Setenv("TRUSTY_STRIPE_API_KEY", "sk_test_123")
+	os.Setenv("TRUSTY_STRIPE_WEBHOOK_SECRET", "6789")
+	prov, err := NewProvider("testdata/stripe.yaml")
+	require.NoError(t, err)
+
+	pi, err := prov.GetPaymentIntent("pi_1JF0naCWsBdfZPJZe0UeNrDw")
 	require.NoError(t, err)
 	require.NotEmpty(t, pi.ID)
 }
