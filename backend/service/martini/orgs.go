@@ -140,7 +140,7 @@ func (s *Service) GetOrgAPIKeysHandler() rest.Handle {
 	}
 }
 
-// ApproveOrgHandler validates Org registration
+// ApproveOrgHandler approves Org registration
 func (s *Service) ApproveOrgHandler() rest.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
 		req := new(v1.ApproveOrgRequest)
@@ -181,48 +181,51 @@ func (s *Service) ApproveOrgHandler() rest.Handle {
 
 		case "approve":
 
+			if org.Status != v1.OrgStatusValidationPending {
+				marshal.WriteJSON(w, r, httperror.WithInvalidRequest("organization status: %s", org.Status).WithCause(err))
+				return
+			}
+
 			_, err := s.db.UseApprovalToken(ctx, req.Token, req.Code)
 			if err != nil {
 				marshal.WriteJSON(w, r, httperror.WithInvalidRequest("the code is not valid or already validated").WithCause(err))
 				return
 			}
 
-			if org.Status == v1.OrgStatusValidationPending {
-
-				org.Status = v1.OrgStatusApproved
-				org, err = s.db.UpdateOrgStatus(ctx, org)
-				if err != nil {
-					marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to update status").WithCause(err))
-					return
-				}
-				go func() {
-					err := s.sendEmail(org.Email,
-						"Organization approved",
-						orgApprovedTemplate,
-						org)
-					if err != nil {
-						logger.KV(xlog.ERROR,
-							"email", org.Email,
-							"err", errors.Details(err))
-					}
-				}()
-
-				now := time.Now().UTC()
-				_, err = s.db.CreateAPIKey(ctx, &model.APIKey{
-					OrgID:      org.ID,
-					Key:        model.GenerateAPIKey(),
-					Enrollemnt: true,
-					//Management: true,
-					//Billing: true,
-					CreatedAt: now,
-					ExpiresAt: org.ExpiresAt,
-				})
+			org.Status = v1.OrgStatusApproved
+			org, err = s.db.UpdateOrgStatus(ctx, org)
+			if err != nil {
+				marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to update status").WithCause(err))
+				return
+			}
+			go func() {
+				err := s.sendEmail(org.Email,
+					"Organization approved",
+					orgApprovedTemplate,
+					org)
 				if err != nil {
 					logger.KV(xlog.ERROR,
 						"email", org.Email,
 						"err", errors.Details(err))
 				}
+			}()
+
+			now := time.Now().UTC()
+			_, err = s.db.CreateAPIKey(ctx, &model.APIKey{
+				OrgID:      org.ID,
+				Key:        model.GenerateAPIKey(),
+				Enrollemnt: true,
+				//Management: true,
+				//Billing: true,
+				CreatedAt: now,
+				ExpiresAt: org.ExpiresAt,
+			})
+			if err != nil {
+				logger.KV(xlog.ERROR,
+					"email", org.Email,
+					"err", errors.Details(err))
 			}
+
 		default:
 			marshal.WriteJSON(w, r, httperror.WithInvalidParam("invalid action parameter"))
 			return
