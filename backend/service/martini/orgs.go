@@ -71,6 +71,29 @@ func (s *Service) GetOrgsHandler() rest.Handle {
 	}
 }
 
+// GetOrgHandler returns the orgs
+func (s *Service) GetOrgHandler() rest.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
+		orgID, err := db.ID(p.ByName("org_id"))
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithInvalidParam("invalid org_id").WithCause(err))
+			return
+		}
+
+		org, err := s.db.GetOrg(r.Context(), orgID)
+		if err != nil {
+			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to get orgs: %s", err.Error()).WithCause(err))
+			return
+		}
+
+		res := v1.OrgResponse{
+			Org: *org.ToDto(),
+		}
+
+		marshal.WriteJSON(w, r, res)
+	}
+}
+
 // GetOrgMembersHandler returns org members
 func (s *Service) GetOrgMembersHandler() rest.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
@@ -370,7 +393,7 @@ func (s *Service) registerOrg(ctx context.Context, filerID string, requestor *mo
 		Provider:     v1.ProviderMartini,
 		Login:        filer.FilerIDInfo.FRN,
 		Name:         filer.FilerIDInfo.LegalName,
-		Email:        contactRes.ContactEmail,
+		Email:        requestor.Email,
 		BillingEmail: requestor.Email,
 		Company:      filer.FilerIDInfo.LegalName,
 		CreatedAt:    now,

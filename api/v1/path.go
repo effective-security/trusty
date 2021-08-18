@@ -157,31 +157,37 @@ const (
 	//
 	// Verbs: POST
 	// Response: v1.RegisterOrgResponse
-	PathForMartiniRegisterOrg = "/v1/ms/register_org"
+	PathForMartiniRegisterOrg = "/v1/ms/orgs/register"
 
 	// PathForMartiniValidateOrg sends Org validation request to Approver
 	//
 	// Verbs: POST
 	// Response: v1.OrgResponse
-	PathForMartiniValidateOrg = "/v1/ms/validate_org"
+	PathForMartiniValidateOrg = "/v1/ms/orgs/validate"
 
 	// PathForMartiniApproveOrg provides Org approval
 	//
 	// Verbs: POST
 	// Response: v1.OrgResponse
-	PathForMartiniApproveOrg = "/v1/ms/approve_org"
+	PathForMartiniApproveOrg = "/v1/ms/orgs/approve"
 
 	// PathForMartiniDeleteOrg provides Org deletion
 	//
 	// Verbs: POST
 	// Response: v1.OrgResponse
-	PathForMartiniDeleteOrg = "/v1/ms/delete_org"
+	PathForMartiniDeleteOrg = "/v1/ms/orgs/delete"
 
 	// PathForMartiniOrgs provides orgs the user belongs to
 	//
 	// Verbs: GET
 	// Response: v1.OrgsResponse
 	PathForMartiniOrgs = "/v1/ms/orgs"
+
+	// PathForMartiniOrgByID provides org response
+	//
+	// Verbs: GET
+	// Response: v1.OrgsResponse
+	PathForMartiniOrgByID = "/v1/ms/orgs/:org_id"
 
 	// PathForMartiniOrgMembers provides orgs the user belongs to
 	//

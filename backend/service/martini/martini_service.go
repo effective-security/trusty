@@ -74,14 +74,15 @@ func (s *Service) DisableEmail() {
 // RegisterRoute adds the Status API endpoints to the overall URL router
 func (s *Service) RegisterRoute(r rest.Router) {
 	r.GET(v1.PathForMartiniSearchCorps, s.SearchCorpsHandler())
-	r.GET(v1.PathForMartiniOrgs, s.GetOrgsHandler())
-	r.GET(v1.PathForMartiniOrgMembers, s.GetOrgMembersHandler())
 	r.GET(v1.PathForMartiniCerts, s.GetCertsHandler())
+	r.GET(v1.PathForMartiniOrgMembers, s.GetOrgMembersHandler())
 	r.GET(v1.PathForMartiniOrgAPIKeys, s.GetOrgAPIKeysHandler())
 	r.POST(v1.PathForMartiniRegisterOrg, s.RegisterOrgHandler())
 	r.POST(v1.PathForMartiniApproveOrg, s.ApproveOrgHandler())
 	r.POST(v1.PathForMartiniValidateOrg, s.ValidateOrgHandler())
 	r.POST(v1.PathForMartiniDeleteOrg, s.DeleteOrgHandler())
+	r.GET(v1.PathForMartiniOrgs, s.GetOrgsHandler())
+	r.GET(v1.PathForMartiniOrgByID, s.GetOrgHandler())
 
 	r.POST(v1.PathForMartiniCreateSubscription, s.CreateSubsciptionHandler())
 	r.POST(v1.PathForMartiniCancelSubscription, s.CancelSubsciptionHandler())

@@ -167,3 +167,13 @@ func (s *testSuite) TestPayOrg() {
 	err := s.Run(martini.PayOrg, &flags)
 	s.NoError(err)
 }
+
+func (s *testSuite) TestGetOrg() {
+	org := "86328843001921862"
+	flags := martini.GetOrgFlags{
+		OrgID: &org,
+	}
+	err := s.Run(martini.GetOrg, &flags)
+	s.NoError(err)
+	s.HasText(`"id": "86328843001921862",`)
+}

@@ -49,11 +49,6 @@ type ApproveOrgRequest struct {
 	Action string `json:"action"`
 }
 
-// OrgResponse returns Organization
-type OrgResponse struct {
-	Org Organization `json:"org"`
-}
-
 // OrgMembersResponse returns Orgs members
 type OrgMembersResponse struct {
 	Members []*OrgMemberInfo `json:"members"`
