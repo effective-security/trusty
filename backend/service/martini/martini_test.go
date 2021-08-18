@@ -655,7 +655,7 @@ func TestRegisterOrgFullFlow(t *testing.T) {
 
 	org, err := dbProv.GetOrg(ctx, subID)
 	require.NoError(t, err)
-	require.Equal(t, v1.OrgStatusPaymentPending, org.Status)
+	require.Equal(t, v1.OrgStatusPaymentProcessing, org.Status)
 
 	// process payment
 	//

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/go-phorce/dolly/fileutil"
+	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
 	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/customer"
@@ -21,6 +22,8 @@ import (
 	"github.com/stripe/stripe-go/v72/webhook"
 	"gopkg.in/yaml.v2"
 )
+
+var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "payment")
 
 const metadataYearsKey = "years"
 
@@ -136,6 +139,9 @@ func (p *provider) GetProduct(id string) (*Product, error) {
 
 // CreateCustomer creates a customer that can later be associated with a subscription
 func (p *provider) CreateCustomer(name, email string, metadata map[string]string) (*Customer, error) {
+
+	logger.KV(xlog.TRACE, "name", name, "email", email)
+
 	if p.cfg.APIKey == "" {
 		return nil, errors.New("invalid API key")
 	}
@@ -210,6 +216,8 @@ func (p *provider) AttachPaymentMethod(customerID, paymentMethodID string) (*Met
 
 // CreatePaymentIntent creates payment intent
 func (p *provider) CreatePaymentIntent(customerID string, amount int64) (*Intent, error) {
+	logger.KV(xlog.TRACE, "customerID", customerID, "amount", amount)
+
 	if p.cfg.APIKey == "" {
 		return nil, errors.New("invalid API key")
 	}
@@ -229,6 +237,8 @@ func (p *provider) CreatePaymentIntent(customerID string, amount int64) (*Intent
 
 // CreateSubscription creates subscription
 func (p *provider) CreateSubscription(customerID, priceID string) (*Subscription, error) {
+	logger.KV(xlog.TRACE, "customerID", customerID, "priceID", priceID)
+
 	if p.cfg.APIKey == "" {
 		return nil, errors.New("invalid API key")
 	}
@@ -253,6 +263,7 @@ func (p *provider) CreateSubscription(customerID, priceID string) (*Subscription
 
 // CancelSubscription cancels subscription
 func (p *provider) CancelSubscription(subscriptionID string) (*Subscription, error) {
+	logger.KV(xlog.TRACE, "subscriptionID", subscriptionID)
 	if p.cfg.APIKey == "" {
 		return nil, errors.New("invalid API key")
 	}
@@ -271,8 +282,8 @@ func (p *provider) HandleWebhook(body []byte, signatureHeader string) (*Intent, 
 	if err != nil {
 		return nil, errors.Annotatef(err, "failed to construct webhook event")
 	}
-
-	if event.Type == "payment_intent.succeeded" {
+	logger.KV(xlog.TRACE, "account", event.Account, "type", event.Type)
+	if event.Type == "payment_intent.succeeded" || event.Type == "invoice.payment_succeeded" {
 		var paymentIntent stripe.PaymentIntent
 		err := json.Unmarshal(event.Data.Raw, &paymentIntent)
 		if err != nil {
@@ -281,6 +292,7 @@ func (p *provider) HandleWebhook(body []byte, signatureHeader string) (*Intent, 
 
 		return NewPaymentIntent(&paymentIntent), nil
 	}
+
 	return nil, nil
 }
 
