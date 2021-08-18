@@ -1,18 +1,14 @@
 package payment
 
 import (
+	"encoding/hex"
+	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
-)
-
-const (
-	ccNumberPaymentSucceeds = "4242 4242 4242 4242"
-	ccNumberPaymentDeclined = "4000 0000 0000 9995"
-	ccExpMonth              = "08"
-	ccExpYear               = "24"
-	ccCVC                   = "123"
+	"github.com/stripe/stripe-go/v72/webhook"
 )
 
 func TestMain(m *testing.M) {
@@ -233,3 +229,642 @@ func Test_yearsFromMetadata(t *testing.T) {
 	_, err = p.yearsFromMetadata(metaWithNoYears)
 	require.Error(t, err)
 }
+
+func Test_HandleWebhook(t *testing.T) {
+	os.Setenv("TRUSTY_STRIPE_API_KEY", "sk_test_123")
+	os.Setenv("TRUSTY_STRIPE_WEBHOOK_SECRET", "1234")
+	prov, err := NewProvider("testdata/stripe.yaml")
+	require.NoError(t, err)
+
+	// payment succeeded
+	signatureTime := time.Now().UTC()
+	sigantureTimeUnix := signatureTime.Unix()
+	sig := webhook.ComputeSignature(signatureTime, []byte(eventSuccessfulPaymentIntent), "1234")
+	require.NotNil(t, sig)
+	sigHeader := fmt.Sprintf("t=%d,v1=%s", sigantureTimeUnix, hex.EncodeToString(sig))
+	event, paymentIntent, err := prov.HandleWebhook([]byte(eventSuccessfulPaymentIntent), sigHeader)
+	require.NoError(t, err)
+	require.Equal(t, "evt_00000000000000", event.ID)
+	require.Equal(t, EventTypePaymentSucceeded, event.Type)
+
+	require.Equal(t, "pi_00000000000000", paymentIntent.ID)
+	require.Equal(t, "succeeded", paymentIntent.Status)
+
+	// payment processing
+	sig = webhook.ComputeSignature(signatureTime, []byte(eventProcessingPaymentIntent), "1234")
+	require.NotNil(t, sig)
+	sigHeader = fmt.Sprintf("t=%d,v1=%s", sigantureTimeUnix, hex.EncodeToString(sig))
+	event, paymentIntent, err = prov.HandleWebhook([]byte(eventProcessingPaymentIntent), sigHeader)
+	require.NoError(t, err)
+	require.Equal(t, "evt_00000000000001", event.ID)
+	require.Equal(t, EventTypePaymentProcessing, event.Type)
+
+	require.Equal(t, "pi_00000000000001", paymentIntent.ID)
+	require.Equal(t, "requires_payment_method", paymentIntent.Status)
+
+	// payment failed
+	sig = webhook.ComputeSignature(signatureTime, []byte(eventFailedPaymentIntent), "1234")
+	require.NotNil(t, sig)
+	sigHeader = fmt.Sprintf("t=%d,v1=%s", sigantureTimeUnix, hex.EncodeToString(sig))
+	event, paymentIntent, err = prov.HandleWebhook([]byte(eventFailedPaymentIntent), sigHeader)
+	require.NoError(t, err)
+	require.Equal(t, "evt_00000000000002", event.ID)
+	require.Equal(t, EventTypePaymentFailed, event.Type)
+
+	require.Equal(t, "pi_00000000000002", paymentIntent.ID)
+	require.Equal(t, "requires_payment_method", paymentIntent.Status)
+
+	// payment created
+	sig = webhook.ComputeSignature(signatureTime, []byte(eventCreatedPaymentIntent), "1234")
+	require.NotNil(t, sig)
+	sigHeader = fmt.Sprintf("t=%d,v1=%s", sigantureTimeUnix, hex.EncodeToString(sig))
+	event, paymentIntent, err = prov.HandleWebhook([]byte(eventCreatedPaymentIntent), sigHeader)
+	require.NoError(t, err)
+	require.Equal(t, "evt_00000000000003", event.ID)
+	require.Equal(t, EventTypePaymentCreated, event.Type)
+
+	require.Equal(t, "pi_00000000000003", paymentIntent.ID)
+	require.Equal(t, "requires_payment_method", paymentIntent.Status)
+
+	// payment canceled
+	sig = webhook.ComputeSignature(signatureTime, []byte(eventCanceledPaymentIntent), "1234")
+	require.NotNil(t, sig)
+	sigHeader = fmt.Sprintf("t=%d,v1=%s", sigantureTimeUnix, hex.EncodeToString(sig))
+	event, paymentIntent, err = prov.HandleWebhook([]byte(eventCanceledPaymentIntent), sigHeader)
+	require.NoError(t, err)
+	require.Equal(t, "evt_00000000000004", event.ID)
+	require.Equal(t, EventTypePaymentCanceled, event.Type)
+
+	require.Equal(t, "pi_00000000000004", paymentIntent.ID)
+	require.Equal(t, "requires_payment_method", paymentIntent.Status)
+
+	// payment requires action
+	sig = webhook.ComputeSignature(signatureTime, []byte(eventRequiredActionPaymentIntent), "1234")
+	require.NotNil(t, sig)
+	sigHeader = fmt.Sprintf("t=%d,v1=%s", sigantureTimeUnix, hex.EncodeToString(sig))
+	event, paymentIntent, err = prov.HandleWebhook([]byte(eventRequiredActionPaymentIntent), sigHeader)
+	require.NoError(t, err)
+	require.Equal(t, "evt_00000000000005", event.ID)
+	require.Equal(t, EventTypePaymentRequiresAction, event.Type)
+
+	require.Equal(t, "pi_00000000000005", paymentIntent.ID)
+	require.Equal(t, "requires_payment_method", paymentIntent.Status)
+
+	// payment amount capturable updated
+	sig = webhook.ComputeSignature(signatureTime, []byte(eventAmountCapturableUpdatedPaymentIntent), "1234")
+	require.NotNil(t, sig)
+	sigHeader = fmt.Sprintf("t=%d,v1=%s", sigantureTimeUnix, hex.EncodeToString(sig))
+	event, paymentIntent, err = prov.HandleWebhook([]byte(eventAmountCapturableUpdatedPaymentIntent), sigHeader)
+	require.NoError(t, err)
+	require.Equal(t, "evt_00000000000006", event.ID)
+	require.Equal(t, EventTypePaymentAmountCapturableUpdated, event.Type)
+
+	require.Equal(t, "pi_00000000000006", paymentIntent.ID)
+	require.Equal(t, "requires_payment_method", paymentIntent.Status)
+}
+
+var eventSuccessfulPaymentIntent = `{
+	"created": 1326853478,
+	"livemode": false,
+	"id": "evt_00000000000000",
+	"type": "payment_intent.succeeded",
+	"object": "event",
+	"request": null,
+	"pending_webhooks": 1,
+	"api_version": "2020-08-27",
+	"data": {
+	  "object": {
+		"id": "pi_00000000000000",
+		"object": "payment_intent",
+		"amount": 1000,
+		"amount_capturable": 0,
+		"amount_received": 1000,
+		"application": null,
+		"application_fee_amount": null,
+		"canceled_at": null,
+		"cancellation_reason": null,
+		"capture_method": "automatic",
+		"charges": {
+		  "object": "list",
+		  "data": [
+			{
+			  "id": "ch_00000000000000",
+			  "object": "charge",
+			  "amount": 1000,
+			  "amount_captured": 1000,
+			  "amount_refunded": 0,
+			  "application": null,
+			  "application_fee": null,
+			  "application_fee_amount": null,
+			  "balance_transaction": "txn_00000000000000",
+			  "billing_details": {
+				"address": {
+				  "city": null,
+				  "country": null,
+				  "line1": null,
+				  "line2": null,
+				  "postal_code": "94107",
+				  "state": null
+				},
+				"email": null,
+				"name": null,
+				"phone": null
+			  },
+			  "calculated_statement_descriptor": "MY HAYK BUSINESS",
+			  "captured": true,
+			  "created": 1627436346,
+			  "currency": "usd",
+			  "customer": null,
+			  "description": "Created by stripe.com/docs demo",
+			  "disputed": false,
+			  "failure_code": null,
+			  "failure_message": null,
+			  "fraud_details": {
+			  },
+			  "invoice": null,
+			  "livemode": false,
+			  "metadata": {
+			  },
+			  "on_behalf_of": null,
+			  "order": null,
+			  "outcome": {
+				"network_status": "approved_by_network",
+				"reason": null,
+				"risk_level": "normal",
+				"risk_score": 24,
+				"seller_message": "Payment complete.",
+				"type": "authorized"
+			  },
+			  "paid": true,
+			  "payment_intent": "pi_00000000000000",
+			  "payment_method": "pm_00000000000000",
+			  "payment_method_details": {
+				"card": {
+				  "brand": "visa",
+				  "checks": {
+					"address_line1_check": null,
+					"address_postal_code_check": "pass",
+					"cvc_check": "pass"
+				  },
+				  "country": "US",
+				  "exp_month": 8,
+				  "exp_year": 2024,
+				  "fingerprint": "ApAd87Afto3qMo3g",
+				  "funding": "credit",
+				  "installments": null,
+				  "last4": "4242",
+				  "network": "visa",
+				  "three_d_secure": null,
+				  "wallet": null
+				},
+				"type": "card"
+			  },
+			  "receipt_email": null,
+			  "receipt_number": null,
+			  "receipt_url": "https://pay.stripe.com/receipts/acct_1JI1BxKfgu58p9BH/ch_1JI1jiKfgu58p9BHiyUQZPvK/rcpt_JvtWeExq3gOg5W5mtByfyND03ycmZl5",
+			  "refunded": false,
+			  "refunds": {
+				"object": "list",
+				"data": [
+				],
+				"has_more": false,
+				"url": "/v1/charges/ch_1JI1jiKfgu58p9BHiyUQZPvK/refunds"
+			  },
+			  "review": null,
+			  "shipping": null,
+			  "source_transfer": null,
+			  "statement_descriptor": null,
+			  "statement_descriptor_suffix": null,
+			  "status": "succeeded",
+			  "transfer_data": null,
+			  "transfer_group": null
+			}
+		  ],
+		  "has_more": false,
+		  "url": "/v1/charges?payment_intent=pi_1JI1j9Kfgu58p9BHRESZu6cO"
+		},
+		"client_secret": "pi_1JI1j9Kfgu58p9BHRESZu6cO_secret_hCYk4jB48B1xbidrxOHao3SUo",
+		"confirmation_method": "automatic",
+		"created": 1627436311,
+		"currency": "usd",
+		"customer": null,
+		"description": "Created by stripe.com/docs demo",
+		"invoice": null,
+		"last_payment_error": null,
+		"livemode": false,
+		"metadata": {
+		},
+		"next_action": null,
+		"on_behalf_of": null,
+		"payment_method": "pm_00000000000000",
+		"payment_method_options": {
+		  "card": {
+			"installments": null,
+			"network": null,
+			"request_three_d_secure": "automatic"
+		  }
+		},
+		"payment_method_types": [
+		  "card"
+		],
+		"receipt_email": null,
+		"review": null,
+		"setup_future_usage": null,
+		"shipping": null,
+		"statement_descriptor": null,
+		"statement_descriptor_suffix": null,
+		"status": "succeeded",
+		"transfer_data": null,
+		"transfer_group": null
+	  }
+	}
+}`
+
+var eventProcessingPaymentIntent = `{
+	"created": 1326853478,
+	"livemode": false,
+	"id": "evt_00000000000001",
+	"type": "payment_intent.processing",
+	"object": "event",
+	"request": null,
+	"pending_webhooks": 1,
+	"api_version": "2020-08-27",
+	"data": {
+	  "object": {
+		"id": "pi_00000000000001",
+		"object": "payment_intent",
+		"amount": 1000,
+		"amount_capturable": 0,
+		"amount_received": 0,
+		"application": null,
+		"application_fee_amount": null,
+		"canceled_at": null,
+		"cancellation_reason": null,
+		"capture_method": "automatic",
+		"charges": {
+		  "object": "list",
+		  "data": [
+		  ],
+		  "has_more": false,
+		  "url": "/v1/charges?payment_intent=pi_1JI1ixKfgu58p9BH7Iqh7016"
+		},
+		"client_secret": "pi_1JI1ixKfgu58p9BH7Iqh7016_secret_1Z7N4IO6Xsmag1OkntJPI2kAm",
+		"confirmation_method": "automatic",
+		"created": 1627436299,
+		"currency": "usd",
+		"customer": null,
+		"description": "Created by stripe.com/docs demo",
+		"invoice": null,
+		"last_payment_error": null,
+		"livemode": false,
+		"metadata": {
+		},
+		"next_action": null,
+		"on_behalf_of": null,
+		"payment_method": null,
+		"payment_method_options": {
+		  "card": {
+			"installments": null,
+			"network": null,
+			"request_three_d_secure": "automatic"
+		  }
+		},
+		"payment_method_types": [
+		  "card"
+		],
+		"receipt_email": null,
+		"review": null,
+		"setup_future_usage": null,
+		"shipping": null,
+		"statement_descriptor": null,
+		"statement_descriptor_suffix": null,
+		"status": "requires_payment_method",
+		"transfer_data": null,
+		"transfer_group": null
+	  }
+	}
+}`
+
+var eventFailedPaymentIntent = `{
+	"created": 1326853478,
+	"livemode": false,
+	"id": "evt_00000000000002",
+	"type": "payment_intent.payment_failed",
+	"object": "event",
+	"request": null,
+	"pending_webhooks": 1,
+	"api_version": "2020-08-27",
+	"data": {
+	  "object": {
+		"id": "pi_00000000000002",
+		"object": "payment_intent",
+		"amount": 1000,
+		"amount_capturable": 0,
+		"amount_received": 0,
+		"application": null,
+		"application_fee_amount": null,
+		"canceled_at": null,
+		"cancellation_reason": null,
+		"capture_method": "automatic",
+		"charges": {
+		  "object": "list",
+		  "data": [
+		  ],
+		  "has_more": false,
+		  "url": "/v1/charges?payment_intent=pi_1JI1ixKfgu58p9BH7Iqh7016"
+		},
+		"client_secret": "pi_1JI1ixKfgu58p9BH7Iqh7016_secret_1Z7N4IO6Xsmag1OkntJPI2kAm",
+		"confirmation_method": "automatic",
+		"created": 1627436299,
+		"currency": "usd",
+		"customer": null,
+		"description": "Created by stripe.com/docs demo",
+		"invoice": null,
+		"last_payment_error": {
+		  "code": "payment_intent_payment_attempt_failed",
+		  "doc_url": "https://stripe.com/docs/error-codes/payment-intent-payment-attempt-failed",
+		  "message": "The payment failed.",
+		  "type": "invalid_request_error"
+		},
+		"livemode": false,
+		"metadata": {
+		},
+		"next_action": null,
+		"on_behalf_of": null,
+		"payment_method": null,
+		"payment_method_options": null,
+		"payment_method_types": [
+		  "card"
+		],
+		"receipt_email": null,
+		"review": null,
+		"setup_future_usage": null,
+		"shipping": null,
+		"statement_descriptor": null,
+		"statement_descriptor_suffix": null,
+		"status": "requires_payment_method",
+		"transfer_data": null,
+		"transfer_group": null
+	  }
+	}
+}`
+
+var eventCreatedPaymentIntent = `{
+	"created": 1326853478,
+	"livemode": false,
+	"id": "evt_00000000000003",
+	"type": "payment_intent.created",
+	"object": "event",
+	"request": null,
+	"pending_webhooks": 1,
+	"api_version": "2020-08-27",
+	"data": {
+	  "object": {
+		"id": "pi_00000000000003",
+		"object": "payment_intent",
+		"amount": 1000,
+		"amount_capturable": 0,
+		"amount_received": 0,
+		"application": null,
+		"application_fee_amount": null,
+		"canceled_at": null,
+		"cancellation_reason": null,
+		"capture_method": "automatic",
+		"charges": {
+		  "object": "list",
+		  "data": [
+		  ],
+		  "has_more": false,
+		  "url": "/v1/charges?payment_intent=pi_1JI1ixKfgu58p9BH7Iqh7016"
+		},
+		"client_secret": "pi_1JI1ixKfgu58p9BH7Iqh7016_secret_1Z7N4IO6Xsmag1OkntJPI2kAm",
+		"confirmation_method": "automatic",
+		"created": 1627436299,
+		"currency": "usd",
+		"customer": null,
+		"description": "Created by stripe.com/docs demo",
+		"invoice": null,
+		"last_payment_error": null,
+		"livemode": false,
+		"metadata": {
+		},
+		"next_action": null,
+		"on_behalf_of": null,
+		"payment_method": null,
+		"payment_method_options": {
+		  "card": {
+			"installments": null,
+			"network": null,
+			"request_three_d_secure": "automatic"
+		  }
+		},
+		"payment_method_types": [
+		  "card"
+		],
+		"receipt_email": null,
+		"review": null,
+		"setup_future_usage": null,
+		"shipping": null,
+		"statement_descriptor": null,
+		"statement_descriptor_suffix": null,
+		"status": "requires_payment_method",
+		"transfer_data": null,
+		"transfer_group": null
+	  }
+	}
+}`
+
+var eventCanceledPaymentIntent = `{
+	"created": 1326853478,
+	"livemode": false,
+	"id": "evt_00000000000004",
+	"type": "payment_intent.canceled",
+	"object": "event",
+	"request": null,
+	"pending_webhooks": 1,
+	"api_version": "2020-08-27",
+	"data": {
+	  "object": {
+		"id": "pi_00000000000004",
+		"object": "payment_intent",
+		"amount": 1000,
+		"amount_capturable": 0,
+		"amount_received": 0,
+		"application": null,
+		"application_fee_amount": null,
+		"canceled_at": null,
+		"cancellation_reason": null,
+		"capture_method": "automatic",
+		"charges": {
+		  "object": "list",
+		  "data": [
+		  ],
+		  "has_more": false,
+		  "url": "/v1/charges?payment_intent=pi_1JI1ixKfgu58p9BH7Iqh7016"
+		},
+		"client_secret": "pi_1JI1ixKfgu58p9BH7Iqh7016_secret_1Z7N4IO6Xsmag1OkntJPI2kAm",
+		"confirmation_method": "automatic",
+		"created": 1627436299,
+		"currency": "usd",
+		"customer": null,
+		"description": "Created by stripe.com/docs demo",
+		"invoice": null,
+		"last_payment_error": null,
+		"livemode": false,
+		"metadata": {
+		},
+		"next_action": null,
+		"on_behalf_of": null,
+		"payment_method": null,
+		"payment_method_options": {
+		  "card": {
+			"installments": null,
+			"network": null,
+			"request_three_d_secure": "automatic"
+		  }
+		},
+		"payment_method_types": [
+		  "card"
+		],
+		"receipt_email": null,
+		"review": null,
+		"setup_future_usage": null,
+		"shipping": null,
+		"statement_descriptor": null,
+		"statement_descriptor_suffix": null,
+		"status": "requires_payment_method",
+		"transfer_data": null,
+		"transfer_group": null
+	  }
+	}
+}`
+
+var eventRequiredActionPaymentIntent = `{
+	"created": 1326853478,
+	"livemode": false,
+	"id": "evt_00000000000005",
+	"type": "payment_intent.requires_action",
+	"object": "event",
+	"request": null,
+	"pending_webhooks": 1,
+	"api_version": "2020-08-27",
+	"data": {
+	  "object": {
+		"id": "pi_00000000000005",
+		"object": "payment_intent",
+		"amount": 1000,
+		"amount_capturable": 0,
+		"amount_received": 0,
+		"application": null,
+		"application_fee_amount": null,
+		"canceled_at": null,
+		"cancellation_reason": null,
+		"capture_method": "automatic",
+		"charges": {
+		  "object": "list",
+		  "data": [
+		  ],
+		  "has_more": false,
+		  "url": "/v1/charges?payment_intent=pi_1JI1ixKfgu58p9BH7Iqh7016"
+		},
+		"client_secret": "pi_1JI1ixKfgu58p9BH7Iqh7016_secret_1Z7N4IO6Xsmag1OkntJPI2kAm",
+		"confirmation_method": "automatic",
+		"created": 1627436299,
+		"currency": "usd",
+		"customer": null,
+		"description": "Created by stripe.com/docs demo",
+		"invoice": null,
+		"last_payment_error": null,
+		"livemode": false,
+		"metadata": {
+		},
+		"next_action": null,
+		"on_behalf_of": null,
+		"payment_method": null,
+		"payment_method_options": {
+		  "card": {
+			"installments": null,
+			"network": null,
+			"request_three_d_secure": "automatic"
+		  }
+		},
+		"payment_method_types": [
+		  "card"
+		],
+		"receipt_email": null,
+		"review": null,
+		"setup_future_usage": null,
+		"shipping": null,
+		"statement_descriptor": null,
+		"statement_descriptor_suffix": null,
+		"status": "requires_payment_method",
+		"transfer_data": null,
+		"transfer_group": null
+	  }
+	}
+}`
+
+var eventAmountCapturableUpdatedPaymentIntent = `{
+	"created": 1326853478,
+	"livemode": false,
+	"id": "evt_00000000000006",
+	"type": "payment_intent.amount_capturable_updated",
+	"object": "event",
+	"request": null,
+	"pending_webhooks": 1,
+	"api_version": "2020-08-27",
+	"data": {
+	  "object": {
+		"id": "pi_00000000000006",
+		"object": "payment_intent",
+		"amount": 1000,
+		"amount_capturable": 0,
+		"amount_received": 0,
+		"application": null,
+		"application_fee_amount": null,
+		"canceled_at": null,
+		"cancellation_reason": null,
+		"capture_method": "automatic",
+		"charges": {
+		  "object": "list",
+		  "data": [
+		  ],
+		  "has_more": false,
+		  "url": "/v1/charges?payment_intent=pi_1JI1ixKfgu58p9BH7Iqh7016"
+		},
+		"client_secret": "pi_1JI1ixKfgu58p9BH7Iqh7016_secret_1Z7N4IO6Xsmag1OkntJPI2kAm",
+		"confirmation_method": "automatic",
+		"created": 1627436299,
+		"currency": "usd",
+		"customer": null,
+		"description": "Created by stripe.com/docs demo",
+		"invoice": null,
+		"last_payment_error": null,
+		"livemode": false,
+		"metadata": {
+		},
+		"next_action": null,
+		"on_behalf_of": null,
+		"payment_method": null,
+		"payment_method_options": {
+		  "card": {
+			"installments": null,
+			"network": null,
+			"request_three_d_secure": "automatic"
+		  }
+		},
+		"payment_method_types": [
+		  "card"
+		],
+		"receipt_email": null,
+		"review": null,
+		"setup_future_usage": null,
+		"shipping": null,
+		"statement_descriptor": null,
+		"statement_descriptor_suffix": null,
+		"status": "requires_payment_method",
+		"transfer_data": null,
+		"transfer_group": null
+	  }
+	}
+}`

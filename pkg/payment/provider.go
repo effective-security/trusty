@@ -13,6 +13,7 @@ import (
 	"github.com/juju/errors"
 	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/customer"
+	"github.com/stripe/stripe-go/v72/event"
 	"github.com/stripe/stripe-go/v72/form"
 	"github.com/stripe/stripe-go/v72/paymentintent"
 	"github.com/stripe/stripe-go/v72/paymentmethod"
@@ -42,6 +43,23 @@ const (
 	StatusRequiresAction = "requires_action"
 	// StatusSucceeded is the status for payment succeeded
 	StatusSucceeded = "succeeded"
+)
+
+const (
+	//EventTypePaymentAmountCapturableUpdated payment amount capturable updated
+	EventTypePaymentAmountCapturableUpdated = "payment_intent.amount_capturable_updated"
+	//EventTypePaymentCanceled payment intent canceled
+	EventTypePaymentCanceled = "payment_intent.canceled"
+	// EventTypePaymentCreated payment created
+	EventTypePaymentCreated = "payment_intent.created"
+	// EventTypePaymentFailed payment failed
+	EventTypePaymentFailed = "payment_intent.payment_failed"
+	// EventTypePaymentProcessing payment processing
+	EventTypePaymentProcessing = "payment_intent.processing"
+	// EventTypePaymentRequiresAction payment requires action
+	EventTypePaymentRequiresAction = "payment_intent.requires_action"
+	// EventTypePaymentSucceeded payment succeeded
+	EventTypePaymentSucceeded = "payment_intent.succeeded"
 )
 
 // Provider implements provider interface
@@ -77,7 +95,7 @@ type Provider interface {
 	CancelSubscription(subscriptionID string) (*Subscription, error)
 
 	// HandlerWebhook handles stripe webhook call
-	HandleWebhook(body []byte, signatureHeader string) (*Intent, error)
+	HandleWebhook(body []byte, signatureHeader string) (*Event, *Intent, error)
 }
 
 // provider implements payment processing
@@ -166,6 +184,8 @@ func (p *provider) CreateCustomer(name, email string, metadata map[string]string
 		return nil, errors.New("invalid API key")
 	}
 	stripe.Key = p.cfg.APIKey
+
+	event.Get("asd", nil)
 
 	params := &stripe.CustomerParams{
 		Name:  stripe.String(name),
@@ -312,23 +332,25 @@ func (p *provider) CancelSubscription(subscriptionID string) (*Subscription, err
 }
 
 // HandleWebhook handles webhook call
-func (p *provider) HandleWebhook(body []byte, signatureHeader string) (*Intent, error) {
+func (p *provider) HandleWebhook(body []byte, signatureHeader string) (*Event, *Intent, error) {
 	event, err := webhook.ConstructEvent(body, signatureHeader, p.cfg.WebhookSecret)
 	if err != nil {
-		return nil, errors.Annotatef(err, "failed to construct webhook event")
+		return nil, nil, errors.Annotatef(err, "failed to construct webhook event")
 	}
-	logger.KV(xlog.TRACE, "account", event.Account, "type", event.Type)
-	if event.Type == "payment_intent.succeeded" || event.Type == "invoice.payment_succeeded" {
-		var paymentIntent stripe.PaymentIntent
-		err := json.Unmarshal(event.Data.Raw, &paymentIntent)
-		if err != nil {
-			return nil, errors.Annotatef(err, "error parsing webhook JSON for event type %s", event.Type)
-		}
+	logger.KV(xlog.TRACE,
+		"event_id", event.ID,
+		"event_type", event.Type,
+		"account", event.Account,
+		"message", "handle webhook",
+	)
 
-		return NewPaymentIntent(&paymentIntent), nil
+	var paymentIntent stripe.PaymentIntent
+	err = json.Unmarshal(event.Data.Raw, &paymentIntent)
+	if err != nil {
+		return nil, nil, errors.Annotatef(err, "error parsing webhook JSON for event type %s", event.Type)
 	}
 
-	return nil, nil
+	return NewEvent(&event), NewPaymentIntent(&paymentIntent), nil
 }
 
 // ListProducts returns existing products

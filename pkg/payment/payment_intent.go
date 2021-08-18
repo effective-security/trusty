@@ -23,3 +23,8 @@ func NewPaymentIntent(p *stripe.PaymentIntent) *Intent {
 		Status:       string(p.Status),
 	}
 }
+
+// IsSucceeded return true if payment succeeded
+func (pi *Intent) IsSucceeded() bool {
+	return pi.Status == StatusSucceeded
+}

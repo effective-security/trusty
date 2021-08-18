@@ -219,40 +219,16 @@ func (s *Service) StripeWebhookHandler() rest.Handle {
 			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("invalid request").WithCause(err))
 			return
 		}
-
-		paymentIntent, err := s.paymentProv.HandleWebhook(b, r.Header.Get("Stripe-Signature"))
+		event, paymentIntent, err := s.paymentProv.HandleWebhook(b, r.Header.Get("Stripe-Signature"))
 		if err != nil {
-			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("webhook: invalid request").WithCause(err))
+			marshal.WriteJSON(w, r, httperror.WithUnexpected("webhook: unable to handle event").WithCause(err))
 			return
 		}
 
-		ctx := r.Context()
-		if paymentIntent != nil {
-			sub, err := s.db.GetSubscriptionByExternalID(ctx, paymentIntent.ID)
-			if err != nil {
-				marshal.WriteJSON(w, r, httperror.WithUnexpected("webhook: unable to find subscription: %s", paymentIntent.ID).WithCause(err))
-				return
-			}
-
-			sub.Status = paymentIntent.Status
-
-			org, err := s.db.GetOrg(ctx, sub.ID)
-			if err != nil {
-				marshal.WriteJSON(w, r, httperror.WithUnexpected("webhook: unable to get org by subscription: %d", sub.ID).WithCause(err))
-				return
-			}
-
-			if org.Status != v1.OrgStatusApproved {
-				org.Status = v1.OrgStatusPaid
-			}
-
-			_, _, err = s.db.UpdateSubscriptionAndOrgStatus(ctx, sub, org)
-			if err != nil {
-				marshal.WriteJSON(w, r, httperror.WithUnexpected("webhook: unable to update org %d", org.ID).WithCause(err))
-				return
-			}
-
+		if event.IsPaymentEvent() {
+			s.handlePaymentIntentEvent(r.Context(), paymentIntent)
 		}
+
 		res := &v1.StripeWebhookResponse{}
 		marshal.WriteJSON(w, r, res)
 	}
@@ -308,6 +284,53 @@ func (s *Service) createSubscription(
 	return subscriptionModel, paymentIntent.ClientSecret, nil
 }
 
+// handlePaymentIntent handles payment intent event
+func (s *Service) handlePaymentIntentEvent(
+	ctx context.Context,
+	paymentIntent *payment.Intent,
+) error {
+	logger.KV(xlog.TRACE,
+		"payment_intent_id", paymentIntent.ID,
+	)
+
+	sub, err := s.db.GetSubscriptionByExternalID(ctx, paymentIntent.ID)
+	if err != nil {
+		return errors.Annotatef(err, "webhook: unable to find subscription: %s", paymentIntent.ID)
+	}
+
+	org, err := s.db.GetOrg(ctx, sub.ID)
+	if err != nil {
+		return errors.Annotatef(err, "webhook: unable to get org: %d", sub.ID)
+	}
+
+	if !paymentIntent.IsSucceeded() {
+		// if payment did not succeed we only update subscriptions status
+		// status of org does not change
+		sub.Status = paymentIntent.Status
+		_, err = s.db.UpdateSubscriptionStatus(ctx, sub)
+		if err != nil {
+			return errors.Annotatef(err, "webhook: unable to update subscription: %d", sub.ID)
+		}
+	} else if org.Status == v1.OrgStatusPaymentProcessing {
+		sub.Status = paymentIntent.Status
+		org.Status = v1.OrgStatusPaid
+		_, _, err = s.db.UpdateSubscriptionAndOrgStatus(ctx, sub, org)
+		if err != nil {
+			return errors.Annotatef(err, "webhook: unable to update sub: %d and org: %d", sub.ID, org.ID)
+		}
+	}
+
+	logger.KV(xlog.TRACE,
+		"sub_id", sub.ID,
+		"org_id", org.ID,
+		"org_status", org.Status,
+		"subscription_status", sub.Status,
+		"payment_id", paymentIntent.ID,
+	)
+
+	return nil
+}
+
 // onSubscriptionCreated is called when a subscription is created
 // it checks and updates payment status
 func (s *Service) onSubscriptionCreated(
@@ -334,38 +357,15 @@ func (s *Service) onSubscriptionCreated(
 				"payment_status", pi.Status,
 			)
 
-			sub, err := s.db.GetSubscriptionByExternalID(ctx, pi.ID)
+			err = s.handlePaymentIntentEvent(ctx, pi)
 			if err != nil {
-				return nil, errors.Annotatef(err, "payment: unable to get subscription with external id %q", pi.ID)
+				return nil, errors.Annotatef(err, "payment: unable to handle payment intent with id %q", pi.ID)
 			}
 
 			org, err := s.db.GetOrg(ctx, sub.ID)
 			if err != nil {
 				return nil, errors.Annotatef(err, "payment: unable to get org with id %q", sub.ID)
 			}
-
-			orgStatus := org.Status
-			if pi.Status == payment.StatusSucceeded {
-				orgStatus = v1.OrgStatusPaid
-			}
-
-			if org.Status == orgStatus {
-				return orgStatus, nil
-			}
-
-			logger.KV(xlog.TRACE,
-				"sub_id", sub.ID,
-				"sub_external_id", sub.ExternalID,
-				"org_current_status", org.Status,
-				"org_update_status", orgStatus,
-			)
-
-			org.Status = orgStatus
-			_, _, err = s.db.UpdateSubscriptionAndOrgStatus(ctx, sub, org)
-			if err != nil {
-				return "", errors.Annotatef(err, "payment: unable to update status for subscription %d and org %d", sub.ID, org.ID)
-			}
-
 			if org.Status == v1.OrgStatusPaid {
 				cancel()
 			}
