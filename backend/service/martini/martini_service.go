@@ -92,6 +92,12 @@ func (s *Service) RegisterRoute(r rest.Router) {
 
 	r.GET(v1.PathForMartiniFccFrn, s.FccFrnHandler())
 	r.GET(v1.PathForMartiniFccContact, s.FccContactHandler())
+
+	// TODO: remove after Web updated
+	r.POST("/v1/ms/register_org", s.RegisterOrgHandler())
+	r.POST("/v1/ms/approve_org", s.ApproveOrgHandler())
+	r.POST("/v1/ms/validate_org", s.ValidateOrgHandler())
+	r.POST("/v1/ms/delete_org", s.DeleteOrgHandler())
 }
 
 // Db returns DB
