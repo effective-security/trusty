@@ -10,6 +10,8 @@ import (
 	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/internal/db"
 	"github.com/ekspand/trusty/internal/db/orgsdb/model"
+	"github.com/ekspand/trusty/pkg/payment"
+	"github.com/ekspand/trusty/pkg/poller"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/httperror"
 	"github.com/go-phorce/dolly/xhttp/identity"
@@ -232,6 +234,8 @@ func (s *Service) StripeWebhookHandler() rest.Handle {
 				return
 			}
 
+			sub.Status = paymentIntent.Status
+
 			org, err := s.db.GetOrg(ctx, sub.ID)
 			if err != nil {
 				marshal.WriteJSON(w, r, httperror.WithUnexpected("webhook: unable to get org by subscription: %d", sub.ID).WithCause(err))
@@ -298,7 +302,85 @@ func (s *Service) createSubscription(
 	if err != nil {
 		return nil, "", errors.Annotatef(err, "unable to create a subscription in db for id %d, customer %s, price %s", org.ID, customer.ID, product.PriceID)
 	}
+
+	s.onSubscriptionCreated(subscriptionModel)
+
 	return subscriptionModel, paymentIntent.ClientSecret, nil
+}
+
+// onSubscriptionCreated is called when a subscription is created
+// it checks and updates payment status
+func (s *Service) onSubscriptionCreated(
+	sub *model.Subscription,
+) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(s.cfg.Martini.PollPaymentStatusTimeout))
+
+	p := poller.New(nil,
+		func(ctx context.Context) (interface{}, error) {
+			logger.KV(xlog.TRACE,
+				"sub_id", sub.ID,
+				"sub_external_id", sub.ExternalID,
+				"status", "polling in progress",
+			)
+
+			pi, err := s.paymentProv.GetPaymentIntent(sub.ExternalID)
+			if err != nil {
+				return nil, errors.Annotatef(err, "payment: unable to get payment intent with id %q", sub.ExternalID)
+			}
+
+			logger.KV(xlog.TRACE,
+				"sub_id", sub.ID,
+				"sub_external_id", sub.ExternalID,
+				"payment_status", pi.Status,
+			)
+
+			sub, err := s.db.GetSubscriptionByExternalID(ctx, pi.ID)
+			if err != nil {
+				return nil, errors.Annotatef(err, "payment: unable to get subscription with external id %q", pi.ID)
+			}
+
+			org, err := s.db.GetOrg(ctx, sub.ID)
+			if err != nil {
+				return nil, errors.Annotatef(err, "payment: unable to get org with id %q", sub.ID)
+			}
+
+			orgStatus := org.Status
+			if pi.Status == payment.StatusSucceeded {
+				orgStatus = v1.OrgStatusPaid
+			}
+
+			if org.Status == orgStatus {
+				return orgStatus, nil
+			}
+
+			logger.KV(xlog.TRACE,
+				"sub_id", sub.ID,
+				"sub_external_id", sub.ExternalID,
+				"org_current_status", org.Status,
+				"org_update_status", orgStatus,
+			)
+
+			org.Status = orgStatus
+			_, _, err = s.db.UpdateSubscriptionAndOrgStatus(ctx, sub, org)
+			if err != nil {
+				return "", errors.Annotatef(err, "payment: unable to update status for subscription %d and org %d", sub.ID, org.ID)
+			}
+
+			if org.Status == v1.OrgStatusPaid {
+				cancel()
+			}
+			return nil, nil
+		},
+		func(err error) {
+			logger.KV(xlog.ERROR,
+				"sub_id", sub.ID,
+				"sub_external_id", sub.ExternalID,
+				"status", "polling payment status failed",
+				"err", errors.Details(err))
+		})
+	p.Start(ctx, time.Duration(s.cfg.Martini.PollPaymentStatusInterval))
+
+	return nil
 }
 
 // subscriptionExpiryPeriodFromProductName derives subscriptions expiry

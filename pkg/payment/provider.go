@@ -25,7 +25,24 @@ import (
 
 var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "payment")
 
-const metadataYearsKey = "years"
+const (
+	metadataYearsKey = "years"
+)
+
+const (
+	//StatusCanceled payment canceled
+	StatusCanceled = "canceled"
+	// StatusCreated payment created
+	StatusCreated = "created"
+	// StatusFailed failed
+	StatusFailed = "payment_failed"
+	// StatusProcessing payment processing
+	StatusProcessing = "processing"
+	// StatusRequiresAction for payment requires actions
+	StatusRequiresAction = "requires_action"
+	// StatusSucceeded is the status for payment succeeded
+	StatusSucceeded = "succeeded"
+)
 
 // Provider implements provider interface
 type Provider interface {
@@ -40,6 +57,9 @@ type Provider interface {
 
 	// CreatePaymentIntent creates payment intent
 	CreatePaymentIntent(customerID string, amount int64) (*Intent, error)
+
+	// GetPaymentIntent returns payment intent
+	GetPaymentIntent(id string) (*Intent, error)
 
 	// AttachPaymentMethod attaches payment method to a customer
 	AttachPaymentMethod(customerID, paymentMethodID string) (*Method, error)
@@ -231,6 +251,21 @@ func (p *provider) CreatePaymentIntent(customerID string, amount int64) (*Intent
 	})
 	if err != nil {
 		return nil, errors.Annotatef(err, "failed to create a payment intent")
+	}
+	return NewPaymentIntent(pi), nil
+}
+
+// GetPaymentIntent returns a payment intent
+func (p *provider) GetPaymentIntent(id string) (*Intent, error) {
+	logger.KV(xlog.TRACE, "paymentIntent", id)
+	if p.cfg.APIKey == "" {
+		return nil, errors.New("invalid API key")
+	}
+	stripe.Key = p.cfg.APIKey
+
+	pi, err := paymentintent.Get(id, nil)
+	if err != nil {
+		return nil, errors.Annotatef(err, "failed to get payment intent with id %q", id)
 	}
 	return NewPaymentIntent(pi), nil
 }

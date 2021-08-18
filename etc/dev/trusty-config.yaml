@@ -103,6 +103,8 @@ tasks:
 
 martini:
   web_app_host: localhost:4200
+  poll_payment_status_interval: 5s
+  poll_payment_status_timeout: 180s
 
 ra:
   # the list of private Root Certs files.
