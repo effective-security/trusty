@@ -6,6 +6,10 @@ logs:
 audit:
   directory: /dev/null
 
+martini:
+  poll_payment_status_interval: 1s
+  poll_payment_status_timeout: 3s
+
 servers:
   cis:
     disabled: false

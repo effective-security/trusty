@@ -125,6 +125,9 @@ type OrgsDb interface {
 
 	// UpdateSubscriptionAndOrgStatus updates status of subscription and org in a single transaction
 	UpdateSubscriptionAndOrgStatus(ctx context.Context, sub *model.Subscription, org *model.Organization) (*model.Subscription, *model.Organization, error)
+
+	// RemoveSubscription deletes subscription
+	RemoveSubscription(ctx context.Context, id uint64) error
 }
 
 // Provider provides complete DB access

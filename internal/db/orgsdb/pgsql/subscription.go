@@ -228,3 +228,16 @@ func (p *Provider) ListSubscriptions(ctx context.Context, userID uint64) ([]*mod
 
 	return list, nil
 }
+
+// RemoveSubscription removes a subscription
+func (p *Provider) RemoveSubscription(ctx context.Context, id uint64) error {
+	_, err := p.db.ExecContext(ctx, `DELETE FROM subscriptions WHERE id=$1;`, id)
+	if err != nil {
+		logger.Errorf("err=[%s]", errors.Details(err))
+		return errors.Trace(err)
+	}
+
+	logger.Noticef("id=%d", id)
+
+	return nil
+}

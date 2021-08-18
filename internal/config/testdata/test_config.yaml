@@ -79,6 +79,10 @@ oauth_clients:
 
 authority: ../../../etc/dev/ca-config.dev.yaml
 
+martini:
+  poll_payment_status_interval: 1s
+  poll_payment_status_timeout: 3s
+
 servers:
   cis:
     listen_urls:
