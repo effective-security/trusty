@@ -56,7 +56,8 @@ const approverEmailTemplate = `
                                 Organization verification request
                               </p>
                               <p style="font-style: normal; font-weight: normal; font-size: 15px; line-height: 25px; letter-spacing: 0.4px; margin-bottom: 15px;">
-                                Hello, {{.RequesterName}}! <br>{{.ApproverName}} ({{.ApproverEmail}}) has requested permission to acquire STIR/SHAKEN certificates for your organization:
+                                Hello, {{.ApproverName}}! <br>
+                                {{.RequesterName}} ({{.RequesterEmail}}) has requested permission to acquire STIR/SHAKEN certificates for your organization:
                               </p>
                               <p style="font-style: normal; font-weight: 600; font-size: 15px; line-height: 25px; letter-spacing: 0.25px; margin-bottom: 30px;">
                                 {{.Company}}
