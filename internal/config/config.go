@@ -9,10 +9,6 @@ const (
 	CISServerName = "cis"
 	// CAServerName specifies server name for Certification Authority
 	CAServerName = "ca"
-	// RAServerName specifies server name for Registration Authority
-	RAServerName = "ra"
-	// SAServerName specifies server name for Storage Authority
-	SAServerName = "sa"
 )
 
 // Configuration contains the user configurable data for the service

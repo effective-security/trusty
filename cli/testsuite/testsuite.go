@@ -39,7 +39,6 @@ type Suite struct {
 	MockStatus    *mockpb.MockStatusServer
 	MockAuthority *mockpb.MockCAServer
 	MockCIS       *mockpb.MockCIServer
-	MockRA        *mockpb.MockRAServer
 
 	appFlags       []string
 	withGRPC       bool
@@ -184,7 +183,6 @@ func (s *Suite) SetupMockGRPC() *grpc.Server {
 	serv := grpc.NewServer()
 	pb.RegisterStatusServiceServer(serv, s.MockStatus)
 	pb.RegisterCAServiceServer(serv, s.MockAuthority)
-	pb.RegisterRAServiceServer(serv, s.MockRA)
 	pb.RegisterCIServiceServer(serv, s.MockCIS)
 
 	var lis net.Listener

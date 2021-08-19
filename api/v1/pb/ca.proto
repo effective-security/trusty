@@ -28,6 +28,10 @@ service CAService {
     // PublishCrls returns published CRLs
     rpc PublishCrls(PublishCrlsRequest) returns (CrlsResponse) {
     }
+
+    // RevokeCertificate returns the revoked certificate
+    rpc RevokeCertificate(RevokeCertificateRequest) returns (RevokedCertificateResponse) {
+    }    
 }
 
 message CertProfileInfoRequest {
@@ -64,4 +68,15 @@ message SignCertificateRequest {
 message PublishCrlsRequest {
     // IKID specifies Issuer, or empty to publish for all issuers
     string ikid = 1;
+}
+
+// RevokeCertificateRequest specifies revocation request
+message RevokeCertificateRequest {
+    // Id specifies certificate ID.
+    // If it's not set, then SKID must be provided
+    uint64 id = 1;
+    // SKID specifies Subject Key ID to search
+    string skid = 2;
+    // Reason for revocation
+    Reason reason = 3;
 }

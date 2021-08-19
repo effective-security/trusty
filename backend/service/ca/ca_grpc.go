@@ -6,6 +6,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"strings"
+	"time"
 
 	v1 "github.com/ekspand/trusty/api/v1"
 	pb "github.com/ekspand/trusty/api/v1/pb"
@@ -219,6 +220,38 @@ func (s *Service) PublishCrls(ctx context.Context, req *pb.PublishCrlsRequest) (
 			}
 			res.Clrs = append(res.Clrs, crl)
 		}
+	}
+	return res, nil
+}
+
+// RevokeCertificate returns the revoked certificate
+func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error) {
+	var crt *model.Certificate
+	var err error
+	if in.Id != 0 {
+		crt, err = s.db.GetCertificate(ctx, in.Id)
+	} else {
+		crt, err = s.db.GetCertificateBySKID(ctx, in.Skid)
+	}
+	if err != nil {
+		logger.KV(xlog.ERROR,
+			"request", in,
+			"err", errors.Details(err),
+		)
+		return nil, v1.NewError(codes.Internal, "unable to find certificate")
+	}
+
+	revoked, err := s.db.RevokeCertificate(ctx, crt, time.Now().UTC(), int(in.Reason))
+	if err != nil {
+		logger.KV(xlog.ERROR,
+			"request", in,
+			"err", errors.Details(err),
+		)
+		return nil, v1.NewError(codes.Internal, "unable to revoke certificate")
+	}
+
+	res := &pb.RevokedCertificateResponse{
+		Revoked: revoked.ToDTO(),
 	}
 	return res, nil
 }

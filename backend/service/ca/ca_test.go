@@ -227,6 +227,16 @@ func TestPublishCrls(t *testing.T) {
 	require.NotEmpty(t, list)
 }
 
+func TestRevokeCertificate(t *testing.T) {
+	_, err := authorityClient.RevokeCertificate(context.Background(), &pb.RevokeCertificateRequest{Id: 123})
+	require.Error(t, err)
+	assert.Equal(t, "unable to find certificate", err.Error())
+
+	_, err = authorityClient.RevokeCertificate(context.Background(), &pb.RevokeCertificateRequest{Skid: "123123"})
+	require.Error(t, err)
+	assert.Equal(t, "unable to find certificate", err.Error())
+}
+
 func generateCSR() []byte {
 	prov := csr.NewProvider(inmemcrypto.NewProvider())
 	req := prov.NewSigningCertificateRequest("label", "ECDSA", 256, "localhost", []csr.X509Name{

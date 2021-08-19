@@ -308,79 +308,9 @@ servers:
         - /pb.CIService
       # allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
       allow:
-        - /pb.CAService/SignCertificate:trusty-wfe,trusty-ra,trusty-admin,trusty
-        - /pb.CAService/PublishCrls:trusty-ra,trusty-admin,trusty
-        - /pb.CAService/RevokeCertificate:trusty-ra,trusty-admin,trusty
-      # specifies to log allowed access to Any role
-      log_allowed_any: false
-      # specifies to log allowed access
-      log_allowed: true
-      # specifies to log denied access
-      log_denied: true
-    # configuration for the Identity mappers
-    identity_map:
-      tls:
-        enabled:  true
-        default_authenticated_role: authenticated_tls
-        roles:
-          trusty:
-            - spifee://trusty/all
-          trusty-cis:
-            - spifee://trusty/cis
-          trusty-ca:
-            - spifee://trusty/ca
-          trusty-ra:
-            - spifee://trusty/ra
-          trusty-wfe:
-            - spifee://trusty/wfe
-      jwt:
-        enabled: true
-        audience: trusty
-        default_authenticated_role: authenticated_jwt
-        roles:
-          trusty-admin:
-          - denis@ekspand.com
-
-  ra:
-    description: Registration Authority
-    disabled: false
-    listen_urls:
-      - https://0.0.0.0:7893
-    client_url: https://localhost:7893
-    server_tls:
-      cert: /tmp/trusty/certs/trusty_peer_ra.pem
-      key: /tmp/trusty/certs/trusty_peer_ra.key
-      trusted_ca: ${TRUSTY_CONFIG_DIR}/roots/trusty_root_ca.pem
-      client_cert_auth: true
-    services:
-      - status
-      - ra
-      - swagger
-    enable_grpc_gateway: false
-    heartbeat_secs: 30
-    timeout:
-      request: 3s
-    keep_alive:
-      min_time: 60s
-      interval: 30s
-      timeout: 180s
-    swagger:
-      enabled: true
-      files:
-        ra: "${TRUSTY_CONFIG_DIR}/../../Documentation/dev-guide/apispec/swagger/ra.swagger.json"
-        status: "${TRUSTY_CONFIG_DIR}/../../Documentation/dev-guide/apispec/swagger/status.swagger.json"
-    cors: *cors
-    authz:
-      # allow any non-authenticated request access to this path and its children
-      # /v1/* is allowed
-      allow_any:
-      # allow any authenticated request that includes a non empty role
-        - /pb.StatusService
-      allow_any_role:
-        - /pb.RAService/GetRoots
-      # allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
-      allow:
-        - /pb.RAService:trusty-wfe,trusty-admin,trusty
+        - /pb.CAService/SignCertificate:trusty-wfe,trusty-ca,trusty-admin,trusty
+        - /pb.CAService/PublishCrls:trusty-ca,trusty-admin,trusty
+        - /pb.CAService/RevokeCertificate:trusty-ca,trusty-admin,trusty
       # specifies to log allowed access to Any role
       log_allowed_any: false
       # specifies to log allowed access
@@ -420,7 +350,6 @@ trusty_client:
     cis: ["http://localhost:7880"]
     wfe: ["https://localhost:7891"]
     ca: ["https://localhost:7892"]
-    ra: ["https://localhost:7893"]
   dial_timeout: 30s
   dial_keep_alive_time: 300s
   dial_keep_alive_timeout: 30s

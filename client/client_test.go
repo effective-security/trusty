@@ -52,7 +52,6 @@ func TestFactory(t *testing.T) {
 	require.NoError(t, err)
 	defer c.Close()
 
-	assert.NotNil(t, c.RAClient())
 	assert.NotNil(t, c.CAClient())
 	assert.NotNil(t, c.CIClient())
 	assert.NotNil(t, c.StatusClient())

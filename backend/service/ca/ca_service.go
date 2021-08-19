@@ -2,6 +2,7 @@ package ca
 
 import (
 	"context"
+	"sync"
 
 	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/authority"
@@ -10,9 +11,11 @@ import (
 	"github.com/ekspand/trusty/internal/db/cadb/model"
 	"github.com/ekspand/trusty/pkg/certpublisher"
 	"github.com/ekspand/trusty/pkg/gserver"
+	"github.com/go-phorce/dolly/fileutil"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/tasks"
 	"github.com/go-phorce/dolly/xlog"
+	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
 	"google.golang.org/grpc"
 )
@@ -24,12 +27,14 @@ var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", 
 
 // Service defines the Status service
 type Service struct {
-	server    *gserver.Server
-	ca        *authority.Authority
-	db        cadb.CaDb
-	publisher certpublisher.Publisher
-	scheduler tasks.Scheduler
-	cfg       *config.Configuration
+	server     *gserver.Server
+	ca         *authority.Authority
+	db         cadb.CaDb
+	publisher  certpublisher.Publisher
+	scheduler  tasks.Scheduler
+	cfg        *config.Configuration
+	registered bool
+	lock       sync.RWMutex
 }
 
 // Factory returns a factory of the service
@@ -59,7 +64,9 @@ func (s *Service) Name() string {
 
 // IsReady indicates that the service is ready to serve its end-points
 func (s *Service) IsReady() bool {
-	return true
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	return s.registered
 }
 
 // Close the subservices and it's resources
@@ -83,6 +90,12 @@ func (s *Service) OnStarted() error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+
+	err = s.registerRoots(context.Background())
+	if err != nil {
+		return errors.Trace(err)
+	}
+
 	return nil
 }
 
@@ -106,5 +119,54 @@ func (s *Service) registerIssuers(ctx context.Context) error {
 			return errors.Trace(err)
 		}
 	}
+	return nil
+}
+
+func (s *Service) registerCert(ctx context.Context, trust pb.Trust, location string) error {
+	crt, err := certutil.LoadFromPEM(location)
+	if err != nil {
+		return err
+	}
+	pem, err := certutil.EncodeToPEMString(true, crt)
+	if err != nil {
+		return err
+	}
+	c := model.NewRootCertificate(crt, int(trust), pem)
+	_, err = s.db.RegisterRootCertificate(ctx, c)
+	if err != nil {
+		return err
+	}
+	logger.Infof("trust=%v, subject=%q", trust, c.Subject)
+	return nil
+}
+
+func (s *Service) registerRoots(ctx context.Context) error {
+	for _, r := range s.cfg.RegistrationAuthority.PrivateRoots {
+		if err := fileutil.FileExists(r); err != nil {
+			logger.Warningf("err=[%v]", err.Error())
+			continue
+		}
+		err := s.registerCert(ctx, pb.Trust_Private, r)
+		if err != nil {
+			logger.Errorf("err=[%v]", errors.ErrorStack(err))
+			return err
+		}
+	}
+	for _, r := range s.cfg.RegistrationAuthority.PublicRoots {
+		if err := fileutil.FileExists(r); err != nil {
+			logger.Warningf("err=[%v]", err.Error())
+			continue
+		}
+		err := s.registerCert(ctx, pb.Trust_Public, r)
+		if err != nil {
+			logger.Errorf("err=[%v]", errors.ErrorStack(err))
+			return err
+		}
+	}
+
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	s.registered = true
+
 	return nil
 }

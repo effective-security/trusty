@@ -75,7 +75,6 @@ services:
       - "7880" # CIS
       - "7891" # WFE
       - "7892" # CA
-      - "7893"
     environment:
       - TRUSTY_JWT_SEED=testseed 
       - TRUSTY_GITHUB_CLIENT_ID=not_used_in_test
@@ -133,7 +132,6 @@ services:
         --cis-listen-url=http://10.77.88.101:7880
         --wfe-listen-url=https://10.77.88.101:7891
         --ca-listen-url=https://10.77.88.101:7892
-        --ra-listen-url=https://10.77.88.101:7893
 
   # NODE 2 on local-kms
   trusty-node2:
@@ -160,7 +158,6 @@ services:
       - "7880" # CIS
       - "7891" # WFE
       - "7892" # CA
-      - "7893"
     environment:
       - AWS_ACCESS_KEY_ID=notusedbyemulator
       - AWS_SECRET_ACCESS_KEY=notusedbyemulator
@@ -215,7 +212,6 @@ services:
         --cis-listen-url=http://10.77.88.102:7880
         --wfe-listen-url=https://10.77.88.102:7891
         --ca-listen-url=https://10.77.88.102:7892
-        --ra-listen-url=https://10.77.88.102:7893
   test-runner:
     image: ekspand/trusty:${ITEST_IMAGE_TAG}
     domainname: tester.trusty.ca
