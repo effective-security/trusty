@@ -4,7 +4,6 @@ import (
 	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/backend/service/ca"
 	"github.com/ekspand/trusty/backend/service/cis"
-	"github.com/ekspand/trusty/backend/service/ra"
 	"github.com/ekspand/trusty/backend/service/status"
 	"github.com/ekspand/trusty/client"
 	"github.com/ekspand/trusty/client/embed/proxy"
@@ -31,14 +30,6 @@ func NewCAClient(s *gserver.Server) client.CAClient {
 func NewCIClient(s *gserver.Server) client.CIClient {
 	if cisServer, ok := s.Service(cis.ServiceName).(pb.CIServiceServer); ok {
 		return client.NewCIClientFromProxy(proxy.CIServiceServerToClient(cisServer))
-	}
-	return nil
-}
-
-// NewRAClient returns embedded RAClient for running server
-func NewRAClient(s *gserver.Server) client.RAClient {
-	if eaServiceServer, ok := s.Service(ra.ServiceName).(pb.RAServiceServer); ok {
-		return client.NewRAClientFromProxy(proxy.RAServiceServerToClient(eaServiceServer))
 	}
 	return nil
 }

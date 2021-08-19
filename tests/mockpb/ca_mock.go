@@ -58,3 +58,11 @@ func (m *MockCAServer) PublishCrls(context.Context, *pb.PublishCrlsRequest) (*pb
 	}
 	return m.Resps[0].(*pb.CrlsResponse), nil
 }
+
+// RevokeCertificate returns the revoked certificate
+func (m *MockCAServer) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error) {
+	if m.Err != nil {
+		return nil, m.Err
+	}
+	return m.Resps[0].(*pb.RevokedCertificateResponse), nil
+}

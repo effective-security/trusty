@@ -15,11 +15,11 @@ export TRUSTY_ROOT=/tmp/trusty/certs/trusty_root_ca.pem
 
 export TRUSTYCTL_FLAGS="-V -D --cfg /opt/trusty/etc/dev/trusty-config.yaml -r $TRUSTY_ROOT"
 
-echo "Trusted anchors"
-cp $TRUSTY_ROOT /etc/pki/ca-trust/source/anchors/
-update-ca-trust extract
-ls /etc/ssl/certs/
-ls /etc/pki/ca-trust/source/anchors/
+#echo "Trusted anchors"
+#cp $TRUSTY_ROOT /etc/pki/ca-trust/source/anchors/
+#update-ca-trust extract
+#ls /etc/ssl/certs/
+#ls /etc/pki/ca-trust/source/anchors/
 
 echo "*** Running trusty intergation tests using flags: $TRUSTYCTL_FLAGS"
 

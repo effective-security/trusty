@@ -15,14 +15,11 @@ import (
 
 func TestDiscovery(t *testing.T) {
 	ca := &mockpb.MockCAServer{}
-	ra := &mockpb.MockRAServer{}
 	cis := &mockpb.MockCIServer{}
 
 	srv := "TestDiscovery"
 	d := appcontainer.NewDiscovery()
 	err := d.Register(srv, ca)
-	require.NoError(t, err)
-	err = d.Register(srv, ra)
 	require.NoError(t, err)
 
 	err = d.Register(srv, cis)

@@ -36,3 +36,8 @@ func (s *caSrv2C) Issuers(ctx context.Context, in *empty.Empty, opts ...grpc.Cal
 func (s *caSrv2C) PublishCrls(ctx context.Context, in *pb.PublishCrlsRequest, opts ...grpc.CallOption) (*pb.CrlsResponse, error) {
 	return s.srv.PublishCrls(ctx, in)
 }
+
+// RevokeCertificate returns the revoked certificate
+func (s *caSrv2C) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest, opts ...grpc.CallOption) (*pb.RevokedCertificateResponse, error) {
+	return s.srv.RevokeCertificate(ctx, in)
+}

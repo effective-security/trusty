@@ -16,7 +16,6 @@ import (
 	"github.com/ekspand/trusty/backend/service/ca"
 	"github.com/ekspand/trusty/backend/service/cis"
 	"github.com/ekspand/trusty/backend/service/martini"
-	"github.com/ekspand/trusty/backend/service/ra"
 	"github.com/ekspand/trusty/backend/service/status"
 	"github.com/ekspand/trusty/backend/service/swagger"
 	"github.com/ekspand/trusty/backend/service/workflow"
@@ -48,7 +47,6 @@ var ServiceFactories = map[string]gserver.ServiceFactory{
 	acme.ServiceName:     acme.Factory,
 	auth.ServiceName:     auth.Factory,
 	ca.ServiceName:       ca.Factory,
-	ra.ServiceName:       ra.Factory,
 	cis.ServiceName:      cis.Factory,
 	status.ServiceName:   status.Factory,
 	workflow.ServiceName: workflow.Factory,
@@ -76,7 +74,6 @@ type appFlags struct {
 	cisURLs             *[]string
 	wfeURLs             *[]string
 	caURLs              *[]string
-	raURLs              *[]string
 	hostNames           *[]string
 	logsDir             *string
 	auditDir            *string
@@ -363,7 +360,6 @@ func (a *App) loadConfig() error {
 	flags.cisURLs = app.Flag("cis-listen-url", "URL for the CIS listening end-point").Strings()
 	flags.wfeURLs = app.Flag("wfe-listen-url", "URL for the WFE listening end-point").Strings()
 	flags.caURLs = app.Flag("ca-listen-url", "URL for the CA listening end-point").Strings()
-	flags.raURLs = app.Flag("ra-listen-url", "URL for the RA listening end-point").Strings()
 	flags.server = app.Flag("only-server", "ca|ra|wfe|cis - name of the server to run, and disable the others.").String()
 
 	flags.hostNames = app.Flag("host-name", "Set of host names to be used in CSR requests to obtaine a server certificate").Strings()
@@ -453,11 +449,6 @@ func (a *App) loadConfig() error {
 			case config.CAServerName:
 				if len(*flags.caURLs) > 0 {
 					httpCfg.ListenURLs = *flags.caURLs
-					httpCfg.Disabled = len(httpCfg.ListenURLs) == 1 && httpCfg.ListenURLs[0] == "none"
-				}
-			case config.RAServerName:
-				if len(*flags.raURLs) > 0 {
-					httpCfg.ListenURLs = *flags.raURLs
 					httpCfg.Disabled = len(httpCfg.ListenURLs) == 1 && httpCfg.ListenURLs[0] == "none"
 				}
 			default:

@@ -18,6 +18,8 @@ type CAClient interface {
 	Issuers(ctx context.Context) (*pb.IssuersInfoResponse, error)
 	// PublishCrls returns published CRLs
 	PublishCrls(ctx context.Context, req *pb.PublishCrlsRequest) (*pb.CrlsResponse, error)
+	// RevokeCertificate returns the revoked certificate
+	RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error)
 }
 
 type authorityClient struct {
@@ -60,6 +62,11 @@ func (c *authorityClient) PublishCrls(ctx context.Context, req *pb.PublishCrlsRe
 	return c.remote.PublishCrls(ctx, req, c.callOpts...)
 }
 
+// RevokeCertificate returns the revoked certificate
+func (c *authorityClient) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error) {
+	return c.remote.RevokeCertificate(ctx, in, c.callOpts...)
+}
+
 type retryCAClient struct {
 	authority pb.CAServiceClient
 }
@@ -91,4 +98,9 @@ func (c *retryCAClient) Issuers(ctx context.Context, in *empty.Empty, opts ...gr
 // PublishCrls returns published CRLs
 func (c *retryCAClient) PublishCrls(ctx context.Context, req *pb.PublishCrlsRequest, opts ...grpc.CallOption) (*pb.CrlsResponse, error) {
 	return c.authority.PublishCrls(ctx, req, opts...)
+}
+
+// RevokeCertificate returns the revoked certificate
+func (c *retryCAClient) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest, opts ...grpc.CallOption) (*pb.RevokedCertificateResponse, error) {
+	return c.authority.RevokeCertificate(ctx, in, opts...)
 }

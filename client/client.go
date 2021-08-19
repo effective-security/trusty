@@ -97,11 +97,6 @@ func New(cfg *Config) (*Client, error) {
 	return newClient(cfg)
 }
 
-// RAClient returns RAClient client from connection
-func (c *Client) RAClient() RAClient {
-	return NewRAClient(c.conn, c.callOpts)
-}
-
 // CAClient returns CAClient client from connection
 func (c *Client) CAClient() CAClient {
 	return NewCAClient(c.conn, c.callOpts)
