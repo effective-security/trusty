@@ -15,10 +15,15 @@ import (
 	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/api/v2acme"
 	"github.com/ekspand/trusty/internal/db"
+	"github.com/go-phorce/dolly/metrics"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/go-phorce/dolly/xlog"
+)
+
+var (
+	keyForACMEOrder = []string{"acme", "order"}
 )
 
 // NewOrderHandler creates an order
@@ -57,7 +62,7 @@ func (s *Service) NewOrderHandler() rest.Handle {
 		if req.NotBefore != "" {
 			notBefore, err = time.Parse("2006-01-02T15:04:05Z", req.NotBefore)
 			if err != nil {
-				//	s.writeProblem(w, r, v2acme.MalformedError("NotBefore and NotAfter are not supported"))
+				s.writeProblem(w, r, v2acme.MalformedError("invalid not_before value: %s", err.Error()))
 				return
 			}
 			notBefore = notBefore.UTC()
@@ -68,7 +73,7 @@ func (s *Service) NewOrderHandler() rest.Handle {
 		if req.NotAfter != "" {
 			notAfter, err = time.Parse("2006-01-02T15:04:05Z", req.NotAfter)
 			if err != nil {
-				//	s.writeProblem(w, r, v2acme.MalformedError("NotBefore and NotAfter are not supported"))
+				s.writeProblem(w, r, v2acme.MalformedError("invalid not_after value: %s", err.Error()))
 				return
 			}
 			notAfter = notAfter.UTC()
@@ -107,19 +112,14 @@ func (s *Service) NewOrderHandler() rest.Handle {
 
 				order = orderUpdated
 			}
-		} else {
-			/* TODO: Audit
-			s.server.Audit(
-				ServiceName,
-				evtOrderCreated,
-				certcentralID,
-				"",
-				0,
-				fmt.Sprintf("acctID=%s, orderID=%s, names=[%s]",
-					account.ID, order.ID, strings.Join(dnsNames, ",")),
-			)
-			*/
 		}
+
+		tags := []metrics.Tag{
+			{Name: "account", Value: db.IDString(account.ID)},
+			{Name: "existing", Value: fmt.Sprintf("%t", existing)},
+		}
+
+		metrics.IncrCounter(keyForACMEOrder, 1, tags...)
 
 		s.writeOrder(w, r, status, order)
 	}

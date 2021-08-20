@@ -220,7 +220,7 @@ func createOrg(t *testing.T) (*orgsmodel.Organization, *model.APIKey) {
 		CreatedAt:  now,
 		UpdatedAt:  now,
 		Status:     v1.OrgStatusApproved,
-		ExpiresAt:  now.Add(8700 * time.Hour),
+		ExpiresAt:  now.Add(24 * 90 * time.Hour),
 	}
 
 	ctx := context.Background()

@@ -64,6 +64,7 @@ func (s *Service) CreateSubsciptionHandler() rest.Handle {
 		}
 
 		org.Status = v1.OrgStatusPaymentProcessing
+		org.ExpiresAt = subscription.ExpiresAt
 		org, err = s.db.UpdateOrgStatus(ctx, org)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to create subscription, status updated failed for org %d", org.ID).WithCause(err))
@@ -314,6 +315,7 @@ func (s *Service) handlePaymentIntentEvent(
 	} else if org.Status == v1.OrgStatusPaymentProcessing {
 		sub.Status = paymentIntent.Status
 		org.Status = v1.OrgStatusPaid
+		org.ExpiresAt = sub.ExpiresAt
 		_, _, err = s.db.UpdateSubscriptionAndOrgStatus(ctx, sub, org)
 		if err != nil {
 			return errors.Annotatef(err, "webhook: unable to update sub: %d and org: %d", sub.ID, org.ID)

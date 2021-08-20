@@ -59,6 +59,7 @@ func TestNewOrderHandler(t *testing.T) {
 	//
 
 	orderReq := &v2acme.OrderRequest{
+		NotAfter: time.Now().Add(46000 * time.Hour).UTC().Format(time.RFC3339),
 		Identifiers: []v2acme.Identifier{
 			{
 				Type:  v2acme.IdentifierTNAuthList,
@@ -78,7 +79,7 @@ func TestNewOrderHandler(t *testing.T) {
 		r := signAndPost(t, newOrderURL, orderReq, acctURL, clientKey1, svc)
 
 		h(w, r, nil)
-		require.Equal(t, http.StatusCreated, w.Code, problemDetails(w.Body.Bytes()))
+		require.True(t, http.StatusCreated == w.Code || http.StatusOK == w.Code, problemDetails(w.Body.Bytes()))
 		assert.NotEmpty(t, w.Header().Get(header.ReplayNonce))
 
 		res := new(v2acme.Order)
@@ -255,6 +256,7 @@ func TestNewOrderHandler(t *testing.T) {
 		assert.NotEmpty(t, chain)
 
 		cert := chain[0]
+		assert.False(t, cert.NotBefore.UTC().After(org.ExpiresAt.UTC()))
 		ext := findExtension(cert.Extensions, asn1.ObjectIdentifier{1, 3, 6, 1, 5, 5, 7, 1, 26})
 		assert.NotNil(t, ext)
 	})
