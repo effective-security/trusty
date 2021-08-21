@@ -3,6 +3,7 @@ package certpublisher
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/pkg/storage"
@@ -36,7 +37,12 @@ func (p *publisher) PublishCertificate(ctx context.Context, cert *pb.Certificate
 
 	logger.KV(xlog.INFO, "location", location)
 
-	_, err := storage.WriteFile(ctx, location, []byte(cert.Pem))
+	pem := strings.TrimSpace(cert.Pem)
+	if len(cert.IssuersPem) > 0 {
+		pem = pem + "\n" + strings.TrimSpace(cert.IssuersPem)
+	}
+
+	_, err := storage.WriteFile(ctx, location, []byte(pem))
 	if err != nil {
 		return "", errors.Annotatef(err, "unable to write file to: "+location)
 	}
