@@ -22,7 +22,7 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 		return nil, errors.Trace(err)
 	}
 
-	logger.Debugf("id=%d, subject=%q, skid=%s", id, crt.Subject, crt.SKID)
+	logger.Tracef("id=%d, subject=%q, skid=%s", id, crt.Subject, crt.SKID)
 
 	res := new(model.Certificate)
 	var locations string
@@ -66,13 +66,12 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 
 // RemoveCertificate removes Cert
 func (p *Provider) RemoveCertificate(ctx context.Context, id uint64) error {
+	logger.Noticef("id=%d", id)
 	_, err := p.db.ExecContext(ctx, `DELETE FROM certificates WHERE id=$1;`, id)
 	if err != nil {
 		logger.Errorf("err=[%s]", errors.Details(err))
 		return errors.Trace(err)
 	}
-
-	logger.Noticef("id=%d", id)
 
 	return nil
 }
