@@ -53,7 +53,11 @@ func (s *Service) NewOrderHandler() rest.Handle {
 		// check the Org is approved
 		orgID, _ := db.ID(account.ExternalID)
 		org, err := s.orgsdb.GetOrg(ctx, orgID)
-		if err != nil || org.Status != v1.OrgStatusApproved {
+		if err != nil {
+			s.writeProblem(w, r, v2acme.NotFoundError("organization not found").WithSource(err))
+			return
+		}
+		if org.Status != v1.OrgStatusApproved {
 			s.writeProblem(w, r, v2acme.MalformedError("organization is not in Approved state"))
 			return
 		}
