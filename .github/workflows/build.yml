@@ -152,18 +152,11 @@ jobs:
         echo "ITEST_IMAGE_TAG=$ITEST_IMAGE_TAG"
         make docker-citest
 
-    - name: Get PR number
-      if: github.event_name == 'push'
-      id: get_pr_number
-      uses: actions-ecosystem/action-get-merged-pull-request@v1.0.1
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-
     - name: Create tags comment
-      if: steps.get_pr_number.number
+      if: github.ref == 'refs/heads/master' && github.event_name == 'pull_request'
       uses: peter-evans/create-or-update-comment@v1
       with:
-        issue-number: ${{ steps.get_pr_number.number }}
+        issue-number: ${{ github.event.number }}
         body: |
           ### trusty 
             - tags:
