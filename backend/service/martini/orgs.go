@@ -392,15 +392,16 @@ func (s *Service) registerOrg(ctx context.Context, filerID string, requestor *mo
 
 	now := time.Now()
 	org = &model.Organization{
-		ExternalID:   filer.FilerIDInfo.FRN,
-		Provider:     v1.ProviderMartini,
-		Login:        filer.FilerIDInfo.FRN,
-		Name:         filer.FilerIDInfo.LegalName,
-		Email:        requestor.Email,
-		BillingEmail: requestor.Email,
-		Company:      filer.FilerIDInfo.LegalName,
-		CreatedAt:    now,
-		UpdatedAt:    now,
+		ExternalID:     filer.FilerIDInfo.FRN,
+		RegistrationID: filerID,
+		Provider:       v1.ProviderMartini,
+		Login:          filer.FilerIDInfo.FRN,
+		Name:           filer.FilerIDInfo.LegalName,
+		Email:          requestor.Email,
+		BillingEmail:   requestor.Email,
+		Company:        filer.FilerIDInfo.LegalName,
+		CreatedAt:      now,
+		UpdatedAt:      now,
 		// Type          :
 		Street:     filer.FilerIDInfo.HQAddress.AddressLine,
 		City:       filer.FilerIDInfo.HQAddress.City,

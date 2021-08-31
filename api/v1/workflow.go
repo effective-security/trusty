@@ -41,30 +41,31 @@ const (
 
 // Organization represents an organization account.
 type Organization struct {
-	ID            string    `json:"id"`
-	ExternalID    string    `json:"extern_id,omitempty"`
-	Provider      string    `json:"provider,omitempty"`
-	Login         string    `json:"login"`
-	AvatarURL     string    `json:"avatar_url,omitempty"`
-	URL           string    `json:"html_url,omitempty"`
-	Name          string    `json:"name"`
-	Email         string    `json:"email"`
-	BillingEmail  string    `json:"billing_email,omitempty"`
-	Company       string    `json:"company,omitempty"`
-	Location      string    `json:"location,omitempty"`
-	Type          string    `json:"type,omitempty"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
-	Street        string    `json:"street_address,omitempty"`
-	City          string    `json:"city,omitempty"`
-	PostalCode    string    `json:"postal_code,omitempty"`
-	Region        string    `json:"region,omitempty"`
-	Country       string    `json:"country,omitempty"`
-	Phone         string    `json:"phone,omitempty"`
-	ApproverName  string    `json:"approver_name,omitempty"`
-	ApproverEmail string    `json:"approver_email,omitempty"`
-	Status        string    `json:"status,omitempty"`
-	ExpiresAt     time.Time `json:"expires_at"`
+	ID             string    `json:"id"`
+	ExternalID     string    `json:"extern_id,omitempty"`
+	RegistrationID string    `json:"registration_id,omitempty"`
+	Provider       string    `json:"provider,omitempty"`
+	Login          string    `json:"login"`
+	AvatarURL      string    `json:"avatar_url,omitempty"`
+	URL            string    `json:"html_url,omitempty"`
+	Name           string    `json:"name"`
+	Email          string    `json:"email"`
+	BillingEmail   string    `json:"billing_email,omitempty"`
+	Company        string    `json:"company,omitempty"`
+	Location       string    `json:"location,omitempty"`
+	Type           string    `json:"type,omitempty"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	Street         string    `json:"street_address,omitempty"`
+	City           string    `json:"city,omitempty"`
+	PostalCode     string    `json:"postal_code,omitempty"`
+	Region         string    `json:"region,omitempty"`
+	Country        string    `json:"country,omitempty"`
+	Phone          string    `json:"phone,omitempty"`
+	ApproverName   string    `json:"approver_name,omitempty"`
+	ApproverEmail  string    `json:"approver_email,omitempty"`
+	Status         string    `json:"status,omitempty"`
+	ExpiresAt      time.Time `json:"expires_at"`
 }
 
 // Repository represents a repository.

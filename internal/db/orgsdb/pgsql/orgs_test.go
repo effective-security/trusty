@@ -20,11 +20,12 @@ func TestUpdateOrg(t *testing.T) {
 	email := login + "@trusty.com"
 
 	o := &model.Organization{
-		ExternalID: fmt.Sprintf("%d", id+2),
-		Provider:   v1.ProviderGithub,
-		Name:       name,
-		Login:      login,
-		Email:      email,
+		ExternalID:     fmt.Sprintf("%d", id+2),
+		RegistrationID: fmt.Sprintf("%d", id+3),
+		Provider:       v1.ProviderGithub,
+		Name:           name,
+		Login:          login,
+		Email:          email,
 		//BillingEmail: email,
 		Company:       "ekspand",
 		Location:      "Kirkland, WA",
@@ -64,6 +65,8 @@ func TestUpdateOrg(t *testing.T) {
 	assert.Equal(t, o.ApproverEmail, org.ApproverEmail)
 	assert.Equal(t, o.ApproverName, org.ApproverName)
 	assert.Equal(t, o.Status, org.Status)
+	assert.Equal(t, o.ExternalID, org.ExternalID)
+	assert.Equal(t, o.RegistrationID, org.RegistrationID)
 
 	org.Company = "Ekspand"
 	org.BillingEmail = email
@@ -141,11 +144,12 @@ func Test_Membership(t *testing.T) {
 	name := fmt.Sprintf("org-%d", id)
 
 	o := &model.Organization{
-		ExternalID: fmt.Sprintf("%d", id),
-		Provider:   v1.ProviderGithub,
-		Name:       name,
-		Login:      email1,
-		Email:      email1,
+		ExternalID:     fmt.Sprintf("%d", id),
+		RegistrationID: fmt.Sprintf("%d", id+1),
+		Provider:       v1.ProviderGithub,
+		Name:           name,
+		Login:          email1,
+		Email:          email1,
 		//BillingEmail: email,
 		Company:   "ekspand",
 		Location:  "Kirkland, WA",
