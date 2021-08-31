@@ -153,7 +153,7 @@ jobs:
         make docker-citest
 
     - name: Create tags comment
-      if: github.ref == 'refs/heads/master' && github.event_name == 'pull_request'
+      if: github.base_ref == 'master' && github.event_name == 'pull_request'
       uses: peter-evans/create-or-update-comment@v1
       with:
         issue-number: ${{ github.event.number }}

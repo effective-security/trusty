@@ -86,6 +86,10 @@ func (s *Service) writeAuthorization(w http.ResponseWriter, r *http.Request, sta
 			a.Challenges[i].Error = chall.Error
 		}
 
+		if chall.Type == "tkauth-01" {
+			a.Challenges[i].TKAuthType = "atc"
+		}
+
 		// https://xxx.com/v2/acme/account/:acct_id/challenge/:authz_id/:id
 		a.Challenges[i].URL = s.baseURL() + fmt.Sprintf(uriChallengeByIDFmt, authz.RegistrationID, authz.ID, chall.ID)
 	}
