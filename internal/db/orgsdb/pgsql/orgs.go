@@ -25,15 +25,16 @@ func (p *Provider) UpdateOrg(ctx context.Context, org *model.Organization) (*mod
 	res := new(model.Organization)
 
 	err = p.db.QueryRowContext(ctx, `
-			INSERT INTO orgs(id,extern_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at,street_address,city,postal_code,region,country,phone,approver_email,approver_name,status,expires_at)
-				VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)
+			INSERT INTO orgs(id,extern_id,reg_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at,street_address,city,postal_code,region,country,phone,approver_email,approver_name,status,expires_at)
+				VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25)
 			ON CONFLICT (provider,login)
 			DO UPDATE
-				SET name=$5,email=$6,billing_email=$7,company=$8,location=$9,avatar_url=$10,html_url=$11,type=$12,created_at=$13,updated_at=$14,
-				street_address=$15,city=$16,postal_code=$17,region=$18,country=$19,phone=$20
-			RETURNING id,extern_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at,street_address,city,postal_code,region,country,phone,approver_email,approver_name,status,expires_at
+				SET name=$6,email=$7,billing_email=$8,company=$9,location=$10,avatar_url=$11,html_url=$12,type=$13,created_at=$14,updated_at=$15,
+				street_address=$16,city=$17,postal_code=$18,region=$19,country=$20,phone=$21
+			RETURNING id,extern_id,reg_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at,street_address,city,postal_code,region,country,phone,approver_email,approver_name,status,expires_at
 			;`, id,
-		org.ExternalID, org.Provider, org.Login, org.Name, org.Email, org.BillingEmail, org.Company, org.Location,
+		org.ExternalID, org.RegistrationID,
+		org.Provider, org.Login, org.Name, org.Email, org.BillingEmail, org.Company, org.Location,
 		org.AvatarURL, org.URL,
 		org.Type,
 		org.CreatedAt.UTC(),
@@ -42,6 +43,7 @@ func (p *Provider) UpdateOrg(ctx context.Context, org *model.Organization) (*mod
 		org.ApproverEmail, org.ApproverName, org.Status, org.ExpiresAt.UTC(),
 	).Scan(&res.ID,
 		&res.ExternalID,
+		&res.RegistrationID,
 		&res.Provider,
 		&res.Login,
 		&res.Name,
@@ -89,10 +91,11 @@ func (p *Provider) UpdateOrgStatus(ctx context.Context, org *model.Organization)
 			UPDATE orgs
 				SET approver_email=$2,approver_name=$3,status=$4,expires_at=$5
 			WHERE id = $1
-			RETURNING id,extern_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at,street_address,city,postal_code,region,country,phone,approver_email,approver_name,status,expires_at
+			RETURNING id,extern_id,reg_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at,street_address,city,postal_code,region,country,phone,approver_email,approver_name,status,expires_at
 			;`, org.ID, org.ApproverEmail, org.ApproverName, org.Status, org.ExpiresAt.UTC(),
 	).Scan(&res.ID,
 		&res.ExternalID,
+		&res.RegistrationID,
 		&res.Provider,
 		&res.Login,
 		&res.Name,
@@ -130,12 +133,13 @@ func (p *Provider) GetOrg(ctx context.Context, id uint64) (*model.Organization, 
 	res := new(model.Organization)
 
 	err := p.db.QueryRowContext(ctx,
-		`SELECT id,extern_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at,street_address,city,postal_code,region,country,phone,approver_email,approver_name,status,expires_at
+		`SELECT id,extern_id,reg_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at,street_address,city,postal_code,region,country,phone,approver_email,approver_name,status,expires_at
 		FROM orgs
 		WHERE id=$1
 		;`, id,
 	).Scan(&res.ID,
 		&res.ExternalID,
+		&res.RegistrationID,
 		&res.Provider,
 		&res.Login,
 		&res.Name,
@@ -173,12 +177,13 @@ func (p *Provider) GetOrgByExternalID(ctx context.Context, provider, externalID 
 	res := new(model.Organization)
 
 	err := p.db.QueryRowContext(ctx,
-		`SELECT id,extern_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at,street_address,city,postal_code,region,country,phone,approver_email,approver_name,status,expires_at
+		`SELECT id,extern_id,reg_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at,street_address,city,postal_code,region,country,phone,approver_email,approver_name,status,expires_at
 		FROM orgs
 		WHERE provider=$1 AND extern_id=$2
 		;`, provider, externalID,
 	).Scan(&res.ID,
 		&res.ExternalID,
+		&res.RegistrationID,
 		&res.Provider,
 		&res.Login,
 		&res.Name,
@@ -517,6 +522,7 @@ func (p *Provider) GetUserOrgs(ctx context.Context, userID uint64) ([]*model.Org
 			SELECT
 				orgs.id,
 				orgs.extern_id,
+				orgs.reg_id,
 				orgs.provider,
 				orgs.login,
 				orgs.name,
@@ -558,6 +564,7 @@ func (p *Provider) GetUserOrgs(ctx context.Context, userID uint64) ([]*model.Org
 		err = q.Scan(
 			&res.ID,
 			&res.ExternalID,
+			&res.RegistrationID,
 			&res.Provider,
 			&res.Login,
 			&res.Name,

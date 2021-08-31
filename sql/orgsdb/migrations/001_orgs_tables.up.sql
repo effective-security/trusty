@@ -193,4 +193,3 @@ CREATE INDEX IF NOT EXISTS idx_repos_provider
 --
 --
 COMMIT;
-

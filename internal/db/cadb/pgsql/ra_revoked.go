@@ -28,7 +28,7 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 	}
 
 	crt := &revoked.Certificate
-	logger.Debugf("subject=%q, skid=%s, ikid=%s", crt.Subject, crt.SKID, crt.IKID)
+	logger.Debugf("id=%d,subject=%q, skid=%s, ikid=%s", id, crt.Subject, crt.SKID, crt.IKID)
 
 	res := new(model.RevokedCertificate)
 
