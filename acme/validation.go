@@ -130,7 +130,7 @@ func (d *Provider) PerformValidation(ctx context.Context, regID uint64, idn v2ac
 	case v2acme.IdentifierTNAuthList:
 		return d.ValidateTNAuthList(ctx, regID, idn.Value, chall)
 	}
-	return nil, errors.Errorf("unsupported challenge type: %s", idn.Type)
+	return nil, v2acme.RejectedIdentifierError("unsupported challenge type: %s", idn.Type)
 }
 
 // TkClaims for SPC
@@ -151,7 +151,7 @@ func (d *Provider) ValidateTNAuthList(ctx context.Context, regID uint64, idn str
 	var challenge map[string]string
 	err := json.Unmarshal([]byte(chall.KeyAuthorization), &challenge)
 	if err != nil {
-		return nil, errors.Annotate(err, "invalid challenge value")
+		return nil, v2acme.MalformedError("invalid challenge value").WithSource(err)
 	}
 
 	atc := challenge["atc"]
@@ -162,37 +162,37 @@ func (d *Provider) ValidateTNAuthList(ctx context.Context, regID uint64, idn str
 		return d.stipaChain[0].PublicKey, nil
 	})
 	if err != nil {
-		return nil, errors.Annotate(err, "failed to validate SPC token signature")
+		return nil, v2acme.MalformedError("failed to validate SPC token signature").WithSource(err)
 	}
 	if parsed.Header["alg"].(string) != "ES256" {
-		return nil, errors.Annotate(err, "unsupported SPC token alg")
+		return nil, v2acme.MalformedError("unsupported SPC token alg")
 	}
 	claims, ok := parsed.Claims.(*TkClaims)
 	if !ok || !parsed.Valid {
-		return nil, errors.Errorf("invalid SPC token")
+		return nil, v2acme.MalformedError("invalid SPC token")
 	}
 
 	if claims.ATC.TKType != string(v2acme.IdentifierTNAuthList) ||
 		claims.ATC.TKValue != idn {
-		return nil, errors.Errorf("invalid SPC token TKValue")
+		return nil, v2acme.MalformedError("invalid SPC token TKValue")
 	}
 
 	if time.Now().After(time.Unix(claims.Exp, 0)) {
-		return nil, errors.Errorf("expired SPC token")
+		return nil, v2acme.MalformedError("expired SPC token")
 	}
 
 	if regID != 0 {
 		// finally check the fingerprint
 		reg, err := d.db.GetRegistration(ctx, regID)
 		if err != nil {
-			return nil, errors.Annotatef(err, "unable to find registration %d", regID)
+			return nil, v2acme.NotFoundError("unable to find registration %d", regID).WithSource(err)
 		}
 
 		fp := strings.TrimLeft(claims.ATC.Fingerprint, "SHA256 ")
 		fp = strings.ReplaceAll(fp, ":", "")
 
 		if strings.EqualFold(reg.KeyID, fp) {
-			return nil, errors.Errorf("SPC fingerprint does not match")
+			return nil, v2acme.MalformedError("SPC fingerprint does not match")
 		}
 	}
 	return nil, nil

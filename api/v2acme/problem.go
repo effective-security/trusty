@@ -198,7 +198,7 @@ func UnauthorizedError(detail string, a ...interface{}) *Problem {
 func MethodNotAllowedError() *Problem {
 	return &Problem{
 		Type:       MalformedProblem,
-		Detail:     "Method not allowed",
+		Detail:     "method not allowed",
 		HTTPStatus: http.StatusMethodNotAllowed,
 	}
 }

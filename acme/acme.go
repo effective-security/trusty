@@ -112,8 +112,11 @@ func (d *Provider) NewOrder(ctx context.Context, p *model.OrderRequest) (*model.
 	// check for existing order
 	order, err := d.GetOrderByHash(ctx, p.RegistrationID, orderID)
 	if err == nil {
-		logger.Tracef("reason=found, regID=%d, orderID=%s, status=%v, expires=%s",
-			p.RegistrationID, orderID, order.Status, order.ExpiresAt.Format(time.RFC3339))
+		logger.Tracef("reason=found, regID=%d, orderID=%s, status=%v, expires=%s, not_after=%s, now=%s",
+			p.RegistrationID, orderID, order.Status,
+			order.ExpiresAt.Format(time.RFC3339),
+			p.NotAfter.Format(time.RFC3339),
+			now.Format(time.RFC3339))
 
 		if !order.ExpiresAt.IsZero() && order.ExpiresAt.Before(p.NotAfter) && now.Before(order.ExpiresAt) {
 			return order, true, nil
