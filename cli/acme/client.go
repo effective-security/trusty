@@ -41,9 +41,9 @@ func NewClient(httpClient *httpclient.Client, kid string, privateKey crypto.Priv
 
 // Account returns Account
 // if contact is empty, then it will check for existing account
-func (c *Client) Account(ctx context.Context, orgID string, hmac []byte, contact []string) (*v2acme.Account, string, error) {
+func (c *Client) Account(ctx context.Context, keyID string, hmac []byte, contact []string) (*v2acme.Account, string, error) {
 	newAccountURL := c.Directory["newAccount"]
-	eabJWS, err := c.signEABContent(newAccountURL, orgID, hmac)
+	eabJWS, err := c.signEABContent(newAccountURL, keyID, hmac)
 	if err != nil {
 		return nil, "", errors.Trace(err)
 	}
@@ -59,9 +59,9 @@ func (c *Client) Account(ctx context.Context, orgID string, hmac []byte, contact
 	if err != nil {
 		return nil, "", errors.Trace(err)
 	}
-	keyID := hdr.Get(header.Location)
-	c.Jws.SetKid(keyID)
-	return res, keyID, nil
+	keyIDLoc := hdr.Get(header.Location)
+	c.Jws.SetKid(keyIDLoc)
+	return res, keyIDLoc, nil
 }
 
 // Order submits the order
