@@ -49,7 +49,7 @@ func (s *testSuite) TestGetAccount() {
 	org := "82936648303640676"
 	mac := "905664a7edc22160bc79f52aa9bfe6bc"
 	flags := acme.GetAccountFlags{
-		OrgID:  &org,
+		KeyID:  &org,
 		EabMAC: &mac,
 	}
 	err := s.Run(acme.GetAccount, &flags)
@@ -60,11 +60,11 @@ func (s *testSuite) TestGetAccount() {
 func (s *testSuite) TestRegisterAccount() {
 	s.prepDirectory()
 
-	org := "82936648303640676"
+	id := "82936648303640676"
 	mac := "905664a7edc22160bc79f52aa9bfe6bc"
 	contact := []string{"denis"}
 	flags := acme.RegisterAccountFlags{
-		OrgID:   &org,
+		KeyID:   &id,
 		EabMAC:  &mac,
 		Contact: &contact,
 	}

@@ -54,7 +54,7 @@ func Directory(c ctl.Control, _ interface{}) error {
 
 // GetAccountFlags for GetAccount command
 type GetAccountFlags struct {
-	OrgID  *string
+	KeyID  *string
 	EabMAC *string
 }
 
@@ -68,7 +68,7 @@ func GetAccount(c ctl.Control, p interface{}) error {
 		return errors.Trace(err)
 	}
 
-	accountsStorage, err := NewAccountsStorage("", client.CurrentHost(), *flags.OrgID)
+	accountsStorage, err := NewAccountsStorage("", client.CurrentHost(), *flags.KeyID)
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -90,7 +90,7 @@ func GetAccount(c ctl.Control, p interface{}) error {
 		}
 
 		account = &Account{
-			OrgID:       *flags.OrgID,
+			KeyID:       *flags.KeyID,
 			Fingerprint: fp,
 			key:         privateKey,
 		}
@@ -108,7 +108,7 @@ func GetAccount(c ctl.Control, p interface{}) error {
 			return errors.Trace(err)
 		}
 
-		reg, keyID, err := ac.Account(context.Background(), *flags.OrgID, hm, nil)
+		reg, keyID, err := ac.Account(context.Background(), *flags.KeyID, hm, nil)
 		if err != nil {
 			return errors.Annotatef(err, "unable to retrieve account")
 		}
@@ -135,7 +135,7 @@ func GetAccount(c ctl.Control, p interface{}) error {
 
 // RegisterAccountFlags for RegisterAccount command
 type RegisterAccountFlags struct {
-	OrgID   *string
+	KeyID   *string
 	EabMAC  *string
 	Contact *[]string
 }
@@ -150,7 +150,7 @@ func RegisterAccount(c ctl.Control, p interface{}) error {
 		return errors.Trace(err)
 	}
 
-	accountsStorage, err := NewAccountsStorage("", client.CurrentHost(), *flags.OrgID)
+	accountsStorage, err := NewAccountsStorage("", client.CurrentHost(), *flags.KeyID)
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -172,7 +172,8 @@ func RegisterAccount(c ctl.Control, p interface{}) error {
 		}
 
 		account = &Account{
-			OrgID:       *flags.OrgID,
+			//OrgID:       *flags.OrgID,
+			KeyID:       *flags.KeyID,
 			Fingerprint: fp,
 			key:         privateKey,
 		}
@@ -190,7 +191,7 @@ func RegisterAccount(c ctl.Control, p interface{}) error {
 			return errors.Trace(err)
 		}
 
-		reg, keyID, err := ac.Account(context.Background(), *flags.OrgID, hm, *flags.Contact)
+		reg, keyID, err := ac.Account(context.Background(), *flags.KeyID, hm, *flags.Contact)
 		if err != nil {
 			return errors.Trace(err)
 		}
@@ -217,7 +218,7 @@ func RegisterAccount(c ctl.Control, p interface{}) error {
 
 // OrderFlags flags for Order command
 type OrderFlags struct {
-	OrgID *string
+	KeyID *string
 	SPC   *string
 }
 
@@ -236,7 +237,7 @@ func Order(c ctl.Control, p interface{}) error {
 		return errors.Trace(err)
 	}
 
-	accountsStorage, err := NewAccountsStorage("", client.CurrentHost(), *flags.OrgID)
+	accountsStorage, err := NewAccountsStorage("", client.CurrentHost(), *flags.KeyID)
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -352,7 +353,7 @@ func Order(c ctl.Control, p interface{}) error {
 
 	prov := csr.NewProvider(inmemcrypto.NewProvider())
 	req := &csr.CertificateRequest{
-		KeyRequest: prov.NewKeyRequest(*flags.OrgID, "ECDSA", 256, csr.SigningKey),
+		KeyRequest: prov.NewKeyRequest(*flags.KeyID, "ECDSA", 256, csr.SigningKey),
 		Extensions: []csr.X509Extension{
 			{
 				ID:    csr.OID{1, 3, 6, 1, 5, 5, 7, 1, 26},

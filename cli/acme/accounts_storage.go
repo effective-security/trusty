@@ -39,7 +39,7 @@ const (
 // rootUserPath:
 //
 //     ~/.mrtsec/accounts/martini_443/83945903542501476/
-//          │      │             │             └── orgID
+//          │      │             │             └── keyID
 //          │      │             └── CA server ("server" option)
 //          │      └── root accounts directory
 //          └── "path" option
@@ -48,7 +48,7 @@ const (
 //
 //     ~/.mrtsec/accounts/martini_443/83945903542501476/key
 //          │      │             │             │
-//          │      │             │             └── orgID
+//          │      │             │             └── keyID
 //          │      │             └── CA server ("server" option)
 //          │      └── root accounts directory
 //          └── "path" option
@@ -57,7 +57,7 @@ const (
 //
 //     ~/.mrtsec/accounts/martini_443/83945903542501476/account.json
 //          │      │             │             │             └── account file
-//          │      │             │             └── orgID ("keyID" option)
+//          │      │             │             └── keyID ("keyID" option)
 //          │      │             └── CA server ("server" option)
 //          │      └── root accounts directory
 //          └── "path" option
@@ -69,7 +69,7 @@ const (
 // AccountsStorage represents Account storage
 type AccountsStorage struct {
 	server          string
-	orgID           string
+	keyID           string
 	rootPath        string
 	orgPath         string
 	certsPath       string
@@ -80,7 +80,7 @@ type AccountsStorage struct {
 const filePerm os.FileMode = 0o600
 
 // NewAccountsStorage Creates a new AccountsStorage.
-func NewAccountsStorage(folder, server string, orgID string) (*AccountsStorage, error) {
+func NewAccountsStorage(folder, server string, keyID string) (*AccountsStorage, error) {
 	if folder == "" {
 		dirname, err := os.UserHomeDir()
 		if err != nil {
@@ -99,14 +99,14 @@ func NewAccountsStorage(folder, server string, orgID string) (*AccountsStorage, 
 	certsPath := filepath.Join(folder, baseCertsRootFolderName)
 	serverPath := strings.NewReplacer(":", "_", "/", string(os.PathSeparator)).Replace(serverURL.Host)
 	accountsPath := filepath.Join(rootPath, serverPath)
-	orgPath := filepath.Join(accountsPath, orgID)
+	orgPath := filepath.Join(accountsPath, keyID)
 
 	os.MkdirAll(orgPath, 0700)
 	os.MkdirAll(certsPath, 0700)
 
 	return &AccountsStorage{
 		server:          server,
-		orgID:           orgID,
+		keyID:           keyID,
 		rootPath:        rootPath,
 		orgPath:         orgPath,
 		certsPath:       certsPath,
@@ -131,9 +131,9 @@ func (s *AccountsStorage) GetCertificatesPath() string {
 	return s.certsPath
 }
 
-// GetOrgID returns OrgID
-func (s *AccountsStorage) GetOrgID() string {
-	return s.orgID
+// GetKeyID returns KeyID
+func (s *AccountsStorage) GetKeyID() string {
+	return s.keyID
 }
 
 // Save account
@@ -150,20 +150,20 @@ func (s *AccountsStorage) Save(account *Account) error {
 func (s *AccountsStorage) LoadAccount(privateKey crypto.PrivateKey) (*Account, error) {
 	fileBytes, err := ioutil.ReadFile(s.accountFilePath)
 	if err != nil {
-		return nil, errors.Annotatef(err, "unable to load file for account %s", s.orgID)
+		return nil, errors.Annotatef(err, "unable to load file for account %s", s.keyID)
 	}
 
 	var account Account
 	err = json.Unmarshal(fileBytes, &account)
 	if err != nil {
-		return nil, errors.Annotatef(err, "unable to parse file for account %s", s.orgID)
+		return nil, errors.Annotatef(err, "unable to parse file for account %s", s.keyID)
 	}
 
 	account.key = privateKey
 	if account.Fingerprint == "" {
 		account.Fingerprint, err = acmemodel.GetKeyFingerprint(privateKey)
 		if err != nil {
-			return nil, errors.Annotatef(err, "unable to fingerprint key for account %s", s.orgID)
+			return nil, errors.Annotatef(err, "unable to fingerprint key for account %s", s.keyID)
 		}
 	}
 
@@ -173,7 +173,7 @@ func (s *AccountsStorage) LoadAccount(privateKey crypto.PrivateKey) (*Account, e
 // GetPrivateKey returns PrivateKey
 func (s *AccountsStorage) GetPrivateKey() (crypto.PrivateKey, error) {
 	if _, err := os.Stat(s.keyFilePath); os.IsNotExist(err) {
-		logger.Infof("no key found for account %s. Generating a key.", s.orgID)
+		logger.Infof("no key found for account %s. Generating a key.", s.keyID)
 		err = createNonExistingFolder(s.orgPath)
 		if err != nil {
 			return nil, errors.Annotatef(err, "unable to create folder %s", s.keyFilePath)
@@ -181,7 +181,7 @@ func (s *AccountsStorage) GetPrivateKey() (crypto.PrivateKey, error) {
 
 		privateKey, err := generatePrivateKey(s.keyFilePath)
 		if err != nil {
-			return nil, errors.Annotatef(err, "unable to generate private key for account %s", s.orgID)
+			return nil, errors.Annotatef(err, "unable to generate private key for account %s", s.keyID)
 		}
 
 		logger.Infof("saved key to %s", s.keyFilePath)
@@ -266,7 +266,7 @@ func loadPrivateKey(file string) (crypto.PrivateKey, error) {
 
 // Account represents a users local saved credentials.
 type Account struct {
-	OrgID        string          `json:"org_id"`
+	KeyID        string          `json:"key_id"`
 	AccountURL   string          `json:"account_url"`
 	Registration *v2acme.Account `json:"registration"`
 	Fingerprint  string          `json:"fingerprint"`
