@@ -85,6 +85,7 @@ build_kube:
 build_martini:
 	echo "*** Building martini"
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/martini ./cmd/martini
+	GOOS=darwin GOARCH=amd64 go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/martini.mac ./cmd/martini
 
 build: build_trusty build_trustyctl build_tool build_kube build_martini
 
