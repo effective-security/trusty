@@ -98,7 +98,7 @@ func (s *Service) SyncGithubOrgs(ctx context.Context, w http.ResponseWriter, use
 
 				o, _, err := client.Organizations.Get(ctx, login)
 				if err != nil {
-					logger.Errorf("user=%s, orgs=%s, err=[%v]", user.Email, login, errors.Details(err))
+					logger.Errorf("user=%s, orgs=%s, err=%v", user.Email, login, errors.Details(err))
 					return
 				}
 
@@ -118,14 +118,14 @@ func (s *Service) SyncGithubOrgs(ctx context.Context, w http.ResponseWriter, use
 					UpdatedAt:    o.GetCreatedAt(),
 				})
 				if err != nil {
-					logger.Errorf("user=%s, orgs=%s, err=[%v]", user.Email, login, errors.Details(err))
+					logger.Errorf("user=%s, orgs=%s, err=%v", user.Email, login, errors.Details(err))
 					return
 				}
 				ch <- mo.ToDto()
 
 				_, err = s.db.AddOrgMember(ctx, mo.ID, user.ID, "admin", v1.ProviderGithub)
 				if err != nil {
-					logger.Errorf("user=%s, orgs=%s, err=[%v]", user.Email, login, errors.Details(err))
+					logger.Errorf("user=%s, orgs=%s, err=%v", user.Email, login, errors.Details(err))
 				}
 			}(org.Organization.GetLogin())
 		}

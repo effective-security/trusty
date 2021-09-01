@@ -259,7 +259,7 @@ func (f *Factory) load(configFilename, hostnameOverride, baseDir string) (*Confi
 			if hn == "" {
 				hn, err = os.Hostname()
 				if err != nil {
-					logger.Errorf("reason=hostname, err=[%v]", errors.Details(err))
+					logger.Errorf("reason=hostname, err=%v", errors.Details(err))
 				}
 			}
 		}

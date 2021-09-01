@@ -149,7 +149,7 @@ func (r *Request) requestCertificate(ctx context.Context, client MinCertificates
 
 	chain, err := certutil.ParseChainFromPEM(certificate)
 	if err != nil {
-		logger.Errorf("failed to parse chain: " + errors.Details(err))
+		logger.Errorf("failed to parse chain: %v" + errors.Details(err))
 	} else {
 		b := new(strings.Builder)
 		print.Certificates(b, chain)

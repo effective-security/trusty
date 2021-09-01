@@ -226,17 +226,14 @@ func (p *Provider) RemoveOrg(ctx context.Context, id uint64) error {
 
 	_, err = p.db.ExecContext(ctx, `DELETE FROM orgmembers WHERE org_id=$1;`, id)
 	if err != nil {
-		logger.Errorf("err=[%s]", errors.Details(err))
 		return errors.Trace(err)
 	}
 	_, err = p.db.ExecContext(ctx, `DELETE FROM orgs WHERE id=$1;`, id)
 	if err != nil {
-		logger.Errorf("err=[%s]", errors.Details(err))
 		return errors.Trace(err)
 	}
 	_, err = p.db.ExecContext(ctx, `DELETE FROM subscriptions WHERE id=$1;`, id)
 	if err != nil {
-		logger.Errorf("err=[%s]", errors.Details(err))
 		return errors.Trace(err)
 	}
 

@@ -117,7 +117,7 @@ func Start(
 		e.disco = d
 		iden, err := roles.New(&cfg.IdentityMap, jwtParser)
 		if err != nil {
-			logger.Errorf("err=[%v]", errors.Details(err))
+			logger.Errorf("err=%v", errors.Details(err))
 			return err
 		}
 

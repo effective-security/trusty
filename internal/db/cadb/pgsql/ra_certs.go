@@ -69,7 +69,7 @@ func (p *Provider) RemoveCertificate(ctx context.Context, id uint64) error {
 	logger.Noticef("id=%d", id)
 	_, err := p.db.ExecContext(ctx, `DELETE FROM certificates WHERE id=$1;`, id)
 	if err != nil {
-		logger.Errorf("err=[%s]", errors.Details(err))
+		logger.Errorf("err=%v", errors.Details(err))
 		return errors.Trace(err)
 	}
 
