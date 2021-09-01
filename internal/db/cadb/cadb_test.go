@@ -35,6 +35,7 @@ func TestMain(m *testing.M) {
 		cfg.CaSQL.Driver,
 		cfg.CaSQL.DataSource,
 		cfg.CaSQL.MigrationsDir,
+		0,
 		testutils.IDGenerator().NextID,
 	)
 	if err != nil {

@@ -35,6 +35,7 @@ func TestMain(m *testing.M) {
 		cfg.OrgsSQL.Driver,
 		cfg.OrgsSQL.DataSource,
 		cfg.OrgsSQL.MigrationsDir,
+		0,
 		testutils.IDGenerator().NextID,
 	)
 	if err != nil {

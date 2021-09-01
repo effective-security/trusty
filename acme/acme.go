@@ -122,7 +122,7 @@ func (d *Provider) NewOrder(ctx context.Context, p *model.OrderRequest) (*model.
 			return order, true, nil
 		}
 	} else if !db.IsNotFoundError(err) {
-		logger.Errorf("err=[%v]", errors.Details(err))
+		logger.Errorf("err=[%v]", errors.ErrorStack(err))
 		// TODO? error or not?
 		// return nil, false, errors.Trace(err)
 	}

@@ -2,6 +2,7 @@ package acmedb
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"strings"
 
@@ -311,24 +312,26 @@ func (p *SQLProvider) PutIssuedCertificate(ctx context.Context, cert *model.Issu
 	res := new(model.IssuedCertificate)
 
 	err = p.db.QueryRowContext(ctx, `
-			INSERT INTO acmecerts(id,reg_id,order_id,binding_id,external_id,pem)
-				VALUES($1, $2, $3, $4, $5, $6)
+			INSERT INTO acmecerts(id,reg_id,order_id,binding_id,external_id,pem,locations)
+				VALUES($1, $2, $3, $4, $5, $6, $7)
 				ON CONFLICT (reg_id,order_id)
 			DO UPDATE
-				SET binding_id=$4,external_id=$5,pem=$6
-			RETURNING id,reg_id,order_id,binding_id,external_id,pem
+				SET binding_id=$4,external_id=$5,pem=$6,locations=$7
+			RETURNING id,reg_id,order_id,binding_id,external_id,pem,locations
 			;`, id,
 		cert.RegistrationID,
 		cert.OrderID,
 		cert.ExternalBindingID,
 		cert.ExternalID,
 		cert.Certificate,
+		cert.Locations,
 	).Scan(&res.ID,
 		&res.RegistrationID,
 		&res.OrderID,
 		&res.ExternalBindingID,
 		&res.ExternalID,
 		&res.Certificate,
+		&res.Locations,
 	)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -340,9 +343,11 @@ func (p *SQLProvider) PutIssuedCertificate(ctx context.Context, cert *model.Issu
 func (p *SQLProvider) GetIssuedCertificate(ctx context.Context, certID uint64) (*model.IssuedCertificate, error) {
 	res := new(model.IssuedCertificate)
 
+	var locations sql.NullString
+
 	err := p.db.QueryRowContext(ctx, `
 		SELECT
-			id,reg_id,order_id,binding_id,external_id,pem
+			id,reg_id,order_id,binding_id,external_id,pem,locations
 		FROM acmecerts
 		WHERE id = $1
 		;
@@ -353,9 +358,13 @@ func (p *SQLProvider) GetIssuedCertificate(ctx context.Context, certID uint64) (
 		&res.ExternalBindingID,
 		&res.ExternalID,
 		&res.Certificate,
+		&locations,
 	)
 	if err != nil {
 		return nil, errors.Trace(err)
+	}
+	if locations.Valid {
+		res.Locations = locations.String
 	}
 
 	return res, nil

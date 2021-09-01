@@ -404,7 +404,12 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*au
 }
 
 func provideOrgsDB(cfg *config.Configuration) (orgsdb.OrgsDb, orgsdb.OrgsReadOnlyDb, error) {
-	d, err := orgsdb.New(cfg.OrgsSQL.Driver, cfg.OrgsSQL.DataSource, cfg.OrgsSQL.MigrationsDir, IDGenerator.NextID)
+	d, err := orgsdb.New(
+		cfg.OrgsSQL.Driver,
+		cfg.OrgsSQL.DataSource,
+		cfg.OrgsSQL.MigrationsDir,
+		cfg.OrgsSQL.ForceVersion,
+		IDGenerator.NextID)
 	if err != nil {
 		return nil, nil, errors.Trace(err)
 	}
@@ -412,7 +417,12 @@ func provideOrgsDB(cfg *config.Configuration) (orgsdb.OrgsDb, orgsdb.OrgsReadOnl
 }
 
 func provideCaDB(cfg *config.Configuration) (cadb.CaDb, cadb.CaReadonlyDb, error) {
-	d, err := cadb.New(cfg.CaSQL.Driver, cfg.CaSQL.DataSource, cfg.CaSQL.MigrationsDir, IDGenerator.NextID)
+	d, err := cadb.New(
+		cfg.CaSQL.Driver,
+		cfg.CaSQL.DataSource,
+		cfg.CaSQL.MigrationsDir,
+		cfg.CaSQL.ForceVersion,
+		IDGenerator.NextID)
 	if err != nil {
 		return nil, nil, errors.Trace(err)
 	}
@@ -429,7 +439,12 @@ func provideAcme(cfg *config.Configuration) (acme.Controller, error) {
 		return nil, errors.Trace(err)
 	}
 
-	db, err := acmedb.New(cfg.CaSQL.Driver, cfg.CaSQL.DataSource, cfg.CaSQL.MigrationsDir, IDGenerator.NextID)
+	db, err := acmedb.New(
+		cfg.CaSQL.Driver,
+		cfg.CaSQL.DataSource,
+		cfg.CaSQL.MigrationsDir,
+		cfg.CaSQL.ForceVersion,
+		IDGenerator.NextID)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

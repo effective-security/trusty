@@ -66,7 +66,7 @@ type Provider interface {
 }
 
 // New creates a Provider instance
-func New(driverName, dataSourceName, migrationsDir string, nextID func() (uint64, error)) (Provider, error) {
+func New(driverName, dataSourceName, migrationsDir string, forceVersion int, nextID func() (uint64, error)) (Provider, error) {
 	ds, err := fileutil.LoadConfigWithSchema(dataSourceName)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -83,10 +83,10 @@ func New(driverName, dataSourceName, migrationsDir string, nextID func() (uint64
 		return nil, errors.Annotatef(err, "unable to ping DB: %s", driverName)
 	}
 
-	err = db.Migrate(migrationsDir, d)
+	err = db.Migrate(migrationsDir, forceVersion, d)
 	if err != nil && !strings.Contains(err.Error(), "no change") {
+		logger.Errorf("reason=migrate, force=%d, err=[%v]", forceVersion, errors.ErrorStack(err))
 		return nil, errors.Trace(err)
 	}
-
 	return NewSQLProvider(d, nextID)
 }

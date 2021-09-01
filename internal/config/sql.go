@@ -11,4 +11,7 @@ type SQL struct {
 
 	// MigrationsDir specifies the directory that contains migrations.
 	MigrationsDir string `json:"migrations_dir,omitempty" yaml:"migrations_dir,omitempty"`
+
+	// ForceVersion specifies to force version.
+	ForceVersion int `json:"force_version,omitempty" yaml:"force_version,omitempty"`
 }

@@ -162,6 +162,7 @@ type IssuedCertificate struct {
 	ExternalBindingID string `json:"binding_id" yaml:"binding_id"`
 	ExternalID        uint64 `json:"external_id" yaml:"external_id"`
 	Certificate       string `json:"pem" yaml:"pem"`
+	Locations         string `json:"locations" yaml:"locations"`
 }
 
 // OrderRequest specifies parameters for new Order
