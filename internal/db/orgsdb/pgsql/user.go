@@ -35,7 +35,7 @@ func (p *Provider) LoginUser(ctx context.Context, user *model.User) (*model.User
 			VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 		ON CONFLICT (provider,email)
 		DO UPDATE
-			SET company=$7,avatar_url=$8,access_token=$9, refresh_token=$10, token_expires_at=$11, login_count = users.login_count + 1, last_login_at=$13
+			SET extern_id=$2,login=$4,name=$5,company=$7,avatar_url=$8,access_token=$9, refresh_token=$10, token_expires_at=$11, login_count = users.login_count + 1, last_login_at=$13
 		RETURNING id,extern_id,provider,login,name,email,company,avatar_url,access_token,refresh_token,token_expires_at,login_count,last_login_at
 		;`, id, user.ExternalID, user.Provider, user.Login, user.Name, user.Email, user.Company, user.AvatarURL,
 		user.AccessToken, user.RefreshToken, user.TokenExpiresAt,

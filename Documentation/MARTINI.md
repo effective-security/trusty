@@ -162,7 +162,7 @@ bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem or
 ## Subscribe
 
 ```.sh
-bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem org subscribe --id 82923411415760996 --product prod_K3K7AZCkE3E0nF
+bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem org subscribe --product prod_K3K7AZCkE3E0nF --id 82923411415760996
 
 {
         "client_secret": "pi_3JPe0NKfgu58p9BH1Lu3Xqrr_secret_bYkh64vZLXHubuueYobMvYKnS",

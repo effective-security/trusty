@@ -193,9 +193,9 @@ func Test_Membership(t *testing.T) {
 	assert.Equal(t, email2, user2.Email)
 	assert.Equal(t, 1, user2.LoginCount)
 
-	ms, err := provider.AddOrgMember(ctx, org.ID, user1.ID, "admin", v1.ProviderGithub)
+	ms, err := provider.AddOrgMember(ctx, org.ID, user1.ID, v1.RoleAdmin, v1.ProviderGithub)
 	require.NoError(t, err)
-	assert.Equal(t, "admin", ms.Role)
+	assert.Equal(t, v1.RoleAdmin, ms.Role)
 	assert.Equal(t, user1.ID, ms.UserID)
 	assert.Equal(t, org.ID, ms.OrgID)
 

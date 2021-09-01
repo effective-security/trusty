@@ -62,7 +62,7 @@ func (s *Service) getFrnResponse(ctx context.Context, filerID string) (*v1.FccFr
 		return nil, errors.Annotate(err, "invalid filer ID")
 	}
 
-	if id <= 123456 {
+	if testFCCId[id] {
 		res := &v1.FccFrnResponse{
 			Filers: []v1.Filer{
 				{
@@ -199,9 +199,19 @@ func contactQueryResultsToDTO(c *fcc.ContactResults) *v1.FccContactResponse {
 	}
 }
 
+var testFCCId = map[uint64]bool{
+	123456: true,
+	123111: true,
+	123222: true,
+	123333: true,
+	123013: true,
+	123014: true,
+	123015: true,
+}
+
 var testEmails = map[string]string{
 	"0123456": "info+test@martinisecurity.com",
-	"0123111": "denis+test@martinisecurity.com",
+	"0123111": "denis@martinisecurity.com",
 	"0123222": "ryan+test@martinisecurity.com",
 	"0123333": "hayk.baluyan@gmail.com",
 	"0123013": "mihail@peculiarventures.com",

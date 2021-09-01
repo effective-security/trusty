@@ -318,6 +318,11 @@ func (s *Service) handlePaymentIntentEvent(
 	} else if org.Status == v1.OrgStatusPaymentProcessing {
 		sub.Status = paymentIntent.Status
 		org.Status = v1.OrgStatusPaid
+
+		if org.ApproverEmail == org.Email {
+			org.Status = v1.OrgStatusApproved
+		}
+
 		org.ExpiresAt = sub.ExpiresAt
 		_, _, err = s.db.UpdateSubscriptionAndOrgStatus(ctx, sub, org)
 		if err != nil {
