@@ -67,7 +67,12 @@ func TestMain(m *testing.M) {
 		}
 
 		acmecfg.Service.BaseURI = httpAddr
-		db, err := acmedb.New(cfg.CaSQL.Driver, cfg.CaSQL.DataSource, cfg.CaSQL.MigrationsDir, testutils.IDGenerator().NextID)
+		db, err := acmedb.New(
+			cfg.CaSQL.Driver,
+			cfg.CaSQL.DataSource,
+			cfg.CaSQL.MigrationsDir,
+			0,
+			testutils.IDGenerator().NextID)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}

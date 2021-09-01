@@ -370,6 +370,7 @@ func (s *Service) FinalizeOrderHandler() rest.Handle {
 			OrderID:        order.ID,
 			Certificate:    certPem,
 			ExternalID:     res.Certificate.Id,
+			Locations:      strings.Join(res.Certificate.Locations, "\n"),
 		})
 		if err != nil {
 			s.writeProblem(w, r, v2acme.ServerInternalError("failed to store certificate").WithSource(err))
@@ -436,7 +437,13 @@ func (s *Service) GetCertHandler() rest.Handle {
 			return
 		}
 
-		w.Header().Set(header.ContentType, "application/pem-certificate-chain")
+		h := w.Header()
+		locations := strings.Split(cert.Locations, "\n")
+		for _, l := range locations {
+			h.Add("x-shaken-certificate-location", l)
+		}
+
+		h.Set(header.ContentType, "application/pem-certificate-chain")
 		w.Write([]byte(cert.Certificate))
 	}
 }

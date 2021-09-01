@@ -250,6 +250,7 @@ func TestNewOrderHandler(t *testing.T) {
 		res := w.Body.Bytes()
 		require.Equal(t, http.StatusOK, w.Code, problemDetails(res))
 		require.Equal(t, "application/pem-certificate-chain", w.Header().Get(header.ContentType))
+		require.NotEmpty(t, w.Header().Get("x-shaken-certificate-location"))
 
 		chain, err := certutil.ParseChainFromPEM(res)
 		require.NoError(t, err)

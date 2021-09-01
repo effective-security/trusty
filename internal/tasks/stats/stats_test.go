@@ -24,6 +24,7 @@ func TestFactory(t *testing.T) {
 		cfg.CaSQL.Driver,
 		cfg.CaSQL.DataSource,
 		cfg.CaSQL.MigrationsDir,
+		0,
 		testutils.IDGenerator().NextID,
 	)
 	require.NoError(t, err)
@@ -33,6 +34,7 @@ func TestFactory(t *testing.T) {
 		cfg.OrgsSQL.Driver,
 		cfg.OrgsSQL.DataSource,
 		cfg.OrgsSQL.MigrationsDir,
+		0,
 		testutils.IDGenerator().NextID,
 	)
 	require.NoError(t, err)

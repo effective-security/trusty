@@ -85,7 +85,7 @@ func IsNotFoundError(err error) bool {
 }
 
 // Migrate performs the db migration
-func Migrate(migrationsDir string, db *sql.DB) error {
+func Migrate(migrationsDir string, forceVersion int, db *sql.DB) error {
 	logger.Tracef("reason=load, directory=%q", migrationsDir)
 	if _, err := os.Stat(migrationsDir); err != nil {
 		return errors.Annotatef(err, "directory %q inaccessible", migrationsDir)
@@ -105,6 +105,7 @@ func Migrate(migrationsDir string, db *sql.DB) error {
 	}
 
 	version, _, err := m.Version()
+
 	if err != nil && err != migrate.ErrNilVersion {
 		return errors.Trace(err)
 	}
@@ -112,6 +113,13 @@ func Migrate(migrationsDir string, db *sql.DB) error {
 		logger.Tracef("reason=initial_state, version=nil")
 	} else {
 		logger.Tracef("reason=initial_state, version=%d", version)
+	}
+
+	if forceVersion > 0 {
+		err = m.Force(forceVersion)
+		if err != nil {
+			return errors.Trace(err)
+		}
 	}
 
 	err = m.Up()
