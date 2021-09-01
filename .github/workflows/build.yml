@@ -182,28 +182,6 @@ jobs:
         echo "ITEST_IMAGE_TAG=$ITEST_IMAGE_TAG"
         make docker-citest
 
-    - name: Create tags comment
-      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-      uses: peter-evans/create-or-update-comment@v1
-      with:
-        issue-number: ${{ github.run_number }}
-        body: |
-          ### trusty 
-            - tags:
-            ${{ steps.meta_trusty.outputs.tags }}
-
-          ### kubeca
-          - tags:
-            ${{ steps.meta_kubeca.outputs.tags }}
-
-          ### kubecertinit
-          - tags:
-            ${{ steps.meta_kubecertinit.outputs.tags }}
-
-          ### martini
-          - tags:
-            ${{ steps.meta_martini.outputs.tags }}
-
     - name: coveralls
       # if: github.event_name == 'pull_request'
       env:
