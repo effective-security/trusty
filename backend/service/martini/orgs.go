@@ -467,7 +467,7 @@ func (s *Service) registerOrg(ctx context.Context, filerID string, requestor *mo
 			Name:     contactRes.ContactName,
 		})
 		if err != nil {
-			logger.Errorf("reason=LoginUser, email=%s, err=[%v]",
+			logger.Errorf("reason=LoginUser, email=%s, err=%v",
 				contactRes.ContactEmail, errors.Details(err))
 		} else {
 			s.db.AddOrgMember(ctx, org.ID, approver.ID, v1.RoleOwner, v1.ProviderMartini)

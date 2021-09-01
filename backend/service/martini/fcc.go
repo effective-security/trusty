@@ -105,7 +105,7 @@ func (s *Service) getFrnResponse(ctx context.Context, filerID string) (*v1.FccFr
 	js, _ := marshal.EncodeBytes(marshal.DontPrettyPrint, res)
 	_, err = s.db.UpdateFRNResponse(ctx, id, string(js))
 	if err != nil {
-		logger.Errorf("filerID=%q, err=[%s]", filerID, errors.Details(err))
+		logger.Errorf("filerID=%q, err=%s", filerID, errors.Details(err))
 	}
 
 	return res, nil
@@ -151,7 +151,7 @@ func (s *Service) getFccContact(ctx context.Context, frn string) (*v1.FccContact
 	js, _ := marshal.EncodeBytes(marshal.DontPrettyPrint, res)
 	_, err = s.db.UpdateFccContactResponse(ctx, frn, string(js))
 	if err != nil {
-		logger.Errorf("frn=%q, err=[%s]", frn, errors.Details(err))
+		logger.Errorf("frn=%q, err=%s", frn, errors.Details(err))
 	}
 	return res, nil
 }

@@ -161,7 +161,7 @@ func (p *Provider) GetOrgAPIKeys(ctx context.Context, orgID uint64) ([]*model.AP
 func (p *Provider) DeleteAPIKey(ctx context.Context, id uint64) error {
 	_, err := p.db.ExecContext(ctx, `DELETE FROM apikeys WHERE id=$1;`, id)
 	if err != nil {
-		logger.Errorf("err=[%s]", errors.Details(err))
+		logger.Errorf("err=%v", errors.Details(err))
 		return errors.Trace(err)
 	}
 	return nil

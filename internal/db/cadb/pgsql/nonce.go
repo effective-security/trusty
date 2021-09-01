@@ -80,7 +80,7 @@ func (p *Provider) UseNonce(ctx context.Context, nonce string) (*model.Nonce, er
 func (p *Provider) DeleteNonce(ctx context.Context, id uint64) error {
 	_, err := p.db.ExecContext(ctx, `DELETE FROM nonces WHERE id=$1;`, id)
 	if err != nil {
-		logger.Errorf("err=[%s]", errors.Details(err))
+		logger.Errorf("err=%v", errors.Details(err))
 		return errors.Trace(err)
 	}
 	return nil

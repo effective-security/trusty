@@ -133,7 +133,6 @@ func (p *Provider) GetOrgApprovalTokens(ctx context.Context, orgID uint64) ([]*m
 func (p *Provider) DeleteApprovalToken(ctx context.Context, id uint64) error {
 	_, err := p.db.ExecContext(ctx, `DELETE FROM orgtokens WHERE id=$1;`, id)
 	if err != nil {
-		logger.Errorf("err=[%s]", errors.Details(err))
 		return errors.Trace(err)
 	}
 	return nil

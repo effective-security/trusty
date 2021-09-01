@@ -76,7 +76,7 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 func (p *Provider) RemoveRevokedCertificate(ctx context.Context, id uint64) error {
 	_, err := p.db.ExecContext(ctx, `DELETE FROM revoked WHERE id=$1;`, id)
 	if err != nil {
-		logger.Errorf("err=[%s]", errors.Details(err))
+		logger.Errorf("err=%v", errors.Details(err))
 		return errors.Trace(err)
 	}
 
@@ -207,7 +207,10 @@ func (p *Provider) RevokeCertificate(ctx context.Context, crt *model.Certificate
 		Reason:      reason,
 	}
 
-	logger.KV(xlog.NOTICE, "subject", crt.Subject, "skid", crt.SKID, "ikid", crt.IKID)
+	logger.KV(xlog.NOTICE, "id", crt.ID,
+		"subject", crt.Subject,
+		"skid", crt.SKID,
+		"ikid", crt.IKID)
 
 	tx, err := p.DB().BeginTx(ctx, nil)
 	if err != nil {

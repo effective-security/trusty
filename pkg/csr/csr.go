@@ -313,7 +313,7 @@ func SetSAN(template *x509.Certificate, SAN []string) {
 		if strings.Contains(san, "://") {
 			u, err := url.Parse(san)
 			if err != nil {
-				logger.Errorf("uri=%q, err=[%s]", san, errors.Details(err))
+				logger.Errorf("uri=%q, err=%v", san, errors.Details(err))
 			}
 			template.URIs = append(template.URIs, u)
 		} else if ip := net.ParseIP(san); ip != nil {
