@@ -46,6 +46,7 @@ jobs:
 
     - name: Install softhsm2
       run: sudo apt-get install softhsm2 opensc
+
     - name: Prepare
       run: make vars tools folders generate hsmconfig
 
@@ -194,7 +195,7 @@ jobs:
       id: upload-martini
       uses: google-github-actions/upload-cloud-storage@main
       with:
-        path: bin/martini
+        path: bin/martini*
         destination: martini-security/download
 
     - name: coveralls
