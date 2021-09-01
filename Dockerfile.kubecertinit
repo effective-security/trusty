@@ -1,6 +1,13 @@
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
 FROM gcr.io/distroless/base-debian10:nonroot
+LABEL org.opencontainers.image.source=https://github.com/martinisecurity/trusty \
+      org.opencontainers.image.authors="Martini Security <denis@martinisecurity.com>" \
+      org.opencontainers.image.url="https://github.com/martinisecurity/trusty" \
+      org.opencontainers.image.source="https://github.com/martinisecurity/trusty" \
+      org.opencontainers.image.documentation="https://github.com/martinisecurity/trusty" \
+      org.opencontainers.image.vendor="Martini Security" \
+      org.opencontainers.image.description="Kube Cert Init"
 
 # RUN mkdir -p /app
 COPY ./bin/kubecertinit /app/kubecertinit

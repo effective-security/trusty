@@ -1,6 +1,4 @@
 FROM ekspand/trusty-docker-base:latest
-LABEL org.opencontainers.image.source https://github.com/ekspand/trusty
-
 LABEL org.opencontainers.image.authors="Martini Security <denis@martinisecurity.com>" \
       org.opencontainers.image.url="https://github.com/martinisecurity/trusty" \
       org.opencontainers.image.source="https://github.com/martinisecurity/trusty" \
