@@ -182,6 +182,21 @@ jobs:
         echo "ITEST_IMAGE_TAG=$ITEST_IMAGE_TAG"
         make docker-citest
 
+    - uses: google-github-actions/setup-gcloud@master
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      with:
+        project_id: ${{ secrets.GCP_PROJECT }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
+
+    - name: Upload martini to bucket
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      id: upload-martini
+      uses: google-github-actions/upload-cloud-storage@main
+      with:
+        path: bin/martini
+        destination: martini-security/download
+
     - name: coveralls
       # if: github.event_name == 'pull_request'
       env:
