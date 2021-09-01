@@ -128,11 +128,39 @@ func (s *Service) GetOrgAPIKeysHandler() rest.Handle {
 			return
 		}
 
-		keys, err := s.db.GetOrgAPIKeys(r.Context(), orgID)
+		ctx := r.Context()
+
+		keys, err := s.db.GetOrgAPIKeys(ctx, orgID)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to get org API keys").WithCause(err))
 			return
 		}
+
+		if len(keys) == 0 {
+			org, err := s.db.GetOrg(ctx, orgID)
+			if err != nil {
+				marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to get org").WithCause(err))
+				return
+			}
+
+			now := time.Now().UTC()
+			key, err := s.db.CreateAPIKey(ctx, &model.APIKey{
+				OrgID:      org.ID,
+				Key:        model.GenerateAPIKey(),
+				Enrollemnt: true,
+				//Management: true,
+				//Billing: true,
+				CreatedAt: now,
+				ExpiresAt: org.ExpiresAt,
+			})
+			if err != nil {
+				marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to create default key").WithCause(err))
+				return
+			}
+
+			keys = append(keys, key)
+		}
+
 		res := &v1.GetOrgAPIKeysResponse{
 			Keys: model.ToAPIKeysDto(keys),
 		}
@@ -300,7 +328,7 @@ func (s *Service) DeleteOrgHandler() rest.Handle {
 		if m != nil {
 			role = m.Role
 		}
-		if role != "owner" && role != "admin" {
+		if role != v1.RoleOwner && role != v1.RoleAdmin {
 			marshal.WriteJSON(w, r, httperror.WithForbidden("only owner or administrator can destroy organization, role=%q", role))
 			return
 		}
@@ -419,10 +447,31 @@ func (s *Service) registerOrg(ctx context.Context, filerID string, requestor *mo
 	if err != nil {
 		return nil, errors.Annotate(err, "unable to create org")
 	}
-	_, err = s.db.AddOrgMember(ctx, org.ID, requestor.ID, "admin", v1.ProviderMartini)
+
+	role := v1.RoleAdmin
+	if contactRes.ContactEmail == requestor.Email {
+		role = v1.RoleOwner
+	}
+
+	_, err = s.db.AddOrgMember(ctx, org.ID, requestor.ID, role, v1.ProviderMartini)
 	if err != nil {
 		s.db.RemoveOrg(ctx, org.ID)
 		return nil, errors.Annotate(err, "unable to create org")
+	}
+
+	if contactRes.ContactEmail != requestor.Email {
+		approver, err := s.db.LoginUser(ctx, &model.User{
+			Provider: requestor.Provider,
+			Email:    contactRes.ContactEmail,
+			Login:    contactRes.ContactEmail,
+			Name:     contactRes.ContactName,
+		})
+		if err != nil {
+			logger.Errorf("reason=LoginUser, email=%s, err=[%v]",
+				contactRes.ContactEmail, errors.Details(err))
+		} else {
+			s.db.AddOrgMember(ctx, org.ID, approver.ID, v1.RoleOwner, v1.ProviderMartini)
+		}
 	}
 
 	res := &v1.OrgResponse{

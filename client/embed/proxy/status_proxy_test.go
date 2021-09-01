@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	v1 "github.com/ekspand/trusty/api/v1"
 	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/ekspand/trusty/tests/mockpb"
 	"github.com/gogo/protobuf/proto"
@@ -39,7 +40,7 @@ func TestStatusServerToClient(t *testing.T) {
 	cexp := &pb.CallerStatusResponse{
 		Id:   "1234",
 		Name: "denis",
-		Role: "admin",
+		Role: v1.RoleAdmin,
 	}
 	srv.Resps = []proto.Message{cexp}
 	cres, err := cli.Caller(ctx, Empty)

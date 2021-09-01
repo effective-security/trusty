@@ -87,7 +87,8 @@ func (s *Service) SyncGithubOrgs(ctx context.Context, w http.ResponseWriter, use
 	ch := make(chan *v1.Organization, len(list))
 	wg := sync.WaitGroup{}
 	for _, org := range list {
-		if org.GetRole() == "admin" && org.GetState() == "active" {
+		isAdmin := org.GetRole() == v1.RoleAdmin || org.GetRole() == v1.RoleOwner
+		if isAdmin && org.GetState() == "active" {
 			wg.Add(1)
 
 			logger.Debugf("user=%s, login=%s, id=%d", user.Email, org.Organization.GetLogin(), org.Organization.GetID())
