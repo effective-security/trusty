@@ -93,13 +93,13 @@ func (s *Service) getFrnResponse(ctx context.Context, filerID string) (*v1.FccFr
 		}
 	}
 
-	fccClient := fcc.NewAPIClient(s.FccBaseURL)
+	fccClient := fcc.NewAPIClient(s.FccBaseURL, s.cfg.Martini.FccTimeout)
 	fQueryResults, err := fccClient.GetFiler499Results(filerID)
 	if err != nil {
 		return nil, errors.Annotate(err, "unable to query FCC")
 	}
 	res := &v1.FccFrnResponse{
-		Filers: filer499ResultsToDTO(fQueryResults),
+		Filers: ToFilersDto(fQueryResults),
 	}
 
 	js, _ := marshal.EncodeBytes(marshal.DontPrettyPrint, res)
@@ -109,6 +109,31 @@ func (s *Service) getFrnResponse(ctx context.Context, filerID string) (*v1.FccFr
 	}
 
 	return res, nil
+}
+
+// ToFilersDto constructs list of filers from fcc query results
+func ToFilersDto(fq *fcc.Filer499Results) []v1.Filer {
+	filers := make([]v1.Filer, 0, len(fq.Filers))
+
+	for _, f := range fq.Filers {
+		fDTO := v1.Filer{
+			FilerID: f.Form499ID,
+			FilerIDInfo: v1.FilerIDInfo{
+				LegalName: f.FilerIDInfo.LegalName,
+				FRN:       f.FilerIDInfo.FRN,
+				HQAddress: v1.HQAdress{
+					AddressLine: f.FilerIDInfo.HQAddress.AddressLine,
+					City:        f.FilerIDInfo.HQAddress.City,
+					State:       f.FilerIDInfo.HQAddress.State,
+					ZipCode:     f.FilerIDInfo.HQAddress.ZipCode,
+				},
+			},
+		}
+
+		filers = append(filers, fDTO)
+	}
+
+	return filers
 }
 
 func (s *Service) getFccContact(ctx context.Context, frn string) (*v1.FccContactResponse, error) {
@@ -140,7 +165,7 @@ func (s *Service) getFccContact(ctx context.Context, frn string) (*v1.FccContact
 		}
 	}
 
-	fccClient := fcc.NewAPIClient(s.FccBaseURL)
+	fccClient := fcc.NewAPIClient(s.FccBaseURL, s.cfg.Martini.FccTimeout)
 	cQueryResults, err := fccClient.GetContactResults(frn)
 	if err != nil {
 		return nil, errors.Annotate(err, "unable to query FCC")
@@ -154,31 +179,6 @@ func (s *Service) getFccContact(ctx context.Context, frn string) (*v1.FccContact
 		logger.Errorf("frn=%q, err=%s", frn, errors.Details(err))
 	}
 	return res, nil
-}
-
-// filer499ResultsToDTO converts to v1.FccFrnResponse
-func filer499ResultsToDTO(fq *fcc.Filer499Results) []v1.Filer {
-	filers := []v1.Filer{}
-
-	for _, f := range fq.Filers {
-		fDTO := v1.Filer{
-			FilerID: f.Form499ID,
-			FilerIDInfo: v1.FilerIDInfo{
-				LegalName: f.FilerIDInfo.LegalName,
-				FRN:       f.FilerIDInfo.FRN,
-				HQAddress: v1.HQAdress{
-					AddressLine: f.FilerIDInfo.HQAddress.AddressLine,
-					City:        f.FilerIDInfo.HQAddress.City,
-					State:       f.FilerIDInfo.HQAddress.State,
-					ZipCode:     f.FilerIDInfo.HQAddress.ZipCode,
-				},
-			},
-		}
-
-		filers = append(filers, fDTO)
-	}
-
-	return filers
 }
 
 // contactQueryResultsToDTO converts to v1.FccContactResults

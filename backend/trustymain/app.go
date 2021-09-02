@@ -23,6 +23,7 @@ import (
 	"github.com/ekspand/trusty/internal/config"
 	trustyTasks "github.com/ekspand/trusty/internal/tasks"
 	"github.com/ekspand/trusty/internal/tasks/certsmonitor"
+	"github.com/ekspand/trusty/internal/tasks/fcc"
 	"github.com/ekspand/trusty/internal/tasks/stats"
 	"github.com/ekspand/trusty/internal/version"
 	"github.com/ekspand/trusty/pkg/gserver"
@@ -57,6 +58,7 @@ var ServiceFactories = map[string]gserver.ServiceFactory{
 var taskFactories = map[string]trustyTasks.Factory{
 	certsmonitor.TaskName: certsmonitor.Factory,
 	stats.TaskName:        stats.Factory,
+	fcc.TaskName:          fcc.Factory,
 }
 
 // appFlags specifies application flags

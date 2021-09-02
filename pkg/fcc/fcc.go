@@ -38,6 +38,7 @@ type APIClient interface {
 
 type apiClientImpl struct {
 	FccBaseURL string
+	FccTimeout time.Duration
 }
 
 // Filer499Results struct
@@ -144,6 +145,12 @@ func (c *FCDate) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	const shortForm = "2006-01-02"
 	var v string
 	d.DecodeElement(&v, &start)
+	if v == "" {
+		// for some fields FCC sends invalid or missing date
+		// we ignore in that case
+		// for example <Registration_Current_as_of></Registration_Current_as_of>
+		return nil
+	}
 	parse, err := time.Parse(shortForm, v)
 	if err != nil {
 		return err
@@ -162,20 +169,28 @@ func (w *fccResponseWriter) Write(data []byte) (int, error) {
 }
 
 // NewAPIClient create new api client for FCC operations
-func NewAPIClient(baseURL string) APIClient {
+// if baseURL is empty, the default one is used
+func NewAPIClient(baseURL string, timeout time.Duration) APIClient {
 	c := apiClientImpl{
 		FccBaseURL: baseURL,
+		FccTimeout: timeout,
 	}
 	if c.FccBaseURL == "" {
 		c.FccBaseURL = fccDefaultBaseURL
 	}
+
 	return c
 }
 
 func (c apiClientImpl) GetFiler499Results(filerID string) (*Filer499Results, error) {
-	httpClient := retriable.New()
+	httpClient := retriable.New().WithTimeout(c.FccTimeout)
 	resFromFcc := new(fccResponseWriter)
-	path := fmt.Sprintf("/cgb/form499/499results.cfm?FilerID=%s&XML=TRUE", filerID)
+
+	path := "/cgb/form499/499results.cfm?XML=TRUE&operational=1"
+	if filerID != "" {
+		path = fmt.Sprintf("%s&FilerID=%s", path, filerID)
+	}
+
 	_, statusCode, err := httpClient.Request(context.Background(), "GET", []string{c.FccBaseURL}, path, nil, resFromFcc)
 	if err != nil {
 		return nil, errors.Annotatef(err, "failed to execute request, url=%q, path=%q", c.FccBaseURL, path)
@@ -187,7 +202,7 @@ func (c apiClientImpl) GetFiler499Results(filerID string) (*Filer499Results, err
 
 	fQueryResults, err := ParseFilerDataFromXML(resFromFcc.data)
 	if err != nil {
-		return nil, errors.New("failed to parse FRN from XML")
+		return nil, errors.Annotatef(err, "failed to parse FRN from XML")
 	}
 
 	return fQueryResults, nil
@@ -323,7 +338,7 @@ func ParseContactDataFromHTML(b []byte) (*ContactResults, error) {
 	return &cQueryResults, nil
 }
 
-// ParseFilerDataFromXML parses data from XML returned by https://apps.fcc.gov/cgb/form499/499results.cfm?FilerID=<fillerID>&XML=TRUE
+// ParseFilerDataFromXML parses data from XML returned by https://apps.fcc.gov/cgb/form499/499results.cfm?FilerID=<fillerID>&XML=TRUE&operational=1
 func ParseFilerDataFromXML(b []byte) (*Filer499Results, error) {
 	reader := bytes.NewReader(b)
 	decoder := xml.NewDecoder(reader)
