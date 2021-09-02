@@ -250,7 +250,7 @@ func TestParseFilerDataFromXML(t *testing.T) {
 
 	filerIDInfo := filer.FilerIDInfo
 	require.NotNil(t, filerIDInfo)
-	require.Equal(t, "2015-01-12 00:00:00 +0000 UTC", filerIDInfo.StartDate.String())
+	require.Equal(t, "2015-01-12 00:00:00 +0000 UTC", filerIDInfo.StartDate.Date.String())
 	require.Equal(t, "Yes", filerIDInfo.USFContributor)
 	require.Equal(t, "LOW LATENCY COMMUNICATIONS LLC", filerIDInfo.LegalName)
 	require.Equal(t, "0024926677", filerIDInfo.FRN)
