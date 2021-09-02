@@ -379,7 +379,7 @@ func (s *Service) OnSubscriptionCreated(
 			if err != nil {
 				return nil, errors.Annotatef(err, "payment: unable to get org with id %q", sub.ID)
 			}
-			if org.Status == v1.OrgStatusPaid {
+			if org.Status == v1.OrgStatusPaid || org.Status == v1.OrgStatusApproved {
 				cancel()
 				doneCh <- true
 			}
