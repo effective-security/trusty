@@ -220,6 +220,7 @@ func RegisterAccount(c ctl.Control, p interface{}) error {
 type OrderFlags struct {
 	KeyID *string
 	SPC   *string
+	Days  *int
 }
 
 // Order creates order
@@ -291,6 +292,11 @@ func Order(c ctl.Control, p interface{}) error {
 				Value: claims.ATC.TKValue,
 			},
 		},
+	}
+
+	if flags.Days != nil && *flags.Days > 0 {
+		notAfter := time.Now().Add(24 * time.Hour * time.Duration(*flags.Days)).UTC()
+		orderReq.NotAfter = notAfter.Format(time.RFC3339)
 	}
 
 	order, orderURL, err := ac.Order(ctx, orderReq)

@@ -269,7 +269,7 @@
         "not_after": {
           "type": "string",
           "format": "date-time",
-          "title": "NotAfter is the time when the validity period starts"
+          "title": "NotAfter is the time when the validity period ends"
         },
         "subject": {
           "type": "string",
@@ -314,14 +314,11 @@
     "protobufAny": {
       "type": "object",
       "properties": {
-        "typeUrl": {
+        "@type": {
           "type": "string"
-        },
-        "value": {
-          "type": "string",
-          "format": "byte"
         }
-      }
+      },
+      "additionalProperties": {}
     },
     "rpcStatus": {
       "type": "object",

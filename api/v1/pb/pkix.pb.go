@@ -216,7 +216,7 @@ type RootCertificate struct {
 	Skid string `protobuf:"bytes,2,opt,name=skid,proto3" json:"skid,omitempty"`
 	// NotBefore is the time when the validity period starts
 	NotBefore *timestamp.Timestamp `protobuf:"bytes,3,opt,name=not_before,proto3" json:"not_before,omitempty"`
-	// NotAfter is the time when the validity period starts
+	// NotAfter is the time when the validity period ends
 	NotAfter *timestamp.Timestamp `protobuf:"bytes,4,opt,name=not_after,proto3" json:"not_after,omitempty"`
 	// Subject name
 	Subject string `protobuf:"bytes,5,opt,name=subject,proto3" json:"subject,omitempty"`

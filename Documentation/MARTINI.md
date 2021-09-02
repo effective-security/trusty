@@ -322,7 +322,7 @@ bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem ac
 ## Request certificate 
 
 ```.sh
- bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem acme order --id 84350577525391460 --spc /tmp/spc                                                       
+ bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem acme order --id 84350577525391460 --spc /tmp/spc                         
 
 certificate: /home/dissoupov/.mrtsec/certificates/ddadd515eb4e758f7a8a18a4093574dacdac4cf2.pem
 key: /home/dissoupov/.mrtsec/certificates/ddadd515eb4e758f7a8a18a4093574dacdac4cf2.key

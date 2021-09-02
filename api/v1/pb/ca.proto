@@ -5,7 +5,7 @@ option go_package = "github.com/ekspand/trusty/api/v1/pb";
 
 import "pkix.proto";
 import "google/protobuf/empty.proto";
-// import "google/protobuf/timestamp.proto";
+import "google/protobuf/timestamp.proto";
 // for grpc-gateway
 import "google/api/annotations.proto";
 
@@ -62,6 +62,10 @@ message SignCertificateRequest {
     string token = 7;
     // OrgId provides the ID of Organization that certificate belongs to
     uint64 org_id = 8;
+    // NotBefore is the time when the validity period starts
+    google.protobuf.Timestamp not_before = 9 [json_name="not_before"];
+    // NotAfter is the time when the validity period ends
+    google.protobuf.Timestamp not_after = 10 [json_name="not_after"];    
 }
 
 // PublishCrlsRequest allows to publish CRLs on demand
