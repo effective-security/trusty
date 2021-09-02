@@ -112,13 +112,19 @@ func (d *Provider) NewOrder(ctx context.Context, p *model.OrderRequest) (*model.
 	// check for existing order
 	order, err := d.GetOrderByHash(ctx, p.RegistrationID, orderID)
 	if err == nil {
-		logger.Tracef("reason=found, regID=%d, orderID=%s, status=%v, expires=%s, not_after=%s, now=%s",
-			p.RegistrationID, orderID, order.Status,
-			order.ExpiresAt.Format(time.RFC3339),
-			p.NotAfter.Format(time.RFC3339),
-			now.Format(time.RFC3339))
-
-		if order.Status.IsPending() && !order.ExpiresAt.IsZero() && order.ExpiresAt.Before(p.NotAfter) && now.Before(order.ExpiresAt) {
+		// check if update is needed
+		// https://datatracker.ietf.org/doc/html/rfc8555#section-7.1.6
+		order, err := d.UpdateOrderStatus(ctx, order)
+		if err == nil &&
+			order.Status.IsPending() &&
+			!order.ExpiresAt.IsZero() &&
+			order.ExpiresAt.Before(p.NotAfter) &&
+			now.Before(order.ExpiresAt) {
+			logger.Tracef("reason=found, regID=%d, orderID=%s, status=%v, expires=%s, not_after=%s, now=%s",
+				p.RegistrationID, orderID, order.Status,
+				order.ExpiresAt.Format(time.RFC3339),
+				p.NotAfter.Format(time.RFC3339),
+				now.Format(time.RFC3339))
 			return order, true, nil
 		}
 	} else if !db.IsNotFoundError(err) {
