@@ -9,6 +9,7 @@ bin/
 .vagrant/
 .idea
 .docker/
+__debug_bin
 debug
 debug.test
 coverage.out

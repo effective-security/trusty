@@ -178,6 +178,7 @@ func TestValidation(t *testing.T) {
 
 	//
 	// Start new order for the same Identifier
+	// https://datatracker.ietf.org/doc/html/rfc8555#section-7.1.6
 	//
 	notBefore = time.Now().UTC()
 	notAfter = notBefore.Add(1024 * time.Hour)
@@ -195,17 +196,17 @@ func TestValidation(t *testing.T) {
 		},
 	})
 	require.NoError(t, err)
-	assert.True(t, existing)
+	assert.False(t, existing)
 	require.Len(t, order.Authorizations, 1)
 
 	authz, err = provider.GetAuthorization(ctx, order.Authorizations[0])
 	require.NoError(t, err)
 	require.Len(t, authz.Challenges, 1)
-	// Must be invalid
-	assert.Equal(t, v2acme.StatusInvalid, authz.Status)
+	// Must be pending
+	assert.Equal(t, v2acme.StatusPending, authz.Status)
 
 	chal = authz.Challenges[0]
-	assert.Equal(t, v2acme.StatusInvalid, chal.Status)
+	assert.Equal(t, v2acme.StatusPending, chal.Status)
 
 	m = map[string]string{
 		"atc": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsIng1dSI6Imh0dHBzOi8vYXV0aGVudGljYXRlLWFwaS5pY29uZWN0aXYuY29tL2Rvd25sb2FkL3YxL2NlcnRpZmljYXRlL2NlcnRpZmljYXRlSWRfNzIzNjQuY3J0In0.eyJleHAiOjE2OTAwNDE4MzQsImp0aSI6ImEyNThlODVjLWQ5NDktNGQxOS05YmZmLTA4YmVjZWM3YzI1NCIsImF0YyI6eyJ0a3R5cGUiOiJUTkF1dGhMaXN0IiwidGt2YWx1ZSI6Ik1BaWdCaFlFTnpBNVNnPT0iLCJjYSI6ZmFsc2UsImZpbmdlcnByaW50IjoiU0hBMjU2IDQwOjQxOjQyOjQzOjQ0OjQ1OjQ2OjQ3OjQ4OjQ5OjRBOjRCOjRDOjREOjRFOjRGOjQwOjQxOjQyOjQzOjQ0OjQ1OjQ2OjQ3OjQ4OjQ5OjRBOjRCOjRDOjREOjRFOjRGIn19.1-N8kGJBXqjOfn-FwNTjDlaoi_oYR5STmkvEu8xvm7e0G7dncIVVayFvkw0Om2DE0l708l-R3Ku4uaCnAARkfw",
