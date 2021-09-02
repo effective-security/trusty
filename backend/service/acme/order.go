@@ -20,6 +20,7 @@ import (
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/go-phorce/dolly/xlog"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var (
@@ -253,6 +254,13 @@ func (s *Service) FinalizeOrderHandler() rest.Handle {
 			return
 		}
 
+		orgID, _ := db.ID(account.ExternalID)
+		org, err := s.orgsdb.GetOrg(ctx, orgID)
+		if err != nil {
+			s.writeProblem(w, r, v2acme.NotFoundError("organization not found").WithSource(err))
+			return
+		}
+
 		now := time.Now().UTC()
 		if order.ExpiresAt.IsZero() || order.ExpiresAt.Before(now) {
 			s.writeProblem(w, r, v2acme.NotFoundError("order %d/%d has expired: %s",
@@ -312,7 +320,7 @@ func (s *Service) FinalizeOrderHandler() rest.Handle {
 				Names: []*pb.X509Name{
 					{
 						Country:      "US",
-						Organisation: "Entity Name From Registration",
+						Organisation: org.Company,
 					},
 				},
 			}
@@ -344,14 +352,19 @@ func (s *Service) FinalizeOrderHandler() rest.Handle {
 			return
 		}
 
-		orgID, _ := db.ID(account.ExternalID)
-
 		signReq := &pb.SignCertificateRequest{
 			Profile:       "SHAKEN",
 			RequestFormat: pb.EncodingFormat_PEM,
 			Request:       []byte(encodeCSR(csr.Raw)),
 			Subject:       subject,
 			OrgId:         orgID,
+		}
+
+		if !order.NotBefore.IsZero() {
+			signReq.NotBefore = timestamppb.New(order.NotBefore)
+		}
+		if !order.NotAfter.IsZero() {
+			signReq.NotAfter = timestamppb.New(order.NotAfter)
 		}
 
 		res, err := ca.SignCertificate(ctx, signReq)

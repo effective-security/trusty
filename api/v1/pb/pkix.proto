@@ -53,7 +53,7 @@ message RootCertificate  {
     string skid = 2;
     // NotBefore is the time when the validity period starts
     google.protobuf.Timestamp not_before = 3 [json_name="not_before"];
-    // NotAfter is the time when the validity period starts
+    // NotAfter is the time when the validity period ends
     google.protobuf.Timestamp not_after = 4 [json_name="not_after"];
     // Subject name
     string subject = 5;

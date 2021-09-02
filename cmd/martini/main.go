@@ -203,6 +203,7 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		Action(cli.RegisterAction(acme.Order, acmeOrderFlags))
 	acmeOrderFlags.KeyID = cmdAcmeOrder.Flag("id", "key ID").Required().String()
 	acmeOrderFlags.SPC = cmdAcmeOrder.Flag("spc", "SPC file").Required().String()
+	acmeOrderFlags.Days = cmdAcmeOrder.Flag("days", "validity period in days").Default("90").Int()
 
 	cli.Parse(args)
 	return cli.ReturnCode()

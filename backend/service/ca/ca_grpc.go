@@ -155,6 +155,12 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 		//Extensions: req.E,
 	}
 
+	if req.NotBefore != nil {
+		cr.NotBefore = req.NotBefore.AsTime()
+	}
+	if req.NotAfter != nil {
+		cr.NotAfter = req.NotAfter.AsTime()
+	}
 	cert, pem, err := ca.Sign(cr)
 	if err != nil {
 		logger.KV(xlog.ERROR,
