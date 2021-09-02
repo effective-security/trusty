@@ -121,7 +121,7 @@ type RegistrationInformation struct {
 // FCDate struct is custom implementation of date to be able to parse yyyy-mm-dd formal
 // FCC API returns dates in yyyy-mm-dd format that default golang XML decoder does not recognize
 type FCDate struct {
-	time.Time
+	Date time.Time
 }
 
 // ContactResults struct
@@ -140,7 +140,7 @@ type ContactResults struct {
 	ContactFax          string `json:"contact_fax"`
 }
 
-// UnmarshalXML is needed to support unmarshalling forcustom date formats
+// UnmarshalXML is needed to support unmarshalling for custom date formats
 func (c *FCDate) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	const shortForm = "2006-01-02"
 	var v string
@@ -155,7 +155,9 @@ func (c *FCDate) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	if err != nil {
 		return err
 	}
-	*c = FCDate{parse}
+	*c = FCDate{
+		Date: parse,
+	}
 	return nil
 }
 

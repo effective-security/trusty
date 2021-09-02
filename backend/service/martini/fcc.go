@@ -127,6 +127,7 @@ func ToFilersDto(fq *fcc.Filer499Results) []v1.Filer {
 					State:       f.FilerIDInfo.HQAddress.State,
 					ZipCode:     f.FilerIDInfo.HQAddress.ZipCode,
 				},
+				CustomerInquiriesTelephone: f.FilerIDInfo.CustomerInquiriesTelephone,
 			},
 		}
 
