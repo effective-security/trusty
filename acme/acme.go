@@ -118,7 +118,7 @@ func (d *Provider) NewOrder(ctx context.Context, p *model.OrderRequest) (*model.
 			p.NotAfter.Format(time.RFC3339),
 			now.Format(time.RFC3339))
 
-		if !order.ExpiresAt.IsZero() && order.ExpiresAt.Before(p.NotAfter) && now.Before(order.ExpiresAt) {
+		if order.Status.IsPending() && !order.ExpiresAt.IsZero() && order.ExpiresAt.Before(p.NotAfter) && now.Before(order.ExpiresAt) {
 			return order, true, nil
 		}
 	} else if !db.IsNotFoundError(err) {
