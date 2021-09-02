@@ -101,11 +101,14 @@ tasks:
     schedule: "every 10 minutes"
   - name: stats
     schedule: "every 13 minutes"
+  - name: fcc
+    schedule: "every 360 minutes"
 
 martini:
   web_app_host: localhost:4200
   poll_payment_status_interval: 5s
   poll_payment_status_timeout: 180s
+  fcc_timeout: 180s
 
 ra:
   # the list of private Root Certs files.

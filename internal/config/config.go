@@ -141,4 +141,5 @@ type Martini struct {
 	WebAppHost                string        `json:"web_app_host" yaml:"web_app_host"`
 	PollPaymentStatusInterval time.Duration `json:"poll_payment_status_interval" yaml:"poll_payment_status_interval"`
 	PollPaymentStatusTimeout  time.Duration `json:"poll_payment_status_timeout" yaml:"poll_payment_status_timeout"`
+	FccTimeout                time.Duration `json:"fcc_timeout" yaml:"fcc_timeout"`
 }

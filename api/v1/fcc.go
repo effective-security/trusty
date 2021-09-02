@@ -1,6 +1,6 @@
 package v1
 
-// FccFrnResponse provides response for https://apps.fcc.gov/cgb/form499/499results.cfm?FilerID=<fillerID>&XML=TRUE
+// FccFrnResponse provides response for https://apps.fcc.gov/cgb/form499/499results.cfm?FilerID=<fillerID>&XML=TRUE&operational=1
 type FccFrnResponse struct {
 	Filers []Filer `json:"filers"`
 }

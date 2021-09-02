@@ -32,7 +32,7 @@ type Task struct {
 }
 
 func (t *Task) run() {
-	logger.Infof("api=run, task=%sd", TaskName)
+	logger.Infof("api=run, task=%s", TaskName)
 	ctx := context.Background()
 
 	c, err := t.orgs.GetUsersCount(ctx)
