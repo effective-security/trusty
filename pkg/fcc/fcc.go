@@ -362,3 +362,25 @@ func CanonicalString(val string) string {
 	val = strings.ReplaceAll(val, "\n", ", ")
 	return val
 }
+
+// TestIDs specifies IDs for testing
+var TestIDs = map[uint64]bool{
+	123456: true,
+	123111: true,
+	123222: true,
+	123333: true,
+	123013: true,
+	123014: true,
+	123015: true,
+}
+
+// TestEmails specifies mapping for test FRN
+var TestEmails = map[string]string{
+	"0123456": "info+test@martinisecurity.com",
+	"0123111": "denis@martinisecurity.com",
+	"0123222": "ryan+test@martinisecurity.com",
+	"0123333": "hayk.baluyan@gmail.com",
+	"0123013": "mihail@peculiarventures.com",
+	"0123014": "sergey.diachenco@peculiarventures.com",
+	"0123015": "ilya@peculiarventures.com",
+}

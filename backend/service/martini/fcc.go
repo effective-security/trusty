@@ -62,7 +62,7 @@ func (s *Service) getFrnResponse(ctx context.Context, filerID string) (*v1.FccFr
 		return nil, errors.Annotate(err, "invalid filer ID")
 	}
 
-	if testFCCId[id] {
+	if fcc.TestIDs[id] {
 		res := &v1.FccFrnResponse{
 			Filers: []v1.Filer{
 				{
@@ -113,7 +113,7 @@ func (s *Service) getFrnResponse(ctx context.Context, filerID string) (*v1.FccFr
 
 func (s *Service) getFccContact(ctx context.Context, frn string) (*v1.FccContactResponse, error) {
 	if strings.HasPrefix(frn, "0123") {
-		email := testEmails[frn]
+		email := fcc.TestEmails[frn]
 		if email == "" {
 			return nil, errors.Errorf("invalid test code, register your email with denis@martinisecurity.com")
 		}
@@ -197,24 +197,4 @@ func contactQueryResultsToDTO(c *fcc.ContactResults) *v1.FccContactResponse {
 		ContactPhone:        c.ContactPhone,
 		ContactFax:          c.ContactFax,
 	}
-}
-
-var testFCCId = map[uint64]bool{
-	123456: true,
-	123111: true,
-	123222: true,
-	123333: true,
-	123013: true,
-	123014: true,
-	123015: true,
-}
-
-var testEmails = map[string]string{
-	"0123456": "info+test@martinisecurity.com",
-	"0123111": "denis@martinisecurity.com",
-	"0123222": "ryan+test@martinisecurity.com",
-	"0123333": "hayk.baluyan@gmail.com",
-	"0123013": "mihail@peculiarventures.com",
-	"0123014": "sergey.diachenco@peculiarventures.com",
-	"0123015": "ilya@peculiarventures.com",
 }
