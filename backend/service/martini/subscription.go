@@ -3,6 +3,7 @@ package martini
 import (
 	"context"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -320,7 +321,16 @@ func (s *Service) handlePaymentIntentEvent(
 		org.Status = v1.OrgStatusPaid
 
 		if org.ApproverEmail == org.Email {
-			org.Status = v1.OrgStatusApproved
+			// TODO: support more Identity providers
+			err = VerifyApproverEmail(org.ApproverEmail, v1.ProviderGoogle)
+			if err == nil {
+				org.Status = v1.OrgStatusApproved
+			} else {
+				logger.KV(xlog.NOTICE,
+					"reason", "verifyApproverEmail",
+					"email", org.ApproverEmail,
+					"err", errors.Details(err))
+			}
 		}
 
 		org.ExpiresAt = sub.ExpiresAt
@@ -339,6 +349,36 @@ func (s *Service) handlePaymentIntentEvent(
 	)
 
 	return nil
+}
+
+var providerHosts = map[string][]string{
+	v1.ProviderGoogle: {"google.com."},
+}
+
+// VerifyApproverEmail return error if email does not have MX recor
+func VerifyApproverEmail(email, profider string) error {
+	tokens := strings.Split(email, "@")
+	if len(tokens) != 2 {
+		return errors.New("invalid email")
+	}
+
+	mxrecords, err := net.LookupMX(tokens[1])
+	if err != nil {
+		return errors.Trace(err)
+	}
+	hosts := providerHosts[profider]
+	for _, mx := range mxrecords {
+		for _, h := range hosts {
+			if strings.HasSuffix(mx.Host, h) {
+				logger.KV(xlog.NOTICE,
+					"status", "verified",
+					"email", email,
+					"MX", mx.Host)
+				return nil
+			}
+		}
+	}
+	return errors.New("no MX records found with trusted provider")
 }
 
 // OnSubscriptionCreated is called when a subscription is created

@@ -1,6 +1,7 @@
 // Package tools for go mod.
 // Add here tool dependencies that are not part of the build.
 
+//go:build tools
 // +build tools
 
 package tools
