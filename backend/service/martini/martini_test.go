@@ -879,6 +879,14 @@ func TestPollingPaymentStatus_TimeoutExceeded(t *testing.T) {
 	require.Equal(t, "payment_pending", org.Status)
 }
 
+func TestMXVerifyApproverEmail(t *testing.T) {
+	err := martini.VerifyApproverEmail("denis@martinisecurity.com", v1.ProviderGoogle)
+	require.NoError(t, err)
+
+	err = martini.VerifyApproverEmail("denis2martinisecurity.com", v1.ProviderGoogle)
+	require.Error(t, err)
+}
+
 var stripeSamplePaymentIntent = `{
 	"id": "evt_3JPbIJKfgu58p9BH0IPqHiCg",
 	"object": "event",
