@@ -13,6 +13,36 @@ import (
 type MartiniClient interface {
 	// SearchCorps returns SearchOpenCorporatesResponse
 	SearchCorps(ctx context.Context, name, jurisdiction string) (*v1.SearchOpenCorporatesResponse, error)
+	// SearchOrgs returns OrgsResponse
+	SearchOrgs(ctx context.Context, frn, regID string) (*v1.OrgsResponse, error)
+	// Orgs returns user's Orgs
+	Orgs(ctx context.Context) (*v1.OrgsResponse, error)
+	// Org returns the organization
+	Org(ctx context.Context, id string) (*v1.OrgResponse, error)
+	// OrgMembers returns org members
+	OrgMembers(ctx context.Context, orgID string) (*v1.OrgMembersResponse, error)
+	// Certificates returns user's Certificates
+	Certificates(ctx context.Context) (*v1.CertificatesResponse, error)
+	// FccFRN returns Fcc FRN
+	FccFRN(ctx context.Context, filerID string) (*v1.FccFrnResponse, error)
+	// FccContact returns Fcc FRN Contact
+	FccContact(ctx context.Context, frn string) (*v1.FccContactResponse, error)
+	// RegisterOrg starts Org registration flow
+	RegisterOrg(ctx context.Context, filerID string) (*v1.OrgResponse, error)
+	// ApproveOrg approves Org registration
+	ApproveOrg(ctx context.Context, token, code, action string) (*v1.OrgResponse, error)
+	// ValidateOrg validates Org registration
+	ValidateOrg(ctx context.Context, orgID string) (*v1.ValidateOrgResponse, error)
+	// DeleteOrg deletes Org
+	DeleteOrg(ctx context.Context, orgID string) error
+	// GetOrgAPIKeys returns Org API keys
+	GetOrgAPIKeys(ctx context.Context, orgID string) (*v1.GetOrgAPIKeysResponse, error)
+	// CreateSubscription pays for Org validation
+	CreateSubscription(ctx context.Context, req *v1.CreateSubscriptionRequest) (*v1.CreateSubscriptionResponse, error)
+	// ListSubscriptions returns user's subscriptions
+	ListSubscriptions(ctx context.Context) (*v1.ListSubscriptionsResponse, error)
+	// ListSubscriptionsProducts returns list of available products
+	ListSubscriptionsProducts(ctx context.Context) (*v1.SubscriptionsProductsResponse, error)
 }
 
 // SearchCorps returns SearchOpenCorporatesResponse
@@ -33,6 +63,25 @@ func (c *Client) SearchCorps(ctx context.Context, name, jurisdiction string) (*v
 func (c *Client) Orgs(ctx context.Context) (*v1.OrgsResponse, error) {
 	r := new(v1.OrgsResponse)
 	_, _, err := c.Get(ctx, v1.PathForMartiniOrgs, r)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return r, nil
+}
+
+// SearchOrgs returns OrgsResponse
+func (c *Client) SearchOrgs(ctx context.Context, frn, regID string) (*v1.OrgsResponse, error) {
+	r := new(v1.OrgsResponse)
+
+	params := url.Values{}
+	if frn != "" {
+		params["frn"] = []string{frn}
+	}
+	if regID != "" {
+		params["reg_id"] = []string{regID}
+	}
+
+	_, _, err := c.Get(ctx, v1.PathForMartiniSearchOrgs+"?"+params.Encode(), r)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

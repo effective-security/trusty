@@ -97,6 +97,46 @@ func TestOrgs(t *testing.T) {
 	assert.Equal(t, "TELCO", org.Name)
 }
 
+func TestSearchOrgs(t *testing.T) {
+
+	h := makeTestHandler(t, "/v1/ms/search/orgs?frn=1&reg_id=2", `{
+        "orgs": [
+			{
+				"id": "123",
+				"extern_id": "1234",
+				"provider": "martini",
+				"name": "TELCO"
+			},
+			{
+				"id": "234",
+				"extern_id": "1235",
+				"provider": "martini",
+				"name": "VOIP"
+			}
+        ]
+}`)
+	server := httptest.NewServer(h)
+	defer server.Close()
+
+	client, err := New(NewConfig(), []string{server.URL})
+	assert.NoError(t, err, "Unexpected error.")
+
+	require.NotPanics(t, func() {
+		// ensure compiles
+		_ = interface{}(client).(API)
+	})
+
+	r, err := client.SearchOrgs(context.Background(), "1", "2")
+	require.NoError(t, err)
+	require.NotNil(t, r)
+	assert.Len(t, r.Orgs, 2)
+	org := r.Orgs[0]
+	assert.Equal(t, "123", org.ID)
+	assert.Equal(t, "1234", org.ExternalID)
+	assert.Equal(t, v1.ProviderMartini, org.Provider)
+	assert.Equal(t, "TELCO", org.Name)
+}
+
 func TestOrg(t *testing.T) {
 	h := makeTestHandler(t, "/v1/ms/orgs/123123", `{
         "org": {

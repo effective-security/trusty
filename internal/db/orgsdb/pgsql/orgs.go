@@ -216,6 +216,50 @@ func (p *Provider) GetOrgByExternalID(ctx context.Context, provider, externalID 
 	return res, nil
 }
 
+// GetOrgByRegistrationID returns Organization by registration ID
+func (p *Provider) GetOrgByRegistrationID(ctx context.Context, provider, regID string) (*model.Organization, error) {
+	res := new(model.Organization)
+
+	err := p.db.QueryRowContext(ctx,
+		`SELECT id,extern_id,reg_id,provider,login,name,email,billing_email,company,location,avatar_url,html_url,type,created_at,updated_at,street_address,city,postal_code,region,country,phone,approver_email,approver_name,status,expires_at
+		FROM orgs
+		WHERE provider=$1 AND reg_id=$2
+		;`, provider, regID,
+	).Scan(&res.ID,
+		&res.ExternalID,
+		&res.RegistrationID,
+		&res.Provider,
+		&res.Login,
+		&res.Name,
+		&res.Email,
+		&res.BillingEmail,
+		&res.Company,
+		&res.Location,
+		&res.AvatarURL,
+		&res.URL,
+		&res.Type,
+		&res.CreatedAt,
+		&res.UpdatedAt,
+		&res.Street,
+		&res.City,
+		&res.PostalCode,
+		&res.Region,
+		&res.Country,
+		&res.Phone,
+		&res.ApproverEmail,
+		&res.ApproverName,
+		&res.Status,
+		&res.ExpiresAt,
+	)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	res.CreatedAt = res.CreatedAt.UTC()
+	res.UpdatedAt = res.UpdatedAt.UTC()
+	res.ExpiresAt = res.ExpiresAt.UTC()
+	return res, nil
+}
+
 // RemoveOrg deletes org and all its members
 func (p *Provider) RemoveOrg(ctx context.Context, id uint64) error {
 

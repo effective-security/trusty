@@ -62,6 +62,39 @@ func Orgs(c ctl.Control, _ interface{}) error {
 	return nil
 }
 
+// SearchOrgsFlags defines flags for SearchOrgs command
+type SearchOrgsFlags struct {
+	FRN      *string
+	FillerID *string
+}
+
+// SearchOrgs prints the orgs result
+func SearchOrgs(c ctl.Control, p interface{}) error {
+	flags := p.(*SearchOrgsFlags)
+	cl := c.(*cli.Cli)
+
+	client, err := cl.HTTPClient()
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	res, err := client.SearchOrgs(context.Background(), cli.String(flags.FRN), cli.String(flags.FillerID))
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	ctl.WriteJSON(c.Writer(), res)
+	/*
+		if cli.IsJSON() {
+			ctl.WriteJSON(c.Writer(), res)
+			fmt.Fprint(c.Writer(), "\n")
+		} else {
+			print.Orgs(c.Writer(), res.List)
+		}
+	*/
+	return nil
+}
+
 // OrgMembersFlags defines flags for OrgMembers command
 type OrgMembersFlags struct {
 	OrgID *string

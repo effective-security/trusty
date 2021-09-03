@@ -91,6 +91,11 @@ func TestUpdateOrg(t *testing.T) {
 	require.NotNil(t, org5)
 	assert.Equal(t, *org, *org5)
 
+	org5, err = provider.GetOrgByRegistrationID(ctx, o.Provider, o.RegistrationID)
+	require.NoError(t, err)
+	require.NotNil(t, org5)
+	assert.Equal(t, *org, *org5)
+
 	c, err := provider.GetOrgsCount(ctx)
 	require.NoError(t, err)
 	assert.Greater(t, c, uint64(0))

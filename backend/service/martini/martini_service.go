@@ -83,6 +83,7 @@ func (s *Service) RegisterRoute(r rest.Router) {
 	r.POST(v1.PathForMartiniDeleteOrg, s.DeleteOrgHandler())
 	r.GET(v1.PathForMartiniOrgs, s.GetOrgsHandler())
 	r.GET(v1.PathForMartiniOrgByID, s.GetOrgHandler())
+	r.GET(v1.PathForMartiniSearchOrgs, s.SearchOrgsHandler())
 
 	r.POST(v1.PathForMartiniCreateSubscription, s.CreateSubsciptionHandler())
 	r.POST(v1.PathForMartiniCancelSubscription, s.CancelSubsciptionHandler())
