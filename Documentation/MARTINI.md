@@ -346,3 +346,35 @@ bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem su
 ```.sh
 bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem products
 ```
+
+## Search org
+
+```.sh
+ bin/martini -s https://localhost:7891 -r /tmp/trusty/certs/trusty_root_ca.pem org search --frn 0123111 --filler 123111
+{
+        "orgs": [
+                {
+                        "approver_email": "denis@martinisecurity.com",
+                        "approver_name": "John Doe",
+                        "billing_email": "denis@martinisecurity.com",
+                        "city": "PELHAM",
+                        "company": "TEST COMMUNICATIONS LLC",
+                        "created_at": "2021-09-02T00:15:22.725605Z",
+                        "email": "denis@martinisecurity.com",
+                        "expires_at": "2024-09-02T00:16:02.915704Z",
+                        "extern_id": "0123111",
+                        "id": "88424187273675065",
+                        "login": "0123111",
+                        "name": "TEST COMMUNICATIONS LLC",
+                        "phone": "2051234567",
+                        "postal_code": "35124",
+                        "provider": "martini",
+                        "region": "AL",
+                        "registration_id": "123111",
+                        "status": "approved",
+                        "street_address": "241 APPLEGATE TRACE",
+                        "updated_at": "2021-09-02T00:15:22.725605Z"
+                }
+        ]
+}
+```

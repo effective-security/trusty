@@ -109,7 +109,7 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		Action(cli.RegisterAction(martini.FccContact, fccContactFlags))
 	fccContactFlags.FRN = cmdFccContact.Flag("frn", "FRN to query").Required().String()
 
-	// org register|validate|approve|subscribe|keys|members|delete|get
+	// org register|validate|approve|subscribe|keys|members|delete|get|search
 	cmdOrgs := app.Command("org", "Orgs operations").
 		PreAction(cli.PopulateControl)
 
@@ -177,6 +177,12 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	orgPayFlags.StripeKey = cmdOrgPay.Flag("stripe-key", "Stripe publishable key").Required().String()
 	orgPayFlags.ClientSecret = cmdOrgPay.Flag("client-secret", "client secret after subscription is created").Required().String()
 	orgPayFlags.NoBrowser = cmdOrgPay.Flag("no-browser", "disable openning in browser").Bool()
+
+	orgSearchFlags := new(martini.SearchOrgsFlags)
+	cmdOrgSearch := cmdOrgs.Command("search", "search organization").
+		Action(cli.RegisterAction(martini.SearchOrgs, orgSearchFlags))
+	orgSearchFlags.FRN = cmdOrgSearch.Flag("frn", "FRN").String()
+	orgSearchFlags.FillerID = cmdOrgSearch.Flag("filler", "FCC 499 ID").String()
 
 	// acme directory|account|register|order
 	cmdAcme := app.Command("acme", "ACME operations").

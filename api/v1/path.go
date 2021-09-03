@@ -147,6 +147,12 @@ const (
 	// Response: SearchOpenCorporatesResponse
 	PathForMartiniSearchCorps = "/v1/ms/search/opencorporates"
 
+	// PathForMartiniSearchOrgs provides search for Organization
+	//
+	// Verbs: GET
+	// Response: v1.OrgsResponse
+	PathForMartiniSearchOrgs = "/v1/ms/search/orgs"
+
 	// PathForMartiniFccFrn is path to get company FRN (Registration Number -CORESID)
 	PathForMartiniFccFrn = "/v1/ms/fcc_frn"
 

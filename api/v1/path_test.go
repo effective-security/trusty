@@ -34,6 +34,7 @@ func TestPaths(t *testing.T) {
 	assert.Equal(t, "/v1/ms/members/:org_id", v1.PathForMartiniOrgMembers)
 	assert.Equal(t, "/v1/ms/certificates", v1.PathForMartiniCerts)
 	assert.Equal(t, "/v1/ms/search/opencorporates", v1.PathForMartiniSearchCorps)
+	assert.Equal(t, "/v1/ms/search/orgs", v1.PathForMartiniSearchOrgs)
 	assert.Equal(t, "/v1/ms/apikeys/:org_id", v1.PathForMartiniOrgAPIKeys)
 	assert.Equal(t, "/v1/ms/subscription/create", v1.PathForMartiniCreateSubscription)
 	assert.Equal(t, "/v1/ms/subscription/cancel", v1.PathForMartiniCancelSubscription)

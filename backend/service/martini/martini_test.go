@@ -289,6 +289,22 @@ func TestDenyOrg(t *testing.T) {
 	require.NoError(t, err)
 
 	//
+	// Search
+	//
+	q := fmt.Sprintf("%s?reg_id=%s&frn=%s", v1.PathForMartiniSearchOrgs, org.RegistrationID, org.ExternalID)
+	r, err = http.NewRequest(http.MethodGet, q, bytes.NewReader(js))
+	require.NoError(t, err)
+	r = identity.WithTestIdentity(r, identity.NewIdentity("user", "test", fmt.Sprintf("%d", user.ID)))
+
+	w = httptest.NewRecorder()
+	svc.SearchOrgsHandler()(w, r, nil)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var orgsRes v1.OrgsResponse
+	require.NoError(t, marshal.Decode(w.Body, &orgsRes))
+	assert.NotEmpty(t, orgsRes.Orgs)
+
+	//
 	// Validate
 	//
 	validateReq := &v1.ValidateOrgRequest{
