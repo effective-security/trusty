@@ -18,6 +18,7 @@ func UserProfile(c ctl.Control, _ interface{}) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+	client.WithAuthorization()
 
 	res, err := client.RefreshToken(context.Background())
 	if err != nil {
@@ -44,6 +45,7 @@ func Orgs(c ctl.Control, _ interface{}) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+	client.WithAuthorization()
 
 	res, err := client.Orgs(context.Background())
 	if err != nil {
@@ -77,6 +79,7 @@ func SearchOrgs(c ctl.Control, p interface{}) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+	client.WithAuthorization()
 
 	res, err := client.SearchOrgs(context.Background(), cli.String(flags.FRN), cli.String(flags.FillerID))
 	if err != nil {
@@ -109,6 +112,7 @@ func OrgMembers(c ctl.Control, p interface{}) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+	client.WithAuthorization()
 
 	res, err := client.OrgMembers(context.Background(), *flags.OrgID)
 	if err != nil {
@@ -135,6 +139,7 @@ func Certificates(c ctl.Control, _ interface{}) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+	client.WithAuthorization()
 
 	res, err := client.Certificates(context.Background())
 	if err != nil {
@@ -167,6 +172,7 @@ func RegisterOrg(c ctl.Control, p interface{}) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+	client.WithAuthorization()
 
 	res, err := client.RegisterOrg(context.Background(), *flags.FilerID)
 	if err != nil {
@@ -201,6 +207,7 @@ func ApproveOrg(c ctl.Control, p interface{}) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+	client.WithAuthorization()
 
 	action := cli.String(flags.Action)
 	code := cli.String(flags.Code)
@@ -242,6 +249,7 @@ func ValidateOrg(c ctl.Control, p interface{}) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+	client.WithAuthorization()
 
 	res, err := client.ValidateOrg(context.Background(), *flags.OrgID)
 	if err != nil {
@@ -275,6 +283,7 @@ func CreateSubscription(c ctl.Control, p interface{}) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+	client.WithAuthorization()
 
 	req := &v1.CreateSubscriptionRequest{
 		OrgID:     *flags.OrgID,
@@ -314,6 +323,7 @@ func APIKeys(c ctl.Control, p interface{}) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+	client.WithAuthorization()
 
 	res, err := client.GetOrgAPIKeys(context.Background(), *flags.OrgID)
 	if err != nil {
@@ -346,6 +356,7 @@ func DeleteOrg(c ctl.Control, p interface{}) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+	client.WithAuthorization()
 
 	err = client.DeleteOrg(context.Background(), *flags.OrgID)
 	if err != nil {
@@ -371,6 +382,7 @@ func GetOrg(c ctl.Control, p interface{}) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+	client.WithAuthorization()
 
 	res, err := client.Org(context.Background(), cli.String(flags.OrgID))
 	if err != nil {

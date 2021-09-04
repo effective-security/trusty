@@ -22,6 +22,7 @@ func FccFRN(c ctl.Control, p interface{}) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+	client.WithAuthorization()
 
 	res, err := client.FccFRN(context.Background(), *flags.FilerID)
 	if err != nil {
@@ -54,6 +55,7 @@ func FccContact(c ctl.Control, p interface{}) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+	client.WithAuthorization()
 
 	res, err := client.FccContact(context.Background(), *flags.FRN)
 	if err != nil {

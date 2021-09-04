@@ -136,6 +136,11 @@ func New(config *Config, initialHosts []string) (*Client, error) {
 		WithName("trusty-client").
 		WithTLS(c.config.TLS)
 
+	return &c, nil
+}
+
+// WithAuthorization sets Authorization token
+func (c *Client) WithAuthorization() *Client {
 	tk := os.Getenv("TRUSTY_AUTH_TOKEN")
 	if tk != "" && c.config.TLS != nil {
 		c.httpClient.AddHeader(header.Authorization, "Bearer "+tk)
@@ -145,8 +150,7 @@ func New(config *Config, initialHosts []string) (*Client, error) {
 			c.httpClient.AddHeader(header.Authorization, "Bearer "+tk)
 		}
 	}
-
-	return &c, nil
+	return c
 }
 
 func loadTrustyToken() (string, error) {

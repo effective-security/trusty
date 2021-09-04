@@ -23,6 +23,7 @@ func SearchCorps(c ctl.Control, p interface{}) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+	client.WithAuthorization()
 
 	res, err := client.SearchCorps(context.Background(), *flags.Name, *flags.Jurisdiction)
 	if err != nil {

@@ -102,7 +102,7 @@ tasks:
   - name: stats
     schedule: "every 13 minutes"
   - name: fcc
-    schedule: "every 360 minutes"
+    schedule: "every 24 hours"
 
 martini:
   web_app_host: localhost:4200

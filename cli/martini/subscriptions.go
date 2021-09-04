@@ -16,6 +16,7 @@ func Subscriptions(c ctl.Control, _ interface{}) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+	client.WithAuthorization()
 
 	res, err := client.ListSubscriptions(context.Background())
 	if err != nil {
@@ -42,6 +43,7 @@ func Products(c ctl.Control, _ interface{}) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
+	client.WithAuthorization()
 
 	res, err := client.ListSubscriptionsProducts(context.Background())
 	if err != nil {

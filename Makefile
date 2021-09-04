@@ -83,8 +83,9 @@ build_kube:
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/kubecertinit ./cmd/kubecertinit
 
 build_martini:
-	echo "*** Building martini"
+	echo "*** Building martini & macme"
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/martini ./cmd/martini
+	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/macme ./cmd/macme
 
 build: build_trusty build_trustyctl build_tool build_kube build_martini
 
