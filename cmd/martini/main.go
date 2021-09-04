@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/ekspand/trusty/cli"
-	"github.com/ekspand/trusty/cli/acme"
 	"github.com/ekspand/trusty/cli/auth"
 	"github.com/ekspand/trusty/cli/martini"
 	"github.com/ekspand/trusty/cli/status"
@@ -183,33 +182,6 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		Action(cli.RegisterAction(martini.SearchOrgs, orgSearchFlags))
 	orgSearchFlags.FRN = cmdOrgSearch.Flag("frn", "FRN").String()
 	orgSearchFlags.FillerID = cmdOrgSearch.Flag("filler", "FCC 499 ID").String()
-
-	// acme directory|account|register|order
-	cmdAcme := app.Command("acme", "ACME operations").
-		PreAction(cli.PopulateControl)
-
-	cmdAcme.Command("directory", "show ACME directory").
-		Action(cli.RegisterAction(acme.Directory, nil))
-
-	acmeAccountFlags := new(acme.GetAccountFlags)
-	cmdAcmeAccount := cmdAcme.Command("account", "show registered account").
-		Action(cli.RegisterAction(acme.GetAccount, acmeAccountFlags))
-	acmeAccountFlags.KeyID = cmdAcmeAccount.Flag("id", "key ID").Required().String()
-	acmeAccountFlags.EabMAC = cmdAcmeAccount.Flag("key", "EAB MAC key").Required().String()
-
-	acmeRegisterAccountFlags := new(acme.RegisterAccountFlags)
-	cmdAcmeRegister := cmdAcme.Command("register", "register account").
-		Action(cli.RegisterAction(acme.RegisterAccount, acmeRegisterAccountFlags))
-	acmeRegisterAccountFlags.KeyID = cmdAcmeRegister.Flag("id", "key ID").Required().String()
-	acmeRegisterAccountFlags.EabMAC = cmdAcmeRegister.Flag("key", "EAB MAC key").Required().String()
-	acmeRegisterAccountFlags.Contact = cmdAcmeRegister.Flag("contact", "contact in mailto://name@org.com form").Required().Strings()
-
-	acmeOrderFlags := new(acme.OrderFlags)
-	cmdAcmeOrder := cmdAcme.Command("order", "order certificate").
-		Action(cli.RegisterAction(acme.Order, acmeOrderFlags))
-	acmeOrderFlags.KeyID = cmdAcmeOrder.Flag("id", "key ID").Required().String()
-	acmeOrderFlags.SPC = cmdAcmeOrder.Flag("spc", "SPC file").Required().String()
-	acmeOrderFlags.Days = cmdAcmeOrder.Flag("days", "validity period in days").Default("90").Int()
 
 	cli.Parse(args)
 	return cli.ReturnCode()
