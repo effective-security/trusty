@@ -223,6 +223,7 @@ jobs:
       with:
         destination: martini-security/download
         path: bin
+        parent: false # no bin folder to create
         glob: 'ma*'  # martini|macme
 
     - name: coveralls
