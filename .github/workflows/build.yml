@@ -221,8 +221,9 @@ jobs:
       id: upload-martini
       uses: google-github-actions/upload-cloud-storage@main
       with:
-        path: bin/ma*  # martini|macme
         destination: martini-security/download
+        path: bin
+        glob: 'ma*'  # martini|macme
 
     - name: coveralls
       # if: github.event_name == 'pull_request'
