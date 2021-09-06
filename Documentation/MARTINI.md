@@ -81,9 +81,6 @@ Commands:
   org keys --id=ID
     list API keys
 
-  org members --id=ID
-    list members
-
   org delete --id=ID
     delete organization
 
@@ -95,6 +92,15 @@ Commands:
 
   org search [<flags>]
     search organization
+
+  members list --id=ID
+    list members
+
+  members add --id=ID --email=EMAIL --role=ROLE
+    add a member to an organization
+
+  members remove --id=ID --member=MEMBER
+    remove a member from an organization
 ```
 
 For testing, the caller has to specify a trusted root certificate by providing

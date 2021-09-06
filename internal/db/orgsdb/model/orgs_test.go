@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/internal/db/orgsdb/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -76,30 +77,53 @@ func TestOrganization(t *testing.T) {
 }
 
 func TestOrgMemberInfo(t *testing.T) {
-	u := &model.OrgMemberInfo{
+	var unil *model.OrgMemberInfo
+	assert.False(t, unil.IsAdmin())
+	assert.False(t, unil.IsOwner())
+
+	u1 := &model.OrgMemberInfo{
 		MembershipID: 999,
 		OrgID:        1000,
 		OrgName:      "org_name",
 		UserID:       1001,
 		Name:         "name",
 		Email:        "email",
-		Role:         "role",
+		Role:         v1.RoleOwner,
 		Source:       "source",
 	}
 
-	dto := u.ToDto()
+	u2 := &model.OrgMemberInfo{
+		MembershipID: 998,
+		OrgID:        1001,
+		OrgName:      "org_name",
+		UserID:       1002,
+		Name:         "name",
+		Email:        "email",
+		Role:         v1.RoleAdmin,
+		Source:       "source",
+	}
+
+	dto := u1.ToDto()
 	assert.Equal(t, "999", dto.MembershipID)
 	assert.Equal(t, "1000", dto.OrgID)
 	assert.Equal(t, "1001", dto.UserID)
 	assert.Equal(t, "org_name", dto.OrgName)
 	assert.Equal(t, "name", dto.Name)
 	assert.Equal(t, "email", dto.Email)
-	assert.Equal(t, "role", dto.Role)
+	assert.Equal(t, v1.RoleOwner, dto.Role)
+	assert.True(t, u1.IsAdmin())
+	assert.True(t, u1.IsOwner())
 	assert.Equal(t, "source", dto.Source)
 
-	l := model.ToMembertsDto([]*model.OrgMemberInfo{u})
-	require.Len(t, l, 1)
+	members := []*model.OrgMemberInfo{u1, u2}
+	l := model.ToMembertsDto(members)
+	require.Len(t, l, 2)
 	assert.Equal(t, *dto, *l[0])
+
+	m1 := model.FindOrgMemberInfo(members, u1.UserID)
+	assert.NotNil(t, m1)
+	m2 := model.FindOrgMemberInfoByEmail(members, u1.Email)
+	assert.NotNil(t, m2)
 }
 
 func TestOrgMembership(t *testing.T) {

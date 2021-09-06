@@ -10,7 +10,9 @@ import (
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/tasks"
+	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
+	"github.com/sony/sonyflake"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -109,4 +111,19 @@ func TestIdGenerator(t *testing.T) {
 		}()
 	}
 	wg.Wait()
+}
+
+func TestIdGenDecompose(t *testing.T) {
+	m := sonyflake.Decompose(89001757933306169)
+	logger.KV(xlog.INFO,
+		"id", "89001757933306169",
+		"Decompose", m)
+	m = sonyflake.Decompose(89116621917913401)
+	logger.KV(xlog.INFO,
+		"id", "89116621917913401",
+		"Decompose", m)
+	m = sonyflake.Decompose(89117306092781881)
+	logger.KV(xlog.INFO,
+		"id", "89117306092781881",
+		"Decompose", m)
 }

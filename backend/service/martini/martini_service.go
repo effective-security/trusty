@@ -76,6 +76,7 @@ func (s *Service) RegisterRoute(r rest.Router) {
 	r.GET(v1.PathForMartiniSearchCorps, s.SearchCorpsHandler())
 	r.GET(v1.PathForMartiniCerts, s.GetCertsHandler())
 	r.GET(v1.PathForMartiniOrgMembers, s.GetOrgMembersHandler())
+	r.POST(v1.PathForMartiniOrgMembers, s.OrgMemberHandler())
 	r.GET(v1.PathForMartiniOrgAPIKeys, s.GetOrgAPIKeysHandler())
 	r.POST(v1.PathForMartiniRegisterOrg, s.RegisterOrgHandler())
 	r.POST(v1.PathForMartiniApproveOrg, s.ApproveOrgHandler())

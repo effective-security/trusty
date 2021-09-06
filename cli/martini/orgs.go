@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/ekspand/trusty/cli"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/juju/errors"
@@ -93,39 +92,6 @@ func SearchOrgs(c ctl.Control, p interface{}) error {
 			fmt.Fprint(c.Writer(), "\n")
 		} else {
 			print.Orgs(c.Writer(), res.List)
-		}
-	*/
-	return nil
-}
-
-// OrgMembersFlags defines flags for OrgMembers command
-type OrgMembersFlags struct {
-	OrgID *string
-}
-
-// OrgMembers prints the org members
-func OrgMembers(c ctl.Control, p interface{}) error {
-	flags := p.(*OrgMembersFlags)
-	cli := c.(*cli.Cli)
-
-	client, err := cli.HTTPClient()
-	if err != nil {
-		return errors.Trace(err)
-	}
-	client.WithAuthorization()
-
-	res, err := client.OrgMembers(context.Background(), *flags.OrgID)
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	ctl.WriteJSON(c.Writer(), res)
-	/*
-		if cli.IsJSON() {
-			ctl.WriteJSON(c.Writer(), res)
-			fmt.Fprint(c.Writer(), "\n")
-		} else {
-			print.OrgMembers(c.Writer(), res.List)
 		}
 	*/
 	return nil
@@ -266,47 +232,6 @@ func ValidateOrg(c ctl.Control, p interface{}) error {
 		}
 	*/
 	return nil
-}
-
-// CreateSubscriptionFlags defines flags for CreateSubscription command
-type CreateSubscriptionFlags struct {
-	OrgID     *string
-	ProductID *string
-}
-
-// CreateSubscription pays for organization
-func CreateSubscription(c ctl.Control, p interface{}) error {
-	flags := p.(*CreateSubscriptionFlags)
-	cli := c.(*cli.Cli)
-
-	client, err := cli.HTTPClient()
-	if err != nil {
-		return errors.Trace(err)
-	}
-	client.WithAuthorization()
-
-	req := &v1.CreateSubscriptionRequest{
-		OrgID:     *flags.OrgID,
-		ProductID: *flags.ProductID,
-	}
-
-	res, err := client.CreateSubscription(context.Background(), req)
-	if err != nil {
-		return errors.Trace(err)
-	}
-
-	ctl.WriteJSON(c.Writer(), res)
-
-	/*
-		if cli.IsJSON() {
-			ctl.WriteJSON(c.Writer(), res)
-			fmt.Fprint(c.Writer(), "\n")
-		} else {
-			print.OrgResponse(c.Writer(), res.List)
-		}
-	*/
-	return nil
-
 }
 
 // APIKeysFlags defines flags for APIKeys command

@@ -10,7 +10,7 @@ import (
 	"github.com/juju/errors"
 )
 
-// LoginUser returns logged in user info
+// LoginUser returns logged in model.User
 func (p *Provider) LoginUser(ctx context.Context, user *model.User) (*model.User, error) {
 	id, err := p.NextID()
 	if err != nil {
@@ -40,6 +40,54 @@ func (p *Provider) LoginUser(ctx context.Context, user *model.User) (*model.User
 		;`, id, user.ExternalID, user.Provider, user.Login, user.Name, user.Email, user.Company, user.AvatarURL,
 		user.AccessToken, user.RefreshToken, user.TokenExpiresAt,
 		1, time.Now().UTC(),
+	).Scan(&res.ID,
+		&res.ExternalID,
+		&res.Provider,
+		&res.Login,
+		&res.Name,
+		&res.Email,
+		&res.Company,
+		&res.AvatarURL,
+		&res.AccessToken,
+		&res.RefreshToken,
+		&res.TokenExpiresAt,
+		&res.LoginCount,
+		&res.LastLoginAt,
+	)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	return res, nil
+}
+
+// CreateUser creates model.User if it does not exist
+func (p *Provider) CreateUser(ctx context.Context, provider, email string) (*model.User, error) {
+	id, err := p.NextID()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	res := &model.User{
+		Provider: provider,
+		Email:    email,
+		Login:    email,
+		Name:     email,
+	}
+
+	logger.KV(xlog.INFO,
+		"provider", res.Provider,
+		"email", res.Email,
+	)
+
+	err = p.db.QueryRowContext(ctx, `
+		INSERT INTO users(id,provider,login,name,email,login_count,last_login_at,extern_id,company,avatar_url,access_token,refresh_token)
+			VALUES($1,$2, $3, $4, $5,0,$6,$7,'','','','')
+		ON CONFLICT (provider,email)
+		DO UPDATE
+			SET login_count = users.login_count + 1, last_login_at=$6
+		RETURNING id,extern_id,provider,login,name,email,company,avatar_url,access_token,refresh_token,token_expires_at,login_count,last_login_at
+		;`, id, provider, email, email, email, time.Now().UTC(), db.IDString(id),
 	).Scan(&res.ID,
 		&res.ExternalID,
 		&res.Provider,

@@ -74,8 +74,11 @@ type OrgsReadOnlyDb interface {
 type OrgsDb interface {
 	db.IDGenerator
 	OrgsReadOnlyDb
+
 	// LoginUser returns User
 	LoginUser(ctx context.Context, user *model.User) (*model.User, error)
+	// CreateUser creates model.User if it does not exist
+	CreateUser(ctx context.Context, provider, email string) (*model.User, error)
 
 	// UpdateOrg inserts or updates Organization in "unknown" state
 	UpdateOrg(ctx context.Context, org *model.Organization) (*model.Organization, error)

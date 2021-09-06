@@ -146,6 +146,31 @@ func (s *testSuite) TestOrgMembers() {
 	s.HasText(`"name": "Denis Issoupov"`)
 }
 
+func (s *testSuite) TestOrgMemberAdd() {
+	org := "85334042257391942"
+	email := "denis@test.com"
+	role := "admin"
+	flags := martini.OrgMemberAddFlags{
+		OrgID: &org,
+		Email: &email,
+		Role:  &role,
+	}
+	err := s.Run(martini.OrgMemberAdd, &flags)
+	s.NoError(err)
+	s.HasText(`"name": "Denis Issoupov"`)
+}
+
+func (s *testSuite) TestOrgMemberRemove() {
+	org := "85334042257391942"
+	flags := martini.OrgMemberRemoveFlags{
+		OrgID:  &org,
+		UserID: &org,
+	}
+	err := s.Run(martini.OrgMemberRemove, &flags)
+	s.NoError(err)
+	s.HasText(`"name": "Denis Issoupov"`)
+}
+
 func (s *testSuite) TestDeleteOrg() {
 	org := "123456"
 	flags := martini.DeleteOrgFlags{
