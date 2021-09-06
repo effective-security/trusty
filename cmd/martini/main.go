@@ -155,11 +155,6 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		Action(cli.RegisterAction(martini.APIKeys, orgAPIKeysFlags))
 	orgAPIKeysFlags.OrgID = cmdOrgAPIKeys.Flag("id", "organization ID").Required().String()
 
-	orgMembersFlags := new(martini.OrgMembersFlags)
-	cmdOrgMembers := cmdOrgs.Command("members", "list members").
-		Action(cli.RegisterAction(martini.OrgMembers, orgMembersFlags))
-	orgMembersFlags.OrgID = cmdOrgMembers.Flag("id", "organization ID").Required().String()
-
 	orgDeleteFlags := new(martini.DeleteOrgFlags)
 	cmdOrgDelete := cmdOrgs.Command("delete", "delete organization").
 		Action(cli.RegisterAction(martini.DeleteOrg, orgDeleteFlags))
@@ -182,6 +177,28 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		Action(cli.RegisterAction(martini.SearchOrgs, orgSearchFlags))
 	orgSearchFlags.FRN = cmdOrgSearch.Flag("frn", "FRN").String()
 	orgSearchFlags.FillerID = cmdOrgSearch.Flag("filler", "FCC 499 ID").String()
+
+	// members list|add|remove
+	cmdMembers := app.Command("members", "Org members operations").
+		PreAction(cli.PopulateControl)
+
+	orgMembersFlags := new(martini.OrgMembersFlags)
+	cmdOrgMembersList := cmdMembers.Command("list", "list organization members").
+		Action(cli.RegisterAction(martini.OrgMembers, orgMembersFlags))
+	orgMembersFlags.OrgID = cmdOrgMembersList.Flag("id", "organization ID").Required().String()
+
+	orgMemberAddFlags := new(martini.OrgMemberAddFlags)
+	cmdOrgMemberAdd := cmdMembers.Command("add", "add a member to an organization").
+		Action(cli.RegisterAction(martini.OrgMemberAdd, orgMemberAddFlags))
+	orgMemberAddFlags.OrgID = cmdOrgMemberAdd.Flag("id", "organization ID").Required().String()
+	orgMemberAddFlags.Email = cmdOrgMemberAdd.Flag("email", "member email").Required().String()
+	orgMemberAddFlags.Role = cmdOrgMemberAdd.Flag("role", "role: admin|user").Required().String()
+
+	orgMemberRemoveFlags := new(martini.OrgMemberRemoveFlags)
+	cmdOrgMemberRemove := cmdMembers.Command("remove", "remove a member from an organization").
+		Action(cli.RegisterAction(martini.OrgMemberRemove, orgMemberRemoveFlags))
+	orgMemberRemoveFlags.OrgID = cmdOrgMemberRemove.Flag("id", "organization ID").Required().String()
+	orgMemberRemoveFlags.UserID = cmdOrgMemberRemove.Flag("member", "member ID").Required().String()
 
 	cli.Parse(args)
 	return cli.ReturnCode()

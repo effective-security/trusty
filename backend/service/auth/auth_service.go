@@ -398,11 +398,11 @@ func (s *Service) GoogleCallbackHandler() rest.Handle {
 		user := &model.User{
 			ExternalID:   userInfo.Id,
 			Provider:     v1.ProviderGoogle,
-			Login:        db.String(&userInfo.Email),
-			Name:         db.String(&userInfo.Name),
+			Login:        userInfo.Email,
+			Name:         userInfo.Name,
 			Email:        uemail,
 			Company:      "",
-			AvatarURL:    db.String(&userInfo.Picture),
+			AvatarURL:    userInfo.Picture,
 			AccessToken:  token.AccessToken,
 			RefreshToken: token.RefreshToken,
 		}

@@ -19,6 +19,9 @@ const (
 
 	// RoleOwner specifies name for Owner role
 	RoleOwner = "owner"
+
+	// RoleUser specifies name for User role
+	RoleUser = "user"
 )
 
 const (

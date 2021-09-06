@@ -34,6 +34,19 @@ func (o *OrgMemberInfo) ToDto() *v1.OrgMemberInfo {
 	return m
 }
 
+// IsAdmin returns true if the role is Admin or Owner
+func (o *OrgMemberInfo) IsAdmin() bool {
+	if o == nil {
+		return false
+	}
+	return o.Role == v1.RoleAdmin || o.Role == v1.RoleOwner
+}
+
+// IsOwner returns true if the role is Owner
+func (o *OrgMemberInfo) IsOwner() bool {
+	return o != nil && o.Role == v1.RoleOwner
+}
+
 // ToMembertsDto returns list of members
 func ToMembertsDto(list []*OrgMemberInfo) []*v1.OrgMemberInfo {
 	res := make([]*v1.OrgMemberInfo, len(list))
@@ -47,6 +60,16 @@ func ToMembertsDto(list []*OrgMemberInfo) []*v1.OrgMemberInfo {
 func FindOrgMemberInfo(list []*OrgMemberInfo, userID uint64) *OrgMemberInfo {
 	for _, m := range list {
 		if m.UserID == userID {
+			return m
+		}
+	}
+	return nil
+}
+
+// FindOrgMemberInfoByEmail returns OrgMemberInfo if found, or nil otherwise
+func FindOrgMemberInfoByEmail(list []*OrgMemberInfo, email string) *OrgMemberInfo {
+	for _, m := range list {
+		if m.Email == email {
 			return m
 		}
 	}

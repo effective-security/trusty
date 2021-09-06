@@ -21,6 +21,10 @@ type MartiniClient interface {
 	Org(ctx context.Context, id string) (*v1.OrgResponse, error)
 	// OrgMembers returns org members
 	OrgMembers(ctx context.Context, orgID string) (*v1.OrgMembersResponse, error)
+	// OrgMemberAdd adds a member to the org
+	OrgMemberAdd(ctx context.Context, orgID, email, role string) (*v1.OrgMembersResponse, error)
+	// OrgMemberRemove removes the member from the org
+	OrgMemberRemove(ctx context.Context, orgID, memberID string) (*v1.OrgMembersResponse, error)
 	// Certificates returns user's Certificates
 	Certificates(ctx context.Context) (*v1.CertificatesResponse, error)
 	// FccFRN returns Fcc FRN
@@ -109,6 +113,41 @@ func (c *Client) OrgMembers(ctx context.Context, orgID string) (*v1.OrgMembersRe
 		return nil, errors.Trace(err)
 	}
 	return r, nil
+}
+
+// OrgMemberAdd adds a member to an org
+func (c *Client) OrgMemberAdd(ctx context.Context, orgID, email, role string) (*v1.OrgMembersResponse, error) {
+	res := new(v1.OrgMembersResponse)
+	mp := strings.Replace(v1.PathForMartiniOrgMembers, ":org_id", orgID, 1)
+
+	req := &v1.OrgMemberRequest{
+		Action: "ADD",
+		Email:  email,
+		Role:   role,
+	}
+
+	_, _, err := c.PostRequest(ctx, mp, req, res)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return res, nil
+}
+
+// OrgMemberRemove removes a member from an org
+func (c *Client) OrgMemberRemove(ctx context.Context, orgID, memberID string) (*v1.OrgMembersResponse, error) {
+	res := new(v1.OrgMembersResponse)
+	mp := strings.Replace(v1.PathForMartiniOrgMembers, ":org_id", orgID, 1)
+
+	req := &v1.OrgMemberRequest{
+		Action: "REMOVE",
+		UserID: memberID,
+	}
+
+	_, _, err := c.PostRequest(ctx, mp, req, res)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	return res, nil
 }
 
 // Certificates returns user's Certificates

@@ -58,3 +58,13 @@ type OrgMembersResponse struct {
 type DeleteOrgRequest struct {
 	OrgID string `json:"org_id"`
 }
+
+// OrgMemberRequest specify membership request
+type OrgMemberRequest struct {
+	// Action spacifies action: ADD|REMOVE
+	Action string `json:"action"`
+	UserID string `json:"user_id"`
+	Email  string `json:"email"`
+	// Role is used in ADD action: admin|user
+	Role string `json:"role"`
+}
