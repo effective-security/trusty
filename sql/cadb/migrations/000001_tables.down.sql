@@ -1,11 +1,10 @@
 BEGIN;
 
 DROP TABLE IF EXISTS public.certificates;
-DROP INDEX IF EXISTS unique_certificates_skid;
-DROP INDEX IF EXISTS unique_certificates_sha256;
 DROP INDEX IF EXISTS idx_certificates_org;
 DROP INDEX IF EXISTS idx_certificates_skid;
 DROP INDEX IF EXISTS idx_certificates_ikid;
+DROP INDEX IF EXISTS idx_certificates_ikid_serial;
 DROP INDEX IF EXISTS idx_certificates_notafter;
 DROP INDEX IF EXISTS idx_certificates_sha256;
 

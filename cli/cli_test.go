@@ -346,3 +346,9 @@ func TestReadStdin(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Empty(t, b)
 }
+
+func TestString(t *testing.T) {
+	assert.Empty(t, cli.String(nil))
+	str := "not nil"
+	assert.Equal(t, str, cli.String(&str))
+}

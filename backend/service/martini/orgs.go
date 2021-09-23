@@ -439,7 +439,7 @@ func (s *Service) registerOrg(ctx context.Context, filerID string, requestor *mo
 		// TODO: convert to pending invitations
 		approver, err := s.db.CreateUser(ctx, v1.ProviderGoogle, contactRes.ContactEmail)
 		if err != nil {
-			logger.Errorf("reason=LoginUser, email=%s, err=%v",
+			logger.Errorf("reason=CreateUser, email=%s, err=%v",
 				contactRes.ContactEmail, errors.Details(err))
 		} else {
 			s.db.AddOrgMember(ctx, org.ID, approver.ID, v1.RoleOwner, v1.ProviderMartini)

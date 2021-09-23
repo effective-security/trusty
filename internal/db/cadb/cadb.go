@@ -31,6 +31,8 @@ type CaReadonlyDb interface {
 	GetCertificate(ctx context.Context, id uint64) (*model.Certificate, error)
 	// GetCertificateBySKID returns registered Certificate
 	GetCertificateBySKID(ctx context.Context, skid string) (*model.Certificate, error)
+	// GetCertificateByIKIDAndSerial returns registered Certificate
+	GetCertificateByIKIDAndSerial(ctx context.Context, ikid, serial string) (*model.Certificate, error)
 	// GetOrgRevokedCertificates returns list of Org's revoked certificates
 	GetOrgRevokedCertificates(ctx context.Context, orgID uint64) (model.RevokedCertificates, error)
 	// GetCrl returns CRL by a specified issuer

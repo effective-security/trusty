@@ -2,7 +2,7 @@
 set -e
 
 if [[ -z "$TRUSTY_URL" ]]; then
-    export TRUSTY_URL=http://10.77.88.101:7880
+    export TRUSTY_URL=http://168.138.72.101:7880
 fi
 
 echo "TRUSTY_URL: $TRUSTY_URL"

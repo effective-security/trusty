@@ -81,9 +81,10 @@ func TestRegisterCertificate(t *testing.T) {
 	assert.Equal(t, rc.Pem, r.Pem)
 	assert.Equal(t, rc.IssuersPem, r.IssuersPem)
 	assert.Equal(t, rc.Profile, r.Profile)
+	assert.Equal(t, rc.Locations, r.Locations)
 	assert.Equal(t, rc.NotBefore.Unix(), r.NotBefore.Unix())
 	assert.Equal(t, rc.NotAfter.Unix(), r.NotAfter.Unix())
-	assert.Empty(t, rc.Locations, 3)
+	assert.Empty(t, rc.Locations)
 
 	r.Locations = []string{"1", "2", "3"}
 
@@ -120,6 +121,11 @@ func TestRegisterCertificate(t *testing.T) {
 	require.NotNil(t, r4)
 	assert.Equal(t, *r, *r4)
 
+	r4, err = provider.GetCertificateByIKIDAndSerial(ctx, r2.IKID, r2.SerialNumber)
+	require.NoError(t, err)
+	require.NotNil(t, r4)
+	assert.Equal(t, *r, *r4)
+
 	cc, err := provider.GetCertsCount(ctx)
 	require.NoError(t, err)
 	assert.Greater(t, cc, uint64(0))
@@ -147,6 +153,62 @@ func TestRegisterCertificate(t *testing.T) {
 
 	err = provider.RemoveRevokedCertificate(ctx, revoked.Certificate.ID)
 	require.NoError(t, err)
+}
+
+func TestRegisterCertificateUniqueIdx(t *testing.T) {
+	orgID, err := provider.NextID()
+	require.NoError(t, err)
+
+	rc := &model.Certificate{
+		OrgID:            orgID,
+		SKID:             guid.MustCreate(),
+		IKID:             guid.MustCreate(),
+		SerialNumber:     certutil.RandomString(10),
+		Subject:          "subj",
+		Issuer:           "iss",
+		NotBefore:        time.Now().Add(-time.Hour).UTC(),
+		NotAfter:         time.Now().Add(time.Hour).UTC(),
+		ThumbprintSha256: certutil.RandomString(64),
+		Pem:              "pem",
+		IssuersPem:       "ipem",
+		Profile:          "client",
+	}
+
+	r, err := provider.RegisterCertificate(ctx, rc)
+	require.NoError(t, err)
+	require.NotNil(t, r)
+	defer provider.RemoveCertificate(ctx, r.ID)
+
+	assert.Equal(t, rc.OrgID, r.OrgID)
+	assert.Equal(t, rc.SKID, r.SKID)
+	assert.Equal(t, rc.IKID, r.IKID)
+	assert.Equal(t, rc.SerialNumber, r.SerialNumber)
+	assert.Equal(t, rc.Subject, r.Subject)
+	assert.Equal(t, rc.Issuer, r.Issuer)
+	assert.Equal(t, rc.ThumbprintSha256, r.ThumbprintSha256)
+	assert.Equal(t, rc.Pem, r.Pem)
+	assert.Equal(t, rc.IssuersPem, r.IssuersPem)
+	assert.Equal(t, rc.Profile, r.Profile)
+	assert.Equal(t, rc.Locations, r.Locations)
+	assert.Equal(t, rc.NotBefore.Unix(), r.NotBefore.Unix())
+	assert.Equal(t, rc.NotAfter.Unix(), r.NotAfter.Unix())
+
+	r2, err := provider.RegisterCertificate(ctx, rc)
+	require.NoError(t, err)
+	require.NotNil(t, r2)
+	assert.EqualValues(t, *r, *r2)
+
+	// change sha2
+	rc.ThumbprintSha256 = certutil.RandomString(64)
+	_, err = provider.RegisterCertificate(ctx, rc)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "pq: duplicate key value violates unique constraint \"idx_certificates_skid\"")
+
+	// change skid
+	rc.SKID = guid.MustCreate()
+	_, err = provider.RegisterCertificate(ctx, rc)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "pq: duplicate key value violates unique constraint \"idx_certificates_ikid_serial\"")
 }
 
 func TestRegisterRevokedCertificate(t *testing.T) {

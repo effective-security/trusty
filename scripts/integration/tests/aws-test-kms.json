@@ -1,4 +1,4 @@
 {
     "Manufacturer" : "AWSKMS",
-    "Attributes": "Endpoint=http://10.77.88.99:4599,Region=us-west-2"
+    "Attributes": "Endpoint=http://168.138.72.99:4599,Region=us-west-2"
 }

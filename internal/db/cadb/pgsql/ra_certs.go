@@ -60,7 +60,9 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 	}
 	res.NotAfter = res.NotAfter.UTC()
 	res.NotBefore = res.NotBefore.UTC()
-	res.Locations = strings.Split(locations, ",")
+	if len(locations) > 0 {
+		res.Locations = strings.Split(locations, ",")
+	}
 	return res, nil
 }
 
@@ -113,7 +115,9 @@ func (p *Provider) GetCertificate(ctx context.Context, id uint64) (*model.Certif
 	}
 	c.NotAfter = c.NotAfter.UTC()
 	c.NotBefore = c.NotBefore.UTC()
-	c.Locations = strings.Split(locations, ",")
+	if len(locations) > 0 {
+		c.Locations = strings.Split(locations, ",")
+	}
 	return c, nil
 }
 
@@ -154,7 +158,52 @@ func (p *Provider) GetCertificateBySKID(ctx context.Context, skid string) (*mode
 	}
 	c.NotAfter = c.NotAfter.UTC()
 	c.NotBefore = c.NotBefore.UTC()
-	c.Locations = strings.Split(locations, ",")
+	if len(locations) > 0 {
+		c.Locations = strings.Split(locations, ",")
+	}
+	return c, nil
+}
+
+// GetCertificateByIKIDAndSerial returns registered Certificate
+func (p *Provider) GetCertificateByIKIDAndSerial(ctx context.Context, ikid, serial string) (*model.Certificate, error) {
+	c := new(model.Certificate)
+	var locations string
+	err := p.db.QueryRowContext(ctx, `
+			SELECT
+				id,org_id,skid,ikid,serial_number,
+				not_before,no_tafter,
+				subject,issuer,
+				sha256,
+				pem,issuers_pem,
+				profile,
+				locations
+			FROM certificates
+			WHERE ikid = $1 AND serial_number = $2
+			;
+			`, ikid, serial).Scan(
+		&c.ID,
+		&c.OrgID,
+		&c.SKID,
+		&c.IKID,
+		&c.SerialNumber,
+		&c.NotBefore,
+		&c.NotAfter,
+		&c.Subject,
+		&c.Issuer,
+		&c.ThumbprintSha256,
+		&c.Pem,
+		&c.IssuersPem,
+		&c.Profile,
+		&locations,
+	)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	c.NotAfter = c.NotAfter.UTC()
+	c.NotBefore = c.NotBefore.UTC()
+	if len(locations) > 0 {
+		c.Locations = strings.Split(locations, ",")
+	}
 	return c, nil
 }
 
@@ -200,7 +249,9 @@ func (p *Provider) GetOrgCertificates(ctx context.Context, orgID uint64) (model.
 		}
 		r.NotAfter = r.NotAfter.UTC()
 		r.NotBefore = r.NotBefore.UTC()
-		r.Locations = strings.Split(locations, ",")
+		if len(locations) > 0 {
+			r.Locations = strings.Split(locations, ",")
+		}
 		list = append(list, r)
 	}
 
@@ -259,7 +310,9 @@ func (p *Provider) ListCertificates(ctx context.Context, ikid string, limit int,
 		}
 		r.NotAfter = r.NotAfter.UTC()
 		r.NotBefore = r.NotBefore.UTC()
-		r.Locations = strings.Split(locations, ",")
+		if len(locations) > 0 {
+			r.Locations = strings.Split(locations, ",")
+		}
 		list = append(list, r)
 	}
 

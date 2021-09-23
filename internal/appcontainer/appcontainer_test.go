@@ -114,16 +114,9 @@ func TestIdGenerator(t *testing.T) {
 }
 
 func TestIdGenDecompose(t *testing.T) {
-	m := sonyflake.Decompose(89001757933306169)
+	m := sonyflake.Decompose(91553362838814981)
 	logger.KV(xlog.INFO,
 		"id", "89001757933306169",
 		"Decompose", m)
-	m = sonyflake.Decompose(89116621917913401)
-	logger.KV(xlog.INFO,
-		"id", "89116621917913401",
-		"Decompose", m)
-	m = sonyflake.Decompose(89117306092781881)
-	logger.KV(xlog.INFO,
-		"id", "89117306092781881",
-		"Decompose", m)
+	assert.NotEmpty(t, m["machine-id"])
 }
