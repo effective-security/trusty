@@ -34,10 +34,7 @@ CREATE TABLE IF NOT EXISTS public.certificates
     issuers_pem text COLLATE pg_catalog."default" NOT NULL,
     profile character varying(32) COLLATE pg_catalog."default" NOT NULL,
     locations text COLLATE pg_catalog."default" NOT NULL,
-    CONSTRAINT certificates_pkey PRIMARY KEY (id),
-    CONSTRAINT certificates_skid UNIQUE (skid),
-    CONSTRAINT certificates_sha256 UNIQUE (sha256),
-    CONSTRAINT certificates_issuer_sn UNIQUE (ikid, serial_number)
+    CONSTRAINT certificates_pkey PRIMARY KEY (id)
 )
 WITH (
     OIDS = FALSE
@@ -63,17 +60,11 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_certificates_skid
     ON public.certificates USING btree
     (skid COLLATE pg_catalog."default");
 
-SELECT create_constraint_if_not_exists(
-    'public',
-    'certificates',
-    'unique_certificates_skid',
-    'ALTER TABLE public.certificates ADD CONSTRAINT unique_certificates_skid UNIQUE USING INDEX idx_certificates_skid;');
-
-SELECT create_constraint_if_not_exists(
-    'public',
-    'certificates',
-    'unique_certificates_sha256',
-    'ALTER TABLE public.certificates ADD CONSTRAINT unique_certificates_sha256 UNIQUE USING INDEX idx_certificates_sha256;');
+CREATE UNIQUE INDEX IF NOT EXISTS idx_certificates_ikid_serial
+    ON public.certificates USING btree
+    (ikid COLLATE pg_catalog."default",
+    serial_number COLLATE pg_catalog."default"
+    );
 
 --
 -- REVOKED CERTIFICATES

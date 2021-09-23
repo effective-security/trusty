@@ -8,11 +8,11 @@ type RegistrationAuthority struct {
 	// PublicRoots specifies the list of public Root Certs files.
 	PublicRoots []string `json:"public_roots,omitempty" yaml:"public_roots,omitempty"`
 
-	Publisher CertPublisher `json:"publisher,omitempty" yaml:"publisher,omitempty"`
+	Publisher Publisher `json:"publisher,omitempty" yaml:"publisher,omitempty"`
 }
 
-// CertPublisher ontains configuration info for Publisher
-type CertPublisher struct {
+// Publisher ontains configuration info for Publisher
+type Publisher struct {
 	BaseURL     string `json:"base_url" yaml:"base_url"`
 	CertsBucket string `json:"cert_bucket" yaml:"cert_bucket"`
 	CRLBucket   string `json:"crl_bucket" yaml:"crl_bucket"`

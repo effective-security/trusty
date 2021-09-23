@@ -16,39 +16,6 @@
     "application/json"
   ],
   "paths": {
-    "/v1/cis/certs": {
-      "get": {
-        "summary": "GetOrgCertificates returns the Org certificates",
-        "operationId": "CIService_GetOrgCertificates",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/pbCertificatesResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "orgId",
-            "description": "OrgId specifies the Org ID.",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "uint64"
-          }
-        ],
-        "tags": [
-          "CIService"
-        ]
-      }
-    },
     "/v1/cis/certs/{id}": {
       "get": {
         "summary": "GetCertificate returns the certificate",
@@ -191,63 +158,6 @@
         }
       },
       "title": "CertificateResponse returns Certificate"
-    },
-    "pbCertificatesResponse": {
-      "type": "object",
-      "properties": {
-        "list": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/pbCertificate"
-          }
-        }
-      },
-      "title": "CertificatesResponse returns Certificates list"
-    },
-    "pbReason": {
-      "type": "string",
-      "enum": [
-        "UNSPECIFIED",
-        "KEY_COMPROMISE",
-        "CA_COMPROMISE",
-        "AFFILIATION_CHANGED",
-        "SUPERSEDED",
-        "CESSATION_OF_OPERATION",
-        "CERTIFICATE_HOLD",
-        "REMOVE_FROM_CRL",
-        "PRIVILEGE_WITHDRAWN",
-        "AA_COMPROMISE"
-      ],
-      "default": "UNSPECIFIED",
-      "title": "Reason specifies Certificate Revocation Reason from RFC 5280\nCRLReason ::= ENUMERATED {\n       unspecified             (0),\n       keyCompromise           (1),\n       cACompromise            (2),\n       affiliationChanged      (3),\n       superseded              (4),\n       cessationOfOperation    (5),\n       certificateHold         (6),\n            -- value 7 is not used\n       removeFromCRL           (8),\n       privilegeWithdrawn      (9),\n       aACompromise           (10) }"
-    },
-    "pbRevokedCertificate": {
-      "type": "object",
-      "properties": {
-        "certificate": {
-          "$ref": "#/definitions/pbCertificate"
-        },
-        "revoked_at": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "reason": {
-          "$ref": "#/definitions/pbReason"
-        }
-      },
-      "title": "RevokedCertificate provides X509 Cert information"
-    },
-    "pbRevokedCertificatesResponse": {
-      "type": "object",
-      "properties": {
-        "list": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/pbRevokedCertificate"
-          }
-        }
-      },
-      "title": "RevokedCertificatesResponse returns Revoked Certificates list"
     },
     "pbRootCertificate": {
       "type": "object",

@@ -2,6 +2,7 @@ package appcontainer
 
 import (
 	"io"
+	"net"
 	"os"
 	"time"
 
@@ -404,6 +405,9 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*au
 }
 
 func provideOrgsDB(cfg *config.Configuration) (orgsdb.OrgsDb, orgsdb.OrgsReadOnlyDb, error) {
+	if IDGenerator == nil {
+		panic("IDGenerator is nil")
+	}
 	d, err := orgsdb.New(
 		cfg.OrgsSQL.Driver,
 		cfg.OrgsSQL.DataSource,
@@ -417,6 +421,9 @@ func provideOrgsDB(cfg *config.Configuration) (orgsdb.OrgsDb, orgsdb.OrgsReadOnl
 }
 
 func provideCaDB(cfg *config.Configuration) (cadb.CaDb, cadb.CaReadonlyDb, error) {
+	if IDGenerator == nil {
+		panic("IDGenerator is nil")
+	}
 	d, err := cadb.New(
 		cfg.CaSQL.Driver,
 		cfg.CaSQL.DataSource,
@@ -434,6 +441,9 @@ func provideClientFactory(cfg *config.Configuration) (client.Factory, error) {
 }
 
 func provideAcme(cfg *config.Configuration) (acme.Controller, error) {
+	if IDGenerator == nil {
+		panic("IDGenerator is nil")
+	}
 	acmecfg, err := acme.LoadConfig(cfg.Acme)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -466,4 +476,27 @@ func providePublisher(cfg *config.Configuration) (certpublisher.Publisher, error
 // IDGenerator for the app
 var IDGenerator = sonyflake.NewSonyflake(sonyflake.Settings{
 	StartTime: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
+	// NOTE: we don't return error here,
+	// as Mac and test containers may not have InterfaceAddrs
+	MachineID: func() (uint16, error) {
+		as, err := net.InterfaceAddrs()
+		if err != nil {
+			logger.Errorf("reason=InterfaceAddrs, err=[%v]", errors.ErrorStack(err))
+			return 0, nil
+		}
+
+		for _, a := range as {
+			ipnet, ok := a.(*net.IPNet)
+			if !ok || ipnet.IP.IsLoopback() {
+				continue
+			}
+			ip := ipnet.IP.To16()
+			last := len(ip)
+			id := uint16(ip[last-2])<<8 + uint16(ip[last-1])
+			logger.Noticef("machine_id=%d, ip=%v, ip_len=%d", id, ip.String(), last)
+			return id, nil
+		}
+		logger.Errorf("reason=no_private_ip")
+		return 0, nil
+	},
 })

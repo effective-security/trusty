@@ -87,10 +87,33 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	signFlags.SAN = signCmd.Flag("san", "optional SAN").Strings()
 	signFlags.Out = signCmd.Flag("out", "output file name").String()
 
+	listCertsFlags := new(ca.ListCertsFlags)
+	listCertsCmd := cmdCA.Command("certs", "print the certificates").
+		Action(cli.RegisterAction(ca.ListCerts, listCertsFlags))
+	listCertsFlags.Ikid = listCertsCmd.Flag("ikid", "Issuer Key Identifier").Required().String()
+	listCertsFlags.Limit = listCertsCmd.Flag("limit", "max limit of the certificates to print").Int()
+	listCertsFlags.After = listCertsCmd.Flag("after", "the certificate ID for pagination").String()
+
+	rlistCertsFlags := new(ca.ListCertsFlags)
+	revokedCmd := cmdCA.Command("revoked", "print the revoked certificates").
+		Action(cli.RegisterAction(ca.ListRevokedCerts, rlistCertsFlags))
+	rlistCertsFlags.Ikid = revokedCmd.Flag("ikid", "Issuer Key Identifier").Required().String()
+	rlistCertsFlags.Limit = revokedCmd.Flag("limit", "max limit of the certificates to print").Int()
+	rlistCertsFlags.After = revokedCmd.Flag("after", "the certificate ID for pagination").String()
+
 	publishCrlFlags := new(ca.PublishCrlsFlags)
 	publishCrlCmd := cmdCA.Command("publish_crl", "publish CRL").
 		Action(cli.RegisterAction(ca.PublishCrls, publishCrlFlags))
 	publishCrlFlags.Ikid = publishCrlCmd.Flag("ikid", "Issuer Key Identifier").Required().String()
+
+	revokeFlags := new(ca.RevokeFlags)
+	revokeCmd := cmdCA.Command("revoke", "revoke a certificate").
+		Action(cli.RegisterAction(ca.Revoke, revokeFlags))
+	revokeFlags.ID = revokeCmd.Flag("id", "ID of the certificate").Uint64()
+	revokeFlags.SKID = revokeCmd.Flag("skid", "Subject Key Identifier").String()
+	revokeFlags.IKID = revokeCmd.Flag("ikid", "Issuer Key Identifier").String()
+	revokeFlags.Serial = revokeCmd.Flag("sn", "Serial Number").String()
+	revokeFlags.Reason = revokeCmd.Flag("reason", "Reason for revocation").Int()
 
 	// cis: roots|certs|revoked
 
@@ -101,20 +124,6 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	rootsCmd := cmdCIS.Command("roots", "show the roots").
 		Action(cli.RegisterAction(cis.Roots, getRootsFlags))
 	getRootsFlags.Pem = rootsCmd.Flag("pem", "specifies to print PEM").Bool()
-
-	listCertsFlags := new(cis.ListCertsFlags)
-	listCertsCmd := cmdCIS.Command("certs", "print the certificates").
-		Action(cli.RegisterAction(cis.ListCerts, listCertsFlags))
-	listCertsFlags.Ikid = listCertsCmd.Flag("ikid", "Issuer Key Identifier").Required().String()
-	listCertsFlags.Limit = listCertsCmd.Flag("limit", "max limit of the certificates to print").Int()
-	listCertsFlags.After = listCertsCmd.Flag("after", "the certificate ID for pagination").String()
-
-	rlistCertsFlags := new(cis.ListCertsFlags)
-	revokedCmd := cmdCIS.Command("revoked", "print the revoked certificates").
-		Action(cli.RegisterAction(cis.ListRevokedCerts, rlistCertsFlags))
-	rlistCertsFlags.Ikid = revokedCmd.Flag("ikid", "Issuer Key Identifier").Required().String()
-	rlistCertsFlags.Limit = revokedCmd.Flag("limit", "max limit of the certificates to print").Int()
-	rlistCertsFlags.After = revokedCmd.Flag("after", "the certificate ID for pagination").String()
 
 	cli.Parse(args)
 	return cli.ReturnCode()

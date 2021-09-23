@@ -230,14 +230,41 @@ func (s *Service) PublishCrls(ctx context.Context, req *pb.PublishCrlsRequest) (
 	return res, nil
 }
 
-// RevokeCertificate returns the revoked certificate
-func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error) {
+// GetCertificate returns Certificate
+func (s *Service) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error) {
 	var crt *model.Certificate
 	var err error
 	if in.Id != 0 {
 		crt, err = s.db.GetCertificate(ctx, in.Id)
 	} else {
 		crt, err = s.db.GetCertificateBySKID(ctx, in.Skid)
+	}
+	// TODO: IssuerSerial
+	if err != nil {
+		logger.KV(xlog.ERROR,
+			"request", in,
+			"err", errors.Details(err),
+		)
+		return nil, v1.NewError(codes.Internal, "unable to find certificate")
+	}
+	res := &pb.CertificateResponse{
+		Certificate: crt.ToPB(),
+	}
+	return res, nil
+}
+
+// RevokeCertificate returns the revoked certificate
+func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error) {
+	var crt *model.Certificate
+	var err error
+	if in.Id != 0 {
+		crt, err = s.db.GetCertificate(ctx, in.Id)
+	} else if in.IssuerSerial != nil {
+		crt, err = s.db.GetCertificateByIKIDAndSerial(ctx, in.IssuerSerial.Ikid, in.IssuerSerial.SerialNumber)
+	} else if len(in.Skid) > 0 {
+		crt, err = s.db.GetCertificateBySKID(ctx, in.Skid)
+	} else {
+		return nil, v1.NewError(codes.InvalidArgument, "invalid parameter")
 	}
 	if err != nil {
 		logger.KV(xlog.ERROR,
@@ -258,6 +285,54 @@ func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificat
 
 	res := &pb.RevokedCertificateResponse{
 		Revoked: revoked.ToDTO(),
+	}
+	return res, nil
+}
+
+// ListCertificates returns stream of Certificates
+func (s *Service) ListCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.CertificatesResponse, error) {
+	list, err := s.db.ListCertificates(ctx, in.Ikid, int(in.Limit), in.After)
+	if err != nil {
+		logger.KV(xlog.ERROR,
+			"request", in,
+			"err", errors.Details(err),
+		)
+		return nil, v1.NewError(codes.Internal, "unable to list certificates")
+	}
+	res := &pb.CertificatesResponse{
+		List: list.ToDTO(),
+	}
+	return res, nil
+}
+
+// ListRevokedCertificates returns stream of Revoked Certificates
+func (s *Service) ListRevokedCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.RevokedCertificatesResponse, error) {
+	list, err := s.db.ListRevokedCertificates(ctx, in.Ikid, int(in.Limit), in.After)
+	if err != nil {
+		logger.KV(xlog.ERROR,
+			"request", in,
+			"err", errors.Details(err),
+		)
+		return nil, v1.NewError(codes.Internal, "unable to list certificates")
+	}
+	res := &pb.RevokedCertificatesResponse{
+		List: list.ToDTO(),
+	}
+	return res, nil
+}
+
+// GetOrgCertificates returns the Org certificates
+func (s *Service) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest) (*pb.CertificatesResponse, error) {
+	list, err := s.db.GetOrgCertificates(ctx, in.OrgId)
+	if err != nil {
+		logger.KV(xlog.ERROR,
+			"request", in,
+			"err", errors.Details(err),
+		)
+		return nil, v1.NewError(codes.Internal, "unable to get certificates")
+	}
+	res := &pb.CertificatesResponse{
+		List: list.ToDTO(),
 	}
 	return res, nil
 }

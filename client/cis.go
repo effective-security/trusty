@@ -14,12 +14,6 @@ type CIClient interface {
 	GetRoots(ctx context.Context, in *empty.Empty) (*pb.RootsResponse, error)
 	// GetCertificate returns the certificate
 	GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error)
-	// GetOrgCertificates returns the Org certificates
-	GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest) (*pb.CertificatesResponse, error)
-	// ListCertificates returns stream of Certificates
-	ListCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.CertificatesResponse, error)
-	// ListRevokedCertificates returns stream of Revoked Certificates
-	ListRevokedCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.RevokedCertificatesResponse, error)
 }
 
 type cisClient struct {
@@ -52,21 +46,6 @@ func (c *cisClient) GetCertificate(ctx context.Context, in *pb.GetCertificateReq
 	return c.remote.GetCertificate(ctx, in, c.callOpts...)
 }
 
-// GetOrgCertificates returns the Org certificates
-func (c *cisClient) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest) (*pb.CertificatesResponse, error) {
-	return c.remote.GetOrgCertificates(ctx, in, c.callOpts...)
-}
-
-// ListCertificates returns stream of Certificates
-func (c *cisClient) ListCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.CertificatesResponse, error) {
-	return c.remote.ListCertificates(ctx, in, c.callOpts...)
-}
-
-// ListRevokedCertificates returns stream of Revoked Certificates
-func (c *cisClient) ListRevokedCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.RevokedCertificatesResponse, error) {
-	return c.remote.ListRevokedCertificates(ctx, in, c.callOpts...)
-}
-
 type retryCIClient struct {
 	cis pb.CIServiceClient
 }
@@ -88,19 +67,4 @@ func (c *retryCIClient) GetRoots(ctx context.Context, in *empty.Empty, opts ...g
 // GetCertificate returns the certificate
 func (c *retryCIClient) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
 	return c.cis.GetCertificate(ctx, in, opts...)
-}
-
-// GetOrgCertificates returns the Org certificates
-func (c *retryCIClient) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest, opts ...grpc.CallOption) (*pb.CertificatesResponse, error) {
-	return c.cis.GetOrgCertificates(ctx, in, opts...)
-}
-
-// ListCertificates returns stream of Certificates
-func (c *retryCIClient) ListCertificates(ctx context.Context, in *pb.ListByIssuerRequest, opts ...grpc.CallOption) (*pb.CertificatesResponse, error) {
-	return c.cis.ListCertificates(ctx, in, opts...)
-}
-
-// ListRevokedCertificates returns stream of Revoked Certificates
-func (c *retryCIClient) ListRevokedCertificates(ctx context.Context, in *pb.ListByIssuerRequest, opts ...grpc.CallOption) (*pb.RevokedCertificatesResponse, error) {
-	return c.cis.ListRevokedCertificates(ctx, in, opts...)
 }
