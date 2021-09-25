@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ekspand/trusty/internal/config"
 	"github.com/go-phorce/dolly/xhttp/httperror"
 	"github.com/go-phorce/dolly/xhttp/retriable"
+	"github.com/martinisecurity/trusty/internal/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

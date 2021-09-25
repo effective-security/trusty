@@ -21,7 +21,7 @@ import (
 	"github.com/juju/errors"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "csr")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/pkg", "csr")
 
 // Provider extends cryptoprov.Crypto functionality to support CSP procesing
 // and certificate signing

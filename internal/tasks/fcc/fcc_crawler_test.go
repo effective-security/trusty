@@ -3,8 +3,8 @@ package fcc
 import (
 	"testing"
 
-	"github.com/ekspand/trusty/internal/db/orgsdb"
-	"github.com/ekspand/trusty/tests/testutils"
+	"github.com/martinisecurity/trusty/internal/db/orgsdb"
+	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/dig"

@@ -1,7 +1,7 @@
 syntax = "proto3";
 package pb;
 
-option go_package = "github.com/ekspand/trusty/api/v1/pb";
+option go_package = "github.com/martinisecurity/trusty/api/v1/pb";
 
 //import "rpc.proto";
 import "google/protobuf/timestamp.proto";
@@ -16,7 +16,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 		version: "1.0";
 		contact: {
 			name: "Trusty";
-			url: "https://github.com/ekspand/trusty";
+			url: "https://github.com/martinisecurity/trusty";
 			email: "denis@ekspand.com";
 		};
 		extensions: {

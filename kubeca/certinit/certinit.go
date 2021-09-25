@@ -15,7 +15,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty", "certinit")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty", "certinit")
 
 // Request parameters
 type Request struct {

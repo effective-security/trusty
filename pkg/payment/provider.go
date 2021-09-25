@@ -24,7 +24,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "payment")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/pkg", "payment")
 
 const (
 	metadataYearsKey = "years"

@@ -3,10 +3,10 @@ package martini
 import (
 	"context"
 
-	v1 "github.com/ekspand/trusty/api/v1"
-	"github.com/ekspand/trusty/cli"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/juju/errors"
+	v1 "github.com/martinisecurity/trusty/api/v1"
+	"github.com/martinisecurity/trusty/cli"
 )
 
 // CreateSubscriptionFlags defines flags for CreateSubscription command

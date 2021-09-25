@@ -18,7 +18,7 @@ import (
 	"github.com/juju/errors"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "awskmscrypto")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/pkg", "awskmscrypto")
 
 // ProviderName specifies a provider name
 const ProviderName = "AWSKMS"

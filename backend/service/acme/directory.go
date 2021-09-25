@@ -3,11 +3,11 @@ package acme
 import (
 	"net/http"
 
-	"github.com/ekspand/trusty/api/v2acme"
-	"github.com/ekspand/trusty/backend/service"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/go-phorce/dolly/xpki/certutil"
+	"github.com/martinisecurity/trusty/api/v2acme"
+	"github.com/martinisecurity/trusty/backend/service"
 )
 
 const randomDirKeyExplanationLink = "https://community.letsencrypt.org/t/adding-random-entries-to-the-directory/33417"

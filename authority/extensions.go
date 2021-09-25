@@ -6,8 +6,8 @@ import (
 	"crypto/x509/pkix"
 	"encoding/asn1"
 
-	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/pkg/csr"
 )
 
 type policyInformation struct {

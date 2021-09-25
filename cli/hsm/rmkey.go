@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ekspand/trusty/cli"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/cli"
 )
 
 // RmKeyFlags specifies flags for the delete key action

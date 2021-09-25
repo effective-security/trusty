@@ -18,15 +18,15 @@ log_levels:
     repo: "*"
     level: TRACE
   -
-    repo: github.com/ekspand/trusty
+    repo: github.com/martinisecurity/trusty
     package: "*"
     level: TRACE
   -
-    repo: github.com/ekspand/trusty/health
+    repo: github.com/martinisecurity/trusty/health
     package: xhttp
     level: ERROR
   -  
-    repo: github.com/ekspand/trusty/backend/service
+    repo: github.com/martinisecurity/trusty/backend/service
     package: "*"
     level: DEBUG
   -

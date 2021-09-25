@@ -1,17 +1,17 @@
 package appcontainer
 
 import (
-	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/internal/db/orgsdb"
-	"github.com/ekspand/trusty/pkg/jwt"
-	"github.com/ekspand/trusty/pkg/oauth2client"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
+	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/internal/db/orgsdb"
+	"github.com/martinisecurity/trusty/pkg/jwt"
+	"github.com/martinisecurity/trusty/pkg/oauth2client"
 	"go.uber.org/dig"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/internal", "appcontainer")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/internal", "appcontainer")
 
 // Builder helps to build container
 type Builder struct {

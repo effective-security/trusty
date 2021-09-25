@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ekspand/trusty/cli"
-	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/cli"
+	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/pkg/print"
 )
 
 // Version shows the service version

@@ -19,7 +19,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/internal", "db")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/internal", "db")
 
 // Max values for strings
 const (

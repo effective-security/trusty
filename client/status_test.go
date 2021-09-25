@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
-	v1 "github.com/ekspand/trusty/api/v1"
-	pb "github.com/ekspand/trusty/api/v1/pb"
-	"github.com/ekspand/trusty/client"
-	"github.com/ekspand/trusty/client/embed/proxy"
-	"github.com/ekspand/trusty/tests/mockpb"
 	"github.com/gogo/protobuf/proto"
+	v1 "github.com/martinisecurity/trusty/api/v1"
+	pb "github.com/martinisecurity/trusty/api/v1/pb"
+	"github.com/martinisecurity/trusty/client"
+	"github.com/martinisecurity/trusty/client/embed/proxy"
+	"github.com/martinisecurity/trusty/tests/mockpb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

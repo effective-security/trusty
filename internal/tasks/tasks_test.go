@@ -3,8 +3,8 @@ package tasks_test
 import (
 	"testing"
 
-	"github.com/ekspand/trusty/internal/tasks"
-	"github.com/ekspand/trusty/internal/tasks/certsmonitor"
+	"github.com/martinisecurity/trusty/internal/tasks"
+	"github.com/martinisecurity/trusty/internal/tasks/certsmonitor"
 	"github.com/stretchr/testify/require"
 )
 

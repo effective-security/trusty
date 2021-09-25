@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ekspand/trusty/internal/version"
 	"github.com/go-phorce/dolly/algorithms/guid"
+	"github.com/martinisecurity/trusty/internal/version"
 	"github.com/stretchr/testify/assert"
 )
 

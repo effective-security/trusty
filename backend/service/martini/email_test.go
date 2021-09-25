@@ -3,7 +3,7 @@ package martini
 import (
 	"testing"
 
-	v1 "github.com/ekspand/trusty/api/v1"
+	v1 "github.com/martinisecurity/trusty/api/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

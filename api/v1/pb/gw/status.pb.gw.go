@@ -13,10 +13,10 @@ import (
 	"io"
 	"net/http"
 
-	extPb "github.com/ekspand/trusty/api/v1/pb"
 	extEmpty "github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/utilities"
+	extPb "github.com/martinisecurity/trusty/api/v1/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"

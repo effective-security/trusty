@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"text/template"
 
-	"github.com/ekspand/trusty/pkg/email"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/pkg/email"
 )
 
 // renderEmailTemplate used to render email template with given data

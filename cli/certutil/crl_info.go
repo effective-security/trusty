@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"path"
 
-	"github.com/ekspand/trusty/cli"
-	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/cli"
+	"github.com/martinisecurity/trusty/pkg/print"
 )
 
 // CRLInfoFlags specifies flags for CRLInfo action

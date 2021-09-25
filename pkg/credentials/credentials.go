@@ -12,7 +12,7 @@ import (
 	grpccredentials "google.golang.org/grpc/credentials"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "credentials")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/pkg", "credentials")
 
 var (
 	// TokenFieldNameGRPC specifies name for token

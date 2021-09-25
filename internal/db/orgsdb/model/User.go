@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"strconv"
 
-	v1 "github.com/ekspand/trusty/api/v1"
-	"github.com/ekspand/trusty/internal/db"
 	"github.com/juju/errors"
+	v1 "github.com/martinisecurity/trusty/api/v1"
+	"github.com/martinisecurity/trusty/internal/db"
 )
 
 // User provides basic user information

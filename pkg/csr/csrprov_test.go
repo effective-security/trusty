@@ -4,8 +4,8 @@ import (
 	"crypto"
 	"testing"
 
-	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
+	"github.com/martinisecurity/trusty/pkg/csr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

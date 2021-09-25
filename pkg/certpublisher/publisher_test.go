@@ -7,12 +7,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ekspand/trusty/api/v1/pb"
-	"github.com/ekspand/trusty/internal/db/cadb/model"
-	"github.com/ekspand/trusty/pkg/certpublisher"
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/fileutil"
 	"github.com/go-phorce/dolly/xpki/certutil"
+	"github.com/martinisecurity/trusty/api/v1/pb"
+	"github.com/martinisecurity/trusty/internal/db/cadb/model"
+	"github.com/martinisecurity/trusty/pkg/certpublisher"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -4,10 +4,10 @@ import (
 	"crypto/tls"
 	"strings"
 
-	"github.com/ekspand/trusty/internal/config"
 	"github.com/go-phorce/dolly/rest/tlsconfig"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/internal/config"
 )
 
 // Factory specifies interface to create Client

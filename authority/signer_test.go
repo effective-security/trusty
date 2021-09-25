@@ -1,7 +1,7 @@
 package authority_test
 
 import (
-	"github.com/ekspand/trusty/authority"
+	"github.com/martinisecurity/trusty/authority"
 )
 
 func (s *testSuite) TestNewSigner() {

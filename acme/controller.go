@@ -4,15 +4,15 @@ import (
 	"context"
 	"crypto/x509"
 
-	"github.com/ekspand/trusty/acme/acmedb"
-	"github.com/ekspand/trusty/acme/model"
 	"github.com/go-phorce/dolly/algorithms/slices"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/acme/acmedb"
+	"github.com/martinisecurity/trusty/acme/model"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty", "acme")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty", "acme")
 
 // Controller defines an interface for ACME flow
 type Controller interface {

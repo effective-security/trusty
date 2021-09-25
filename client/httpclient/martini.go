@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"strings"
 
-	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/juju/errors"
+	v1 "github.com/martinisecurity/trusty/api/v1"
 )
 
 // MartiniClient client interface

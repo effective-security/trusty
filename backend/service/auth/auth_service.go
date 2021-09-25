@@ -9,15 +9,6 @@ import (
 	"net/url"
 	"time"
 
-	v1 "github.com/ekspand/trusty/api/v1"
-	"github.com/ekspand/trusty/backend/service"
-	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/internal/db"
-	"github.com/ekspand/trusty/internal/db/orgsdb"
-	"github.com/ekspand/trusty/internal/db/orgsdb/model"
-	"github.com/ekspand/trusty/pkg/gserver"
-	"github.com/ekspand/trusty/pkg/jwt"
-	"github.com/ekspand/trusty/pkg/oauth2client"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/httperror"
@@ -27,6 +18,15 @@ import (
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/google/go-github/github"
 	"github.com/juju/errors"
+	v1 "github.com/martinisecurity/trusty/api/v1"
+	"github.com/martinisecurity/trusty/backend/service"
+	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/internal/db"
+	"github.com/martinisecurity/trusty/internal/db/orgsdb"
+	"github.com/martinisecurity/trusty/internal/db/orgsdb/model"
+	"github.com/martinisecurity/trusty/pkg/gserver"
+	"github.com/martinisecurity/trusty/pkg/jwt"
+	"github.com/martinisecurity/trusty/pkg/oauth2client"
 	"golang.org/x/oauth2"
 	googleapioauth2 "google.golang.org/api/oauth2/v2"
 	"google.golang.org/api/option"
@@ -35,7 +35,7 @@ import (
 // ServiceName provides the Service Name for this package
 const ServiceName = "auth"
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", "auth")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/service", "auth")
 
 const (
 	evtTokenIssued    = "token_issued"

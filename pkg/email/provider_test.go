@@ -3,7 +3,7 @@ package email_test
 import (
 	"testing"
 
-	"github.com/ekspand/trusty/pkg/email"
+	"github.com/martinisecurity/trusty/pkg/email"
 	"github.com/stretchr/testify/require"
 )
 

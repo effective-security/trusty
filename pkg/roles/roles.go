@@ -6,19 +6,19 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ekspand/trusty/internal/config"
-	tcredentials "github.com/ekspand/trusty/pkg/credentials"
-	"github.com/ekspand/trusty/pkg/jwt"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/internal/config"
+	tcredentials "github.com/martinisecurity/trusty/pkg/credentials"
+	"github.com/martinisecurity/trusty/pkg/jwt"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "roles")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/pkg", "roles")
 
 const (
 	// GuestRoleName defines role name for an unauthenticated user

@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ekspand/trusty/api/v2acme"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/api/v2acme"
 	"gopkg.in/square/go-jose.v2"
 )
 

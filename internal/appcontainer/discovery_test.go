@@ -4,11 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/ekspand/trusty/api/v1/pb"
-	"github.com/ekspand/trusty/internal/appcontainer"
-	"github.com/ekspand/trusty/tests/mockpb"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/api/v1/pb"
+	"github.com/martinisecurity/trusty/internal/appcontainer"
+	"github.com/martinisecurity/trusty/tests/mockpb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/ekspand/trusty/pkg/credentials"
+	"github.com/martinisecurity/trusty/pkg/credentials"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

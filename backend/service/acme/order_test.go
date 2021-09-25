@@ -16,12 +16,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ekspand/trusty/api/v2acme"
-	"github.com/ekspand/trusty/pkg/csr"
-	"github.com/ekspand/trusty/pkg/inmemcrypto"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xpki/certutil"
+	"github.com/martinisecurity/trusty/api/v2acme"
+	"github.com/martinisecurity/trusty/pkg/csr"
+	"github.com/martinisecurity/trusty/pkg/inmemcrypto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

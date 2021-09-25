@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ekspand/trusty/internal/version"
-	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/marshal"
+	"github.com/martinisecurity/trusty/internal/version"
+	"github.com/martinisecurity/trusty/pkg/print"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 

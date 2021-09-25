@@ -3,20 +3,20 @@ package workflow
 import (
 	"net/url"
 
-	v1 "github.com/ekspand/trusty/api/v1"
-	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/internal/db/orgsdb"
-	"github.com/ekspand/trusty/pkg/gserver"
-	"github.com/ekspand/trusty/pkg/oauth2client"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
+	v1 "github.com/martinisecurity/trusty/api/v1"
+	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/internal/db/orgsdb"
+	"github.com/martinisecurity/trusty/pkg/gserver"
+	"github.com/martinisecurity/trusty/pkg/oauth2client"
 )
 
 // ServiceName provides the Service Name for this package
 const ServiceName = "workflow"
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", "workflow")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/service", "workflow")
 
 // Service defines the Status service
 type Service struct {

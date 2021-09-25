@@ -3,10 +3,10 @@ package pgsql
 import (
 	"context"
 
-	"github.com/ekspand/trusty/internal/db"
-	"github.com/ekspand/trusty/internal/db/cadb/model"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/internal/db"
+	"github.com/martinisecurity/trusty/internal/db/cadb/model"
 )
 
 // RegisterCrl registers CRL

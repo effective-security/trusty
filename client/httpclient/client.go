@@ -22,7 +22,7 @@ import (
 
 var (
 	jsonHandle codec.JsonHandle
-	logger     = xlog.NewPackageLogger("github.com/ekspand/trusty", "httpclient")
+	logger     = xlog.NewPackageLogger("github.com/martinisecurity/trusty", "httpclient")
 )
 
 func init() {

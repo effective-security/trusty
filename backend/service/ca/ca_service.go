@@ -4,26 +4,26 @@ import (
 	"context"
 	"sync"
 
-	pb "github.com/ekspand/trusty/api/v1/pb"
-	"github.com/ekspand/trusty/authority"
-	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/internal/db/cadb"
-	"github.com/ekspand/trusty/internal/db/cadb/model"
-	"github.com/ekspand/trusty/pkg/certpublisher"
-	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/go-phorce/dolly/fileutil"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/tasks"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
+	pb "github.com/martinisecurity/trusty/api/v1/pb"
+	"github.com/martinisecurity/trusty/authority"
+	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/internal/db/cadb"
+	"github.com/martinisecurity/trusty/internal/db/cadb/model"
+	"github.com/martinisecurity/trusty/pkg/certpublisher"
+	"github.com/martinisecurity/trusty/pkg/gserver"
 	"google.golang.org/grpc"
 )
 
 // ServiceName provides the Service Name for this package
 const ServiceName = "ca"
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", "ca")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/service", "ca")
 
 // Service defines the Status service
 type Service struct {

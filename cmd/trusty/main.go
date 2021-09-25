@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ekspand/trusty/backend/trustymain"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/backend/trustymain"
 )
 
 const (

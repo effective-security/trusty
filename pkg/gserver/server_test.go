@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ekspand/trusty/internal/appcontainer"
-	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
+	"github.com/martinisecurity/trusty/internal/appcontainer"
+	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -15,7 +15,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "jwt")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/pkg", "jwt")
 
 // Signer specifies JWT signer interface
 type Signer interface {

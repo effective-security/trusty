@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ekspand/trusty/pkg/jwt"
+	"github.com/martinisecurity/trusty/pkg/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

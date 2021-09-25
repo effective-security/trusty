@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/ekspand/trusty/api/v2acme"
+	"github.com/martinisecurity/trusty/api/v2acme"
 )
 
 // NewChallenge returns an instance of the challenge

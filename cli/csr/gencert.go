@@ -6,13 +6,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ekspand/trusty/authority"
-	"github.com/ekspand/trusty/cli"
-	"github.com/ekspand/trusty/pkg/csr"
-	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/authority"
+	"github.com/martinisecurity/trusty/cli"
+	"github.com/martinisecurity/trusty/pkg/csr"
+	"github.com/martinisecurity/trusty/pkg/print"
 )
 
 // GenCertFlags specifies flags for GenCert command

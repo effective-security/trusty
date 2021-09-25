@@ -4,9 +4,9 @@ import (
 	"os"
 	"testing"
 
-	acmemodel "github.com/ekspand/trusty/acme/model"
-	"github.com/ekspand/trusty/cli/acme"
 	"github.com/go-phorce/dolly/algorithms/guid"
+	acmemodel "github.com/martinisecurity/trusty/acme/model"
+	"github.com/martinisecurity/trusty/cli/acme"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

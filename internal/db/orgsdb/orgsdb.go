@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"strings"
 
-	"github.com/ekspand/trusty/internal/db"
-	"github.com/ekspand/trusty/internal/db/orgsdb/model"
-	"github.com/ekspand/trusty/internal/db/orgsdb/pgsql"
 	"github.com/go-phorce/dolly/fileutil"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/internal/db"
+	"github.com/martinisecurity/trusty/internal/db/orgsdb/model"
+	"github.com/martinisecurity/trusty/internal/db/orgsdb/pgsql"
 
 	// register Postgres driver
 	_ "github.com/lib/pq"
@@ -19,7 +19,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/internal/db", "orgsdb")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/internal/db", "orgsdb")
 
 // IDGenerator defines an interface to generate unique ID accross the cluster
 type IDGenerator interface {

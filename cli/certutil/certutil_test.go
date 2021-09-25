@@ -18,11 +18,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ekspand/trusty/cli/certutil"
-	"github.com/ekspand/trusty/cli/testsuite"
 	"github.com/go-phorce/dolly/algorithms/guid"
 	xcrtutil "github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/cli/certutil"
+	"github.com/martinisecurity/trusty/cli/testsuite"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"

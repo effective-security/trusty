@@ -14,11 +14,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/pkg/csr"
 )
 
 var (

@@ -9,20 +9,20 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ekspand/trusty/client"
-	"github.com/ekspand/trusty/client/httpclient"
-	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/pkg/awskmscrypto"
-	"github.com/ekspand/trusty/pkg/gcpkmscrypto"
-	"github.com/ekspand/trusty/pkg/inmemcrypto"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/rest/tlsconfig"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/client"
+	"github.com/martinisecurity/trusty/client/httpclient"
+	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/pkg/awskmscrypto"
+	"github.com/martinisecurity/trusty/pkg/gcpkmscrypto"
+	"github.com/martinisecurity/trusty/pkg/inmemcrypto"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty", "cli")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty", "cli")
 
 // ReturnCode is the type that your command returns, these map to standard process return codes
 type ReturnCode ctl.ReturnCode

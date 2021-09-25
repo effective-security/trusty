@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/go-phorce/dolly/xhttp/marshal"
+	v1 "github.com/martinisecurity/trusty/api/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

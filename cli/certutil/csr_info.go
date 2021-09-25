@@ -4,10 +4,10 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 
-	"github.com/ekspand/trusty/cli"
-	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/cli"
+	"github.com/martinisecurity/trusty/pkg/print"
 )
 
 // CSRInfoFlags specifies flags for CSRInfo action

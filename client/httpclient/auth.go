@@ -3,8 +3,8 @@ package httpclient
 import (
 	"context"
 
-	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/juju/errors"
+	v1 "github.com/martinisecurity/trusty/api/v1"
 )
 
 // RefreshToken returns AuthTokenRefreshResponse

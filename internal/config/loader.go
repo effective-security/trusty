@@ -18,7 +18,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty", "config")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty", "config")
 
 const (
 	// ConfigFileName is default name for the configuration file

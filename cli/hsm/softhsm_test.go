@@ -3,8 +3,8 @@ package hsm_test
 import (
 	"testing"
 
-	"github.com/ekspand/trusty/cli/hsm"
-	"github.com/ekspand/trusty/cli/testsuite"
+	"github.com/martinisecurity/trusty/cli/hsm"
+	"github.com/martinisecurity/trusty/cli/testsuite"
 	"github.com/stretchr/testify/suite"
 )
 

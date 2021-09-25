@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/types/known/timestamppb"

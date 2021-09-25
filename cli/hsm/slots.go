@@ -3,10 +3,10 @@ package hsm
 import (
 	"fmt"
 
-	"github.com/ekspand/trusty/cli"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/cli"
 )
 
 // Slots shows hsm slots

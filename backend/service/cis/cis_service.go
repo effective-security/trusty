@@ -1,20 +1,20 @@
 package cis
 
 import (
-	pb "github.com/ekspand/trusty/api/v1/pb"
-	"github.com/ekspand/trusty/client"
-	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/internal/db/cadb"
-	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xlog"
+	pb "github.com/martinisecurity/trusty/api/v1/pb"
+	"github.com/martinisecurity/trusty/client"
+	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/internal/db/cadb"
+	"github.com/martinisecurity/trusty/pkg/gserver"
 	"google.golang.org/grpc"
 )
 
 // ServiceName provides the Service Name for this package
 const ServiceName = "cis"
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", "cis")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/service", "cis")
 
 // Service defines the Status service
 type Service struct {

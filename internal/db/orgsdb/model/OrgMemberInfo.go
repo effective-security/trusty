@@ -3,7 +3,7 @@ package model
 import (
 	"strconv"
 
-	v1 "github.com/ekspand/trusty/api/v1"
+	v1 "github.com/martinisecurity/trusty/api/v1"
 )
 
 // OrgMemberInfo provides Org membership information for a user

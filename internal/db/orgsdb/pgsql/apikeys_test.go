@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ekspand/trusty/internal/db/orgsdb/model"
 	"github.com/go-phorce/dolly/xpki/certutil"
+	"github.com/martinisecurity/trusty/internal/db/orgsdb/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -3,8 +3,8 @@ package martini_test
 import (
 	"testing"
 
-	"github.com/ekspand/trusty/cli/martini"
-	"github.com/ekspand/trusty/cli/testsuite"
+	"github.com/martinisecurity/trusty/cli/martini"
+	"github.com/martinisecurity/trusty/cli/testsuite"
 	"github.com/stretchr/testify/suite"
 )
 

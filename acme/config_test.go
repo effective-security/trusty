@@ -3,7 +3,7 @@ package acme_test
 import (
 	"testing"
 
-	"github.com/ekspand/trusty/acme"
+	"github.com/martinisecurity/trusty/acme"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

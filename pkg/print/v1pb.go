@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/go-phorce/dolly/xpki/certutil"
+	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/olekukonko/tablewriter"
 )
 

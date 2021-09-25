@@ -7,8 +7,8 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/ekspand/trusty/api/v2acme"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/api/v2acme"
 	"github.com/stretchr/testify/assert"
 )
 

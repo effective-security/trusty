@@ -12,19 +12,19 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/ekspand/trusty/acme"
-	acmemodel "github.com/ekspand/trusty/acme/model"
-	"github.com/ekspand/trusty/api/v2acme"
-	"github.com/ekspand/trusty/cli"
-	"github.com/ekspand/trusty/pkg/csr"
-	"github.com/ekspand/trusty/pkg/inmemcrypto"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/acme"
+	acmemodel "github.com/martinisecurity/trusty/acme/model"
+	"github.com/martinisecurity/trusty/api/v2acme"
+	"github.com/martinisecurity/trusty/cli"
+	"github.com/martinisecurity/trusty/pkg/csr"
+	"github.com/martinisecurity/trusty/pkg/inmemcrypto"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/cli", "acme")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/cli", "acme")
 
 // Directory returns ACME directory
 func Directory(c ctl.Control, _ interface{}) error {

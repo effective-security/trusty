@@ -6,8 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/ekspand/trusty/cli/auth"
-	"github.com/ekspand/trusty/cli/testsuite"
+	"github.com/martinisecurity/trusty/cli/auth"
+	"github.com/martinisecurity/trusty/cli/testsuite"
 	"github.com/stretchr/testify/suite"
 )
 

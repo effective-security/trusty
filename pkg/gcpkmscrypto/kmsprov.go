@@ -21,7 +21,7 @@ import (
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "gcpkmscrypto")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/pkg", "gcpkmscrypto")
 
 // ProviderName specifies a provider name
 const ProviderName = "GCPKMS"
