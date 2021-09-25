@@ -3,9 +3,9 @@ package authority
 import (
 	"crypto"
 
-	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/pkg/csr"
 )
 
 // NewRoot creates a new root certificate from the certificate request.

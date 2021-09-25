@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	v1 "github.com/ekspand/trusty/api/v1"
-	"github.com/ekspand/trusty/backend/service/martini"
-	"github.com/ekspand/trusty/pkg/fcc"
 	"github.com/go-phorce/dolly/testify/servefiles"
 	"github.com/go-phorce/dolly/xhttp/marshal"
+	v1 "github.com/martinisecurity/trusty/api/v1"
+	"github.com/martinisecurity/trusty/backend/service/martini"
+	"github.com/martinisecurity/trusty/pkg/fcc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -5,11 +5,11 @@ import (
 	"database/sql"
 	"strings"
 
-	"github.com/ekspand/trusty/acme/model"
-	"github.com/ekspand/trusty/internal/db"
 	"github.com/go-phorce/dolly/fileutil"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/acme/model"
+	"github.com/martinisecurity/trusty/internal/db"
 
 	// register Postgres driver
 	_ "github.com/lib/pq"
@@ -17,7 +17,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/acme", "acmedb")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/acme", "acmedb")
 
 // AcmeDB defines an interface to work with ACME data model
 type AcmeDB interface {

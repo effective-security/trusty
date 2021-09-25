@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"time"
 
-	acmemodel "github.com/ekspand/trusty/acme/model"
-	"github.com/ekspand/trusty/api/v2acme"
-	"github.com/ekspand/trusty/internal/db"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/go-phorce/dolly/xlog"
+	acmemodel "github.com/martinisecurity/trusty/acme/model"
+	"github.com/martinisecurity/trusty/api/v2acme"
+	"github.com/martinisecurity/trusty/internal/db"
 )
 
 // GetChallengeHandler returns challenge

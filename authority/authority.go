@@ -6,7 +6,7 @@ import (
 	"github.com/juju/errors"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty", "authority")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty", "authority")
 
 // Authority defines the CA
 type Authority struct {

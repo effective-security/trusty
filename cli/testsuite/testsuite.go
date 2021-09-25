@@ -12,12 +12,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ekspand/trusty/api/v1/pb"
-	"github.com/ekspand/trusty/cli"
-	"github.com/ekspand/trusty/tests/mockpb"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/testify/servefiles"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
+	"github.com/martinisecurity/trusty/api/v1/pb"
+	"github.com/martinisecurity/trusty/cli"
+	"github.com/martinisecurity/trusty/tests/mockpb"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc"
 )

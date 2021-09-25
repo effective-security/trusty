@@ -3,9 +3,9 @@ package martini
 import (
 	"context"
 
-	"github.com/ekspand/trusty/cli"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/cli"
 )
 
 // SearchCorpsFlags defines flags for SearchCorps command

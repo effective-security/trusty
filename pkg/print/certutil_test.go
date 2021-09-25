@@ -14,9 +14,9 @@ import (
 	"time"
 
 	"github.com/cloudflare/cfssl/helpers"
-	"github.com/ekspand/trusty/api/v1/pb"
-	"github.com/ekspand/trusty/pkg/print"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/api/v1/pb"
+	"github.com/martinisecurity/trusty/pkg/print"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/ocsp"

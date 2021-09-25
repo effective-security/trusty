@@ -6,7 +6,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/ekspand/trusty/api/v2acme"
+	"github.com/martinisecurity/trusty/api/v2acme"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -3,8 +3,8 @@ package oauth2client_test
 import (
 	"testing"
 
-	v1 "github.com/ekspand/trusty/api/v1"
-	"github.com/ekspand/trusty/pkg/oauth2client"
+	v1 "github.com/martinisecurity/trusty/api/v1"
+	"github.com/martinisecurity/trusty/pkg/oauth2client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

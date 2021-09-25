@@ -7,6 +7,7 @@ export AWS_SECRET_ACCESS_KEY=notusedbyemulator
 export AWS_DEFAULT_REGION=us-west-2
 export TRUSTY_JWT_SEED=testseed 
 
+export GOPRIVATE=github.com/martinisecurity/trusty
 export COVERAGE_EXCLUSIONS="vendor|tests|api/v1/pb/gw|main.go|testsuite.go|mocks.go|.pb.go|.pb.gw.go"
 export TRUSTY_DIR=${PROJ_ROOT}
 export GO111MODULE=on

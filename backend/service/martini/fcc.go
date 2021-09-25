@@ -5,15 +5,15 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ekspand/trusty/api"
-	v1 "github.com/ekspand/trusty/api/v1"
-	"github.com/ekspand/trusty/internal/db"
-	"github.com/ekspand/trusty/pkg/fcc"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/httperror"
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/api"
+	v1 "github.com/martinisecurity/trusty/api/v1"
+	"github.com/martinisecurity/trusty/internal/db"
+	"github.com/martinisecurity/trusty/pkg/fcc"
 )
 
 // FccFrnHandler handles v1.PathForMartiniFccFrn

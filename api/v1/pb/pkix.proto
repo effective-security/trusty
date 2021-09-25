@@ -1,7 +1,7 @@
 syntax = "proto3";
 package pb;
 
-option go_package = "github.com/ekspand/trusty/api/v1/pb";
+option go_package = "github.com/martinisecurity/trusty/api/v1/pb";
 
 import "google/protobuf/timestamp.proto";
 // for grpc-gateway

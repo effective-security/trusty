@@ -3,7 +3,7 @@ package authority_test
 import (
 	"crypto"
 
-	"github.com/ekspand/trusty/authority"
+	"github.com/martinisecurity/trusty/authority"
 )
 
 func (s *testSuite) TestNewIssuer() {

@@ -3,8 +3,8 @@ package client
 import (
 	"context"
 
-	pb "github.com/ekspand/trusty/api/v1/pb"
 	"github.com/golang/protobuf/ptypes/empty"
+	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"google.golang.org/grpc"
 )
 

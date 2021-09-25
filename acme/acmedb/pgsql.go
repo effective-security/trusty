@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/ekspand/trusty/acme/model"
-	"github.com/ekspand/trusty/internal/db"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/acme/model"
+	"github.com/martinisecurity/trusty/internal/db"
 )
 
 // SetRegistration registers account

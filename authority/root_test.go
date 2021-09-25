@@ -6,11 +6,11 @@ import (
 	"encoding/pem"
 	"testing"
 
-	"github.com/ekspand/trusty/authority"
-	"github.com/ekspand/trusty/pkg/csr"
-	"github.com/ekspand/trusty/pkg/inmemcrypto"
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/xpki/certutil"
+	"github.com/martinisecurity/trusty/authority"
+	"github.com/martinisecurity/trusty/pkg/csr"
+	"github.com/martinisecurity/trusty/pkg/inmemcrypto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

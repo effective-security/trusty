@@ -7,14 +7,14 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	// +kubebuilder:scaffold:imports
-	"github.com/ekspand/trusty/authority"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
+	"github.com/martinisecurity/trusty/authority"
 )
 
 var (
 	scheme = runtime.NewScheme()
-	logger = xlog.NewPackageLogger("github.com/ekspand/trusty/kubeca", "controller")
+	logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/kubeca", "controller")
 )
 
 const controllerName = "CSRSigningReconciler"

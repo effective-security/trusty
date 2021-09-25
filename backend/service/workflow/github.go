@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"sync"
 
-	v1 "github.com/ekspand/trusty/api/v1"
-	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/internal/db/orgsdb/model"
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/google/go-github/github"
 	"github.com/juju/errors"
+	v1 "github.com/martinisecurity/trusty/api/v1"
+	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/internal/db/orgsdb/model"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 )

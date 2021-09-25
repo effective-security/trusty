@@ -5,14 +5,14 @@ import (
 	"io"
 	"os"
 
-	"github.com/ekspand/trusty/cli"
-	"github.com/ekspand/trusty/cli/auth"
-	"github.com/ekspand/trusty/cli/ca"
-	"github.com/ekspand/trusty/cli/cis"
-	"github.com/ekspand/trusty/cli/status"
-	"github.com/ekspand/trusty/internal/version"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/xlog"
+	"github.com/martinisecurity/trusty/cli"
+	"github.com/martinisecurity/trusty/cli/auth"
+	"github.com/martinisecurity/trusty/cli/ca"
+	"github.com/martinisecurity/trusty/cli/cis"
+	"github.com/martinisecurity/trusty/cli/status"
+	"github.com/martinisecurity/trusty/internal/version"
 )
 
 func main() {

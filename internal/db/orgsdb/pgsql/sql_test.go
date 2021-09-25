@@ -5,10 +5,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ekspand/trusty/internal/db/orgsdb"
-	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/internal/db/orgsdb"
+	"github.com/martinisecurity/trusty/tests/testutils"
 )
 
 var (

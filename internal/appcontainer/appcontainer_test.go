@@ -6,12 +6,12 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/ekspand/trusty/internal/config"
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/tasks"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/internal/config"
 	"github.com/sony/sonyflake"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

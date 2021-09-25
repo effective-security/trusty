@@ -3,8 +3,8 @@ package model
 import (
 	"time"
 
-	"github.com/ekspand/trusty/internal/db"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/internal/db"
 )
 
 // ApprovalToken provides approval token

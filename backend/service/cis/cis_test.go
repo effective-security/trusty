@@ -5,17 +5,17 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ekspand/trusty/api/v1/pb"
-	"github.com/ekspand/trusty/backend/service/cis"
-	"github.com/ekspand/trusty/client"
-	"github.com/ekspand/trusty/client/embed"
-	"github.com/ekspand/trusty/internal/appcontainer"
-	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/pkg/gserver"
-	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/api/v1/pb"
+	"github.com/martinisecurity/trusty/backend/service/cis"
+	"github.com/martinisecurity/trusty/client"
+	"github.com/martinisecurity/trusty/client/embed"
+	"github.com/martinisecurity/trusty/internal/appcontainer"
+	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/pkg/gserver"
+	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -35,7 +35,7 @@ var (
 
 func TestMain(m *testing.M) {
 	xlog.GetFormatter().WithCaller(true)
-	xlog.SetPackageLogLevel("github.com/ekspand/trusty/internal/cadb", "pgsql", xlog.DEBUG)
+	xlog.SetPackageLogLevel("github.com/martinisecurity/trusty/internal/cadb", "pgsql", xlog.DEBUG)
 
 	var err error
 

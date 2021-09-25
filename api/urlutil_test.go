@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/ekspand/trusty/api"
+	"github.com/martinisecurity/trusty/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

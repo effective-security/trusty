@@ -1,10 +1,10 @@
 package certutil
 
 import (
-	"github.com/ekspand/trusty/cli"
-	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/cli"
+	"github.com/martinisecurity/trusty/pkg/print"
 	"golang.org/x/crypto/ocsp"
 )
 

@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/go-phorce/dolly/algorithms/slices"
 	"github.com/jinzhu/copier"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/pkg/csr"
 	"gopkg.in/yaml.v2"
 )
 

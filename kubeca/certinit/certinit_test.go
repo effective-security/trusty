@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ekspand/trusty/kubeca/certinit"
+	"github.com/martinisecurity/trusty/kubeca/certinit"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

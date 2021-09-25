@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"github.com/ekspand/trusty/cli"
-	"github.com/ekspand/trusty/pkg/csr"
-	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/cli"
+	"github.com/martinisecurity/trusty/pkg/csr"
+	"github.com/martinisecurity/trusty/pkg/print"
 )
 
 // CreateFlags specifies flags for Create command

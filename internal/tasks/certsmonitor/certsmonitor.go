@@ -4,16 +4,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ekspand/trusty/internal/config"
 	"github.com/go-phorce/dolly/fileutil"
 	metricsutil "github.com/go-phorce/dolly/metrics/util"
 	"github.com/go-phorce/dolly/tasks"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/internal/config"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/internal/tasks", "certsmonitor")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/internal/tasks", "certsmonitor")
 
 // TaskName is the name of this task
 const TaskName = "certsmonitor"

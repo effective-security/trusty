@@ -5,12 +5,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ekspand/trusty/api/v1/pb"
-	"github.com/ekspand/trusty/cli/ca"
-	"github.com/ekspand/trusty/cli/testsuite"
-	"github.com/ekspand/trusty/tests/mockpb"
 	"github.com/gogo/protobuf/proto"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/api/v1/pb"
+	"github.com/martinisecurity/trusty/cli/ca"
+	"github.com/martinisecurity/trusty/cli/testsuite"
+	"github.com/martinisecurity/trusty/tests/mockpb"
 	"github.com/stretchr/testify/suite"
 )
 

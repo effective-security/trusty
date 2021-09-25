@@ -18,10 +18,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ekspand/trusty/api/v2acme"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/api/v2acme"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	jose "gopkg.in/square/go-jose.v2"

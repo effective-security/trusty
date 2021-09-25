@@ -10,8 +10,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/ekspand/trusty/api/v2acme"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/api/v2acme"
 	"gopkg.in/square/go-jose.v2"
 )
 

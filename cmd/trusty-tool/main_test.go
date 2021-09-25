@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/internal/version"
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/ctl"
+	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/internal/version"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )

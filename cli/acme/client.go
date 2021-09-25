@@ -9,11 +9,11 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/ekspand/trusty/api/v2acme"
-	"github.com/ekspand/trusty/client/httpclient"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/retriable"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/api/v2acme"
+	"github.com/martinisecurity/trusty/client/httpclient"
 )
 
 // Client for ACME

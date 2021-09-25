@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ekspand/trusty/api/v1/pb"
-	"github.com/ekspand/trusty/pkg/storage"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/api/v1/pb"
+	"github.com/martinisecurity/trusty/pkg/storage"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/pkg", "certpublisher")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/pkg", "certpublisher")
 
 // Publisher interface
 type Publisher interface {

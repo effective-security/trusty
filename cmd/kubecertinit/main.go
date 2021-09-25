@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/ekspand/trusty/kubeca/certinit"
 	"github.com/go-phorce/dolly/xlog"
+	"github.com/martinisecurity/trusty/kubeca/certinit"
 )
 
 func main() {

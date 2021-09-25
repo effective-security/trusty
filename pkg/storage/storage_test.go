@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ekspand/trusty/pkg/storage"
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/fileutil"
+	"github.com/martinisecurity/trusty/pkg/storage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

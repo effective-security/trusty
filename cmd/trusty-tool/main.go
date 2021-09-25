@@ -5,16 +5,16 @@ import (
 	"io"
 	"os"
 
-	"github.com/ekspand/trusty/cli"
-	"github.com/ekspand/trusty/cli/certutil"
-	"github.com/ekspand/trusty/cli/csr"
-	"github.com/ekspand/trusty/cli/hsm"
-	"github.com/ekspand/trusty/internal/version"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/xlog"
+	"github.com/martinisecurity/trusty/cli"
+	"github.com/martinisecurity/trusty/cli/certutil"
+	"github.com/martinisecurity/trusty/cli/csr"
+	"github.com/martinisecurity/trusty/cli/hsm"
+	"github.com/martinisecurity/trusty/internal/version"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/cmd", "trusty-tool")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/cmd", "trusty-tool")
 
 const (
 	rcError   = 1

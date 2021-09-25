@@ -10,11 +10,11 @@ import (
 
 	// +kubebuilder:scaffold:imports
 
-	"github.com/ekspand/trusty/kubeca/controller"
-	"github.com/ekspand/trusty/pkg/awskmscrypto"
-	"github.com/ekspand/trusty/pkg/gcpkmscrypto"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
+	"github.com/martinisecurity/trusty/kubeca/controller"
+	"github.com/martinisecurity/trusty/pkg/awskmscrypto"
+	"github.com/martinisecurity/trusty/pkg/gcpkmscrypto"
 )
 
 func main() {

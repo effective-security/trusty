@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	db "github.com/ekspand/trusty/internal/db/cadb"
-	"github.com/ekspand/trusty/tests/testutils"
 	"github.com/juju/errors"
+	db "github.com/martinisecurity/trusty/internal/db/cadb"
+	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/ekspand/trusty/internal/db"
-	"github.com/ekspand/trusty/internal/db/orgsdb/model"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/internal/db"
+	"github.com/martinisecurity/trusty/internal/db/orgsdb/model"
 )
 
 // CreateApprovalToken returns ApprovalToken

@@ -13,8 +13,6 @@ import (
 	"strings"
 	"sync"
 
-	v1 "github.com/ekspand/trusty/api/v1"
-	"github.com/ekspand/trusty/cli"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/rest/tlsconfig"
 	"github.com/go-phorce/dolly/xhttp/header"
@@ -22,6 +20,8 @@ import (
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/go-phorce/dolly/xhttp/retriable"
 	"github.com/juju/errors"
+	v1 "github.com/martinisecurity/trusty/api/v1"
+	"github.com/martinisecurity/trusty/cli"
 )
 
 // AuthenticateFlags defines flags for Authenticate command

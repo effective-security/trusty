@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"time"
 
-	v1 "github.com/ekspand/trusty/api/v1"
+	v1 "github.com/martinisecurity/trusty/api/v1"
 )
 
 // Organization represents an organization account.

@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/ekspand/trusty/internal/db"
-	"github.com/ekspand/trusty/internal/db/orgsdb/model"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/internal/db"
+	"github.com/martinisecurity/trusty/internal/db/orgsdb/model"
 )
 
 // LoginUser returns logged in model.User

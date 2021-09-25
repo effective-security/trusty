@@ -6,9 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	v1 "github.com/ekspand/trusty/api/v1"
-	"github.com/ekspand/trusty/internal/db"
-	"github.com/ekspand/trusty/internal/db/orgsdb/model"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/httperror"
 	"github.com/go-phorce/dolly/xhttp/identity"
@@ -16,6 +13,9 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
+	v1 "github.com/martinisecurity/trusty/api/v1"
+	"github.com/martinisecurity/trusty/internal/db"
+	"github.com/martinisecurity/trusty/internal/db/orgsdb/model"
 )
 
 // GetCertsHandler returns user's certs

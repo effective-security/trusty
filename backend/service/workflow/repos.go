@@ -4,11 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/ekspand/trusty/internal/db"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/httperror"
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xhttp/marshal"
+	"github.com/martinisecurity/trusty/internal/db"
 )
 
 // GetReposHandler returns user's repos

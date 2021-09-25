@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/ekspand/trusty/acme/model"
-	"github.com/ekspand/trusty/api/v2acme"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/acme/model"
+	"github.com/martinisecurity/trusty/api/v2acme"
 )
 
 // UpdateAuthorizationChallenge updates Authorization challenge

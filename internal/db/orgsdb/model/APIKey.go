@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"time"
 
-	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
+	v1 "github.com/martinisecurity/trusty/api/v1"
 )
 
 // APIKey provides API key

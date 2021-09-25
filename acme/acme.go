@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ekspand/trusty/acme/model"
-	"github.com/ekspand/trusty/api/v2acme"
-	"github.com/ekspand/trusty/internal/db"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/acme/model"
+	"github.com/martinisecurity/trusty/api/v2acme"
+	"github.com/martinisecurity/trusty/internal/db"
 )
 
 // SetRegistration registers account

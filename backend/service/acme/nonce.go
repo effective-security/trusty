@@ -6,13 +6,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ekspand/trusty/api/v2acme"
-	"github.com/ekspand/trusty/internal/db/cadb/model"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/api/v2acme"
+	"github.com/martinisecurity/trusty/internal/db/cadb/model"
 )
 
 // NonceHandler returns nonce

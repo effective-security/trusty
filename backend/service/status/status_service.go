@@ -1,18 +1,18 @@
 package status
 
 import (
-	v1 "github.com/ekspand/trusty/api/v1"
-	pb "github.com/ekspand/trusty/api/v1/pb"
-	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xlog"
+	v1 "github.com/martinisecurity/trusty/api/v1"
+	pb "github.com/martinisecurity/trusty/api/v1/pb"
+	"github.com/martinisecurity/trusty/pkg/gserver"
 	"google.golang.org/grpc"
 )
 
 // ServiceName provides the Service Name for this package
 const ServiceName = "status"
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", "status")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/service", "status")
 
 // Service defines the Status service
 type Service struct {

@@ -7,10 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ekspand/trusty/internal/appcontainer"
-	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/pkg/jwt"
-	"github.com/ekspand/trusty/pkg/roles"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/netutil"
 	"github.com/go-phorce/dolly/rest"
@@ -18,11 +14,15 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/internal/appcontainer"
+	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/pkg/jwt"
+	"github.com/martinisecurity/trusty/pkg/roles"
 	"go.uber.org/dig"
 	"google.golang.org/grpc"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend", "gserver")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend", "gserver")
 
 // ServiceFactory is interface to create Services
 type ServiceFactory func(*Server) interface{}

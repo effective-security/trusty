@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ekspand/trusty/authority"
-	"github.com/ekspand/trusty/pkg/csr"
+	"github.com/martinisecurity/trusty/authority"
+	"github.com/martinisecurity/trusty/pkg/csr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ekspand/trusty/pkg/csr"
-	"github.com/ekspand/trusty/pkg/inmemcrypto"
-	"github.com/ekspand/trusty/pkg/print"
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/pkg/csr"
+	"github.com/martinisecurity/trusty/pkg/inmemcrypto"
+	"github.com/martinisecurity/trusty/pkg/print"
 	capi "k8s.io/api/certificates/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

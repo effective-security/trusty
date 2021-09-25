@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	acmemodel "github.com/ekspand/trusty/acme/model"
+	acmemodel "github.com/martinisecurity/trusty/acme/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/square/go-jose.v2"

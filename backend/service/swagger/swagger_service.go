@@ -4,21 +4,21 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	v1 "github.com/ekspand/trusty/api/v1"
-	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/pkg/gserver"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/httperror"
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
+	v1 "github.com/martinisecurity/trusty/api/v1"
+	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/pkg/gserver"
 )
 
 // ServiceName provides the Service Name for this package
 const ServiceName = "swagger"
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/backend/service", "swagger")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/service", "swagger")
 
 // Service defines the Swagger service
 type Service struct {

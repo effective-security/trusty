@@ -6,12 +6,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ekspand/trusty/internal/db"
-	"github.com/ekspand/trusty/internal/db/cadb/model"
-	"github.com/ekspand/trusty/internal/db/cadb/pgsql"
 	"github.com/go-phorce/dolly/fileutil"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/internal/db"
+	"github.com/martinisecurity/trusty/internal/db/cadb/model"
+	"github.com/martinisecurity/trusty/internal/db/cadb/pgsql"
 
 	// register Postgres driver
 	_ "github.com/lib/pq"
@@ -19,7 +19,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/internal/db", "cadb")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/internal/db", "cadb")
 
 // CaReadonlyDb defines an interface for Read operations on Certs
 type CaReadonlyDb interface {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	v1 "github.com/ekspand/trusty/api/v1"
-	"github.com/ekspand/trusty/internal/db/orgsdb/model"
+	v1 "github.com/martinisecurity/trusty/api/v1"
+	"github.com/martinisecurity/trusty/internal/db/orgsdb/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

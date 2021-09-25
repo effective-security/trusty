@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"time"
 
-	v1 "github.com/ekspand/trusty/api/v1"
-	"github.com/ekspand/trusty/api/v1/pb"
 	"github.com/go-phorce/dolly/xpki/certutil"
+	v1 "github.com/martinisecurity/trusty/api/v1"
+	"github.com/martinisecurity/trusty/api/v1/pb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

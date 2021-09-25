@@ -3,10 +3,10 @@ package appcontainer_test
 import (
 	"testing"
 
-	"github.com/ekspand/trusty/internal/appcontainer"
-	"github.com/ekspand/trusty/pkg/jwt"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
+	"github.com/martinisecurity/trusty/internal/appcontainer"
+	"github.com/martinisecurity/trusty/pkg/jwt"
 	"github.com/stretchr/testify/require"
 )
 

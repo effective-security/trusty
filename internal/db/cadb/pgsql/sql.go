@@ -7,7 +7,7 @@ import (
 	"github.com/juju/errors"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/internal/cadb", "pgsql")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/internal/cadb", "pgsql")
 
 const (
 	defaultLimitOfRows = 1000

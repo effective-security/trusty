@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	v1 "github.com/ekspand/trusty/api/v1"
-	tcredentials "github.com/ekspand/trusty/pkg/credentials"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
+	v1 "github.com/martinisecurity/trusty/api/v1"
+	tcredentials "github.com/martinisecurity/trusty/pkg/credentials"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -18,7 +18,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty", "client")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty", "client")
 
 var (
 	// client-side handling retrying of request failures where data was not written to the wire or

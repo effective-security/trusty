@@ -15,10 +15,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	acmemodel "github.com/ekspand/trusty/acme/model"
-	"github.com/ekspand/trusty/api/v2acme"
 	"github.com/go-acme/lego/certcrypto"
 	"github.com/juju/errors"
+	acmemodel "github.com/martinisecurity/trusty/acme/model"
+	"github.com/martinisecurity/trusty/api/v2acme"
 )
 
 const (

@@ -3,12 +3,12 @@ package authority_test
 import (
 	"testing"
 
-	"github.com/ekspand/trusty/authority"
-	"github.com/ekspand/trusty/internal/config"
-	"github.com/ekspand/trusty/pkg/csr"
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/authority"
+	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/pkg/csr"
 	"github.com/stretchr/testify/suite"
 )
 

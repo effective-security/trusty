@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ekspand/trusty/pkg/csr"
-	"github.com/ekspand/trusty/pkg/inmemcrypto"
+	"github.com/martinisecurity/trusty/pkg/csr"
+	"github.com/martinisecurity/trusty/pkg/inmemcrypto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

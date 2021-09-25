@@ -3,15 +3,15 @@ package stats
 import (
 	"context"
 
-	"github.com/ekspand/trusty/internal/db/cadb"
-	"github.com/ekspand/trusty/internal/db/orgsdb"
 	"github.com/go-phorce/dolly/metrics"
 	"github.com/go-phorce/dolly/tasks"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/internal/db/cadb"
+	"github.com/martinisecurity/trusty/internal/db/orgsdb"
 )
 
-var logger = xlog.NewPackageLogger("github.com/ekspand/trusty/internal/tasks", "stats")
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/internal/tasks", "stats")
 
 // TaskName is the name of this task
 const TaskName = "stats"

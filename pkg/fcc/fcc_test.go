@@ -3,7 +3,7 @@ package fcc_test
 import (
 	"testing"
 
-	"github.com/ekspand/trusty/pkg/fcc"
+	"github.com/martinisecurity/trusty/pkg/fcc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

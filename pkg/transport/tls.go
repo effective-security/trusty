@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ekspand/trusty/pkg/tlsutil"
 	"github.com/go-phorce/dolly/rest/tlsconfig"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/pkg/tlsutil"
 )
 
 // TLSInfo provides TLS configuration

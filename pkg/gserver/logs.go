@@ -5,11 +5,11 @@ import (
 	"reflect"
 	"time"
 
-	v1 "github.com/ekspand/trusty/api/v1"
 	"github.com/go-phorce/dolly/metrics"
 	"github.com/go-phorce/dolly/metrics/tags"
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xlog"
+	v1 "github.com/martinisecurity/trusty/api/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/peer"

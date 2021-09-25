@@ -3,11 +3,11 @@ package status_test
 import (
 	"testing"
 
-	"github.com/ekspand/trusty/api/v1/pb"
-	"github.com/ekspand/trusty/cli/status"
-	"github.com/ekspand/trusty/cli/testsuite"
-	"github.com/ekspand/trusty/tests/mockpb"
 	"github.com/gogo/protobuf/proto"
+	"github.com/martinisecurity/trusty/api/v1/pb"
+	"github.com/martinisecurity/trusty/cli/status"
+	"github.com/martinisecurity/trusty/cli/testsuite"
+	"github.com/martinisecurity/trusty/tests/mockpb"
 	"github.com/stretchr/testify/suite"
 )
 

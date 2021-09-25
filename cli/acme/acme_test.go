@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ekspand/trusty/cli/acme"
-	"github.com/ekspand/trusty/cli/testsuite"
+	"github.com/martinisecurity/trusty/cli/acme"
+	"github.com/martinisecurity/trusty/cli/testsuite"
 	"github.com/stretchr/testify/suite"
 )
 
