@@ -13,7 +13,7 @@ import (
 
 const projFolder = "../../"
 
-func Test_NewFactory(t *testing.T) {
+func TestNewFactory(t *testing.T) {
 	f, err := NewFactory(nil, nil)
 	assert.NoError(t, err)
 	assert.NotNil(t, f)
@@ -23,7 +23,7 @@ func Test_NewFactory(t *testing.T) {
 	assert.Equal(t, `file "trusty-config.yaml" in [] not found`, err.Error())
 }
 
-func Test_ConfigFilesAreYAML(t *testing.T) {
+func TestConfigFilesAreYAML(t *testing.T) {
 	isJSON := func(file string) {
 		abs := projFolder + file
 		f, err := os.Open(abs)
@@ -35,7 +35,7 @@ func Test_ConfigFilesAreYAML(t *testing.T) {
 	isJSON("etc/dev/" + ConfigFileName)
 }
 
-func Test_LoadConfig(t *testing.T) {
+func TestLoadConfig(t *testing.T) {
 	_, err := LoadConfig("missing.yaml")
 	assert.Error(t, err)
 	assert.True(t, errors.IsNotFound(err) || os.IsNotExist(err), "LoadConfig with missing file should return a file doesn't exist error: %v", errors.Trace(err))
@@ -87,7 +87,7 @@ func TestTLSInfo(t *testing.T) {
 	assert.Equal(t, "cert=cert.pem, key=key.pem, trusted-ca=cacerts.pem, client-cert-auth=false, crl-file=123.crl", i.String())
 }
 
-func Test_LoadYAML(t *testing.T) {
+func TestLoadYAML(t *testing.T) {
 	cfgFile, err := GetConfigAbsFilename("etc/dev/"+ConfigFileName, projFolder)
 	require.NoError(t, err, "unable to determine config file")
 
@@ -98,7 +98,7 @@ func Test_LoadYAML(t *testing.T) {
 	require.NoError(t, err, "failed to load config: %v", cfgFile)
 }
 
-func Test_LoadYAMLOverride(t *testing.T) {
+func TestLoadYAMLOverrideByHostname(t *testing.T) {
 	cfgFile, err := GetConfigAbsFilename("testdata/test_config.yaml", ".")
 	require.NoError(t, err, "unable to determine config file")
 
@@ -133,6 +133,58 @@ func Test_LoadYAMLOverride(t *testing.T) {
 	assert.Contains(t, c.OrgsSQL.DataSource, "sql-conn-orgsdb.txt")          // should be resolved
 	assert.NotEqual(t, "../../sql/orgs/migrations", c.OrgsSQL.MigrationsDir) // should be resolved
 	assert.NotEqual(t, "../../../etc/dev/ca-config.dev.yaml", c.Authority)
+
+	require.NotEmpty(t, c.Authority)
+
+	cis := c.HTTPServers[CISServerName]
+	require.NotNil(t, cis)
+	assert.False(t, cis.Disabled)
+	assert.True(t, cis.CORS.GetEnabled())
+	assert.False(t, cis.CORS.GetDebug())
+	require.NotEmpty(t, c.HTTPServers)
+
+	wfe := c.HTTPServers[WFEServerName]
+	require.NotNil(t, wfe)
+	assert.False(t, wfe.Disabled)
+	assert.True(t, wfe.CORS.GetEnabled())
+	assert.False(t, wfe.CORS.GetDebug())
+
+	assert.True(t, c.Metrics.GetDisabled())
+}
+
+func TestLoadYAMLWithOverride(t *testing.T) {
+	cfgFile, err := GetConfigAbsFilename("testdata/test_config.yaml", ".")
+	require.NoError(t, err, "unable to determine config file")
+	cfgOverrideFile, err := GetConfigAbsFilename("testdata/test_config-override.yaml", ".")
+	require.NoError(t, err, "unable to determine config file")
+
+	f, err := DefaultFactory()
+	require.NoError(t, err)
+
+	f.WithOverride(cfgOverrideFile)
+
+	os.Setenv(EnvHostnameKey, "UNIT_TEST")
+
+	c, err := f.LoadConfig(cfgFile)
+	require.NoError(t, err, "failed to load config: %v", cfgFile)
+	assert.Equal(t, "unit_test", c.Environment) // lower cased
+	assert.Equal(t, "local", c.Region)
+	assert.Equal(t, "trusty-pod", c.ServiceName)
+	assert.NotEmpty(t, c.ClusterName)
+
+	assert.Equal(t, "/tmp/trusty/logs", c.Logs.Directory)
+	assert.Equal(t, 3, c.Logs.MaxAgeDays)
+	assert.Equal(t, 10, c.Logs.MaxSizeMb)
+
+	assert.Equal(t, "/tmp/trusty/audit", c.Audit.Directory)
+	assert.Equal(t, 99, c.Audit.MaxAgeDays)
+	assert.Equal(t, 99, c.Audit.MaxSizeMb)
+
+	assert.Len(t, c.LogLevels, 5)
+
+	assert.Equal(t, "/tmp/trusty/softhsm/unittest_hsm.json", c.CryptoProv.Default)
+	assert.Empty(t, c.CryptoProv.Providers)
+	assert.Len(t, c.CryptoProv.PKCS11Manufacturers, 2)
 
 	require.NotEmpty(t, c.Authority)
 
