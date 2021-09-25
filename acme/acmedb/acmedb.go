@@ -9,7 +9,7 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/acme/model"
-	"github.com/martinisecurity/trusty/internal/db"
+	"github.com/martinisecurity/trusty/backend/db"
 
 	// register Postgres driver
 	_ "github.com/lib/pq"

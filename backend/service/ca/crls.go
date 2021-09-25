@@ -13,7 +13,7 @@ import (
 	"github.com/juju/errors"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/authority"
-	"github.com/martinisecurity/trusty/internal/db/cadb/model"
+	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 )
 
 func (s *Service) createGenericCRL(ctx context.Context, issuer *authority.Issuer) (*pb.Crl, error) {

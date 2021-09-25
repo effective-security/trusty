@@ -14,7 +14,7 @@ import (
 
 	"github.com/go-phorce/dolly/xhttp/httperror"
 	"github.com/go-phorce/dolly/xhttp/retriable"
-	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

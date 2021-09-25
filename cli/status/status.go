@@ -6,8 +6,8 @@ import (
 
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/cli"
-	"github.com/martinisecurity/trusty/internal/config"
 	"github.com/martinisecurity/trusty/pkg/print"
 )
 

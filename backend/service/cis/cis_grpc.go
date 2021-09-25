@@ -8,7 +8,7 @@ import (
 	"github.com/juju/errors"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/internal/db/cadb/model"
+	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"google.golang.org/grpc/codes"
 )
 

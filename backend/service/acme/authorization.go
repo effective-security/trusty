@@ -12,7 +12,7 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	acmemodel "github.com/martinisecurity/trusty/acme/model"
 	"github.com/martinisecurity/trusty/api/v2acme"
-	"github.com/martinisecurity/trusty/internal/db"
+	"github.com/martinisecurity/trusty/backend/db"
 )
 
 // GetAuthorizationHandler returns authorization

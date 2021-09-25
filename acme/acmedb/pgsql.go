@@ -8,7 +8,7 @@ import (
 
 	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/acme/model"
-	"github.com/martinisecurity/trusty/internal/db"
+	"github.com/martinisecurity/trusty/backend/db"
 )
 
 // SetRegistration registers account

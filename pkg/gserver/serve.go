@@ -18,7 +18,7 @@ import (
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/juju/errors"
-	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/pkg/credentials"
 	"github.com/martinisecurity/trusty/pkg/transport"
 	"github.com/rs/cors"

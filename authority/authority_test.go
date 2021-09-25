@@ -7,7 +7,7 @@ import (
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/authority"
-	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/pkg/csr"
 	"github.com/stretchr/testify/suite"
 )

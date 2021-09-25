@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/martinisecurity/trusty/api/v1/pb"
+	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/client"
-	"github.com/martinisecurity/trusty/internal/config"
 	"github.com/martinisecurity/trusty/tests/mockpb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

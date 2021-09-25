@@ -12,7 +12,7 @@ import (
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/api/v2acme"
-	"github.com/martinisecurity/trusty/internal/db/cadb/model"
+	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 )
 
 // NonceHandler returns nonce

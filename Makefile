@@ -28,6 +28,7 @@ clean:
 	echo "Running clean"
 	go clean
 	rm -rf \
+		/tmp/trusty \
 		./bin \
 		./.gopath \
 		${COVPATH} \
@@ -42,21 +43,13 @@ tools:
 	go install github.com/mattn/goreman
 	go install github.com/mattn/goveralls
 	go install golang.org/x/tools/cmd/goimports
-	#go install sigs.k8s.io/controller-tools/cmd/controller-gen
-	# go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
-	# go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
 
 folders:
 	mkdir -p /tmp/trusty/softhsm/tokens \
 		/tmp/trusty/certs \
 		/tmp/trusty/logs \
 		/tmp/trusty/audit \
-		/tmp/trusty/certs \
-		/tmp/trusty/data/etcd \
-		/tmp/trusty/cluster/data_0 \
-		/tmp/trusty/cluster/data_1 \
-		/tmp/trusty/cluster/data_2 \
-		/tmp/trusty/snapshots
+		/tmp/trusty/certs
 	chmod -R 0700 /tmp/trusty
 
 version:
