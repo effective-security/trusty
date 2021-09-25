@@ -34,6 +34,7 @@ type Factory struct {
 	nodeInfo    netutil.NodeInfo
 	hostEnvName string
 	environment string
+	overrideCfg string
 	searchDirs  []string
 	user        *string
 }
@@ -81,6 +82,12 @@ func NewFactory(nodeInfo netutil.NodeInfo, searchDirs []string) (*Factory, error
 		nodeInfo:    nodeInfo,
 		hostEnvName: EnvHostnameKey,
 	}, nil
+}
+
+// WithOverride allows to specify additional override config file
+func (f *Factory) WithOverride(file string) *Factory {
+	f.overrideCfg = file
+	return f
 }
 
 // WithEnvHostname allows to specify Env name for hostname
@@ -273,6 +280,15 @@ func (f *Factory) load(configFilename, hostnameOverride, baseDir string) (*Confi
 			logger.KV(xlog.INFO, "hostname", hn, "override", override)
 			ops = append(ops, yamlcfg.File(override))
 		}
+	}
+
+	if len(f.overrideCfg) > 0 {
+		overrideCfg, _, err := f.resolveConfigFile(f.overrideCfg)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		logger.KV(xlog.INFO, "override", overrideCfg)
+		ops = append(ops, yamlcfg.File(overrideCfg))
 	}
 
 	provider, err := yamlcfg.NewYAML(ops...)

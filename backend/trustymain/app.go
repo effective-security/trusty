@@ -64,6 +64,7 @@ var taskFactories = map[string]trustyTasks.Factory{
 // appFlags specifies application flags
 type appFlags struct {
 	cfgFile             *string
+	cfgOverrideFile     *string
 	cpu                 *string
 	isStderr            *bool
 	dryRun              *bool
@@ -349,6 +350,7 @@ func (a *App) loadConfig() error {
 	flags := a.flags
 
 	flags.cfgFile = app.Flag("cfg", "load configuration file").Default(config.ConfigFileName).Short('c').String()
+	flags.cfgOverrideFile = app.Flag("cfg-override", "configuration override file").String()
 	flags.cpu = app.Flag("cpu", "enable CPU profiling, specify a file to store CPU profiling info").String()
 	flags.isStderr = app.Flag("std", "output logs to stderr").Bool()
 	flags.dryRun = app.Flag("dry-run", "verify config etc, and do not start the service").Bool()
@@ -379,7 +381,15 @@ func (a *App) loadConfig() error {
 	// Parse arguments
 	kp.MustParse(app.Parse(a.args))
 
-	cfg, err := config.LoadConfig(*flags.cfgFile)
+	f, err := config.DefaultFactory()
+	if err != nil {
+		return errors.Annotatef(err, "failed to create configuration factory")
+	}
+	if len(*flags.cfgOverrideFile) > 0 {
+		f.WithOverride(*flags.cfgOverrideFile)
+	}
+
+	cfg, err := f.LoadConfigForHostName(*flags.cfgFile, "")
 	if err != nil {
 		return errors.Annotatef(err, "failed to load configuration %q", *flags.cfgFile)
 	}
