@@ -7,8 +7,8 @@ import (
 
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
-	"github.com/martinisecurity/trusty/internal/appcontainer"
-	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/backend/appcontainer"
+	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/go-phorce/dolly/ctl"
+	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/cli"
-	"github.com/martinisecurity/trusty/internal/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -19,7 +19,7 @@ import (
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/api/v2acme"
-	"github.com/martinisecurity/trusty/internal/db"
+	"github.com/martinisecurity/trusty/backend/db"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

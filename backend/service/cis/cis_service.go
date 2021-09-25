@@ -4,9 +4,9 @@ import (
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xlog"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
+	"github.com/martinisecurity/trusty/backend/config"
+	"github.com/martinisecurity/trusty/backend/db/cadb"
 	"github.com/martinisecurity/trusty/client"
-	"github.com/martinisecurity/trusty/internal/config"
-	"github.com/martinisecurity/trusty/internal/db/cadb"
 	"github.com/martinisecurity/trusty/pkg/gserver"
 	"google.golang.org/grpc"
 )

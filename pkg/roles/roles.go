@@ -10,7 +10,7 @@ import (
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
-	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/backend/config"
 	tcredentials "github.com/martinisecurity/trusty/pkg/credentials"
 	"github.com/martinisecurity/trusty/pkg/jwt"
 	"google.golang.org/grpc/credentials"

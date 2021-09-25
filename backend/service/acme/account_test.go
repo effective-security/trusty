@@ -17,8 +17,8 @@ import (
 	"github.com/go-phorce/dolly/xhttp/header"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	"github.com/martinisecurity/trusty/api/v2acme"
-	"github.com/martinisecurity/trusty/internal/db/orgsdb/model"
-	orgsmodel "github.com/martinisecurity/trusty/internal/db/orgsdb/model"
+	"github.com/martinisecurity/trusty/backend/db/orgsdb/model"
+	orgsmodel "github.com/martinisecurity/trusty/backend/db/orgsdb/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -1,8 +1,8 @@
 package testutils
 
 import (
-	"github.com/martinisecurity/trusty/internal/appcontainer"
-	"github.com/martinisecurity/trusty/internal/db"
+	"github.com/martinisecurity/trusty/backend/appcontainer"
+	"github.com/martinisecurity/trusty/backend/db"
 )
 
 // IDGenerator returns static ID generator for the app

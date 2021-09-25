@@ -7,7 +7,7 @@ import (
 	"github.com/go-phorce/dolly/rest/tlsconfig"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
-	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/backend/config"
 )
 
 // Factory specifies interface to create Client

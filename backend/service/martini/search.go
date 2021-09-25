@@ -9,7 +9,7 @@ import (
 	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/api"
 	v1 "github.com/martinisecurity/trusty/api/v1"
-	"github.com/martinisecurity/trusty/internal/db/orgsdb/model"
+	"github.com/martinisecurity/trusty/backend/db/orgsdb/model"
 	"github.com/rvflash/opencorporates"
 )
 

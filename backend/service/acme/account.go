@@ -16,7 +16,7 @@ import (
 	acmemodel "github.com/martinisecurity/trusty/acme/model"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	"github.com/martinisecurity/trusty/api/v2acme"
-	"github.com/martinisecurity/trusty/internal/db"
+	"github.com/martinisecurity/trusty/backend/db"
 	"gopkg.in/square/go-jose.v2"
 )
 

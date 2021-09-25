@@ -12,7 +12,7 @@ import (
 	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/api"
 	v1 "github.com/martinisecurity/trusty/api/v1"
-	"github.com/martinisecurity/trusty/internal/db"
+	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/pkg/fcc"
 )
 

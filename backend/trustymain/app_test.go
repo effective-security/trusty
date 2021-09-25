@@ -11,7 +11,7 @@ import (
 
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/juju/errors"
-	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/pkg/payment"
 	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/stretchr/testify/assert"

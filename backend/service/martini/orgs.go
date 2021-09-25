@@ -14,8 +14,8 @@ import (
 	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
 	v1 "github.com/martinisecurity/trusty/api/v1"
-	"github.com/martinisecurity/trusty/internal/db"
-	"github.com/martinisecurity/trusty/internal/db/orgsdb/model"
+	"github.com/martinisecurity/trusty/backend/db"
+	"github.com/martinisecurity/trusty/backend/db/orgsdb/model"
 )
 
 // GetCertsHandler returns user's certs

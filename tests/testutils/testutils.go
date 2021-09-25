@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"sync/atomic"
 
-	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/backend/config"
 )
 
 var (

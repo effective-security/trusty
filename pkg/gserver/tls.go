@@ -5,7 +5,7 @@ import (
 
 	metricsutil "github.com/go-phorce/dolly/metrics/util"
 	"github.com/go-phorce/dolly/rest/tlsconfig"
-	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/backend/config"
 )
 
 // this task is to reload keypair (if required) and publish metrics

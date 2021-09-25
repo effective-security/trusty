@@ -7,8 +7,8 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
 	v1 "github.com/martinisecurity/trusty/api/v1"
-	"github.com/martinisecurity/trusty/internal/config"
-	"github.com/martinisecurity/trusty/internal/db/orgsdb"
+	"github.com/martinisecurity/trusty/backend/config"
+	"github.com/martinisecurity/trusty/backend/db/orgsdb"
 	"github.com/martinisecurity/trusty/pkg/gserver"
 	"github.com/martinisecurity/trusty/pkg/oauth2client"
 )

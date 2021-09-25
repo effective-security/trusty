@@ -15,8 +15,8 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
 	v1 "github.com/martinisecurity/trusty/api/v1"
-	"github.com/martinisecurity/trusty/internal/db"
-	"github.com/martinisecurity/trusty/internal/db/orgsdb/model"
+	"github.com/martinisecurity/trusty/backend/db"
+	"github.com/martinisecurity/trusty/backend/db/orgsdb/model"
 	"github.com/martinisecurity/trusty/pkg/payment"
 	"github.com/martinisecurity/trusty/pkg/poller"
 )

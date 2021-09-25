@@ -11,7 +11,7 @@ import (
 	jwtjwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/identity"
-	"github.com/martinisecurity/trusty/internal/config"
+	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/pkg/roles"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -12,7 +12,7 @@ import (
 	"github.com/martinisecurity/trusty/acme/acmedb"
 	"github.com/martinisecurity/trusty/acme/model"
 	"github.com/martinisecurity/trusty/api/v2acme"
-	"github.com/martinisecurity/trusty/internal/db"
+	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/tests/testutils"
 	"gopkg.in/square/go-jose.v2"
 

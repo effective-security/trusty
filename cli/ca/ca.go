@@ -9,9 +9,9 @@ import (
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/api/v1/pb"
+	"github.com/martinisecurity/trusty/backend/config"
+	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/cli"
-	"github.com/martinisecurity/trusty/internal/config"
-	"github.com/martinisecurity/trusty/internal/db"
 	"github.com/martinisecurity/trusty/pkg/print"
 )
 
