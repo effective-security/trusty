@@ -147,18 +147,20 @@ start-sql:
 	if [ "$$CONTAINER_STATE" = "missing" ]; then \
 		docker pull ekspand/docker-centos7-postgres:latest && \
 		docker run \
-			-d -p 5432:5432 \
-			-e 'POSTGRES_USER=postgres' -e 'POSTGRES_PASSWORD=postgres' \
+			-d -p 127.0.0.1:15432:15432 \
+			-e 'POSTGRES_USER=postgres' \
+			-e 'POSTGRES_PASSWORD=postgres' \
+			-e 'POSTGRES_PORT=15432' \
 			-v ${PROJ_ROOT}/sql:/trusty_sql \
 			--name trusty-unittest-postgres \
 			ekspand/docker-centos7-postgres:latest /start_postgres.sh && \
 		sleep 9; \
 	elif [ "$$CONTAINER_STATE" = "false" ]; then docker start trusty-unittest-postgres && sleep 9; fi;
-	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 5432 -U postgres -a -f /trusty_sql/cadb/create.sql
-	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 5432 -U postgres -a -f /trusty_sql/orgsdb/create.sql
-	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 5432 -U postgres -lqt
-	echo "host=127.0.0.1 port=5432 user=postgres password=postgres sslmode=disable dbname=cadb" > etc/dev/sql-conn-cadb.txt
-	echo "host=127.0.0.1 port=5432 user=postgres password=postgres sslmode=disable dbname=orgsdb" > etc/dev/sql-conn-orgsdb.txt
+	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 15432 -U postgres -a -f /trusty_sql/cadb/create.sql
+	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 15432 -U postgres -a -f /trusty_sql/orgsdb/create.sql
+	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 15432 -U postgres -lqt
+	echo "host=127.0.0.1 port=15432 user=postgres password=postgres sslmode=disable dbname=cadb" > etc/dev/sql-conn-cadb.txt
+	echo "host=127.0.0.1 port=15432 user=postgres password=postgres sslmode=disable dbname=orgsdb" > etc/dev/sql-conn-orgsdb.txt
 
 start-stripe-mock:
 	# Container state will be true (it's already running), false (exists but stopped), or missing (does not exist).
@@ -176,9 +178,9 @@ start-stripe-mock:
 	elif [ "$$CONTAINER_STATE" = "false" ]; then docker start stripe-mock && sleep 1; fi;
 
 drop-sql:
-	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 5432 -U postgres -a -f /trusty_sql/cadb/drop.sql
-	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 5432 -U postgres -a -f /trusty_sql/orgsdb/drop.sql
-	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 5432 -U postgres -lqt
+	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 15432 -U postgres -a -f /trusty_sql/cadb/drop.sql
+	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 15432 -U postgres -a -f /trusty_sql/orgsdb/drop.sql
+	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 15432 -U postgres -lqt
 
 coveralls-github:
 	echo "Running coveralls"

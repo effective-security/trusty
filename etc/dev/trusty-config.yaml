@@ -199,7 +199,7 @@ servers:
 
   wfe:
     description: Web Front End
-    disabled: false
+    disabled: true
     listen_urls:
       - https://0.0.0.0:7891
     server_tls:
