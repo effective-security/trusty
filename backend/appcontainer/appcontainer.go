@@ -380,6 +380,10 @@ func providePayment(cfg *config.Configuration) (payment.Provider, error) {
 }
 
 func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
+	for _, m := range cfg.CryptoProv.PKCS11Manufacturers {
+		cryptoprov.Register(m, cryptoprov.Crypto11Loader)
+	}
+
 	cryptoprov.Register("AWSKMS", awskmscrypto.KmsLoader)
 	cryptoprov.Register("GCPKMS", gcpkmscrypto.KmsLoader)
 	crypto, err := cryptoprov.Load(cfg.CryptoProv.Default, cfg.CryptoProv.Providers)

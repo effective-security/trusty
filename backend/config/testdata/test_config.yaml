@@ -63,7 +63,7 @@ orgs_sql:
   # specifies the connection string. It can be prefixed with file:// or env:// to load the source from a file or environment variable.
   data_source: file://${TRUSTY_CONFIG_DIR}/sql-conn-orgsdb.txt
   # the directory that contains migrations.
-  migrations_dir: ../../../sql/orgsdb/migrations
+  migrations_dir: ${TRUSTY_CONFIG_DIR}/../../../sql/orgsdb/migrations
 
 ca_sql:
   # the driver name: postgres|mysql
@@ -71,13 +71,13 @@ ca_sql:
   # specifies the connection string. It can be prefixed with file:// or env:// to load the source from a file or environment variable.
   data_source: file://${TRUSTY_CONFIG_DIR}/sql-conn-cadb.txt
   # the directory that contains migrations.
-  migrations_dir: ../../../sql/cadb/migrations
+  migrations_dir: ${TRUSTY_CONFIG_DIR}/../../../sql/cadb/migrations
 
 # the configuration files for OAuth clients    
 oauth_clients:
-  - ../../../etc/dev/oauth-github.yaml
+  - ${TRUSTY_CONFIG_DIR}/oauth-github.yaml
 
-authority: ../../../etc/dev/ca-config.dev.yaml
+authority: ${TRUSTY_CONFIG_DIR}/ca-config.dev.yaml
 
 martini:
   poll_payment_status_interval: 1s

@@ -389,7 +389,8 @@ func (a *App) loadConfig() error {
 		f.WithOverride(*flags.cfgOverrideFile)
 	}
 
-	cfg, err := f.LoadConfigForHostName(*flags.cfgFile, "")
+	cfg := new(config.Configuration)
+	err = f.LoadConfigForHostName(*flags.cfgFile, "", cfg)
 	if err != nil {
 		return errors.Annotatef(err, "failed to load configuration %q", *flags.cfgFile)
 	}

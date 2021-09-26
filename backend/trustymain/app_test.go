@@ -12,6 +12,7 @@ import (
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/config"
+	"github.com/martinisecurity/trusty/pkg/configloader"
 	"github.com/martinisecurity/trusty/pkg/payment"
 	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/stretchr/testify/assert"
@@ -47,7 +48,7 @@ func Test_App_NoConfig(t *testing.T) {
 }
 
 func Test_AppOnClose(t *testing.T) {
-	cfgFile, err := config.GetConfigAbsFilename("etc/dev/"+config.ConfigFileName, projFolder)
+	cfgFile, err := configloader.GetConfigAbsFilename("etc/dev/"+config.ConfigFileName, projFolder)
 	require.NoError(t, err, "unable to determine config file")
 
 	c := &closer{}
@@ -76,7 +77,7 @@ func Test_AppOnClose(t *testing.T) {
 }
 
 func Test_AppInitWithRun(t *testing.T) {
-	cfgFile, err := config.GetConfigAbsFilename("etc/dev/"+config.ConfigFileName, projFolder)
+	cfgFile, err := configloader.GetConfigAbsFilename("etc/dev/"+config.ConfigFileName, projFolder)
 	require.NoError(t, err, "unable to determine config file")
 
 	c := &closer{}
@@ -95,7 +96,7 @@ func Test_AppInitWithRun(t *testing.T) {
 }
 
 func Test_AppInitWithCfg(t *testing.T) {
-	cfgFile, err := config.GetConfigAbsFilename("etc/dev/"+config.ConfigFileName, projFolder)
+	cfgFile, err := configloader.GetConfigAbsFilename("etc/dev/"+config.ConfigFileName, projFolder)
 	require.NoError(t, err, "unable to determine config file")
 
 	cpuf := path.Join(testDirPath, "profiler")
@@ -191,7 +192,7 @@ func Test_AppInstance_CryptoProvError(t *testing.T) {
 	cfgPath, err := filepath.Abs(projFolder + "etc/dev/" + config.ConfigFileName)
 	require.NoError(t, err)
 
-	cfg, err := config.LoadConfig(cfgPath)
+	cfg, err := config.Load(cfgPath)
 	require.NoError(t, err)
 
 	sigs := make(chan os.Signal, 2)

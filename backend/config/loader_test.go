@@ -6,22 +6,13 @@ import (
 	"testing"
 
 	"github.com/juju/errors"
+	"github.com/martinisecurity/trusty/pkg/configloader"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 )
 
 const projFolder = "../../"
-
-func TestNewFactory(t *testing.T) {
-	f, err := NewFactory(nil, nil)
-	assert.NoError(t, err)
-	assert.NotNil(t, f)
-
-	_, err = f.WithEnvHostname("").LoadConfig("")
-	require.Error(t, err)
-	assert.Equal(t, `file "trusty-config.yaml" in [] not found`, err.Error())
-}
 
 func TestConfigFilesAreYAML(t *testing.T) {
 	isJSON := func(file string) {
@@ -36,14 +27,14 @@ func TestConfigFilesAreYAML(t *testing.T) {
 }
 
 func TestLoadConfig(t *testing.T) {
-	_, err := LoadConfig("missing.yaml")
+	_, err := Load("missing.yaml")
 	assert.Error(t, err)
 	assert.True(t, errors.IsNotFound(err) || os.IsNotExist(err), "LoadConfig with missing file should return a file doesn't exist error: %v", errors.Trace(err))
 
-	cfgFile, err := GetConfigAbsFilename("etc/dev/"+ConfigFileName, projFolder)
+	cfgFile, err := configloader.GetConfigAbsFilename("etc/dev/"+ConfigFileName, projFolder)
 	require.NoError(t, err, "unable to determine config file")
 
-	c, err := LoadConfig(cfgFile)
+	c, err := Load(cfgFile)
 	require.NoError(t, err, "failed to load config: %v", cfgFile)
 
 	testDirAbs := func(name, dir string) {
@@ -88,28 +79,30 @@ func TestTLSInfo(t *testing.T) {
 }
 
 func TestLoadYAML(t *testing.T) {
-	cfgFile, err := GetConfigAbsFilename("etc/dev/"+ConfigFileName, projFolder)
+	cfgFile, err := configloader.GetConfigAbsFilename("etc/dev/"+ConfigFileName, projFolder)
 	require.NoError(t, err, "unable to determine config file")
 
 	f, err := DefaultFactory()
 	require.NoError(t, err)
 
-	_, err = f.LoadConfig(cfgFile)
+	var c Configuration
+	err = f.LoadConfig(cfgFile, &c)
 	require.NoError(t, err, "failed to load config: %v", cfgFile)
 }
 
 func TestLoadYAMLOverrideByHostname(t *testing.T) {
-	cfgFile, err := GetConfigAbsFilename("testdata/test_config.yaml", ".")
+	cfgFile, err := configloader.GetConfigAbsFilename("testdata/test_config.yaml", ".")
 	require.NoError(t, err, "unable to determine config file")
 
 	f, err := DefaultFactory()
 	require.NoError(t, err)
 
-	os.Setenv(EnvHostnameKey, "UNIT_TEST")
+	os.Setenv("TRUSTY_HOSTNAME", "UNIT_TEST")
 
-	c, err := f.LoadConfig(cfgFile)
+	var c Configuration
+	err = f.LoadConfig(cfgFile, &c)
 	require.NoError(t, err, "failed to load config: %v", cfgFile)
-	assert.Equal(t, "unit_test", c.Environment) // lower cased
+	assert.Equal(t, "UNIT_TEST", c.Environment)
 	assert.Equal(t, "local", c.Region)
 	assert.Equal(t, "trusty-pod", c.ServiceName)
 	assert.NotEmpty(t, c.ClusterName)
@@ -130,9 +123,7 @@ func TestLoadYAMLOverrideByHostname(t *testing.T) {
 
 	assert.Equal(t, "postgres", c.OrgsSQL.Driver)
 	assert.NotEqual(t, "file://${TRUSTY_CONFIG_DIR}/sql-conn.txt", c.OrgsSQL.DataSource)
-	assert.Contains(t, c.OrgsSQL.DataSource, "sql-conn-orgsdb.txt")          // should be resolved
-	assert.NotEqual(t, "../../sql/orgs/migrations", c.OrgsSQL.MigrationsDir) // should be resolved
-	assert.NotEqual(t, "../../../etc/dev/ca-config.dev.yaml", c.Authority)
+	assert.Contains(t, c.OrgsSQL.DataSource, "sql-conn-orgsdb.txt") // should be resolved
 
 	require.NotEmpty(t, c.Authority)
 
@@ -153,9 +144,9 @@ func TestLoadYAMLOverrideByHostname(t *testing.T) {
 }
 
 func TestLoadYAMLWithOverride(t *testing.T) {
-	cfgFile, err := GetConfigAbsFilename("testdata/test_config.yaml", ".")
+	cfgFile, err := configloader.GetConfigAbsFilename("testdata/test_config.yaml", ".")
 	require.NoError(t, err, "unable to determine config file")
-	cfgOverrideFile, err := GetConfigAbsFilename("testdata/test_config-override.yaml", ".")
+	cfgOverrideFile, err := configloader.GetConfigAbsFilename("testdata/test_config-override.yaml", ".")
 	require.NoError(t, err, "unable to determine config file")
 
 	f, err := DefaultFactory()
@@ -163,11 +154,12 @@ func TestLoadYAMLWithOverride(t *testing.T) {
 
 	f.WithOverride(cfgOverrideFile)
 
-	os.Setenv(EnvHostnameKey, "UNIT_TEST")
+	os.Setenv("TRUSTY_HOSTNAME", "UNIT_TEST")
 
-	c, err := f.LoadConfig(cfgFile)
+	var c Configuration
+	err = f.LoadConfig(cfgFile, &c)
 	require.NoError(t, err, "failed to load config: %v", cfgFile)
-	assert.Equal(t, "unit_test", c.Environment) // lower cased
+	assert.Equal(t, "UNIT_TEST", c.Environment)
 	assert.Equal(t, "local", c.Region)
 	assert.Equal(t, "trusty-pod", c.ServiceName)
 	assert.NotEmpty(t, c.ClusterName)

@@ -204,7 +204,7 @@ func (cli *Cli) RegisterAction(f func(c ctl.Control, flags interface{}) error, p
 func (cli *Cli) EnsureServiceConfig() error {
 	if cli.config == nil && cli.flags.serviceConfig != nil && *cli.flags.serviceConfig != "" {
 		var err error
-		cli.config, err = config.LoadConfig(*cli.flags.serviceConfig)
+		cli.config, err = config.Load(*cli.flags.serviceConfig)
 		if err != nil {
 			return errors.Annotate(err, "load service configuration")
 		}
