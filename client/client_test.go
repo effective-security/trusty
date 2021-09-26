@@ -10,6 +10,7 @@ import (
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/client"
+	"github.com/martinisecurity/trusty/pkg/gserver"
 	"github.com/martinisecurity/trusty/tests/mockpb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -42,7 +43,7 @@ func TestFactory(t *testing.T) {
 
 	f = client.NewFactory(&config.TrustyClient{
 		ServerURL: map[string][]string{"ca": {"https://host1"}},
-		ClientTLS: config.TLSInfo{
+		ClientTLS: gserver.TLSInfo{
 			CertFile:      "/tmp/trusty/certs/trusty_client.pem",
 			KeyFile:       "/tmp/trusty/certs/trusty_client.key",
 			TrustedCAFile: "/tmp/trusty/certs/trusty_root_ca.pem",

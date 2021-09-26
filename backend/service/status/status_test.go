@@ -14,13 +14,13 @@ import (
 	"github.com/juju/errors"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/backend/appcontainer"
-	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/backend/service/status"
 	"github.com/martinisecurity/trusty/client"
 	"github.com/martinisecurity/trusty/client/embed"
 	"github.com/martinisecurity/trusty/internal/version"
+	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/pkg/gserver"
+	"github.com/martinisecurity/trusty/tests/mockappcontainer"
 	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -55,9 +55,9 @@ func TestMain(m *testing.M) {
 	httpsAddr = testutils.CreateURLs("https", "")
 	httpAddr = testutils.CreateURLs("http", "")
 
-	cfg := &config.HTTPServer{
+	cfg := &gserver.HTTPServerCfg{
 		ListenURLs: []string{httpsAddr, httpAddr},
-		ServerTLS: &config.TLSInfo{
+		ServerTLS: &gserver.TLSInfo{
 			CertFile:      "/tmp/trusty/certs/trusty_peer_wfe.pem",
 			KeyFile:       "/tmp/trusty/certs/trusty_peer_wfe.key",
 			TrustedCAFile: "/tmp/trusty/certs/trusty_root_ca.pem",
@@ -65,11 +65,11 @@ func TestMain(m *testing.M) {
 		Services: []string{status.ServiceName},
 	}
 
-	container := appcontainer.NewBuilder().
+	container := mockappcontainer.NewBuilder().
 		WithAuditor(nil).
 		WithCrypto(nil).
 		WithJwtParser(nil).
-		WithDiscovery(appcontainer.NewDiscovery()).
+		WithDiscovery(discovery.New()).
 		Container()
 
 	trustyServer, err = gserver.Start("StatusTest", cfg, container, serviceFactories)

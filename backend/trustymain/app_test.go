@@ -48,7 +48,7 @@ func Test_App_NoConfig(t *testing.T) {
 }
 
 func Test_AppOnClose(t *testing.T) {
-	cfgFile, err := configloader.GetConfigAbsFilename("etc/dev/"+config.ConfigFileName, projFolder)
+	cfgFile, err := configloader.GetAbsFilename("etc/dev/"+config.ConfigFileName, projFolder)
 	require.NoError(t, err, "unable to determine config file")
 
 	c := &closer{}
@@ -77,7 +77,7 @@ func Test_AppOnClose(t *testing.T) {
 }
 
 func Test_AppInitWithRun(t *testing.T) {
-	cfgFile, err := configloader.GetConfigAbsFilename("etc/dev/"+config.ConfigFileName, projFolder)
+	cfgFile, err := configloader.GetAbsFilename("etc/dev/"+config.ConfigFileName, projFolder)
 	require.NoError(t, err, "unable to determine config file")
 
 	c := &closer{}
@@ -96,7 +96,7 @@ func Test_AppInitWithRun(t *testing.T) {
 }
 
 func Test_AppInitWithCfg(t *testing.T) {
-	cfgFile, err := configloader.GetConfigAbsFilename("etc/dev/"+config.ConfigFileName, projFolder)
+	cfgFile, err := configloader.GetAbsFilename("etc/dev/"+config.ConfigFileName, projFolder)
 	require.NoError(t, err, "unable to determine config file")
 
 	cpuf := path.Join(testDirPath, "profiler")

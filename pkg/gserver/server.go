@@ -14,8 +14,7 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
-	"github.com/martinisecurity/trusty/backend/appcontainer"
-	"github.com/martinisecurity/trusty/backend/config"
+	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/pkg/jwt"
 	"github.com/martinisecurity/trusty/pkg/roles"
 	"go.uber.org/dig"
@@ -63,7 +62,7 @@ type Server struct {
 
 	di   *dig.Container
 	name string
-	cfg  config.HTTPServer
+	cfg  HTTPServerCfg
 
 	stopc     chan struct{}
 	errc      chan error
@@ -76,13 +75,13 @@ type Server struct {
 	auditor  audit.Auditor
 	identity roles.IdentityProvider
 	crypto   *cryptoprov.Crypto
-	disco    appcontainer.Discovery
+	disco    discovery.Discovery
 }
 
 // Start returns running Server
 func Start(
 	name string,
-	cfg *config.HTTPServer,
+	cfg *HTTPServerCfg,
 	container *dig.Container,
 	serviceFactories map[string]ServiceFactory,
 ) (e *Server, err error) {
@@ -108,7 +107,7 @@ func Start(
 	}
 
 	err = container.Invoke(func(
-		d appcontainer.Discovery,
+		d discovery.Discovery,
 		jwtParser jwt.Parser,
 		auditor audit.Auditor,
 		crypto *cryptoprov.Crypto) error {
@@ -160,7 +159,7 @@ func Start(
 
 func newServer(
 	name string,
-	cfg *config.HTTPServer,
+	cfg *HTTPServerCfg,
 	container *dig.Container,
 	serviceFactories map[string]ServiceFactory,
 ) (*Server, error) {
@@ -320,7 +319,7 @@ func (e *Server) Name() string {
 }
 
 // Configuration of the server
-func (e *Server) Configuration() *config.HTTPServer {
+func (e *Server) Configuration() *HTTPServerCfg {
 	return &e.cfg
 }
 
@@ -369,7 +368,7 @@ func (e *Server) LocalIP() string {
 }
 
 // Discovery returns Discovery interface
-func (e *Server) Discovery() appcontainer.Discovery {
+func (e *Server) Discovery() discovery.Discovery {
 	return e.disco
 }
 

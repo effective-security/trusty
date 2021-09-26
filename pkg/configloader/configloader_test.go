@@ -15,25 +15,25 @@ func TestNewFactory(t *testing.T) {
 
 	var c struct{}
 
-	err = f.LoadConfig("trusty-config.yaml", &c)
+	err = f.Load("trusty-config.yaml", &c)
 	require.Error(t, err)
 	assert.Equal(t, `file "trusty-config.yaml" in [] not found`, err.Error())
 }
 
 func TestLoadYAML(t *testing.T) {
-	cfgFile, err := GetConfigAbsFilename("testdata/test_config.yaml", ".")
+	cfgFile, err := GetAbsFilename("testdata/test_config.yaml", ".")
 	require.NoError(t, err, "unable to determine config file")
 
 	f, err := NewFactory(nil, nil, "TRUSTY_")
 	require.NoError(t, err)
 
 	var c configuration
-	err = f.LoadConfig(cfgFile, &c)
+	err = f.Load(cfgFile, &c)
 	require.NoError(t, err, "failed to load config: %v", cfgFile)
 }
 
 func TestLoadYAMLOverrideByHostname(t *testing.T) {
-	cfgFile, err := GetConfigAbsFilename("testdata/test_config.yaml", ".")
+	cfgFile, err := GetAbsFilename("testdata/test_config.yaml", ".")
 	require.NoError(t, err, "unable to determine config file")
 
 	f, err := NewFactory(nil, nil, "TEST_")
@@ -42,7 +42,7 @@ func TestLoadYAMLOverrideByHostname(t *testing.T) {
 	os.Setenv("TEST_HOSTNAME", "UNIT_TEST")
 
 	var c configuration
-	err = f.LoadConfig(cfgFile, &c)
+	err = f.Load(cfgFile, &c)
 	require.NoError(t, err, "failed to load config: %v", cfgFile)
 	assert.Equal(t, "UNIT_TEST", c.Environment) // lower cased
 	assert.Equal(t, "local", c.Region)
@@ -60,9 +60,9 @@ func TestLoadYAMLOverrideByHostname(t *testing.T) {
 }
 
 func TestLoadYAMLWithOverride(t *testing.T) {
-	cfgFile, err := GetConfigAbsFilename("testdata/test_config.yaml", ".")
+	cfgFile, err := GetAbsFilename("testdata/test_config.yaml", ".")
 	require.NoError(t, err, "unable to determine config file")
-	cfgOverrideFile, err := GetConfigAbsFilename("testdata/test_config-override.yaml", ".")
+	cfgOverrideFile, err := GetAbsFilename("testdata/test_config-override.yaml", ".")
 	require.NoError(t, err, "unable to determine config file")
 
 	f, err := NewFactory(nil, nil, "TEST_")
@@ -73,7 +73,7 @@ func TestLoadYAMLWithOverride(t *testing.T) {
 	f.WithOverride(cfgOverrideFile)
 
 	var c configuration
-	err = f.LoadConfig(cfgFile, &c)
+	err = f.Load(cfgFile, &c)
 	require.NoError(t, err, "failed to load config: %v", cfgFile)
 	assert.Equal(t, "UNIT_TEST", c.Environment)
 	assert.Equal(t, "local", c.Region)

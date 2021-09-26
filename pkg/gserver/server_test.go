@@ -1,4 +1,4 @@
-package gserver
+package gserver_test
 
 import (
 	"net/http"
@@ -7,35 +7,36 @@ import (
 
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/header"
-	"github.com/martinisecurity/trusty/backend/appcontainer"
-	"github.com/martinisecurity/trusty/backend/config"
+	"github.com/martinisecurity/trusty/pkg/discovery"
+	"github.com/martinisecurity/trusty/pkg/gserver"
+	"github.com/martinisecurity/trusty/tests/mockappcontainer"
 	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestStartTrustyEmptyHTTP(t *testing.T) {
-	cfg := &config.HTTPServer{
+	cfg := &gserver.HTTPServerCfg{
 		ListenURLs: []string{testutils.CreateURLs("http", ""), testutils.CreateURLs("unix", "localhost")},
 		Services:   []string{"test"},
-		KeepAlive: config.KeepAlive{
+		KeepAlive: gserver.KeepAliveCfg{
 			MinTime:  time.Second,
 			Interval: time.Second,
 			Timeout:  time.Second,
 		},
 	}
 
-	c := appcontainer.NewBuilder().
+	c := mockappcontainer.NewBuilder().
 		WithAuditor(nil).
 		WithCrypto(nil).
 		WithJwtParser(nil).
-		WithDiscovery(appcontainer.NewDiscovery()).
+		WithDiscovery(discovery.New()).
 		Container()
 
-	fact := map[string]ServiceFactory{
+	fact := map[string]gserver.ServiceFactory{
 		"test": testServiceFactory,
 	}
-	srv, err := Start("EmptyTrusty", cfg, c, fact)
+	srv, err := gserver.Start("EmptyTrusty", cfg, c, fact)
 	require.NoError(t, err)
 	require.NotNil(t, srv)
 	defer srv.Close()
@@ -54,23 +55,23 @@ func TestStartTrustyEmptyHTTP(t *testing.T) {
 }
 
 func TestStartTrustyEmptyHTTPS(t *testing.T) {
-	cfg := &config.HTTPServer{
+	cfg := &gserver.HTTPServerCfg{
 		ListenURLs: []string{testutils.CreateURLs("https", ""), testutils.CreateURLs("unixs", "localhost")},
-		ServerTLS: &config.TLSInfo{
+		ServerTLS: &gserver.TLSInfo{
 			CertFile:      "/tmp/trusty/certs/trusty_peer_wfe.pem",
 			KeyFile:       "/tmp/trusty/certs/trusty_peer_wfe.key",
 			TrustedCAFile: "/tmp/trusty/certs/trusty_root_ca.pem",
 		},
 	}
 
-	c := appcontainer.NewBuilder().
+	c := mockappcontainer.NewBuilder().
 		WithAuditor(nil).
 		WithCrypto(nil).
 		WithJwtParser(nil).
-		WithDiscovery(appcontainer.NewDiscovery()).
+		WithDiscovery(discovery.New()).
 		Container()
 
-	srv, err := Start("EmptyTrustyHTTPS", cfg, c, nil)
+	srv, err := gserver.Start("EmptyTrustyHTTPS", cfg, c, nil)
 	require.NoError(t, err)
 	require.NotNil(t, srv)
 	defer srv.Close()
@@ -96,7 +97,7 @@ func (s *service) handler() rest.Handle {
 	}
 }
 
-func testServiceFactory(server *Server) interface{} {
+func testServiceFactory(server *gserver.Server) interface{} {
 	return func() {
 		svc := &service{}
 		server.AddService(svc)

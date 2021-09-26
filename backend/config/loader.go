@@ -56,7 +56,7 @@ func LoadForHostName(configFile, hostnameOverride string) (*Configuration, error
 		return nil, errors.Trace(err)
 	}
 	config := new(Configuration)
-	err = f.LoadConfigForHostName(configFile, hostnameOverride, config)
+	err = f.LoadForHostName(configFile, hostnameOverride, config)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

@@ -32,6 +32,7 @@ import (
 	"github.com/martinisecurity/trusty/backend/tasks/fcc"
 	"github.com/martinisecurity/trusty/backend/tasks/stats"
 	"github.com/martinisecurity/trusty/internal/version"
+	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/pkg/gserver"
 	"go.uber.org/dig"
 	kp "gopkg.in/alecthomas/kingpin.v2"
@@ -281,7 +282,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 	a.scheduler.Start()
 
 	// Notify services
-	err = a.container.Invoke(func(disco appcontainer.Discovery) error {
+	err = a.container.Invoke(func(disco discovery.Discovery) error {
 		var svc gserver.Service
 		return disco.ForEach(&svc, func(key string) error {
 			if onstarted, ok := svc.(gserver.StartSubcriber); ok {
@@ -390,7 +391,7 @@ func (a *App) loadConfig() error {
 	}
 
 	cfg := new(config.Configuration)
-	err = f.LoadConfigForHostName(*flags.cfgFile, "", cfg)
+	err = f.LoadForHostName(*flags.cfgFile, "", cfg)
 	if err != nil {
 		return errors.Annotatef(err, "failed to load configuration %q", *flags.cfgFile)
 	}

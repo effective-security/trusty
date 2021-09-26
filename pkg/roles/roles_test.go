@@ -11,7 +11,6 @@ import (
 	jwtjwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/identity"
-	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/pkg/roles"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -21,7 +20,7 @@ import (
 )
 
 func Test_Empty(t *testing.T) {
-	p, err := roles.New(&config.IdentityMap{}, nil)
+	p, err := roles.New(&roles.IdentityMap{}, nil)
 	require.NoError(t, err)
 
 	r, _ := http.NewRequest(http.MethodGet, "/", nil)
@@ -39,15 +38,15 @@ func Test_All(t *testing.T) {
 		err: nil,
 	}
 
-	p, err := roles.New(&config.IdentityMap{
-		TLS: config.TLSIdentityMap{
+	p, err := roles.New(&roles.IdentityMap{
+		TLS: roles.TLSIdentityMap{
 			Enabled:                  true,
 			DefaultAuthenticatedRole: "tls_authenticated",
 			Roles: map[string][]string{
 				"trusty-client": {"spifee://trusty/client"},
 			},
 		},
-		JWT: config.JWTIdentityMap{
+		JWT: roles.JWTIdentityMap{
 			Enabled:                  true,
 			DefaultAuthenticatedRole: "jwt_authenticated",
 			Roles: map[string][]string{
@@ -109,8 +108,8 @@ func Test_All(t *testing.T) {
 }
 
 func TestTLSOnly(t *testing.T) {
-	p, err := roles.New(&config.IdentityMap{
-		TLS: config.TLSIdentityMap{
+	p, err := roles.New(&roles.IdentityMap{
+		TLS: roles.TLSIdentityMap{
 			Enabled:                  true,
 			DefaultAuthenticatedRole: "tls_authenticated",
 			Roles: map[string][]string{

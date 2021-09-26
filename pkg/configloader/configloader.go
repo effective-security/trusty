@@ -70,9 +70,9 @@ func (f *Factory) WithEnvironment(environment string) *Factory {
 	return f
 }
 
-// GetConfigAbsFilename returns absolute path for the configuration file
+// GetAbsFilename returns absolute path for the file
 // from the relative path to projFolder
-func GetConfigAbsFilename(file, projFolder string) (string, error) {
+func GetAbsFilename(file, projFolder string) (string, error) {
 	if !filepath.IsAbs(projFolder) {
 		wd, err := os.Getwd() // package dir
 		if err != nil {
@@ -88,15 +88,15 @@ func GetConfigAbsFilename(file, projFolder string) (string, error) {
 	return filepath.Join(projFolder, file), nil
 }
 
-// LoadConfig will load the configuration from the named config file,
+// Load will load the configuration from the named config file,
 // apply any overrides, and resolve relative directory locations.
-func (f *Factory) LoadConfig(configFile string, config interface{}) error {
-	return f.LoadConfigForHostName(configFile, "", config)
+func (f *Factory) Load(configFile string, config interface{}) error {
+	return f.LoadForHostName(configFile, "", config)
 }
 
-// LoadConfigForHostName will load the configuration from the named config file for specified host name,
+// LoadForHostName will load the configuration from the named config file for specified host name,
 // apply any overrides, and resolve relative directory locations.
-func (f *Factory) LoadConfigForHostName(configFile, hostnameOverride string, config interface{}) error {
+func (f *Factory) LoadForHostName(configFile, hostnameOverride string, config interface{}) error {
 	logger.Infof("file=%s, hostname=%s", configFile, hostnameOverride)
 
 	configFile, baseDir, err := f.resolveConfigFile(configFile)

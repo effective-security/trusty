@@ -18,7 +18,6 @@ import (
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/juju/errors"
-	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/pkg/credentials"
 	"github.com/martinisecurity/trusty/pkg/transport"
 	"github.com/rs/cors"
@@ -39,7 +38,7 @@ type serveCtx struct {
 
 	tlsInfo *transport.TLSInfo
 
-	cfg *config.HTTPServer
+	cfg *HTTPServerCfg
 
 	gopts    []grpc.ServerOption
 	serversC chan *servers
@@ -51,7 +50,7 @@ type servers struct {
 	http   *http.Server
 }
 
-func configureListeners(cfg *config.HTTPServer) (sctxs map[string]*serveCtx, err error) {
+func configureListeners(cfg *HTTPServerCfg) (sctxs map[string]*serveCtx, err error) {
 	urls, err := cfg.ParseListenURLs()
 	if err != nil {
 		return nil, errors.Trace(err)

@@ -1,17 +1,15 @@
-package appcontainer
+package mockappcontainer
 
 import (
 	"github.com/go-phorce/dolly/audit"
-	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/backend/db/orgsdb"
+	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/pkg/jwt"
 	"github.com/martinisecurity/trusty/pkg/oauth2client"
 	"go.uber.org/dig"
 )
-
-var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/internal", "appcontainer")
 
 // Builder helps to build container
 type Builder struct {
@@ -79,8 +77,8 @@ func (b *Builder) WithOauth2Client(o *oauth2client.Provider) *Builder {
 }
 
 // WithDiscovery sets Discover
-func (b *Builder) WithDiscovery(d Discovery) *Builder {
-	b.container.Provide(func() Discovery {
+func (b *Builder) WithDiscovery(d discovery.Discovery) *Builder {
+	b.container.Provide(func() discovery.Discovery {
 		return d
 	})
 	return b

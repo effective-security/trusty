@@ -11,7 +11,6 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
 	v1 "github.com/martinisecurity/trusty/api/v1"
-	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/pkg/gserver"
 )
 
@@ -23,7 +22,7 @@ var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/se
 // Service defines the Swagger service
 type Service struct {
 	server *gserver.Server
-	cfg    *config.HTTPServer
+	cfg    *gserver.HTTPServerCfg
 }
 
 // Factory returns a factory of the service
