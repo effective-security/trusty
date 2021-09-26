@@ -23,14 +23,14 @@ func CreateURLs(scheme, host string) string {
 // LoadConfig returns Configuration
 func LoadConfig(projFolder, hostname string) (*config.Configuration, error) {
 	if hostname != "" {
-		os.Setenv(config.EnvHostnameKey, hostname)
+		os.Setenv("TRUSTY_HOSTNAME", hostname)
 	}
 	cfgPath, err := filepath.Abs(projFolder + "etc/dev/" + config.ConfigFileName)
 	if err != nil {
 		return nil, err
 	}
 
-	cfg, err := config.LoadConfigForHostName(cfgPath, hostname)
+	cfg, err := config.LoadForHostName(cfgPath, hostname)
 	if err != nil {
 		return nil, err
 	}

@@ -5,10 +5,10 @@ import (
 
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/pkg/csr"
+	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -36,7 +36,7 @@ type testSuite struct {
 func (s *testSuite) SetupSuite() {
 	var err error
 
-	s.cfg, err = loadConfig()
+	s.cfg, err = testutils.LoadConfig(projFolder, "UNIT_TEST")
 	s.Require().NoError(err)
 
 	cryptoprov.Register("SoftHSM", cryptoprov.Crypto11Loader)
@@ -134,18 +134,6 @@ func (s *testSuite) TestNewAuthority() {
 	_, err = a.GetIssuerByProfile("wrong_profile")
 	s.Error(err)
 	s.Equal("issuer not found for profile: wrong_profile", err.Error())
-}
-
-func loadConfig() (*config.Configuration, error) {
-	cfgFile, err := config.GetConfigAbsFilename("etc/dev/"+config.ConfigFileName, projFolder)
-	if err != nil {
-		return nil, errors.Annotate(err, "unable to determine config file")
-	}
-	cfg, err := config.LoadConfig(cfgFile)
-	if err != nil {
-		return nil, errors.Annotate(err, "failed to create config factory")
-	}
-	return cfg, nil
 }
 
 func (s *testSuite) TestIssuerSign() {

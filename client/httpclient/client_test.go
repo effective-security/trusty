@@ -14,7 +14,6 @@ import (
 
 	"github.com/go-phorce/dolly/xhttp/httperror"
 	"github.com/go-phorce/dolly/xhttp/retriable"
-	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -163,13 +162,4 @@ func setContentsEqual(a, b []string) bool {
 	sa := mkSet(a)
 	sb := mkSet(b)
 	return reflect.DeepEqual(sa, sb)
-}
-
-func loadConfig(t *testing.T) *config.Configuration {
-	cfgFile, err := config.GetConfigAbsFilename("etc/dev/"+config.ConfigFileName, projFolder)
-	require.NoError(t, err, "unable to determine config file")
-
-	c, err := config.LoadConfig(cfgFile)
-	require.NoError(t, err, "failed to load config: %v", cfgFile)
-	return c
 }
