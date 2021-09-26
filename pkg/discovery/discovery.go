@@ -1,11 +1,14 @@
-package appcontainer
+package discovery
 
 import (
 	"fmt"
 	"reflect"
 
+	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
 )
+
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/pkg", "discovery")
 
 type serviceInfo struct {
 	ServerName string
@@ -24,8 +27,8 @@ type disco struct {
 	reg map[string]serviceInfo
 }
 
-// NewDiscovery return new Discovery
-func NewDiscovery() Discovery {
+// New return new Discovery
+func New() Discovery {
 	return &disco{
 		reg: make(map[string]serviceInfo),
 	}

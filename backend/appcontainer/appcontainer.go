@@ -9,6 +9,7 @@ import (
 	"github.com/go-phorce/dolly/audit"
 	fauditor "github.com/go-phorce/dolly/audit/log"
 	"github.com/go-phorce/dolly/tasks"
+	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/acme"
@@ -20,6 +21,7 @@ import (
 	"github.com/martinisecurity/trusty/client"
 	"github.com/martinisecurity/trusty/pkg/awskmscrypto"
 	"github.com/martinisecurity/trusty/pkg/certpublisher"
+	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/pkg/email"
 	"github.com/martinisecurity/trusty/pkg/fcc"
 	"github.com/martinisecurity/trusty/pkg/gcpkmscrypto"
@@ -30,6 +32,8 @@ import (
 	"go.uber.org/dig"
 )
 
+var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/internal", "appcontainer")
+
 // ContainerFactoryFn defines an app container factory interface
 type ContainerFactoryFn func() (*dig.Container, error)
 
@@ -37,7 +41,7 @@ type ContainerFactoryFn func() (*dig.Container, error)
 type ProvideConfigurationFn func() (*config.Configuration, error)
 
 // ProvideDiscoveryFn defines Discovery provider
-type ProvideDiscoveryFn func() (Discovery, error)
+type ProvideDiscoveryFn func() (discovery.Discovery, error)
 
 // ProvideAuditorFn defines Auditor provider
 type ProvideAuditorFn func(cfg *config.Configuration, r CloseRegistrator) (audit.Auditor, error)
@@ -317,8 +321,8 @@ const (
 	nullDevName = "/dev/null"
 )
 
-func provideDiscovery() (Discovery, error) {
-	return NewDiscovery(), nil
+func provideDiscovery() (discovery.Discovery, error) {
+	return discovery.New(), nil
 }
 
 func provideAuditor(cfg *config.Configuration, r CloseRegistrator) (audit.Auditor, error) {

@@ -1,6 +1,10 @@
 package config
 
-import "time"
+import (
+	"time"
+
+	"github.com/martinisecurity/trusty/pkg/gserver"
+)
 
 const (
 	// WFEServerName specifies server name for Web Front End
@@ -57,7 +61,7 @@ type Configuration struct {
 	RegistrationAuthority *RegistrationAuthority `json:"ra" yaml:"ra"`
 
 	// HTTPServers specifies a list of servers that expose HTTP or gRPC services
-	HTTPServers map[string]*HTTPServer `json:"servers" yaml:"servers"`
+	HTTPServers map[string]*gserver.HTTPServerCfg `json:"servers" yaml:"servers"`
 
 	// TODO: refactor
 	// TrustyClient specifies configurations for the client to connect to the cluster

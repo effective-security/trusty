@@ -46,7 +46,7 @@ func TestMain(m *testing.M) {
 
 	httpAddr := testutils.CreateURLs("http", "")
 
-	httpcfg := &config.HTTPServer{
+	httpcfg := &gserver.HTTPServerCfg{
 		ListenURLs: []string{httpAddr},
 		Services:   []string{cis.ServiceName},
 	}

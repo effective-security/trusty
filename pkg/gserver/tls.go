@@ -5,12 +5,11 @@ import (
 
 	metricsutil "github.com/go-phorce/dolly/metrics/util"
 	"github.com/go-phorce/dolly/rest/tlsconfig"
-	"github.com/martinisecurity/trusty/backend/config"
 )
 
 // this task is to reload keypair (if required) and publish metrics
 // for server certficates
-func certExpirationTask(loader *tlsconfig.KeypairReloader, cfg *config.TLSInfo) {
+func certExpirationTask(loader *tlsconfig.KeypairReloader, cfg *TLSInfo) {
 	logger.Tracef("cert=%q, key=%q", cfg.CertFile, cfg.KeyFile)
 
 	loader.Reload()

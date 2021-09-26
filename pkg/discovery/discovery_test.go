@@ -1,4 +1,4 @@
-package appcontainer_test
+package discovery_test
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/backend/appcontainer"
+	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/tests/mockpb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -18,7 +18,7 @@ func TestDiscovery(t *testing.T) {
 	cis := &mockpb.MockCIServer{}
 
 	srv := "TestDiscovery"
-	d := appcontainer.NewDiscovery()
+	d := discovery.New()
 	err := d.Register(srv, ca)
 	require.NoError(t, err)
 

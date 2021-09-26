@@ -11,10 +11,10 @@ import (
 	"github.com/go-phorce/dolly/xhttp/retriable"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
-	"github.com/martinisecurity/trusty/backend/appcontainer"
-	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/backend/service/swagger"
+	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/pkg/gserver"
+	"github.com/martinisecurity/trusty/tests/mockappcontainer"
 	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -46,9 +46,9 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		panic(err.Error())
 	}
-	cfg := &config.HTTPServer{
+	cfg := &gserver.HTTPServerCfg{
 		ListenURLs: []string{httpsAddr, httpAddr},
-		ServerTLS: &config.TLSInfo{
+		ServerTLS: &gserver.TLSInfo{
 			CertFile:      "/tmp/trusty/certs/trusty_peer_wfe.pem",
 			KeyFile:       "/tmp/trusty/certs/trusty_peer_wfe.key",
 			TrustedCAFile: "/tmp/trusty/certs/trusty_root_ca.pem",
@@ -57,11 +57,11 @@ func TestMain(m *testing.M) {
 		Swagger:  devcfg.HTTPServers["cis"].Swagger,
 	}
 
-	container := appcontainer.NewBuilder().
+	container := mockappcontainer.NewBuilder().
 		WithAuditor(nil).
 		WithCrypto(nil).
 		WithJwtParser(nil).
-		WithDiscovery(appcontainer.NewDiscovery()).
+		WithDiscovery(discovery.New()).
 		Container()
 
 	trustyServer, err = gserver.Start("SwaggerTest", cfg, container, serviceFactories)

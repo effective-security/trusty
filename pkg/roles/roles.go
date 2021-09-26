@@ -10,7 +10,6 @@ import (
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
-	"github.com/martinisecurity/trusty/backend/config"
 	tcredentials "github.com/martinisecurity/trusty/pkg/credentials"
 	"github.com/martinisecurity/trusty/pkg/jwt"
 	"google.golang.org/grpc/credentials"
@@ -46,14 +45,14 @@ type IdentityProvider interface {
 
 // Provider for identity
 type provider struct {
-	config   config.IdentityMap
+	config   IdentityMap
 	jwtRoles map[string]string
 	tlsRoles map[string]string
 	jwt      jwt.Parser
 }
 
 // New returns Authz provider instance
-func New(config *config.IdentityMap, jwt jwt.Parser) (IdentityProvider, error) {
+func New(config *IdentityMap, jwt jwt.Parser) (IdentityProvider, error) {
 	prov := &provider{
 		config:   *config,
 		jwtRoles: make(map[string]string),

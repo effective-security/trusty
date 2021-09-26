@@ -86,9 +86,9 @@ func TestMain(m *testing.M) {
 	httpsAddr = testutils.CreateURLs("https", "")
 	httpAddr = testutils.CreateURLs("http", "")
 
-	httpCfg := &config.HTTPServer{
+	httpCfg := &gserver.HTTPServerCfg{
 		ListenURLs: []string{httpsAddr, httpAddr},
-		ServerTLS: &config.TLSInfo{
+		ServerTLS: &gserver.TLSInfo{
 			CertFile:      "/tmp/trusty/certs/trusty_peer_wfe.pem",
 			KeyFile:       "/tmp/trusty/certs/trusty_peer_wfe.key",
 			TrustedCAFile: "/tmp/trusty/certs/trusty_root_ca.pem",

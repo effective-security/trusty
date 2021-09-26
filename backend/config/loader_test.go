@@ -31,7 +31,7 @@ func TestLoadConfig(t *testing.T) {
 	assert.Error(t, err)
 	assert.True(t, errors.IsNotFound(err) || os.IsNotExist(err), "LoadConfig with missing file should return a file doesn't exist error: %v", errors.Trace(err))
 
-	cfgFile, err := configloader.GetConfigAbsFilename("etc/dev/"+ConfigFileName, projFolder)
+	cfgFile, err := configloader.GetAbsFilename("etc/dev/"+ConfigFileName, projFolder)
 	require.NoError(t, err, "unable to determine config file")
 
 	c, err := Load(cfgFile)
@@ -54,44 +54,20 @@ func TestLoadConfig(t *testing.T) {
 	testDirAbs("cis.swagger", cis.Swagger.Files["cis"])
 }
 
-func TestParseListenURLs(t *testing.T) {
-	cfg := &HTTPServer{
-		ListenURLs: []string{"https://trusty:2380"},
-	}
-
-	lp, err := cfg.ParseListenURLs()
-	require.NoError(t, err)
-	assert.Equal(t, 1, len(lp))
-}
-
-func TestTLSInfo(t *testing.T) {
-	empty := &TLSInfo{}
-	assert.True(t, empty.Empty())
-
-	i := &TLSInfo{
-		CertFile:      "cert.pem",
-		KeyFile:       "key.pem",
-		TrustedCAFile: "cacerts.pem",
-		CRLFile:       "123.crl",
-	}
-	assert.False(t, i.Empty())
-	assert.Equal(t, "cert=cert.pem, key=key.pem, trusted-ca=cacerts.pem, client-cert-auth=false, crl-file=123.crl", i.String())
-}
-
 func TestLoadYAML(t *testing.T) {
-	cfgFile, err := configloader.GetConfigAbsFilename("etc/dev/"+ConfigFileName, projFolder)
+	cfgFile, err := configloader.GetAbsFilename("etc/dev/"+ConfigFileName, projFolder)
 	require.NoError(t, err, "unable to determine config file")
 
 	f, err := DefaultFactory()
 	require.NoError(t, err)
 
 	var c Configuration
-	err = f.LoadConfig(cfgFile, &c)
+	err = f.Load(cfgFile, &c)
 	require.NoError(t, err, "failed to load config: %v", cfgFile)
 }
 
 func TestLoadYAMLOverrideByHostname(t *testing.T) {
-	cfgFile, err := configloader.GetConfigAbsFilename("testdata/test_config.yaml", ".")
+	cfgFile, err := configloader.GetAbsFilename("testdata/test_config.yaml", ".")
 	require.NoError(t, err, "unable to determine config file")
 
 	f, err := DefaultFactory()
@@ -100,7 +76,7 @@ func TestLoadYAMLOverrideByHostname(t *testing.T) {
 	os.Setenv("TRUSTY_HOSTNAME", "UNIT_TEST")
 
 	var c Configuration
-	err = f.LoadConfig(cfgFile, &c)
+	err = f.Load(cfgFile, &c)
 	require.NoError(t, err, "failed to load config: %v", cfgFile)
 	assert.Equal(t, "UNIT_TEST", c.Environment)
 	assert.Equal(t, "local", c.Region)
@@ -144,9 +120,9 @@ func TestLoadYAMLOverrideByHostname(t *testing.T) {
 }
 
 func TestLoadYAMLWithOverride(t *testing.T) {
-	cfgFile, err := configloader.GetConfigAbsFilename("testdata/test_config.yaml", ".")
+	cfgFile, err := configloader.GetAbsFilename("testdata/test_config.yaml", ".")
 	require.NoError(t, err, "unable to determine config file")
-	cfgOverrideFile, err := configloader.GetConfigAbsFilename("testdata/test_config-override.yaml", ".")
+	cfgOverrideFile, err := configloader.GetAbsFilename("testdata/test_config-override.yaml", ".")
 	require.NoError(t, err, "unable to determine config file")
 
 	f, err := DefaultFactory()
@@ -157,7 +133,7 @@ func TestLoadYAMLWithOverride(t *testing.T) {
 	os.Setenv("TRUSTY_HOSTNAME", "UNIT_TEST")
 
 	var c Configuration
-	err = f.LoadConfig(cfgFile, &c)
+	err = f.Load(cfgFile, &c)
 	require.NoError(t, err, "failed to load config: %v", cfgFile)
 	assert.Equal(t, "UNIT_TEST", c.Environment)
 	assert.Equal(t, "local", c.Region)
