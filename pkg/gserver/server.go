@@ -12,7 +12,6 @@ import (
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/authz"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/pkg/jwt"
@@ -74,7 +73,6 @@ type Server struct {
 	authz    *authz.Provider
 	auditor  audit.Auditor
 	identity roles.IdentityProvider
-	crypto   *cryptoprov.Crypto
 	disco    discovery.Discovery
 }
 
@@ -109,10 +107,8 @@ func Start(
 	err = container.Invoke(func(
 		d discovery.Discovery,
 		jwtParser jwt.Parser,
-		auditor audit.Auditor,
-		crypto *cryptoprov.Crypto) error {
+		auditor audit.Auditor) error {
 		e.auditor = auditor
-		e.crypto = crypto
 		e.disco = d
 		iden, err := roles.New(&cfg.IdentityMap, jwtParser)
 		if err != nil {

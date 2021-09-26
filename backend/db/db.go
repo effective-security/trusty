@@ -86,7 +86,11 @@ func IsNotFoundError(err error) bool {
 
 // Migrate performs the db migration
 func Migrate(migrationsDir string, forceVersion int, db *sql.DB) error {
-	logger.Tracef("reason=load, directory=%q", migrationsDir)
+	logger.Tracef("reason=load, directory=%q, forceVersion=%d", migrationsDir, forceVersion)
+	if len(migrationsDir) == 0 {
+		return nil
+	}
+
 	if _, err := os.Stat(migrationsDir); err != nil {
 		return errors.Annotatef(err, "directory %q inaccessible", migrationsDir)
 	}
