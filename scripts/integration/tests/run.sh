@@ -5,9 +5,6 @@ set -e
 export TRUSTY_CIS_1=http://168.138.72.101:7880
 export TRUSTY_CIS_2=http://168.138.72.102:7880
 
-export TRUSTY_WFE_1=https://168.138.72.101:7891
-export TRUSTY_WFE_2=https://168.138.72.102:7891
-
 export TRUSTY_CA_1=https://168.138.72.101:7892
 export TRUSTY_CA_2=https://168.138.72.102:7892
 

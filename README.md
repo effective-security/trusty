@@ -22,14 +22,7 @@ Add this to your ~/.profile
 Note that these secrets can be random if you don't use a specific feature with GCP or Github.
 
 ```.sh
-export TRUSTY_GITHUB_CLIENT_SECRET=0d...a8
-export TRUSTY_GITHUB_CLIENT_ID=09...71
-export TRUSTY_GOOGLE_CLIENT_SECRET=01...b2
-export TRUSTY_GOOGLE_CLIENT_ID=4a...89
 export TRUSTY_JWT_SEED=g...A
-export TRUSTY_MAILGUN_PRIVATE_KEY=c0..aa
-export TRUSTY_STRIPE_API_KEY=12..av
-export TRUSTY_STRIPE_WEBHOOK_SECRET=c1..aw
 # export CR_PAT=ghp_M...v
 ```
 

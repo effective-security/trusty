@@ -6,7 +6,6 @@ import (
 
 	"github.com/gogo/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/empty"
-	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/tests/mockpb"
 	"github.com/stretchr/testify/assert"
@@ -40,7 +39,7 @@ func TestStatusServerToClient(t *testing.T) {
 	cexp := &pb.CallerStatusResponse{
 		Id:   "1234",
 		Name: "denis",
-		Role: v1.RoleAdmin,
+		Role: "admin",
 	}
 	srv.Resps = []proto.Message{cexp}
 	cres, err := cli.Caller(ctx, Empty)

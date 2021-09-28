@@ -8,7 +8,6 @@ import (
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/martinisecurity/trusty/cli"
-	"github.com/martinisecurity/trusty/cli/auth"
 	"github.com/martinisecurity/trusty/cli/ca"
 	"github.com/martinisecurity/trusty/cli/cis"
 	"github.com/martinisecurity/trusty/cli/status"
@@ -54,14 +53,6 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	app.Command("caller", "show the caller info").
 		PreAction(cli.PopulateControl).
 		Action(cli.RegisterAction(status.Caller, nil))
-
-	// login
-	loginFlags := new(auth.AuthenticateFlags)
-	cmdLogin := app.Command("login", "login to Trusty").
-		PreAction(cli.PopulateControl).
-		Action(cli.RegisterAction(auth.Authenticate, loginFlags))
-	loginFlags.NoBrowser = cmdLogin.Flag("no-browser", "disable openning in browser").Bool()
-	loginFlags.Provider = cmdLogin.Flag("provider", "oauth2 provider, should be github or google").Default("github").String()
 
 	// ca: issuers|profile|sign|publish_crl
 

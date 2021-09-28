@@ -12,22 +12,15 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/juju/errors"
-	"github.com/martinisecurity/trusty/acme"
-	"github.com/martinisecurity/trusty/acme/acmedb"
 	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/backend/db/cadb"
-	"github.com/martinisecurity/trusty/backend/db/orgsdb"
 	"github.com/martinisecurity/trusty/client"
 	"github.com/martinisecurity/trusty/pkg/awskmscrypto"
 	"github.com/martinisecurity/trusty/pkg/certpublisher"
 	"github.com/martinisecurity/trusty/pkg/discovery"
-	"github.com/martinisecurity/trusty/pkg/email"
-	"github.com/martinisecurity/trusty/pkg/fcc"
 	"github.com/martinisecurity/trusty/pkg/gcpkmscrypto"
 	"github.com/martinisecurity/trusty/pkg/jwt"
-	"github.com/martinisecurity/trusty/pkg/oauth2client"
-	"github.com/martinisecurity/trusty/pkg/payment"
 	"github.com/sony/sonyflake"
 	"go.uber.org/dig"
 )
@@ -52,35 +45,17 @@ type ProvideSchedulerFn func() (tasks.Scheduler, error)
 // ProvideJwtFn defines JWT provider
 type ProvideJwtFn func(cfg *config.Configuration) (jwt.Parser, jwt.Provider, error)
 
-// ProvideOAuthClientsFn defines OAuth clients provider
-type ProvideOAuthClientsFn func(cfg *config.Configuration) (*oauth2client.Provider, error)
-
-// ProvideEmailClientsFn defines email clients provider
-type ProvideEmailClientsFn func(cfg *config.Configuration) (*email.Provider, error)
-
-// ProvidePaymentProviderFn defines email clients provider
-type ProvidePaymentProviderFn func(cfg *config.Configuration) (payment.Provider, error)
-
 // ProvideCryptoFn defines Crypto provider
 type ProvideCryptoFn func(cfg *config.Configuration) (*cryptoprov.Crypto, error)
 
 // ProvideAuthorityFn defines Crypto provider
 type ProvideAuthorityFn func(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*authority.Authority, error)
 
-// ProvideOrgsDbFn defines Orgs DB provider
-type ProvideOrgsDbFn func(cfg *config.Configuration) (orgsdb.OrgsDb, orgsdb.OrgsReadOnlyDb, error)
-
 // ProvideCaDbFn defines CA DB provider
 type ProvideCaDbFn func(cfg *config.Configuration) (cadb.CaDb, cadb.CaReadonlyDb, error)
 
 // ProvideClientFactoryFn defines client.Facroty provider
 type ProvideClientFactoryFn func(cfg *config.Configuration) (client.Factory, error)
-
-// ProvideFCCAPIClientFn defines FCC API Client provider
-type ProvideFCCAPIClientFn func() (fcc.APIClient, error)
-
-// ProvideAcmeFn defines ACMA provider
-type ProvideAcmeFn func(cfg *config.Configuration) (acme.Controller, error)
 
 // ProvidePublisherFn defines Publisher provider
 type ProvidePublisherFn func(cfg *config.Configuration) (certpublisher.Publisher, error)
@@ -100,15 +75,9 @@ type ContainerFactory struct {
 	schedulerProvider     ProvideSchedulerFn
 	cryptoProvider        ProvideCryptoFn
 	authorityProvider     ProvideAuthorityFn
-	orgsdbProvider        ProvideOrgsDbFn
 	cadbProvider          ProvideCaDbFn
-	oauthProvider         ProvideOAuthClientsFn
-	emailProvider         ProvideEmailClientsFn
 	jwtProvider           ProvideJwtFn
 	clientFactoryProvider ProvideClientFactoryFn
-	fccAPIClientProvider  ProvideFCCAPIClientFn
-	acmeProvider          ProvideAcmeFn
-	paymentProvider       ProvidePaymentProviderFn
 	publisherProvider     ProvidePublisherFn
 }
 
@@ -129,14 +98,8 @@ func NewContainerFactory(closer CloseRegistrator) *ContainerFactory {
 		WithSchedulerProvider(defaultSchedulerProv).
 		WithCryptoProvider(provideCrypto).
 		WithAuthorityProvider(provideAuthority).
-		WithOrgsDbProvider(provideOrgsDB).
 		WithCaDbProvider(provideCaDB).
-		WithOAuthClientsProvider(provideOAuth).
-		WithEmailClientsProvider(provideEmail).
 		WithJwtProvider(provideJwt).
-		WithACMEProvider(provideAcme).
-		WithClientFactoryProvider(provideClientFactory).
-		WithPaymentProvider(providePayment).
 		WithPublisher(providePublisher).
 		WithClientFactoryProvider(provideClientFactory)
 }
@@ -150,12 +113,6 @@ func (f *ContainerFactory) WithConfigurationProvider(p ProvideConfigurationFn) *
 // WithDiscoveryProvider allows to specify Discovery
 func (f *ContainerFactory) WithDiscoveryProvider(p ProvideDiscoveryFn) *ContainerFactory {
 	f.discoveryProvider = p
-	return f
-}
-
-// WithACMEProvider allows to specify ACME provider
-func (f *ContainerFactory) WithACMEProvider(p ProvideAcmeFn) *ContainerFactory {
-	f.acmeProvider = p
 	return f
 }
 
@@ -177,33 +134,9 @@ func (f *ContainerFactory) WithJwtProvider(p ProvideJwtFn) *ContainerFactory {
 	return f
 }
 
-// WithOAuthClientsProvider allows to specify custom OAuth clients provider
-func (f *ContainerFactory) WithOAuthClientsProvider(p ProvideOAuthClientsFn) *ContainerFactory {
-	f.oauthProvider = p
-	return f
-}
-
-// WithEmailClientsProvider allows to specify custom emailclients provider
-func (f *ContainerFactory) WithEmailClientsProvider(p ProvideEmailClientsFn) *ContainerFactory {
-	f.emailProvider = p
-	return f
-}
-
-// WithPaymentProvider allows to specify payment provider
-func (f *ContainerFactory) WithPaymentProvider(p ProvidePaymentProviderFn) *ContainerFactory {
-	f.paymentProvider = p
-	return f
-}
-
 // WithAuditorProvider allows to specify custom Auditor
 func (f *ContainerFactory) WithAuditorProvider(p ProvideAuditorFn) *ContainerFactory {
 	f.auditorProvider = p
-	return f
-}
-
-// WithOrgsDbProvider allows to specify custom DB provider
-func (f *ContainerFactory) WithOrgsDbProvider(p ProvideOrgsDbFn) *ContainerFactory {
-	f.orgsdbProvider = p
 	return f
 }
 
@@ -264,11 +197,6 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 		return nil, errors.Trace(err)
 	}
 
-	err = container.Provide(f.oauthProvider)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
 	err = container.Provide(f.cryptoProvider)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -284,27 +212,7 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 		return nil, errors.Trace(err)
 	}
 
-	err = container.Provide(f.orgsdbProvider)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
 	err = container.Provide(f.clientFactoryProvider)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	err = container.Provide(f.acmeProvider)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	err = container.Provide(f.emailProvider)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	err = container.Provide(f.paymentProvider)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -359,30 +267,6 @@ func provideJwt(cfg *config.Configuration) (jwt.Parser, jwt.Provider, error) {
 	return provider, provider, nil
 }
 
-func provideOAuth(cfg *config.Configuration) (*oauth2client.Provider, error) {
-	p, err := oauth2client.NewProvider(cfg.OAuthClients)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	return p, nil
-}
-
-func provideEmail(cfg *config.Configuration) (*email.Provider, error) {
-	p, err := email.NewProvider(cfg.EmailProviders)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	return p, nil
-}
-
-func providePayment(cfg *config.Configuration) (payment.Provider, error) {
-	p, err := payment.NewProvider(cfg.PaymentProvider)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-	return p, nil
-}
-
 func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
 	for _, m := range cfg.CryptoProv.PKCS11Manufacturers {
 		cryptoprov.Register(m, cryptoprov.Crypto11Loader)
@@ -412,22 +296,6 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*au
 	return ca, nil
 }
 
-func provideOrgsDB(cfg *config.Configuration) (orgsdb.OrgsDb, orgsdb.OrgsReadOnlyDb, error) {
-	if IDGenerator == nil {
-		panic("IDGenerator is nil")
-	}
-	d, err := orgsdb.New(
-		cfg.OrgsSQL.Driver,
-		cfg.OrgsSQL.DataSource,
-		cfg.OrgsSQL.MigrationsDir,
-		cfg.OrgsSQL.ForceVersion,
-		IDGenerator.NextID)
-	if err != nil {
-		return nil, nil, errors.Trace(err)
-	}
-	return d, d, nil
-}
-
 func provideCaDB(cfg *config.Configuration) (cadb.CaDb, cadb.CaReadonlyDb, error) {
 	if IDGenerator == nil {
 		panic("IDGenerator is nil")
@@ -446,28 +314,6 @@ func provideCaDB(cfg *config.Configuration) (cadb.CaDb, cadb.CaReadonlyDb, error
 
 func provideClientFactory(cfg *config.Configuration) (client.Factory, error) {
 	return client.NewFactory(&cfg.TrustyClient), nil
-}
-
-func provideAcme(cfg *config.Configuration) (acme.Controller, error) {
-	if IDGenerator == nil {
-		panic("IDGenerator is nil")
-	}
-	acmecfg, err := acme.LoadConfig(cfg.Acme)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	db, err := acmedb.New(
-		cfg.CaSQL.Driver,
-		cfg.CaSQL.DataSource,
-		cfg.CaSQL.MigrationsDir,
-		cfg.CaSQL.ForceVersion,
-		IDGenerator.NextID)
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	return acme.NewProvider(acmecfg, db)
 }
 
 func providePublisher(cfg *config.Configuration) (certpublisher.Publisher, error) {

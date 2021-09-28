@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/martinisecurity/trusty/backend/db/cadb"
-	"github.com/martinisecurity/trusty/backend/db/orgsdb"
 	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -30,19 +29,9 @@ func TestFactory(t *testing.T) {
 	require.NoError(t, err)
 	defer cadbp.Close()
 
-	odbp, err := orgsdb.New(
-		cfg.OrgsSQL.Driver,
-		cfg.OrgsSQL.DataSource,
-		cfg.OrgsSQL.MigrationsDir,
-		0,
-		testutils.IDGenerator().NextID,
-	)
-	require.NoError(t, err)
-	defer odbp.Close()
-
 	c := dig.New()
-	c.Provide(func() (cadb.CaReadonlyDb, orgsdb.OrgsReadOnlyDb) {
-		return cadbp, odbp
+	c.Provide(func() cadb.CaReadonlyDb {
+		return cadbp
 	})
 	require.NoError(t, err)
 

@@ -1,5 +1,0 @@
----
-provider_id: mailgun
-domain: martinisecurity.com
-sender: no-reply@martinisecurity.com
-api_key: env://TRUSTY_MAILGUN_PRIVATE_KEY

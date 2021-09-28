@@ -172,6 +172,9 @@ SELECT create_constraint_if_not_exists(
     'unique_roots_sha256',
     'ALTER TABLE public.roots ADD CONSTRAINT unique_roots_sha256 UNIQUE USING INDEX idx_roots_sha256;');
 
+--
+-- CRLs
+--
 CREATE TABLE IF NOT EXISTS public.crls
 (
     id bigint NOT NULL,

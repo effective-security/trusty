@@ -6,22 +6,18 @@ import (
 
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	"github.com/martinisecurity/trusty/backend/service"
-	"github.com/martinisecurity/trusty/backend/service/auth"
 	"github.com/martinisecurity/trusty/backend/service/ca"
 	"github.com/martinisecurity/trusty/backend/service/status"
 	"github.com/martinisecurity/trusty/backend/service/swagger"
-	"github.com/martinisecurity/trusty/backend/service/workflow"
 	"github.com/martinisecurity/trusty/pkg/gserver"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 var serviceFactories = map[string]gserver.ServiceFactory{
-	auth.ServiceName:     auth.Factory,
-	ca.ServiceName:       ca.Factory,
-	status.ServiceName:   status.Factory,
-	workflow.ServiceName: workflow.Factory,
-	swagger.ServiceName:  swagger.Factory,
+	ca.ServiceName:      ca.Factory,
+	status.ServiceName:  status.Factory,
+	swagger.ServiceName: swagger.Factory,
 }
 
 func Test_invalidArgs(t *testing.T) {

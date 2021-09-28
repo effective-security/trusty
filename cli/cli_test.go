@@ -22,7 +22,7 @@ func cmdAction(c ctl.Control, p interface{}) error {
 }
 
 func cmdClientAction(c ctl.Control, p interface{}) error {
-	client, err := c.(*cli.Cli).Client(config.WFEServerName)
+	client, err := c.(*cli.Cli).Client(config.CISServerName)
 	if err != nil {
 		return err
 	}
@@ -241,6 +241,9 @@ func TestCLIWithServiceCfg(t *testing.T) {
 
 	cli.Parse([]string{"cliapp", "-D", "-V", "--timeout", "0", "cmd", "client", "--cfg", cfg})
 
+	assert.Equal(t, ctl.RCOkay, cli.ReturnCode(), "output: "+out.String())
+	assert.Contains(t, out.String(), "client: *client.Client\n")
+
 	err = cli.EnsureServiceConfig()
 	require.NoError(t, err)
 
@@ -249,9 +252,6 @@ func TestCLIWithServiceCfg(t *testing.T) {
 
 	err = cli.EnsureCryptoProvider()
 	require.NoError(t, err)
-
-	assert.Equal(t, ctl.RCOkay, cli.ReturnCode(), "output: "+out.String())
-	assert.Contains(t, out.String(), "client: *client.Client\n")
 }
 
 func TestCLIWithHsmCfg(t *testing.T) {
