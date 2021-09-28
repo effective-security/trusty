@@ -1,9 +1,0 @@
-{
-    "provider_id": "github",
-    "client_id": "123414",
-    "client_secret": "3456345634563",
-    "scopes": ["repo", "user"],
-    "response_type": "code",
-    "auth_url": "https://github.com/login/oauth/authorize",
-    "token_url": "https://github.com/login/oauth/access_token"
-}

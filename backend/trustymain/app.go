@@ -19,17 +19,12 @@ import (
 	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/appcontainer"
 	"github.com/martinisecurity/trusty/backend/config"
-	"github.com/martinisecurity/trusty/backend/service/acme"
-	"github.com/martinisecurity/trusty/backend/service/auth"
 	"github.com/martinisecurity/trusty/backend/service/ca"
 	"github.com/martinisecurity/trusty/backend/service/cis"
-	"github.com/martinisecurity/trusty/backend/service/martini"
 	"github.com/martinisecurity/trusty/backend/service/status"
 	"github.com/martinisecurity/trusty/backend/service/swagger"
-	"github.com/martinisecurity/trusty/backend/service/workflow"
 	trustyTasks "github.com/martinisecurity/trusty/backend/tasks"
 	"github.com/martinisecurity/trusty/backend/tasks/certsmonitor"
-	"github.com/martinisecurity/trusty/backend/tasks/fcc"
 	"github.com/martinisecurity/trusty/backend/tasks/stats"
 	"github.com/martinisecurity/trusty/internal/version"
 	"github.com/martinisecurity/trusty/pkg/discovery"
@@ -46,20 +41,15 @@ const (
 
 // ServiceFactories provides map of gserver.ServiceFactory
 var ServiceFactories = map[string]gserver.ServiceFactory{
-	acme.ServiceName:     acme.Factory,
-	auth.ServiceName:     auth.Factory,
-	ca.ServiceName:       ca.Factory,
-	cis.ServiceName:      cis.Factory,
-	status.ServiceName:   status.Factory,
-	workflow.ServiceName: workflow.Factory,
-	swagger.ServiceName:  swagger.Factory,
-	martini.ServiceName:  martini.Factory,
+	ca.ServiceName:      ca.Factory,
+	cis.ServiceName:     cis.Factory,
+	status.ServiceName:  status.Factory,
+	swagger.ServiceName: swagger.Factory,
 }
 
 var taskFactories = map[string]trustyTasks.Factory{
 	certsmonitor.TaskName: certsmonitor.Factory,
 	stats.TaskName:        stats.Factory,
-	fcc.TaskName:          fcc.Factory,
 }
 
 // appFlags specifies application flags
@@ -71,12 +61,9 @@ type appFlags struct {
 	dryRun              *bool
 	hsmCfg              *string
 	caCfg               *string
-	acmeCfg             *string
-	sqlOrgs             *string
 	sqlCa               *string
 	cryptoProvs         *[]string
 	cisURLs             *[]string
-	wfeURLs             *[]string
 	caURLs              *[]string
 	hostNames           *[]string
 	logsDir             *string
@@ -357,13 +344,10 @@ func (a *App) loadConfig() error {
 	flags.dryRun = app.Flag("dry-run", "verify config etc, and do not start the service").Bool()
 	flags.hsmCfg = app.Flag("hsm-cfg", "location of the HSM configuration file").String()
 	flags.caCfg = app.Flag("ca-cfg", "location of the CA configuration file").String()
-	flags.acmeCfg = app.Flag("acme-cfg", "location of the ACME configuration file").String()
 	flags.cryptoProvs = app.Flag("crypto-prov", "path to additional Crypto provider configurations").Strings()
-	flags.sqlOrgs = app.Flag("orgs-sql", "SQL data source for Orgs").String()
 	flags.sqlCa = app.Flag("ca-sql", "SQL data source for CA").String()
 
 	flags.cisURLs = app.Flag("cis-listen-url", "URL for the CIS listening end-point").Strings()
-	flags.wfeURLs = app.Flag("wfe-listen-url", "URL for the WFE listening end-point").Strings()
 	flags.caURLs = app.Flag("ca-listen-url", "URL for the CA listening end-point").Strings()
 	flags.server = app.Flag("only-server", "ca|ra|wfe|cis - name of the server to run, and disable the others.").String()
 
@@ -410,12 +394,6 @@ func (a *App) loadConfig() error {
 	if *flags.caCfg != "" {
 		cfg.Authority = *flags.caCfg
 	}
-	if *flags.acmeCfg != "" {
-		cfg.Acme = *flags.acmeCfg
-	}
-	if *flags.sqlOrgs != "" {
-		cfg.OrgsSQL.DataSource = *flags.sqlOrgs
-	}
 	if *flags.sqlCa != "" {
 		cfg.CaSQL.DataSource = *flags.sqlCa
 	}
@@ -455,11 +433,6 @@ func (a *App) loadConfig() error {
 					httpCfg.Disabled = len(httpCfg.ListenURLs) == 1 && httpCfg.ListenURLs[0] == "none"
 				}
 
-			case config.WFEServerName:
-				if len(*flags.wfeURLs) > 0 {
-					httpCfg.ListenURLs = *flags.wfeURLs
-					httpCfg.Disabled = len(httpCfg.ListenURLs) == 1 && httpCfg.ListenURLs[0] == "none"
-				}
 			case config.CAServerName:
 				if len(*flags.caURLs) > 0 {
 					httpCfg.ListenURLs = *flags.caURLs

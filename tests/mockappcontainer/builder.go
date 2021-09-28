@@ -4,10 +4,8 @@ import (
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/martinisecurity/trusty/backend/config"
-	"github.com/martinisecurity/trusty/backend/db/orgsdb"
 	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/pkg/jwt"
-	"github.com/martinisecurity/trusty/pkg/oauth2client"
 	"go.uber.org/dig"
 )
 
@@ -68,25 +66,9 @@ func (b *Builder) WithJwtParser(j jwt.Parser) *Builder {
 	return b
 }
 
-// WithOauth2Client sets oauth2client.Provider
-func (b *Builder) WithOauth2Client(o *oauth2client.Provider) *Builder {
-	b.container.Provide(func() *oauth2client.Provider {
-		return o
-	})
-	return b
-}
-
 // WithDiscovery sets Discover
 func (b *Builder) WithDiscovery(d discovery.Discovery) *Builder {
 	b.container.Provide(func() discovery.Discovery {
-		return d
-	})
-	return b
-}
-
-// WithOrgsDb sets orgsdb.OrgsDb
-func (b *Builder) WithOrgsDb(d orgsdb.OrgsDb) *Builder {
-	b.container.Provide(func() orgsdb.OrgsDb {
 		return d
 	})
 	return b

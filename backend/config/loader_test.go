@@ -97,10 +97,6 @@ func TestLoadYAMLOverrideByHostname(t *testing.T) {
 	assert.Empty(t, c.CryptoProv.Providers)
 	assert.Len(t, c.CryptoProv.PKCS11Manufacturers, 2)
 
-	assert.Equal(t, "postgres", c.OrgsSQL.Driver)
-	assert.NotEqual(t, "file://${TRUSTY_CONFIG_DIR}/sql-conn.txt", c.OrgsSQL.DataSource)
-	assert.Contains(t, c.OrgsSQL.DataSource, "sql-conn-orgsdb.txt") // should be resolved
-
 	require.NotEmpty(t, c.Authority)
 
 	cis := c.HTTPServers[CISServerName]
@@ -109,12 +105,6 @@ func TestLoadYAMLOverrideByHostname(t *testing.T) {
 	assert.True(t, cis.CORS.GetEnabled())
 	assert.False(t, cis.CORS.GetDebug())
 	require.NotEmpty(t, c.HTTPServers)
-
-	wfe := c.HTTPServers[WFEServerName]
-	require.NotNil(t, wfe)
-	assert.False(t, wfe.Disabled)
-	assert.True(t, wfe.CORS.GetEnabled())
-	assert.False(t, wfe.CORS.GetDebug())
 
 	assert.True(t, c.Metrics.GetDisabled())
 }
@@ -162,12 +152,6 @@ func TestLoadYAMLWithOverride(t *testing.T) {
 	assert.True(t, cis.CORS.GetEnabled())
 	assert.False(t, cis.CORS.GetDebug())
 	require.NotEmpty(t, c.HTTPServers)
-
-	wfe := c.HTTPServers[WFEServerName]
-	require.NotNil(t, wfe)
-	assert.False(t, wfe.Disabled)
-	assert.True(t, wfe.CORS.GetEnabled())
-	assert.False(t, wfe.CORS.GetDebug())
 
 	assert.True(t, c.Metrics.GetDisabled())
 }

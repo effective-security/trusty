@@ -1,8 +1,0 @@
-{
-    "contact": [
-            "denis@ekspand.com"
-    ],
-    "orders": "https://localhost:7891/v2/acme/account/84084416455901284/orders",
-    "status": "valid",
-    "termsOfServiceAgreed": true
-}

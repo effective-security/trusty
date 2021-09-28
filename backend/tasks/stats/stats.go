@@ -8,7 +8,6 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/db/cadb"
-	"github.com/martinisecurity/trusty/backend/db/orgsdb"
 )
 
 var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/tasks", "stats")
@@ -17,8 +16,6 @@ var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/ta
 const TaskName = "stats"
 
 var (
-	keyForDbUsersCount   = []string{"db", "stats", "users_count"}
-	keyForDbOrgsCount    = []string{"db", "stats", "orgs_count"}
 	keyForDbCertsCount   = []string{"db", "stats", "certs_count"}
 	keyForDbRevokedCount = []string{"db", "stats", "revoked_count"}
 )
@@ -28,30 +25,13 @@ type Task struct {
 	name     string
 	schedule string
 	ca       cadb.CaReadonlyDb
-	orgs     orgsdb.OrgsReadOnlyDb
 }
 
 func (t *Task) run() {
 	logger.Infof("api=run, task=%s", TaskName)
 	ctx := context.Background()
 
-	c, err := t.orgs.GetUsersCount(ctx)
-	if err != nil {
-		logger.Errorf(errors.ErrorStack(err))
-	} else {
-		metrics.IncrCounter(keyForDbUsersCount, float32(c))
-		logger.Infof("users_count=%d", c)
-	}
-
-	c, err = t.orgs.GetOrgsCount(ctx)
-	if err != nil {
-		logger.Errorf(errors.ErrorStack(err))
-	} else {
-		metrics.IncrCounter(keyForDbOrgsCount, float32(c))
-		logger.Infof("orgs_count=%d", c)
-	}
-
-	c, err = t.ca.GetCertsCount(ctx)
+	c, err := t.ca.GetCertsCount(ctx)
 	if err != nil {
 		logger.Errorf(errors.ErrorStack(err))
 	} else {
@@ -71,12 +51,10 @@ func (t *Task) run() {
 func create(
 	name string,
 	ca cadb.CaReadonlyDb,
-	orgs orgsdb.OrgsReadOnlyDb,
 	schedule string,
 ) (*Task, error) {
 	task := &Task{
 		ca:       ca,
-		orgs:     orgs,
 		name:     name,
 		schedule: schedule,
 	}
@@ -91,8 +69,8 @@ func Factory(
 	schedule string,
 	args ...string,
 ) interface{} {
-	return func(ca cadb.CaReadonlyDb, orgs orgsdb.OrgsReadOnlyDb) error {
-		task, err := create(name, ca, orgs, schedule)
+	return func(ca cadb.CaReadonlyDb) error {
+		task, err := create(name, ca, schedule)
 		if err != nil {
 			return errors.Trace(err)
 		}

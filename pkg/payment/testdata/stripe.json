@@ -1,4 +1,0 @@
-{
-    "api_key": "env://TRUSTY_STRIPE_API_KEY",
-    "webhook_secret": "env://TRUSTY_STRIPE_WEBHOOK_SECRET"
-}

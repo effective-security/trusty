@@ -5,7 +5,7 @@ SHA := $(shell git rev-parse HEAD)
 export AWS_ACCESS_KEY_ID=notusedbyemulator
 export AWS_SECRET_ACCESS_KEY=notusedbyemulator
 export AWS_DEFAULT_REGION=us-west-2
-export TRUSTY_JWT_SEED=testseed 
+export TRUSTY_JWT_SEED=testseed
 
 export GOPRIVATE=github.com/martinisecurity/trusty
 export COVERAGE_EXCLUSIONS="vendor|tests|api/v1/pb/gw|main.go|testsuite.go|mocks.go|.pb.go|.pb.gw.go"
@@ -19,7 +19,7 @@ BUILD_FLAGS=
 
 default: help
 
-all: clean folders tools generate hsmconfig build gen_test_certs gen_martini_certs start-local-kms start-sql start-stripe-mock test
+all: clean folders tools generate hsmconfig build gen_test_certs gen_martini_certs start-local-kms start-sql test
 
 #
 # clean produced files
@@ -157,29 +157,11 @@ start-sql:
 		sleep 9; \
 	elif [ "$$CONTAINER_STATE" = "false" ]; then docker start trusty-unittest-postgres && sleep 9; fi;
 	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 15432 -U postgres -a -f /trusty_sql/cadb/create.sql
-	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 15432 -U postgres -a -f /trusty_sql/orgsdb/create.sql
 	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 15432 -U postgres -lqt
 	echo "host=127.0.0.1 port=15432 user=postgres password=postgres sslmode=disable dbname=cadb" > etc/dev/sql-conn-cadb.txt
-	echo "host=127.0.0.1 port=15432 user=postgres password=postgres sslmode=disable dbname=orgsdb" > etc/dev/sql-conn-orgsdb.txt
-
-start-stripe-mock:
-	# Container state will be true (it's already running), false (exists but stopped), or missing (does not exist).
-	# Annoyingly, when there is no such container and Docker returns an error, it also writes a blank line to stdout.
-	# Hence the sed to trim whitespace.
-	CONTAINER_STATE=$$(echo $$(docker inspect -f "{{.State.Running}}" stripe-mock 2>/dev/null || echo "missing") | sed -e 's/^[ \t]*//'); \
-	if [ "$$CONTAINER_STATE" = "missing" ]; then \
-		docker pull stripemock/stripe-mock:latest && \
-		docker run \
-			-d -p 12111-12112:12111-12112  \
-			-v ${PROJ_ROOT}/pkg/payment/testdata:/testdata \
-			--name stripe-mock \
-			stripemock/stripe-mock:latest -fixtures testdata/fixtures3.json && \
-		sleep 1; \
-	elif [ "$$CONTAINER_STATE" = "false" ]; then docker start stripe-mock && sleep 1; fi;
 
 drop-sql:
 	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 15432 -U postgres -a -f /trusty_sql/cadb/drop.sql
-	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 15432 -U postgres -a -f /trusty_sql/orgsdb/drop.sql
 	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 15432 -U postgres -lqt
 
 coveralls-github:

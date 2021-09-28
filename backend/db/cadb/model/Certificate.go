@@ -4,11 +4,9 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"math/big"
-	"strconv"
 	"time"
 
 	"github.com/go-phorce/dolly/xpki/certutil"
-	v1 "github.com/martinisecurity/trusty/api/v1"
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -71,6 +69,7 @@ func (r *Certificate) FileName() string {
 	return r.IKID[:4] + "/" + sn
 }
 
+/*
 // ToDTO returns ToDTO
 func (r *Certificate) ToDTO() *v1.Certificate {
 	return &v1.Certificate{
@@ -90,6 +89,7 @@ func (r *Certificate) ToDTO() *v1.Certificate {
 		Locations:    r.Locations,
 	}
 }
+*/
 
 // CertificateFromPB returns Certificate
 func CertificateFromPB(r *pb.Certificate) *Certificate {

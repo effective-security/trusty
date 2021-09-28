@@ -39,7 +39,7 @@ func TestStatusWithNewCtxClient(t *testing.T) {
 	cexp := &pb.CallerStatusResponse{
 		Id:   "1234",
 		Name: "denis",
-		Role: v1.RoleAdmin,
+		Role: "admin",
 	}
 	srv.Resps = []proto.Message{cexp}
 	cres, err := cli.Caller(ctx)
@@ -92,7 +92,7 @@ func TestStatusWithNewClientMock(t *testing.T) {
 
 	t.Run("CallerStatus", func(t *testing.T) {
 		cexp := &pb.CallerStatusResponse{
-			Role: v1.RoleAdmin,
+			Role: "admin",
 		}
 		srv.SetResponse(cexp)
 		cres, err := cli.Caller(ctx)

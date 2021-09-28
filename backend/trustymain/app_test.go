@@ -13,7 +13,6 @@ import (
 	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/pkg/configloader"
-	"github.com/martinisecurity/trusty/pkg/payment"
 	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -28,9 +27,6 @@ var (
 func TestMain(m *testing.M) {
 	_ = os.MkdirAll(testDirPath, 0700)
 	defer os.RemoveAll(testDirPath)
-
-	// Run stripe mocked backend
-	payment.SetStripeMockedBackend()
 
 	// Run the tests
 	rc := m.Run()
@@ -56,7 +52,6 @@ func Test_AppOnClose(t *testing.T) {
 		"--std",
 		"--cfg", cfgFile,
 		"--cis-listen-url", testutils.CreateURLs("http", "localhost"),
-		"--wfe-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--ca-listen-url", testutils.CreateURLs("http", "localhost"),
 	})
 
@@ -85,7 +80,6 @@ func Test_AppInitWithRun(t *testing.T) {
 		"--dry-run",
 		"--cfg", cfgFile,
 		"--cis-listen-url", testutils.CreateURLs("http", "localhost"),
-		"--wfe-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--ca-listen-url", testutils.CreateURLs("http", "localhost"),
 	})
 
@@ -107,7 +101,6 @@ func Test_AppInitWithCfg(t *testing.T) {
 		"--dry-run",
 		"--cfg", cfgFile,
 		"--cis-listen-url", testutils.CreateURLs("http", "localhost"),
-		"--wfe-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--ca-listen-url", testutils.CreateURLs("http", "localhost"),
 	})
 	defer app.OnClose(c)
@@ -145,8 +138,7 @@ func Test_AppInstance_StartFailOnPort(t *testing.T) {
 	app := NewApp([]string{
 		"--std",
 		"--cfg", cfgPath,
-		"--cis-listen-url", testutils.CreateURLs("http", "localhost"),
-		"--wfe-listen-url", listenURL,
+		"--cis-listen-url", listenURL,
 		"--ca-listen-url", listenURL,
 	}).WithSignal(sigs)
 	defer app.Close()
@@ -200,7 +192,6 @@ func Test_AppInstance_CryptoProvError(t *testing.T) {
 		"--std",
 		"--cfg", cfgPath,
 		"--cis-listen-url", testutils.CreateURLs("http", "localhost"),
-		"--wfe-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--ca-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--hsm-cfg", cfg.CryptoProv.Default,
 		"--crypto-prov", cfg.CryptoProv.Default,
@@ -254,7 +245,6 @@ func Test_AppInstance_StartStop(t *testing.T) {
 		"--std",
 		"--cfg", cfgPath,
 		"--cis-listen-url", testutils.CreateURLs("http", "localhost"),
-		"--wfe-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--ca-listen-url", testutils.CreateURLs("http", "localhost"),
 	}).WithSignal(sigs)
 	defer app.Close()
