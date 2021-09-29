@@ -19,7 +19,7 @@ BUILD_FLAGS=
 
 default: help
 
-all: clean folders tools generate hsmconfig build gen_test_certs gen_martini_certs start-local-kms start-sql test
+all: clean folders tools generate hsmconfig start-local-kms start-sql build gen_test_certs test
 
 #
 # clean produced files
@@ -110,19 +110,6 @@ gen_test_certs:
 		--root-ca-key $(PROJ_ROOT)/etc/dev/roots/trusty_root_ca.key \
 		--ca1 --ca2  --bundle --peer --client --force
 	cp $(PROJ_ROOT)/etc/dev/roots/trusty_root_ca.pem /tmp/trusty/certs/trusty_root_ca.pem
-
-gen_martini_certs:
-	echo "*** Running gen_martini_certs"
-	./scripts/build/gen_martini_certs.sh \
-		--hsm-config /tmp/trusty/softhsm/unittest_hsm.json \
-		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.yaml \
-		--out-dir /tmp/trusty/certs \
-		--csr-dir $(PROJ_ROOT)/etc/dev/csr_profile \
-		--csr-prefix martini_ \
-		--out-prefix martini_ \
-		--root-ca /tmp/trusty/certs/martini_root_ca.pem \
-		--root-ca-key /tmp/trusty/certs/martini_root_ca.key \
-		--root --ca --bundle --force
 
 start-local-kms:
 	# Container state will be true (it's already running), false (exists but stopped), or missing (does not exist).

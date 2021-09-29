@@ -314,7 +314,7 @@ func (s *testSuite) Test_ValidateCA_notfound() {
 func (s *testSuite) Test_ValidateCA_untrusted() {
 	cert := "/tmp/trusty/certs/trusty_l2_ca.pem"
 	caBundle := "/tmp/trusty/certs/trusty_l2_ca.pem"
-	rootBundle := "/tmp/trusty/certs/martini_root_ca.pem"
+	rootBundle := "testdata/trusty_untrusted_root_ca.pem"
 	err := s.Run(certutil.Validate, &certutil.ValidateFlags{
 		Cert: &cert,
 		CA:   &caBundle,

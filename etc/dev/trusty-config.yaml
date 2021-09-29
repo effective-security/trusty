@@ -87,7 +87,6 @@ ra:
     - ${TRUSTY_CONFIG_DIR}/roots/trusty_root_ca.pem
   # the list of public Root Certs files.
   public_roots:
-    - ${TRUSTY_CONFIG_DIR}/roots/martini_root_ca.pem
   publisher:
     base_url: https://mrtsec.io
     # use gs:// for GCP, or file path 
