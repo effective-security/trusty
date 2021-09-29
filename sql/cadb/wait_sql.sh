@@ -20,6 +20,6 @@ until PGPASSWORD=$POSTGRES_PWD psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POST
   sleep 3
 done
 
->&2 echo "trcadbustydb is up - executing command:"
+>&2 echo "cadb is up - executing command:"
 >&2 echo $cmd
 exec $cmd

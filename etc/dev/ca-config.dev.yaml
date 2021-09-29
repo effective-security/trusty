@@ -27,16 +27,6 @@ authority:
     ca_bundle: /tmp/trusty/certs/trusty_cabundle.pem
     # location of the Root CA file
     root_bundle: /tmp/trusty/certs/trusty_root_ca.pem
-  -
-    # specifies Issuer's label
-    label: SHAKEN_L1_CA
-    type: trusty
-    cert: /tmp/trusty/certs/martini_ca.pem
-    key: /tmp/trusty/certs/martini_ca.key
-    # location of the CA bundle file
-    ca_bundle: /tmp/trusty/certs/martini_cabundle.pem
-    # location of the Root CA file
-    root_bundle: /tmp/trusty/certs/martini_root_ca.pem
 
 # profile:
 #
@@ -181,22 +171,3 @@ profiles:
     - digital signature
     - code signing
     - key encipherment
-
-  SHAKEN:
-    issuer_label: SHAKEN_L1_CA
-    expiry: 8760h
-    backdate: 30m
-    usages:
-    - signing
-    - digital signature
-    policies_critical: true
-    policies:
-    - oid: 2.16.840.1.114569.1.1.1
-    allowed_extensions:
-    - 1.3.6.1.5.5.7.1.26
-    allowed_fields:
-      subject: true
-      dns: false
-      ip: false
-      email: false
-    #allowed_names: ^C=US, O=Entity Name From Registration, CN=SHAKEN .*$

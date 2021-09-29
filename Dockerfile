@@ -6,24 +6,28 @@ LABEL org.opencontainers.image.authors="Martini Security <denis@martinisecurity.
       org.opencontainers.image.vendor="Martini Security" \
       org.opencontainers.image.description="Trusty CA"
 
-ENV TRUSTY_DIR=/opt/trusty
-ENV PATH=$PATH:$TRUSTY_DIR/bin
+ENV PATH=$PATH:/opt/trusty/bin
 
-RUN mkdir -p $TRUSTY_DIR/bin $TRUSTY_DIR/sql
-COPY ./bin/trusty* $TRUSTY_DIR/bin/
-COPY ./scripts/build/* $TRUSTY_DIR/bin/
-COPY ./sql/ $TRUSTY_DIR/sql/
+RUN mkdir -p /home/nonroot /opt/trusty/bin /opt/trusty/sql /var/trusty/certs /var/trusty/audit /opt/trusty/etc/prod /opt/trusty/etc/dev /trusty_certs
+COPY ./bin/trusty* /opt/trusty/bin/
+COPY ./scripts/build/* /opt/trusty/bin/
+COPY ./sql/ /opt/trusty/sql/
 
-VOLUME ["/var/trusty/certs", "/var/trusty/logs", "/var/trusty/audit"]
+VOLUME ["/var/trusty/certs", \
+"/var/trusty/logs", \
+"/var/trusty/audit", \
+"/opt/trusty/sql", \
+"/opt/trusty/etc/prod", \
+"/opt/trusty/etc/dev"]
 
-EXPOSE 7880 7891 7892
+EXPOSE 7880 7892
 
 RUN groupadd -g 1000 -o nonroot
 RUN useradd -r -u 1000 -g nonroot nonroot
-RUN mkdir -p /home/nonroot/.config/softhsm2
-RUN chown -R nonroot:nonroot /home/nonroot
+RUN chown -R nonroot:nonroot /home/nonroot 
+RUN chown -R nonroot:nonroot /var/trusty /trusty_certs
 
 USER nonroot:nonroot
 
 # Define default command.
-CMD ["$TRUSTY_DIR/bin/trusty"]
+CMD ["/opt/trusty/bin/trusty"]

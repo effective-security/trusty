@@ -50,7 +50,7 @@ jobs:
       run: make vars tools folders generate hsmconfig
 
     - name: UnitTest
-      run: make build gen_test_certs gen_martini_certs start-local-kms start-sql covtest
+      run: make build start-local-kms start-sql gen_test_certs covtest
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1

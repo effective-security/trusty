@@ -109,16 +109,6 @@ services:
         --out-prefix trusty_
         --san 168.138.72.101
         --ca1 --ca2 --bundle --client --peer --force &&
-        /opt/trusty/bin/gen_martini_certs.sh
-        --hsm-config /tmp/trusty/softhsm/unittest_hsm.json
-        --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml
-        --out-dir /tmp/trusty/certs
-        --csr-dir /opt/trusty/etc/dev/csr_profile
-        --csr-prefix martini_
-        --out-prefix martini_
-        --root-ca /tmp/trusty/certs/martini_root_ca.pem
-        --root-ca-key /tmp/trusty/certs/martini_root_ca.key
-        --root --ca --bundle --force &&
         /opt/trusty/bin/trusty --std
         --hsm-cfg=/tmp/trusty/softhsm/unittest_hsm.json
         --cfg=/opt/trusty/etc/dev/trusty-config.yaml
@@ -185,16 +175,6 @@ services:
         --out-prefix trusty_
         --san 168.138.72.102
         --ca1 --ca2 --bundle --client --peer --force &&
-        /opt/trusty/bin/gen_martini_certs.sh
-        --hsm-config /opt/trusty/tests/aws-test-kms.json
-        --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml
-        --out-dir /tmp/trusty/certs
-        --csr-dir /opt/trusty/etc/dev/csr_profile
-        --csr-prefix martini_
-        --out-prefix martini_
-        --root-ca /tmp/trusty/certs/martini_root_ca.pem
-        --root-ca-key /tmp/trusty/certs/martini_root_ca.key
-        --root --ca --bundle --force &&
         /opt/trusty/bin/trusty --std
         --hsm-cfg=/opt/trusty/tests/aws-test-kms.json
         --cfg=/opt/trusty/etc/dev/trusty-config.yaml

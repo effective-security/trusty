@@ -43,7 +43,7 @@ type ProvideAuditorFn func(cfg *config.Configuration, r CloseRegistrator) (audit
 type ProvideSchedulerFn func() (tasks.Scheduler, error)
 
 // ProvideJwtFn defines JWT provider
-type ProvideJwtFn func(cfg *config.Configuration) (jwt.Parser, jwt.Provider, error)
+type ProvideJwtFn func(cfg *config.Configuration) (jwt.Parser, error)
 
 // ProvideCryptoFn defines Crypto provider
 type ProvideCryptoFn func(cfg *config.Configuration) (*cryptoprov.Crypto, error)
@@ -254,17 +254,17 @@ func provideAuditor(cfg *config.Configuration, r CloseRegistrator) (audit.Audito
 	return auditor, nil
 }
 
-func provideJwt(cfg *config.Configuration) (jwt.Parser, jwt.Provider, error) {
-	var provider jwt.Provider
+func provideJwt(cfg *config.Configuration) (jwt.Parser, error) {
+	var provider jwt.Parser
 	var err error
 	if cfg.JWT != "" {
 		provider, err = jwt.Load(cfg.JWT)
 		if err != nil {
-			return nil, nil, errors.Trace(err)
+			return nil, errors.Trace(err)
 		}
 	}
 
-	return provider, provider, nil
+	return provider, nil
 }
 
 func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
