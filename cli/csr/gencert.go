@@ -141,7 +141,7 @@ func prefixKeyLabel(label string) string {
 		g := guid.MustCreate()
 		t := time.Now().UTC()
 		label = strings.TrimSuffix(label, "*") +
-			fmt.Sprintf("_%04d%02d%02d%02d%02d%02d_%x", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), g[:4])
+			fmt.Sprintf("_%04d%02d%02d%02d%02d%02d_%s", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), g[:4])
 	}
 
 	return label

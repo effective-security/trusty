@@ -204,13 +204,15 @@ func TestKeyLabelOrID(t *testing.T) {
 	l2, k2 := gcpkmscrypto.KeyLabelAndID("plain")
 	assert.Equal(t, l1, l2)
 	assert.NotEqual(t, k1, k2)
+	assert.Equal(t, "plain", l1)
+	assert.Equal(t, "plain", l2)
 
 	l1, k1 = gcpkmscrypto.KeyLabelAndID("plain*")
 	l2, k2 = gcpkmscrypto.KeyLabelAndID("plain*")
-	assert.NotEqual(t, l1, l2)
+	assert.Equal(t, l1, l2)
 	assert.NotEqual(t, k1, k2)
-	assert.Equal(t, l1, k1)
-	assert.Equal(t, l2, k2)
+	assert.Equal(t, "plain", l1)
+	assert.Equal(t, "plain", l2)
 }
 
 //
