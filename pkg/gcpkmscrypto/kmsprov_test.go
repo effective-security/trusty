@@ -6,6 +6,7 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"fmt"
+	"io"
 	"testing"
 	"time"
 
@@ -91,7 +92,6 @@ MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEpSwQTzpTI9LFgLtdHAMHl0oEIgwf
 	mocked.On("GetCryptoKey", mock.Anything, mock.Anything, mock.Anything).Return(key, nil)
 	mocked.On("GetPublicKey", mock.Anything, mock.Anything, mock.Anything).Return(pubKey, nil)
 	mocked.On("AsymmetricSign", mock.Anything, mock.Anything, mock.Anything).Return(sig, nil)
-
 	mocked.On("Close").Return(nil)
 
 	prov, err := gcpkmscrypto.KmsLoader(cfg)
@@ -109,6 +109,8 @@ MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEpSwQTzpTI9LFgLtdHAMHl0oEIgwf
 		assert.Equal(t, "GCPKMS", model)
 		return nil
 	})
+
+	// TODO: GCP KMS makes it very hard to mock keys iterator
 	/*
 		err = mgr.EnumKeys(mgr.CurrentSlotID(), "", func(id, label, typ, class, currentVersionID string, creationTime *time.Time) error {
 			count++
@@ -121,6 +123,7 @@ MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEpSwQTzpTI9LFgLtdHAMHl0oEIgwf
 		hash crypto.Hash
 	}{
 		{2048, crypto.SHA256},
+		{3072, crypto.SHA256},
 		{4096, crypto.SHA512},
 	}
 
@@ -190,6 +193,24 @@ MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEpSwQTzpTI9LFgLtdHAMHl0oEIgwf
 
 	_, err = mgr.FindKeyPairOnSlot(0, "123412", "")
 	require.Error(t, err)
+
+	closer := prov.(io.Closer)
+	err = closer.Close()
+	require.NoError(t, err)
+}
+
+func TestKeyLabelOrID(t *testing.T) {
+	l1, k1 := gcpkmscrypto.KeyLabelAndID("plain")
+	l2, k2 := gcpkmscrypto.KeyLabelAndID("plain")
+	assert.Equal(t, l1, l2)
+	assert.NotEqual(t, k1, k2)
+
+	l1, k1 = gcpkmscrypto.KeyLabelAndID("plain*")
+	l2, k2 = gcpkmscrypto.KeyLabelAndID("plain*")
+	assert.NotEqual(t, l1, l2)
+	assert.NotEqual(t, k1, k2)
+	assert.Equal(t, l1, k1)
+	assert.Equal(t, l2, k2)
 }
 
 //
