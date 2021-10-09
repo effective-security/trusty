@@ -88,10 +88,10 @@ ra:
   # the list of public Root Certs files.
   public_roots:
   publisher:
-    base_url: https://mrtsec.io
+    base_url: https://dev.trustyca.com
     # use gs:// for GCP, or file path 
-    cert_bucket: /tmp/trusty/martini-dev-certs
-    crl_bucket: /tmp/trusty/martini-dev-crls
+    cert_bucket: /tmp/trusty/dev-certs
+    crl_bucket: /tmp/trusty/dev-crls
 
 servers:
   cis:
@@ -203,14 +203,13 @@ servers:
       # allow any authenticated request that includes a non empty role
         - /pb.StatusService
       allow_any_role:
-        - /pb.CAService/ProfileInfo
-        - /pb.CAService/Issuers
         - /pb.CIService
+        - /pb.CAService
       # allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
       allow:
-        - /pb.CAService/SignCertificate:trusty-wfe,trusty-ca,trusty-admin,trusty
-        - /pb.CAService/PublishCrls:trusty-ca,trusty-admin,trusty
-        - /pb.CAService/RevokeCertificate:trusty-ca,trusty-admin,trusty
+        - /pb.CAService/SignCertificate:trusty-wfe,trusty-ca,trusty-admin,trusty-ra
+        - /pb.CAService/PublishCrls:trusty-ca,trusty-admin,trusty-ra
+        - /pb.CAService/RevokeCertificate:trusty-ca,trusty-admin,trusty-ra
       # specifies to log allowed access to Any role
       log_allowed_any: false
       # specifies to log allowed access

@@ -66,6 +66,7 @@ message CertProfileInfoRequest {
 // CertProfileInfo is the response for an Profile Info API request
 message CertProfileInfo {
     string issuer = 1;
+    string label = 2;
     CertProfile profile = 3;
 }
 

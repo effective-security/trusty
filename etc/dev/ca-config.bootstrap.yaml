@@ -104,6 +104,12 @@ profiles:
     policies_critical: true
     policies:
     - oid: 2.16.840.1.114569.1.1.1
+    - oid: 1.3.6.1.4.1.57973.1.1
+      qualifiers:
+      - type: id-qt-cps
+        value: https://stirshaken.com/CPS
+    allowed_extensions:
+    - 2.5.29.32
 
   SHAKEN:
     issuer_label: SHAKEN_L1_CA

@@ -2,19 +2,18 @@ package ca_test
 
 import (
 	"context"
+	"crypto/x509"
 	"os"
+	"strings"
 	"sync"
 	"syscall"
 	"testing"
 	"time"
 
-	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/backend/config"
-	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/martinisecurity/trusty/backend/service/ca"
 	"github.com/martinisecurity/trusty/backend/trustymain"
 	"github.com/martinisecurity/trusty/client"
@@ -133,12 +132,16 @@ func TestProfileInfo(t *testing.T) {
 	}
 
 	for _, tc := range tcases {
-		_, err := authorityClient.ProfileInfo(context.Background(), tc.req)
+		res, err := authorityClient.ProfileInfo(context.Background(), tc.req)
 		if tc.err != "" {
 			require.Error(t, err)
 			assert.Equal(t, tc.err, err.Error())
 		} else {
 			assert.NoError(t, err)
+			if len(tc.req.Label) > 0 {
+				assert.Equal(t, strings.ToLower(tc.req.Label), res.Label)
+			}
+			assert.NotEmpty(t, res.Issuer)
 		}
 	}
 }
@@ -197,15 +200,15 @@ func TestSignCertificate(t *testing.T) {
 	// Signed cert must be registered in DB
 
 	svc := trustyServer.Service(config.CAServerName).(*ca.Service)
-	db := svc.CaDb()
-
-	crt, err := db.GetCertificate(context.Background(), res.Certificate.Id)
+	crt, err := svc.GetCertificate(context.Background(),
+		&pb.GetCertificateRequest{Id: res.Certificate.Id})
 	require.NoError(t, err)
-	assert.Equal(t, res.Certificate.String(), crt.ToPB().String())
+	assert.Equal(t, res.Certificate.String(), crt.Certificate.String())
 
-	crt, err = db.GetCertificateBySKID(context.Background(), res.Certificate.Skid)
+	crt, err = svc.GetCertificate(context.Background(),
+		&pb.GetCertificateRequest{Skid: res.Certificate.Skid})
 	require.NoError(t, err)
-	assert.Equal(t, res.Certificate.String(), crt.ToPB().String())
+	assert.Equal(t, res.Certificate.String(), crt.Certificate.String())
 }
 
 func TestPublishCrls(t *testing.T) {
@@ -217,16 +220,26 @@ func TestPublishCrls(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	svc := trustyServer.Service(config.CAServerName).(*ca.Service)
-	db := svc.CaDb()
-
-	revRes, err := db.RevokeCertificate(ctx, model.CertificateFromPB(certRes.Certificate), time.Now(), int(pb.Reason_CA_COMPROMISE))
+	revRes, err := authorityClient.RevokeCertificate(ctx, &pb.RevokeCertificateRequest{
+		Skid:   certRes.Certificate.Skid,
+		Reason: pb.Reason_CA_COMPROMISE,
+	})
 	require.NoError(t, err)
-	assert.Equal(t, int(pb.Reason_CA_COMPROMISE), revRes.Reason)
+	assert.Equal(t, pb.Reason_CA_COMPROMISE, revRes.Revoked.Reason)
 
 	list, err := authorityClient.PublishCrls(ctx, &pb.PublishCrlsRequest{})
 	require.NoError(t, err)
 	require.NotEmpty(t, list)
+
+	crl, err := x509.ParseCRL([]byte(list.Clrs[0].Pem))
+	require.NoError(t, err)
+	require.Equal(t, certRes.Certificate.Issuer, crl.TBSCertList.Issuer.String())
+	require.NotEmpty(t, crl.TBSCertList.RevokedCertificates)
+	var revokedCerts []string
+	for _, item := range crl.TBSCertList.RevokedCertificates {
+		revokedCerts = append(revokedCerts, item.SerialNumber.String())
+	}
+	require.Contains(t, revokedCerts, certRes.Certificate.SerialNumber)
 }
 
 func TestRevokeCertificate(t *testing.T) {
@@ -241,72 +254,55 @@ func TestRevokeCertificate(t *testing.T) {
 
 func TestE2E(t *testing.T) {
 	svc := trustyServer.Service(config.CAServerName).(*ca.Service)
-	db := svc.CaDb()
 	ctx := context.Background()
 	count := 50
 
-	orgID, err := db.NextID()
+	res, err := authorityClient.SignCertificate(ctx, &pb.SignCertificateRequest{
+		Profile:       "test_server",
+		Request:       generateCSR(),
+		RequestFormat: pb.EncodingFormat_PEM,
+	})
 	require.NoError(t, err)
 
-	rc := &model.Certificate{
-		OrgID:            orgID,
-		SKID:             guid.MustCreate(),
-		IKID:             guid.MustCreate(),
-		SerialNumber:     certutil.RandomString(10),
-		Subject:          "subj",
-		Issuer:           "iss",
-		NotBefore:        time.Now().Add(-time.Hour).UTC(),
-		NotAfter:         time.Now().Add(time.Hour).UTC(),
-		ThumbprintSha256: certutil.RandomString(64),
-		Pem:              "pem",
-		IssuersPem:       "ipem",
-		Profile:          "client",
-	}
-
-	crt, err := db.RegisterCertificate(ctx, rc)
+	ikid := res.Certificate.Ikid
+	lRes, err := authorityClient.ListCertificates(ctx, &pb.ListByIssuerRequest{
+		Limit: 1000,
+		Ikid:  ikid,
+	})
 	require.NoError(t, err)
-
-	ikid := crt.IKID
-	lRes, err := svc.ListCertificates(ctx, &pb.ListByIssuerRequest{Ikid: crt.IKID, Limit: 100, After: 0})
-	require.NoError(t, err)
-	//	t.Logf("ListCertificates: %d", len(lRes.List))
+	t.Logf("ListCertificates: %d", len(lRes.List))
 
 	for i := 0; i < count; i++ {
-		rc := &model.Certificate{
-			OrgID:            orgID,
-			SKID:             guid.MustCreate(),
-			IKID:             ikid,
-			SerialNumber:     certutil.RandomString(10),
-			Subject:          "subj",
-			Issuer:           "iss",
-			NotBefore:        time.Now().Add(-time.Hour).UTC(),
-			NotAfter:         time.Now().Add(time.Hour).UTC(),
-			ThumbprintSha256: certutil.RandomString(64),
-			Pem:              "pem",
-			IssuersPem:       "ipem",
-			Profile:          "client",
-		}
-
-		crt, err := db.RegisterCertificate(ctx, rc)
+		res, err = authorityClient.SignCertificate(ctx, &pb.SignCertificateRequest{
+			Profile:       "test_server",
+			Request:       generateCSR(),
+			RequestFormat: pb.EncodingFormat_PEM,
+		})
 		require.NoError(t, err)
 
 		list, err := svc.GetOrgCertificates(ctx,
-			&pb.GetOrgCertificatesRequest{OrgId: orgID})
+			&pb.GetOrgCertificatesRequest{OrgId: res.Certificate.OrgId})
 		require.NoError(t, err)
 		assert.NotEmpty(t, list.List)
 		t.Logf("GetOrgCertificates: %d", len(list.List))
 
 		crtRes, err := svc.GetCertificate(ctx,
-			&pb.GetCertificateRequest{Skid: crt.SKID})
+			&pb.GetCertificateRequest{Skid: res.Certificate.Skid})
 		require.NoError(t, err)
-		require.Equal(t, crt.ToPB().String(), crtRes.Certificate.String())
+		assert.Equal(t, res.Certificate.String(), crtRes.Certificate.String())
 
 		if i%2 == 0 {
 			if i < count/2 {
-				_, err = db.RevokeCertificate(ctx, crt, time.Now(), int(pb.Reason_KEY_COMPROMISE))
+				_, err = authorityClient.RevokeCertificate(ctx, &pb.RevokeCertificateRequest{
+					Id:     crtRes.Certificate.Id,
+					Reason: pb.Reason_KEY_COMPROMISE,
+				})
 				require.NoError(t, err)
 			} else {
-				_, err = db.RevokeCertificate(ctx, crt, time.Now(), int(pb.Reason_CESSATION_OF_OPERATION))
+				_, err = authorityClient.RevokeCertificate(ctx, &pb.RevokeCertificateRequest{
+					Skid:   crtRes.Certificate.Skid,
+					Reason: pb.Reason_CESSATION_OF_OPERATION,
+				})
 				require.NoError(t, err)
 			}
 		}
@@ -315,7 +311,7 @@ func TestE2E(t *testing.T) {
 	last := uint64(0)
 	certsCount := 0
 	for {
-		lRes2, err := svc.ListCertificates(ctx, &pb.ListByIssuerRequest{
+		lRes2, err := authorityClient.ListCertificates(ctx, &pb.ListByIssuerRequest{
 			Limit: 10,
 			After: last,
 			Ikid:  ikid,
@@ -336,7 +332,7 @@ func TestE2E(t *testing.T) {
 	last = uint64(0)
 	revokedCount := 0
 	for {
-		lRes3, err := svc.ListRevokedCertificates(ctx, &pb.ListByIssuerRequest{
+		lRes3, err := authorityClient.ListRevokedCertificates(ctx, &pb.ListByIssuerRequest{
 			Limit: 10,
 			After: last,
 			Ikid:  ikid,

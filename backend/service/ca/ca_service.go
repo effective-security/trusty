@@ -86,16 +86,17 @@ func (s *Service) RegisterGRPC(r *grpc.Server) {
 // OnStarted is called when the server started and
 // is ready to serve requests
 func (s *Service) OnStarted() error {
-	err := s.registerIssuers(context.Background())
+	ctx := context.Background()
+	err := s.registerIssuers(ctx)
 	if err != nil {
 		return errors.Trace(err)
 	}
 
-	err = s.registerRoots(context.Background())
+	err = s.registerRoots(ctx)
 	if err != nil {
 		return errors.Trace(err)
 	}
-
+	s.registerPublisherTask(ctx)
 	return nil
 }
 
@@ -169,4 +170,28 @@ func (s *Service) registerRoots(ctx context.Context) error {
 	s.registered = true
 
 	return nil
+}
+
+func (s *Service) registerPublisherTask(ctx context.Context) {
+	issuers := s.ca.Issuers()
+	for _, issuer := range issuers {
+		logger.KV(xlog.NOTICE,
+			"ikid", issuer.SubjectKID(),
+			"scheduled", "crl_publisher",
+			"interval", issuer.CrlRenewal().String(),
+		)
+		task := tasks.NewTaskAtIntervals(uint64(issuer.CrlRenewal().Hours()), tasks.Hours)
+		taskName := "crl_publisher_" + issuer.SubjectKID()
+		task = task.Do(taskName, func() {
+			_, err := s.publishCrl(ctx, issuer.SubjectKID())
+			if err != nil {
+				logger.KV(xlog.ERROR,
+					"ikid", issuer.SubjectKID(),
+					"task", taskName,
+					"err", errors.Details(err),
+				)
+			}
+		})
+		s.scheduler = s.scheduler.Add(task)
+	}
 }

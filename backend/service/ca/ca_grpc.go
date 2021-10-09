@@ -20,7 +20,12 @@ import (
 )
 
 var (
-	keyForCertIssued = []string{"cert", "issued"}
+	keyForCertIssued        = []string{"cert", "issued"}
+	keyForCertRevoked       = []string{"cert", "revoked"}
+	keyForCertSignFailed    = []string{"cert", "sign-failed"}
+	keyForCertPublishFailed = []string{"cert", "publish-failed"}
+	keyForCrlPublished      = []string{"crl", "published"}
+	keyForCrlPublishFailed  = []string{"crl", "publish-failed"}
 )
 
 // ProfileInfo returns the certificate profile info
@@ -48,7 +53,8 @@ func (s *Service) ProfileInfo(ctx context.Context, req *pb.CertProfileInfoReques
 	}
 
 	res := &pb.CertProfileInfo{
-		Issuer: ca.Label(),
+		Label:  ca.Label(),
+		Issuer: ca.Bundle().CertPEM,
 		Profile: &pb.CertProfile{
 			Description:       profile.Description,
 			Usages:            profile.Usage,
@@ -128,6 +134,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 			subj.Names[i] = csr.X509Name{
 				C:  n.Country,
 				ST: n.State,
+				L:  n.Locality,
 				O:  n.Organisation,
 				OU: n.OrganisationalUnit,
 			}
@@ -143,7 +150,6 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 	if label != "" && label != ca.Label() {
 		msg := fmt.Sprintf("%q issuer does not support the request profile: %q", label, req.Profile)
 		return nil, v1.NewError(codes.InvalidArgument, msg)
-
 	}
 
 	cr := csr.SignRequest{
@@ -152,7 +158,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 		SAN:     req.San,
 		Subject: subj,
 		// TODO:
-		//Extensions: req.E,
+		//Extensions: req.Extensions,
 	}
 
 	if req.NotBefore != nil {
@@ -161,17 +167,20 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 	if req.NotAfter != nil {
 		cr.NotAfter = req.NotAfter.AsTime()
 	}
+
+	tags := []metrics.Tag{
+		{Name: "profile", Value: req.Profile},
+		{Name: "issuer", Value: ca.Label()},
+	}
+
 	cert, pem, err := ca.Sign(cr)
 	if err != nil {
 		logger.KV(xlog.ERROR,
 			"status", "failed to sign certificate",
 			"err", errors.Details(err))
-		return nil, v1.NewError(codes.Internal, "failed to sign certificate request")
-	}
 
-	tags := []metrics.Tag{
-		{Name: "profile", Value: req.Profile},
-		{Name: "issuer", Value: ca.Label()},
+		metrics.IncrCounter(keyForCertSignFailed, 1, tags...)
+		return nil, v1.NewError(codes.Internal, "failed to sign certificate request")
 	}
 
 	metrics.IncrCounter(keyForCertIssued, 1, tags...)
@@ -186,6 +195,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 			logger.KV(xlog.ERROR,
 				"status", "failed to publish certificate",
 				"err", errors.Details(err))
+			metrics.IncrCounter(keyForCertPublishFailed, 1, tags...)
 			return nil, v1.NewError(codes.Internal, "failed to publish certificate")
 		}
 	}
@@ -211,23 +221,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 
 // PublishCrls returns published CRLs
 func (s *Service) PublishCrls(ctx context.Context, req *pb.PublishCrlsRequest) (*pb.CrlsResponse, error) {
-	logger.KV(xlog.TRACE, "ikid", req.Ikid)
-
-	res := &pb.CrlsResponse{}
-	for _, issuer := range s.ca.Issuers() {
-		if req.Ikid == "" || req.Ikid == issuer.SubjectKID() {
-			crl, err := s.createGenericCRL(ctx, issuer)
-			if err != nil {
-				logger.KV(xlog.ERROR,
-					"issuer_id", issuer.SubjectKID(),
-					"err", errors.Details(err),
-				)
-				return nil, v1.NewError(codes.Internal, "failed to publish CRLs")
-			}
-			res.Clrs = append(res.Clrs, crl)
-		}
-	}
-	return res, nil
+	return s.publishCrl(ctx, req.Ikid)
 }
 
 // GetCertificate returns Certificate
@@ -282,6 +276,15 @@ func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificat
 		)
 		return nil, v1.NewError(codes.Internal, "unable to revoke certificate")
 	}
+
+	tags := []metrics.Tag{
+		{Name: "ikid", Value: crt.IKID},
+		{Name: "serial", Value: crt.SerialNumber},
+	}
+
+	metrics.IncrCounter(keyForCertRevoked, 1, tags...)
+
+	s.publishCrlInBackground(crt.IKID)
 
 	res := &pb.RevokedCertificateResponse{
 		Revoked: revoked.ToDTO(),
