@@ -2,6 +2,7 @@ package certpublisher
 
 import (
 	"context"
+	"encoding/pem"
 	"fmt"
 	"strings"
 
@@ -51,11 +52,16 @@ func (p *publisher) PublishCertificate(ctx context.Context, cert *pb.Certificate
 
 // PublishCRL publishes issued CRL
 func (p *publisher) PublishCRL(ctx context.Context, crl *pb.Crl) (string, error) {
-	fileName := fmt.Sprintf("%s/%s", p.cfg.CertsBucket, string(crl.Ikid))
+	fileName := fmt.Sprintf("%s/%s.crl", p.cfg.CRLBucket, crl.Ikid)
 
 	logger.KV(xlog.INFO, "location", fileName)
 
-	_, err := storage.WriteFile(ctx, fileName, []byte(crl.Pem))
+	block, _ := pem.Decode([]byte(crl.Pem))
+	if block == nil || block.Type != "X509 CRL" || len(block.Headers) != 0 {
+		return "", errors.Errorf("unable to parse PEM CRL: block type %s", block.Type)
+	}
+
+	_, err := storage.WriteFile(ctx, fileName, block.Bytes)
 	if err != nil {
 		return "", errors.Annotatef(err, "unable to write file to: "+fileName)
 	}
