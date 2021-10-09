@@ -127,9 +127,10 @@ func (p *Provider) GenerateRSAKey(label string, bits int, purpose int) (crypto.P
 		return nil, errors.Errorf("unsupported key size: %d", bits)
 	}
 
+	label, keyID := KeyLabelAndID(label)
 	req := &kmspb.CreateCryptoKeyRequest{
 		Parent:      p.keyring,
-		CryptoKeyId: guid.MustCreate(),
+		CryptoKeyId: keyID,
 		CryptoKey: &kmspb.CryptoKey{
 			Purpose: pbpurpose,
 			VersionTemplate: &kmspb.CryptoKeyVersionTemplate{
@@ -210,9 +211,10 @@ func (p *Provider) GenerateECDSAKey(label string, curve elliptic.Curve) (crypto.
 		return nil, errors.New("unsupported curve")
 	}
 
+	label, keyID := KeyLabelAndID(label)
 	req := &kmspb.CreateCryptoKeyRequest{
 		Parent:      p.keyring,
-		CryptoKeyId: guid.MustCreate(),
+		CryptoKeyId: keyID,
 		CryptoKey: &kmspb.CryptoKey{
 			Purpose: pbpurpose,
 			VersionTemplate: &kmspb.CryptoKeyVersionTemplate{
@@ -297,7 +299,7 @@ func (p *Provider) EnumKeys(slotID uint, prefix string, keyInfoFunc func(id, lab
 		createdAt := key.CreateTime.AsTime()
 		err = keyInfoFunc(
 			path.Base(key.Name),
-			keyLabel(key),
+			keyLabelInfo(key),
 			key.Purpose.String(),
 			key.VersionTemplate.Algorithm.String(),
 			"1",
@@ -318,7 +320,7 @@ func (p *Provider) keyVersionName(keyID string) string {
 	return p.keyring + "/cryptoKeys/" + keyID + "/cryptoKeyVersions/1"
 }
 
-func keyLabel(key *kmspb.CryptoKey) string {
+func keyLabelInfo(key *kmspb.CryptoKey) string {
 	label := "protection=" + key.VersionTemplate.ProtectionLevel.String()
 	for k, v := range key.Labels {
 		if label != "" {
@@ -369,7 +371,7 @@ func (p *Provider) KeyInfo(slotID uint, keyID string, includePublic bool, keyInf
 	createdAt := key.CreateTime.AsTime()
 	err = keyInfoFunc(
 		path.Base(key.Name),
-		keyLabel(key),
+		keyLabelInfo(key),
 		key.Purpose.String(),
 		key.VersionTemplate.Algorithm.String(),
 		"1",
@@ -417,4 +419,20 @@ func KmsLoader(tc cryptoprov.TokenConfig) (cryptoprov.Provider, error) {
 		return nil, errors.Trace(err)
 	}
 	return p, nil
+}
+
+// KeyLabelAndID adds a date suffix to ID of a key
+func KeyLabelAndID(val string) (label string, id string) {
+	g := guid.MustCreate()
+	t := time.Now().UTC()
+	id = strings.TrimSuffix(val, "*") +
+		fmt.Sprintf("_%04d%02d%02d%02d%02d%02d_%x", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), g[:4])
+
+	if strings.HasSuffix(val, "*") {
+		label = id
+	} else {
+		label = val
+	}
+
+	return
 }
