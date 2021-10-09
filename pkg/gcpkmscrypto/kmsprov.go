@@ -424,14 +424,11 @@ func KmsLoader(tc cryptoprov.TokenConfig) (cryptoprov.Provider, error) {
 // KeyLabelAndID adds a date suffix to ID of a key
 func KeyLabelAndID(val string) (label string, id string) {
 	g := guid.MustCreate()
-	t := time.Now().UTC()
-	id = strings.TrimSuffix(val, "*") +
-		fmt.Sprintf("_%04d%02d%02d%02d%02d%02d_%x", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), g[:4])
+	label = strings.ToLower(strings.TrimSuffix(val, "*"))
+	id = label + strings.ToLower(g[:4])
 
-	if strings.HasSuffix(val, "*") {
-		label = id
-	} else {
-		label = val
+	if len(id) > 63 {
+		id = id[:63]
 	}
 
 	return
