@@ -85,8 +85,8 @@ func IsNotFoundError(err error) bool {
 }
 
 // Migrate performs the db migration
-func Migrate(migrationsDir string, forceVersion int, db *sql.DB) error {
-	logger.Tracef("reason=load, directory=%q, forceVersion=%d", migrationsDir, forceVersion)
+func Migrate(dbName, migrationsDir string, forceVersion int, db *sql.DB) error {
+	logger.Infof("db=%s, reason=load, directory=%q, forceVersion=%d", dbName, migrationsDir, forceVersion)
 	if len(migrationsDir) == 0 {
 		return nil
 	}
@@ -109,17 +109,17 @@ func Migrate(migrationsDir string, forceVersion int, db *sql.DB) error {
 	}
 
 	version, _, err := m.Version()
-
 	if err != nil && err != migrate.ErrNilVersion {
 		return errors.Trace(err)
 	}
 	if err == migrate.ErrNilVersion {
-		logger.Tracef("reason=initial_state, version=nil")
+		logger.Infof("db=%s, reason=initial_state, version=nil", dbName)
 	} else {
-		logger.Tracef("reason=initial_state, version=%d", version)
+		logger.Infof("db=%s, reason=initial_state, version=%d", dbName, version)
 	}
 
 	if forceVersion > 0 {
+		logger.Infof("db=%s, forceVersion=%d", dbName, forceVersion)
 		err = m.Force(forceVersion)
 		if err != nil {
 			return errors.Trace(err)
@@ -128,6 +128,10 @@ func Migrate(migrationsDir string, forceVersion int, db *sql.DB) error {
 
 	err = m.Up()
 	if err != nil {
+		if strings.Contains(err.Error(), "no change") {
+			logger.Infof("db=%s, reason=no_change, version=%d", dbName, version)
+			return nil
+		}
 		return errors.Trace(err)
 	}
 
@@ -135,7 +139,8 @@ func Migrate(migrationsDir string, forceVersion int, db *sql.DB) error {
 	if err != nil {
 		return errors.Trace(err)
 	}
-	logger.Infof("reason=current_state, version=%d", version)
+
+	logger.Infof("db=%s, reason=changed_state, version=%d", dbName, version)
 
 	return nil
 }
