@@ -119,8 +119,8 @@ start-local-kms:
 	if [ "$$LKMS_CONTAINER_STATE" = "missing" ]; then \
 		docker pull nsmithuk/local-kms && \
 		docker run \
-			-d -e 'PORT=4599' \
-			-p 4599:4599 \
+			-d -e 'PORT=7599' \
+			-p 7599:7599 \
 			--name trusty-unittest-local-kms \
 			nsmithuk/local-kms && \
 			sleep 1; \

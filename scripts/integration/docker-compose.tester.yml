@@ -21,9 +21,9 @@ services:
         aliases:
           - trusty-kms.ekspand.com
     ports:
-      - "4599" # KMS
+      - "7599" # KMS
     environment:
-      - PORT=4599
+      - PORT=7599
 
   trusty-sql:
     image: ekspand/docker-centos7-postgres:latest
