@@ -102,7 +102,7 @@ func TestCertProfile(t *testing.T) {
 		AllowedNames: "trusty*",
 		AllowedDNS:   "^(www\\.)?trusty\\.com$",
 		AllowedEmail: "^ca@trusty\\.com$",
-		AllowedURI:   "^spifee://trysty/.*$",
+		AllowedURI:   "^spiffe://trysty/.*$",
 		AllowedExtensions: []csr.OID{
 			{1, 1000, 1, 1},
 			{1, 1000, 1, 3},

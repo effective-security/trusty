@@ -190,7 +190,7 @@ func (s *testSuite) TestIssuerSign() {
 				AllowedNames: "^[Tt]rusty CA$",
 				AllowedDNS:   "^trusty\\.com$",
 				AllowedEmail: "^ca@trusty\\.com$",
-				AllowedURI:   "^spifee://trusty/.*$",
+				AllowedURI:   "^spiffe://trusty/.*$",
 				AllowedCSRFields: &csr.AllowedFields{
 					Subject:        true,
 					DNSNames:       true,
@@ -210,7 +210,7 @@ func (s *testSuite) TestIssuerSign() {
 				AllowedNames: "trusty.com",
 				AllowedDNS:   "^(www\\.)?trusty\\.com$",
 				AllowedEmail: "^ca@trusty\\.com$",
-				AllowedURI:   "^spifee://trusty/.*$",
+				AllowedURI:   "^spiffe://trusty/.*$",
 				AllowedCSRFields: &csr.AllowedFields{
 					Subject:        true,
 					DNSNames:       true,
@@ -228,7 +228,7 @@ func (s *testSuite) TestIssuerSign() {
 				Expiry:       1 * csr.OneYear,
 				Backdate:     0,
 				AllowedNames: "trusty.com",
-				AllowedURI:   "^spifee://trusty/.*$",
+				AllowedURI:   "^spiffe://trusty/.*$",
 				AllowedCSRFields: &csr.AllowedFields{
 					Subject:  true,
 					DNSNames: true,
@@ -252,7 +252,7 @@ func (s *testSuite) TestIssuerSign() {
 	s.Run("default", func() {
 		req := csr.CertificateRequest{
 			CommonName: "trusty.com",
-			SAN:        []string{"www.trusty.com", "127.0.0.1", "server@trusty.com", "spifee://trusty/test"},
+			SAN:        []string{"www.trusty.com", "127.0.0.1", "server@trusty.com", "spiffe://trusty/test"},
 			KeyRequest: kr,
 		}
 
@@ -370,7 +370,7 @@ func (s *testSuite) TestIssuerSign() {
 		caReq := csr.CertificateRequest{
 			CommonName: "trusty CA",
 			KeyRequest: kr,
-			SAN:        []string{"ca@trusty.com", "127.0.0.1", "spifee://google.com/ca"},
+			SAN:        []string{"ca@trusty.com", "127.0.0.1", "spiffe://google.com/ca"},
 			Names: []csr.X509Name{
 				{
 					O: "trusty",
@@ -390,7 +390,7 @@ func (s *testSuite) TestIssuerSign() {
 
 		_, _, err = rootCA.Sign(sreq)
 		s.Require().Error(err)
-		s.Equal("URI does not match allowed list: spifee://google.com/ca", err.Error())
+		s.Equal("URI does not match allowed list: spiffe://google.com/ca", err.Error())
 	})
 
 	s.Run("RestrictedCA/NotAllowedEmail", func() {
