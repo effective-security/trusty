@@ -177,13 +177,13 @@ func (p *provider) jwtIdentity(auth string) (identity.Identity, error) {
 
 func (p *provider) tlsIdentity(TLS *tls.ConnectionState) (identity.Identity, error) {
 	peer := TLS.PeerCertificates[0]
-	if len(peer.URIs) == 1 && peer.URIs[0].Scheme == "spifee" {
-		spifee := peer.URIs[0].String()
-		role := p.tlsRoles[spifee]
+	if len(peer.URIs) == 1 && peer.URIs[0].Scheme == "spiffe" {
+		spiffe := peer.URIs[0].String()
+		role := p.tlsRoles[spiffe]
 		if role == "" {
 			role = p.config.TLS.DefaultAuthenticatedRole
 		}
-		logger.Debugf("spifee=%s, role=%s", spifee, role)
+		logger.Debugf("spiffe=%s, role=%s", spiffe, role)
 		return identity.NewIdentity(role, peer.Subject.CommonName, ""), nil
 	}
 

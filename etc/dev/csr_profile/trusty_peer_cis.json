@@ -2,7 +2,7 @@
     "san": [
         "localhost",
         "127.0.0.1",
-        "spifee://trusty/cis"
+        "spiffe://trusty/cis"
     ],
     "common_name": "cis.trusty.com",
     "key": {

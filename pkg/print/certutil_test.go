@@ -61,7 +61,7 @@ func Test_PrintCertsRequest(t *testing.T) {
 		require.NoError(t, err)
 
 		csrv.EmailAddresses = append(csrv.EmailAddresses, "d@test.com")
-		u, _ := url.Parse("spifee://domain/workflow")
+		u, _ := url.Parse("spiffe://domain/workflow")
 		csrv.URIs = append(csrv.URIs, u)
 
 		w := bytes.NewBuffer([]byte{})

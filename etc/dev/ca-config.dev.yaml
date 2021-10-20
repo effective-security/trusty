@@ -107,7 +107,7 @@ profiles:
     allowed_extensions:
     - 1.3.6.1.5.5.7.1.1
     - 2.5.29.17
-    allowed_uri: ^spifee://trusty/.*$
+    allowed_uri: ^spiffe://trusty/.*$
     allowed_fields:
       uri: true
 
@@ -136,7 +136,7 @@ profiles:
     allowed_extensions:
     - 1.3.6.1.5.5.7.1.1
     - 2.5.29.17
-    allowed_uri: ^spifee://trusty/.*$
+    allowed_uri: ^spiffe://trusty/.*$
     allowed_fields:
       uri: true
 

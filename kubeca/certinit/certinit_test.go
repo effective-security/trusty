@@ -49,7 +49,7 @@ func TestCreate(t *testing.T) {
 		ClusterDomain:      "test",
 		Labels:             "key=value",
 		QueryK8s:           true,
-		SAN:                "email@test.com,test.com,127.0.0.1,spifee://test/service",
+		SAN:                "email@test.com,test.com,127.0.0.1,spiffe://test/service",
 		ServiceNames:       "service1",
 		IncludeUnqualified: true,
 		SignerName:         "trusty.svc/peer",

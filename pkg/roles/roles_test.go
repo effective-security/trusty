@@ -43,7 +43,7 @@ func Test_All(t *testing.T) {
 			Enabled:                  true,
 			DefaultAuthenticatedRole: "tls_authenticated",
 			Roles: map[string][]string{
-				"trusty-client": {"spifee://trusty/client"},
+				"trusty-client": {"spiffe://trusty/client"},
 			},
 		},
 		JWT: roles.JWTIdentityMap{
@@ -83,7 +83,7 @@ func Test_All(t *testing.T) {
 	t.Run("tls:trusty-client", func(t *testing.T) {
 		r, _ := http.NewRequest(http.MethodGet, "/", nil)
 
-		u, _ := url.Parse("spifee://trusty/client")
+		u, _ := url.Parse("spiffe://trusty/client")
 		state := &tls.ConnectionState{
 			PeerCertificates: []*x509.Certificate{
 				{
@@ -113,7 +113,7 @@ func TestTLSOnly(t *testing.T) {
 			Enabled:                  true,
 			DefaultAuthenticatedRole: "tls_authenticated",
 			Roles: map[string][]string{
-				"trusty-client": {"spifee://trusty/client"},
+				"trusty-client": {"spiffe://trusty/client"},
 			},
 		},
 	}, nil)
@@ -146,7 +146,7 @@ func TestTLSOnly(t *testing.T) {
 	t.Run("tls:trusty-client", func(t *testing.T) {
 		r, _ := http.NewRequest(http.MethodGet, "/", nil)
 
-		u, _ := url.Parse("spifee://trusty/client")
+		u, _ := url.Parse("spiffe://trusty/client")
 		state := &tls.ConnectionState{
 			PeerCertificates: []*x509.Certificate{
 				{
@@ -175,11 +175,11 @@ func TestTLSOnly(t *testing.T) {
 	t.Run("tls:invalid", func(t *testing.T) {
 		r, _ := http.NewRequest(http.MethodGet, "/", nil)
 
-		u, _ := url.Parse("spifee://trusty/client")
+		u, _ := url.Parse("spiffe://trusty/client")
 		state := &tls.ConnectionState{
 			PeerCertificates: []*x509.Certificate{
 				{
-					URIs: []*url.URL{u, u}, // spifee must have only one URI
+					URIs: []*url.URL{u, u}, // spiffe must have only one URI
 				},
 			},
 		}

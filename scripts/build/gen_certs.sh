@@ -243,7 +243,7 @@ if [[ "$CLIENT" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}c
         --ca-cert ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem \
         --ca-key ${OUT_DIR}/${OUT_PREFIX}l2_ca.key \
         --csr-profile ${CSR_DIR}/${CSR_PREFIX}client.json \
-        --SAN=spifee://trusty/client \
+        --SAN=spiffe://trusty/client \
         --key-label="${KEY_LABEL}${OUT_PREFIX}client*" \
         --out ${OUT_DIR}/${OUT_PREFIX}client
 
@@ -260,7 +260,7 @@ if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}pe
         --ca-cert ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem \
         --ca-key ${OUT_DIR}/${OUT_PREFIX}l2_ca.key \
         --csr-profile ${CSR_DIR}/${CSR_PREFIX}peer_ca.json \
-        --SAN=localhost,${SAN},${HOSTNAME},spifee://trusty/ca \
+        --SAN=localhost,${SAN},${HOSTNAME},spiffe://trusty/ca \
         --key-label="${KEY_LABEL}${OUT_PREFIX}peer_ca*" \
         --out ${OUT_DIR}/${OUT_PREFIX}peer_ca
 
@@ -277,7 +277,7 @@ if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}pe
         --ca-cert ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem \
         --ca-key ${OUT_DIR}/${OUT_PREFIX}l2_ca.key \
         --csr-profile ${CSR_DIR}/${CSR_PREFIX}peer_ra.json \
-        --SAN=localhost,${SAN},${HOSTNAME},spifee://trusty/ra \
+        --SAN=localhost,${SAN},${HOSTNAME},spiffe://trusty/ra \
         --key-label="${KEY_LABEL}${OUT_PREFIX}peer_ra*" \
         --out ${OUT_DIR}/${OUT_PREFIX}peer_ra
 
@@ -294,7 +294,7 @@ if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}pe
         --ca-cert ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem \
         --ca-key ${OUT_DIR}/${OUT_PREFIX}l2_ca.key \
         --csr-profile ${CSR_DIR}/${CSR_PREFIX}peer_cis.json \
-        --SAN=localhost,${SAN},${HOSTNAME},spifee://trusty/cis \
+        --SAN=localhost,${SAN},${HOSTNAME},spiffe://trusty/cis \
         --key-label="${KEY_LABEL}${OUT_PREFIX}peer_cis*" \
         --out ${OUT_DIR}/${OUT_PREFIX}peer_cis
 
@@ -311,7 +311,7 @@ if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}pe
         --ca-cert ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem \
         --ca-key ${OUT_DIR}/${OUT_PREFIX}l2_ca.key \
         --csr-profile ${CSR_DIR}/${CSR_PREFIX}peer_wfe.json \
-        --SAN=localhost,${SAN},${HOSTNAME},spifee://trusty/wfe \
+        --SAN=localhost,${SAN},${HOSTNAME},spiffe://trusty/wfe \
         --key-label="${KEY_LABEL}${OUT_PREFIX}peer_wfe*" \
         --out ${OUT_DIR}/${OUT_PREFIX}peer_wfe
 

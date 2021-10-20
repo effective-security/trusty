@@ -223,15 +223,15 @@ servers:
         default_authenticated_role: authenticated_tls
         roles:
           trusty:
-            - spifee://trusty/all
+            - spiffe://trusty/all
           trusty-cis:
-            - spifee://trusty/cis
+            - spiffe://trusty/cis
           trusty-ca:
-            - spifee://trusty/ca
+            - spiffe://trusty/ca
           trusty-ra:
-            - spifee://trusty/ra
+            - spiffe://trusty/ra
           trusty-wfe:
-            - spifee://trusty/wfe
+            - spiffe://trusty/wfe
       jwt:
         enabled: true
         audience: trusty
