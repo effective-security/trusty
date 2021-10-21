@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/juju/errors"
+	"github.com/pkg/errors"
 )
 
 // FilesystemConnection is an adapter for local filesystem access, basically for
@@ -35,7 +35,7 @@ func (conn *FilesystemConnection) getPath(path string, mkdir bool) (result strin
 	}()
 	path, err := filepath.Abs(path)
 	if err != nil {
-		return "", errors.Trace(err)
+		return "", errors.WithStack(err)
 	}
 	children := strings.Split(path, "/")
 	checkDir := func(dir string) {
@@ -66,11 +66,11 @@ func (conn *FilesystemConnection) getPath(path string, mkdir bool) (result strin
 func (conn *FilesystemConnection) GetReader(ctx context.Context, path string) (result io.ReadCloser, err error) {
 	file, err := conn.getPath(path, false)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	fp, err := os.Open(file)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	return fp, nil
 
@@ -81,11 +81,11 @@ func (conn *FilesystemConnection) GetReader(ctx context.Context, path string) (r
 func (conn *FilesystemConnection) GetWriter(ctx context.Context, path string) (result io.WriteCloser, err error) {
 	file, err := conn.getPath(path, true)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	fp, err := os.Create(file)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	return fp, nil
 }
@@ -94,7 +94,7 @@ func (conn *FilesystemConnection) GetWriter(ctx context.Context, path string) (r
 func (conn *FilesystemConnection) Delete(ctx context.Context, path string) error {
 	file, err := conn.getPath(path, false)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	return os.Remove(file)
 }

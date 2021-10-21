@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/trustymain"
 )
 
@@ -20,7 +19,7 @@ func main() {
 
 	err := app.Run(nil)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ERROR: %s\n", errors.ErrorStack(err))
+		fmt.Fprintf(os.Stderr, "ERROR: %+v\n", err)
 		rc = rcError
 	}
 	app.Close()

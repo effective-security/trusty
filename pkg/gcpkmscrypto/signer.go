@@ -8,7 +8,7 @@ import (
 	"io"
 	"reflect"
 
-	"github.com/juju/errors"
+	"github.com/pkg/errors"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
@@ -77,7 +77,7 @@ func (s *Signer) Sign(rand io.Reader, digest []byte, opts crypto.SignerOpts) (si
 
 	result, err := s.prov.AsymmetricSign(context.Background(), req)
 	if err != nil {
-		return nil, errors.Annotatef(err, "unable to sign")
+		return nil, errors.WithMessagef(err, "unable to sign")
 	}
 
 	// Optional, but recommended: perform integrity verification on result.

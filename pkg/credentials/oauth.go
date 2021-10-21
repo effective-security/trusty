@@ -3,7 +3,7 @@ package credentials
 import (
 	"context"
 
-	"github.com/juju/errors"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc/credentials"
 )
 
@@ -20,7 +20,7 @@ func NewOauthAccess(token string) credentials.PerRPCCredentials {
 func (oa oauthAccess) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
 	ri, _ := credentials.RequestInfoFromContext(ctx)
 	if err := credentials.CheckSecurityLevel(ri.AuthInfo, credentials.PrivacyAndIntegrity); err != nil {
-		return nil, errors.Annotatef(err, "unable to transfer oauthAccess PerRPCCredentials")
+		return nil, errors.WithMessagef(err, "unable to transfer oauthAccess PerRPCCredentials")
 	}
 	return map[string]string{
 		TokenFieldNameGRPC: oa.token,

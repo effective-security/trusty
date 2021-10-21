@@ -6,8 +6,8 @@ import (
 	"github.com/go-phorce/dolly/metrics"
 	"github.com/go-phorce/dolly/tasks"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/db/cadb"
+	"github.com/pkg/errors"
 )
 
 var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/tasks", "stats")
@@ -33,7 +33,7 @@ func (t *Task) run() {
 
 	c, err := t.ca.GetCertsCount(ctx)
 	if err != nil {
-		logger.Errorf(errors.ErrorStack(err))
+		logger.Errorf("err=[%+v]", err)
 	} else {
 		metrics.IncrCounter(keyForDbCertsCount, float32(c))
 		logger.Infof("certs_count=%d", c)
@@ -41,7 +41,7 @@ func (t *Task) run() {
 
 	c, err = t.ca.GetRevokedCount(ctx)
 	if err != nil {
-		logger.Errorf(errors.ErrorStack(err))
+		logger.Errorf("err=[%+v]", err)
 	} else {
 		metrics.IncrCounter(keyForDbRevokedCount, float32(c))
 		logger.Infof("revoked_count=%d", c)
@@ -72,12 +72,12 @@ func Factory(
 	return func(ca cadb.CaReadonlyDb) error {
 		task, err := create(name, ca, schedule)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 
 		job, err := tasks.NewTask(task.schedule)
 		if err != nil {
-			return errors.Annotatef(err, "unable to schedule a job on schedule: %q", task.schedule)
+			return errors.WithMessagef(err, "unable to schedule a job on schedule: %q", task.schedule)
 		}
 
 		t := job.Do(task.name, task.run)

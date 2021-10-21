@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
+	"github.com/pkg/errors"
 )
 
 // RegisterRevokedCertificate registers revoked Certificate
@@ -18,13 +18,13 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 	if id == 0 {
 		id, err = p.NextID()
 		if err != nil {
-			return nil, errors.Trace(err)
+			return nil, errors.WithStack(err)
 		}
 	}
 
 	err = db.Validate(revoked)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	crt := &revoked.Certificate
@@ -64,7 +64,7 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 		&res.Reason,
 	)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	res.Certificate.NotAfter = res.Certificate.NotAfter.UTC()
 	res.Certificate.NotBefore = res.Certificate.NotBefore.UTC()
@@ -76,8 +76,8 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 func (p *Provider) RemoveRevokedCertificate(ctx context.Context, id uint64) error {
 	_, err := p.db.ExecContext(ctx, `DELETE FROM revoked WHERE id=$1;`, id)
 	if err != nil {
-		logger.Errorf("err=%v", errors.Details(err))
-		return errors.Trace(err)
+		logger.Errorf("err=[%+v]", err)
+		return errors.WithStack(err)
 	}
 
 	logger.Noticef("id=%d", id)
@@ -97,7 +97,7 @@ func (p *Provider) GetOrgRevokedCertificates(ctx context.Context, orgID uint64) 
 		;
 		`, orgID)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	defer res.Close()
 
@@ -123,7 +123,7 @@ func (p *Provider) GetOrgRevokedCertificates(ctx context.Context, orgID uint64) 
 			&r.Reason,
 		)
 		if err != nil {
-			return nil, errors.Trace(err)
+			return nil, errors.WithStack(err)
 		}
 		r.Certificate.NotAfter = r.Certificate.NotAfter.UTC()
 		r.Certificate.NotBefore = r.Certificate.NotBefore.UTC()
@@ -159,7 +159,7 @@ func (p *Provider) ListRevokedCertificates(ctx context.Context, ikid string, lim
 		;
 		`, ikid, afterID, limit)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	defer res.Close()
 
@@ -183,7 +183,7 @@ func (p *Provider) ListRevokedCertificates(ctx context.Context, ikid string, lim
 			&r.Reason,
 		)
 		if err != nil {
-			return nil, errors.Trace(err)
+			return nil, errors.WithStack(err)
 		}
 		r.Certificate.NotAfter = r.Certificate.NotAfter.UTC()
 		r.Certificate.NotBefore = r.Certificate.NotBefore.UTC()
@@ -198,7 +198,7 @@ func (p *Provider) ListRevokedCertificates(ctx context.Context, ikid string, lim
 func (p *Provider) RevokeCertificate(ctx context.Context, crt *model.Certificate, at time.Time, reason int) (*model.RevokedCertificate, error) {
 	err := db.Validate(crt)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	revoked := &model.RevokedCertificate{
@@ -214,25 +214,25 @@ func (p *Provider) RevokeCertificate(ctx context.Context, crt *model.Certificate
 
 	tx, err := p.DB().BeginTx(ctx, nil)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	err = p.RemoveCertificate(ctx, crt.ID)
 	if err != nil {
 		tx.Rollback()
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	revoked, err = p.RegisterRevokedCertificate(ctx, revoked)
 	if err != nil {
 		tx.Rollback()
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	// Finally, if no errors are recieved from the queries, commit the transaction
 	// this applies the above changes to our database
 	err = tx.Commit()
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	return revoked, nil
 }

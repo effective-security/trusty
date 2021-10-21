@@ -11,7 +11,7 @@ import (
 	"github.com/go-phorce/dolly/fileutil"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
-	"github.com/juju/errors"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
 
@@ -67,19 +67,19 @@ func LoadConfig(file string) (*Config, error) {
 
 	raw, err := ioutil.ReadFile(file)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	var config Config
 	if strings.HasSuffix(file, ".json") {
 		err = json.Unmarshal(raw, &config)
 		if err != nil {
-			return nil, errors.Annotatef(err, "unable to unmarshal JSON: %q", file)
+			return nil, errors.WithMessagef(err, "unable to unmarshal JSON: %q", file)
 		}
 	} else {
 		err = yaml.Unmarshal(raw, &config)
 		if err != nil {
-			return nil, errors.Annotatef(err, "unable to unmarshal YAML: %q", file)
+			return nil, errors.WithMessagef(err, "unable to unmarshal YAML: %q", file)
 		}
 	}
 
@@ -97,7 +97,7 @@ func LoadConfig(file string) (*Config, error) {
 func Load(cfgfile string) (Provider, error) {
 	cfg, err := LoadConfig(cfgfile)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	return New(cfg), nil
 }
@@ -161,7 +161,7 @@ func (p *provider) SignToken(id, subject, audience string, expiry time.Duration)
 	// Sign and get the complete encoded token as a string using the secret
 	tokenString, err := token.SignedString(key)
 	if err != nil {
-		return "", nil, errors.Annotatef(err, "failed to sign token")
+		return "", nil, errors.WithMessagef(err, "failed to sign token")
 	}
 
 	return tokenString, claims, nil
@@ -196,7 +196,7 @@ func (p *provider) ParseToken(authorization, audience string) (*jwt.StandardClai
 		return nil, errors.Errorf("missing kid")
 	})
 	if err != nil {
-		return nil, errors.Annotatef(err, "failed to verify token")
+		return nil, errors.WithMessagef(err, "failed to verify token")
 	}
 
 	if claims, ok := token.Claims.(*jwt.StandardClaims); ok && token.Valid {

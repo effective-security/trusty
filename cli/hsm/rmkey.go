@@ -6,8 +6,8 @@ import (
 
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/cli"
+	"github.com/pkg/errors"
 )
 
 // RmKeyFlags specifies flags for the delete key action
@@ -67,7 +67,7 @@ func RmKey(c ctl.Control, p interface{}) error {
 					return nil
 				})
 				if err != nil {
-					return errors.Annotatef(err, "failed to list keys on slot %d", slotID)
+					return errors.WithMessagef(err, "failed to list keys on slot %d", slotID)
 				}
 
 				if len(keysToDestroy) == 0 {
@@ -88,7 +88,7 @@ func RmKey(c ctl.Control, p interface{}) error {
 				} else {
 					isConfirmed, err := ctl.AskForConfirmation(c.Writer(), c.Reader(), "WARNING: Destroyed keys can not be recovered. Type 'yes' to continue or 'no' to cancel.")
 					if err != nil {
-						return errors.Annotatef(err, "unable to get a confirmation to destroy keys")
+						return errors.WithMessagef(err, "unable to get a confirmation to destroy keys")
 					}
 
 					if !isConfirmed {
@@ -120,7 +120,7 @@ func destroyKeys(c ctl.Control, keyProv cryptoprov.KeyManager, slotID uint, keys
 func destroyKey(c ctl.Control, keyProv cryptoprov.KeyManager, slotID uint, keyID string) error {
 	err := keyProv.DestroyKeyPairOnSlot(slotID, keyID)
 	if err != nil {
-		return errors.Annotatef(err, "unable to destroy key %q on slot %d", keyID, slotID)
+		return errors.WithMessagef(err, "unable to destroy key %q on slot %d", keyID, slotID)
 	}
 	fmt.Fprintf(c.Writer(), "destroyed key: %s\n", keyID)
 	return nil

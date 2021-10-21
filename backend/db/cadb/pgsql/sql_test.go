@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
 	db "github.com/martinisecurity/trusty/backend/db/cadb"
 	"github.com/martinisecurity/trusty/tests/testutils"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -25,7 +25,7 @@ func TestMain(m *testing.M) {
 
 	cfg, err := testutils.LoadConfig(projFolder, "UNIT_TEST")
 	if err != nil {
-		panic(errors.Trace(err))
+		panic(errors.WithStack(err))
 	}
 
 	p, err := db.New(

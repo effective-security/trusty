@@ -20,7 +20,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/juju/errors"
+	"github.com/pkg/errors"
 )
 
 // tlsListener overrides a TLS listener so it will reject client
@@ -52,7 +52,7 @@ func newTLSListener(l net.Listener, tlsinfo *TLSInfo, check tlsCheckFunc) (net.L
 
 	tlsCfg, err := tlsinfo.ServerTLSWithReloader()
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	hf := tlsinfo.HandshakeFailure
@@ -65,7 +65,7 @@ func newTLSListener(l net.Listener, tlsinfo *TLSInfo, check tlsCheckFunc) (net.L
 		prevCheck := check
 		check = func(ctx context.Context, tlsConn *tls.Conn) error {
 			if err := prevCheck(ctx, tlsConn); err != nil {
-				return errors.Trace(err)
+				return errors.WithStack(err)
 			}
 			st := tlsConn.ConnectionState()
 			if certs := st.PeerCertificates; len(certs) > 0 {
@@ -170,11 +170,11 @@ func checkCRL(crlPath string, cert []*x509.Certificate) error {
 	// TODO: cache
 	crlBytes, err := ioutil.ReadFile(crlPath)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	certList, err := x509.ParseCRL(crlBytes)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	revokedSerials := make(map[string]struct{})
 	for _, rc := range certList.TBSCertList.RevokedCertificates {

@@ -13,12 +13,12 @@ import (
 	"github.com/go-phorce/dolly/rest/tlsconfig"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/client"
 	"github.com/martinisecurity/trusty/pkg/awskmscrypto"
 	"github.com/martinisecurity/trusty/pkg/gcpkmscrypto"
 	"github.com/martinisecurity/trusty/pkg/inmemcrypto"
+	"github.com/pkg/errors"
 )
 
 var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty", "cli")
@@ -205,7 +205,7 @@ func (cli *Cli) EnsureServiceConfig() error {
 		var err error
 		cli.config, err = config.Load(*cli.flags.serviceConfig)
 		if err != nil {
-			return errors.Annotate(err, "load service configuration")
+			return errors.WithMessage(err, "load service configuration")
 		}
 	}
 	if cli.config == nil {
@@ -229,7 +229,7 @@ func (cli *Cli) EnsureCryptoProvider() error {
 	} else if cli.flags.serviceConfig != nil && *cli.flags.serviceConfig != "" {
 		err = cli.EnsureServiceConfig()
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 		defaultProvider = cli.config.CryptoProv.Default
 		providers = cli.config.CryptoProv.Providers
@@ -248,12 +248,12 @@ func (cli *Cli) EnsureCryptoProvider() error {
 	if defaultProvider == "inmem" || defaultProvider == "plain" {
 		cli.crypto, err = cryptoprov.New(inmemcrypto.NewProvider(), nil)
 		if err != nil {
-			return errors.Annotate(err, "unable to initialize crypto providers")
+			return errors.WithMessage(err, "unable to initialize crypto providers")
 		}
 	} else {
 		cli.crypto, err = cryptoprov.Load(defaultProvider, providers)
 		if err != nil {
-			return errors.Annotate(err, "unable to initialize crypto providers")
+			return errors.WithMessage(err, "unable to initialize crypto providers")
 		}
 	}
 
@@ -315,7 +315,7 @@ func (cli *Cli) Client(svc string) (*client.Client, error) {
 	if cli.flags.serviceConfig != nil && *cli.flags.serviceConfig != "" {
 		err := cli.EnsureServiceConfig()
 		if err != nil {
-			return nil, errors.Trace(err)
+			return nil, errors.WithStack(err)
 		}
 
 		cfg = cli.Config()
@@ -351,7 +351,7 @@ func (cli *Cli) Client(svc string) (*client.Client, error) {
 			tlsKey,
 			tlsCA)
 		if err != nil {
-			return nil, errors.Annotate(err, "unable to build TLS configuration")
+			return nil, errors.WithMessage(err, "unable to build TLS configuration")
 		}
 	}
 
@@ -366,7 +366,7 @@ func (cli *Cli) Client(svc string) (*client.Client, error) {
 
 	client, err := client.New(clientCfg)
 	if err != nil {
-		return nil, errors.Annotate(err, "unable to create client")
+		return nil, errors.WithMessage(err, "unable to create client")
 	}
 	return client, nil
 }

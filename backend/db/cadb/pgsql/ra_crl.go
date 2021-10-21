@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
+	"github.com/pkg/errors"
 )
 
 // RegisterCrl registers CRL
@@ -17,13 +17,13 @@ func (p *Provider) RegisterCrl(ctx context.Context, crl *model.Crl) (*model.Crl,
 	if id == 0 {
 		id, err = p.NextID()
 		if err != nil {
-			return nil, errors.Trace(err)
+			return nil, errors.WithStack(err)
 		}
 	}
 
 	err = db.Validate(crl)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	logger.Debugf("issuer=%q, ikid=%s", crl.Issuer, crl.IKID)
@@ -51,8 +51,8 @@ func (p *Provider) RegisterCrl(ctx context.Context, crl *model.Crl) (*model.Crl,
 		&res.Pem,
 	)
 	if err != nil {
-		logger.KV(xlog.ERROR, "err", errors.Details(err))
-		return nil, errors.Trace(err)
+		logger.KV(xlog.ERROR, "err", err)
+		return nil, errors.WithStack(err)
 	}
 	res.ThisUpdate = res.ThisUpdate.UTC()
 	res.NextUpdate = res.NextUpdate.UTC()
@@ -63,8 +63,8 @@ func (p *Provider) RegisterCrl(ctx context.Context, crl *model.Crl) (*model.Crl,
 func (p *Provider) RemoveCrl(ctx context.Context, id uint64) error {
 	_, err := p.db.ExecContext(ctx, `DELETE FROM crls WHERE id=$1;`, id)
 	if err != nil {
-		logger.KV(xlog.ERROR, "err", errors.Details(err))
-		return errors.Trace(err)
+		logger.KV(xlog.ERROR, "err", err)
+		return errors.WithStack(err)
 	}
 
 	logger.Noticef("id=%d", id)
@@ -89,8 +89,8 @@ func (p *Provider) GetCrl(ctx context.Context, ikid string) (*model.Crl, error) 
 		&res.Pem,
 	)
 	if err != nil {
-		logger.KV(xlog.ERROR, "err", errors.Details(err))
-		return nil, errors.Trace(err)
+		logger.KV(xlog.ERROR, "err", err)
+		return nil, errors.WithStack(err)
 	}
 	res.ThisUpdate = res.ThisUpdate.UTC()
 	res.NextUpdate = res.NextUpdate.UTC()

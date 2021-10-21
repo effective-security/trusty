@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/cli"
+	"github.com/pkg/errors"
 )
 
 // Slots shows hsm slots
@@ -25,7 +25,7 @@ func Slots(c ctl.Control, _ interface{}) error {
 		return nil
 	})
 	if err != nil {
-		return errors.Annotate(err, "unable to list slots")
+		return errors.WithMessage(err, "unable to list slots")
 	}
 
 	return nil

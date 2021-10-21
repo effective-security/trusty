@@ -7,8 +7,8 @@ import (
 
 	"github.com/go-phorce/dolly/netutil"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/pkg/configloader"
+	"github.com/pkg/errors"
 )
 
 var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty", "config")
@@ -24,7 +24,7 @@ func DefaultFactory() (*configloader.Factory, error) {
 
 	nodeInfo, err := netutil.NewNodeInfo(nil)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	cwd, _ := filepath.Abs(filepath.Dir(os.Args[0]))
@@ -53,12 +53,12 @@ func Load(configFile string) (*Configuration, error) {
 func LoadForHostName(configFile, hostnameOverride string) (*Configuration, error) {
 	f, err := DefaultFactory()
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	config := new(Configuration)
 	err = f.LoadForHostName(configFile, hostnameOverride, config)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	return config, nil
 }

@@ -5,21 +5,21 @@ import (
 	"strings"
 
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
+	"github.com/pkg/errors"
 )
 
 // RegisterCertificate registers Cert
 func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certificate) (*model.Certificate, error) {
 	id, err := p.NextID()
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	err = db.Validate(crt)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	logger.Tracef("id=%d, subject=%q, skid=%s", id, crt.Subject, crt.SKID)
@@ -56,7 +56,7 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 		&locations,
 	)
 	if err != nil {
-		return nil, errors.Annotatef(err, "ID=%d, orgID=%d, skid=%s, ikid=%s", id, crt.OrgID, crt.SKID, crt.IKID)
+		return nil, errors.WithMessagef(err, "ID=%d, orgID=%d, skid=%s, ikid=%s", id, crt.OrgID, crt.SKID, crt.IKID)
 	}
 	res.NotAfter = res.NotAfter.UTC()
 	res.NotBefore = res.NotBefore.UTC()
@@ -71,8 +71,8 @@ func (p *Provider) RemoveCertificate(ctx context.Context, id uint64) error {
 	logger.Noticef("id=%d", id)
 	_, err := p.db.ExecContext(ctx, `DELETE FROM certificates WHERE id=$1;`, id)
 	if err != nil {
-		logger.Errorf("err=%v", errors.Details(err))
-		return errors.Trace(err)
+		logger.Errorf("err=[%+v]", err)
+		return errors.WithStack(err)
 	}
 
 	return nil
@@ -111,7 +111,7 @@ func (p *Provider) GetCertificate(ctx context.Context, id uint64) (*model.Certif
 		&locations,
 	)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	c.NotAfter = c.NotAfter.UTC()
 	c.NotBefore = c.NotBefore.UTC()
@@ -154,7 +154,7 @@ func (p *Provider) GetCertificateBySKID(ctx context.Context, skid string) (*mode
 		&locations,
 	)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	c.NotAfter = c.NotAfter.UTC()
 	c.NotBefore = c.NotBefore.UTC()
@@ -197,7 +197,7 @@ func (p *Provider) GetCertificateByIKIDAndSerial(ctx context.Context, ikid, seri
 		&locations,
 	)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	c.NotAfter = c.NotAfter.UTC()
 	c.NotBefore = c.NotBefore.UTC()
@@ -219,7 +219,7 @@ func (p *Provider) GetOrgCertificates(ctx context.Context, orgID uint64) (model.
 		;
 		`, orgID)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	defer res.Close()
 
@@ -245,7 +245,7 @@ func (p *Provider) GetOrgCertificates(ctx context.Context, orgID uint64) (model.
 			&locations,
 		)
 		if err != nil {
-			return nil, errors.Trace(err)
+			return nil, errors.WithStack(err)
 		}
 		r.NotAfter = r.NotAfter.UTC()
 		r.NotBefore = r.NotBefore.UTC()
@@ -282,7 +282,7 @@ func (p *Provider) ListCertificates(ctx context.Context, ikid string, limit int,
 		;
 		`, ikid, afterID, limit)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	defer res.Close()
 
@@ -306,7 +306,7 @@ func (p *Provider) ListCertificates(ctx context.Context, ikid string, limit int,
 			&locations,
 		)
 		if err != nil {
-			return nil, errors.Trace(err)
+			return nil, errors.WithStack(err)
 		}
 		r.NotAfter = r.NotAfter.UTC()
 		r.NotBefore = r.NotBefore.UTC()

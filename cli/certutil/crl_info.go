@@ -9,9 +9,9 @@ import (
 
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/xpki/certutil"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/cli"
 	"github.com/martinisecurity/trusty/pkg/print"
+	"github.com/pkg/errors"
 )
 
 // CRLInfoFlags specifies flags for CRLInfo action
@@ -26,12 +26,12 @@ func CRLInfo(c ctl.Control, p interface{}) error {
 	// Load CRL
 	der, err := c.(*cli.Cli).ReadFileOrStdin(*flags.In)
 	if err != nil {
-		return errors.Annotate(err, "unable to load CRL file")
+		return errors.WithMessage(err, "unable to load CRL file")
 	}
 
 	crl, err := x509.ParseCRL(der)
 	if err != nil {
-		return errors.Annotate(err, "unable to prase CRL")
+		return errors.WithMessage(err, "unable to prase CRL")
 	}
 
 	print.CertificateList(c.Writer(), crl)
@@ -56,12 +56,12 @@ func CRLFetch(c ctl.Control, p interface{}) error {
 	// Load PEM
 	pem, err := c.(*cli.Cli).ReadFileOrStdin(*flags.CertFile)
 	if err != nil {
-		return errors.Annotate(err, "unable to load PEM file")
+		return errors.WithMessage(err, "unable to load PEM file")
 	}
 
 	list, err := certutil.ParseChainFromPEM(pem)
 	if err != nil {
-		return errors.Annotate(err, "unable to parse PEM")
+		return errors.WithMessage(err, "unable to parse PEM")
 	}
 
 	if !*flags.All {
@@ -84,12 +84,12 @@ func CRLFetch(c ctl.Control, p interface{}) error {
 
 		body, err := download(crldp)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 
 		crl, err := x509.ParseCRL(body)
 		if err != nil {
-			return errors.Annotate(err, "unable to prase CRL")
+			return errors.WithMessage(err, "unable to prase CRL")
 		}
 		if *flags.Print {
 			print.CertificateList(c.Writer(), crl)
@@ -99,7 +99,7 @@ func CRLFetch(c ctl.Control, p interface{}) error {
 			filename := path.Join(*flags.OutDir, fmt.Sprintf("%s.crl", certutil.GetIssuerID(crt)))
 			err = ioutil.WriteFile(filename, body, 0644)
 			if err != nil {
-				return errors.Annotatef(err, "unable to write CRL: %s", filename)
+				return errors.WithMessagef(err, "unable to write CRL: %s", filename)
 			}
 		}
 	}
@@ -109,13 +109,13 @@ func CRLFetch(c ctl.Control, p interface{}) error {
 func download(url string) ([]byte, error) {
 	resp, err := http.Get(url)
 	if err != nil {
-		return nil, errors.Annotatef(err, "unable to fetch from %s", url)
+		return nil, errors.WithMessagef(err, "unable to fetch from %s", url)
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, errors.Annotatef(err, "unable to download from %s", url)
+		return nil, errors.WithMessagef(err, "unable to download from %s", url)
 	}
 
 	return body, nil

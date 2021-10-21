@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/juju/errors"
 	"github.com/miekg/dns"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -185,24 +185,24 @@ func serveLoopResolver(stopChan chan bool) {
 	go func() {
 		err := tcpServer.ListenAndServe()
 		if err != nil {
-			logger.Errorf("reason=tcpServer.ListenAndServe, err=[%s]", err)
+			logger.Errorf("reason=tcpServer.ListenAndServe, err=[%+v]", err)
 		}
 	}()
 	go func() {
 		err := udpServer.ListenAndServe()
 		if err != nil {
-			logger.Errorf("reason=udpServer.ListenAndServe, err=[%s]", err)
+			logger.Errorf("reason=udpServer.ListenAndServe, err=[%+v]", err)
 		}
 	}()
 	go func() {
 		<-stopChan
 		err := tcpServer.Shutdown()
 		if err != nil {
-			logger.Fatalf("reason=tcpServer.Shutdown, err=[%s]", err)
+			logger.Fatalf("reason=tcpServer.Shutdown, err=[%+v]", err)
 		}
 		err = udpServer.Shutdown()
 		if err != nil {
-			logger.Fatalf("reason=udpServer.Shutdown, err=[%s]", err)
+			logger.Fatalf("reason=udpServer.Shutdown, err=[%+v]", err)
 		}
 	}()
 }

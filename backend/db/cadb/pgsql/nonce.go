@@ -4,21 +4,21 @@ import (
 	"context"
 	"time"
 
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
+	"github.com/pkg/errors"
 )
 
 // CreateNonce returns Nonce
 func (p *Provider) CreateNonce(ctx context.Context, nonce *model.Nonce) (*model.Nonce, error) {
 	id, err := p.NextID()
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	err = db.Validate(nonce)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	res := new(model.Nonce)
@@ -41,7 +41,7 @@ func (p *Provider) CreateNonce(ctx context.Context, nonce *model.Nonce) (*model.
 		&res.UsedAt,
 	)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	res.CreatedAt = res.CreatedAt.UTC()
 	res.UsedAt = res.UsedAt.UTC()
@@ -68,7 +68,7 @@ func (p *Provider) UseNonce(ctx context.Context, nonce string) (*model.Nonce, er
 			&res.UsedAt,
 		)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	res.CreatedAt = res.CreatedAt.UTC()
 	res.UsedAt = res.UsedAt.UTC()
@@ -80,8 +80,8 @@ func (p *Provider) UseNonce(ctx context.Context, nonce string) (*model.Nonce, er
 func (p *Provider) DeleteNonce(ctx context.Context, id uint64) error {
 	_, err := p.db.ExecContext(ctx, `DELETE FROM nonces WHERE id=$1;`, id)
 	if err != nil {
-		logger.Errorf("err=%v", errors.Details(err))
-		return errors.Trace(err)
+		logger.Errorf("err=[%+v]", err)
+		return errors.WithStack(err)
 	}
 	return nil
 }

@@ -10,12 +10,12 @@ import (
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/retriable"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/service/swagger"
 	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/pkg/gserver"
 	"github.com/martinisecurity/trusty/tests/mockappcontainer"
 	"github.com/martinisecurity/trusty/tests/testutils"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -66,7 +66,7 @@ func TestMain(m *testing.M) {
 
 	trustyServer, err = gserver.Start("SwaggerTest", cfg, container, serviceFactories)
 	if err != nil || trustyServer == nil {
-		panic(errors.Trace(err))
+		panic(errors.WithStack(err))
 	}
 
 	// TODO: channel for <-trustyServer.ServerReady()

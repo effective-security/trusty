@@ -4,7 +4,6 @@ import (
 	"database/sql"
 
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
 )
 
 var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/internal/cadb", "pgsql")
@@ -37,7 +36,7 @@ func (p *Provider) Close() (err error) {
 	}
 
 	if err = p.db.Close(); err != nil {
-		logger.Errorf("err=%v", errors.Details(err))
+		logger.Errorf("err=[%+v]", err)
 	} else {
 		p.db = nil
 	}

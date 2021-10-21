@@ -7,10 +7,10 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/authority"
 	csrapi "github.com/martinisecurity/trusty/pkg/csr"
 	"github.com/martinisecurity/trusty/pkg/print"
+	"github.com/pkg/errors"
 	capi "k8s.io/api/certificates/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -37,7 +37,7 @@ func (r *CertificateSigningRequestSigningReconciler) Reconcile(ctx context.Conte
 	log := logger.WithValues("certificatesigningrequest", req.NamespacedName)
 	var csr capi.CertificateSigningRequest
 	if err := r.Client.Get(ctx, req.NamespacedName, &csr); client.IgnoreNotFound(err) != nil {
-		return ctrl.Result{}, errors.Annotatef(err, "error getting CSR")
+		return ctrl.Result{}, errors.WithMessagef(err, "error getting CSR")
 	}
 	json, _ := marshal.EncodeBytes(marshal.PrettyPrint, csr)
 
@@ -77,7 +77,7 @@ func (r *CertificateSigningRequestSigningReconciler) Reconcile(ctx context.Conte
 				logger.KV(xlog.ERROR,
 					"reason", "unable to sign",
 					"err", err)
-				return ctrl.Result{}, errors.Annotatef(err, "error auto signing CSR")
+				return ctrl.Result{}, errors.WithMessagef(err, "error auto signing CSR")
 			}
 
 			b := new(strings.Builder)
@@ -96,7 +96,7 @@ func (r *CertificateSigningRequestSigningReconciler) Reconcile(ctx context.Conte
 				logger.KV(xlog.ERROR,
 					"reason", "unable to patch status",
 					"err", err)
-				return ctrl.Result{}, errors.Annotatef(err, "error patching CSR")
+				return ctrl.Result{}, errors.WithMessagef(err, "error patching CSR")
 			}
 			r.EventRecorder.Event(&csr, v1.EventTypeNormal, "Signed", "The CSR has been signed")
 		} else {

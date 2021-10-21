@@ -19,7 +19,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/juju/errors"
+	"github.com/pkg/errors"
 )
 
 type keepAliveConn interface {
@@ -49,7 +49,7 @@ type keepaliveListener struct{ net.Listener }
 func (kln *keepaliveListener) Accept() (net.Conn, error) {
 	c, err := kln.Listener.Accept()
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	kac := c.(keepAliveConn)
 	// detection time: tcp_keepalive_time + tcp_keepalive_probes + tcp_keepalive_intvl
@@ -71,7 +71,7 @@ type tlsKeepaliveListener struct {
 func (l *tlsKeepaliveListener) Accept() (net.Conn, error) {
 	c, err := l.Listener.Accept()
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	kac := c.(keepAliveConn)
 	// detection time: tcp_keepalive_time + tcp_keepalive_probes + tcp_keepalive_intvl

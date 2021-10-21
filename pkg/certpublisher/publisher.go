@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/pkg/storage"
+	"github.com/pkg/errors"
 )
 
 var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/pkg", "certpublisher")
@@ -45,7 +45,7 @@ func (p *publisher) PublishCertificate(ctx context.Context, cert *pb.Certificate
 
 	_, err := storage.WriteFile(ctx, location, []byte(pem))
 	if err != nil {
-		return "", errors.Annotatef(err, "unable to write file to: "+location)
+		return "", errors.WithMessagef(err, "unable to write file to: "+location)
 	}
 	return location, nil
 }
@@ -63,7 +63,7 @@ func (p *publisher) PublishCRL(ctx context.Context, crl *pb.Crl) (string, error)
 
 	_, err := storage.WriteFile(ctx, fileName, block.Bytes)
 	if err != nil {
-		return "", errors.Annotatef(err, "unable to write file to: "+fileName)
+		return "", errors.WithMessagef(err, "unable to write file to: "+fileName)
 	}
 	return fileName, nil
 }

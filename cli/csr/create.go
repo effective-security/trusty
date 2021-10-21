@@ -5,10 +5,10 @@ import (
 	"io/ioutil"
 
 	"github.com/go-phorce/dolly/ctl"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/cli"
 	"github.com/martinisecurity/trusty/pkg/csr"
 	"github.com/martinisecurity/trusty/pkg/print"
+	"github.com/pkg/errors"
 )
 
 // CreateFlags specifies flags for Create command
@@ -35,7 +35,7 @@ func Create(c ctl.Control, p interface{}) error {
 
 	csrf, err := c.(*cli.Cli).ReadFileOrStdin(*flags.CsrProfile)
 	if err != nil {
-		return errors.Annotate(err, "read CSR profile")
+		return errors.WithMessage(err, "read CSR profile")
 	}
 
 	req := csr.CertificateRequest{
@@ -44,14 +44,14 @@ func Create(c ctl.Control, p interface{}) error {
 
 	err = json.Unmarshal(csrf, &req)
 	if err != nil {
-		return errors.Annotate(err, "invalid CSR")
+		return errors.WithMessage(err, "invalid CSR")
 	}
 
 	var key, csrPEM []byte
 	csrPEM, key, _, _, err = prov.CreateRequestAndExportKey(&req)
 	if err != nil {
 		key = nil
-		return errors.Annotate(err, "process CSR")
+		return errors.WithMessage(err, "process CSR")
 	}
 
 	if *flags.Output == "" {
@@ -59,7 +59,7 @@ func Create(c ctl.Control, p interface{}) error {
 	} else {
 		err = SaveCert(*flags.Output, key, csrPEM, nil)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 	}
 
@@ -72,19 +72,19 @@ func SaveCert(baseName string, key, csrPEM, certPEM []byte) error {
 	if len(certPEM) > 0 {
 		err = ioutil.WriteFile(baseName+".pem", certPEM, 0664)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 	}
 	if len(csrPEM) > 0 {
 		err = ioutil.WriteFile(baseName+".csr", csrPEM, 0664)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 	}
 	if len(key) > 0 {
 		err = ioutil.WriteFile(baseName+".key", key, 0600)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 	}
 	return nil

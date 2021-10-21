@@ -3,7 +3,7 @@ package trustymain
 import (
 	"runtime/pprof"
 
-	"github.com/juju/errors"
+	"github.com/pkg/errors"
 )
 
 type cpuProfileCloser struct {

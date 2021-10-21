@@ -9,7 +9,6 @@ import (
 	"github.com/go-phorce/dolly/tasks"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
-	"github.com/juju/errors"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/backend/config"
@@ -17,6 +16,7 @@ import (
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/martinisecurity/trusty/pkg/certpublisher"
 	"github.com/martinisecurity/trusty/pkg/gserver"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 )
 
@@ -89,12 +89,12 @@ func (s *Service) OnStarted() error {
 	ctx := context.Background()
 	err := s.registerIssuers(ctx)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	err = s.registerRoots(ctx)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	s.registerPublisherTask(ctx)
 	return nil
@@ -116,8 +116,8 @@ func (s *Service) registerIssuers(ctx context.Context) error {
 			logger.KV(xlog.ERROR,
 				"status", "failed to register issuer",
 				"serial", mcert.SerialNumber,
-				"err", errors.Details(err))
-			return errors.Trace(err)
+				"err", err)
+			return errors.WithStack(err)
 		}
 	}
 	return nil
@@ -144,23 +144,23 @@ func (s *Service) registerCert(ctx context.Context, trust pb.Trust, location str
 func (s *Service) registerRoots(ctx context.Context) error {
 	for _, r := range s.cfg.RegistrationAuthority.PrivateRoots {
 		if err := fileutil.FileExists(r); err != nil {
-			logger.Warningf("err=[%v]", err.Error())
+			logger.Warningf("err=[%+v]", err.Error())
 			continue
 		}
 		err := s.registerCert(ctx, pb.Trust_Private, r)
 		if err != nil {
-			logger.Errorf("err=[%v]", errors.ErrorStack(err))
+			logger.Errorf("err=[%+v]", err)
 			return err
 		}
 	}
 	for _, r := range s.cfg.RegistrationAuthority.PublicRoots {
 		if err := fileutil.FileExists(r); err != nil {
-			logger.Warningf("err=[%v]", err.Error())
+			logger.Warningf("err=[%+v]", err.Error())
 			continue
 		}
 		err := s.registerCert(ctx, pb.Trust_Public, r)
 		if err != nil {
-			logger.Errorf("err=[%v]", errors.ErrorStack(err))
+			logger.Errorf("err=[%+v]", err)
 			return err
 		}
 	}
@@ -188,7 +188,7 @@ func (s *Service) registerPublisherTask(ctx context.Context) {
 				logger.KV(xlog.ERROR,
 					"ikid", issuer.SubjectKID(),
 					"task", taskName,
-					"err", errors.Details(err),
+					"err", err,
 				)
 			}
 		})

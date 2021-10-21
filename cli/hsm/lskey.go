@@ -6,8 +6,8 @@ import (
 
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/cli"
+	"github.com/pkg/errors"
 )
 
 // LsKeyFlags specifies flags for the Keys action
@@ -62,7 +62,7 @@ func Keys(c ctl.Control, p interface{}) error {
 				return nil
 			})
 			if err != nil {
-				return errors.Annotatef(err, "failed to list keys on slot %d", slotID)
+				return errors.WithMessagef(err, "failed to list keys on slot %d", slotID)
 			}
 
 			if *flags.Prefix != "" && count == 0 {

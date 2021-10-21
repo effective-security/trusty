@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/go-phorce/dolly/rest/tlsconfig"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/pkg/tlsutil"
+	"github.com/pkg/errors"
 )
 
 // TLSInfo provides TLS configuration
@@ -87,11 +87,11 @@ func (info *TLSInfo) ServerTLSWithReloader() (*tls.Config, error) {
 		info.TrustedCAFile,
 		info.ClientAuthType)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	if err = tlsutil.UpdateCipherSuites(info.tlsCfg, info.CipherSuites); err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	logger.Infof(info.String())
@@ -101,7 +101,7 @@ func (info *TLSInfo) ServerTLSWithReloader() (*tls.Config, error) {
 		info.KeyFile,
 		5*time.Minute)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	//  TODO: tlsloader.WithOCSPStaple(cfg.OCSPFile)

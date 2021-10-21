@@ -2,9 +2,9 @@ package certutil
 
 import (
 	"github.com/go-phorce/dolly/ctl"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/cli"
 	"github.com/martinisecurity/trusty/pkg/print"
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/ocsp"
 )
 
@@ -21,12 +21,12 @@ func OCSPInfo(c ctl.Control, p interface{}) error {
 	// Load DER
 	der, err := c.(*cli.Cli).ReadFileOrStdin(*flags.In)
 	if err != nil {
-		return errors.Annotate(err, "unable to load OCSP file")
+		return errors.WithMessage(err, "unable to load OCSP file")
 	}
 
 	res, err := ocsp.ParseResponse(der, nil)
 	if err != nil {
-		return errors.Annotate(err, "unable to prase OCSP")
+		return errors.WithMessage(err, "unable to prase OCSP")
 	}
 
 	print.OCSPResponse(c.Writer(), res)

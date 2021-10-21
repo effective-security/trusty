@@ -11,11 +11,11 @@ import (
 	"time"
 
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 )
 
@@ -29,7 +29,7 @@ func (s *Service) createGenericCRL(ctx context.Context, issuer *authority.Issuer
 	for {
 		revokedInfoList, err := s.db.ListRevokedCertificates(ctx, issuer.SubjectKID(), 0, last)
 		if err != nil {
-			return nil, errors.Trace(err)
+			return nil, errors.WithStack(err)
 		}
 		if len(revokedInfoList) == 0 {
 			break
@@ -48,12 +48,12 @@ func (s *Service) createGenericCRL(ctx context.Context, issuer *authority.Issuer
 
 	crlBytes, err := bundle.Cert.CreateCRL(rand.Reader, issuer.Signer(), revokedCerts, now, expiryTime)
 	if err != nil {
-		return nil, errors.Annotate(err, "failed to create CRL")
+		return nil, errors.WithMessage(err, "failed to create CRL")
 	}
 
 	crl, err := x509.ParseCRL(crlBytes)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	mcrl, err := s.db.RegisterCrl(ctx, &model.Crl{
@@ -64,7 +64,7 @@ func (s *Service) createGenericCRL(ctx context.Context, issuer *authority.Issuer
 		Pem:        string(pem.EncodeToMemory(&pem.Block{Type: "X509 CRL", Bytes: crlBytes})),
 	})
 	if err != nil {
-		return nil, errors.Annotatef(err, "failed to register CRL")
+		return nil, errors.WithMessagef(err, "failed to register CRL")
 	}
 
 	s.server.Audit(
@@ -92,7 +92,7 @@ func (s *Service) publishCrl(ctx context.Context, ikID string) (*pb.CrlsResponse
 			if err != nil {
 				logger.KV(xlog.ERROR,
 					"ikid", issuer.SubjectKID(),
-					"err", errors.Details(err),
+					"err", err,
 				)
 				return res, v1.NewError(codes.Internal, "failed to generate CRLs")
 			}
@@ -102,7 +102,7 @@ func (s *Service) publishCrl(ctx context.Context, ikID string) (*pb.CrlsResponse
 			if err != nil {
 				logger.KV(xlog.ERROR,
 					"ikid", issuer.SubjectKID(),
-					"err", errors.Details(err),
+					"err", err,
 				)
 				return res, v1.NewError(codes.Internal, "failed to publish CRLs")
 			}
@@ -130,7 +130,7 @@ func (s *Service) publishCrlInBackground(ikID string) {
 		if err != nil {
 			logger.KV(xlog.ERROR,
 				"ikid", ikID,
-				"err", errors.Details(err),
+				"err", err,
 			)
 		}
 	}()

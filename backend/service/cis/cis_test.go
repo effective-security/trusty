@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/backend/appcontainer"
 	"github.com/martinisecurity/trusty/backend/config"
@@ -16,6 +15,7 @@ import (
 	"github.com/martinisecurity/trusty/client/embed"
 	"github.com/martinisecurity/trusty/pkg/gserver"
 	"github.com/martinisecurity/trusty/tests/testutils"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -41,7 +41,7 @@ func TestMain(m *testing.M) {
 
 	cfg, err := testutils.LoadConfig(projFolder, "UNIT_TEST")
 	if err != nil {
-		panic(errors.Trace(err))
+		panic(errors.WithStack(err))
 	}
 
 	httpAddr := testutils.CreateURLs("http", "")
@@ -57,18 +57,18 @@ func TestMain(m *testing.M) {
 		}).
 		CreateContainerWithDependencies()
 	if err != nil {
-		panic(errors.Trace(err))
+		panic(errors.WithStack(err))
 	}
 
 	trustyServer, err = gserver.Start(config.CISServerName, httpcfg, container, serviceFactories)
 	if err != nil || trustyServer == nil {
-		panic(errors.Trace(err))
+		panic(errors.WithStack(err))
 	}
 	cisClient = embed.NewCIClient(trustyServer)
 
 	err = trustyServer.Service(config.CISServerName).(*cis.Service).OnStarted()
 	if err != nil {
-		panic(errors.Trace(err))
+		panic(errors.WithStack(err))
 	}
 
 	// Run the tests

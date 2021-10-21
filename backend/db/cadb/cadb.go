@@ -8,10 +8,10 @@ import (
 
 	"github.com/go-phorce/dolly/fileutil"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/martinisecurity/trusty/backend/db/cadb/pgsql"
+	"github.com/pkg/errors"
 
 	// register Postgres driver
 	_ "github.com/lib/pq"
@@ -98,23 +98,23 @@ type Provider interface {
 func New(driverName, dataSourceName, migrationsDir string, forceVersion int, nextID func() (uint64, error)) (Provider, error) {
 	ds, err := fileutil.LoadConfigWithSchema(dataSourceName)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	ds = strings.Trim(ds, "\"")
 	d, err := sql.Open(driverName, ds)
 	if err != nil {
-		return nil, errors.Annotatef(err, "unable to open DB: %s", driverName)
+		return nil, errors.WithMessagef(err, "unable to open DB: %s", driverName)
 	}
 
 	err = d.Ping()
 	if err != nil {
-		return nil, errors.Annotatef(err, "unable to ping DB: %s", driverName)
+		return nil, errors.WithMessagef(err, "unable to ping DB: %s", driverName)
 	}
 
 	err = db.Migrate("cadb", migrationsDir, forceVersion, d)
 	if err != nil {
-		return nil, errors.Annotatef(err, "unable to migrate cadb")
+		return nil, errors.WithMessagef(err, "unable to migrate cadb")
 	}
 
 	return pgsql.New(d, nextID)

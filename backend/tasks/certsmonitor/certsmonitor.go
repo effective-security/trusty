@@ -9,8 +9,8 @@ import (
 	"github.com/go-phorce/dolly/tasks"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/certutil"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/config"
+	"github.com/pkg/errors"
 )
 
 var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/tasks", "certsmonitor")
@@ -39,7 +39,7 @@ func (t *Task) run() {
 	for location, typ := range t.certsMap {
 		cert, err := certutil.LoadFromPEM(location)
 		if err != nil {
-			logger.Errorf("api=certsmonitor, file=%q, err=[%v]", location, err.Error())
+			logger.Errorf("api=certsmonitor, file=%q, err=[%+v]", location, err.Error())
 		} else {
 			logger.Infof("cert=%q, subject=%q, expires=%q", location, cert.Subject.CommonName, cert.NotAfter.Format(time.RFC3339))
 			if typ == typIssuer {
@@ -108,12 +108,12 @@ func Factory(
 
 		task, err := create(name, cfg, schedule, args...)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 
 		job, err := tasks.NewTask(task.schedule)
 		if err != nil {
-			return errors.Annotatef(err, "unable to schedule a job on schedule: %q", task.schedule)
+			return errors.WithMessagef(err, "unable to schedule a job on schedule: %q", task.schedule)
 		}
 
 		t := job.Do(task.name, task.run)

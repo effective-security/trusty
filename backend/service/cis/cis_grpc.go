@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/juju/errors"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
@@ -18,7 +17,7 @@ func (s *Service) GetRoots(ctx context.Context, _ *empty.Empty) (*pb.RootsRespon
 	if err != nil {
 		logger.KV(xlog.ERROR,
 			"status", "unable to query root certificates",
-			"err", errors.Details(err))
+			"err", err)
 		return nil, v1.NewError(codes.Internal, "unable to query root certificates")
 	}
 
@@ -41,7 +40,7 @@ func (s *Service) GetCertificate(ctx context.Context, in *pb.GetCertificateReque
 	if err != nil {
 		logger.KV(xlog.ERROR,
 			"request", in,
-			"err", errors.Details(err),
+			"err", err,
 		)
 		return nil, v1.NewError(codes.Internal, "unable to find certificate")
 	}

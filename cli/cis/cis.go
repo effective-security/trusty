@@ -6,10 +6,10 @@ import (
 
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/cli"
 	"github.com/martinisecurity/trusty/pkg/print"
+	"github.com/pkg/errors"
 )
 
 // GetRootsFlags defines flags for Roots command
@@ -24,13 +24,13 @@ func Roots(c ctl.Control, p interface{}) error {
 	cli := c.(*cli.Cli)
 	client, err := cli.Client(config.CISServerName)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	defer client.Close()
 
 	res, err := client.CIClient().GetRoots(context.Background(), &empty.Empty{})
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	if cli.IsJSON() {

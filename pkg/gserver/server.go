@@ -12,10 +12,10 @@ import (
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/authz"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/pkg/jwt"
 	"github.com/martinisecurity/trusty/pkg/roles"
+	"github.com/pkg/errors"
 	"go.uber.org/dig"
 	"google.golang.org/grpc"
 )
@@ -101,7 +101,7 @@ func Start(
 
 	e, err = newServer(name, cfg, container, serviceFactories)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	err = container.Invoke(func(
@@ -112,7 +112,7 @@ func Start(
 		e.disco = d
 		iden, err := roles.New(&cfg.IdentityMap, jwtParser)
 		if err != nil {
-			logger.Errorf("err=%v", errors.Details(err))
+			logger.Errorf("err=[%+v]", err)
 			return err
 		}
 
@@ -121,7 +121,7 @@ func Start(
 		return nil
 	})
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	if len(cfg.Authz.Allow) > 0 ||
@@ -136,7 +136,7 @@ func Start(
 			LogDenied:     cfg.Authz.LogDenied,
 		})
 		if err != nil {
-			return nil, errors.Trace(err)
+			return nil, errors.WithStack(err)
 		}
 	}
 
@@ -164,7 +164,7 @@ func newServer(
 	ipaddr, err := netutil.GetLocalIP()
 	if err != nil {
 		ipaddr = "127.0.0.1"
-		logger.Errorf("reason=unable_determine_ipaddr, use=%q, err=[%v]", ipaddr, errors.ErrorStack(err))
+		logger.Errorf("reason=unable_determine_ipaddr, use=%q, err=[%+v]", ipaddr, err)
 	}
 	hostname, _ := os.Hostname()
 
@@ -187,7 +187,7 @@ func newServer(
 		}
 		err = container.Invoke(sf(e))
 		if err != nil {
-			return nil, errors.Annotatef(err, "reason=factory, server=%q, service=%s",
+			return nil, errors.WithMessagef(err, "reason=factory, server=%q, service=%s",
 				name, svc)
 		}
 	}
@@ -196,7 +196,7 @@ func newServer(
 
 	e.sctxs, err = configureListeners(cfg)
 	if err != nil {
-		return e, errors.Trace(err)
+		return e, errors.WithStack(err)
 	}
 
 	for _, sctx := range e.sctxs {
@@ -221,7 +221,7 @@ func (e *Server) serveClients() (err error) {
 
 func (e *Server) errHandler(err error) {
 	if err != nil {
-		logger.Infof("err=[%v]", errors.ErrorStack(err))
+		logger.Infof("err=[%+v]", err)
 	}
 	select {
 	case <-e.stopc:

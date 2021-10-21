@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/juju/errors"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -128,7 +128,7 @@ func ParseObjectIdentifier(oidString string) (oid asn1.ObjectIdentifier, err err
 	for i, intString := range segments {
 		oid[i], err = strconv.Atoi(intString)
 		if err != nil {
-			err = errors.Annotatef(err, "invalid OID")
+			err = errors.WithMessagef(err, "invalid OID")
 			return
 		}
 	}

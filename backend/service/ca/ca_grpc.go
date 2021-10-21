@@ -11,7 +11,6 @@ import (
 	"github.com/go-phorce/dolly/metrics"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/juju/errors"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
@@ -177,7 +176,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 	if err != nil {
 		logger.KV(xlog.ERROR,
 			"status", "failed to sign certificate",
-			"err", errors.Details(err))
+			"err", err)
 
 		metrics.IncrCounter(keyForCertSignFailed, 1, tags...)
 		return nil, v1.NewError(codes.Internal, "failed to sign certificate request")
@@ -194,7 +193,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 		if err != nil {
 			logger.KV(xlog.ERROR,
 				"status", "failed to publish certificate",
-				"err", errors.Details(err))
+				"err", err)
 			metrics.IncrCounter(keyForCertPublishFailed, 1, tags...)
 			return nil, v1.NewError(codes.Internal, "failed to publish certificate")
 		}
@@ -204,7 +203,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 	if err != nil {
 		logger.KV(xlog.ERROR,
 			"status", "failed to register certificate",
-			"err", errors.Details(err))
+			"err", err)
 
 		return nil, v1.NewError(codes.Internal, "failed to register certificate")
 	}
@@ -237,7 +236,7 @@ func (s *Service) GetCertificate(ctx context.Context, in *pb.GetCertificateReque
 	if err != nil {
 		logger.KV(xlog.ERROR,
 			"request", in,
-			"err", errors.Details(err),
+			"err", err,
 		)
 		return nil, v1.NewError(codes.Internal, "unable to find certificate")
 	}
@@ -263,7 +262,7 @@ func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificat
 	if err != nil {
 		logger.KV(xlog.ERROR,
 			"request", in,
-			"err", errors.Details(err),
+			"err", err,
 		)
 		return nil, v1.NewError(codes.Internal, "unable to find certificate")
 	}
@@ -272,7 +271,7 @@ func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificat
 	if err != nil {
 		logger.KV(xlog.ERROR,
 			"request", in,
-			"err", errors.Details(err),
+			"err", err,
 		)
 		return nil, v1.NewError(codes.Internal, "unable to revoke certificate")
 	}
@@ -298,7 +297,7 @@ func (s *Service) ListCertificates(ctx context.Context, in *pb.ListByIssuerReque
 	if err != nil {
 		logger.KV(xlog.ERROR,
 			"request", in,
-			"err", errors.Details(err),
+			"err", err,
 		)
 		return nil, v1.NewError(codes.Internal, "unable to list certificates")
 	}
@@ -314,7 +313,7 @@ func (s *Service) ListRevokedCertificates(ctx context.Context, in *pb.ListByIssu
 	if err != nil {
 		logger.KV(xlog.ERROR,
 			"request", in,
-			"err", errors.Details(err),
+			"err", err,
 		)
 		return nil, v1.NewError(codes.Internal, "unable to list certificates")
 	}
@@ -330,7 +329,7 @@ func (s *Service) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertifica
 	if err != nil {
 		logger.KV(xlog.ERROR,
 			"request", in,
-			"err", errors.Details(err),
+			"err", err,
 		)
 		return nil, v1.NewError(codes.Internal, "unable to get certificates")
 	}

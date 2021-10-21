@@ -11,7 +11,6 @@ import (
 	"github.com/go-phorce/dolly/tasks"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/backend/db/cadb"
@@ -21,6 +20,7 @@ import (
 	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/pkg/gcpkmscrypto"
 	"github.com/martinisecurity/trusty/pkg/jwt"
+	"github.com/pkg/errors"
 	"github.com/sony/sonyflake"
 	"go.uber.org/dig"
 )
@@ -170,7 +170,7 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 
 	err := container.Provide(f.configProvider)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	container.Provide(func() CloseRegistrator {
@@ -179,47 +179,47 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 
 	err = container.Provide(f.discoveryProvider)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	err = container.Provide(f.schedulerProvider)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	err = container.Provide(f.auditorProvider)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	err = container.Provide(f.jwtProvider)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	err = container.Provide(f.cryptoProvider)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	err = container.Provide(f.authorityProvider)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	err = container.Provide(f.cadbProvider)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	err = container.Provide(f.clientFactoryProvider)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	err = container.Provide(f.publisherProvider)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	return container, nil
@@ -242,8 +242,8 @@ func provideAuditor(cfg *config.Configuration, r CloseRegistrator) (audit.Audito
 		var err error
 		auditor, err = fauditor.New(cfg.ServiceName+".log", cfg.Audit.Directory, cfg.Audit.MaxAgeDays, cfg.Audit.MaxSizeMb)
 		if err != nil {
-			logger.Errorf("reason=auditor, err=[%v]", errors.ErrorStack(err))
-			return nil, errors.Annotate(err, "failed to create Auditor")
+			logger.Errorf("reason=auditor, err=[%+v]", err)
+			return nil, errors.WithMessage(err, "failed to create Auditor")
 		}
 	} else {
 		auditor = auditornoop{}
@@ -260,7 +260,7 @@ func provideJwt(cfg *config.Configuration) (jwt.Parser, error) {
 	if cfg.JWT != "" {
 		provider, err = jwt.Load(cfg.JWT)
 		if err != nil {
-			return nil, errors.Trace(err)
+			return nil, errors.WithStack(err)
 		}
 	}
 
@@ -276,10 +276,10 @@ func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
 	cryptoprov.Register("GCPKMS", gcpkmscrypto.KmsLoader)
 	crypto, err := cryptoprov.Load(cfg.CryptoProv.Default, cfg.CryptoProv.Providers)
 	if err != nil {
-		logger.Errorf("default=%s, providers=%v, err=[%v]",
+		logger.Errorf("default=%s, providers=%v, err=[%+v]",
 			cfg.CryptoProv.Default, cfg.CryptoProv.Providers,
-			errors.ErrorStack(err))
-		return nil, errors.Trace(err)
+			err)
+		return nil, errors.WithStack(err)
 	}
 	return crypto, nil
 }
@@ -287,11 +287,11 @@ func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
 func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*authority.Authority, error) {
 	caCfg, err := authority.LoadConfig(cfg.Authority)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	ca, err := authority.NewAuthority(caCfg, crypto)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	return ca, nil
 }
@@ -307,7 +307,7 @@ func provideCaDB(cfg *config.Configuration) (cadb.CaDb, cadb.CaReadonlyDb, error
 		cfg.CaSQL.ForceVersion,
 		IDGenerator.NextID)
 	if err != nil {
-		return nil, nil, errors.Trace(err)
+		return nil, nil, errors.WithStack(err)
 	}
 	return d, d, nil
 }
@@ -322,7 +322,7 @@ func providePublisher(cfg *config.Configuration) (certpublisher.Publisher, error
 		CRLBucket:   cfg.RegistrationAuthority.Publisher.CRLBucket,
 	})
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	return pub, err
 }
@@ -335,7 +335,7 @@ var IDGenerator = sonyflake.NewSonyflake(sonyflake.Settings{
 	MachineID: func() (uint16, error) {
 		as, err := net.InterfaceAddrs()
 		if err != nil {
-			logger.Errorf("reason=InterfaceAddrs, err=[%v]", errors.ErrorStack(err))
+			logger.Errorf("reason=InterfaceAddrs, err=[%+v]", err)
 			return 0, nil
 		}
 

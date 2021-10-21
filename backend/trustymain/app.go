@@ -16,7 +16,6 @@ import (
 	"github.com/go-phorce/dolly/tasks"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xlog/logrotate"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/appcontainer"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/backend/service/ca"
@@ -29,6 +28,7 @@ import (
 	"github.com/martinisecurity/trusty/internal/version"
 	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/pkg/gserver"
+	"github.com/pkg/errors"
 	"go.uber.org/dig"
 	kp "gopkg.in/alecthomas/kingpin.v2"
 )
@@ -161,7 +161,7 @@ func (a *App) Close() error {
 		if closer != nil {
 			err := closer.Close()
 			if err != nil {
-				logger.Errorf("err=[%v]", err.Error())
+				logger.Errorf("err=[%+v]", err.Error())
 			}
 		}
 	}
@@ -176,7 +176,7 @@ func (a *App) Container() (*dig.Container, error) {
 	if a.container == nil {
 		a.container, err = a.containerFactory()
 		if err != nil {
-			return nil, errors.Trace(err)
+			return nil, errors.WithStack(err)
 		}
 	}
 	return a.container, nil
@@ -188,7 +188,7 @@ func (a *App) Configuration() (*config.Configuration, error) {
 	if a.cfg == nil {
 		err = a.loadConfig()
 		if err != nil {
-			return nil, errors.Trace(err)
+			return nil, errors.WithStack(err)
 		}
 	}
 	return a.cfg, nil
@@ -202,22 +202,22 @@ func (a *App) Run(startedCh chan<- bool) error {
 
 	ipaddr, err := netutil.WaitForNetwork(30 * time.Second)
 	if err != nil {
-		return errors.Annotate(err, "unable to resolve local IP")
+		return errors.WithMessage(err, "unable to resolve local IP")
 	}
 
 	a.hostname, err = os.Hostname()
 	if err != nil {
-		return errors.Annotate(err, "unable to resolve hostname")
+		return errors.WithMessage(err, "unable to resolve hostname")
 	}
 
 	_, err = a.Configuration()
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	err = a.initLogs()
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	ver := version.Current().String()
@@ -226,18 +226,18 @@ func (a *App) Run(startedCh chan<- bool) error {
 	if a.flags.cpu != nil {
 		err = a.initCPUProfiler(*a.flags.cpu)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 	}
 
 	err = a.setupMetrics()
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	_, err = a.Container()
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	isDryRun := a.flags.dryRun != nil && *a.flags.dryRun
@@ -250,10 +250,10 @@ func (a *App) Run(startedCh chan<- bool) error {
 		if !svcCfg.Disabled {
 			httpServer, err := gserver.Start(name, svcCfg, a.container, ServiceFactories)
 			if err != nil {
-				logger.Errorf("reason=Start, server=%s, err=[%v]", name, errors.ErrorStack(err))
+				logger.Errorf("reason=Start, server=%s, err=[%+v]", name, err)
 
 				a.stopServers()
-				return errors.Trace(err)
+				return errors.WithStack(err)
 			}
 			a.servers[httpServer.Name()] = httpServer
 		} else {
@@ -264,7 +264,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 	err = a.scheduleTasks()
 	if err != nil {
 		a.stopServers()
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	a.scheduler.Start()
 
@@ -282,7 +282,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 	})
 	if err != nil {
 		a.stopServers()
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	if startedCh != nil {
@@ -368,7 +368,7 @@ func (a *App) loadConfig() error {
 
 	f, err := config.DefaultFactory()
 	if err != nil {
-		return errors.Annotatef(err, "failed to create configuration factory")
+		return errors.WithMessagef(err, "failed to create configuration factory")
 	}
 	if len(*flags.cfgOverrideFile) > 0 {
 		f.WithOverride(*flags.cfgOverrideFile)
@@ -377,7 +377,7 @@ func (a *App) loadConfig() error {
 	cfg := new(config.Configuration)
 	err = f.LoadForHostName(*flags.cfgFile, "", cfg)
 	if err != nil {
-		return errors.Annotatef(err, "failed to load configuration %q", *flags.cfgFile)
+		return errors.WithMessagef(err, "failed to load configuration %q", *flags.cfgFile)
 	}
 	logger.Infof("status=loaded, cfg=%q", *flags.cfgFile)
 	a.cfg = cfg
@@ -463,8 +463,8 @@ func (a *App) initLogs() error {
 
 		logRotate, err := logrotate.Initialize(cfg.Logs.Directory, cfg.ServiceName, cfg.Logs.MaxAgeDays, cfg.Logs.MaxSizeMb, true, sink)
 		if err != nil {
-			logger.Errorf("reason=logrotate, folder=%q, err=[%s]", cfg.Logs.Directory, errors.ErrorStack(err))
-			return errors.Annotate(err, "failed to initialize log rotate")
+			logger.Errorf("reason=logrotate, folder=%q, err=[%+v]", cfg.Logs.Directory, err)
+			return errors.WithMessage(err, "failed to initialize log rotate")
 		}
 		a.OnClose(logRotate)
 	} else {
@@ -495,7 +495,7 @@ func (a *App) initCPUProfiler(file string) error {
 	if file != "" && file != nullDevName {
 		cpuf, err := os.Create(file)
 		if err != nil {
-			return errors.Annotate(err, "unable to create CPU profile")
+			return errors.WithMessage(err, "unable to create CPU profile")
 		}
 		logger.Infof("status=starting_cpu_profiling, file=%q", file)
 
@@ -519,19 +519,19 @@ func (a *App) setupMetrics() error {
 	case "datadog":
 		sink, err = metrics.NewDogStatsdSink("127.0.0.1:8125", cfg.ServiceName)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 	case "prometheus":
 		if promSink == nil {
 			promSink, err = metrics.NewPrometheusSink()
 			if err != nil {
-				return errors.Trace(err)
+				return errors.WithStack(err)
 			}
 		}
 		sink = promSink
 	case "inmem", "inmemory":
 	default:
-		return errors.NotImplementedf("metrics provider %q", cfg.Metrics.Provider)
+		return errors.Errorf("metrics provider %q not supported", cfg.Metrics.Provider)
 	}
 
 	if sink != nil {
@@ -551,7 +551,7 @@ func (a *App) setupMetrics() error {
 		}
 		prov, err := metrics.NewGlobal(cfg, sink)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 		prov.SetGauge([]string{"version"}, version.Current().Float())
 	}
@@ -565,7 +565,7 @@ func (a *App) scheduleTasks() error {
 		return nil
 	})
 	if err != nil {
-		return errors.Annotatef(err, "failed to create scheduler")
+		return errors.WithMessagef(err, "failed to create scheduler")
 	}
 	for _, task := range a.cfg.Tasks {
 		tf := taskFactories[task.Name]
@@ -575,7 +575,7 @@ func (a *App) scheduleTasks() error {
 
 		err := a.container.Invoke(tf(a.scheduler, task.Name, task.Schedule, task.Args...))
 		if err != nil {
-			return errors.Annotatef(err, "failed to create a task: %q", task.Name)
+			return errors.WithMessagef(err, "failed to create a task: %q", task.Name)
 		}
 		logger.KV(xlog.INFO, "task", task.Name, "schedule", task.Schedule)
 	}

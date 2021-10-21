@@ -3,10 +3,11 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/pkg/configloader"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
@@ -29,7 +30,7 @@ func TestConfigFilesAreYAML(t *testing.T) {
 func TestLoadConfig(t *testing.T) {
 	_, err := Load("missing.yaml")
 	assert.Error(t, err)
-	assert.True(t, errors.IsNotFound(err) || os.IsNotExist(err), "LoadConfig with missing file should return a file doesn't exist error: %v", errors.Trace(err))
+	assert.True(t, strings.Contains(err.Error(), "not found") || os.IsNotExist(err), "LoadConfig with missing file should return a file doesn't exist error: %v", errors.WithStack(err))
 
 	cfgFile, err := configloader.GetAbsFilename("etc/dev/"+ConfigFileName, projFolder)
 	require.NoError(t, err, "unable to determine config file")
