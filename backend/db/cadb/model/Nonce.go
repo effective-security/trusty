@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"github.com/juju/errors"
+	"github.com/pkg/errors"
 )
 
 // Nonce provides nonce

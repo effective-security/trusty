@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/tests/mockpb"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -54,7 +54,7 @@ func TestDiscovery(t *testing.T) {
 
 	err = d.Find(err)
 	require.Error(t, err)
-	assert.Equal(t, "non interface type: *errors.Err", err.Error())
+	assert.Equal(t, "non interface type: *errors.fundamental", err.Error())
 
 	err = d.Find(&err)
 	require.Error(t, err)
@@ -70,7 +70,7 @@ func TestDiscovery(t *testing.T) {
 		return nil
 	})
 	require.Error(t, err)
-	assert.Equal(t, "non interface type: *errors.Err", err.Error())
+	assert.Equal(t, "non interface type: *errors.fundamental", err.Error())
 
 	err = d.ForEach(&pbCA, func(key string) error {
 		return errors.Errorf("unable to do something")

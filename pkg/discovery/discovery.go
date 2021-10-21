@@ -5,7 +5,7 @@ import (
 	"reflect"
 
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
+	"github.com/pkg/errors"
 )
 
 var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/pkg", "discovery")
@@ -95,7 +95,7 @@ func (d *disco) ForEach(v interface{}, f func(typ string) error) error {
 			rv.Set(reflect.ValueOf(reg.Service))
 			err := f(key)
 			if err != nil {
-				return errors.Annotatef(err, "failed to execute callback for %s", reg.Type.String())
+				return errors.WithMessagef(err, "failed to execute callback for %s", reg.Type.String())
 			}
 		}
 	}

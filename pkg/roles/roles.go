@@ -9,9 +9,9 @@ import (
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
 	tcredentials "github.com/martinisecurity/trusty/pkg/credentials"
 	"github.com/martinisecurity/trusty/pkg/jwt"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"
@@ -164,7 +164,7 @@ func (p *provider) IdentityFromContext(ctx context.Context) (identity.Identity, 
 func (p *provider) jwtIdentity(auth string) (identity.Identity, error) {
 	token, err := p.jwt.ParseToken(auth, p.config.JWT.Audience)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	role := p.jwtRoles[token.Subject]
 	if role == "" {

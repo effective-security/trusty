@@ -6,8 +6,8 @@ import (
 
 	"github.com/go-phorce/dolly/rest/tlsconfig"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/config"
+	"github.com/pkg/errors"
 )
 
 // Factory specifies interface to create Client
@@ -82,7 +82,7 @@ func (f *factory) NewClient(svc string, ops ...Option) (*Client, error) {
 
 	targetHosts := f.cfg.ServerURL[svc]
 	if len(targetHosts) == 0 {
-		return nil, errors.NotFoundf(svc)
+		return nil, errors.Errorf("service %s not found", svc)
 	}
 
 	logger.KV(xlog.INFO, "host", targetHosts[0], "tls", f.cfg.ClientTLS.String())
@@ -100,7 +100,7 @@ func (f *factory) NewClient(svc string, ops ...Option) (*Client, error) {
 			tlsKey,
 			tlsCA)
 		if err != nil {
-			return nil, errors.Annotate(err, "unable to build TLS configuration")
+			return nil, errors.WithMessage(err, "unable to build TLS configuration")
 		}
 	}
 
@@ -113,7 +113,7 @@ func (f *factory) NewClient(svc string, ops ...Option) (*Client, error) {
 	}
 	client, err := New(clientCfg)
 	if err != nil {
-		return nil, errors.Annotatef(err, "unable to create client: %v", targetHosts)
+		return nil, errors.WithMessagef(err, "unable to create client: %v", targetHosts)
 	}
 	return client, nil
 }

@@ -11,10 +11,10 @@ import (
 	"time"
 
 	"github.com/go-phorce/dolly/xpki/certutil"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/pkg/csr"
 	"github.com/martinisecurity/trusty/pkg/inmemcrypto"
 	"github.com/martinisecurity/trusty/pkg/print"
+	"github.com/pkg/errors"
 	capi "k8s.io/api/certificates/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -65,20 +65,20 @@ func (r *Request) requestCertificate(ctx context.Context, client MinCertificates
 
 	pemCsr, pemKeyBytes, _, _, err := prov.CreateRequestAndExportKey(&req)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	keyFile := path.Join(r.CertDir, "tls.key")
 	// TODO: for 0600 the POD got access denied
 	if err := ioutil.WriteFile(keyFile, pemKeyBytes, 0644); err != nil {
-		return errors.Annotate(err, "unable to save key")
+		return errors.WithMessage(err, "unable to save key")
 	}
 
 	logger.Infof("wrote %s", keyFile)
 
 	csrFile := path.Join(r.CertDir, "tls.csr")
 	if err := ioutil.WriteFile(csrFile, pemCsr, 0644); err != nil {
-		return errors.Annotate(err, "unable to save CSR")
+		return errors.WithMessage(err, "unable to save CSR")
 	}
 
 	logger.Infof("wrote %s", csrFile)
@@ -111,7 +111,7 @@ func (r *Request) requestCertificate(ctx context.Context, client MinCertificates
 		logger.Debugf("unable to get CSR: " + err.Error())
 		_, err = client.Create(ctx, certificateSigningRequest, metaV1.CreateOptions{})
 		if err != nil {
-			return errors.Annotate(err, "unable to create the certificate signing request")
+			return errors.WithMessage(err, "unable to create the certificate signing request")
 		}
 		logger.Info("waiting for certificate...")
 	} else {
@@ -121,11 +121,12 @@ func (r *Request) requestCertificate(ctx context.Context, client MinCertificates
 	var certificate []byte
 	for {
 		csr, err := client.Get(ctx, certificateSigningRequestName, metaV1.GetOptions{})
-		if errors.IsNotFound(err) {
-			// If the request got deleted, waiting won't help.
-			return errors.Errorf("certificate signing request not found: " + certificateSigningRequestName)
-		}
 		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				// If the request got deleted, waiting won't help.
+				return errors.Errorf("certificate signing request not found: " + certificateSigningRequestName)
+			}
+
 			logger.Errorf("unable to retrieve certificate signing request (%s): %v", certificateSigningRequestName, err)
 			time.Sleep(5 * time.Second)
 			continue
@@ -149,7 +150,7 @@ func (r *Request) requestCertificate(ctx context.Context, client MinCertificates
 
 	chain, err := certutil.ParseChainFromPEM(certificate)
 	if err != nil {
-		logger.Errorf("failed to parse chain: %v" + errors.Details(err))
+		logger.Errorf("failed to parse chain: %+v", err)
 	} else {
 		b := new(strings.Builder)
 		print.Certificates(b, chain)
@@ -158,7 +159,7 @@ func (r *Request) requestCertificate(ctx context.Context, client MinCertificates
 
 	certFile := path.Join(r.CertDir, "tls.crt")
 	if err := ioutil.WriteFile(certFile, certificate, 0644); err != nil {
-		return errors.Annotate(err, "unable to save certificate")
+		return errors.WithMessage(err, "unable to save certificate")
 	}
 
 	logger.Infof("wrote %s", certFile)

@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/juju/errors"
 	db "github.com/martinisecurity/trusty/backend/db/cadb"
 	"github.com/martinisecurity/trusty/tests/testutils"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -28,7 +28,7 @@ func TestMain(m *testing.M) {
 
 	cfg, err := testutils.LoadConfig(projFolder, "UNIT_TEST")
 	if err != nil {
-		panic(errors.Trace(err))
+		panic(errors.WithStack(err))
 	}
 
 	p, err := db.New(

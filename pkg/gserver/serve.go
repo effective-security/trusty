@@ -3,6 +3,7 @@ package gserver
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net"
 	"net/http"
 	"strings"
@@ -17,9 +18,9 @@ import (
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/pkg/credentials"
 	"github.com/martinisecurity/trusty/pkg/transport"
+	"github.com/pkg/errors"
 	"github.com/rs/cors"
 	"github.com/soheilhy/cmux"
 	"google.golang.org/grpc"
@@ -53,7 +54,7 @@ type servers struct {
 func configureListeners(cfg *HTTPServerCfg) (sctxs map[string]*serveCtx, err error) {
 	urls, err := cfg.ParseListenURLs()
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	var tlsInfo *transport.TLSInfo
@@ -74,7 +75,7 @@ func configureListeners(cfg *HTTPServerCfg) (sctxs map[string]*serveCtx, err err
 
 		_, err = tlsInfo.ServerTLSWithReloader()
 		if err != nil {
-			return nil, errors.Trace(err)
+			return nil, errors.WithStack(err)
 		}
 	}
 
@@ -104,8 +105,8 @@ func configureListeners(cfg *HTTPServerCfg) (sctxs map[string]*serveCtx, err err
 		// clean up on error
 		for _, sctx := range sctxs {
 			if sctx.listener != nil {
-				logger.Infof("reason=error, network=%s, address=%s, err=%v",
-					sctx.network, sctx.addr, errors.Details(err))
+				logger.Infof("reason=error, network=%s, address=%s, err=[%+v]",
+					sctx.network, sctx.addr, err)
 				sctx.listener.Close()
 			}
 		}
@@ -160,12 +161,12 @@ func configureListeners(cfg *HTTPServerCfg) (sctxs map[string]*serveCtx, err err
 			sctx.network, sctx.addr)
 
 		if sctx.listener, err = net.Listen(sctx.network, sctx.addr); err != nil {
-			return nil, errors.Trace(err)
+			return nil, errors.WithStack(err)
 		}
 
 		if sctx.network == "tcp" {
 			if sctx.listener, err = transport.NewKeepAliveListener(sctx.listener, sctx.network, nil); err != nil {
-				return nil, errors.Trace(err)
+				return nil, errors.WithStack(err)
 			}
 		}
 		// TODO: register profiler, tracer, etc
@@ -268,7 +269,7 @@ func configureHandlers(s *Server, handler http.Handler) http.Handler {
 	if s.authz != nil {
 		handler, err = s.authz.NewHandler(handler)
 		if err != nil {
-			panic(errors.ErrorStack(err))
+			panic(fmt.Sprintf("%+v", err))
 		}
 	}
 

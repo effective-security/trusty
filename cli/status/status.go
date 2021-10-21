@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"github.com/go-phorce/dolly/ctl"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/cli"
 	"github.com/martinisecurity/trusty/pkg/print"
+	"github.com/pkg/errors"
 )
 
 // Version shows the service version
@@ -16,13 +16,13 @@ func Version(c ctl.Control, _ interface{}) error {
 	cli := c.(*cli.Cli)
 	client, err := cli.Client(config.WFEServerName)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	defer client.Close()
 
 	res, err := client.StatusClient().Version(context.Background())
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	if cli.IsJSON() {
@@ -39,13 +39,13 @@ func Server(c ctl.Control, _ interface{}) error {
 	cli := c.(*cli.Cli)
 	client, err := cli.Client(config.WFEServerName)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	defer client.Close()
 
 	res, err := client.StatusClient().Server(context.Background())
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	if cli.IsJSON() {
@@ -63,13 +63,13 @@ func Caller(c ctl.Control, _ interface{}) error {
 	cli := c.(*cli.Cli)
 	client, err := cli.Client(config.WFEServerName)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	defer client.Close()
 
 	res, err := client.StatusClient().Caller(context.Background())
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	if cli.IsJSON() {

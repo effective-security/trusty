@@ -7,12 +7,12 @@ import (
 	"strings"
 
 	"github.com/go-phorce/dolly/ctl"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/cli"
 	"github.com/martinisecurity/trusty/pkg/print"
+	"github.com/pkg/errors"
 )
 
 // Issuers shows the Issuing CAs
@@ -21,13 +21,13 @@ func Issuers(c ctl.Control, _ interface{}) error {
 
 	client, err := cli.Client(config.CAServerName)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	defer client.Close()
 
 	res, err := client.CAClient().Issuers(context.Background())
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	if cli.IsJSON() {
@@ -52,7 +52,7 @@ func ListCerts(c ctl.Control, p interface{}) error {
 	cli := c.(*cli.Cli)
 	client, err := cli.Client(config.CAServerName)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	defer client.Close()
 
@@ -60,7 +60,7 @@ func ListCerts(c ctl.Control, p interface{}) error {
 	if *flags.After != "" {
 		after, err = db.ID(*flags.After)
 		if err != nil {
-			return errors.Annotate(err, "unable to parse --after")
+			return errors.WithMessage(err, "unable to parse --after")
 		}
 	}
 
@@ -70,7 +70,7 @@ func ListCerts(c ctl.Control, p interface{}) error {
 		After: after,
 	})
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	if cli.IsJSON() {
@@ -89,7 +89,7 @@ func ListRevokedCerts(c ctl.Control, p interface{}) error {
 	cli := c.(*cli.Cli)
 	client, err := cli.Client(config.CAServerName)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	defer client.Close()
 
@@ -97,7 +97,7 @@ func ListRevokedCerts(c ctl.Control, p interface{}) error {
 	if *flags.After != "" {
 		after, err = db.ID(*flags.After)
 		if err != nil {
-			return errors.Annotate(err, "unable to parse --after")
+			return errors.WithMessage(err, "unable to parse --after")
 		}
 	}
 
@@ -107,7 +107,7 @@ func ListRevokedCerts(c ctl.Control, p interface{}) error {
 		After: after,
 	})
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	if cli.IsJSON() {
@@ -132,7 +132,7 @@ func Profile(c ctl.Control, p interface{}) error {
 	cli := c.(*cli.Cli)
 	client, err := cli.Client(config.CAServerName)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	defer client.Close()
 
@@ -141,7 +141,7 @@ func Profile(c ctl.Control, p interface{}) error {
 		Label:   *flags.Label,
 	})
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	ctl.WriteJSON(c.Writer(), res)
@@ -167,13 +167,13 @@ func Sign(c ctl.Control, p interface{}) error {
 	cli := c.(*cli.Cli)
 	client, err := cli.Client(config.CAServerName)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	defer client.Close()
 
 	csr, err := ioutil.ReadFile(*flags.Request)
 	if err != nil {
-		return errors.Annotatef(err, "failed to load request")
+		return errors.WithMessagef(err, "failed to load request")
 	}
 
 	res, err := client.CAClient().SignCertificate(context.Background(), &pb.SignCertificateRequest{
@@ -185,7 +185,7 @@ func Sign(c ctl.Control, p interface{}) error {
 		Token:         *flags.Token,
 	})
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	pem := res.Certificate.Pem
@@ -197,7 +197,7 @@ func Sign(c ctl.Control, p interface{}) error {
 	if flags.Out != nil && *flags.Out != "" {
 		err = ioutil.WriteFile(*flags.Out, []byte(pem), 0664)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 	} else if cli.IsJSON() {
 		ctl.WriteJSON(c.Writer(), res)
@@ -221,7 +221,7 @@ func PublishCrls(c ctl.Control, p interface{}) error {
 	cli := c.(*cli.Cli)
 	client, err := cli.Client(config.CAServerName)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	defer client.Close()
 
@@ -229,7 +229,7 @@ func PublishCrls(c ctl.Control, p interface{}) error {
 		Ikid: *flags.Ikid,
 	})
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	if cli.IsJSON() {
@@ -257,7 +257,7 @@ func Revoke(c ctl.Control, p interface{}) error {
 
 	client, err := c.(*cli.Cli).Client(config.CAServerName)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	defer client.Close()
 
@@ -276,7 +276,7 @@ func Revoke(c ctl.Control, p interface{}) error {
 		Reason:       pb.Reason(*flags.Reason),
 	})
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	ctl.WriteJSON(c.Writer(), res)

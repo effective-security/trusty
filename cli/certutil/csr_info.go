@@ -5,9 +5,9 @@ import (
 	"encoding/pem"
 
 	"github.com/go-phorce/dolly/ctl"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/cli"
 	"github.com/martinisecurity/trusty/pkg/print"
+	"github.com/pkg/errors"
 )
 
 // CSRInfoFlags specifies flags for CSRInfo action
@@ -22,7 +22,7 @@ func CSRInfo(c ctl.Control, p interface{}) error {
 	// Load CSR
 	csrb, err := c.(*cli.Cli).ReadFileOrStdin(*flags.In)
 	if err != nil {
-		return errors.Annotate(err, "unable to load CSR file")
+		return errors.WithMessage(err, "unable to load CSR file")
 	}
 
 	block, _ := pem.Decode(csrb)
@@ -32,7 +32,7 @@ func CSRInfo(c ctl.Control, p interface{}) error {
 
 	csrv, err := x509.ParseCertificateRequest(block.Bytes)
 	if err != nil {
-		return errors.Annotate(err, "unable to prase CSR")
+		return errors.WithMessage(err, "unable to prase CSR")
 	}
 
 	print.CertificateRequest(c.Writer(), csrv)

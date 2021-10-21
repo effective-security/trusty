@@ -12,8 +12,8 @@ import (
 	"github.com/go-phorce/dolly/fileutil/resolve"
 	"github.com/go-phorce/dolly/netutil"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
 	"github.com/oleiade/reflections"
+	"github.com/pkg/errors"
 	yamlcfg "go.uber.org/config"
 	"gopkg.in/yaml.v2"
 )
@@ -36,7 +36,7 @@ func NewFactory(nodeInfo netutil.NodeInfo, searchDirs []string, envPrefix string
 	if nodeInfo == nil {
 		nodeInfo, err = netutil.NewNodeInfo(nil)
 		if err != nil {
-			return nil, errors.Trace(err)
+			return nil, errors.WithStack(err)
 		}
 	}
 	/*
@@ -76,12 +76,12 @@ func GetAbsFilename(file, projFolder string) (string, error) {
 	if !filepath.IsAbs(projFolder) {
 		wd, err := os.Getwd() // package dir
 		if err != nil {
-			return "", errors.Annotate(err, "unable to determine current directory")
+			return "", errors.WithMessage(err, "unable to determine current directory")
 		}
 
 		projFolder, err = filepath.Abs(filepath.Join(wd, projFolder))
 		if err != nil {
-			return "", errors.Annotatef(err, "unable to determine project directory: %q", projFolder)
+			return "", errors.WithMessagef(err, "unable to determine project directory: %q", projFolder)
 		}
 	}
 
@@ -101,14 +101,14 @@ func (f *Factory) LoadForHostName(configFile, hostnameOverride string, config in
 
 	configFile, baseDir, err := f.resolveConfigFile(configFile)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	logger.Infof("file=%s, baseDir=%s", configFile, baseDir)
 
 	err = f.load(configFile, hostnameOverride, baseDir, config)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	var environment string
@@ -150,7 +150,7 @@ func (f *Factory) load(configFilename, hostnameOverride, baseDir string, config 
 		var hmap Hostmap
 		err = yaml.Unmarshal(hmapraw, &hmap)
 		if err != nil {
-			return errors.Annotatef(err, "failed to load hostmap file")
+			return errors.WithMessagef(err, "failed to load hostmap file")
 		}
 
 		hn := hostnameOverride
@@ -161,7 +161,7 @@ func (f *Factory) load(configFilename, hostnameOverride, baseDir string, config 
 			if hn == "" {
 				hn, err = os.Hostname()
 				if err != nil {
-					logger.Errorf("reason=hostname, err=%v", errors.Details(err))
+					logger.Errorf("reason=hostname, err=[%+v]", err)
 				}
 			}
 		}
@@ -170,7 +170,7 @@ func (f *Factory) load(configFilename, hostnameOverride, baseDir string, config 
 			override := hmap.Override[hn]
 			override, err = resolve.File(override, baseDir)
 			if err != nil {
-				return errors.Annotatef(err, "failed to resolve file")
+				return errors.WithMessagef(err, "failed to resolve file")
 			}
 			logger.KV(xlog.INFO, "hostname", hn, "override", override)
 			ops = append(ops, yamlcfg.File(override))
@@ -180,7 +180,7 @@ func (f *Factory) load(configFilename, hostnameOverride, baseDir string, config 
 	if len(f.overrideCfg) > 0 {
 		overrideCfg, _, err := f.resolveConfigFile(f.overrideCfg)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 		logger.KV(xlog.INFO, "override", overrideCfg)
 		ops = append(ops, yamlcfg.File(overrideCfg))
@@ -188,12 +188,12 @@ func (f *Factory) load(configFilename, hostnameOverride, baseDir string, config 
 
 	provider, err := yamlcfg.NewYAML(ops...)
 	if err != nil {
-		return errors.Annotatef(err, "failed to load configuration")
+		return errors.WithMessagef(err, "failed to load configuration")
 	}
 
 	err = provider.Get(yamlcfg.Root).Populate(config)
 	if err != nil {
-		return errors.Annotatef(err, "failed to parse configuration")
+		return errors.WithMessagef(err, "failed to parse configuration")
 	}
 
 	return nil
@@ -250,7 +250,7 @@ func (f *Factory) resolveConfigFile(configFile string) (absConfigFile, baseDir s
 		}
 	}
 
-	err = errors.NotFoundf("file %q in [%s]", configFile, strings.Join(f.searchDirs, ","))
+	err = errors.Errorf("file %q not found in [%s]", configFile, strings.Join(f.searchDirs, ","))
 	return
 }
 

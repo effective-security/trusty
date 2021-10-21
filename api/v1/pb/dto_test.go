@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/api/v1/pb"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -67,12 +67,12 @@ func Test_Decode_ValidDTO(t *testing.T) {
 func loadJson(filename string, v interface{}) error {
 	cfr, err := os.Open(filename)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	defer cfr.Close()
 	err = json.NewDecoder(cfr).Decode(v)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	return nil
 }

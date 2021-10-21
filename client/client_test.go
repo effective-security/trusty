@@ -31,7 +31,7 @@ func TestFactory(t *testing.T) {
 	_, err := f.NewClient("ca", client.WithTLS(&tls.Config{ServerName: "test2"}))
 	assert.Equal(t, "test1", tlsCfg1.ServerName)
 	require.Error(t, err)
-	assert.Equal(t, "ca not found", err.Error())
+	assert.Equal(t, "service ca not found", err.Error())
 
 	f = client.NewFactory(&config.TrustyClient{
 		ServerURL: map[string][]string{"ca": {"https://host1"}},

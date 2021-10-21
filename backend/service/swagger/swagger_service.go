@@ -9,7 +9,6 @@ import (
 	"github.com/go-phorce/dolly/xhttp/httperror"
 	"github.com/go-phorce/dolly/xhttp/marshal"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	"github.com/martinisecurity/trusty/pkg/gserver"
 )
@@ -75,7 +74,7 @@ func (s *Service) swagger() rest.Handle {
 		}
 		sw, err := ioutil.ReadFile(f)
 		if err != nil {
-			logger.Errorf("err=%v", errors.Details(err))
+			logger.Errorf("err=[%+v]", err)
 			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to load swagger file: "+f).WithCause(err))
 			return
 		}

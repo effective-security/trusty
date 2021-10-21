@@ -17,7 +17,7 @@ func TestNewFactory(t *testing.T) {
 
 	err = f.Load("trusty-config.yaml", &c)
 	require.Error(t, err)
-	assert.Equal(t, `file "trusty-config.yaml" in [] not found`, err.Error())
+	assert.Equal(t, `file "trusty-config.yaml" not found in []`, err.Error())
 }
 
 func TestLoadYAML(t *testing.T) {

@@ -9,9 +9,9 @@ import (
 
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/xpki/certutil"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/cli"
 	"github.com/martinisecurity/trusty/pkg/print"
+	"github.com/pkg/errors"
 )
 
 // CertInfoFlags specifies flags for CertInfo action
@@ -29,12 +29,12 @@ func CertInfo(c ctl.Control, p interface{}) error {
 	// Load PEM
 	pem, err := c.(*cli.Cli).ReadFileOrStdin(*flags.In)
 	if err != nil {
-		return errors.Annotate(err, "unable to load PEM file")
+		return errors.WithMessage(err, "unable to load PEM file")
 	}
 
 	list, err := certutil.ParseChainFromPEM(pem)
 	if err != nil {
-		return errors.Annotate(err, "unable to parse PEM")
+		return errors.WithMessage(err, "unable to parse PEM")
 	}
 
 	now := time.Now().UTC()
@@ -45,7 +45,7 @@ func CertInfo(c ctl.Control, p interface{}) error {
 	if flags.NotAfter != nil && *flags.NotAfter != "" {
 		d, err := time.ParseDuration(*flags.NotAfter)
 		if err != nil {
-			return errors.Annotate(err, "unable to parse --not-after")
+			return errors.WithMessage(err, "unable to parse --not-after")
 		}
 		list = filterByAfter(list, now.Add(d))
 	}
@@ -55,7 +55,7 @@ func CertInfo(c ctl.Control, p interface{}) error {
 	if *flags.Out != "" {
 		f, err := os.OpenFile(*flags.Out, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0664)
 		if err != nil {
-			return errors.Annotate(err, "unable to create file")
+			return errors.WithMessage(err, "unable to create file")
 		}
 		defer f.Close()
 
@@ -105,19 +105,19 @@ func Validate(c ctl.Control, p interface{}) error {
 
 	certBytes, err = ioutil.ReadFile(*flags.Cert)
 	if err != nil {
-		return errors.Annotate(err, "unable to load cert")
+		return errors.WithMessage(err, "unable to load cert")
 	}
 
 	if flags.CA != nil && *flags.CA != "" {
 		cas, err = ioutil.ReadFile(*flags.CA)
 		if err != nil {
-			return errors.Annotate(err, "unable to load CA bundle")
+			return errors.WithMessage(err, "unable to load CA bundle")
 		}
 	}
 	if flags.Root != nil && *flags.Root != "" {
 		roots, err = ioutil.ReadFile(*flags.Root)
 		if err != nil {
-			return errors.Annotate(err, "unable to load Root bundle")
+			return errors.WithMessage(err, "unable to load Root bundle")
 		}
 	}
 
@@ -127,7 +127,7 @@ func Validate(c ctl.Control, p interface{}) error {
 		if crt, err2 := certutil.ParseFromPEM(certBytes); err2 == nil {
 			print.Certificate(w, crt)
 		}
-		return errors.Annotate(err, "unable to verify certificate")
+		return errors.WithMessage(err, "unable to verify certificate")
 	}
 
 	if bundleStatus.IsUntrusted() {
@@ -158,7 +158,7 @@ func Validate(c ctl.Control, p interface{}) error {
 		pem := bundle.CertPEM + "\n" + bundle.CACertsPEM
 		err = ioutil.WriteFile(*flags.Out, []byte(pem), 0664)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 	}
 

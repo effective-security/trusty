@@ -10,8 +10,8 @@ import (
 
 	"github.com/go-phorce/dolly/metrics"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
 	"github.com/miekg/dns"
+	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
 
@@ -164,7 +164,7 @@ func (c *Client) exchangeOne(ctx context.Context, hostname string, qtype uint16)
 			)
 
 			if err != nil {
-				logger.Errorf("hostname=%q, type=%v, err=[%s]", hostname, qtypeStr, err.Error())
+				logger.Errorf("hostname=%q, type=%v, err=[%+v]", hostname, qtypeStr, err.Error())
 			} else {
 				logger.Warningf("hostname=%q, type=%v", hostname, qtypeStr)
 			}
@@ -201,7 +201,7 @@ func (c *Client) LookupTXT(ctx context.Context, hostname string) ([]string, []st
 	dnsType := dns.TypeTXT
 	r, err := c.exchangeOne(ctx, hostname, dnsType)
 	if err != nil {
-		logger.Tracef("reason=exchangeOne, host=%s, err=[%s]", hostname, err.Error())
+		logger.Tracef("reason=exchangeOne, host=%s, err=[%+v]", hostname, err.Error())
 		return nil, nil, &Error{dnsType, hostname, err, -1}
 	}
 	if r.Rcode != dns.RcodeSuccess {
@@ -228,7 +228,7 @@ func (c *Client) LookupTXT(ctx context.Context, hostname string) ([]string, []st
 func (c *Client) lookupIP(ctx context.Context, hostname string, ipType uint16) ([]dns.RR, error) {
 	resp, err := c.exchangeOne(ctx, hostname, ipType)
 	if err != nil {
-		logger.Tracef("reason=exchangeOne, type=%d, host=%s, err=[%s]", ipType, hostname, err.Error())
+		logger.Tracef("reason=exchangeOne, type=%d, host=%s, err=[%+v]", ipType, hostname, err.Error())
 		return nil, &Error{ipType, hostname, err, -1}
 	}
 	if resp.Rcode != dns.RcodeSuccess {
@@ -254,7 +254,7 @@ func (c *Client) LookupHost(ctx context.Context, hostname string) ([]net.IP, err
 		defer wg.Done()
 		recordsA, errA = c.lookupIP(ctx, hostname, dns.TypeA)
 		if errA != nil {
-			logger.Tracef("reason=lookupIP, type=A, host=%s, err=[%s]",
+			logger.Tracef("reason=lookupIP, type=A, host=%s, err=[%+v]",
 				hostname, errA.Error())
 		} else {
 			logger.Tracef("reason=lookupIP, type=A, host=%s, records=%d",
@@ -266,7 +266,7 @@ func (c *Client) LookupHost(ctx context.Context, hostname string) ([]net.IP, err
 		defer wg.Done()
 		recordsAAAA, errAAAA = c.lookupIP(ctx, hostname, dns.TypeAAAA)
 		if errAAAA != nil {
-			logger.Tracef("reason=lookupIP, type=AAAA, host=%s, err=[%s]", hostname, errAAAA.Error())
+			logger.Tracef("reason=lookupIP, type=AAAA, host=%s, err=[%+v]", hostname, errAAAA.Error())
 		} else {
 			logger.Tracef("reason=lookupIP, type=AAAA, host=%s, records=%d",
 				hostname, len(recordsAAAA))
@@ -275,7 +275,7 @@ func (c *Client) LookupHost(ctx context.Context, hostname string) ([]net.IP, err
 	wg.Wait()
 
 	if errA != nil && errAAAA != nil {
-		return nil, errors.Trace(errA)
+		return nil, errors.WithStack(errA)
 	}
 
 	var addrs []net.IP
@@ -308,7 +308,7 @@ func (c *Client) LookupCAA(ctx context.Context, hostname string) ([]*dns.CAA, er
 	dnsType := dns.TypeCAA
 	r, err := c.exchangeOne(ctx, hostname, dnsType)
 	if err != nil {
-		logger.Tracef("reason=exchangeOne, host=%s, err=[%s]", hostname, err.Error())
+		logger.Tracef("reason=exchangeOne, host=%s, err=[%+v]", hostname, err.Error())
 		return nil, &Error{dnsType, hostname, err, -1}
 	}
 
@@ -332,7 +332,7 @@ func (c *Client) LookupMX(ctx context.Context, hostname string) ([]string, error
 	dnsType := dns.TypeMX
 	r, err := c.exchangeOne(ctx, hostname, dnsType)
 	if err != nil {
-		logger.Tracef("reason=exchangeOne, host=%s, err=[%s]", hostname, err.Error())
+		logger.Tracef("reason=exchangeOne, host=%s, err=[%+v]", hostname, err.Error())
 		return nil, &Error{dnsType, hostname, err, -1}
 	}
 	if r.Rcode != dns.RcodeSuccess {

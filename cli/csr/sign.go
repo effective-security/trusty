@@ -4,11 +4,11 @@ import (
 	"strings"
 
 	"github.com/go-phorce/dolly/ctl"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/cli"
 	"github.com/martinisecurity/trusty/pkg/csr"
 	"github.com/martinisecurity/trusty/pkg/print"
+	"github.com/pkg/errors"
 )
 
 // SignFlags specifies flags for Sign command
@@ -50,17 +50,17 @@ func Sign(c ctl.Control, p interface{}) error {
 	// Load CSR
 	csrPEM, err := c.(*cli.Cli).ReadFileOrStdin(*flags.Csr)
 	if err != nil {
-		return errors.Annotate(err, "read CSR")
+		return errors.WithMessage(err, "read CSR")
 	}
 
 	// Load ca-config
 	cacfg, err := authority.LoadConfig(*flags.CAConfig)
 	if err != nil {
-		return errors.Annotate(err, "ca-config")
+		return errors.WithMessage(err, "ca-config")
 	}
 	err = cacfg.Validate()
 	if err != nil {
-		return errors.Annotate(err, "invalid ca-config")
+		return errors.WithMessage(err, "invalid ca-config")
 	}
 
 	isscfg := &authority.IssuerConfig{
@@ -76,7 +76,7 @@ func Sign(c ctl.Control, p interface{}) error {
 
 	issuer, err := authority.NewIssuer(isscfg, cryptoprov)
 	if err != nil {
-		return errors.Annotate(err, "create issuer")
+		return errors.WithMessage(err, "create issuer")
 	}
 
 	var san []string
@@ -91,7 +91,7 @@ func Sign(c ctl.Control, p interface{}) error {
 
 	_, certPEM, err := issuer.Sign(signReq)
 	if err != nil {
-		return errors.Annotate(err, "sign request")
+		return errors.WithMessage(err, "sign request")
 	}
 
 	if *flags.Output == "" {
@@ -99,7 +99,7 @@ func Sign(c ctl.Control, p interface{}) error {
 	} else {
 		err = SaveCert(*flags.Output, nil, nil, certPEM)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 	}
 

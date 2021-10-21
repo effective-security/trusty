@@ -20,9 +20,9 @@ import (
 
 	"github.com/go-phorce/dolly/algorithms/guid"
 	xcrtutil "github.com/go-phorce/dolly/xpki/certutil"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/cli/certutil"
 	"github.com/martinisecurity/trusty/cli/testsuite"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -341,7 +341,7 @@ func makeSelfCertRSA(hours int, crldp, ocsp string) (*x509.Certificate, crypto.P
 	// rsa key pair
 	key, err := rsa.GenerateKey(crand.Reader, 512)
 	if err != nil {
-		return nil, nil, errors.Trace(err)
+		return nil, nil, errors.WithStack(err)
 	}
 
 	// certificate
@@ -363,12 +363,12 @@ func makeSelfCertRSA(hours int, crldp, ocsp string) (*x509.Certificate, crypto.P
 
 	der, err := x509.CreateCertificate(crand.Reader, certTemplate, certTemplate, &key.PublicKey, key)
 	if err != nil {
-		return nil, nil, errors.Trace(err)
+		return nil, nil, errors.WithStack(err)
 	}
 
 	crt, err := x509.ParseCertificate(der)
 	if err != nil {
-		return nil, nil, errors.Trace(err)
+		return nil, nil, errors.WithStack(err)
 	}
 
 	return crt, key, nil

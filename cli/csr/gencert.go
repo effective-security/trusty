@@ -8,11 +8,11 @@ import (
 
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/ctl"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/cli"
 	"github.com/martinisecurity/trusty/pkg/csr"
 	"github.com/martinisecurity/trusty/pkg/print"
+	"github.com/pkg/errors"
 )
 
 // GenCertFlags specifies flags for GenCert command
@@ -63,7 +63,7 @@ func GenCert(c ctl.Control, p interface{}) error {
 	// Load CSR
 	csrf, err := c.(*cli.Cli).ReadFileOrStdin(*flags.CsrProfile)
 	if err != nil {
-		return errors.Annotate(err, "read CSR profile")
+		return errors.WithMessage(err, "read CSR profile")
 	}
 
 	prov := csr.NewProvider(defaultCrypto)
@@ -73,7 +73,7 @@ func GenCert(c ctl.Control, p interface{}) error {
 
 	err = json.Unmarshal(csrf, &req)
 	if err != nil {
-		return errors.Annotate(err, "invalid CSR profile")
+		return errors.WithMessage(err, "invalid CSR profile")
 	}
 	if flags.SAN != nil && len(*flags.SAN) > 0 {
 		req.SAN = strings.Split(*flags.SAN, ",")
@@ -82,11 +82,11 @@ func GenCert(c ctl.Control, p interface{}) error {
 	// Load ca-config
 	cacfg, err := authority.LoadConfig(*flags.CAConfig)
 	if err != nil {
-		return errors.Annotate(err, "ca-config")
+		return errors.WithMessage(err, "ca-config")
 	}
 	err = cacfg.Validate()
 	if err != nil {
-		return errors.Annotate(err, "invalid ca-config")
+		return errors.WithMessage(err, "invalid ca-config")
 	}
 
 	isscfg.Profiles = cacfg.Profiles
@@ -98,18 +98,18 @@ func GenCert(c ctl.Control, p interface{}) error {
 			cacfg,
 			defaultCrypto, &req)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 	} else {
 		issuer, err := authority.NewIssuer(isscfg, cryptoprov)
 		if err != nil {
-			return errors.Annotate(err, "create issuer")
+			return errors.WithMessage(err, "create issuer")
 		}
 
 		csrPEM, key, _, _, err = prov.CreateRequestAndExportKey(&req)
 		if err != nil {
 			key = nil
-			return errors.Annotate(err, "process CSR")
+			return errors.WithMessage(err, "process CSR")
 		}
 
 		signReq := csr.SignRequest{
@@ -119,7 +119,7 @@ func GenCert(c ctl.Control, p interface{}) error {
 
 		_, certPEM, err = issuer.Sign(signReq)
 		if err != nil {
-			return errors.Annotate(err, "sign request")
+			return errors.WithMessage(err, "sign request")
 		}
 	}
 
@@ -128,7 +128,7 @@ func GenCert(c ctl.Control, p interface{}) error {
 	} else {
 		err = SaveCert(*flags.Output, key, csrPEM, certPEM)
 		if err != nil {
-			return errors.Annotatef(err, "unable to save generated files")
+			return errors.WithMessagef(err, "unable to save generated files")
 		}
 	}
 

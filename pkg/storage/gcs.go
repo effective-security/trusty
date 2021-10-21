@@ -9,7 +9,7 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
+	"github.com/pkg/errors"
 	"google.golang.org/api/option"
 )
 
@@ -60,7 +60,7 @@ func (conn *GoogleCloudStorageConnection) Open(ctx context.Context) (*storage.Cl
 	}
 	client, err := storage.NewClient(ctx, conn.GetClientOptions()...)
 	if err != nil {
-		return nil, errors.Annotate(err, "unable to create storage client")
+		return nil, errors.WithMessage(err, "unable to create storage client")
 	}
 	conn.client = client
 	return client, nil
@@ -71,12 +71,12 @@ func (conn *GoogleCloudStorageConnection) Open(ctx context.Context) (*storage.Cl
 func (conn *GoogleCloudStorageConnection) getRemoteObject(ctx context.Context, path string) (*storage.ObjectHandle, error) {
 	uri, err := parseURI(path)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	bucketName := uri.Hostname()
 	bucket, err := conn.getRemoteBucket(ctx, bucketName)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	objectName := uri.Path[1:]
 	logger.KV(xlog.DEBUG, "bucket", bucketName, "object", objectName)
@@ -86,7 +86,7 @@ func (conn *GoogleCloudStorageConnection) getRemoteObject(ctx context.Context, p
 func parseURI(path string) (*url.URL, error) {
 	uri, err := url.Parse(path)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	if uri.Scheme != "gs" {
 		return nil, errors.Errorf("invalid scheme: %q", uri.Scheme)
@@ -100,7 +100,7 @@ func parseURI(path string) (*url.URL, error) {
 func (conn *GoogleCloudStorageConnection) getRemoteBucket(ctx context.Context, bucketName string) (*storage.BucketHandle, error) {
 	client, err := conn.Open(ctx)
 	if err != nil {
-		return nil, errors.Annotate(err, "unable to open storage client")
+		return nil, errors.WithMessage(err, "unable to open storage client")
 	}
 	return client.Bucket(bucketName), nil
 }
@@ -110,11 +110,11 @@ func (conn *GoogleCloudStorageConnection) getRemoteBucket(ctx context.Context, b
 func (conn *GoogleCloudStorageConnection) GetReader(ctx context.Context, path string) (result io.ReadCloser, err error) {
 	obj, err := conn.getRemoteObject(ctx, path)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	reader, err := obj.NewReader(ctx)
 	if err != nil {
-		return nil, errors.Annotate(err, "unable to open reader")
+		return nil, errors.WithMessage(err, "unable to open reader")
 	}
 	return reader, nil
 }
@@ -124,7 +124,7 @@ func (conn *GoogleCloudStorageConnection) GetReader(ctx context.Context, path st
 func (conn *GoogleCloudStorageConnection) GetWriter(ctx context.Context, path string) (result io.WriteCloser, err error) {
 	obj, err := conn.getRemoteObject(ctx, path)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	return obj.NewWriter(ctx), nil
 }
@@ -133,10 +133,10 @@ func (conn *GoogleCloudStorageConnection) GetWriter(ctx context.Context, path st
 func (conn *GoogleCloudStorageConnection) Delete(ctx context.Context, path string) (err error) {
 	obj, err := conn.getRemoteObject(ctx, path)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	if err := obj.Delete(ctx); err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	return nil
 }
@@ -148,12 +148,12 @@ func (conn *GoogleCloudStorageConnection) Delete(ctx context.Context, path strin
 func (conn *GoogleCloudStorageConnection) List(ctx context.Context, path string, delimiter string) (*storage.ObjectIterator, error) {
 	uri, err := parseURI(path)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	bucketName := uri.Hostname()
 	bucket, err := conn.getRemoteBucket(ctx, bucketName)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	queryPath := uri.Path[1:]
 	query := &storage.Query{
@@ -178,7 +178,7 @@ func (conn *GoogleCloudStorageConnection) List(ctx context.Context, path string,
 func (conn *GoogleCloudStorageConnection) Close() error {
 	if conn.client != nil {
 		if err := conn.client.Close(); err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 	}
 	return nil

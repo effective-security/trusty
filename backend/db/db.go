@@ -11,7 +11,7 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
-	"github.com/juju/errors"
+	"github.com/pkg/errors"
 
 	// register Postgres driver
 	_ "github.com/lib/pq"
@@ -69,7 +69,7 @@ func String(val *string) string {
 func ID(id string) (uint64, error) {
 	i64, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		return 0, errors.Trace(err)
+		return 0, errors.WithStack(err)
 	}
 	return i64, nil
 }
@@ -92,12 +92,12 @@ func Migrate(dbName, migrationsDir string, forceVersion int, db *sql.DB) error {
 	}
 
 	if _, err := os.Stat(migrationsDir); err != nil {
-		return errors.Annotatef(err, "directory %q inaccessible", migrationsDir)
+		return errors.WithMessagef(err, "directory %q inaccessible", migrationsDir)
 	}
 
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
@@ -105,12 +105,12 @@ func Migrate(dbName, migrationsDir string, forceVersion int, db *sql.DB) error {
 		"postgres",
 		driver)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	version, _, err := m.Version()
 	if err != nil && err != migrate.ErrNilVersion {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	if err == migrate.ErrNilVersion {
 		logger.Infof("db=%s, reason=initial_state, version=nil", dbName)
@@ -122,7 +122,7 @@ func Migrate(dbName, migrationsDir string, forceVersion int, db *sql.DB) error {
 		logger.Infof("db=%s, forceVersion=%d", dbName, forceVersion)
 		err = m.Force(forceVersion)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 	}
 
@@ -132,12 +132,12 @@ func Migrate(dbName, migrationsDir string, forceVersion int, db *sql.DB) error {
 			logger.Infof("db=%s, reason=no_change, version=%d", dbName, version)
 			return nil
 		}
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	version, _, err = m.Version()
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	logger.Infof("db=%s, reason=changed_state, version=%d", dbName, version)

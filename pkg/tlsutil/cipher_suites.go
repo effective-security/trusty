@@ -17,7 +17,7 @@ package tlsutil
 import (
 	"crypto/tls"
 
-	"github.com/juju/errors"
+	"github.com/pkg/errors"
 )
 
 // cipher suites implemented by Go

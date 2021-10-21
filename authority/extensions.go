@@ -6,8 +6,8 @@ import (
 	"crypto/x509/pkix"
 	"encoding/asn1"
 
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/pkg/csr"
+	"github.com/pkg/errors"
 )
 
 type policyInformation struct {
@@ -83,7 +83,7 @@ func addPolicies(template *x509.Certificate, policies []csr.CertificatePolicy, c
 
 	asn1Bytes, err := asn1.Marshal(asn1PolicyList)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 
 	template.ExtraExtensions = append(template.ExtraExtensions, pkix.Extension{
@@ -101,13 +101,13 @@ func computeSKI(template *x509.Certificate) ([]byte, error) {
 	pub := template.PublicKey
 	encodedPub, err := x509.MarshalPKIXPublicKey(pub)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	var subPKI subjectPublicKeyInfo
 	_, err = asn1.Unmarshal(encodedPub, &subPKI)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	pubHash := sha1.Sum(subPKI.SubjectPublicKey.Bytes)

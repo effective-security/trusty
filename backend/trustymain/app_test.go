@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/go-phorce/dolly/algorithms/guid"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/pkg/configloader"
 	"github.com/martinisecurity/trusty/tests/testutils"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -40,7 +40,7 @@ func Test_App_NoConfig(t *testing.T) {
 	err := app.Run(nil)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "failed to load configuration \"trusty-config.yaml\"")
-	assert.Contains(t, err.Error(), "file \"trusty-config.yaml\" in [")
+	assert.Contains(t, err.Error(), "file \"trusty-config.yaml\" not found in")
 }
 
 func Test_AppOnClose(t *testing.T) {

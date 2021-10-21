@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	tcredentials "github.com/martinisecurity/trusty/pkg/credentials"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -168,7 +168,7 @@ func newClient(cfg *Config) (*Client, error) {
 	conn, err := client.dial(dialEndpoint, creds, dopts...)
 	if err != nil {
 		client.cancel()
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	client.conn = conn

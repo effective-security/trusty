@@ -6,11 +6,11 @@ import (
 	"testing"
 
 	"github.com/gogo/protobuf/proto"
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/cli/ca"
 	"github.com/martinisecurity/trusty/cli/testsuite"
 	"github.com/martinisecurity/trusty/tests/mockpb"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -201,12 +201,12 @@ func (s *testSuite) TestRevokedListCerts() {
 func loadJSON(filename string, v interface{}) error {
 	cfr, err := os.Open(filename)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	defer cfr.Close()
 	err = json.NewDecoder(cfr).Decode(v)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	return nil
 }

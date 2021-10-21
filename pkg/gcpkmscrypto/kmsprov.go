@@ -16,7 +16,7 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/googleapis/gax-go/v2"
-	"github.com/juju/errors"
+	"github.com/pkg/errors"
 	"google.golang.org/api/iterator"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
@@ -43,7 +43,7 @@ var KmsClientFactory = func() (KmsClient, error) {
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return nil, errors.Annotatef(err, "failed to create kms client")
+		return nil, errors.WithMessagef(err, "failed to create kms client")
 	}
 
 	return client, nil
@@ -73,7 +73,7 @@ func Init(tc cryptoprov.TokenConfig) (*Provider, error) {
 	var err error
 	p.KmsClient, err = KmsClientFactory()
 	if err != nil {
-		return nil, errors.Annotatef(err, "failed to create KMS client")
+		return nil, errors.WithMessagef(err, "failed to create KMS client")
 	}
 
 	return p, nil
@@ -148,7 +148,7 @@ func (p *Provider) GenerateRSAKey(label string, bits int, purpose int) (crypto.P
 func (p *Provider) genKey(ctx context.Context, req *kmspb.CreateCryptoKeyRequest, label string) (crypto.PrivateKey, error) {
 	resp, err := p.KmsClient.CreateCryptoKey(ctx, req)
 	if err != nil {
-		return nil, errors.Annotatef(err, "failed to create key")
+		return nil, errors.WithMessagef(err, "failed to create key")
 	}
 
 	logger.KV(xlog.NOTICE,
@@ -165,14 +165,14 @@ func (p *Provider) genKey(ctx context.Context, req *kmspb.CreateCryptoKeyRequest
 		}
 
 		if !strings.Contains(err.Error(), "PENDING_GENERATION") {
-			return nil, errors.Annotatef(err, "failed to get public key")
+			return nil, errors.WithMessagef(err, "failed to get public key")
 		}
 		time.Sleep(1 * time.Second)
 	}
 
 	pub, err := parseKeyFromPEM([]byte(pubKeyResp.Pem))
 	if err != nil {
-		return nil, errors.Annotatef(err, "failed to parse public key")
+		return nil, errors.WithMessagef(err, "failed to parse public key")
 	}
 	signer := NewSigner(path.Base(resp.Name), label, pub, p)
 
@@ -187,7 +187,7 @@ func parseKeyFromPEM(bytes []byte) (interface{}, error) {
 
 	k, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	return k, nil
@@ -246,17 +246,17 @@ func (p *Provider) GetKey(keyID string) (crypto.PrivateKey, error) {
 	name := p.keyName(keyID)
 	key, err := p.KmsClient.GetCryptoKey(ctx, &kmspb.GetCryptoKeyRequest{Name: name})
 	if err != nil {
-		return nil, errors.Annotatef(err, "failed to get key")
+		return nil, errors.WithMessagef(err, "failed to get key")
 	}
 
 	pubResponse, err := p.KmsClient.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{Name: name + "/cryptoKeyVersions/1"})
 	if err != nil {
-		return nil, errors.Annotatef(err, "failed to get public key")
+		return nil, errors.WithMessagef(err, "failed to get public key")
 	}
 
 	pub, err := parseKeyFromPEM([]byte(pubResponse.Pem))
 	if err != nil {
-		return nil, errors.Annotatef(err, "failed to parse public key")
+		return nil, errors.WithMessagef(err, "failed to parse public key")
 	}
 	signer := NewSigner(keyID, key.Labels["label"], pub, p)
 	return signer, nil
@@ -289,7 +289,7 @@ func (p *Provider) EnumKeys(slotID uint, prefix string, keyInfoFunc func(id, lab
 			break
 		}
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 
 		if key.Primary != nil && key.Primary.State != kmspb.CryptoKeyVersion_ENABLED {
@@ -306,7 +306,7 @@ func (p *Provider) EnumKeys(slotID uint, prefix string, keyInfoFunc func(id, lab
 			&createdAt,
 		)
 		if err != nil {
-			return errors.Trace(err)
+			return errors.WithStack(err)
 		}
 	}
 	return nil
@@ -338,7 +338,7 @@ func (p *Provider) DestroyKeyPairOnSlot(slotID uint, keyID string) error {
 			Name: p.keyVersionName(keyID),
 		})
 	if err != nil {
-		return errors.Annotatef(err, "failed to schedule key deletion: %s", keyID)
+		return errors.WithMessagef(err, "failed to schedule key deletion: %s", keyID)
 	}
 	logger.Noticef("id=%s, deletion_time=%v",
 		keyID, resp.DestroyTime.AsTime().Format(time.RFC3339))
@@ -356,14 +356,14 @@ func (p *Provider) KeyInfo(slotID uint, keyID string, includePublic bool, keyInf
 
 	key, err := p.KmsClient.GetCryptoKey(ctx, &kmspb.GetCryptoKeyRequest{Name: name})
 	if err != nil {
-		return errors.Annotatef(err, "failed to describe key, id=%s", keyID)
+		return errors.WithMessagef(err, "failed to describe key, id=%s", keyID)
 	}
 
 	pubKey := ""
 	if includePublic {
 		pub, err := p.KmsClient.GetPublicKey(ctx, &kmspb.GetPublicKeyRequest{Name: name + "/cryptoKeyVersions/1"})
 		if err != nil {
-			return errors.Annotatef(err, "failed to get public key, id=%s", keyID)
+			return errors.WithMessagef(err, "failed to get public key, id=%s", keyID)
 		}
 		pubKey = pub.Pem
 	}
@@ -379,10 +379,10 @@ func (p *Provider) KeyInfo(slotID uint, keyID string, includePublic bool, keyInf
 		&createdAt,
 	)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	return nil
 }
@@ -416,7 +416,7 @@ func (p *Provider) Close() error {
 func KmsLoader(tc cryptoprov.TokenConfig) (cryptoprov.Provider, error) {
 	p, err := Init(tc)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	return p, nil
 }

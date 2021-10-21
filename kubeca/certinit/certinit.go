@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
+	"github.com/pkg/errors"
 	capi "k8s.io/api/certificates/v1"
 	v1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -101,12 +101,12 @@ func (r *Request) Create(ctx context.Context, client *CertClient) error {
 	if r.QueryK8s {
 		pod, err := client.Pods.Get(context.Background(), r.PodName, metaV1.GetOptions{})
 		if err != nil {
-			return errors.Annotatef(err, "failed to query pod %q in namespace %q", r.PodName, r.Namespace)
+			return errors.WithMessagef(err, "failed to query pod %q in namespace %q", r.PodName, r.Namespace)
 		}
 
 		r.san, err = getNamesForPod(ctx, client.Services, *pod, r.ClusterDomain, r.IncludeUnqualified)
 		if err != nil {
-			return errors.Annotatef(err, "failed to query names for pod %q in namespace %q", r.PodName, r.Namespace)
+			return errors.WithMessagef(err, "failed to query names for pod %q in namespace %q", r.PodName, r.Namespace)
 		}
 	}
 
@@ -119,7 +119,7 @@ func (r *Request) Create(ctx context.Context, client *CertClient) error {
 
 	err := r.requestCertificate(ctx, client.Certificates)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	return nil
 }
@@ -128,12 +128,12 @@ func (r *Request) Create(ctx context.Context, client *CertClient) error {
 func NewClient(kubeconfig, namespace string) (*CertClient, error) {
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	c, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	return &CertClient{

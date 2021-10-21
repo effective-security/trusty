@@ -94,7 +94,7 @@ func (s *Service) OnStarted() error {
 			func(ctx context.Context) (interface{}, error) {
 				c, err := s.getRAClient()
 				if err != nil {
-					return nil, errors.Trace(err)
+					return nil, errors.WithStack(err)
 				}
 				return c, nil
 			},
@@ -134,8 +134,8 @@ func (s *Service) getRAClient() (client.RAClient, error) {
 	if err != nil {
 		logger.KV(xlog.ERROR,
 			"status", "failed to get RA client",
-			"err", errors.Details(err))
-		return nil, errors.Trace(err)
+			"err", err)
+		return nil, errors.WithStack(err)
 	}
 
 	s.lock.Lock()

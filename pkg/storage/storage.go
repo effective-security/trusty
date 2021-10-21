@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/juju/errors"
+	"github.com/pkg/errors"
 )
 
 var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/pkg", "storage")
@@ -105,10 +105,10 @@ func (reader *WrappedReader) Close() error {
 	readerError := reader.Reader.Close()
 	connError := reader.Conn.Close()
 	if readerError != nil {
-		return errors.Trace(readerError)
+		return errors.WithStack(readerError)
 	}
 	if connError != nil {
-		return errors.Trace(connError)
+		return errors.WithStack(connError)
 	}
 	return nil
 }
@@ -124,7 +124,7 @@ func (writer *WrappedWriter) Close() error {
 	writerError := writer.Writer.Close()
 	connError := writer.Conn.Close()
 	if writerError != nil {
-		return errors.Trace(writerError)
+		return errors.WithStack(writerError)
 	}
 	return connError
 }
@@ -134,7 +134,7 @@ func (writer *WrappedWriter) Close() error {
 func GetReaderFromPath(ctx context.Context, path string, options ...*Options) (*WrappedReader, error) {
 	conn, err := ConnectionFromPath(path, options...)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	return GetReaderFromConn(ctx, path, conn)
 }
@@ -144,7 +144,7 @@ func GetReaderFromConn(ctx context.Context, path string, conn ReadWriteConnectio
 	reader, err := conn.GetReader(ctx, path)
 	if err != nil {
 		conn.Close()
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	return &WrappedReader{
 		Conn:   conn,
@@ -157,7 +157,7 @@ func GetReaderFromConn(ctx context.Context, path string, conn ReadWriteConnectio
 func GetWriterFromPath(ctx context.Context, path string, options ...*Options) (*WrappedWriter, error) {
 	conn, err := ConnectionFromPath(path, options...)
 	if err != nil {
-		return nil, errors.Annotatef(err, "failed to create connection: %s", path)
+		return nil, errors.WithMessagef(err, "failed to create connection: %s", path)
 	}
 	return GetWriterFromConn(ctx, path, conn)
 }
@@ -167,7 +167,7 @@ func GetWriterFromConn(ctx context.Context, path string, conn ReadWriteConnectio
 	writer, err := conn.GetWriter(ctx, path)
 	if err != nil {
 		conn.Close()
-		return nil, errors.Annotatef(err, "failed to create writer: %s", path)
+		return nil, errors.WithMessagef(err, "failed to create writer: %s", path)
 	}
 	return &WrappedWriter{
 		Conn:   conn,
@@ -181,12 +181,12 @@ func GetWriterFromConn(ctx context.Context, path string, conn ReadWriteConnectio
 func DeletePath(ctx context.Context, path string, options ...*Options) error {
 	conn, err := ConnectionFromPath(path, options...)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.WithStack(err)
 	}
 	deleteError := conn.Delete(ctx, path)
 	closeError := conn.Close()
 	if deleteError != nil {
-		return errors.Trace(deleteError)
+		return errors.WithStack(deleteError)
 	}
 	return closeError
 }
@@ -196,12 +196,12 @@ func DeletePath(ctx context.Context, path string, options ...*Options) error {
 func ReadFile(ctx context.Context, path string, options ...*Options) ([]byte, error) {
 	reader, err := GetReaderFromPath(ctx, path, options...)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	defer reader.Close()
 	ret, err := ioutil.ReadAll(reader)
 	if err != nil {
-		return nil, errors.Annotatef(err, "failed to read: %s", path)
+		return nil, errors.WithMessagef(err, "failed to read: %s", path)
 	}
 	return ret, nil
 }
@@ -213,15 +213,15 @@ func ReadFile(ctx context.Context, path string, options ...*Options) ([]byte, er
 func WriteFile(ctx context.Context, path string, data []byte, options ...*Options) (int, error) {
 	writer, err := GetWriterFromPath(ctx, path, options...)
 	if err != nil {
-		return 0, errors.Trace(err)
+		return 0, errors.WithStack(err)
 	}
 	defer writer.Close()
 	n, err := writer.Write(data)
 	if err != nil {
-		return n, errors.Annotatef(err, "failed to write: %s", path)
+		return n, errors.WithMessagef(err, "failed to write: %s", path)
 	}
 	if n != len(data) {
-		err = errors.Trace(io.ErrShortWrite)
+		err = errors.WithStack(io.ErrShortWrite)
 	}
 	return n, err
 }

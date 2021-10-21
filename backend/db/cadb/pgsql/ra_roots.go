@@ -3,21 +3,21 @@ package pgsql
 import (
 	"context"
 
-	"github.com/juju/errors"
 	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
+	"github.com/pkg/errors"
 )
 
 // RegisterRootCertificate registers Root Cert
 func (p *Provider) RegisterRootCertificate(ctx context.Context, crt *model.RootCertificate) (*model.RootCertificate, error) {
 	id, err := p.NextID()
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	err = db.Validate(crt)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 
 	logger.Debugf("subject=%q, skid=%s", crt.Subject, crt.SKID)
@@ -43,7 +43,7 @@ func (p *Provider) RegisterRootCertificate(ctx context.Context, crt *model.RootC
 		&res.Pem,
 	)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	res.NotAfter = res.NotAfter.UTC()
 	res.NotBefore = res.NotBefore.UTC()
@@ -54,8 +54,8 @@ func (p *Provider) RegisterRootCertificate(ctx context.Context, crt *model.RootC
 func (p *Provider) RemoveRootCertificate(ctx context.Context, id uint64) error {
 	_, err := p.db.ExecContext(ctx, `DELETE FROM roots WHERE id=$1;`, id)
 	if err != nil {
-		logger.Errorf("err=%v", errors.Details(err))
-		return errors.Trace(err)
+		logger.Errorf("err=[%+v]", err)
+		return errors.WithStack(err)
 	}
 
 	logger.Noticef("id=%d", id)
@@ -74,7 +74,7 @@ func (p *Provider) GetRootCertificates(ctx context.Context) (model.RootCertifica
 		;
 		`)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.WithStack(err)
 	}
 	defer res.Close()
 
@@ -93,7 +93,7 @@ func (p *Provider) GetRootCertificates(ctx context.Context) (model.RootCertifica
 			&r.Pem,
 		)
 		if err != nil {
-			return nil, errors.Trace(err)
+			return nil, errors.WithStack(err)
 		}
 		r.NotAfter = r.NotAfter.UTC()
 		r.NotBefore = r.NotBefore.UTC()
