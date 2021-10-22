@@ -11,6 +11,7 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	"github.com/martinisecurity/trusty/pkg/gserver"
+	"github.com/pkg/errors"
 )
 
 // ServiceName provides the Service Name for this package
@@ -68,14 +69,14 @@ func (s *Service) swagger() rest.Handle {
 
 		f := s.cfg.Swagger.Files[svc]
 		if f == "" {
-			marshal.WriteJSON(w, r, httperror.WithNotFound("file not found for: "+svc))
+			marshal.WriteJSON(w, r, httperror.WithNotFound("file not found for: %s", svc))
 			return
 
 		}
 		sw, err := ioutil.ReadFile(f)
 		if err != nil {
-			logger.Errorf("err=[%+v]", err)
-			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to load swagger file: "+f).WithCause(err))
+			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to load swagger file: %s", f).
+				WithCause(errors.WithStack(err)))
 			return
 		}
 		w.Header().Set(header.ContentType, header.ApplicationJSON)
