@@ -142,7 +142,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 
 	ca, err := s.ca.GetIssuerByProfile(req.Profile)
 	if err != nil {
-		return nil, v1.NewError(codes.InvalidArgument, err.Error())
+		return nil, v1.NewError(codes.InvalidArgument, "issuer not found for profile: %s", req.Profile)
 	}
 
 	label := req.IssuerLabel

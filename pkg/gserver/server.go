@@ -4,6 +4,7 @@ import (
 	"context"
 	"net"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -220,8 +221,8 @@ func (e *Server) serveClients() (err error) {
 }
 
 func (e *Server) errHandler(err error) {
-	if err != nil {
-		logger.Infof("err=[%+v]", err)
+	if err != nil && !strings.Contains(err.Error(), "closed") {
+		logger.Infof("err=[%v]", err)
 	}
 	select {
 	case <-e.stopc:
