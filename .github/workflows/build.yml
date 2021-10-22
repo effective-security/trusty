@@ -41,6 +41,11 @@ jobs:
       with:
         go-version: ${{ matrix.go-version }}
 
+    - name: Configure git for private modules
+      env:
+        TOKEN: ${{ secrets.BUILDER_PAT }}
+      run: git config --global url."https://dissoupov:${TOKEN}@github.com".insteadOf "https://github.com"
+
     - name: Checkout code
       uses: actions/checkout@v2
 
