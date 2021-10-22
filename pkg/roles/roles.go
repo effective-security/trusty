@@ -116,6 +116,12 @@ func (p *provider) ApplicableForContext(ctx context.Context) bool {
 
 // IdentityFromRequest returns identity from the request
 func (p *provider) IdentityFromRequest(r *http.Request) (identity.Identity, error) {
+	peers := getPeerCertAndCount(r)
+	logger.KV(xlog.DEBUG,
+		"jwt_enabled", p.config.JWT.Enabled,
+		"tls_enabled", p.config.TLS.Enabled,
+		"certs_present", peers)
+
 	if p.config.JWT.Enabled {
 		key := r.Header.Get(header.Authorization)
 		if key != "" && strings.HasPrefix(key, header.Bearer) {
@@ -123,7 +129,7 @@ func (p *provider) IdentityFromRequest(r *http.Request) (identity.Identity, erro
 		}
 	}
 
-	if p.config.TLS.Enabled && r.TLS != nil && len(r.TLS.PeerCertificates) > 0 {
+	if p.config.TLS.Enabled && peers > 0 {
 		id, err := p.tlsIdentity(r.TLS)
 		if err == nil {
 			logger.Debugf("type=TLS, role=%v", id)
@@ -134,6 +140,13 @@ func (p *provider) IdentityFromRequest(r *http.Request) (identity.Identity, erro
 	// if none of mappers are applicable or configured,
 	// then use default guest mapper
 	return identity.GuestIdentityMapper(r)
+}
+
+func getPeerCertAndCount(r *http.Request) int {
+	if r.TLS != nil {
+		return len(r.TLS.PeerCertificates)
+	}
+	return 0
 }
 
 // IdentityFromContext returns identity from context
@@ -186,6 +199,8 @@ func (p *provider) tlsIdentity(TLS *tls.ConnectionState) (identity.Identity, err
 		logger.Debugf("spiffe=%s, role=%s", spiffe, role)
 		return identity.NewIdentity(role, peer.Subject.CommonName, ""), nil
 	}
+
+	logger.Debugf("spiffe=none, cn=%q", peer.Subject.CommonName)
 
 	return nil, errors.Errorf("could not determine identity: %q", peer.Subject.CommonName)
 }
