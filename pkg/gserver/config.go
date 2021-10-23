@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-phorce/dolly/netutil"
+	"github.com/go-phorce/dolly/xhttp"
 	"github.com/martinisecurity/trusty/pkg/roles"
 )
 
@@ -28,6 +29,10 @@ type HTTPServerCfg struct {
 
 	// PackageLogger if set, specifies name of the package logger
 	PackageLogger string `json:"logger,omitempty" yaml:"logger,omitempty"`
+
+	// SkipLogPaths if set, specifies a list of paths to not log.
+	// this can be used for /v1/status/node or /metrics
+	SkipLogPaths []xhttp.LoggerSkipPath `json:"logger_skip_paths,omitempty" yaml:"logger_skip_paths,omitempty"`
 
 	// AllowProfiling if set, will allow for per request CPU/Memory profiling triggered by the URI QueryString
 	AllowProfiling *bool `json:"allow_profiling,omitempty" yaml:"allow_profiling,omitempty"`

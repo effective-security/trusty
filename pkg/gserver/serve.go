@@ -274,7 +274,11 @@ func configureHandlers(s *Server, handler http.Handler) http.Handler {
 	}
 
 	// logging wrapper
-	handler = xhttp.NewRequestLogger(handler, s.Name(), serverExtraLogger, time.Millisecond, s.cfg.PackageLogger)
+	var opts []xhttp.RequestLoggerOption
+	if len(s.cfg.SkipLogPaths) > 0 {
+		opts = append(opts, xhttp.WithLoggerSkipPaths(s.cfg.SkipLogPaths))
+	}
+	handler = xhttp.NewRequestLogger(handler, s.Name(), serverExtraLogger, time.Millisecond, s.cfg.PackageLogger, opts...)
 
 	// metrics wrapper
 	handler = xhttp.NewRequestMetrics(handler)
