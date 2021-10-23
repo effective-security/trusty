@@ -16,8 +16,8 @@ var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/ta
 const TaskName = "stats"
 
 var (
-	keyForDbCertsCount   = []string{"db", "stats", "certs_count"}
-	keyForDbRevokedCount = []string{"db", "stats", "revoked_count"}
+	keyForDbCertsCount   = []string{"db", "stats", "certs"}
+	keyForDbRevokedCount = []string{"db", "stats", "revoked"}
 )
 
 // Task defines the healthcheck task
@@ -35,7 +35,7 @@ func (t *Task) run() {
 	if err != nil {
 		logger.Errorf("err=[%+v]", err)
 	} else {
-		metrics.IncrCounter(keyForDbCertsCount, float32(c))
+		metrics.SetGauge(keyForDbCertsCount, float32(c))
 		logger.Infof("certs_count=%d", c)
 	}
 
@@ -43,7 +43,7 @@ func (t *Task) run() {
 	if err != nil {
 		logger.Errorf("err=[%+v]", err)
 	} else {
-		metrics.IncrCounter(keyForDbRevokedCount, float32(c))
+		metrics.SetGauge(keyForDbRevokedCount, float32(c))
 		logger.Infof("revoked_count=%d", c)
 	}
 }
