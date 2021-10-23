@@ -8,7 +8,10 @@ LABEL org.opencontainers.image.authors="Martini Security <denis@martinisecurity.
 
 ENV PATH=$PATH:/opt/trusty/bin
 
-RUN mkdir -p /home/nonroot /opt/trusty/bin /opt/trusty/sql /var/trusty/certs /var/trusty/audit /opt/trusty/etc/prod /opt/trusty/etc/dev /trusty_certs
+RUN mkdir -p /home/nonroot \
+      /opt/trusty/bin /opt/trusty/sql /opt/trusty/etc/prod /opt/trusty/etc/dev \
+      /var/trusty/certs /var/trusty/audit /var/trusty/logs \
+      /trusty_certs /trusty_logs /trusty_audit
 COPY ./bin/trusty* /opt/trusty/bin/
 COPY ./scripts/build/* /opt/trusty/bin/
 COPY ./sql/ /opt/trusty/sql/
@@ -25,7 +28,7 @@ EXPOSE 7880 7892
 RUN groupadd -g 1000 -o nonroot
 RUN useradd -r -u 1000 -g nonroot nonroot
 RUN chown -R nonroot:nonroot /home/nonroot 
-RUN chown -R nonroot:nonroot /var/trusty /trusty_certs
+RUN chown -R nonroot:nonroot /var/trusty /trusty_certs /trusty_logs /trusty_audit
 
 USER nonroot:nonroot
 
