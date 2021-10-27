@@ -119,8 +119,8 @@ start-local-kms:
 	if [ "$$LKMS_CONTAINER_STATE" = "missing" ]; then \
 		docker pull nsmithuk/local-kms && \
 		docker run \
-			-d -e 'PORT=7599' \
-			-p 7599:7599 \
+			-d -e 'PORT=24599' \
+			-p 24599:24599 \
 			--name trusty-unittest-local-kms \
 			nsmithuk/local-kms && \
 			sleep 1; \
@@ -134,7 +134,7 @@ start-sql:
 	if [ "$$CONTAINER_STATE" = "missing" ]; then \
 		docker pull ekspand/docker-centos7-postgres:latest && \
 		docker run \
-			-d -p 127.0.0.1:15432:15432 \
+			-d -p 15432:15432 \
 			-e 'POSTGRES_USER=postgres' \
 			-e 'POSTGRES_PASSWORD=postgres' \
 			-e 'POSTGRES_PORT=15432' \
@@ -143,13 +143,13 @@ start-sql:
 			ekspand/docker-centos7-postgres:latest /start_postgres.sh && \
 		sleep 9; \
 	elif [ "$$CONTAINER_STATE" = "false" ]; then docker start trusty-unittest-postgres && sleep 9; fi;
-	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 15432 -U postgres -a -f /trusty_sql/cadb/create.sql
-	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 15432 -U postgres -lqt
-	echo "host=127.0.0.1 port=15432 user=postgres password=postgres sslmode=disable dbname=cadb" > etc/dev/sql-conn-cadb.txt
+	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h localhost -p 15432 -U postgres -a -f /trusty_sql/cadb/create.sql
+	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h localhost -p 15432 -U postgres -lqt
+	echo "host=localhost port=15432 user=postgres password=postgres sslmode=disable dbname=cadb" > etc/dev/sql-conn-cadb.txt
 
 drop-sql:
-	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 15432 -U postgres -a -f /trusty_sql/cadb/drop.sql
-	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h 127.0.0.1 -p 15432 -U postgres -lqt
+	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h localhost -p 15432 -U postgres -a -f /trusty_sql/cadb/drop.sql
+	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h localhost -p 15432 -U postgres -lqt
 
 coveralls-github:
 	echo "Running coveralls"

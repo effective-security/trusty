@@ -23,7 +23,7 @@ func Test_KmsProvider(t *testing.T) {
 	cfg := &mockTokenCfg{
 		manufacturer: awskmscrypto.ProviderName,
 		model:        "KMS",
-		atts:         "Endpoint=http://localhost:7599,Region=eu-west-2",
+		atts:         "Endpoint=http://localhost:24599,Region=eu-west-2",
 	}
 
 	prov, err := awskmscrypto.KmsLoader(cfg)

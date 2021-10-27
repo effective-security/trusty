@@ -21,9 +21,9 @@ services:
         aliases:
           - trusty-kms.ekspand.com
     ports:
-      - "7599" # KMS
+      - "14599:14599" # KMS
     environment:
-      - PORT=7599
+      - PORT=14599
 
   trusty-sql:
     image: ekspand/docker-centos7-postgres:latest
@@ -39,9 +39,9 @@ services:
       # the source path in the volume definitions are relative to ./sql
       - ../../sql:/trusty_sql
     ports:
-      - "5432" # SQL
+      - "25433:25433" # SQL
     environment:
-      - POSTGRES_PORT=5432
+      - POSTGRES_PORT=25433
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - TRUSTY_JWT_SEED=testseed 
@@ -84,12 +84,12 @@ services:
       - TRUSTY_MAILGUN_PRIVATE_KEY=not_used_in_test
       - TRUSTY_STRIPE_API_KEY=sk_test_123
       - TRUSTY_STRIPE_WEBHOOK_SECRET=not_used_in_test
-      - TRUSTY_CA_SQL_CONN=host=168.138.72.100 port=5432 user=postgres password=postgres sslmode=disable dbname=cadb
+      - TRUSTY_CA_SQL_CONN=host=168.138.72.100 port=25433 user=postgres password=postgres sslmode=disable dbname=cadb
     entrypoint:
       - /bin/bash
       - -c
       - >-
-        /opt/trusty/sql/cadb/wait_sql.sh 168.138.72.100 5432 postgres postgres echo "CA DB is ready" &&
+        /opt/trusty/sql/cadb/wait_sql.sh 168.138.72.100 25433 postgres postgres echo "CA DB is ready" &&
         mkdir -p /tmp/trusty/softhsm/tokens /tmp/trusty/certs &&
         cp /opt/trusty/etc/dev/roots/trusty_root_ca.pem /tmp/trusty/certs/trusty_root_ca.pem &&
         /opt/trusty/bin/config-softhsm.sh
@@ -156,12 +156,12 @@ services:
       - TRUSTY_MAILGUN_PRIVATE_KEY=not_used_in_test
       - TRUSTY_STRIPE_API_KEY=sk_test_123
       - TRUSTY_STRIPE_WEBHOOK_SECRET=not_used_in_test
-      - TRUSTY_CA_SQL_CONN=host=168.138.72.100 port=5432 user=postgres password=postgres sslmode=disable dbname=cadb
+      - TRUSTY_CA_SQL_CONN=host=168.138.72.100 port=25433 user=postgres password=postgres sslmode=disable dbname=cadb
     entrypoint:
       - /bin/bash
       - -c
       - >-
-        /opt/trusty/sql/cadb/wait_sql.sh 168.138.72.100 5432 postgres postgres echo "CA DB is ready" &&
+        /opt/trusty/sql/cadb/wait_sql.sh 168.138.72.100 25433 postgres postgres echo "CA DB is ready" &&
         mkdir -p /tmp/trusty/certs &&
         cp /opt/trusty/etc/dev/roots/trusty_root_ca.pem /tmp/trusty/certs/trusty_root_ca.pem &&
         /opt/trusty/bin/gen_certs.sh
@@ -222,7 +222,7 @@ services:
       - >-
         mkdir -p /tmp/trusty/softhsm/tokens /tmp/trusty/certs &&
         cp /opt/trusty/etc/dev/roots/trusty_root_ca.pem /tmp/trusty/certs/trusty_root_ca.pem &&
-        /opt/trusty/sql/cadb/create_sql.sh 168.138.72.100 5432 postgres postgres echo "CA DB is ready" &&
+        /opt/trusty/sql/cadb/create_sql.sh 168.138.72.100 25433 postgres postgres echo "CA DB is ready" &&
         /opt/trusty/bin/config-softhsm.sh
         --tokens-dir /tmp/trusty/softhsm/tokens
         --pin-file /tmp/trusty/softhsm/trusty_unittest.txt
