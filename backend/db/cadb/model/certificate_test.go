@@ -54,6 +54,7 @@ func TestCertificate(t *testing.T) {
 		Profile:          "profile",
 		Pem:              "pem",
 		IssuersPem:       "issuers_pem",
+		Label:            "label",
 		Locations:        []string{"1"},
 	}
 	dto := m.ToPB()
@@ -86,8 +87,9 @@ func TestCertificate(t *testing.T) {
 
 	crt, err := certutil.ParseFromPEM([]byte(testCrt))
 	require.NoError(t, err)
-	m4 := model.NewCertificate(crt, 123, "ca", testCrt, testCrt, nil)
+	m4 := model.NewCertificate(crt, 123, "ca", testCrt, testCrt, m.Label, nil)
 	assert.Equal(t, uint64(0), m4.ID)
+	assert.Equal(t, m2.Label, m4.Label)
 }
 
 func TestRevokedCertificate(t *testing.T) {
@@ -111,6 +113,7 @@ func TestRevokedCertificate(t *testing.T) {
 			Profile:          "profile",
 			Pem:              "pem",
 			IssuersPem:       "issuers_pem",
+			Label:            "label",
 		},
 		Reason: 1,
 	}

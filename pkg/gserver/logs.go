@@ -30,12 +30,12 @@ func (s *Server) newLogUnaryInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		startTime := time.Now()
 		resp, err := handler(ctx, req)
-		defer logUnaryRequestStats(ctx, info, startTime, req, resp)
+		defer logRequest(ctx, info, startTime, req, resp)
 		return resp, err
 	}
 }
 
-func logUnaryRequestStats(ctx context.Context, info *grpc.UnaryServerInfo, startTime time.Time, req interface{}, resp interface{}) {
+func logRequest(ctx context.Context, info *grpc.UnaryServerInfo, startTime time.Time, req interface{}, resp interface{}) {
 	duration := time.Since(startTime)
 	expensiveRequest := duration > warnUnaryRequestLatency
 

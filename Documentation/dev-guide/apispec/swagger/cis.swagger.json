@@ -146,6 +146,10 @@
             "type": "string"
           },
           "title": "Locations of published certificate"
+        },
+        "label": {
+          "type": "string",
+          "title": "Label of the certificate provided by the client"
         }
       },
       "title": "Certificate provides X509 Certificate information"

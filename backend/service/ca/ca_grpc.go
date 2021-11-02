@@ -187,7 +187,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 
 	metrics.IncrCounter(keyForCertIssued, 1, tags...)
 
-	mcert := model.NewCertificate(cert, req.OrgId, req.Profile, string(pem), ca.PEM(), nil)
+	mcert := model.NewCertificate(cert, req.OrgId, req.Profile, string(pem), ca.PEM(), req.Label, nil)
 	fn := mcert.FileName()
 	mcert.Locations = append(mcert.Locations, s.cfg.RegistrationAuthority.Publisher.BaseURL+"/"+fn)
 

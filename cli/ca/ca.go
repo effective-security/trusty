@@ -158,14 +158,15 @@ type SignFlags struct {
 	IssuerLabel *string
 	Token       *string
 	SAN         *[]string
+	Label       *string
 	Out         *string
 }
 
 // Sign certificate request
 func Sign(c ctl.Control, p interface{}) error {
 	flags := p.(*SignFlags)
-	cli := c.(*cli.Cli)
-	client, err := cli.Client(config.CAServerName)
+	cl := c.(*cli.Cli)
+	client, err := cl.Client(config.CAServerName)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -179,10 +180,11 @@ func Sign(c ctl.Control, p interface{}) error {
 	res, err := client.CAClient().SignCertificate(context.Background(), &pb.SignCertificateRequest{
 		RequestFormat: pb.EncodingFormat_PEM,
 		Request:       csr,
-		Profile:       *flags.Profile,
-		IssuerLabel:   *flags.IssuerLabel,
+		Profile:       cli.String(flags.Profile),
+		IssuerLabel:   cli.String(flags.IssuerLabel),
+		Label:         cli.String(flags.Label),
+		Token:         cli.String(flags.Token),
 		San:           *flags.SAN,
-		Token:         *flags.Token,
 	})
 	if err != nil {
 		return errors.WithStack(err)
@@ -199,7 +201,7 @@ func Sign(c ctl.Control, p interface{}) error {
 		if err != nil {
 			return errors.WithStack(err)
 		}
-	} else if cli.IsJSON() {
+	} else if cl.IsJSON() {
 		ctl.WriteJSON(c.Writer(), res)
 		fmt.Fprint(c.Writer(), "\n")
 	} else {

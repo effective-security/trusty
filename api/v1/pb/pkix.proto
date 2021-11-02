@@ -95,6 +95,8 @@ message Certificate  {
     string issuers_pem = 13 [json_name="issuers_pem"];
     // Locations of published certificate
     repeated string locations = 14;
+    // Label of the certificate provided by the client
+    string label = 15;
 }
 
 // RevokedCertificate provides X509 Cert information
