@@ -114,7 +114,7 @@ servers:
       allow_any:
         - /v1/auth
         - /v1/status
-        - /v1/certs
+        - /v1/cert
         - /v1/crl
         - /v1/ocsp
         - /v1/roots

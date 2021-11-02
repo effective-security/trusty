@@ -151,9 +151,9 @@ func (s *testSuite) TestIssuerSign() {
 
 	cfg := &authority.IssuerConfig{
 		AIA: &authority.AIAConfig{
-			AiaURL:  "https://localhost/v1/certs/${ISSUER_ID}.crt",
+			AiaURL:  "https://localhost/v1/cert/${ISSUER_ID}",
 			OcspURL: "https://localhost/v1/ocsp",
-			CrlURL:  "https://localhost/v1/crl/${ISSUER_ID}.crl",
+			CrlURL:  "https://localhost/v1/crl/${ISSUER_ID}",
 		},
 		Label: "TrustyRoot",
 		Profiles: map[string]*authority.CertProfile{

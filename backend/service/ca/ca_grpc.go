@@ -13,8 +13,11 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
+	"github.com/martinisecurity/trusty/authority"
+	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/martinisecurity/trusty/pkg/csr"
+	"golang.org/x/crypto/ocsp"
 	"google.golang.org/grpc/codes"
 )
 
@@ -188,6 +191,19 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 	fn := mcert.FileName()
 	mcert.Locations = append(mcert.Locations, s.cfg.RegistrationAuthority.Publisher.BaseURL+"/"+fn)
 
+	mcert, err = s.db.RegisterCertificate(ctx, mcert)
+	if err != nil {
+		logger.KV(xlog.ERROR,
+			"status", "failed to register certificate",
+			"err", err)
+
+		if strings.Contains(err.Error(), "duplicate key") {
+			return nil, v1.NewError(codes.AlreadyExists, "the key was already used")
+		}
+
+		return nil, v1.NewError(codes.Internal, "failed to register certificate")
+	}
+
 	if s.publisher != nil {
 		_, err := s.publisher.PublishCertificate(context.Background(), mcert.ToPB(), fn)
 		if err != nil {
@@ -199,14 +215,6 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 		}
 	}
 
-	mcert, err = s.db.RegisterCertificate(ctx, mcert)
-	if err != nil {
-		logger.KV(xlog.ERROR,
-			"status", "failed to register certificate",
-			"err", err)
-
-		return nil, v1.NewError(codes.Internal, "failed to register certificate")
-	}
 	logger.KV(xlog.NOTICE,
 		"status", "signed certificate",
 		"id", mcert.ID,
@@ -337,4 +345,87 @@ func (s *Service) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertifica
 		List: list.ToDTO(),
 	}
 	return res, nil
+}
+
+// GetCRL returns the CRL
+func (s *Service) GetCRL(ctx context.Context, in *pb.GetCrlRequest) (*pb.CrlResponse, error) {
+	crl, err := s.db.GetCrl(ctx, in.Ikid)
+	if err == nil {
+		return &pb.CrlResponse{
+			Clr: crl.ToDTO(),
+		}, nil
+	}
+
+	logger.KV(xlog.ERROR,
+		"ikid", in.Ikid,
+		"err", err,
+	)
+
+	resp, err := s.publishCrl(ctx, in.Ikid)
+	if err != nil {
+		logger.KV(xlog.ERROR,
+			"ikid", in.Ikid,
+			"err", err,
+		)
+		return nil, v1.NewError(codes.Internal, "unable to publish CRL")
+	}
+
+	res := &pb.CrlResponse{
+		Clr: resp.Clrs[0],
+	}
+
+	return res, nil
+}
+
+// SignOCSP returns OCSP response
+func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPResponse, error) {
+	ocspRequest, err := ocsp.ParseRequest(in.Der)
+	if err != nil ||
+		ocspRequest.SerialNumber == nil {
+		return nil, v1.NewError(codes.InvalidArgument, "invalid request")
+	}
+
+	var ica *authority.Issuer
+	if len(ocspRequest.IssuerKeyHash) > 0 {
+		ica, err = s.ca.GetIssuerByKeyHash(ocspRequest.HashAlgorithm, ocspRequest.IssuerKeyHash)
+	} else if len(ocspRequest.IssuerNameHash) > 0 {
+		ica, err = s.ca.GetIssuerByNameHash(ocspRequest.HashAlgorithm, ocspRequest.IssuerNameHash)
+	} else {
+		return nil, v1.NewError(codes.InvalidArgument, "issuer not specified")
+	}
+
+	if err != nil {
+		return nil, v1.NewError(codes.NotFound, "issuer not found")
+	}
+
+	serial := ocspRequest.SerialNumber.String()
+
+	req := &authority.OCSPSignRequest{
+		SerialNumber: ocspRequest.SerialNumber,
+		Status:       "good",
+		IssuerHash:   ocspRequest.HashAlgorithm,
+	}
+
+	ikid := ica.Bundle().IssuerID
+	ri, err := s.db.GetRevokedCertificateByIKIDAndSerial(ctx, ikid, serial)
+	if err != nil && !db.IsNotFoundError(err) {
+		logger.KV(xlog.ERROR, "ikid", ikid, "serial", serial, "err", err)
+		return nil, v1.NewError(codes.Internal, "unable to get revoked certificate")
+	}
+
+	if ri != nil {
+		req.Status = "revoked"
+		req.Reason = ocsp.Unspecified
+		req.RevokedAt = ri.RevokedAt
+	}
+
+	logger.KV(xlog.TRACE, "ikid", ikid, "serial", serial, "status", req.Status)
+
+	der, err := ica.SignOCSP(req)
+	if err != nil {
+		logger.KV(xlog.ERROR, "err", err)
+		return nil, v1.NewError(codes.Internal, "unable to sign OCSP")
+	}
+
+	return &pb.OCSPResponse{Der: der}, nil
 }

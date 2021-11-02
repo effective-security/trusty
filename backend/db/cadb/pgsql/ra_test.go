@@ -139,6 +139,11 @@ func TestRegisterCertificate(t *testing.T) {
 	revoked.Certificate.Locations = r.Locations
 	assert.Equal(t, revoked.Certificate, *r4)
 
+	revoked2, err := provider.GetRevokedCertificateByIKIDAndSerial(ctx, r4.IKID, r4.SerialNumber)
+	require.NoError(t, err)
+	revoked2.Certificate.Locations = r.Locations
+	assert.Equal(t, *revoked, *revoked2)
+
 	cc2, err := provider.GetCertsCount(ctx)
 	require.NoError(t, err)
 	assert.Greater(t, cc, cc2)

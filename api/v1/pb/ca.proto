@@ -27,9 +27,14 @@ service CAService {
 
     // GetCertificate returns the certificate
     rpc GetCertificate(GetCertificateRequest) returns (CertificateResponse) {
-        option (google.api.http) = {
-            post: "/v1/ca/certs"
-        };
+    }
+
+    // GetCRL returns the CRL
+    rpc GetCRL(GetCrlRequest) returns (CrlResponse) {
+    }
+
+    // SignOCSP returns OCSP response
+    rpc SignOCSP(OCSPRequest) returns (OCSPResponse) {
     }
 
     // RevokeCertificate returns the revoked certificate
@@ -130,6 +135,12 @@ message GetCertificateRequest {
     string skid = 2;
 }
 
+// GetCrlRequest specifies CRL request by IKID
+message GetCrlRequest {
+    // IKID specifies Issuer
+    string ikid = 1;
+}
+
 message ListByIssuerRequest {
     // Limit specifies the limit to return, or ALL if 0
     int64 limit = 1; 
@@ -181,6 +192,22 @@ message PublishCrlsRequest {
 // CrlsResponse returns published CRLs
 message CrlsResponse {
     repeated Crl clrs = 1;
+}
+
+// CrlResponse returns CRL
+message CrlResponse {
+    Crl clr = 1;
+}
+
+message OCSPRequest {
+    // Der provides DER encoded request
+    bytes Der = 1;
+}
+
+// OCSPResponse returns OCSP
+message OCSPResponse {
+    // Der provides DER encoded response
+    bytes Der = 1;
 }
 
 // GetOrgsCertificatesRequest specifies a certificates request by Org ID

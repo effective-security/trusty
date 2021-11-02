@@ -1,6 +1,9 @@
 package authority
 
 import (
+	"bytes"
+	"crypto"
+
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/pkg/errors"
@@ -97,6 +100,28 @@ func (s *Authority) GetIssuerByProfile(profile string) (*Issuer, error) {
 		return issuer, nil
 	}
 	return nil, errors.Errorf("issuer not found for profile: %s", profile)
+}
+
+// GetIssuerByKeyHash returns matching Issuer by key hash
+func (s *Authority) GetIssuerByKeyHash(alg crypto.Hash, val []byte) (*Issuer, error) {
+	for _, iss := range s.issuers {
+		if bytes.Equal(iss.keyHash[alg], val) {
+			return iss, nil
+		}
+	}
+
+	return nil, errors.New("issuer not found")
+}
+
+// GetIssuerByNameHash returns matching Issuer by name hash
+func (s *Authority) GetIssuerByNameHash(alg crypto.Hash, val []byte) (*Issuer, error) {
+	for _, iss := range s.issuers {
+		if bytes.Equal(iss.nameHash[alg], val) {
+			return iss, nil
+		}
+	}
+
+	return nil, errors.New("issuer not found")
 }
 
 // Issuers returns a list of issuers

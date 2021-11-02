@@ -27,7 +27,7 @@ func Test_invalidArgs(t *testing.T) {
 }
 
 func TestGetPublicServerURL(t *testing.T) {
-	r, err := http.NewRequest(http.MethodGet, v1.PathForAuthURL, nil)
+	r, err := http.NewRequest(http.MethodGet, v1.PathForStatus, nil)
 	require.NoError(t, err)
 
 	u := service.GetPublicServerURL(r, "/v1").String()

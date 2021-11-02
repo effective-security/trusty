@@ -45,67 +45,6 @@ const (
 	PathForMetrics = "/v1/metrics"
 )
 
-// Auth service API
-const (
-	// PathForAuth is base path for the Auth service
-	PathForAuth = "/v1/auth"
-
-	// PathForAuthURL returns Auth URL
-	//
-	// Verbs: GET
-	// Parameters:
-	//	redirect_url
-	//	device_id
-	//	sts
-	// Response: v1.AuthStsURLResponse
-	PathForAuthURL = "/v1/auth/url"
-
-	// PathForAuthDone receives authenticated code and prints it
-	//
-	// Verbs: GET
-	// Response: v1.PathForAuthDone
-	PathForAuthDone = "/v1/auth/done"
-
-	// PathForAuthTokenRefresh returns access token
-	//
-	// Verbs: GET
-	// Response: v1.AuthTokenRefreshResponse
-	PathForAuthTokenRefresh = "/v1/auth/token/refresh"
-
-	// PathForAuthGithub is base path for the Auth service
-	PathForAuthGithub = "/v1/auth/github"
-
-	// PathForAuthGithubCallback is auth callback for github
-	PathForAuthGithubCallback = "/v1/auth/github/callback"
-
-	// PathForAuthGoogleCallback is auth callback for google
-	PathForAuthGoogleCallback = "/v1/auth/google/callback"
-)
-
-// Workflow service API
-const (
-	// PathForWorkflow is base path for the Workflow service
-	PathForWorkflow = "/v1/wf"
-
-	// PathForWorkflowRepos provides repos for the user
-	//
-	// Verbs: GET
-	// Response: v1.RepositoriesResponse
-	PathForWorkflowRepos = "/v1/wf/:provider/repos"
-
-	// PathForWorkflowOrgs provides orgs the user
-	//
-	// Verbs: GET
-	// Response: v1.OrgsResponse
-	PathForWorkflowOrgs = "/v1/wf/:provider/orgs"
-
-	// PathForWorkflowSyncOrgs sync orgs the user
-	//
-	// Verbs: GET
-	// Response: v1.OrgsResponse
-	PathForWorkflowSyncOrgs = "/v1/wf/:provider/sync_orgs"
-)
-
 // CIS service API
 const (
 	// PathForCIS is base path for the CIS service
@@ -116,6 +55,24 @@ const (
 	// Verbs: GET
 	// Response: RootsResponse
 	PathForCISRoots = "/v1/cis/roots"
+)
+
+// AIA service API
+const (
+	// URIForCRLDP provides base URI for CRL DP
+	PathForCRLDP = "/v1/crl"
+
+	// URIForCRLByID provides URI for CRL by issuer
+	PathForCRLByID = "/v1/crl/:issuer_id"
+
+	// URIForAIACerts provides base URI for AIA certs
+	PathForAIACerts = "/v1/cert"
+
+	// URIForAIACertByID provides URI for a CA certificate
+	PathForAIACertByID = "/v1/cert/:subject_id"
+
+	// URIForOCSP provides base URI for OCSP
+	PathForOCSP = "/v1/ocsp"
 )
 
 // CA service API
@@ -134,112 +91,4 @@ const (
 	// Verbs: GET
 	// Response: CertProfileInfo
 	PathForCAProfileInfo = "/v1/ca/csr/profile_info"
-)
-
-// Martini service API
-const (
-	// PathForMartini is base path for the Martini service
-	PathForMartini = "/v1/ms"
-
-	// PathForMartiniSearchCorps provides Search Open Corporates
-	//
-	// Verbs: GET
-	// Response: SearchOpenCorporatesResponse
-	PathForMartiniSearchCorps = "/v1/ms/search/opencorporates"
-
-	// PathForMartiniSearchOrgs provides search for Organization
-	//
-	// Verbs: GET
-	// Response: v1.OrgsResponse
-	PathForMartiniSearchOrgs = "/v1/ms/search/orgs"
-
-	// PathForMartiniFccFrn is path to get company FRN (Registration Number -CORESID)
-	PathForMartiniFccFrn = "/v1/ms/fcc_frn"
-
-	// PathForMartiniFccContact is path to get company details
-	PathForMartiniFccContact = "/v1/ms/fcc_contact"
-
-	// PathForMartiniRegisterOrg provides Org registration
-	//
-	// Verbs: POST
-	// Response: v1.RegisterOrgResponse
-	PathForMartiniRegisterOrg = "/v1/ms/orgs/register"
-
-	// PathForMartiniValidateOrg sends Org validation request to Approver
-	//
-	// Verbs: POST
-	// Response: v1.OrgResponse
-	PathForMartiniValidateOrg = "/v1/ms/orgs/validate"
-
-	// PathForMartiniApproveOrg provides Org approval
-	//
-	// Verbs: POST
-	// Response: v1.OrgResponse
-	PathForMartiniApproveOrg = "/v1/ms/orgs/approve"
-
-	// PathForMartiniDeleteOrg provides Org deletion
-	//
-	// Verbs: POST
-	// Response: v1.OrgResponse
-	PathForMartiniDeleteOrg = "/v1/ms/orgs/delete"
-
-	// PathForMartiniOrgs provides orgs the user belongs to
-	//
-	// Verbs: GET
-	// Response: v1.OrgsResponse
-	PathForMartiniOrgs = "/v1/ms/orgs"
-
-	// PathForMartiniOrgByID provides org response
-	//
-	// Verbs: GET
-	// Response: v1.OrgsResponse
-	PathForMartiniOrgByID = "/v1/ms/orgs/:org_id"
-
-	// PathForMartiniOrgMembers provides orgs the user belongs to
-	//
-	// Verbs: GET|POST
-	// Response: v1.GetOrgMembersResponse
-	PathForMartiniOrgMembers = "/v1/ms/members/:org_id"
-
-	// PathForMartiniCerts provides certs from all orgs the user belongs to
-	//
-	// Verbs: GET
-	// Response: v1.certsResponse
-	PathForMartiniCerts = "/v1/ms/certificates"
-
-	// PathForMartiniOrgAPIKeys provides org API keys
-	//
-	// Verbs: GET
-	// Response: v1.OrgAPIKeysResponse
-	PathForMartiniOrgAPIKeys = "/v1/ms/apikeys/:org_id"
-
-	// PathForMartiniCreateSubscription creates Org subscription
-	//
-	// Verbs: POST
-	// Response: v1.CreateSubscriptionResponse
-	PathForMartiniCreateSubscription = "/v1/ms/subscription/create"
-
-	// PathForMartiniCancelSubscription cancels Org subscription
-	//
-	// Verbs: POST
-	// Response: v1.CancelSubscriptionResponse
-	PathForMartiniCancelSubscription = "/v1/ms/subscription/cancel"
-
-	// PathForMartiniListSubscriptions lists user's subscriptions
-	//
-	// Verbs: GET
-	// Response: v1.ListSubscriptionsResponse
-	PathForMartiniListSubscriptions = "/v1/ms/subscriptions"
-
-	// PathForMartiniSubscriptionsProducts list products
-	//
-	// Verbs: GET
-	// Response: v1.SubscriptionsProductsResponse
-	PathForMartiniSubscriptionsProducts = "/v1/ms/subscriptions/products"
-
-	// PathForMartiniStripeWebhook handles Stripe webhook call
-	//
-	// Verbs: POST
-	// Response: v1.StripeWebhookResponse
-	PathForMartiniStripeWebhook = "/v1/ms/stripe_webhook"
 )
