@@ -26,6 +26,10 @@ type CAClient interface {
 	ListCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.CertificatesResponse, error)
 	// ListRevokedCertificates returns stream of Revoked Certificates
 	ListRevokedCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.RevokedCertificatesResponse, error)
+	// GetCRL returns the CRL
+	GetCRL(ctx context.Context, in *pb.GetCrlRequest) (*pb.CrlResponse, error)
+	// SignOCSP returns OCSP response
+	SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPResponse, error)
 }
 
 type authorityClient struct {
@@ -88,6 +92,16 @@ func (c *authorityClient) ListRevokedCertificates(ctx context.Context, req *pb.L
 	return c.remote.ListRevokedCertificates(ctx, req, c.callOpts...)
 }
 
+// GetCRL returns the CRL
+func (c *authorityClient) GetCRL(ctx context.Context, in *pb.GetCrlRequest) (*pb.CrlResponse, error) {
+	return c.remote.GetCRL(ctx, in)
+}
+
+// SignOCSP returns OCSP response
+func (c *authorityClient) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPResponse, error) {
+	return c.remote.SignOCSP(ctx, in)
+}
+
 type retryCAClient struct {
 	authority pb.CAServiceClient
 }
@@ -139,4 +153,14 @@ func (c *retryCAClient) ListCertificates(ctx context.Context, req *pb.ListByIssu
 // ListRevokedCertificates returns stream of Revoked Certificates
 func (c *retryCAClient) ListRevokedCertificates(ctx context.Context, req *pb.ListByIssuerRequest, opts ...grpc.CallOption) (*pb.RevokedCertificatesResponse, error) {
 	return c.authority.ListRevokedCertificates(ctx, req, opts...)
+}
+
+// GetCRL returns the CRL
+func (c *retryCAClient) GetCRL(ctx context.Context, req *pb.GetCrlRequest, opts ...grpc.CallOption) (*pb.CrlResponse, error) {
+	return c.authority.GetCRL(ctx, req, opts...)
+}
+
+// SignOCSP returns OCSP response
+func (c *retryCAClient) SignOCSP(ctx context.Context, req *pb.OCSPRequest, opts ...grpc.CallOption) (*pb.OCSPResponse, error) {
+	return c.authority.SignOCSP(ctx, req, opts...)
 }

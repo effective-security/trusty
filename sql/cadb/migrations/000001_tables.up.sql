@@ -111,6 +111,10 @@ CREATE INDEX IF NOT EXISTS idx_revoked_ikid
     ON public.revoked USING btree
     (ikid COLLATE pg_catalog."default");
 
+CREATE INDEX IF NOT EXISTS idx_revoked_sn
+    ON public.revoked USING btree
+    (serial_number COLLATE pg_catalog."default");
+
 CREATE INDEX IF NOT EXISTS idx_revoked_notafter
     ON public.revoked USING btree
     (no_tafter);

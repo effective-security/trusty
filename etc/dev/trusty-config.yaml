@@ -148,6 +148,7 @@ servers:
       allow_any:
         - /favicon.ico
         - /v1
+        - /metrics
         - /pb.CIService
         - /pb.StatusService
       # allow any authenticated request that includes a non empty role
@@ -207,6 +208,8 @@ servers:
       allow_any:
       # allow any authenticated request that includes a non empty role
         - /pb.StatusService
+        - /metrics
+        - /v1/status
       allow_any_role:
         - /pb.CIService
         - /pb.CAService

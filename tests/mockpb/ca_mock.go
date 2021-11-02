@@ -90,3 +90,19 @@ func (m *MockCAServer) ListRevokedCertificates(ctx context.Context, in *pb.ListB
 	}
 	return m.Resps[0].(*pb.RevokedCertificatesResponse), nil
 }
+
+// GetCRL returns the CRL
+func (m *MockCAServer) GetCRL(ctx context.Context, in *pb.GetCrlRequest) (*pb.CrlResponse, error) {
+	if m.Err != nil {
+		return nil, m.Err
+	}
+	return m.Resps[0].(*pb.CrlResponse), nil
+}
+
+// SignOCSP returns OCSP response
+func (m *MockCAServer) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPResponse, error) {
+	if m.Err != nil {
+		return nil, m.Err
+	}
+	return m.Resps[0].(*pb.OCSPResponse), nil
+}

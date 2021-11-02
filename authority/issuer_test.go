@@ -29,7 +29,7 @@ func (s *testSuite) TestNewIssuer() {
 		s.Nil(issuer.Profile("notfound"))
 
 		//s.Equal(fmt.Sprintf("http://localhost:7880/v1/crl/%s.crl", issuer.SubjectKID()), issuer.CrlURL())
-		//s.Equal(fmt.Sprintf("http://localhost:7880/v1/certs/%s.crt", issuer.SubjectKID()), issuer.AiaURL())
+		//s.Equal(fmt.Sprintf("http://localhost:7880/v1/cert/%s.crt", issuer.SubjectKID()), issuer.AiaURL())
 		//s.NotNil(issuer.AIAExtension("server"))
 		//s.Nil(issuer.AIAExtension("not_supported"))
 	}
@@ -38,9 +38,9 @@ func (s *testSuite) TestNewIssuer() {
 func (s *testSuite) TestNewIssuerErrors() {
 
 	aia := &authority.AIAConfig{
-		AiaURL:  "https://localhost/v1/certs/${ISSUER_ID}.crt",
+		AiaURL:  "https://localhost/v1/cert/${ISSUER_ID}",
 		OcspURL: "https://localhost/v1/ocsp",
-		CrlURL:  "https://localhost/v1/crl/${ISSUER_ID}.crl",
+		CrlURL:  "https://localhost/v1/crl/${ISSUER_ID}",
 	}
 	cfg := &authority.IssuerConfig{
 		KeyFile: "not_found",

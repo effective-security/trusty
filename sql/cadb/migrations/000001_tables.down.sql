@@ -16,6 +16,7 @@ DROP INDEX IF EXISTS idx_revoked_skid;
 DROP INDEX IF EXISTS idx_revoked_ikid;
 DROP INDEX IF EXISTS idx_revoked_notafter;
 DROP INDEX IF EXISTS idx_revoked_sha256;
+DROP INDEX IF EXISTS idx_revoked_sn;
 
 DROP TABLE IF EXISTS public.roots;
 DROP INDEX IF EXISTS unique_roots_skid;

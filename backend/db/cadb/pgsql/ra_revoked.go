@@ -90,7 +90,7 @@ func (p *Provider) GetOrgRevokedCertificates(ctx context.Context, orgID uint64) 
 
 	res, err := p.db.QueryContext(ctx, `
 		SELECT
-		id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,revoked_at,reason
+			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,revoked_at,reason
 		FROM
 			revoked
 		WHERE org_id = $1
@@ -235,4 +235,39 @@ func (p *Provider) RevokeCertificate(ctx context.Context, crt *model.Certificate
 		return nil, errors.WithStack(err)
 	}
 	return revoked, nil
+}
+
+// GetRevokedCertificateByIKIDAndSerial returns revoked certificate
+func (p *Provider) GetRevokedCertificateByIKIDAndSerial(ctx context.Context, ikid, serial string) (*model.RevokedCertificate, error) {
+	res := new(model.RevokedCertificate)
+	err := p.db.QueryRowContext(ctx, `
+			SELECT
+			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,revoked_at,reason
+			FROM revoked
+			WHERE ikid = $1 AND serial_number = $2;`,
+		ikid, serial).
+		Scan(
+			&res.Certificate.ID,
+			&res.Certificate.OrgID,
+			&res.Certificate.SKID,
+			&res.Certificate.IKID,
+			&res.Certificate.SerialNumber,
+			&res.Certificate.NotBefore,
+			&res.Certificate.NotAfter,
+			&res.Certificate.Subject,
+			&res.Certificate.Issuer,
+			&res.Certificate.ThumbprintSha256,
+			&res.Certificate.Pem,
+			&res.Certificate.IssuersPem,
+			&res.Certificate.Profile,
+			&res.RevokedAt,
+			&res.Reason,
+		)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	res.Certificate.NotBefore = res.Certificate.NotBefore.UTC()
+	res.Certificate.NotAfter = res.Certificate.NotAfter.UTC()
+	res.RevokedAt = res.RevokedAt.UTC()
+	return res, nil
 }

@@ -56,3 +56,13 @@ func (s *caSrv2C) ListCertificates(ctx context.Context, req *pb.ListByIssuerRequ
 func (s *caSrv2C) ListRevokedCertificates(ctx context.Context, req *pb.ListByIssuerRequest, opts ...grpc.CallOption) (*pb.RevokedCertificatesResponse, error) {
 	return s.srv.ListRevokedCertificates(ctx, req)
 }
+
+// GetCRL returns the CRL
+func (s *caSrv2C) GetCRL(ctx context.Context, req *pb.GetCrlRequest, opts ...grpc.CallOption) (*pb.CrlResponse, error) {
+	return s.srv.GetCRL(ctx, req)
+}
+
+// SignOCSP returns OCSP response
+func (s *caSrv2C) SignOCSP(ctx context.Context, req *pb.OCSPRequest, opts ...grpc.CallOption) (*pb.OCSPResponse, error) {
+	return s.srv.SignOCSP(ctx, req)
+}

@@ -10,7 +10,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-logr/logr v0.4.0
 	github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba
-	github.com/go-phorce/dolly v0.8.5-0.20211023120345-61b8af0d9bee
+	github.com/go-phorce/dolly v0.8.5-0.20211031003254-f84cb6356cf3
 	github.com/gogo/googleapis v1.4.1
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang-migrate/migrate/v4 v4.14.1
@@ -85,6 +85,7 @@ require (
 	github.com/joho/godotenv v1.3.0 // indirect
 	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/jstemmer/go-junit-report v0.9.1 // indirect
+	github.com/jteeuwen/go-bindata v3.0.7+incompatible // indirect
 	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/kisielk/sqlstruct v0.0.0-20150923205031-648daed35d49 // indirect
 	github.com/kr/pretty v0.2.1 // indirect
