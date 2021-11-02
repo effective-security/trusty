@@ -75,6 +75,7 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	signFlags.Profile = signCmd.Flag("profile", "certificate profile").Required().String()
 	signFlags.IssuerLabel = signCmd.Flag("issuer", "label of issuer to use").String()
 	signFlags.Token = signCmd.Flag("token", "authorization token for the request").String()
+	signFlags.Label = signCmd.Flag("label", "certificate label").String()
 	signFlags.SAN = signCmd.Flag("san", "optional SAN").Strings()
 	signFlags.Out = signCmd.Flag("out", "output file name").String()
 

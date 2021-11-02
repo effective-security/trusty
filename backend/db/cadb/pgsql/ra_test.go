@@ -64,6 +64,7 @@ func TestRegisterCertificate(t *testing.T) {
 		Pem:              "pem",
 		IssuersPem:       "ipem",
 		Profile:          "client",
+		Label:            "label",
 	}
 
 	r, err := provider.RegisterCertificate(ctx, rc)
@@ -81,6 +82,7 @@ func TestRegisterCertificate(t *testing.T) {
 	assert.Equal(t, rc.Pem, r.Pem)
 	assert.Equal(t, rc.IssuersPem, r.IssuersPem)
 	assert.Equal(t, rc.Profile, r.Profile)
+	assert.Equal(t, rc.Label, r.Label)
 	assert.Equal(t, rc.Locations, r.Locations)
 	assert.Equal(t, rc.NotBefore.Unix(), r.NotBefore.Unix())
 	assert.Equal(t, rc.NotAfter.Unix(), r.NotAfter.Unix())
@@ -177,6 +179,8 @@ func TestRegisterCertificateUniqueIdx(t *testing.T) {
 		Pem:              "pem",
 		IssuersPem:       "ipem",
 		Profile:          "client",
+		Label:            "label",
+		Locations:        []string{"l1", "l2"},
 	}
 
 	r, err := provider.RegisterCertificate(ctx, rc)
@@ -194,6 +198,8 @@ func TestRegisterCertificateUniqueIdx(t *testing.T) {
 	assert.Equal(t, rc.Pem, r.Pem)
 	assert.Equal(t, rc.IssuersPem, r.IssuersPem)
 	assert.Equal(t, rc.Profile, r.Profile)
+	assert.Equal(t, rc.Label, r.Label)
+	assert.Equal(t, rc.Locations, r.Locations)
 	assert.Equal(t, rc.Locations, r.Locations)
 	assert.Equal(t, rc.NotBefore.Unix(), r.NotBefore.Unix())
 	assert.Equal(t, rc.NotAfter.Unix(), r.NotAfter.Unix())
@@ -234,6 +240,8 @@ func TestRegisterRevokedCertificate(t *testing.T) {
 			Pem:              "pem",
 			IssuersPem:       "ipem",
 			Profile:          "client",
+			Label:            "label",
+			Locations:        []string{"l1", "l2"},
 		},
 		RevokedAt: time.Now(),
 		Reason:    1,
@@ -256,6 +264,8 @@ func TestRegisterRevokedCertificate(t *testing.T) {
 	assert.Equal(t, rc.Pem, r.Pem)
 	assert.Equal(t, rc.IssuersPem, r.IssuersPem)
 	assert.Equal(t, rc.Profile, r.Profile)
+	assert.Equal(t, rc.Label, r.Label)
+	assert.Equal(t, rc.Locations, r.Locations)
 	assert.Equal(t, rc.NotBefore.Unix(), r.NotBefore.Unix())
 	assert.Equal(t, rc.NotAfter.Unix(), r.NotAfter.Unix())
 
@@ -324,6 +334,8 @@ func TestListCertificate(t *testing.T) {
 			Pem:              "pem",
 			IssuersPem:       "ipem",
 			Profile:          "client",
+			Label:            "label",
+			Locations:        []string{"l1", "l2"},
 		}
 
 		r, err := provider.RegisterCertificate(ctx, rc)

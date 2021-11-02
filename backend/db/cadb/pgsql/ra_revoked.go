@@ -2,6 +2,7 @@ package pgsql
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/go-phorce/dolly/xlog"
@@ -31,20 +32,22 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 	logger.Debugf("id=%d,subject=%q, skid=%s, ikid=%s", id, crt.Subject, crt.SKID, crt.IKID)
 
 	res := new(model.RevokedCertificate)
-
+	var locations string
 	err = p.db.QueryRowContext(ctx, `
-			INSERT INTO revoked(id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,revoked_at,reason)
-				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+			INSERT INTO revoked(id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,label,locations,revoked_at,reason)
+				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
 			ON CONFLICT (sha256)
 			DO UPDATE
 				SET org_id=$2,issuers_pem=$12
-			RETURNING id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,revoked_at,reason
+			RETURNING id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,label,locations,revoked_at,reason
 			;`, id, crt.OrgID, crt.SKID, crt.IKID, crt.SerialNumber,
 		crt.NotBefore, crt.NotAfter,
 		crt.Subject, crt.Issuer,
 		crt.ThumbprintSha256,
 		crt.Pem, crt.IssuersPem,
 		crt.Profile,
+		crt.Label,
+		strings.Join(crt.Locations, ","),
 		revoked.RevokedAt,
 		revoked.Reason,
 	).Scan(&res.Certificate.ID,
@@ -60,6 +63,8 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 		&res.Certificate.Pem,
 		&res.Certificate.IssuersPem,
 		&res.Certificate.Profile,
+		&res.Certificate.Label,
+		&locations,
 		&res.RevokedAt,
 		&res.Reason,
 	)
@@ -69,6 +74,10 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 	res.Certificate.NotAfter = res.Certificate.NotAfter.UTC()
 	res.Certificate.NotBefore = res.Certificate.NotBefore.UTC()
 	res.RevokedAt = res.RevokedAt.UTC()
+	if len(locations) > 0 {
+		res.Certificate.Locations = strings.Split(locations, ",")
+	}
+
 	return res, nil
 }
 
@@ -90,7 +99,7 @@ func (p *Provider) GetOrgRevokedCertificates(ctx context.Context, orgID uint64) 
 
 	res, err := p.db.QueryContext(ctx, `
 		SELECT
-			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,revoked_at,reason
+			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,label,locations,revoked_at,reason
 		FROM
 			revoked
 		WHERE org_id = $1
@@ -102,9 +111,9 @@ func (p *Provider) GetOrgRevokedCertificates(ctx context.Context, orgID uint64) 
 	defer res.Close()
 
 	list := make([]*model.RevokedCertificate, 0, 100)
-
 	for res.Next() {
 		r := new(model.RevokedCertificate)
+		var locations string
 		err = res.Scan(
 			&r.Certificate.ID,
 			&r.Certificate.OrgID,
@@ -119,6 +128,8 @@ func (p *Provider) GetOrgRevokedCertificates(ctx context.Context, orgID uint64) 
 			&r.Certificate.Pem,
 			&r.Certificate.IssuersPem,
 			&r.Certificate.Profile,
+			&r.Certificate.Label,
+			&locations,
 			&r.RevokedAt,
 			&r.Reason,
 		)
@@ -128,6 +139,9 @@ func (p *Provider) GetOrgRevokedCertificates(ctx context.Context, orgID uint64) 
 		r.Certificate.NotAfter = r.Certificate.NotAfter.UTC()
 		r.Certificate.NotBefore = r.Certificate.NotBefore.UTC()
 		r.RevokedAt = r.RevokedAt.UTC()
+		if len(locations) > 0 {
+			r.Certificate.Locations = strings.Split(locations, ",")
+		}
 		list = append(list, r)
 	}
 
@@ -148,7 +162,7 @@ func (p *Provider) ListRevokedCertificates(ctx context.Context, ikid string, lim
 
 	res, err := p.db.QueryContext(ctx,
 		`SELECT
-			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,profile,revoked_at,reason
+			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,profile,label,locations,revoked_at,reason
 		FROM
 			revoked
 		WHERE 
@@ -167,6 +181,7 @@ func (p *Provider) ListRevokedCertificates(ctx context.Context, ikid string, lim
 
 	for res.Next() {
 		r := new(model.RevokedCertificate)
+		var locations string
 		err = res.Scan(
 			&r.Certificate.ID,
 			&r.Certificate.OrgID,
@@ -179,6 +194,8 @@ func (p *Provider) ListRevokedCertificates(ctx context.Context, ikid string, lim
 			&r.Certificate.Issuer,
 			&r.Certificate.ThumbprintSha256,
 			&r.Certificate.Profile,
+			&r.Certificate.Label,
+			&locations,
 			&r.RevokedAt,
 			&r.Reason,
 		)
@@ -188,6 +205,10 @@ func (p *Provider) ListRevokedCertificates(ctx context.Context, ikid string, lim
 		r.Certificate.NotAfter = r.Certificate.NotAfter.UTC()
 		r.Certificate.NotBefore = r.Certificate.NotBefore.UTC()
 		r.RevokedAt = r.RevokedAt.UTC()
+		if len(locations) > 0 {
+			r.Certificate.Locations = strings.Split(locations, ",")
+		}
+
 		list = append(list, r)
 	}
 
@@ -240,9 +261,10 @@ func (p *Provider) RevokeCertificate(ctx context.Context, crt *model.Certificate
 // GetRevokedCertificateByIKIDAndSerial returns revoked certificate
 func (p *Provider) GetRevokedCertificateByIKIDAndSerial(ctx context.Context, ikid, serial string) (*model.RevokedCertificate, error) {
 	res := new(model.RevokedCertificate)
+	var locations string
 	err := p.db.QueryRowContext(ctx, `
 			SELECT
-			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,revoked_at,reason
+			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,label,locations,revoked_at,reason
 			FROM revoked
 			WHERE ikid = $1 AND serial_number = $2;`,
 		ikid, serial).
@@ -260,6 +282,9 @@ func (p *Provider) GetRevokedCertificateByIKIDAndSerial(ctx context.Context, iki
 			&res.Certificate.Pem,
 			&res.Certificate.IssuersPem,
 			&res.Certificate.Profile,
+			&res.Certificate.Label,
+			&locations,
+
 			&res.RevokedAt,
 			&res.Reason,
 		)
@@ -269,5 +294,9 @@ func (p *Provider) GetRevokedCertificateByIKIDAndSerial(ctx context.Context, iki
 	res.Certificate.NotBefore = res.Certificate.NotBefore.UTC()
 	res.Certificate.NotAfter = res.Certificate.NotAfter.UTC()
 	res.RevokedAt = res.RevokedAt.UTC()
+	if len(locations) > 0 {
+		res.Certificate.Locations = strings.Split(locations, ",")
+	}
+
 	return res, nil
 }

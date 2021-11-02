@@ -17,7 +17,7 @@ bin/trustyctl -s https://localhost:7892 --timeout 3 --json \
     -c /tmp/trusty/certs/trusty_peer_ca.pem \
     -k /tmp/trusty/certs/trusty_peer_ca.key \
     -r /tmp/trusty/certs/trusty_root_ca.pem \
-    ca sign --csr $CSR.csr --profile=server 1> /dev/null
+    ca sign --csr $CSR.csr --profile=server --label=$RANDOM 1> /dev/null
 
 done
 

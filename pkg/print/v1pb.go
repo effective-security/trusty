@@ -171,7 +171,7 @@ func CertificatesTable(w io.Writer, list []*pb.Certificate) {
 	table := tablewriter.NewWriter(w)
 	table.SetBorder(false)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetHeader([]string{"Id", "OrgId", "SKID", "Serial", "From", "To", "Subject", "Profile"})
+	table.SetHeader([]string{"Id", "OrgId", "SKID", "Serial", "From", "To", "Subject", "Profile", "Label"})
 
 	for _, c := range list {
 		table.Append([]string{
@@ -183,6 +183,7 @@ func CertificatesTable(w io.Writer, list []*pb.Certificate) {
 			c.NotAfter.AsTime().Local().Format(time.RFC3339),
 			c.Subject,
 			c.Profile,
+			c.Label,
 		})
 	}
 	table.Render()
@@ -194,7 +195,7 @@ func RevokedCertificatesTable(w io.Writer, list []*pb.RevokedCertificate) {
 	table := tablewriter.NewWriter(w)
 	table.SetBorder(false)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetHeader([]string{"Id", "OrgId", "SKID", "Serial", "From", "To", "Subject", "Profile", "Revoked", "Reason"})
+	table.SetHeader([]string{"Id", "OrgId", "SKID", "Serial", "From", "To", "Subject", "Profile", "Label", "Revoked", "Reason"})
 
 	for _, r := range list {
 		c := r.Certificate
@@ -207,6 +208,7 @@ func RevokedCertificatesTable(w io.Writer, list []*pb.RevokedCertificate) {
 			c.NotAfter.AsTime().Local().Format(time.RFC3339),
 			c.Subject,
 			c.Profile,
+			c.Label,
 			r.RevokedAt.AsTime().Local().Format(time.RFC3339),
 			r.Reason.String(),
 		})

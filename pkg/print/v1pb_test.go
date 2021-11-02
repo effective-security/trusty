@@ -137,6 +137,7 @@ func TestRevokedCertificatesTable(t *testing.T) {
 				Issuer:    "CN=ca",
 				Ikid:      "1233",
 				Skid:      "23423",
+				Label:     "label",
 				NotBefore: timestamppb.New(nb.UTC()),
 				NotAfter:  timestamppb.New(na.UTC()),
 			},

@@ -124,6 +124,8 @@ message SignCertificateRequest {
     google.protobuf.Timestamp not_before = 9 [json_name="not_before"];
     // NotAfter is the time when the validity period ends
     google.protobuf.Timestamp not_after = 10 [json_name="not_after"];
+    // Label is provided by a client
+    string label = 11;
 }
 
 // GetCertificateRequest specifies certificate request by ID or issuer key identifier
