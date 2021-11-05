@@ -53,6 +53,10 @@ service CAService {
     rpc ListRevokedCertificates(ListByIssuerRequest) returns (RevokedCertificatesResponse) {
     }
 
+    // UpdateCertificateLabel returns the updated certificate
+    rpc UpdateCertificateLabel(UpdateCertificateLabelRequest) returns (CertificateResponse) {
+    }
+
     /*
     // GetOrgCertificates returns the Org certificates
     rpc GetOrgCertificates(GetOrgCertificatesRequest) returns (CertificatesResponse) {
@@ -126,6 +130,14 @@ message SignCertificateRequest {
     google.protobuf.Timestamp not_after = 10 [json_name="not_after"];
     // Label is provided by a client
     string label = 11;
+}
+
+// UpdateCertificateLabelRequest specifies certificate label update request
+message UpdateCertificateLabelRequest {
+    // Id specifies certificate ID.
+    uint64 id = 1;
+    // Label is provided by a client
+    string label = 2;
 }
 
 // GetCertificateRequest specifies certificate request by ID or issuer key identifier

@@ -80,6 +80,43 @@ func (p *Provider) RemoveCertificate(ctx context.Context, id uint64) error {
 	return nil
 }
 
+// UpdateCertificateLabel update Certificate label
+func (p *Provider) UpdateCertificateLabel(ctx context.Context, id uint64, label string) (*model.Certificate, error) {
+	c := new(model.Certificate)
+	var locations string
+	err := p.db.QueryRowContext(ctx, `
+			UPDATE certificates
+			SET label=$2
+			WHERE id=$1
+			RETURNING id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,label,locations
+			;`, id, label).Scan(
+		&c.ID,
+		&c.OrgID,
+		&c.SKID,
+		&c.IKID,
+		&c.SerialNumber,
+		&c.NotBefore,
+		&c.NotAfter,
+		&c.Subject,
+		&c.Issuer,
+		&c.ThumbprintSha256,
+		&c.Pem,
+		&c.IssuersPem,
+		&c.Profile,
+		&c.Label,
+		&locations,
+	)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	c.NotAfter = c.NotAfter.UTC()
+	c.NotBefore = c.NotBefore.UTC()
+	if len(locations) > 0 {
+		c.Locations = strings.Split(locations, ",")
+	}
+	return c, nil
+}
+
 // GetCertificate returns registered Certificate
 func (p *Provider) GetCertificate(ctx context.Context, id uint64) (*model.Certificate, error) {
 	c := new(model.Certificate)

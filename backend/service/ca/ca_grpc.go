@@ -254,6 +254,22 @@ func (s *Service) GetCertificate(ctx context.Context, in *pb.GetCertificateReque
 	return res, nil
 }
 
+// UpdateCertificateLabel returns the updated certificate
+func (s *Service) UpdateCertificateLabel(ctx context.Context, req *pb.UpdateCertificateLabelRequest) (*pb.CertificateResponse, error) {
+	crt, err := s.db.UpdateCertificateLabel(ctx, req.Id, req.Label)
+	if err != nil {
+		logger.KV(xlog.ERROR,
+			"request", req,
+			"err", err,
+		)
+		return nil, v1.NewError(codes.Internal, "unable to update certificate")
+	}
+	res := &pb.CertificateResponse{
+		Certificate: crt.ToPB(),
+	}
+	return res, nil
+}
+
 // RevokeCertificate returns the revoked certificate
 func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error) {
 	var crt *model.Certificate

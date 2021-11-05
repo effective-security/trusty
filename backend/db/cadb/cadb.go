@@ -63,6 +63,8 @@ type CaDb interface {
 	RegisterCertificate(ctx context.Context, crt *model.Certificate) (*model.Certificate, error)
 	// RemoveCertificate removes Certificate
 	RemoveCertificate(ctx context.Context, id uint64) error
+	// UpdateCertificateLabel update Certificate label
+	UpdateCertificateLabel(ctx context.Context, id uint64, label string) (*model.Certificate, error)
 
 	// RegisterRevokedCertificate registers revoked Certificate
 	RegisterRevokedCertificate(ctx context.Context, revoked *model.RevokedCertificate) (*model.RevokedCertificate, error)

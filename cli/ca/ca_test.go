@@ -198,6 +198,34 @@ func (s *testSuite) TestRevokedListCerts() {
 	}
 }
 
+func (s *testSuite) TestUpdateCertLabel() {
+	expectedResponse := new(pb.CertificateResponse)
+	err := loadJSON("testdata/cert.json", expectedResponse)
+	s.Require().NoError(err)
+
+	s.MockAuthority = &mockpb.MockCAServer{
+		Err:   nil,
+		Resps: []proto.Message{expectedResponse},
+	}
+	srv := s.SetupMockGRPC()
+	defer srv.Stop()
+
+	id := uint64(273465927834659287)
+	label := "label"
+
+	err = s.Run(ca.UpdateCertLabel, &ca.UpdateCertLabelFlags{
+		ID:    &id,
+		Label: &label,
+	})
+	s.Require().NoError(err)
+
+	if s.Cli.IsJSON() {
+		s.HasText(`"label": "new"`)
+	} else {
+		s.HasText(`"label": "new"`)
+	}
+}
+
 func loadJSON(filename string, v interface{}) error {
 	cfr, err := os.Open(filename)
 	if err != nil {

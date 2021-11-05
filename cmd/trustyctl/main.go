@@ -86,6 +86,12 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	listCertsFlags.Limit = listCertsCmd.Flag("limit", "max limit of the certificates to print").Int()
 	listCertsFlags.After = listCertsCmd.Flag("after", "the certificate ID for pagination").String()
 
+	certLabelFlags := new(ca.UpdateCertLabelFlags)
+	certLabelCmd := cmdCA.Command("label", "update the certificate label").
+		Action(cli.RegisterAction(ca.UpdateCertLabel, certLabelFlags))
+	certLabelFlags.ID = certLabelCmd.Flag("id", "certificate ID").Uint64()
+	certLabelFlags.Label = certLabelCmd.Flag("label", "certificates label").String()
+
 	rlistCertsFlags := new(ca.ListCertsFlags)
 	revokedCmd := cmdCA.Command("revoked", "print the revoked certificates").
 		Action(cli.RegisterAction(ca.ListRevokedCerts, rlistCertsFlags))
