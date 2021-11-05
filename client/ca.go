@@ -30,6 +30,8 @@ type CAClient interface {
 	GetCRL(ctx context.Context, in *pb.GetCrlRequest) (*pb.CrlResponse, error)
 	// SignOCSP returns OCSP response
 	SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPResponse, error)
+	// UpdateCertificateLabel returns the updated certificate
+	UpdateCertificateLabel(ctx context.Context, in *pb.UpdateCertificateLabelRequest) (*pb.CertificateResponse, error)
 }
 
 type authorityClient struct {
@@ -102,6 +104,11 @@ func (c *authorityClient) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb
 	return c.remote.SignOCSP(ctx, in)
 }
 
+// UpdateCertificateLabel returns the updated certificate
+func (c *authorityClient) UpdateCertificateLabel(ctx context.Context, in *pb.UpdateCertificateLabelRequest) (*pb.CertificateResponse, error) {
+	return c.remote.UpdateCertificateLabel(ctx, in)
+}
+
 type retryCAClient struct {
 	authority pb.CAServiceClient
 }
@@ -163,4 +170,9 @@ func (c *retryCAClient) GetCRL(ctx context.Context, req *pb.GetCrlRequest, opts 
 // SignOCSP returns OCSP response
 func (c *retryCAClient) SignOCSP(ctx context.Context, req *pb.OCSPRequest, opts ...grpc.CallOption) (*pb.OCSPResponse, error) {
 	return c.authority.SignOCSP(ctx, req, opts...)
+}
+
+// UpdateCertificateLabel returns the updated certificate
+func (c *retryCAClient) UpdateCertificateLabel(ctx context.Context, req *pb.UpdateCertificateLabelRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
+	return c.authority.UpdateCertificateLabel(ctx, req, opts...)
 }

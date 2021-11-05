@@ -3,6 +3,7 @@ package ca_test
 import (
 	"context"
 	"crypto/x509"
+	"fmt"
 	"os"
 	"strings"
 	"sync"
@@ -291,6 +292,15 @@ func TestE2E(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, res.Certificate.String(), crtRes.Certificate.String())
 
+		label := fmt.Sprintf("l-%d", i+1)
+		crtRes, err = svc.UpdateCertificateLabel(ctx,
+			&pb.UpdateCertificateLabelRequest{
+				Id:    res.Certificate.Id,
+				Label: label,
+			})
+		require.NoError(t, err)
+		assert.Equal(t, label, crtRes.Certificate.Label)
+
 		if i%2 == 0 {
 			if i < count/2 {
 				_, err = authorityClient.RevokeCertificate(ctx, &pb.RevokeCertificateRequest{
@@ -317,16 +327,18 @@ func TestE2E(t *testing.T) {
 			Ikid:  ikid,
 		})
 		require.NoError(t, err)
-		certsCount += len(lRes2.List)
-		last = lRes2.List[len(lRes2.List)-1].Id
+		count := len(lRes2.List)
+		if count == 0 {
+			break
+		}
+
+		certsCount += count
+		last = lRes2.List[count-1].Id
 		/*
 			for _, c := range lRes2.List {
 				defer db.RemoveCertificate(ctx, c.Id)
 			}
 		*/
-		if len(lRes2.List) < 10 {
-			break
-		}
 	}
 
 	last = uint64(0)
@@ -342,17 +354,16 @@ func TestE2E(t *testing.T) {
 		count := len(lRes3.List)
 		revokedCount += count
 
-		if count > 0 {
-			last = lRes3.List[count-1].Certificate.Id
+		if count == 0 {
+			break
 		}
+		last = lRes3.List[count-1].Certificate.Id
+
 		/*
 			for _, c := range lRes3.List {
 				defer db.RemoveRevokedCertificate(ctx, c.Certificate.Id)
 			}
 		*/
-		if len(lRes3.List) < 10 {
-			break
-		}
 	}
 
 	assert.GreaterOrEqual(t, revokedCount, count/2)
@@ -372,6 +383,15 @@ func TestGetCert(t *testing.T) {
 	_, err = svc.GetCertificate(ctx,
 		&pb.GetCertificateRequest{Skid: "notfound"})
 	require.Error(t, err)
+
+	_, err = svc.UpdateCertificateLabel(ctx,
+		&pb.UpdateCertificateLabelRequest{
+			Id:    123,
+			Label: "label",
+		})
+	require.Error(t, err)
+	assert.Equal(t, "unable to update certificate", err.Error())
+
 }
 
 func generateCSR() []byte {

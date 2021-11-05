@@ -66,3 +66,8 @@ func (s *caSrv2C) GetCRL(ctx context.Context, req *pb.GetCrlRequest, opts ...grp
 func (s *caSrv2C) SignOCSP(ctx context.Context, req *pb.OCSPRequest, opts ...grpc.CallOption) (*pb.OCSPResponse, error) {
 	return s.srv.SignOCSP(ctx, req)
 }
+
+// UpdateCertificateLabel returns the updated certificate
+func (s *caSrv2C) UpdateCertificateLabel(ctx context.Context, req *pb.UpdateCertificateLabelRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
+	return s.srv.UpdateCertificateLabel(ctx, req)
+}

@@ -286,3 +286,33 @@ func Revoke(c ctl.Control, p interface{}) error {
 	// TODO: printer
 	return nil
 }
+
+// UpdateCertLabelFlags defines flags for UpdateCertLabel command
+type UpdateCertLabelFlags struct {
+	ID    *uint64
+	Label *string
+}
+
+// UpdateCertLabel allows to update certifiate label
+func UpdateCertLabel(c ctl.Control, p interface{}) error {
+	flags := p.(*UpdateCertLabelFlags)
+	cli := c.(*cli.Cli)
+	client, err := cli.Client(config.CAServerName)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	defer client.Close()
+
+	res, err := client.CAClient().UpdateCertificateLabel(context.Background(), &pb.UpdateCertificateLabelRequest{
+		Id:    *flags.ID,
+		Label: *flags.Label,
+	})
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	ctl.WriteJSON(c.Writer(), res)
+	fmt.Fprint(c.Writer(), "\n")
+	// TODO: printer
+	return nil
+}

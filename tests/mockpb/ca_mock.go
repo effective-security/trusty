@@ -106,3 +106,11 @@ func (m *MockCAServer) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OC
 	}
 	return m.Resps[0].(*pb.OCSPResponse), nil
 }
+
+// UpdateCertificateLabel returns the updated certificate
+func (m *MockCAServer) UpdateCertificateLabel(ctx context.Context, in *pb.UpdateCertificateLabelRequest) (*pb.CertificateResponse, error) {
+	if m.Err != nil {
+		return nil, m.Err
+	}
+	return m.Resps[0].(*pb.CertificateResponse), nil
+}

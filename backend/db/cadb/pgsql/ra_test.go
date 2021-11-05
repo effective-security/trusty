@@ -128,6 +128,10 @@ func TestRegisterCertificate(t *testing.T) {
 	require.NotNil(t, r4)
 	assert.Equal(t, *r, *r4)
 
+	r5, err := provider.UpdateCertificateLabel(ctx, r4.ID, r4.Label+"1")
+	require.NoError(t, err)
+	assert.Equal(t, r4.Label+"1", r5.Label)
+
 	cc, err := provider.GetCertsCount(ctx)
 	require.NoError(t, err)
 	assert.Greater(t, cc, uint64(0))
