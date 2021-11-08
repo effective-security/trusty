@@ -1,6 +1,7 @@
 package appcontainer
 
 import (
+	"context"
 	"io"
 	"net"
 	"os"
@@ -11,6 +12,7 @@ import (
 	"github.com/go-phorce/dolly/tasks"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
+	v1 "github.com/martinisecurity/trusty/api/v1"
 	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/backend/db/cadb"
@@ -23,6 +25,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sony/sonyflake"
 	"go.uber.org/dig"
+	"google.golang.org/grpc/codes"
+	"gopkg.in/yaml.v2"
 )
 
 var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/internal", "appcontainer")
@@ -49,7 +53,7 @@ type ProvideJwtFn func(cfg *config.Configuration) (jwt.Parser, error)
 type ProvideCryptoFn func(cfg *config.Configuration) (*cryptoprov.Crypto, error)
 
 // ProvideAuthorityFn defines Crypto provider
-type ProvideAuthorityFn func(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*authority.Authority, error)
+type ProvideAuthorityFn func(cfg *config.Configuration, crypto *cryptoprov.Crypto, db cadb.CaDb) (*authority.Authority, error)
 
 // ProvideCaDbFn defines CA DB provider
 type ProvideCaDbFn func(cfg *config.Configuration) (cadb.CaDb, cadb.CaReadonlyDb, error)
@@ -284,7 +288,7 @@ func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
 	return crypto, nil
 }
 
-func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*authority.Authority, error) {
+func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto, db cadb.CaDb) (*authority.Authority, error) {
 	caCfg, err := authority.LoadConfig(cfg.Authority)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -293,6 +297,69 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto) (*au
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
+
+	ctx := context.Background()
+	last := uint64(0)
+	for {
+		list, err := db.ListIssuers(ctx, 100, last)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+		batch := len(list)
+		logger.KV(xlog.TRACE, "batch", batch, "after", last)
+		if batch == 0 {
+			break
+		}
+		last = list[batch-1].ID
+
+		for _, l := range list {
+			logger.KV(xlog.TRACE, "issuer", l.Label)
+
+			var cfg = new(authority.IssuerConfig)
+			err := yaml.Unmarshal([]byte(l.Config), cfg)
+			if err != nil {
+				return nil, errors.WithMessage(err, "unable to decode configuration")
+			}
+
+			cfg.Profiles = make(map[string]*authority.CertProfile)
+
+			signer, err := authority.NewSignerFromPEM(crypto, []byte(cfg.KeyFile))
+			if err != nil {
+				return nil, errors.WithMessage(err, "unable to create signer from private key")
+			}
+
+			profiles, err := db.GetCertProfilesByIssuer(ctx, cfg.Label)
+			if err != nil {
+				return nil, errors.WithMessage(err, "unable to load profiles")
+			}
+
+			for _, p := range profiles {
+				var profile = new(authority.CertProfile)
+				err := yaml.Unmarshal([]byte(p.Config), profile)
+				if err != nil {
+					return nil, errors.WithMessagef(err, "unable to decode profile: %s", p.Label)
+				}
+
+				cfg.Profiles[p.Label] = profile
+			}
+
+			issuer, err := authority.CreateIssuer(cfg,
+				[]byte(cfg.CertFile),
+				[]byte(cfg.CABundleFile),
+				[]byte(cfg.RootBundleFile),
+				signer,
+			)
+			if err != nil {
+				return nil, errors.WithMessagef(err, "unable to load profiles: %s", cfg.Label)
+			}
+
+			err = ca.AddIssuer(issuer)
+			if err != nil {
+				return nil, v1.NewError(codes.Internal, "unable to add issuer: %s", err.Error())
+			}
+		}
+	}
+
 	return ca, nil
 }
 

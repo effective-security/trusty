@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -57,7 +58,7 @@ func Test_KmsProvider(t *testing.T) {
 	}
 
 	for _, tc := range rsacases {
-		pvk, err := prov.GenerateRSAKey(fmt.Sprintf("RSA_%d_%s", tc.size, guid.MustCreate()), tc.size, 1)
+		pvk, err := prov.GenerateRSAKey(fmt.Sprintf("TEST_RSA_%d_%s", tc.size, guid.MustCreate()), tc.size, 1)
 		require.NoError(t, err)
 
 		keyID, _, err := prov.IdentifyKey(pvk)
@@ -86,7 +87,7 @@ func Test_KmsProvider(t *testing.T) {
 	}
 
 	for _, tc := range eccases {
-		pvk, err := prov.GenerateECDSAKey(fmt.Sprintf("ECC_%s", guid.MustCreate()), tc.curve)
+		pvk, err := prov.GenerateECDSAKey(fmt.Sprintf("TEST_ECC_%s", guid.MustCreate()), tc.curve)
 		require.NoError(t, err)
 
 		keyID, _, err := prov.IdentifyKey(pvk)
@@ -112,8 +113,9 @@ func Test_KmsProvider(t *testing.T) {
 	addedCount := 0
 	err = mgr.EnumKeys(mgr.CurrentSlotID(), "", func(id, label, typ, class, currentVersionID string, creationTime *time.Time) error {
 		addedCount++
-
-		mgr.DestroyKeyPairOnSlot(mgr.CurrentSlotID(), id)
+		if strings.HasPrefix(label, "TEST_") {
+			mgr.DestroyKeyPairOnSlot(mgr.CurrentSlotID(), id)
+		}
 		return nil
 	})
 	require.NoError(t, err)

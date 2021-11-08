@@ -15,6 +15,7 @@ var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty", "authori
 type Authority struct {
 	issuers          map[string]*Issuer // label => Issuer
 	issuersByProfile map[string]*Issuer // cert profile => Issuer
+	issuersByKeyID   map[string]*Issuer // SKID => Issuer
 
 	// Crypto holds providers for HSM, SoftHSM, KMS, etc.
 	crypto *cryptoprov.Crypto
@@ -30,11 +31,8 @@ func NewAuthority(cfg *Config, crypto *cryptoprov.Crypto) (*Authority, error) {
 		crypto:           crypto,
 		issuers:          make(map[string]*Issuer),
 		issuersByProfile: make(map[string]*Issuer),
+		issuersByKeyID:   make(map[string]*Issuer),
 	}
-
-	ocspNextUpdate := cfg.Authority.DefaultAIA.GetOCSPExpiry()
-	crlNextUpdate := cfg.Authority.DefaultAIA.GetCRLExpiry()
-	crlRenewal := cfg.Authority.DefaultAIA.GetCRLRenewal()
 
 	for _, isscfg := range cfg.Authority.Issuers {
 		if isscfg.GetDisabled() {
@@ -43,45 +41,46 @@ func NewAuthority(cfg *Config, crypto *cryptoprov.Crypto) (*Authority, error) {
 		}
 
 		ccfg := isscfg.Copy()
-		if ccfg.AIA == nil {
-			ccfg.AIA = cfg.Authority.DefaultAIA.Copy()
-		}
-		if ccfg.AIA.CRLRenewal == 0 {
-			ccfg.AIA.CRLRenewal = crlRenewal
-		}
-		if ccfg.AIA.CRLExpiry == 0 {
-			ccfg.AIA.CRLExpiry = crlNextUpdate
-		}
-		if ccfg.AIA.OCSPExpiry == 0 {
-			ccfg.AIA.OCSPExpiry = ocspNextUpdate
-		}
-		if ccfg.AIA.CrlURL == "" {
-			ccfg.AIA.CrlURL = cfg.Authority.DefaultAIA.CrlURL
-		}
-		if ccfg.AIA.OcspURL == "" {
-			ccfg.AIA.OcspURL = cfg.Authority.DefaultAIA.OcspURL
-		}
-		if ccfg.AIA.AiaURL == "" {
-			ccfg.AIA.AiaURL = cfg.Authority.DefaultAIA.AiaURL
-		}
 		issuer, err := NewIssuer(ccfg, crypto)
 		if err != nil {
 			return nil, errors.WithMessagef(err, "unable to create issuer: %q", isscfg.Label)
 		}
-
-		ca.issuers[isscfg.Label] = issuer
-
-		for profileName := range isscfg.Profiles {
-			/*
-				if is := ca.issuersByProfile[profileName]; is != nil {
-					return nil, errors.Errorf("profile %q is already registered by %q issuer", profileName, is.Label())
-				}
-			*/
-			ca.issuersByProfile[profileName] = issuer
+		err = ca.AddIssuer(issuer)
+		if err != nil {
+			return nil, errors.WithMessagef(err, "unable to create issuer: %q", isscfg.Label)
 		}
 	}
 
 	return ca, nil
+}
+
+// Crypto returns the provider
+func (s *Authority) Crypto() *cryptoprov.Crypto {
+	return s.crypto
+}
+
+// AddIssuer add issuer to the Authority
+func (s *Authority) AddIssuer(issuer *Issuer) error {
+	s.issuers[issuer.Label()] = issuer
+	s.issuersByKeyID[issuer.SubjectKID()] = issuer
+	for profileName := range issuer.Profiles() {
+		// Maybe this is a redundand check, after config loaded and Validate() call
+		if is := s.issuersByProfile[profileName]; is != nil {
+			return errors.Errorf("profile %q is already registered by %q issuer", profileName, is.Label())
+		}
+
+		s.issuersByProfile[profileName] = issuer
+	}
+	return nil
+}
+
+// GetIssuerByKeyID by IKID
+func (s *Authority) GetIssuerByKeyID(ikid string) (*Issuer, error) {
+	issuer, ok := s.issuersByKeyID[ikid]
+	if ok {
+		return issuer, nil
+	}
+	return nil, errors.Errorf("issuer not found: %s", ikid)
 }
 
 // GetIssuerByLabel by label

@@ -389,3 +389,11 @@ func String(ptr *string) string {
 	}
 	return ""
 }
+
+// Uint64 returns uint64 from a pointer
+func Uint64(ptr *uint64) uint64 {
+	if ptr != nil {
+		return *ptr
+	}
+	return 0
+}

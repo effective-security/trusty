@@ -25,8 +25,6 @@ var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/db
 type CaReadonlyDb interface {
 	// GetRootCertificatesr returns list of Root certs
 	GetRootCertificates(ctx context.Context) (model.RootCertificates, error)
-	// GetOrgCertificates returns Certificates for organization
-	GetOrgCertificates(ctx context.Context, orgID uint64) (model.Certificates, error)
 	// GetCertificate returns registered Certificate
 	GetCertificate(ctx context.Context, id uint64) (*model.Certificate, error)
 	// GetCertificateBySKID returns registered Certificate
@@ -41,8 +39,16 @@ type CaReadonlyDb interface {
 	GetCrl(ctx context.Context, ikid string) (*model.Crl, error)
 	// ListRevokedCertificates returns revoked certificates info by a specified issuer
 	ListRevokedCertificates(ctx context.Context, ikid string, limit int, afterID uint64) (model.RevokedCertificates, error)
+	// ListOrgCertificates returns Certificates for organization
+	ListOrgCertificates(ctx context.Context, orgID uint64, limit int, afterID uint64) (model.Certificates, error)
 	// ListCertificates returns list of Certificate info
 	ListCertificates(ctx context.Context, ikid string, limit int, afterID uint64) (model.Certificates, error)
+	// ListIssuers returns list of Issuer
+	ListIssuers(ctx context.Context, limit int, afterID uint64) ([]*model.Issuer, error)
+	// ListCertProfiles returns list of CertProfile
+	ListCertProfiles(ctx context.Context, limit int, afterID uint64) ([]*model.CertProfile, error)
+	// GetCertProfilesByIssuer returns list of CertProfile
+	GetCertProfilesByIssuer(ctx context.Context, issuer string) ([]*model.CertProfile, error)
 
 	// GetCertsCount returns number of certs
 	GetCertsCount(ctx context.Context) (uint64, error)
@@ -84,6 +90,16 @@ type CaDb interface {
 	UseNonce(ctx context.Context, nonce string) (*model.Nonce, error)
 	// DeleteNonce deletes the nonce
 	DeleteNonce(ctx context.Context, id uint64) error
+
+	// RegisterIssuer registers Issuer config
+	RegisterIssuer(ctx context.Context, crt *model.Issuer) (*model.Issuer, error)
+	// DeleteIssuer deletes the Issuer
+	DeleteIssuer(ctx context.Context, label string) error
+
+	// RegisterCertProfile registers CertProfile config
+	RegisterCertProfile(ctx context.Context, crt *model.CertProfile) (*model.CertProfile, error)
+	// DeleteCertProfile deletes the CertProfile
+	DeleteCertProfile(ctx context.Context, label string) error
 }
 
 // Provider provides complete DB access

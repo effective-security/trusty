@@ -49,6 +49,20 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "issuerSerial.ikid",
+            "description": "Ikid provides Issuer Key Identifier.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "issuerSerial.serialNumber",
+            "description": "SerialNumber provides certificate's serial number.",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -162,6 +176,19 @@
         }
       },
       "title": "CertificateResponse returns Certificate"
+    },
+    "pbIssuerSerial": {
+      "type": "object",
+      "properties": {
+        "ikid": {
+          "type": "string",
+          "title": "Ikid provides Issuer Key Identifier"
+        },
+        "serialNumber": {
+          "type": "string",
+          "title": "SerialNumber provides certificate's serial number"
+        }
+      }
     },
     "pbRootCertificate": {
       "type": "object",

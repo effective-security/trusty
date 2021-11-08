@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"google.golang.org/grpc"
 )
@@ -11,11 +10,13 @@ import (
 // CAClient client interface
 type CAClient interface {
 	// ProfileInfo returns the certificate profile info
-	ProfileInfo(ctx context.Context, in *pb.CertProfileInfoRequest) (*pb.CertProfileInfo, error)
+	ProfileInfo(ctx context.Context, in *pb.CertProfileInfoRequest) (*pb.CertProfile, error)
+	// GetIssuer returns the issuing CA
+	GetIssuer(ctx context.Context, in *pb.IssuerInfoRequest) (*pb.IssuerInfo, error)
 	// SignCertificate returns the certificate
 	SignCertificate(ctx context.Context, in *pb.SignCertificateRequest) (*pb.CertificateResponse, error)
-	// Issuers returns the issuing CAs
-	Issuers(ctx context.Context) (*pb.IssuersInfoResponse, error)
+	// ListIssuers returns the issuing CAs
+	ListIssuers(ctx context.Context, in *pb.ListIssuersRequest) (*pb.IssuersInfoResponse, error)
 	// GetCertificate returns the certificate
 	GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error)
 	// RevokeCertificate returns the revoked certificate
@@ -32,6 +33,12 @@ type CAClient interface {
 	SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPResponse, error)
 	// UpdateCertificateLabel returns the updated certificate
 	UpdateCertificateLabel(ctx context.Context, in *pb.UpdateCertificateLabelRequest) (*pb.CertificateResponse, error)
+	// ListOrgCertificates returns the Org certificates
+	ListOrgCertificates(ctx context.Context, in *pb.ListOrgCertificatesRequest) (*pb.CertificatesResponse, error)
+	// RegisterIssuer registers the IssuerInfo
+	RegisterIssuer(ctx context.Context, in *pb.RegisterIssuerRequest) (*pb.IssuerInfo, error)
+	// RegisterProfile registers the certificate profile
+	RegisterProfile(ctx context.Context, in *pb.RegisterProfileRequest) (*pb.CertProfile, error)
 }
 
 type authorityClient struct {
@@ -55,28 +62,33 @@ func NewCAClientFromProxy(proxy pb.CAServiceClient) CAClient {
 }
 
 // ProfileInfo returns the certificate profile info
-func (c *authorityClient) ProfileInfo(ctx context.Context, in *pb.CertProfileInfoRequest) (*pb.CertProfileInfo, error) {
-	return c.remote.ProfileInfo(ctx, in, c.callOpts...)
+func (c *authorityClient) ProfileInfo(ctx context.Context, req *pb.CertProfileInfoRequest) (*pb.CertProfile, error) {
+	return c.remote.ProfileInfo(ctx, req, c.callOpts...)
+}
+
+// GetIssuer returns the issuing CA
+func (c *authorityClient) GetIssuer(ctx context.Context, req *pb.IssuerInfoRequest) (*pb.IssuerInfo, error) {
+	return c.remote.GetIssuer(ctx, req, c.callOpts...)
 }
 
 // SignCertificate returns the certificate
-func (c *authorityClient) SignCertificate(ctx context.Context, in *pb.SignCertificateRequest) (*pb.CertificateResponse, error) {
-	return c.remote.SignCertificate(ctx, in, c.callOpts...)
+func (c *authorityClient) SignCertificate(ctx context.Context, req *pb.SignCertificateRequest) (*pb.CertificateResponse, error) {
+	return c.remote.SignCertificate(ctx, req, c.callOpts...)
 }
 
 // Issuers returns the issuing CAs
-func (c *authorityClient) Issuers(ctx context.Context) (*pb.IssuersInfoResponse, error) {
-	return c.remote.Issuers(ctx, emptyReq, c.callOpts...)
+func (c *authorityClient) ListIssuers(ctx context.Context, req *pb.ListIssuersRequest) (*pb.IssuersInfoResponse, error) {
+	return c.remote.ListIssuers(ctx, req, c.callOpts...)
 }
 
 // GetCertificate returns the certificate
-func (c *authorityClient) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error) {
-	return c.remote.GetCertificate(ctx, in, c.callOpts...)
+func (c *authorityClient) GetCertificate(ctx context.Context, req *pb.GetCertificateRequest) (*pb.CertificateResponse, error) {
+	return c.remote.GetCertificate(ctx, req, c.callOpts...)
 }
 
 // RevokeCertificate returns the revoked certificate
-func (c *authorityClient) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error) {
-	return c.remote.RevokeCertificate(ctx, in, c.callOpts...)
+func (c *authorityClient) RevokeCertificate(ctx context.Context, req *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error) {
+	return c.remote.RevokeCertificate(ctx, req, c.callOpts...)
 }
 
 // PublishCrls returns published CRLs
@@ -95,18 +107,33 @@ func (c *authorityClient) ListRevokedCertificates(ctx context.Context, req *pb.L
 }
 
 // GetCRL returns the CRL
-func (c *authorityClient) GetCRL(ctx context.Context, in *pb.GetCrlRequest) (*pb.CrlResponse, error) {
-	return c.remote.GetCRL(ctx, in)
+func (c *authorityClient) GetCRL(ctx context.Context, req *pb.GetCrlRequest) (*pb.CrlResponse, error) {
+	return c.remote.GetCRL(ctx, req, c.callOpts...)
 }
 
 // SignOCSP returns OCSP response
-func (c *authorityClient) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPResponse, error) {
-	return c.remote.SignOCSP(ctx, in)
+func (c *authorityClient) SignOCSP(ctx context.Context, req *pb.OCSPRequest) (*pb.OCSPResponse, error) {
+	return c.remote.SignOCSP(ctx, req, c.callOpts...)
 }
 
 // UpdateCertificateLabel returns the updated certificate
-func (c *authorityClient) UpdateCertificateLabel(ctx context.Context, in *pb.UpdateCertificateLabelRequest) (*pb.CertificateResponse, error) {
-	return c.remote.UpdateCertificateLabel(ctx, in)
+func (c *authorityClient) UpdateCertificateLabel(ctx context.Context, req *pb.UpdateCertificateLabelRequest) (*pb.CertificateResponse, error) {
+	return c.remote.UpdateCertificateLabel(ctx, req, c.callOpts...)
+}
+
+// ListOrgCertificates returns the Org certificates
+func (c *authorityClient) ListOrgCertificates(ctx context.Context, req *pb.ListOrgCertificatesRequest) (*pb.CertificatesResponse, error) {
+	return c.remote.ListOrgCertificates(ctx, req, c.callOpts...)
+}
+
+// RegisterIssuer registers the IssuerInfo
+func (c *authorityClient) RegisterIssuer(ctx context.Context, req *pb.RegisterIssuerRequest) (*pb.IssuerInfo, error) {
+	return c.remote.RegisterIssuer(ctx, req, c.callOpts...)
+}
+
+// RegisterProfile registers the certificate profile
+func (c *authorityClient) RegisterProfile(ctx context.Context, req *pb.RegisterProfileRequest) (*pb.CertProfile, error) {
+	return c.remote.RegisterProfile(ctx, req, c.callOpts...)
 }
 
 type retryCAClient struct {
@@ -123,8 +150,13 @@ func RetryCAClient(conn *grpc.ClientConn) pb.CAServiceClient {
 }
 
 // ProfileInfo returns the certificate profile info
-func (c *retryCAClient) ProfileInfo(ctx context.Context, in *pb.CertProfileInfoRequest, opts ...grpc.CallOption) (*pb.CertProfileInfo, error) {
+func (c *retryCAClient) ProfileInfo(ctx context.Context, in *pb.CertProfileInfoRequest, opts ...grpc.CallOption) (*pb.CertProfile, error) {
 	return c.authority.ProfileInfo(ctx, in, opts...)
+}
+
+// GetIssuer returns the issuing CA
+func (c *retryCAClient) GetIssuer(ctx context.Context, in *pb.IssuerInfoRequest, opts ...grpc.CallOption) (*pb.IssuerInfo, error) {
+	return c.authority.GetIssuer(ctx, in, opts...)
 }
 
 // SignCertificate returns the certificate
@@ -132,9 +164,9 @@ func (c *retryCAClient) SignCertificate(ctx context.Context, in *pb.SignCertific
 	return c.authority.SignCertificate(ctx, in, opts...)
 }
 
-// Issuers returns the issuing CAs
-func (c *retryCAClient) Issuers(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*pb.IssuersInfoResponse, error) {
-	return c.authority.Issuers(ctx, in, opts...)
+// ListIssuers returns the issuing CAs
+func (c *retryCAClient) ListIssuers(ctx context.Context, in *pb.ListIssuersRequest, opts ...grpc.CallOption) (*pb.IssuersInfoResponse, error) {
+	return c.authority.ListIssuers(ctx, in, opts...)
 }
 
 // PublishCrls returns published CRLs
@@ -175,4 +207,19 @@ func (c *retryCAClient) SignOCSP(ctx context.Context, req *pb.OCSPRequest, opts 
 // UpdateCertificateLabel returns the updated certificate
 func (c *retryCAClient) UpdateCertificateLabel(ctx context.Context, req *pb.UpdateCertificateLabelRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
 	return c.authority.UpdateCertificateLabel(ctx, req, opts...)
+}
+
+// ListOrgCertificates returns the Org certificates
+func (c *retryCAClient) ListOrgCertificates(ctx context.Context, req *pb.ListOrgCertificatesRequest, opts ...grpc.CallOption) (*pb.CertificatesResponse, error) {
+	return c.authority.ListOrgCertificates(ctx, req, opts...)
+}
+
+// RegisterIssuer returns the issuing CAs
+func (c *retryCAClient) RegisterIssuer(ctx context.Context, req *pb.RegisterIssuerRequest, opts ...grpc.CallOption) (*pb.IssuerInfo, error) {
+	return c.authority.RegisterIssuer(ctx, req, opts...)
+}
+
+// RegisterProfile registers the certificate profile
+func (c *retryCAClient) RegisterProfile(ctx context.Context, req *pb.RegisterProfileRequest, opts ...grpc.CallOption) (*pb.CertProfile, error) {
+	return c.authority.RegisterProfile(ctx, req, opts...)
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/gogo/protobuf/proto"
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/martinisecurity/trusty/api/v1/pb"
 )
 
@@ -28,11 +27,19 @@ func (m *MockCAServer) SetResponse(r proto.Message) {
 }
 
 // ProfileInfo returns the certificate profile info
-func (m *MockCAServer) ProfileInfo(context.Context, *pb.CertProfileInfoRequest) (*pb.CertProfileInfo, error) {
+func (m *MockCAServer) ProfileInfo(context.Context, *pb.CertProfileInfoRequest) (*pb.CertProfile, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
-	return m.Resps[0].(*pb.CertProfileInfo), nil
+	return m.Resps[0].(*pb.CertProfile), nil
+}
+
+// GetIssuer returns the issuing CA
+func (m *MockCAServer) GetIssuer(ctx context.Context, req *pb.IssuerInfoRequest) (*pb.IssuerInfo, error) {
+	if m.Err != nil {
+		return nil, m.Err
+	}
+	return m.Resps[0].(*pb.IssuerInfo), nil
 }
 
 // SignCertificate returns the certificate
@@ -43,8 +50,8 @@ func (m *MockCAServer) SignCertificate(context.Context, *pb.SignCertificateReque
 	return m.Resps[0].(*pb.CertificateResponse), nil
 }
 
-// Issuers returns the issuing CAs
-func (m *MockCAServer) Issuers(context.Context, *empty.Empty) (*pb.IssuersInfoResponse, error) {
+// ListIssuers returns the issuing CAs
+func (m *MockCAServer) ListIssuers(context.Context, *pb.ListIssuersRequest) (*pb.IssuersInfoResponse, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
@@ -113,4 +120,28 @@ func (m *MockCAServer) UpdateCertificateLabel(ctx context.Context, in *pb.Update
 		return nil, m.Err
 	}
 	return m.Resps[0].(*pb.CertificateResponse), nil
+}
+
+// ListOrgCertificates returns the Org certificates
+func (m *MockCAServer) ListOrgCertificates(ctx context.Context, in *pb.ListOrgCertificatesRequest) (*pb.CertificatesResponse, error) {
+	if m.Err != nil {
+		return nil, m.Err
+	}
+	return m.Resps[0].(*pb.CertificatesResponse), nil
+}
+
+// RegisterIssuer creates Issuer
+func (m *MockCAServer) RegisterIssuer(ctx context.Context, in *pb.RegisterIssuerRequest) (*pb.IssuerInfo, error) {
+	if m.Err != nil {
+		return nil, m.Err
+	}
+	return m.Resps[0].(*pb.IssuerInfo), nil
+}
+
+// RegisterProfile registers the certificate profile
+func (m *MockCAServer) RegisterProfile(ctx context.Context, req *pb.RegisterProfileRequest) (*pb.CertProfile, error) {
+	if m.Err != nil {
+		return nil, m.Err
+	}
+	return m.Resps[0].(*pb.CertProfile), nil
 }

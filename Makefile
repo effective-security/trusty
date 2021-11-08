@@ -19,7 +19,7 @@ BUILD_FLAGS=
 
 default: help
 
-all: clean folders tools generate hsmconfig start-local-kms start-sql build gen_test_certs test
+all: clean folders tools generate hsmconfig start-local-kms start-sql build gen_test_certs gen_shaken_certs test
 
 #
 # clean produced files
@@ -99,7 +99,7 @@ gen_test_certs:
 	echo "*** generating test CAs"
 	tar -xzvf $(PROJ_ROOT)/etc/dev/roots/trusty_root_ca.key.tar.gz -C $(PROJ_ROOT)/etc/dev/roots/
 	./scripts/build/gen_certs.sh \
-		--hsm-config /tmp/trusty/softhsm/unittest_hsm.json \
+		--hsm-config $(PROJ_ROOT)/etc/dev/kms/aws-dev-kms.json \
 		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.yaml \
 		--out-dir /tmp/trusty/certs \
 		--csr-dir $(PROJ_ROOT)/etc/dev/csr_profile \
@@ -110,6 +110,18 @@ gen_test_certs:
 		--root-ca-key $(PROJ_ROOT)/etc/dev/roots/trusty_root_ca.key \
 		--ca1 --ca2  --bundle --peer --client --force
 	cp $(PROJ_ROOT)/etc/dev/roots/trusty_root_ca.pem /tmp/trusty/certs/trusty_root_ca.pem
+
+gen_shaken_certs:
+	./scripts/build/gen_shaken_certs.sh \
+		--hsm-config $(PROJ_ROOT)/etc/dev/kms/aws-dev-kms.json \
+		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.yaml \
+		--out-dir /tmp/trusty/certs \
+		--csr-dir $(PROJ_ROOT)/etc/dev/csr_profile \
+		--csr-prefix shaken_ \
+		--out-prefix shaken_ \
+		--root-ca /tmp/trusty/certs/shaken_root_ca.pem \
+		--root-ca-key /tmp/trusty/certs/shaken_root_ca.key \
+		--root --ca --l1_ca --bundle --force
 
 start-local-kms:
 	# Container state will be true (it's already running), false (exists but stopped), or missing (does not exist).

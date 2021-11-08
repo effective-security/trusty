@@ -233,7 +233,7 @@ func Test_AppInstance_CryptoProvError(t *testing.T) {
 	require.Error(t, expError)
 
 	assert.Contains(t, expError.Error(), "could not build arguments for function")
-	assert.Contains(t, expError.Error(), "duplicate provider specified for manufacturer: SoftHSM")
+	assert.Contains(t, expError.Error(), "duplicate provider specified for manufacturer: AWSKMS")
 }
 
 func Test_AppInstance_StartStop(t *testing.T) {

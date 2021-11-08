@@ -17,11 +17,11 @@ import (
 
 var (
 	// DefaultCRLRenewal specifies default duration for CRL renewal
-	DefaultCRLRenewal = 7 * 24 * time.Hour // 7 days
+	DefaultCRLRenewal = 12 * time.Hour // 12 hours
 	// DefaultCRLExpiry specifies default duration for CRL expiry
-	DefaultCRLExpiry = 30 * 24 * time.Hour // 30 days
+	DefaultCRLExpiry = 2 * 24 * time.Hour // 2 days
 	// DefaultOCSPExpiry specifies default for OCSP expiry
-	DefaultOCSPExpiry = 1 * 24 * time.Hour // 1 day
+	DefaultOCSPExpiry = 8 * time.Hour // 8 hours
 )
 
 // Config provides configuration for Certification Authority
@@ -32,9 +32,6 @@ type Config struct {
 
 // CAConfig contains configuration info for CA
 type CAConfig struct {
-	// DefaultAIA specifies default AIA configuration
-	DefaultAIA *AIAConfig `json:"default_aia,omitempty" yaml:"default_aia,omitempty"`
-
 	// Issuers specifies the list of issuing authorities.
 	Issuers []IssuerConfig `json:"issuers,omitempty" yaml:"issuers,omitempty"`
 
@@ -156,6 +153,7 @@ func (c *AIAConfig) GetCRLRenewal() time.Duration {
 
 // CertProfile provides certificate profile
 type CertProfile struct {
+	IssuerLabel string `json:"issuer_label" yaml:"issuer_label"`
 	Description string `json:"description" yaml:"description"`
 
 	// Usage provides a list key usages
@@ -202,7 +200,6 @@ type CertProfile struct {
 	// PoliciesCritical specifies to mark Policies as Critical extension
 	PoliciesCritical bool `json:"policies_critical" yaml:"policies_critical"`
 
-	IssuerLabel  string   `json:"issuer_label" yaml:"issuer_label"`
 	AllowedRoles []string `json:"allowed_roles" yaml:"allowed_roles"`
 	DeniedRoles  []string `json:"denied_roles" yaml:"denied_roles"`
 
@@ -247,20 +244,6 @@ func (p *CertProfile) IsAllowed(role string) bool {
 	return true
 }
 
-// DefaultCertProfile returns a default configuration
-// for a certificate profile, specifying basic key
-// usage and a 1 year expiration time.
-// The key usages chosen are:
-//   signing, key encipherment, client auth and server auth.
-func DefaultCertProfile() *CertProfile {
-	return &CertProfile{
-		Description: "default profile with Server and Client auth",
-		Usage:       []string{"signing", "key encipherment", "server auth", "client auth"},
-		Expiry:      csr.Duration(8760 * time.Hour),
-		Backdate:    csr.Duration(10 * time.Minute),
-	}
-}
-
 // LoadConfig loads the configuration file stored at the path
 // and returns the configuration.
 func LoadConfig(path string) (*Config, error) {
@@ -288,41 +271,27 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, errors.New("no \"profiles\" configuration present")
 	}
 
-	if cfg.Profiles["default"] == nil {
-		logger.Infof("reason=no_default_profile")
-		cfg.Profiles["default"] = DefaultCertProfile()
-	}
-
-	if cfg.Authority != nil && cfg.Authority.DefaultAIA != nil {
+	if cfg.Authority != nil {
+		issuers := map[string]*IssuerConfig{}
+		count := len(cfg.Authority.Issuers)
 		for i := range cfg.Authority.Issuers {
 			iss := &cfg.Authority.Issuers[i]
-			if iss.AIA == nil {
-				iss.AIA = cfg.Authority.DefaultAIA.Copy()
-			} else {
-				if iss.AIA.AiaURL == "" {
-					iss.AIA.AiaURL = cfg.Authority.DefaultAIA.AiaURL
-				}
-				if iss.AIA.CrlURL == "" {
-					iss.AIA.CrlURL = cfg.Authority.DefaultAIA.CrlURL
-				}
-				if iss.AIA.OcspURL == "" {
-					iss.AIA.OcspURL = cfg.Authority.DefaultAIA.OcspURL
-				}
-				if iss.AIA.CRLExpiry == 0 {
-					iss.AIA.CRLExpiry = cfg.Authority.DefaultAIA.GetCRLExpiry()
-				}
-				if iss.AIA.CRLRenewal == 0 {
-					iss.AIA.CRLRenewal = cfg.Authority.DefaultAIA.GetCRLRenewal()
-				}
-				if iss.AIA.OCSPExpiry == 0 {
-					iss.AIA.OCSPExpiry = cfg.Authority.DefaultAIA.GetOCSPExpiry()
-				}
+			if issuers[iss.Label] != nil {
+				return nil, errors.Errorf("duplicate issuer configuration found: %s", iss.Label)
 			}
+			issuers[iss.Label] = iss
 
 			iss.Profiles = make(map[string]*CertProfile)
 			for name, profile := range cfg.Profiles {
-				if profile.IssuerLabel == iss.Label ||
-					(profile.IssuerLabel == "" && len(cfg.Authority.Issuers) == 1) {
+				if profile.IssuerLabel == "" {
+					if count == 1 {
+						profile.IssuerLabel = cfg.Authority.Issuers[0].Label
+					} else if count > 1 {
+						return nil, errors.Errorf("profile has no issuer label: %s", name)
+					}
+				}
+
+				if profile.IssuerLabel == iss.Label {
 					iss.Profiles[name] = profile
 				}
 			}
@@ -410,7 +379,9 @@ func (c *Config) Validate() error {
 	var err error
 
 	issuers := map[string]bool{}
+	count := 0
 	if c.Authority != nil {
+		count = len(c.Authority.Issuers)
 		for i := range c.Authority.Issuers {
 			iss := &c.Authority.Issuers[i]
 			issuers[iss.Label] = true
@@ -422,9 +393,12 @@ func (c *Config) Validate() error {
 		if err != nil {
 			return errors.WithMessagef(err, "invalid %s profile", name)
 		}
-		if profile.IssuerLabel != "" {
+		if count > 0 {
+			if profile.IssuerLabel == "" {
+				return errors.Errorf("profile has no issuer label: %s", name)
+			}
 			if !issuers[profile.IssuerLabel] {
-				return errors.WithMessagef(err, "%s issuer not found for %s profile", profile.IssuerLabel, name)
+				return errors.Errorf("%q issuer not found for %q profile", profile.IssuerLabel, name)
 			}
 		}
 	}

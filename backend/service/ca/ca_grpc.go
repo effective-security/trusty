@@ -1,234 +1,87 @@
 package ca
 
 import (
-	"bytes"
 	"context"
-	"encoding/pem"
-	"fmt"
-	"strings"
-	"time"
 
-	"github.com/go-phorce/dolly/metrics"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/golang/protobuf/ptypes/empty"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/authority"
-	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
-	"github.com/martinisecurity/trusty/pkg/csr"
-	"golang.org/x/crypto/ocsp"
 	"google.golang.org/grpc/codes"
-)
-
-var (
-	keyForCertIssued        = []string{"cert", "issued"}
-	keyForCertRevoked       = []string{"cert", "revoked"}
-	keyForCertSignFailed    = []string{"cert", "sign-failed"}
-	keyForCertPublishFailed = []string{"cert", "publish-failed"}
-	keyForCrlPublished      = []string{"crl", "published"}
-	keyForCrlPublishFailed  = []string{"crl", "publish-failed"}
+	"gopkg.in/yaml.v2"
 )
 
 // ProfileInfo returns the certificate profile info
-func (s *Service) ProfileInfo(ctx context.Context, req *pb.CertProfileInfoRequest) (*pb.CertProfileInfo, error) {
-	if req == nil || req.Profile == "" {
-		return nil, v1.NewError(codes.InvalidArgument, "missing profile parameter")
+func (s *Service) ProfileInfo(ctx context.Context, req *pb.CertProfileInfoRequest) (*pb.CertProfile, error) {
+	if req == nil || req.Label == "" {
+		return nil, v1.NewError(codes.InvalidArgument, "missing label parameter")
 	}
 
-	ca, err := s.ca.GetIssuerByProfile(req.Profile)
+	ca, err := s.ca.GetIssuerByProfile(req.Label)
 	if err != nil {
-		logger.Warningf("reason=no_issuer, profile=%q", req.Profile)
-		return nil, v1.NewError(codes.NotFound, "profile not found: %s", req.Profile)
+		logger.Warningf("reason=no_issuer, profile=%q", req.Label)
+		return nil, v1.NewError(codes.NotFound, "issuer not found for profile: %s", req.Label)
 	}
 
-	label := strings.ToLower(req.Label)
-	if label != "" && label != strings.ToLower(ca.Label()) {
-		return nil, v1.NewError(codes.NotFound, "profile %q is served by %s issuer",
-			req.Profile, ca.Label())
-	}
-
-	profile := ca.Profile(req.Profile)
+	profile := ca.Profile(req.Label)
 	if profile == nil {
 		return nil, v1.NewError(codes.NotFound, "%q issuer does not support the request profile: %q",
-			ca.Label(), req.Profile)
+			ca.Label(), req.Label)
 	}
 
-	res := &pb.CertProfileInfo{
-		Label:  ca.Label(),
-		Issuer: ca.Bundle().CertPEM,
-		Profile: &pb.CertProfile{
-			Description:       profile.Description,
-			Usages:            profile.Usage,
-			CaConstraint:      &pb.CAConstraint{},
-			OcspNoCheck:       profile.OCSPNoCheck,
-			Expiry:            profile.Expiry.String(),
-			Backdate:          profile.Backdate.String(),
-			AllowedExtensions: profile.AllowedExtensionsStrings(),
-			AllowedNames:      profile.AllowedNames,
-			AllowedDns:        profile.AllowedDNS,
-			AllowedEmail:      profile.AllowedEmail,
-		},
-	}
-
-	if profile.AllowedCSRFields != nil {
-		res.Profile.AllowedFields = &pb.CSRAllowedFields{
-			Subject: profile.AllowedCSRFields.Subject,
-			Dns:     profile.AllowedCSRFields.DNSNames,
-			Ip:      profile.AllowedCSRFields.IPAddresses,
-			Email:   profile.AllowedCSRFields.EmailAddresses,
-		}
-	}
-
-	return res, nil
+	return toCertProfilePB(profile, req.Label), nil
 }
 
-// Issuers returns the issuing CAs
-func (s *Service) Issuers(context.Context, *empty.Empty) (*pb.IssuersInfoResponse, error) {
+// GetIssuer returns the issuing CA
+func (s *Service) GetIssuer(ctx context.Context, req *pb.IssuerInfoRequest) (*pb.IssuerInfo, error) {
+	var issuer *authority.Issuer
+	var err error
+	if req.Label != "" {
+		issuer, err = s.ca.GetIssuerByLabel(req.Label)
+	} else if req.Ikid != "" {
+		issuer, err = s.ca.GetIssuerByKeyID(req.Ikid)
+	} else {
+		return nil, v1.NewError(codes.InvalidArgument, "either label or ikid are required")
+	}
+
+	if err != nil {
+		return nil, v1.NewError(codes.NotFound, "issuer not found")
+	}
+	return issuerInfo(issuer, true), nil
+}
+
+// ListIssuers returns the issuing CAs
+func (s *Service) ListIssuers(ctx context.Context, req *pb.ListIssuersRequest) (*pb.IssuersInfoResponse, error) {
 	issuers := s.ca.Issuers()
 
 	res := &pb.IssuersInfoResponse{
-		Issuers: make([]*pb.IssuerInfo, len(issuers)),
+		Issuers: make([]*pb.IssuerInfo, 0, len(issuers)),
 	}
 
-	for i, issuer := range issuers {
-		bundle := issuer.Bundle()
-		res.Issuers[i] = &pb.IssuerInfo{
-			Certificate:   bundle.CertPEM,
-			Intermediates: bundle.CACertsPEM,
-			Root:          bundle.RootCertPEM,
-			Label:         issuer.Label(),
-		}
+	for _, issuer := range issuers {
+		res.Issuers = append(res.Issuers, issuerInfo(issuer, req.Bundle))
 	}
 
 	return res, nil
 }
 
-// SignCertificate returns the certificate
-func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRequest) (*pb.CertificateResponse, error) {
-	if req == nil || req.Profile == "" {
-		return nil, v1.NewError(codes.InvalidArgument, "missing profile")
-	}
-	if len(req.Request) == 0 {
-		return nil, v1.NewError(codes.InvalidArgument, "missing request")
+func issuerInfo(issuer *authority.Issuer, withBundle bool) *pb.IssuerInfo {
+	bundle := issuer.Bundle()
+	ii := &pb.IssuerInfo{
+		Certificate: bundle.CertPEM,
+		Label:       issuer.Label(),
 	}
 
-	var pemReq string
-
-	switch req.RequestFormat {
-	case pb.EncodingFormat_PEM:
-		pemReq = string(req.Request)
-	case pb.EncodingFormat_DER:
-		b := bytes.NewBuffer([]byte{})
-		_ = pem.Encode(b, &pem.Block{Type: "CERTIFICATE REQUEST", Bytes: req.Request})
-		pemReq = b.String()
-	default:
-		return nil, v1.NewError(codes.InvalidArgument, "unsupported request_format: %v", req.RequestFormat)
+	if withBundle {
+		ii.Intermediates = bundle.CACertsPEM
+		ii.Root = bundle.RootCertPEM
 	}
 
-	var subj *csr.X509Subject
-	if req.Subject != nil {
-		subj = &csr.X509Subject{
-			CommonName: req.Subject.CommonName,
-			Names:      make([]csr.X509Name, len(req.Subject.Names)),
-		}
-		for i, n := range req.Subject.Names {
-			subj.Names[i] = csr.X509Name{
-				C:  n.Country,
-				ST: n.State,
-				L:  n.Locality,
-				O:  n.Organisation,
-				OU: n.OrganisationalUnit,
-			}
-		}
+	for name := range issuer.Profiles() {
+		ii.Profiles = append(ii.Profiles, name)
 	}
-
-	ca, err := s.ca.GetIssuerByProfile(req.Profile)
-	if err != nil {
-		return nil, v1.NewError(codes.InvalidArgument, "issuer not found for profile: %s", req.Profile)
-	}
-
-	label := req.IssuerLabel
-	if label != "" && label != ca.Label() {
-		msg := fmt.Sprintf("%q issuer does not support the request profile: %q", label, req.Profile)
-		return nil, v1.NewError(codes.InvalidArgument, msg)
-	}
-
-	cr := csr.SignRequest{
-		Request: pemReq,
-		Profile: req.Profile,
-		SAN:     req.San,
-		Subject: subj,
-		// TODO:
-		//Extensions: req.Extensions,
-	}
-
-	if req.NotBefore != nil {
-		cr.NotBefore = req.NotBefore.AsTime()
-	}
-	if req.NotAfter != nil {
-		cr.NotAfter = req.NotAfter.AsTime()
-	}
-
-	tags := []metrics.Tag{
-		{Name: "profile", Value: req.Profile},
-		{Name: "issuer", Value: ca.Label()},
-	}
-
-	cert, pem, err := ca.Sign(cr)
-	if err != nil {
-		logger.KV(xlog.ERROR,
-			"status", "failed to sign certificate",
-			"err", err)
-
-		metrics.IncrCounter(keyForCertSignFailed, 1, tags...)
-		return nil, v1.NewError(codes.Internal, "failed to sign certificate request")
-	}
-
-	metrics.IncrCounter(keyForCertIssued, 1, tags...)
-
-	mcert := model.NewCertificate(cert, req.OrgId, req.Profile, string(pem), ca.PEM(), req.Label, nil)
-	fn := mcert.FileName()
-	mcert.Locations = append(mcert.Locations, s.cfg.RegistrationAuthority.Publisher.BaseURL+"/"+fn)
-
-	mcert, err = s.db.RegisterCertificate(ctx, mcert)
-	if err != nil {
-		logger.KV(xlog.ERROR,
-			"status", "failed to register certificate",
-			"err", err)
-
-		if strings.Contains(err.Error(), "duplicate key") {
-			return nil, v1.NewError(codes.AlreadyExists, "the key was already used")
-		}
-
-		return nil, v1.NewError(codes.Internal, "failed to register certificate")
-	}
-
-	if s.publisher != nil {
-		_, err := s.publisher.PublishCertificate(context.Background(), mcert.ToPB(), fn)
-		if err != nil {
-			logger.KV(xlog.ERROR,
-				"status", "failed to publish certificate",
-				"err", err)
-			metrics.IncrCounter(keyForCertPublishFailed, 1, tags...)
-			return nil, v1.NewError(codes.Internal, "failed to publish certificate")
-		}
-	}
-
-	logger.KV(xlog.NOTICE,
-		"status", "signed certificate",
-		"id", mcert.ID,
-		"subject", mcert.Subject,
-	)
-	res := &pb.CertificateResponse{
-		Certificate: mcert.ToPB(),
-	}
-	return res, nil
-}
-
-// PublishCrls returns published CRLs
-func (s *Service) PublishCrls(ctx context.Context, req *pb.PublishCrlsRequest) (*pb.CrlsResponse, error) {
-	return s.publishCrl(ctx, req.Ikid)
+	return ii
 }
 
 // GetCertificate returns Certificate
@@ -270,51 +123,6 @@ func (s *Service) UpdateCertificateLabel(ctx context.Context, req *pb.UpdateCert
 	return res, nil
 }
 
-// RevokeCertificate returns the revoked certificate
-func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error) {
-	var crt *model.Certificate
-	var err error
-	if in.Id != 0 {
-		crt, err = s.db.GetCertificate(ctx, in.Id)
-	} else if in.IssuerSerial != nil {
-		crt, err = s.db.GetCertificateByIKIDAndSerial(ctx, in.IssuerSerial.Ikid, in.IssuerSerial.SerialNumber)
-	} else if len(in.Skid) > 0 {
-		crt, err = s.db.GetCertificateBySKID(ctx, in.Skid)
-	} else {
-		return nil, v1.NewError(codes.InvalidArgument, "invalid parameter")
-	}
-	if err != nil {
-		logger.KV(xlog.ERROR,
-			"request", in,
-			"err", err,
-		)
-		return nil, v1.NewError(codes.Internal, "unable to find certificate")
-	}
-
-	revoked, err := s.db.RevokeCertificate(ctx, crt, time.Now().UTC(), int(in.Reason))
-	if err != nil {
-		logger.KV(xlog.ERROR,
-			"request", in,
-			"err", err,
-		)
-		return nil, v1.NewError(codes.Internal, "unable to revoke certificate")
-	}
-
-	tags := []metrics.Tag{
-		{Name: "ikid", Value: crt.IKID},
-		{Name: "serial", Value: crt.SerialNumber},
-	}
-
-	metrics.IncrCounter(keyForCertRevoked, 1, tags...)
-
-	s.publishCrlInBackground(crt.IKID)
-
-	res := &pb.RevokedCertificateResponse{
-		Revoked: revoked.ToDTO(),
-	}
-	return res, nil
-}
-
 // ListCertificates returns stream of Certificates
 func (s *Service) ListCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.CertificatesResponse, error) {
 	list, err := s.db.ListCertificates(ctx, in.Ikid, int(in.Limit), in.After)
@@ -347,9 +155,9 @@ func (s *Service) ListRevokedCertificates(ctx context.Context, in *pb.ListByIssu
 	return res, nil
 }
 
-// GetOrgCertificates returns the Org certificates
-func (s *Service) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest) (*pb.CertificatesResponse, error) {
-	list, err := s.db.GetOrgCertificates(ctx, in.OrgId)
+// ListOrgCertificates returns the Org certificates
+func (s *Service) ListOrgCertificates(ctx context.Context, in *pb.ListOrgCertificatesRequest) (*pb.CertificatesResponse, error) {
+	list, err := s.db.ListOrgCertificates(ctx, in.OrgId, int(in.Limit), in.After)
 	if err != nil {
 		logger.KV(xlog.ERROR,
 			"request", in,
@@ -363,85 +171,135 @@ func (s *Service) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertifica
 	return res, nil
 }
 
-// GetCRL returns the CRL
-func (s *Service) GetCRL(ctx context.Context, in *pb.GetCrlRequest) (*pb.CrlResponse, error) {
-	crl, err := s.db.GetCrl(ctx, in.Ikid)
-	if err == nil {
-		return &pb.CrlResponse{
-			Clr: crl.ToDTO(),
-		}, nil
-	}
-
-	logger.KV(xlog.ERROR,
-		"ikid", in.Ikid,
-		"err", err,
-	)
-
-	resp, err := s.publishCrl(ctx, in.Ikid)
+// RegisterIssuer creates a persisted Issuer configuration
+func (s *Service) RegisterIssuer(ctx context.Context, req *pb.RegisterIssuerRequest) (*pb.IssuerInfo, error) {
+	var cfg = new(authority.IssuerConfig)
+	err := yaml.Unmarshal(req.Config, cfg)
 	if err != nil {
-		logger.KV(xlog.ERROR,
-			"ikid", in.Ikid,
-			"err", err,
-		)
-		return nil, v1.NewError(codes.Internal, "unable to publish CRL")
+		return nil, v1.NewError(codes.InvalidArgument, "unable to decode configuration: %s", err.Error())
 	}
 
-	res := &pb.CrlResponse{
-		Clr: resp.Clrs[0],
+	signer, err := authority.NewSignerFromPEM(s.ca.Crypto(), []byte(cfg.KeyFile))
+	if err != nil {
+		return nil, v1.NewError(codes.InvalidArgument, "unable to create signer from private key: %s", err.Error())
 	}
 
-	return res, nil
+	profiles, err := s.db.GetCertProfilesByIssuer(ctx, cfg.Label)
+	if err != nil {
+		return nil, v1.NewError(codes.Internal, "unable to load profiles: %s", err.Error())
+	}
+
+	for _, p := range profiles {
+		var profile = new(authority.CertProfile)
+		err := yaml.Unmarshal([]byte(p.Config), profile)
+		if err != nil {
+			return nil, v1.NewError(codes.InvalidArgument, "unable to decode profile: %s", err.Error())
+		}
+
+		cfg.Profiles[p.Label] = profile
+	}
+
+	issuer, err := authority.CreateIssuer(cfg,
+		[]byte(cfg.CertFile),
+		[]byte(cfg.CABundleFile),
+		[]byte(cfg.RootBundleFile),
+		signer,
+	)
+	if err != nil {
+		return nil, v1.NewError(codes.Internal, "failed to create issuer: %s", err.Error())
+	}
+
+	err = s.ca.AddIssuer(issuer)
+	if err != nil {
+		return nil, v1.NewError(codes.Internal, "failed to add issuer: %s", err.Error())
+	}
+
+	_, err = s.db.RegisterIssuer(ctx, &model.Issuer{
+		Label:  cfg.Label,
+		Config: string(req.Config),
+	})
+	if err != nil {
+		return nil, v1.NewError(codes.Internal, "failed to save issuer: %s", err.Error())
+	}
+
+	return issuerInfo(issuer, true), nil
 }
 
-// SignOCSP returns OCSP response
-func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPResponse, error) {
-	ocspRequest, err := ocsp.ParseRequest(in.Der)
-	if err != nil ||
-		ocspRequest.SerialNumber == nil {
-		return nil, v1.NewError(codes.InvalidArgument, "invalid request")
-	}
-
-	var ica *authority.Issuer
-	if len(ocspRequest.IssuerKeyHash) > 0 {
-		ica, err = s.ca.GetIssuerByKeyHash(ocspRequest.HashAlgorithm, ocspRequest.IssuerKeyHash)
-	} else if len(ocspRequest.IssuerNameHash) > 0 {
-		ica, err = s.ca.GetIssuerByNameHash(ocspRequest.HashAlgorithm, ocspRequest.IssuerNameHash)
-	} else {
-		return nil, v1.NewError(codes.InvalidArgument, "issuer not specified")
-	}
-
+// RegisterProfile registers the certificate profile
+func (s *Service) RegisterProfile(ctx context.Context, req *pb.RegisterProfileRequest) (*pb.CertProfile, error) {
+	var cfg = new(authority.CertProfile)
+	err := yaml.Unmarshal(req.Config, cfg)
 	if err != nil {
-		return nil, v1.NewError(codes.NotFound, "issuer not found")
+		return nil, v1.NewError(codes.InvalidArgument, "unable to decode configuration: %s", err.Error())
 	}
 
-	serial := ocspRequest.SerialNumber.String()
-
-	req := &authority.OCSPSignRequest{
-		SerialNumber: ocspRequest.SerialNumber,
-		Status:       "good",
-		IssuerHash:   ocspRequest.HashAlgorithm,
+	// check if profile is already served
+	issuer, err := s.ca.GetIssuerByProfile(req.Label)
+	if err == nil && issuer.Label() != cfg.IssuerLabel {
+		return nil, v1.NewError(codes.InvalidArgument, "%q profile already served by %q issuer", req.Label, issuer.Label())
 	}
 
-	ikid := ica.Bundle().IssuerID
-	ri, err := s.db.GetRevokedCertificateByIKIDAndSerial(ctx, ikid, serial)
-	if err != nil && !db.IsNotFoundError(err) {
-		logger.KV(xlog.ERROR, "ikid", ikid, "serial", serial, "err", err)
-		return nil, v1.NewError(codes.Internal, "unable to get revoked certificate")
-	}
-
-	if ri != nil {
-		req.Status = "revoked"
-		req.Reason = ocsp.Unspecified
-		req.RevokedAt = ri.RevokedAt
-	}
-
-	logger.KV(xlog.TRACE, "ikid", ikid, "serial", serial, "status", req.Status)
-
-	der, err := ica.SignOCSP(req)
+	issuer, err = s.ca.GetIssuerByLabel(cfg.IssuerLabel)
 	if err != nil {
-		logger.KV(xlog.ERROR, "err", err)
-		return nil, v1.NewError(codes.Internal, "unable to sign OCSP")
+		return nil, v1.NewError(codes.InvalidArgument, "issuer not found: %s", cfg.IssuerLabel)
 	}
 
-	return &pb.OCSPResponse{Der: der}, nil
+	_, err = s.db.RegisterCertProfile(ctx, &model.CertProfile{
+		Label:       req.Label,
+		IssuerLabel: cfg.IssuerLabel,
+		Config:      string(req.Config),
+	})
+	if err != nil {
+		return nil, v1.NewError(codes.Internal, "unable to register profile: %s", err.Error())
+	}
+
+	issuer.AddProfile(req.Label, cfg)
+
+	return toCertProfilePB(cfg, req.Label), nil
+}
+
+func toCertProfilePB(cfg *authority.CertProfile, label string) *pb.CertProfile {
+	p := &pb.CertProfile{
+		Label:       label,
+		IssuerLabel: cfg.IssuerLabel,
+		Description: cfg.Description,
+		Usages:      cfg.Usage,
+		CaConstraint: &pb.CAConstraint{
+			IsCa:       cfg.CAConstraint.IsCA,
+			MaxPathLen: int32(cfg.CAConstraint.MaxPathLen),
+		},
+		OcspNoCheck:       cfg.OCSPNoCheck,
+		Expiry:            cfg.Expiry.String(),
+		Backdate:          cfg.Backdate.String(),
+		AllowedExtensions: cfg.AllowedExtensionsStrings(),
+		AllowedNames:      cfg.AllowedNames,
+		AllowedDns:        cfg.AllowedDNS,
+		AllowedEmail:      cfg.AllowedEmail,
+		AllowedUri:        cfg.AllowedURI,
+		PoliciesCritical:  cfg.PoliciesCritical,
+		AllowedRoles:      cfg.AllowedRoles,
+		DeniedRoles:       cfg.DeniedRoles,
+	}
+	if cfg.AllowedCSRFields != nil {
+		p.AllowedFields = &pb.CSRAllowedFields{
+			Subject: cfg.AllowedCSRFields.Subject,
+			Dns:     cfg.AllowedCSRFields.DNSNames,
+			Email:   cfg.AllowedCSRFields.EmailAddresses,
+			Uri:     cfg.AllowedCSRFields.URIs,
+			Ip:      cfg.AllowedCSRFields.IPAddresses,
+		}
+	}
+	for _, pol := range cfg.Policies {
+		pbPol := &pb.CertificatePolicy{
+			Id: pol.ID.String(),
+		}
+		for _, q := range pol.Qualifiers {
+			pbPol.Qualifiers = append(pbPol.Qualifiers, &pb.CertificatePolicyQualifier{
+				Type:  q.Type,
+				Value: q.Value,
+			})
+		}
+		p.Policies = append(p.Policies, pbPol)
+	}
+	return p
 }

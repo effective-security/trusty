@@ -109,8 +109,19 @@ services:
         --out-prefix trusty_
         --san 168.138.72.101
         --ca1 --ca2 --bundle --client --peer --force &&
+        /opt/trusty/bin/gen_shaken_certs.sh
+        --hsm-config /tmp/trusty/softhsm/unittest_hsm.json
+        --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml
+        --out-dir /tmp/trusty/certs
+        --csr-dir /opt/trusty/etc/dev/csr_profile
+        --csr-prefix shaken_
+        --out-prefix shaken_
+        --root-ca /tmp/trusty/certs/shaken_root_ca.pem
+        --root-ca-key /tmp/trusty/certs/shaken_root_ca.key
+        --root --ca --l1_ca --bundle --force &&
         /opt/trusty/bin/trusty --std
         --hsm-cfg=/tmp/trusty/softhsm/unittest_hsm.json
+        --crypto-prov=/opt/trusty/tests/aws-test-kms.json
         --cfg=/opt/trusty/etc/dev/trusty-config.yaml
         --ca-sql=env://TRUSTY_CA_SQL_CONN
         --logs-dir=/var/trusty/logs
@@ -175,6 +186,16 @@ services:
         --out-prefix trusty_
         --san 168.138.72.102
         --ca1 --ca2 --bundle --client --peer --force &&
+        /opt/trusty/bin/gen_shaken_certs.sh
+        --hsm-config /opt/trusty/tests/aws-test-kms.json
+        --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml
+        --out-dir /tmp/trusty/certs
+        --csr-dir /opt/trusty/etc/dev/csr_profile
+        --csr-prefix shaken_
+        --out-prefix shaken_
+        --root-ca /tmp/trusty/certs/shaken_root_ca.pem
+        --root-ca-key /tmp/trusty/certs/shaken_root_ca.key
+        --root --ca --l1_ca --bundle --force &&
         /opt/trusty/bin/trusty --std
         --hsm-cfg=/opt/trusty/tests/aws-test-kms.json
         --cfg=/opt/trusty/etc/dev/trusty-config.yaml

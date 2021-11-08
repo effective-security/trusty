@@ -3,7 +3,6 @@ package proxy
 import (
 	"context"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"google.golang.org/grpc"
 )
@@ -18,8 +17,13 @@ func CAServerToClient(srv pb.CAServiceServer) pb.CAServiceClient {
 }
 
 // ProfileInfo returns the certificate profile info
-func (s *caSrv2C) ProfileInfo(ctx context.Context, in *pb.CertProfileInfoRequest, opts ...grpc.CallOption) (*pb.CertProfileInfo, error) {
+func (s *caSrv2C) ProfileInfo(ctx context.Context, in *pb.CertProfileInfoRequest, opts ...grpc.CallOption) (*pb.CertProfile, error) {
 	return s.srv.ProfileInfo(ctx, in)
+}
+
+// GetIssuer returns the issuing CA
+func (s *caSrv2C) GetIssuer(ctx context.Context, in *pb.IssuerInfoRequest, opts ...grpc.CallOption) (*pb.IssuerInfo, error) {
+	return s.srv.GetIssuer(ctx, in)
 }
 
 // SignCertificate returns the certificate
@@ -28,8 +32,8 @@ func (s *caSrv2C) SignCertificate(ctx context.Context, in *pb.SignCertificateReq
 }
 
 // Issuers returns the issuing CAs
-func (s *caSrv2C) Issuers(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*pb.IssuersInfoResponse, error) {
-	return s.srv.Issuers(ctx, in)
+func (s *caSrv2C) ListIssuers(ctx context.Context, in *pb.ListIssuersRequest, opts ...grpc.CallOption) (*pb.IssuersInfoResponse, error) {
+	return s.srv.ListIssuers(ctx, in)
 }
 
 // PublishCrls returns published CRLs
@@ -70,4 +74,19 @@ func (s *caSrv2C) SignOCSP(ctx context.Context, req *pb.OCSPRequest, opts ...grp
 // UpdateCertificateLabel returns the updated certificate
 func (s *caSrv2C) UpdateCertificateLabel(ctx context.Context, req *pb.UpdateCertificateLabelRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
 	return s.srv.UpdateCertificateLabel(ctx, req)
+}
+
+// ListOrgCertificates returns the Org certificates
+func (s *caSrv2C) ListOrgCertificates(ctx context.Context, req *pb.ListOrgCertificatesRequest, opts ...grpc.CallOption) (*pb.CertificatesResponse, error) {
+	return s.srv.ListOrgCertificates(ctx, req)
+}
+
+// RegisterIssuer registers the IssuerInfo
+func (s *caSrv2C) RegisterIssuer(ctx context.Context, req *pb.RegisterIssuerRequest, opts ...grpc.CallOption) (*pb.IssuerInfo, error) {
+	return s.srv.RegisterIssuer(ctx, req)
+}
+
+// RegisterProfile registers the certificate profile
+func (s *caSrv2C) RegisterProfile(ctx context.Context, req *pb.RegisterProfileRequest, opts ...grpc.CallOption) (*pb.CertProfile, error) {
+	return s.srv.RegisterProfile(ctx, req)
 }

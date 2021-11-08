@@ -54,8 +54,8 @@ func CallerStatusResponse(w io.Writer, r *pb.CallerStatusResponse) {
 // Issuers prints list of IssuerInfo
 func Issuers(w io.Writer, issuers []*pb.IssuerInfo, withPem bool) {
 	now := time.Now()
-	for cnt, ci := range issuers {
-		fmt.Fprintf(w, "==================================== %d ====================================\n", cnt+1)
+	for _, ci := range issuers {
+		fmt.Fprintf(w, "=========================================================\n")
 		certBytes := []byte(ci.Certificate)
 		bundle, bundleStatus, err := certutil.VerifyBundleFromPEM(certBytes, []byte(ci.Intermediates), []byte(ci.Root))
 		if err != nil {
@@ -72,9 +72,11 @@ func Issuers(w io.Writer, issuers []*pb.IssuerInfo, withPem bool) {
 		issuedIn := now.Sub(bundle.Cert.NotBefore.Local()) / time.Minute * time.Minute
 		expiresIn := bundle.Cert.NotAfter.Local().Sub(now) / time.Minute * time.Minute
 
+		fmt.Fprintf(w, "Label: %s\n", ci.Label)
+		fmt.Fprintf(w, "Profiles: %v\n", ci.Profiles)
 		fmt.Fprintf(w, "Subject: %s\n", certutil.NameToString(&bundle.Cert.Subject))
-		fmt.Fprintf(w, "  ID: %s\n", bundle.SubjectID)
-		fmt.Fprintf(w, "  Issuer ID: %s\n", bundle.IssuerID)
+		fmt.Fprintf(w, "  SKID: %s\n", bundle.SubjectID)
+		fmt.Fprintf(w, "  IKID: %s\n", bundle.IssuerID)
 		fmt.Fprintf(w, "  Serial: %s\n", bundle.Cert.SerialNumber.String())
 		fmt.Fprintf(w, "  Issued: %s (%s ago)\n", bundle.Cert.NotBefore.Local().String(), issuedIn.String())
 		fmt.Fprintf(w, "  Expires: %s (in %s)\n", bundle.Cert.NotAfter.Local().String(), expiresIn.String())
@@ -117,22 +119,22 @@ func Issuers(w io.Writer, issuers []*pb.IssuerInfo, withPem bool) {
 				if !bytes.Equal(crt.Raw, bundle.Cert.Raw) {
 					cnt++
 					fmt.Fprintf(w, "  [%d] %s\n", cnt, certutil.NameToString(&crt.Subject))
-					fmt.Fprintf(w, "    ID: %s\n", certutil.GetSubjectID(crt))
+					fmt.Fprintf(w, "    SKID: %s\n", certutil.GetSubjectID(crt))
 					fmt.Fprintf(w, "    Serial: %s\n", crt.SerialNumber.String())
 					fmt.Fprintf(w, "    Issuer: %s\n", certutil.NameToString(&crt.Issuer))
-					fmt.Fprintf(w, "    Issuer ID: %s\n", certutil.GetIssuerID(crt))
+					fmt.Fprintf(w, "    IKID: %s\n", certutil.GetIssuerID(crt))
 				}
 			}
 		} else if bundle.IssuerCert != nil {
 			fmt.Fprintf(w, "Issuer: %s\n", certutil.NameToString(&bundle.IssuerCert.Subject))
-			fmt.Fprintf(w, "  ID: %s\n", certutil.GetSubjectID(bundle.IssuerCert))
-			fmt.Fprintf(w, "  Issuer ID: %s\n", certutil.GetIssuerID(bundle.IssuerCert))
+			fmt.Fprintf(w, "  SKID: %s\n", certutil.GetSubjectID(bundle.IssuerCert))
+			fmt.Fprintf(w, "  IKID: %s\n", certutil.GetIssuerID(bundle.IssuerCert))
 		}
 
 		if bundle.RootCert != nil &&
 			(bundle.IssuerCert == nil || !bytes.Equal(bundle.RootCert.Raw, bundle.IssuerCert.Raw)) {
 			fmt.Fprintf(w, "Root: %s\n", certutil.NameToString(&bundle.RootCert.Subject))
-			fmt.Fprintf(w, "  ID: %s\n", certutil.GetSubjectID(bundle.RootCert))
+			fmt.Fprintf(w, "  SKID: %s\n", certutil.GetSubjectID(bundle.RootCert))
 		}
 
 		if withPem {

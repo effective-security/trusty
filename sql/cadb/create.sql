@@ -8,6 +8,8 @@ SELECT
 
 \if :cadb_exists
 \echo 'cadb already exists!'
+\c cadb
+\dt
 \q
 \endif
 

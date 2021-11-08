@@ -54,10 +54,12 @@ func NewRoot(profile string, cfg *Config, provider cryptoprov.Provider, req *csr
 		signer:  signer,
 		sigAlgo: csr.DefaultSigAlgo(signer),
 	}
-	if cfg.Authority != nil {
-		issuer.cfg.AIA = cfg.Authority.DefaultAIA
-	}
-
+	/*
+		if cfg.Authority != nil {
+			// TODO: AIA to root CA
+			// issuer.cfg.AIA = cfg.Authority.DefaultAIA
+		}
+	*/
 	sreq := csr.SignRequest{
 		SAN:     req.SAN,
 		Request: string(csrPEM),

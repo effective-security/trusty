@@ -252,17 +252,25 @@ func (p *Provider) GetCertificateByIKIDAndSerial(ctx context.Context, ikid, seri
 	return c, nil
 }
 
-// GetOrgCertificates returns list of Org certs
-func (p *Provider) GetOrgCertificates(ctx context.Context, orgID uint64) (model.Certificates, error) {
+// ListOrgCertificates returns Certificates for organization
+func (p *Provider) ListOrgCertificates(ctx context.Context, orgID uint64, limit int, afterID uint64) (model.Certificates, error) {
+	if limit == 0 {
+		limit = 100
+	}
+	if limit > 500 {
+		limit = 500
+	}
 
 	res, err := p.db.QueryContext(ctx, `
 		SELECT
 			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,label,locations
 		FROM
 			certificates
-		WHERE org_id = $1
-		;
-		`, orgID)
+		WHERE org_id = $1 AND id > $2
+		ORDER BY
+			id ASC
+		LIMIT $3
+		;`, orgID, afterID, limit)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -307,7 +315,10 @@ func (p *Provider) GetOrgCertificates(ctx context.Context, orgID uint64) (model.
 // ListCertificates returns list of Certificate info
 func (p *Provider) ListCertificates(ctx context.Context, ikid string, limit int, afterID uint64) (model.Certificates, error) {
 	if limit == 0 {
-		limit = 1000
+		limit = 100
+	}
+	if limit > 500 {
+		limit = 500
 	}
 	logger.KV(xlog.DEBUG,
 		"ikid", ikid,

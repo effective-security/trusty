@@ -49,6 +49,9 @@ func TestMain(m *testing.M) {
 }
 func Test_ListTables(t *testing.T) {
 	expectedTables := []string{
+		"'issuers'",
+		"'cert_profiles'",
+		"'nonces'",
 		"'certificates'",
 		"'revoked'",
 		"'roots'",

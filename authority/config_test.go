@@ -2,7 +2,6 @@ package authority_test
 
 import (
 	"testing"
-	"time"
 
 	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/pkg/csr"
@@ -11,25 +10,6 @@ import (
 )
 
 const projFolder = "../"
-
-func TestDefaultCertProfile(t *testing.T) {
-	def := authority.DefaultCertProfile().Copy()
-	require.NotNil(t, def)
-
-	def.AllowedExtensions = []csr.OID{{1, 2, 3, 4, 5, 6, 8}}
-	assert.Equal(t, time.Duration(10*time.Minute), def.Backdate.TimeDuration())
-	assert.Equal(t, time.Duration(8760*time.Hour), def.Expiry.TimeDuration())
-	assert.Equal(t, "default profile with Server and Client auth", def.Description)
-	require.NotEmpty(t, def.Usage)
-	assert.Contains(t, def.Usage, "signing")
-	assert.Contains(t, def.Usage, "key encipherment")
-	assert.Contains(t, def.Usage, "server auth")
-	assert.Contains(t, def.Usage, "client auth")
-	assert.NoError(t, def.Validate())
-	assert.False(t, def.IsAllowedExtention(csr.OID{1, 2, 3, 4, 5, 6, 7}))
-	assert.True(t, def.IsAllowedExtention(csr.OID{1, 2, 3, 4, 5, 6, 8}))
-	assert.NotEmpty(t, def.AllowedExtensionsStrings())
-}
 
 func TestLoadInvalidConfigFile(t *testing.T) {
 	tcases := []struct {
@@ -75,11 +55,6 @@ func TestLoadConfig(t *testing.T) {
 	cfg2 := cfg.Copy()
 	assert.Equal(t, cfg, cfg2)
 
-	def := cfg.DefaultCertProfile()
-	require.NotNil(t, def)
-	assert.Equal(t, time.Duration(30*time.Minute), def.Backdate.TimeDuration())
-	assert.Equal(t, time.Duration(168*time.Hour), def.Expiry.TimeDuration())
-
 	files := []string{
 		projFolder + "etc/dev/ca-config.dev.yaml",
 		projFolder + "etc/dev/ca-config.bootstrap.yaml",
@@ -92,6 +67,21 @@ func TestLoadConfig(t *testing.T) {
 		cfg, err := authority.LoadConfig(path)
 		require.NoError(t, err, "failed to parse: %s", path)
 		require.NotEmpty(t, cfg.Profiles)
+	}
+}
+
+func TestLoadConfigError(t *testing.T) {
+	files := map[string]string{
+		"testdata/ca-config.dup_iss.yaml":      "duplicate issuer configuration found: TrustyCA",
+		"testdata/ca-config.prof.yaml":         "profile has no issuer label: test_server",
+		"testdata/ca-config.prof_unknown.yaml": `invalid configuration: "NoIssuer" issuer not found for "test_server" profile`,
+	}
+	for path, expErr := range files {
+		t.Run(path, func(t *testing.T) {
+			_, err := authority.LoadConfig(path)
+			require.Error(t, err)
+			assert.Equal(t, expErr, err.Error())
+		})
 	}
 }
 
@@ -111,25 +101,9 @@ func TestCertProfile(t *testing.T) {
 	assert.NoError(t, p.Validate())
 	assert.True(t, p.IsAllowedExtention(csr.OID{1, 1000, 1, 3}))
 	assert.False(t, p.IsAllowedExtention(csr.OID{1, 1000, 1, 3, 1}))
-}
 
-func TestDefaultAuthority(t *testing.T) {
-	a := &authority.CAConfig{}
-	assert.Equal(t, authority.DefaultCRLExpiry, a.DefaultAIA.GetCRLExpiry())
-	assert.Equal(t, authority.DefaultOCSPExpiry, a.DefaultAIA.GetOCSPExpiry())
-	assert.Equal(t, authority.DefaultCRLRenewal, a.DefaultAIA.GetCRLRenewal())
-
-	d := 1 * time.Hour
-	a = &authority.CAConfig{
-		DefaultAIA: &authority.AIAConfig{
-			CRLExpiry:  d,
-			OCSPExpiry: d,
-			CRLRenewal: d,
-		},
-	}
-	assert.Equal(t, time.Duration(d), a.DefaultAIA.GetCRLExpiry())
-	assert.Equal(t, time.Duration(d), a.DefaultAIA.GetOCSPExpiry())
-	assert.Equal(t, time.Duration(d), a.DefaultAIA.GetCRLRenewal())
+	p2 := p.Copy()
+	assert.Equal(t, p.AllowedExtensionsStrings(), p2.AllowedExtensionsStrings())
 }
 
 func TestProfilePolicyIsAllowed(t *testing.T) {

@@ -106,6 +106,12 @@ func (s *Service) CaDb() cadb.CaDb {
 	return s.db
 }
 
+// CA returns Authority
+// Used in Unittests
+func (s *Service) CA() *authority.Authority {
+	return s.ca
+}
+
 func (s *Service) registerIssuers(ctx context.Context) error {
 	for _, ca := range s.ca.Issuers() {
 		bundle := ca.Bundle()
@@ -175,23 +181,34 @@ func (s *Service) registerRoots(ctx context.Context) error {
 func (s *Service) registerPublisherTask(ctx context.Context) {
 	issuers := s.ca.Issuers()
 	for _, issuer := range issuers {
-		logger.KV(xlog.NOTICE,
-			"ikid", issuer.SubjectKID(),
-			"scheduled", "crl_publisher",
-			"interval", issuer.CrlRenewal().String(),
-		)
-		task := tasks.NewTaskAtIntervals(uint64(issuer.CrlRenewal().Hours()), tasks.Hours)
-		taskName := "crl_publisher_" + issuer.SubjectKID()
-		task = task.Do(taskName, func() {
-			_, err := s.publishCrl(ctx, issuer.SubjectKID())
-			if err != nil {
-				logger.KV(xlog.ERROR,
-					"ikid", issuer.SubjectKID(),
-					"task", taskName,
-					"err", err,
-				)
-			}
-		})
-		s.scheduler = s.scheduler.Add(task)
+		if issuer.CrlRenewal() > 0 && issuer.CrlURL() != "" {
+			logger.KV(xlog.NOTICE,
+				"ikid", issuer.SubjectKID(),
+				"scheduled", "crl_publisher",
+				"interval", issuer.CrlRenewal().String(),
+				"crldp", issuer.CrlURL(),
+			)
+
+			task := tasks.NewTaskAtIntervals(uint64(issuer.CrlRenewal().Hours()), tasks.Hours)
+			taskName := "crl_publisher_" + issuer.SubjectKID()
+			task = task.Do(taskName, func() {
+				_, err := s.publishCrl(ctx, issuer.SubjectKID())
+				if err != nil {
+					logger.KV(xlog.ERROR,
+						"ikid", issuer.SubjectKID(),
+						"task", taskName,
+						"err", err,
+					)
+				}
+			})
+			s.scheduler = s.scheduler.Add(task)
+		} else {
+			logger.KV(xlog.NOTICE,
+				"ikid", issuer.SubjectKID(),
+				"skipped", "crl_publisher",
+				"interval", issuer.CrlRenewal().String(),
+				"crldp", issuer.CrlURL(),
+			)
+		}
 	}
 }

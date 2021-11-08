@@ -54,13 +54,14 @@ metrics:
 # configuration for crypto providers
 crypto_provider:
   #  the location of the configuration file for default provider
-  default: /tmp/trusty/softhsm/unittest_hsm.json
+  default: ${TRUSTY_CONFIG_DIR}/kms/aws-dev-kms.json
   # the list of locations of the configuration files
   providers:
+  #- /tmp/trusty/softhsm/unittest_hsm.json
   # the list of supported manufactures of PKCS11 tokens
   pkcs11_manufacturers:
-    - SoftHSM
-    - Gemalto NV
+  - SoftHSM
+  - Gemalto NV
 
 jwt_provider: ${TRUSTY_CONFIG_DIR}/jwt-provider.yaml
 
@@ -87,6 +88,7 @@ ra:
     - ${TRUSTY_CONFIG_DIR}/roots/trusty_root_ca.pem
   # the list of public Root Certs files.
   public_roots:
+    - /tmp/trusty/certs/shaken_root_ca.pem
   publisher:
     base_url: https://dev.trustyca.com
     # use gs:// for GCP, or file path 
@@ -182,6 +184,7 @@ servers:
     services:
       - status
       - ca
+      - cis
       - swagger
     enable_grpc_gateway: false
     heartbeat_secs: 30

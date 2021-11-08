@@ -1,15 +1,5 @@
 ---
 authority:
-  default_aia: 
-    issuer_url: http://localhost:7880/v1/cert/${ISSUER_ID}
-    crl_url: http://localhost:7880/v1/crl/${ISSUER_ID}
-    ocsp_url: http://localhost:7880/v1/ocsp
-    # value in 72h format for duration of CRL next update time
-    crl_expiry: 12h
-    # value in 8h format for duration of CRL renewal before next update time
-    crl_renewal: 1h
-    # value in 8h format for duration of OCSP next update time
-    ocsp_expiry: 30m
   issuers:
   -
     # specifies Issuer's label
@@ -22,10 +12,13 @@ authority:
     ca_bundle: /tmp/trusty/certs/trusty_cabundle.pem
     # location of the Root CA file
     root_bundle: /tmp/trusty/certs/trusty_root_ca.pem
-    aia: #empty
-      issuer_url:
-      crl_url:
-      ocsp_url:
+    aia:
+      issuer_url: http://localhost:7880/v1/cert/${ISSUER_ID}
+      crl_url: http://localhost:7880/v1/crl/${ISSUER_ID}
+      ocsp_url: http://localhost:7880/v1/ocsp
+      crl_expiry:
+      crl_renewal:
+      ocsp_expiry:
 
 profiles:
 
