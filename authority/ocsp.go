@@ -27,12 +27,21 @@ var revocationReasonCodes = map[string]int{
 	"aacompromise":         ocsp.AACompromise,
 }
 
+const (
+	// OCSPStatusGood specifies name for good status
+	OCSPStatusGood = "good"
+	// OCSPStatusRevoked specifies name for revoked status
+	OCSPStatusRevoked = "revoked"
+	// OCSPStatusUnknown specifies name for unknown status
+	OCSPStatusUnknown = "unknown"
+)
+
 // OCSPStatusCode is a map between string statuses sent by cli/api
 // to ocsp int statuses
 var OCSPStatusCode = map[string]int{
-	"good":    ocsp.Good,
-	"revoked": ocsp.Revoked,
-	"unknown": ocsp.Unknown,
+	OCSPStatusGood:    ocsp.Good,
+	OCSPStatusRevoked: ocsp.Revoked,
+	OCSPStatusUnknown: ocsp.Unknown,
 }
 
 // OCSPSignRequest represents the desired contents of a

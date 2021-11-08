@@ -81,7 +81,7 @@ func (s *Service) GetCRL(ctx context.Context, in *pb.GetCrlRequest) (*pb.CrlResp
 		}, nil
 	}
 
-	logger.KV(xlog.ERROR,
+	logger.KV(xlog.TRACE,
 		"ikid", in.Ikid,
 		"err", err,
 	)
@@ -95,8 +95,10 @@ func (s *Service) GetCRL(ctx context.Context, in *pb.GetCrlRequest) (*pb.CrlResp
 		return nil, v1.NewError(codes.Internal, "unable to publish CRL")
 	}
 
-	res := &pb.CrlResponse{
-		Clr: resp.Clrs[0],
+	res := &pb.CrlResponse{}
+
+	if len(resp.Clrs) > 0 {
+		res.Clr = resp.Clrs[0]
 	}
 
 	return res, nil
@@ -127,7 +129,7 @@ func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPRes
 
 	req := &authority.OCSPSignRequest{
 		SerialNumber: ocspRequest.SerialNumber,
-		Status:       "good",
+		Status:       authority.OCSPStatusGood,
 		IssuerHash:   ocspRequest.HashAlgorithm,
 	}
 
@@ -139,7 +141,7 @@ func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPRes
 	}
 
 	if ri != nil {
-		req.Status = "revoked"
+		req.Status = authority.OCSPStatusRevoked
 		req.Reason = ocsp.Unspecified
 		req.RevokedAt = ri.RevokedAt
 	}

@@ -3,6 +3,7 @@ package appcontainer
 import (
 	"os"
 	"path"
+	"path/filepath"
 	"sync"
 	"testing"
 
@@ -10,12 +11,20 @@ import (
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/tasks"
 	"github.com/go-phorce/dolly/xlog"
+	"github.com/go-phorce/dolly/xpki/cryptoprov"
+	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/backend/config"
+	"github.com/martinisecurity/trusty/backend/db/cadb"
+	"github.com/martinisecurity/trusty/client"
+	"github.com/martinisecurity/trusty/pkg/certpublisher"
+	"github.com/martinisecurity/trusty/pkg/jwt"
 	"github.com/pkg/errors"
 	"github.com/sony/sonyflake"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+const projFolder = "../../"
 
 func TestNewContainerFactory(t *testing.T) {
 	output := path.Join(os.TempDir(), "tests", "trusty", guid.MustCreate())
@@ -72,6 +81,42 @@ func TestNewContainerFactory(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestAppContainer(t *testing.T) {
+	cfgPath, err := filepath.Abs(projFolder + "etc/dev/" + config.ConfigFileName)
+	require.NoError(t, err)
+
+	f := NewContainerFactory(nil).
+		WithConfigurationProvider(func() (*config.Configuration, error) {
+
+			f, err := config.DefaultFactory()
+			require.NoError(t, err)
+
+			cfg := new(config.Configuration)
+			err = f.LoadForHostName(cfgPath, "", cfg)
+			require.NoError(t, err)
+
+			return cfg, nil
+		})
+
+	container, err := f.CreateContainerWithDependencies()
+	require.NoError(t, err)
+	err = container.Invoke(func(
+		_ *config.Configuration,
+		_ *cryptoprov.Crypto,
+		_ audit.Auditor,
+		_ tasks.Scheduler,
+		_ cadb.CaDb,
+		_ cadb.CaReadonlyDb,
+		_ jwt.Parser,
+		_ *authority.Authority,
+		_ certpublisher.Publisher,
+		_ client.Factory,
+	) {
+	})
+	require.NoError(t, err)
+
 }
 
 func TestIdGenerator(t *testing.T) {

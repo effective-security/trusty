@@ -118,7 +118,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 			"status", "failed to register certificate",
 			"err", err)
 
-		if strings.Contains(err.Error(), "duplicate key") {
+		if strings.Contains(err.Error(), "certificates_skid") {
 			return nil, v1.NewError(codes.AlreadyExists, "the key was already used")
 		}
 

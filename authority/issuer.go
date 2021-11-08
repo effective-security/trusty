@@ -93,6 +93,11 @@ func (ca *Issuer) KeyHash(h crypto.Hash) []byte {
 	return ca.keyHash[h]
 }
 
+// NameHash returns name hash
+func (ca *Issuer) NameHash(h crypto.Hash) []byte {
+	return ca.nameHash[h]
+}
+
 // CrlRenewal is duration for CRL renewal interval
 func (ca *Issuer) CrlRenewal() time.Duration {
 	return ca.crlRenewal

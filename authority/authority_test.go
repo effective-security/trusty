@@ -1,6 +1,7 @@
 package authority_test
 
 import (
+	"crypto"
 	"strings"
 	"testing"
 
@@ -122,6 +123,10 @@ func (s *testSuite) TestNewAuthority() {
 		s.NotContains(issuer.CrlURL(), "${ISSUER_ID}")
 		s.NotContains(issuer.OcspURL(), "${ISSUER_ID}")
 
+		issuer.CrlRenewal()
+		issuer.CrlExpiry()
+		issuer.OcspExpiry()
+
 		i, err := a.GetIssuerByLabel(issuer.Label())
 		s.NoError(err)
 		s.NotNil(i)
@@ -129,6 +134,18 @@ func (s *testSuite) TestNewAuthority() {
 		i, err = a.GetIssuerByKeyID(issuer.SubjectKID())
 		s.NoError(err)
 		s.NotNil(i)
+
+		i, err = a.GetIssuerByNameHash(crypto.SHA1, issuer.NameHash(crypto.SHA1))
+		s.NoError(err)
+		s.NotNil(i)
+		_, err = a.GetIssuerByNameHash(crypto.SHA256, issuer.NameHash(crypto.SHA1))
+		s.Error(err)
+
+		i, err = a.GetIssuerByKeyHash(crypto.SHA1, issuer.KeyHash(crypto.SHA1))
+		s.NoError(err)
+		s.NotNil(i)
+		_, err = a.GetIssuerByKeyHash(crypto.SHA256, issuer.KeyHash(crypto.SHA1))
+		s.Error(err)
 
 		for name := range cfg.Profiles {
 			_, err = a.GetIssuerByProfile(name)
