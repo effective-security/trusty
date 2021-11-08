@@ -47,18 +47,25 @@ func (s *testSuite) TestIssuers() {
 	srv := s.SetupMockGRPC()
 	defer srv.Stop()
 
-	err = s.Run(ca.Issuers, nil)
+	limit := int64(100)
+	after := uint64(0)
+	bundle := false
+	err = s.Run(ca.ListIssuers, &ca.ListIssuersFlags{
+		Limit:  &limit,
+		After:  &after,
+		Bundle: &bundle,
+	})
 	s.Require().NoError(err)
 
 	if s.Cli.IsJSON() {
-		s.HasText("{\n\t\"issuers\": [\n\t\t{\n\t\t\t\"certificate\": \"#   Issuer: C=US, L=WA, O=trusty.com, CN=[TEST] Trusty Level 1 CA\\n#   Subject: C=US, L=WA, O=trusty.com, CN=[TEST] Trusty Level 2 CA\\n#   Validity\\n#       Not Before: Nov  4 16:11:00 2020 GMT\\n#       Not After : Nov  3 16:11:00 2025 GMT\\n-----BEGIN CERTIFICATE-----\\n")
+		s.HasText("{\n\t\"issuers\": [\n\t\t{\n\t\t\t\"certificate\": \"#   Issuer: C=US, ST=WA, L=Seattle, O=Effective Security, LLC., OU=Dev, CN=SHAKEN R1\\n#   Subject: C=US, ST=WA, L=Seattle, O=Effective Security, LLC., OU=Dev, CN=SHAKEN G1\\n#   Validity\\n#       Not Before: Nov  6 21:37:00 2021 GMT\\n#       Not After : Nov  5 21:37:00 2026 GMT\\n-----BEGIN CERTIFICATE-----\\nMIICoDCCAkagAwIBAgIULobw6UOmZHjPBjHpTE4PD9WySogwCgYIKoZIzj0EAwIw\\ncTELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAldBMRAwDgYDVQQHEwdTZWF0dGxlMSEw\\nHwYDVQQKExhFZmZlY3RpdmUgU2VjdXJpdHksIExMQy4xDDAKBgNVBAsTA0RldjES\\nMBAGA1UEAxMJU0hBS0VOIFIxMB4XDTIxMTEwNjIxMzcwMFoXDTI2MTEwNTIxMzcw\\nMFowcTELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAldBMRAwDgYDVQQHEwdTZWF0dGxl\\nMSEwHwYDVQQKExhFZmZlY3RpdmUgU2VjdXJpdHksIExMQy4xDDAKBgNVBAsTA0Rl\\ndjESMBAGA1UEAxMJU0hBS0VOIEcxMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE\\ne/AeKIF1tyEeptOVMY5q7aKjSrI57hX20YG9VLkOCVm8uSdJO0lPmjpYbUC1FVWH\\nDjYuJ4gtcSQCKSYZhPh2dqOBuzCBuDAOBgNVHQ8BAf8EBAMCAQYwEgYDVR0TAQH/\\nBAgwBgEB/wIBADAdBgNVHQ4EFgQUW0/DIvRAkP4IJSAWDRYOwrw+NNUwHwYDVR0j\\nBBgwFoAUE5QzhNGAbTw5P2RsiyNNk+FYOBAwUgYDVR0gAQH/BEgwRjAMBgpghkgB\\nhv8JAQEBMDYGCisGAQQBg8R1AQEwKDAmBggrBgEFBQcCARYaaHR0cHM6Ly9zdGly\\nc2hha2VuLmNvbS9DUFMwCgYIKoZIzj0EAwIDSAAwRQIhAJlz09JroD/cHTiIQYlB\\nhsmB3h5u4Z2iKefhYZBQZGYJAiB2f+k4GmdVIgIRU2z1gYCzAs97Kb4UliglatVG\\nT0TbwQ==\\n-----END CERTIFICATE-----\",\n\t\t\t\"label\": \"SHAKEN_CA\",\n\t\t\t\"profiles\": [\n\t\t\t\t\"SHAKEN\"\n\t\t\t],\n\t\t\t\"root\": \"#   Issuer: C=US, ST=WA, L=Seattle, O=Effective Security, LLC., OU=Dev, CN=SHAKEN R1\\n#   Subject: C=US, ST=WA, L=Seattle, O=Effective Security, LLC., OU=Dev, CN=SHAKEN R1\\n#   Validity\\n#       Not Before: Nov  6 21:37:00 2021 GMT\\n#       Not After : Nov  4 21:37:00 2031 GMT\\n-----BEGIN CERTIFICATE-----\\nMIICJjCCAcygAwIBAgIUVaH35KweAkbQ9+Zoh/QfSwP45BUwCgYIKoZIzj0EAwIw\\ncTELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAldBMRAwDgYDVQQHEwdTZWF0dGxlMSEw\\nHwYDVQQKExhFZmZlY3RpdmUgU2VjdXJpdHksIExMQy4xDDAKBgNVBAsTA0RldjES\\nMBAGA1UEAxMJU0hBS0VOIFIxMB4XDTIxMTEwNjIxMzcwMFoXDTMxMTEwNDIxMzcw\\nMFowcTELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAldBMRAwDgYDVQQHEwdTZWF0dGxl\\nMSEwHwYDVQQKExhFZmZlY3RpdmUgU2VjdXJpdHksIExMQy4xDDAKBgNVBAsTA0Rl\\ndjESMBAGA1UEAxMJU0hBS0VOIFIxMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE\\ngaBoImhURVPBeRmG4bKkBqWaXdLPXeCr94UHVY8Qytj5tNWFgC7JKGuYo93GNrYN\\nNlAwYx0tnR2VIozAR+WJFqNCMEAwDgYDVR0PAQH/BAQDAgEGMA8GA1UdEwEB/wQF\\nMAMBAf8wHQYDVR0OBBYEFBOUM4TRgG08OT9kbIsjTZPhWDgQMAoGCCqGSM49BAMC\\nA0gAMEUCIFB8n51NY0QifCwbZaZbD0NWxwCWJDTzaLoyidjZkViNAiEAuP/odPVk\\n4JrhhrAGM3bmaBsOXaxC5QtNs1ThVuPh7rc=\\n-----END CERTIFICATE-----\"\n\t\t}")
 	} else {
-		s.HasText("==================================== 1 ====================================\nSubject: C=US, L=WA, O=trusty.com, CN=[TEST] Trusty Level 2 CA\n  ID: 0c2d74591b9418ea0dbeffabdc45ddc2d0854d07\n  Issuer ID: 6aaa5b9679de083158dea410e90b5e9053b80fe9\n  Serial: 587326160986110266985360397839241616566604194108\n")
+		s.HasText("=========================================================\nLabel: SHAKEN_CA\nProfiles: [SHAKEN]\nSubject: C=US, ST=WA, L=Seattle, O=Effective Security, LLC., OU=Dev, CN=SHAKEN G1\n  SKID: 5b4fc322f44090fe082520160d160ec2bc3e34d5\n  IKID: 13943384d1806d3c393f646c8b234d93e1583810\n  Serial: 265622861638837071462064479366543661900737170056\n  Issued:")
 	}
 }
 
 func (s *testSuite) TestProfile() {
-	expectedResponse := new(pb.CertProfileInfo)
+	expectedResponse := new(pb.CertProfile)
 	err := loadJSON("testdata/server_profile.json", expectedResponse)
 	s.Require().NoError(err)
 
@@ -69,32 +76,29 @@ func (s *testSuite) TestProfile() {
 	srv := s.SetupMockGRPC()
 	defer srv.Stop()
 
-	profile := "server"
-	label := ""
-	err = s.Run(ca.Profile, &ca.GetProfileFlags{Profile: &profile, Label: &label})
+	label := "server"
+	err = s.Run(ca.Profile, &ca.GetProfileFlags{Label: &label})
 	s.Require().NoError(err)
 
 	s.Equal(`{
-	"issuer": "TrustyCA",
-	"profile": {
-		"allowed_extensions": [
-			"1.3.6.1.5.5.7.1.1"
-		],
-		"backdate": "30m0s",
-		"ca_constraint": {},
-		"description": "server TLS profile",
-		"expiry": "168h0m0s",
-		"usages": [
-			"signing",
-			"key encipherment",
-			"server auth",
-			"ipsec end system"
-		]
-	}
+	"allowed_extensions": [
+		"1.3.6.1.5.5.7.1.1"
+	],
+	"backdate": "30m0s",
+	"ca_constraint": {},
+	"description": "server TLS profile",
+	"expiry": "168h0m0s",
+	"issuer_label": "TrustyCA",
+	"label": "server",
+	"usages": [
+		"signing",
+		"key encipherment",
+		"server auth",
+		"ipsec end system"
+	]
 }
 `,
 		s.Output())
-
 }
 
 func (s *testSuite) TestSign() {

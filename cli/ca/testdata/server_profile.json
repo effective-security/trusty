@@ -1,18 +1,17 @@
 {
-    "issuer": "TrustyCA",
-    "profile": {
-        "allowed_extensions": [
-            "1.3.6.1.5.5.7.1.1"
-        ],
-        "backdate": "30m0s",
-        "ca_constraint": {},
-        "description": "server TLS profile",
-        "expiry": "168h0m0s",
-        "usages": [
-            "signing",
-            "key encipherment",
-            "server auth",
-            "ipsec end system"
-        ]
-    }
+    "label": "server",
+    "issuer_label": "TrustyCA",
+    "allowed_extensions": [
+        "1.3.6.1.5.5.7.1.1"
+    ],
+    "backdate": "30m0s",
+    "ca_constraint": {},
+    "description": "server TLS profile",
+    "expiry": "168h0m0s",
+    "usages": [
+        "signing",
+        "key encipherment",
+        "server auth",
+        "ipsec end system"
+    ]
 }

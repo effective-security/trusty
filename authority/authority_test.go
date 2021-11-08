@@ -1,13 +1,16 @@
 package authority_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/backend/config"
+	"github.com/martinisecurity/trusty/pkg/awskmscrypto"
 	"github.com/martinisecurity/trusty/pkg/csr"
+	"github.com/martinisecurity/trusty/pkg/gcpkmscrypto"
 	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/stretchr/testify/suite"
 )
@@ -39,8 +42,10 @@ func (s *testSuite) SetupSuite() {
 	s.cfg, err = testutils.LoadConfig(projFolder, "UNIT_TEST")
 	s.Require().NoError(err)
 
+	cryptoprov.Register("AWSKMS", awskmscrypto.KmsLoader)
+	cryptoprov.Register("GCPKMS", gcpkmscrypto.KmsLoader)
 	cryptoprov.Register("SoftHSM", cryptoprov.Crypto11Loader)
-	s.crypto, err = cryptoprov.Load(s.cfg.CryptoProv.Default, nil)
+	s.crypto, err = cryptoprov.Load(s.cfg.CryptoProv.Default, s.cfg.CryptoProv.Providers)
 	s.Require().NoError(err)
 }
 
@@ -63,20 +68,22 @@ func (s *testSuite) TestNewAuthority() {
 	cfg, err = authority.LoadConfig(projFolder + "/etc/dev/ca-config.dev.yaml")
 	s.Require().NoError(err)
 
-	//
-	// Test 0 default durations
-	//
-	cfg2 := cfg.Copy()
-	s.Require().Equal(*cfg, *cfg2)
+	/*
+		//
+		// Test 0 default durations
+		//
+		cfg2 := cfg.Copy()
+		s.Require().Equal(*cfg, *cfg2)
 
-	cfg2.Authority.DefaultAIA = &authority.AIAConfig{
-		CRLExpiry:  0,
-		OCSPExpiry: 0,
-		CRLRenewal: 0,
-	}
+		cfg2.Authority.DefaultAIA = &authority.AIAConfig{
+			CRLExpiry:  0,
+			OCSPExpiry: 0,
+			CRLRenewal: 0,
+		}
 
-	_, err = authority.NewAuthority(cfg2, s.crypto)
-	s.Require().NoError(err)
+		_, err = authority.NewAuthority(cfg2, s.crypto)
+		s.Require().NoError(err)
+	*/
 
 	//
 	// Test invalid Issuer files
@@ -111,9 +118,6 @@ func (s *testSuite) TestNewAuthority() {
 	s.Equal(len(cfg4.Authority.Issuers), len(issuers))
 
 	for _, issuer := range issuers {
-		s.Equal(cfg4.Authority.DefaultAIA.GetCRLRenewal(), issuer.CrlRenewal())
-		s.Equal(cfg4.Authority.DefaultAIA.GetCRLExpiry(), issuer.CrlExpiry())
-		s.Equal(cfg4.Authority.DefaultAIA.GetOCSPExpiry(), issuer.OcspExpiry())
 		s.NotContains(issuer.AiaURL(), "${ISSUER_ID}")
 		s.NotContains(issuer.CrlURL(), "${ISSUER_ID}")
 		s.NotContains(issuer.OcspURL(), "${ISSUER_ID}")
@@ -122,11 +126,24 @@ func (s *testSuite) TestNewAuthority() {
 		s.NoError(err)
 		s.NotNil(i)
 
+		i, err = a.GetIssuerByKeyID(issuer.SubjectKID())
+		s.NoError(err)
+		s.NotNil(i)
+
 		for name := range cfg.Profiles {
 			_, err = a.GetIssuerByProfile(name)
-			s.NoError(err)
+			if strings.Contains(name, "${LABEL}") {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
 		}
 	}
+
+	_, err = a.GetIssuerByKeyID("xxxx")
+	s.Error(err)
+	s.Equal("issuer not found: xxxx", err.Error())
+
 	_, err = a.GetIssuerByLabel("wrong")
 	s.Error(err)
 	s.Equal("issuer not found: wrong", err.Error())

@@ -2,9 +2,9 @@ package ca_test
 
 import (
 	"context"
-	"crypto/x509"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"sync"
 	"syscall"
@@ -39,7 +39,7 @@ const (
 func TestMain(m *testing.M) {
 	xlog.GetFormatter().WithCaller(true)
 	var err error
-	//	xlog.SetPackageLogLevel("github.com/go-phorce/dolly/xhttp", "retriable", xlog.DEBUG)
+	xlog.SetGlobalLogLevel(xlog.ERROR)
 
 	cfg, err := testutils.LoadConfig(projFolder, "UNIT_TEST")
 	if err != nil {
@@ -112,10 +112,36 @@ func TestReady(t *testing.T) {
 	assert.True(t, trustyServer.IsReady())
 }
 
-func TestIssuers(t *testing.T) {
-	res, err := authorityClient.Issuers(context.Background())
+func TestListIssuers(t *testing.T) {
+	res, err := authorityClient.ListIssuers(context.Background(), &pb.ListIssuersRequest{
+		Limit:  100,
+		After:  0,
+		Bundle: true,
+	})
 	require.NoError(t, err)
 	assert.NotEmpty(t, res.Issuers)
+
+	for _, iss := range res.Issuers {
+		iisres, err := authorityClient.GetIssuer(context.Background(), &pb.IssuerInfoRequest{
+			Label: iss.Label,
+		})
+		require.NoError(t, err)
+		assert.Equal(t, iss.Label, iisres.Label)
+
+		sort.Strings(iss.Profiles)
+		sort.Strings(iisres.Profiles)
+
+		assert.Equal(t, iss.Profiles, iisres.Profiles)
+		assert.Equal(t, iss.Certificate, iisres.Certificate)
+		assert.Equal(t, iss.Intermediates, iisres.Intermediates)
+		assert.Equal(t, iss.Root, iisres.Root)
+	}
+
+	_, err = authorityClient.GetIssuer(context.Background(), &pb.IssuerInfoRequest{
+		Label: "xxx",
+	})
+	require.Error(t, err)
+	assert.Equal(t, "issuer not found", err.Error())
 }
 
 func TestProfileInfo(t *testing.T) {
@@ -123,13 +149,10 @@ func TestProfileInfo(t *testing.T) {
 		req *pb.CertProfileInfoRequest
 		err string
 	}{
-		{nil, "missing profile parameter"},
-		{&pb.CertProfileInfoRequest{}, "missing profile parameter"},
-		{&pb.CertProfileInfoRequest{Profile: "test_server"}, ""},
-		{&pb.CertProfileInfoRequest{Profile: "test_server", Label: "trusty.svc"}, ""},
-		{&pb.CertProfileInfoRequest{Profile: "test_server", Label: "Trusty.Svc"}, ""},
-		{&pb.CertProfileInfoRequest{Profile: "test_server", Label: "trusty"}, `profile "test_server" is served by trusty.svc issuer`},
-		{&pb.CertProfileInfoRequest{Profile: "xxx"}, "profile not found: xxx"},
+		{nil, "missing label parameter"},
+		{&pb.CertProfileInfoRequest{}, "missing label parameter"},
+		{&pb.CertProfileInfoRequest{Label: "test_server"}, ""},
+		{&pb.CertProfileInfoRequest{Label: "xxx"}, "issuer not found for profile: xxx"},
 	}
 
 	for _, tc := range tcases {
@@ -139,10 +162,8 @@ func TestProfileInfo(t *testing.T) {
 			assert.Equal(t, tc.err, err.Error())
 		} else {
 			assert.NoError(t, err)
-			if len(tc.req.Label) > 0 {
-				assert.Equal(t, strings.ToLower(tc.req.Label), res.Label)
-			}
-			assert.NotEmpty(t, res.Issuer)
+			assert.Equal(t, strings.ToLower(tc.req.Label), res.Label)
+			assert.NotEmpty(t, res.IssuerLabel)
 		}
 	}
 }
@@ -193,7 +214,7 @@ func TestSignCertificate(t *testing.T) {
 
 	res, err := authorityClient.SignCertificate(context.Background(), &pb.SignCertificateRequest{
 		Profile:       "test_server",
-		Request:       generateCSR(),
+		Request:       generateServerCSR(),
 		RequestFormat: pb.EncodingFormat_PEM,
 	})
 	require.NoError(t, err)
@@ -212,47 +233,6 @@ func TestSignCertificate(t *testing.T) {
 	assert.Equal(t, res.Certificate.String(), crt.Certificate.String())
 }
 
-func TestPublishCrls(t *testing.T) {
-	ctx := context.Background()
-	certRes, err := authorityClient.SignCertificate(ctx, &pb.SignCertificateRequest{
-		Profile:       "test_server",
-		Request:       generateCSR(),
-		RequestFormat: pb.EncodingFormat_PEM,
-	})
-	require.NoError(t, err)
-
-	revRes, err := authorityClient.RevokeCertificate(ctx, &pb.RevokeCertificateRequest{
-		Skid:   certRes.Certificate.Skid,
-		Reason: pb.Reason_CA_COMPROMISE,
-	})
-	require.NoError(t, err)
-	assert.Equal(t, pb.Reason_CA_COMPROMISE, revRes.Revoked.Reason)
-
-	list, err := authorityClient.PublishCrls(ctx, &pb.PublishCrlsRequest{})
-	require.NoError(t, err)
-	require.NotEmpty(t, list)
-
-	crl, err := x509.ParseCRL([]byte(list.Clrs[0].Pem))
-	require.NoError(t, err)
-	require.Equal(t, certRes.Certificate.Issuer, crl.TBSCertList.Issuer.String())
-	require.NotEmpty(t, crl.TBSCertList.RevokedCertificates)
-	var revokedCerts []string
-	for _, item := range crl.TBSCertList.RevokedCertificates {
-		revokedCerts = append(revokedCerts, item.SerialNumber.String())
-	}
-	require.Contains(t, revokedCerts, certRes.Certificate.SerialNumber)
-}
-
-func TestRevokeCertificate(t *testing.T) {
-	_, err := authorityClient.RevokeCertificate(context.Background(), &pb.RevokeCertificateRequest{Id: 123})
-	require.Error(t, err)
-	assert.Equal(t, "unable to find certificate", err.Error())
-
-	_, err = authorityClient.RevokeCertificate(context.Background(), &pb.RevokeCertificateRequest{Skid: "123123"})
-	require.Error(t, err)
-	assert.Equal(t, "unable to find certificate", err.Error())
-}
-
 func TestE2E(t *testing.T) {
 	svc := trustyServer.Service(config.CAServerName).(*ca.Service)
 	ctx := context.Background()
@@ -260,14 +240,14 @@ func TestE2E(t *testing.T) {
 
 	res, err := authorityClient.SignCertificate(ctx, &pb.SignCertificateRequest{
 		Profile:       "test_server",
-		Request:       generateCSR(),
+		Request:       generateServerCSR(),
 		RequestFormat: pb.EncodingFormat_PEM,
 	})
 	require.NoError(t, err)
 
 	ikid := res.Certificate.Ikid
 	lRes, err := authorityClient.ListCertificates(ctx, &pb.ListByIssuerRequest{
-		Limit: 1000,
+		Limit: 100,
 		Ikid:  ikid,
 	})
 	require.NoError(t, err)
@@ -276,16 +256,19 @@ func TestE2E(t *testing.T) {
 	for i := 0; i < count; i++ {
 		res, err = authorityClient.SignCertificate(ctx, &pb.SignCertificateRequest{
 			Profile:       "test_server",
-			Request:       generateCSR(),
+			Request:       generateServerCSR(),
 			RequestFormat: pb.EncodingFormat_PEM,
+			OrgId:         uint64(i),
 		})
 		require.NoError(t, err)
 
-		list, err := svc.GetOrgCertificates(ctx,
-			&pb.GetOrgCertificatesRequest{OrgId: res.Certificate.OrgId})
+		list, err := svc.ListOrgCertificates(ctx, &pb.ListOrgCertificatesRequest{
+			OrgId: res.Certificate.OrgId,
+			Limit: 10,
+		})
 		require.NoError(t, err)
 		assert.NotEmpty(t, list.List)
-		t.Logf("GetOrgCertificates: %d", len(list.List))
+		t.Logf("ListOrgCertificates: %d", len(list.List))
 
 		crtRes, err := svc.GetCertificate(ctx,
 			&pb.GetCertificateRequest{Skid: res.Certificate.Skid})
@@ -375,8 +358,8 @@ func TestE2E(t *testing.T) {
 func TestGetCert(t *testing.T) {
 	svc := trustyServer.Service(config.CAServerName).(*ca.Service)
 	ctx := context.Background()
-	list, err := svc.GetOrgCertificates(ctx,
-		&pb.GetOrgCertificatesRequest{OrgId: 1111111})
+	list, err := svc.ListOrgCertificates(ctx,
+		&pb.ListOrgCertificatesRequest{OrgId: 1111111})
 	require.NoError(t, err)
 	assert.Empty(t, list.List)
 
@@ -391,10 +374,9 @@ func TestGetCert(t *testing.T) {
 		})
 	require.Error(t, err)
 	assert.Equal(t, "unable to update certificate", err.Error())
-
 }
 
-func generateCSR() []byte {
+func generateServerCSR() []byte {
 	prov := csr.NewProvider(inmemcrypto.NewProvider())
 	req := prov.NewSigningCertificateRequest("label", "ECDSA", 256, "localhost", []csr.X509Name{
 		{

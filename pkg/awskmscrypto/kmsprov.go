@@ -287,6 +287,7 @@ func (p *Provider) EnumKeys(slotID uint, prefix string, keyInfoFunc func(id, lab
 
 // DestroyKeyPairOnSlot destroys key pair on slot. For KMS slotID is ignored and KMS retire API is used to destroy the key.
 func (p *Provider) DestroyKeyPairOnSlot(slotID uint, keyID string) error {
+	logger.KV(xlog.NOTICE, "slot", slotID, "key", keyID)
 	resp, err := p.kmsClient.ScheduleKeyDeletion(&kms.ScheduleKeyDeletionInput{
 		KeyId: &keyID,
 	})

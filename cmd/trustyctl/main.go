@@ -54,19 +54,22 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 		PreAction(cli.PopulateControl).
 		Action(cli.RegisterAction(status.Caller, nil))
 
-	// ca: issuers|profile|sign|publish_crl
+	// ca: issuers|profile|sign|publish_crl|certificate
 
 	cmdCA := app.Command("ca", "CA operations").
 		PreAction(cli.PopulateControl)
 
-	cmdCA.Command("issuers", "show the issuing CAs").
-		Action(cli.RegisterAction(ca.Issuers, nil))
+	listIssuersFlags := new(ca.ListIssuersFlags)
+	cmdListIssuers := cmdCA.Command("issuers", "show the issuing CAs").
+		Action(cli.RegisterAction(ca.ListIssuers, listIssuersFlags))
+	listIssuersFlags.Limit = cmdListIssuers.Flag("limit", "limit the items in response").Int64()
+	listIssuersFlags.After = cmdListIssuers.Flag("after", "pagination after ID").Uint64()
+	listIssuersFlags.Bundle = cmdListIssuers.Flag("bundle", "return PEM of the chain").Bool()
 
 	getProfileFlags := new(ca.GetProfileFlags)
 	profileCmd := cmdCA.Command("profile", "show the certificate profile").
 		Action(cli.RegisterAction(ca.Profile, getProfileFlags))
-	getProfileFlags.Profile = profileCmd.Flag("name", "profile name").Required().String()
-	getProfileFlags.Label = profileCmd.Flag("issuer", "issuer label").String()
+	getProfileFlags.Label = profileCmd.Flag("label", "profile label").String()
 
 	signFlags := new(ca.SignFlags)
 	signCmd := cmdCA.Command("sign", "sign CSR").
@@ -112,6 +115,12 @@ func realMain(args []string, out io.Writer, errout io.Writer) ctl.ReturnCode {
 	revokeFlags.IKID = revokeCmd.Flag("ikid", "Issuer Key Identifier").String()
 	revokeFlags.Serial = revokeCmd.Flag("sn", "Serial Number").String()
 	revokeFlags.Reason = revokeCmd.Flag("reason", "Reason for revocation").Int()
+
+	getCertFlags := new(ca.GetCertificateFlags)
+	getCertCmd := cmdCA.Command("certificate", "get a certificate").
+		Action(cli.RegisterAction(ca.GetCertificate, getCertFlags))
+	getCertFlags.ID = getCertCmd.Flag("id", "ID of the certificate").Uint64()
+	getCertFlags.SKID = getCertCmd.Flag("skid", "Subject Key Identifier").String()
 
 	// cis: roots|certs|revoked
 

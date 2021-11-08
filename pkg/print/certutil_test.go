@@ -129,10 +129,12 @@ func Test_Issuers(t *testing.T) {
 	w := bytes.NewBuffer([]byte{})
 	print.Issuers(w, res.Issuers, true)
 	out := w.String()
-	assert.Contains(t, out, `Subject: C=US, L=WA, O=trusty.com, CN=[TEST] Trusty Level 2 CA
-  ID: 0c2d74591b9418ea0dbeffabdc45ddc2d0854d07
-  Issuer ID: 6aaa5b9679de083158dea410e90b5e9053b80fe9
-  Serial: 587326160986110266985360397839241616566604194108
+	assert.Contains(t, out, `Label: trusty.svc
+Profiles: [default peer timestamp test_client server client ocsp test_server codesign]
+Subject: C=US, L=WA, O=trusty.com, CN=[TEST] Trusty Level 2 CA
+  SKID: 2e897da29a7b7b8aea10e0aa0900bc72eb31b62f
+  IKID: 91bba6f326b11e030b0893b68362e35176d4e526
+  Serial: 339118521149703476204197482799788296632679099480
 `)
 }
 

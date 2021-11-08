@@ -333,6 +333,7 @@ func keyLabelInfo(key *kmspb.CryptoKey) string {
 
 // DestroyKeyPairOnSlot destroys key pair on slot. For KMS slotID is ignored and KMS retire API is used to destroy the key.
 func (p *Provider) DestroyKeyPairOnSlot(slotID uint, keyID string) error {
+	logger.KV(xlog.NOTICE, "slot", slotID, "key", keyID)
 	resp, err := p.KmsClient.DestroyCryptoKeyVersion(context.Background(),
 		&kmspb.DestroyCryptoKeyVersionRequest{
 			Name: p.keyVersionName(keyID),

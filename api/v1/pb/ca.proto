@@ -11,14 +11,15 @@ import "google/api/annotations.proto";
 
 service CAService {
     // ProfileInfo returns the certificate profile info
-    rpc ProfileInfo(CertProfileInfoRequest) returns (CertProfileInfo) {
-        option (google.api.http) = {
-            post: "/v1/ca/profile_info"
-        };
+    rpc ProfileInfo(CertProfileInfoRequest) returns (CertProfile) {
     }
 
-    // Issuers returns the issuing CAs
-    rpc Issuers(google.protobuf.Empty) returns (IssuersInfoResponse) {
+    // GetIssuer returns the issuing CA
+    rpc GetIssuer(IssuerInfoRequest) returns (IssuerInfo) {
+    }
+
+    // ListIssuers returns the issuing CAs
+    rpc ListIssuers(ListIssuersRequest) returns (IssuersInfoResponse) {
     }
 
     // SignCertificate returns the certificate
@@ -45,6 +46,10 @@ service CAService {
     rpc PublishCrls(PublishCrlsRequest) returns (CrlsResponse) {
     }
 
+    // ListOrgCertificates returns the Org certificates
+    rpc ListOrgCertificates(ListOrgCertificatesRequest) returns (CertificatesResponse) {
+    }
+
     // ListCertificates returns stream of Certificates
     rpc ListCertificates(ListByIssuerRequest) returns (CertificatesResponse) {
     }
@@ -57,26 +62,23 @@ service CAService {
     rpc UpdateCertificateLabel(UpdateCertificateLabelRequest) returns (CertificateResponse) {
     }
 
-    /*
-    // GetOrgCertificates returns the Org certificates
-    rpc GetOrgCertificates(GetOrgCertificatesRequest) returns (CertificatesResponse) {
-        option (google.api.http) = {
-            get: "/v1/cis/certs"
-        };
+    // RegisterIssuer registers the IssuerInfo
+    rpc RegisterIssuer(RegisterIssuerRequest) returns (IssuerInfo) {
     }
-    */
+
+    // RegisterProfile registers the certificate profile
+    rpc RegisterProfile(RegisterProfileRequest) returns (CertProfile) {
+    }
 }
 
 message CertProfileInfoRequest {
     string label = 1;
-    string profile = 2;
 }
 
-// CertProfileInfo is the response for an Profile Info API request
-message CertProfileInfo {
-    string issuer = 1;
-    string label = 2;
-    CertProfile profile = 3;
+message IssuerInfoRequest {
+    string label = 1;
+    // IKID specifies Issuer Key ID to search
+    string ikid = 2;
 }
 
 // CertificateBundle provides certificate and its issuers
@@ -91,14 +93,16 @@ message CertificateBundle {
 
 // IssuerInfo provides Issuer information
 message IssuerInfo {
-    // Certificate provides the certificate in PEM format
-    string certificate = 1;
-    // Intermediates provides the intermediate CA certificates bundle in PEM format
-    string intermediates = 2;
-    // Root provides the Root CA certificate in PEM format
-    string root = 3;
     // Label specifies the Issuer's label
-    string label = 4;
+    string label = 1;
+    // Certificate provides the certificate in PEM format
+    string certificate = 2;
+    // Intermediates provides the intermediate CA certificates bundle in PEM format
+    string intermediates = 3;
+    // Root provides the Root CA certificate in PEM format
+    string root = 4;
+    // Profiles specifies the list of profiles the issuer supports
+    repeated string profiles = 5;
 }
 
 // IssuersInfoResponse provides response for Issuers Info request
@@ -147,6 +151,8 @@ message GetCertificateRequest {
     uint64 id = 1;
     // SKID specifies Subject Key ID to search
     string skid = 2;
+    // IssuerSerial specifies Issuer Key ID and certificate serial number to search
+    IssuerSerial issuer_serial = 3;
 }
 
 // GetCrlRequest specifies CRL request by IKID
@@ -156,7 +162,7 @@ message GetCrlRequest {
 }
 
 message ListByIssuerRequest {
-    // Limit specifies the limit to return, or ALL if 0
+    // Limit specifies the limit to return
     int64 limit = 1; 
     // After specifies certificate ID to start after
     uint64 after = 2;
@@ -224,8 +230,35 @@ message OCSPResponse {
     bytes Der = 1;
 }
 
-// GetOrgsCertificatesRequest specifies a certificates request by Org ID
-message GetOrgCertificatesRequest {
+// ListOrgsCertificatesRequest specifies a certificates request by Org ID
+message ListOrgCertificatesRequest {
+    // Limit specifies the limit to return
+    int64 limit = 1; 
+    // After specifies certificate ID to start after
+    uint64 after = 2;
     // OrgId specifies the Org ID.
-    uint64 org_id = 1;
+    uint64 org_id = 3;
+}
+
+// RegisterIssuerRequest specifies a request to register a persisted issuer
+message RegisterIssuerRequest {
+    // Config is yaml encoded Issuer configuration
+    bytes config = 1;
+}
+
+// RegisterProfileRequest specifies a request to register a persisted profile
+message RegisterProfileRequest {
+    // Label provides Profile label
+    string label = 1;
+    // Config is yaml encoded Profile configuration
+    bytes config = 2;
+}
+
+message ListIssuersRequest {
+    // Limit specifies the limit to return
+    int64 limit = 1; 
+    // After specifies certificate ID to start after
+    uint64 after = 2;
+    // Bundle specifies to return entire chain
+    bool bundle = 3;
 }

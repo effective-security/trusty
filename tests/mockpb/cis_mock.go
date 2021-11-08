@@ -43,8 +43,8 @@ func (m *MockCIServer) GetCertificate(ctx context.Context, in *pb.GetCertificate
 	return m.Resps[0].(*pb.CertificateResponse), nil
 }
 
-// GetOrgCertificates returns the Org certificates
-func (m *MockCIServer) GetOrgCertificates(ctx context.Context, in *pb.GetOrgCertificatesRequest) (*pb.CertificatesResponse, error) {
+// ListOrgCertificates returns the Org certificates
+func (m *MockCIServer) ListOrgCertificates(ctx context.Context, in *pb.ListOrgCertificatesRequest) (*pb.CertificatesResponse, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}

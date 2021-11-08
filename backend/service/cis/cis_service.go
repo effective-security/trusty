@@ -108,7 +108,11 @@ func (s *Service) OnStarted() error {
 
 		ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
 		defer cancel()
-		_, err = c.Issuers(ctx)
+		_, err = c.ListIssuers(ctx, &pb.ListIssuersRequest{
+			Limit:  1,
+			After:  0,
+			Bundle: false,
+		})
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}

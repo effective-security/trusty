@@ -11,7 +11,6 @@ func (s *testSuite) TestNewIssuer() {
 	cfg, err := authority.LoadConfig(projFolder + "/etc/dev/ca-config.dev.yaml")
 	s.Require().NoError(err)
 	s.Require().NotNil(cfg.Authority)
-	s.NotNil(cfg.Authority.DefaultAIA)
 
 	for _, isscfg := range cfg.Authority.Issuers {
 		if isscfg.GetDisabled() {

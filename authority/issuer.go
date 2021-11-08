@@ -113,6 +113,16 @@ func (ca *Issuer) Profile(name string) *CertProfile {
 	return ca.cfg.Profiles[name]
 }
 
+// Profiles returns CertProfiles
+func (ca *Issuer) Profiles() map[string]*CertProfile {
+	return ca.cfg.Profiles
+}
+
+// AddProfile adds CertProfile
+func (ca *Issuer) AddProfile(label string, p *CertProfile) {
+	ca.cfg.Profiles[label] = p
+}
+
 // NewIssuer creates Issuer from provided configuration
 func NewIssuer(cfg *IssuerConfig, prov *cryptoprov.Crypto) (*Issuer, error) {
 	// ensure that signer can be created before the key is generated
@@ -154,6 +164,11 @@ func NewIssuer(cfg *IssuerConfig, prov *cryptoprov.Crypto) (*Issuer, error) {
 // CreateIssuer returns Issuer created directly from crypto.Signer,
 // this method is mostly used for testing
 func CreateIssuer(cfg *IssuerConfig, certBytes, intCAbytes, rootBytes []byte, signer crypto.Signer) (*Issuer, error) {
+	cfg = cfg.Copy()
+	if cfg.Profiles == nil {
+		cfg.Profiles = make(map[string]*CertProfile)
+	}
+
 	label := cfg.Label
 	bundle, status, err := certutil.VerifyBundleFromPEM(certBytes, intCAbytes, rootBytes)
 	if err != nil {

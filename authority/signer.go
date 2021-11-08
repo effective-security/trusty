@@ -21,7 +21,11 @@ func NewSignerFromFromFile(crypto *cryptoprov.Crypto, caKeyFile string) (crypto.
 	// remove trailing space and end-of-line
 	cakey = []byte(strings.TrimSpace(string(cakey)))
 
-	return NewSignerFromPEM(crypto, cakey)
+	s, err := NewSignerFromPEM(crypto, cakey)
+	if err != nil {
+		return nil, errors.WithMessagef(err, "load key from file: %s", caKeyFile)
+	}
+	return s, nil
 }
 
 // NewSignerFromPEM generates a new crypto signer from PEM encoded blocks,

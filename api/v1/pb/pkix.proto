@@ -154,36 +154,49 @@ message CSRAllowedFields {
     bool uri = 5;
 }
 
+message CertificatePolicyQualifier {
+	string type  = 1;
+	string value = 2;
+}
+
+message CertificatePolicy {
+    // Id is OID of Certificate Policy
+	string id = 1;
+	repeated CertificatePolicyQualifier qualifiers = 2;
+}
+
 // CertProfile provides certificate profile
 message CertProfile {
-	string description = 1;
+    string label = 1;
+    string issuer_label = 2;
+	string description = 3;
 
 	// Usage provides a list key usages
-	repeated string usages = 2;
+	repeated string usages = 4;
 
-	CAConstraint ca_constraint  = 3;
-	bool ocsp_no_check  = 4;
+	CAConstraint ca_constraint  = 5;
+	bool ocsp_no_check  = 6;
 
-	string expiry = 5;
-	string backdate = 6;
+	string expiry = 7;
+	string backdate = 8;
 
-	repeated string allowed_extensions = 7;
+	repeated string allowed_extensions = 9;
 
 	// AllowedNames specifies a RegExp to check for allowed names.
 	// If not provided, then all values are allowed
-	string allowed_names = 8;
+	string allowed_names = 10;
 
 	// AllowedDns specifies a RegExp to check for allowed DNS.
 	// If not provided, then all values are allowed
-	string allowed_dns = 9;
+	string allowed_dns = 11;
 
 	// AllowedEmail specifies a RegExp to check for allowed email.
 	// If not provided, then all values are allowed
-	string allowed_email = 10;
+	string allowed_email = 12;
 
 	// AllowedUri specifies a RegExp to check for allowed URI.
 	// If not provided, then all values are allowed
-	string allowed_uri = 11;
+	string allowed_uri = 13;
 
 	// AllowedFields provides booleans for fields in the CSR.
 	// If a AllowedFields is not present in a CertProfile,
@@ -196,10 +209,15 @@ message CertProfile {
 	// Since API clients are expected to be trusted, but CSRs are not, fields
 	// provided through the API are not subject to validation through this
 	// mechanism.
-	CSRAllowedFields allowed_fields = 12;
+	CSRAllowedFields allowed_fields = 14;
 
-    // TODO
-	// Policies []csr.CertificatePolicy `json:"policies"`
+	repeated CertificatePolicy policies = 15;
+
+	// PoliciesCritical specifies to mark Policies as Critical extension
+    bool policies_critical = 16;
+
+	repeated string allowed_roles = 17;
+	repeated string denied_roles = 18;
 }
 
 message IssuerSerial {

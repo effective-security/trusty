@@ -15,26 +15,38 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Issuers shows the Issuing CAs
-func Issuers(c ctl.Control, _ interface{}) error {
-	cli := c.(*cli.Cli)
+// ListIssuersFlags defines flags for ListIssuers command
+type ListIssuersFlags struct {
+	Limit  *int64
+	After  *uint64
+	Bundle *bool
+}
 
-	client, err := cli.Client(config.CAServerName)
+// ListIssuers shows the Issuing CAs
+func ListIssuers(c ctl.Control, p interface{}) error {
+	flags := p.(*ListIssuersFlags)
+	cl := c.(*cli.Cli)
+
+	client, err := cl.Client(config.CAServerName)
 	if err != nil {
 		return errors.WithStack(err)
 	}
 	defer client.Close()
 
-	res, err := client.CAClient().Issuers(context.Background())
+	res, err := client.CAClient().ListIssuers(context.Background(), &pb.ListIssuersRequest{
+		Limit:  *flags.Limit,
+		After:  *flags.After,
+		Bundle: *flags.Bundle,
+	})
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	if cli.IsJSON() {
+	if cl.IsJSON() {
 		ctl.WriteJSON(c.Writer(), res)
 		fmt.Fprint(c.Writer(), "\n")
 	} else {
-		print.Issuers(c.Writer(), res.Issuers, true)
+		print.Issuers(c.Writer(), res.Issuers, *flags.Bundle)
 	}
 	return nil
 }
@@ -122,8 +134,7 @@ func ListRevokedCerts(c ctl.Control, p interface{}) error {
 
 // GetProfileFlags defines flags for Profile command
 type GetProfileFlags struct {
-	Profile *string
-	Label   *string
+	Label *string
 }
 
 // Profile shows the certifiate profile
@@ -137,8 +148,7 @@ func Profile(c ctl.Control, p interface{}) error {
 	defer client.Close()
 
 	res, err := client.CAClient().ProfileInfo(context.Background(), &pb.CertProfileInfoRequest{
-		Profile: *flags.Profile,
-		Label:   *flags.Label,
+		Label: *flags.Label,
 	})
 	if err != nil {
 		return errors.WithStack(err)
@@ -306,6 +316,38 @@ func UpdateCertLabel(c ctl.Control, p interface{}) error {
 	res, err := client.CAClient().UpdateCertificateLabel(context.Background(), &pb.UpdateCertificateLabelRequest{
 		Id:    *flags.ID,
 		Label: *flags.Label,
+	})
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	ctl.WriteJSON(c.Writer(), res)
+	fmt.Fprint(c.Writer(), "\n")
+	// TODO: printer
+	return nil
+}
+
+// GetCertificateFlags specifies flags for the GetCertificate action
+type GetCertificateFlags struct {
+	ID     *uint64
+	SKID   *string
+	IKID   *string
+	Serial *string
+}
+
+// GetCertificate returns a certifiate
+func GetCertificate(c ctl.Control, p interface{}) error {
+	flags := p.(*GetCertificateFlags)
+
+	client, err := c.(*cli.Cli).Client(config.CAServerName)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	defer client.Close()
+
+	res, err := client.CAClient().GetCertificate(context.Background(), &pb.GetCertificateRequest{
+		Id:   cli.Uint64(flags.ID),
+		Skid: cli.String(flags.SKID),
 	})
 	if err != nil {
 		return errors.WithStack(err)

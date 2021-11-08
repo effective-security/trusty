@@ -96,7 +96,7 @@ func TestRegisterCertificate(t *testing.T) {
 	assert.Equal(t, *r, *r2)
 	assert.Len(t, r2.Locations, 3)
 
-	list, err := provider.GetOrgCertificates(ctx, orgID)
+	list, err := provider.ListOrgCertificates(ctx, orgID, 10, 0)
 	require.NoError(t, err)
 	r3 := list.Find(r.ID)
 	require.NotNil(t, r3)

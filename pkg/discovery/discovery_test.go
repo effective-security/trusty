@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/tests/mockpb"
@@ -34,7 +33,9 @@ func TestDiscovery(t *testing.T) {
 	require.NotNil(t, pbCA)
 
 	ca.SetResponse(&pb.IssuersInfoResponse{})
-	issResp, err := pbCA.Issuers(context.Background(), &empty.Empty{})
+	issResp, err := pbCA.ListIssuers(context.Background(), &pb.ListIssuersRequest{
+		Limit: 10, After: 0, Bundle: true,
+	})
 	require.NoError(t, err)
 	require.NotNil(t, issResp)
 

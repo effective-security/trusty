@@ -219,7 +219,7 @@ CREATE TABLE IF NOT EXISTS public.nonces
     id bigint NOT NULL,
     nonce character varying(16) COLLATE pg_catalog."default" NOT NULL,
     used boolean NOT NULL,
-    created_at timestamp with time zone,
+    created_at timestamp with time zone DEFAULT Now(),
     expires_at timestamp with time zone,
     used_at timestamp with time zone,
     CONSTRAINT nonces_pkey PRIMARY KEY (id),

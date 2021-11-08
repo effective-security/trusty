@@ -1,32 +1,59 @@
 ---
 authority:
-  default_aia: 
-    issuer_url:
-    crl_url:
-    ocsp_url:
-    # value in 72h format for duration of CRL next update time
-    crl_expiry: 12h
-    # value in 8h format for duration of CRL renewal before next update time
-    crl_renewal: 1h
-    # value in 8h format for duration of OCSP next update time
-    ocsp_expiry: 30m
-
   issuers:
   -
     # specifies Issuer's label
     label: trusty.svc
     # specifies type: tls|codesign|timestamp|ocsp|spiffe|trusty
     type: trusty
-    aia:
-      issuer_url: http://localhost:7880/v1/cert/${ISSUER_ID}
-      crl_url: http://localhost:7880/v1/crl/${ISSUER_ID}
-      ocsp_url: http://localhost:7880/v1/ocsp
     cert: /tmp/trusty/certs/trusty_l2_ca.pem
     key: /tmp/trusty/certs/trusty_l2_ca.key
     # location of the CA bundle file
     ca_bundle: /tmp/trusty/certs/trusty_cabundle.pem
     # location of the Root CA file
     root_bundle: /tmp/trusty/certs/trusty_root_ca.pem
+    aia:
+      issuer_url: http://localhost:7880/v1/cert/${ISSUER_ID}
+      crl_url: http://localhost:7880/v1/crl/${ISSUER_ID}
+      ocsp_url: http://localhost:7880/v1/ocsp
+      crl_expiry: 48h
+      crl_renewal: 12h
+      ocsp_expiry: 1h
+  -
+    # specifies Issuer's label
+    label: SHAKEN_CA
+    type: shaken
+    cert: /tmp/trusty/certs/shaken_ca.pem
+    key: /tmp/trusty/certs/shaken_ca.key
+    # location of the CA bundle file
+    ca_bundle: /tmp/trusty/certs/shaken_cabundle.pem
+    # location of the Root CA file
+    root_bundle: /tmp/trusty/certs/shaken_root_ca.pem
+    aia:
+      crl_url: https://authenticate-api.iconectiv.com/download/v1/crl
+      issuer_url:
+      ocsp_url:
+      crl_expiry:
+      crl_renewal:
+      ocsp_expiry:
+  -
+    # specifies Issuer's label
+    label: SHAKEN_L1_CA
+    type: shaken
+    cert: /tmp/trusty/certs/shaken_l1_ca.pem
+    key: /tmp/trusty/certs/shaken_l1_ca.key
+    # location of the CA bundle file
+    ca_bundle: /tmp/trusty/certs/shaken_cabundle.pem
+    # location of the Root CA file
+    root_bundle: /tmp/trusty/certs/shaken_root_ca.pem
+    aia:
+      crl_url: https://authenticate-api.iconectiv.com/download/v1/crl
+      issuer_url:
+      ocsp_url:
+      crl_expiry:
+      crl_renewal:
+      ocsp_expiry:
+
 
 # profile:
 #
@@ -171,3 +198,43 @@ profiles:
     - digital signature
     - code signing
     - key encipherment
+
+  SHAKEN:
+    issuer_label: SHAKEN_CA
+    expiry: 8760h
+    backdate: 30m
+    usages:
+    - signing
+    - digital signature
+    policies_critical: true
+    policies:
+    - oid: 2.16.840.1.114569.1.1.1
+    allowed_extensions:
+    - 1.3.6.1.5.5.7.1.26
+    allowed_fields:
+      subject: true
+      dns: false
+      ip: false
+      email: false
+    #allowed_names: ^C=US, O=Entity Name From Registration, CN=SHAKEN .*$
+
+  SHAKEN_ICA:
+    issuer_label: SHAKEN_L1_CA
+    expiry: 43800h
+    backdate: 30m
+    usages:
+      - cert sign
+      - crl sign
+    ca_constraint:
+      is_ca: true
+      max_path_len: 0
+    policies_critical: true
+    policies:
+    - oid: 2.16.840.1.114569.1.1.1
+    - oid: 1.3.6.1.4.1.57973.1.1
+      qualifiers:
+      - type: id-qt-cps
+        value: https://stirshaken.com/CPS
+    allowed_extensions:
+    - 2.5.29.32
+
