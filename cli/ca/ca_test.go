@@ -230,6 +230,58 @@ func (s *testSuite) TestUpdateCertLabel() {
 	}
 }
 
+func (s *testSuite) TestPublishCrls() {
+	expectedResponse := new(pb.CrlsResponse)
+	err := loadJSON("testdata/crls.json", expectedResponse)
+	s.Require().NoError(err)
+
+	s.MockAuthority = &mockpb.MockCAServer{
+		Err:   nil,
+		Resps: []proto.Message{expectedResponse},
+	}
+	srv := s.SetupMockGRPC()
+	defer srv.Stop()
+
+	ikid := "9e0fd4a22cd5aa773de1fe00e5fefa13109849cb"
+
+	err = s.Run(ca.PublishCrls, &ca.PublishCrlsFlags{
+		Ikid: &ikid,
+	})
+	s.Require().NoError(err)
+
+	if s.Cli.IsJSON() {
+		s.HasText(`"clrs": [`)
+	} else {
+		s.HasText(`98246506544474622 | 9e0fd4a22cd5aa773de1fe00e5fefa13109849cb`)
+	}
+}
+
+func (s *testSuite) TestGetCertificate() {
+	expectedResponse := new(pb.CertificateResponse)
+	err := loadJSON("testdata/cert.json", expectedResponse)
+	s.Require().NoError(err)
+
+	s.MockAuthority = &mockpb.MockCAServer{
+		Err:   nil,
+		Resps: []proto.Message{expectedResponse},
+	}
+	srv := s.SetupMockGRPC()
+	defer srv.Stop()
+
+	id := uint64(97371720557570558)
+
+	err = s.Run(ca.GetCertificate, &ca.GetCertificateFlags{
+		ID: &id,
+	})
+	s.Require().NoError(err)
+
+	if s.Cli.IsJSON() {
+		s.HasText(`"certificate": {`)
+	} else {
+		s.HasText(`"id": 97371720557570558`)
+	}
+}
+
 func loadJSON(filename string, v interface{}) error {
 	cfr, err := os.Open(filename)
 	if err != nil {

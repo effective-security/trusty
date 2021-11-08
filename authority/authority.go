@@ -47,7 +47,7 @@ func NewAuthority(cfg *Config, crypto *cryptoprov.Crypto) (*Authority, error) {
 		}
 		err = ca.AddIssuer(issuer)
 		if err != nil {
-			return nil, errors.WithMessagef(err, "unable to create issuer: %q", isscfg.Label)
+			return nil, errors.WithMessagef(err, "unable to add issuer: %q", isscfg.Label)
 		}
 	}
 

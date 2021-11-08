@@ -2,6 +2,7 @@ package authority_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/pkg/csr"
@@ -68,6 +69,32 @@ func TestLoadConfig(t *testing.T) {
 		require.NoError(t, err, "failed to parse: %s", path)
 		require.NotEmpty(t, cfg.Profiles)
 	}
+}
+
+func TestAIAConfig(t *testing.T) {
+	c1 := &authority.AIAConfig{
+		CrlURL:     "crl",
+		AiaURL:     "aia",
+		OcspURL:    "ocsp",
+		CRLExpiry:  8 * time.Hour,
+		CRLRenewal: 2 * time.Hour,
+		OCSPExpiry: 1 * time.Hour,
+	}
+	assert.Equal(t, c1.CRLExpiry, c1.GetCRLExpiry())
+	assert.Equal(t, c1.CRLRenewal, c1.GetCRLRenewal())
+	assert.Equal(t, c1.OCSPExpiry, c1.GetOCSPExpiry())
+
+	c2 := c1.Copy()
+	assert.Equal(t, *c1, *c2)
+
+	c3 := &authority.AIAConfig{
+		CrlURL:  "crl",
+		AiaURL:  "aia",
+		OcspURL: "ocsp",
+	}
+	assert.Equal(t, authority.DefaultCRLExpiry, c3.GetCRLExpiry())
+	assert.Equal(t, authority.DefaultCRLRenewal, c3.GetCRLRenewal())
+	assert.Equal(t, authority.DefaultOCSPExpiry, c3.GetOCSPExpiry())
 }
 
 func TestLoadConfigError(t *testing.T) {
