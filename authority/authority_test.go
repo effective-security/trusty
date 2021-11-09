@@ -2,7 +2,6 @@ package authority_test
 
 import (
 	"crypto"
-	"strings"
 	"testing"
 
 	"github.com/go-phorce/dolly/algorithms/guid"
@@ -147,9 +146,9 @@ func (s *testSuite) TestNewAuthority() {
 		_, err = a.GetIssuerByKeyHash(crypto.SHA256, issuer.KeyHash(crypto.SHA1))
 		s.Error(err)
 
-		for name := range cfg.Profiles {
+		for name, p := range cfg.Profiles {
 			_, err = a.GetIssuerByProfile(name)
-			if strings.Contains(name, "${LABEL}") {
+			if p.IssuerLabel == "*" {
 				s.Error(err)
 			} else {
 				s.NoError(err)

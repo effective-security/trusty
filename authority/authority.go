@@ -19,6 +19,9 @@ type Authority struct {
 
 	// Crypto holds providers for HSM, SoftHSM, KMS, etc.
 	crypto *cryptoprov.Crypto
+
+	// keep track of Wildcard profiles
+	profiles map[string]*CertProfile
 }
 
 // NewAuthority returns new instance of Authority
@@ -26,12 +29,17 @@ func NewAuthority(cfg *Config, crypto *cryptoprov.Crypto) (*Authority, error) {
 	if cfg.Authority == nil {
 		return nil, errors.New("missing Authority configuration")
 	}
-
+	cfg = cfg.Copy()
 	ca := &Authority{
 		crypto:           crypto,
 		issuers:          make(map[string]*Issuer),
 		issuersByProfile: make(map[string]*Issuer),
 		issuersByKeyID:   make(map[string]*Issuer),
+		profiles:         cfg.Profiles,
+	}
+
+	if ca.profiles == nil {
+		ca.profiles = make(map[string]*CertProfile)
 	}
 
 	for _, isscfg := range cfg.Authority.Issuers {
@@ -59,11 +67,25 @@ func (s *Authority) Crypto() *cryptoprov.Crypto {
 	return s.crypto
 }
 
+// AddProfile adds CertProfile
+func (s *Authority) AddProfile(label string, p *CertProfile) {
+	s.profiles[label] = p
+}
+
+// Profiles returns profiles map
+func (s *Authority) Profiles() map[string]*CertProfile {
+	return s.profiles
+}
+
 // AddIssuer add issuer to the Authority
 func (s *Authority) AddIssuer(issuer *Issuer) error {
 	s.issuers[issuer.Label()] = issuer
 	s.issuersByKeyID[issuer.SubjectKID()] = issuer
-	for profileName := range issuer.Profiles() {
+	for profileName, profile := range issuer.Profiles() {
+		if profile.IssuerLabel == "*" {
+			continue
+		}
+
 		// Maybe this is a redundand check, after config loaded and Validate() call
 		if is := s.issuersByProfile[profileName]; is != nil {
 			return errors.Errorf("profile %q is already registered by %q issuer", profileName, is.Label())

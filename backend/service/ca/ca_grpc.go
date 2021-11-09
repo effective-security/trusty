@@ -18,16 +18,18 @@ func (s *Service) ProfileInfo(ctx context.Context, req *pb.CertProfileInfoReques
 		return nil, v1.NewError(codes.InvalidArgument, "missing label parameter")
 	}
 
+	var profile *authority.CertProfile
+
 	ca, err := s.ca.GetIssuerByProfile(req.Label)
-	if err != nil {
-		logger.Warningf("reason=no_issuer, profile=%q", req.Label)
-		return nil, v1.NewError(codes.NotFound, "issuer not found for profile: %s", req.Label)
+	if err == nil {
+		profile = ca.Profile(req.Label)
+	}
+	if profile == nil {
+		profile = s.ca.Profiles()[req.Label]
 	}
 
-	profile := ca.Profile(req.Label)
 	if profile == nil {
-		return nil, v1.NewError(codes.NotFound, "%q issuer does not support the request profile: %q",
-			ca.Label(), req.Label)
+		return nil, v1.NewError(codes.NotFound, "profile not found: %s", req.Label)
 	}
 
 	return toCertProfilePB(profile, req.Label), nil
@@ -178,6 +180,9 @@ func (s *Service) RegisterIssuer(ctx context.Context, req *pb.RegisterIssuerRequ
 	if err != nil {
 		return nil, v1.NewError(codes.InvalidArgument, "unable to decode configuration: %s", err.Error())
 	}
+	if cfg.Profiles == nil {
+		cfg.Profiles = make(map[string]*authority.CertProfile)
+	}
 
 	signer, err := authority.NewSignerFromPEM(s.ca.Crypto(), []byte(cfg.KeyFile))
 	if err != nil {
@@ -197,6 +202,12 @@ func (s *Service) RegisterIssuer(ctx context.Context, req *pb.RegisterIssuerRequ
 		}
 
 		cfg.Profiles[p.Label] = profile
+	}
+
+	for name, profile := range s.ca.Profiles() {
+		if profile.IssuerLabel == "*" {
+			cfg.Profiles[name] = profile
+		}
 	}
 
 	issuer, err := authority.CreateIssuer(cfg,
@@ -233,15 +244,26 @@ func (s *Service) RegisterProfile(ctx context.Context, req *pb.RegisterProfileRe
 		return nil, v1.NewError(codes.InvalidArgument, "unable to decode configuration: %s", err.Error())
 	}
 
-	// check if profile is already served
-	issuer, err := s.ca.GetIssuerByProfile(req.Label)
-	if err == nil && issuer.Label() != cfg.IssuerLabel {
-		return nil, v1.NewError(codes.InvalidArgument, "%q profile already served by %q issuer", req.Label, issuer.Label())
-	}
+	isWildcard := cfg.IssuerLabel == "*"
 
-	issuer, err = s.ca.GetIssuerByLabel(cfg.IssuerLabel)
-	if err != nil {
-		return nil, v1.NewError(codes.InvalidArgument, "issuer not found: %s", cfg.IssuerLabel)
+	var issuer *authority.Issuer
+
+	// check if profile is already served
+	if !isWildcard {
+		issuer, err = s.ca.GetIssuerByProfile(req.Label)
+		if err == nil && issuer.Label() != cfg.IssuerLabel {
+			return nil, v1.NewError(codes.InvalidArgument, "%q profile already served by %q issuer", req.Label, issuer.Label())
+		}
+		issuer, err = s.ca.GetIssuerByLabel(cfg.IssuerLabel)
+		if err != nil {
+			return nil, v1.NewError(codes.InvalidArgument, "issuer not found: %s", cfg.IssuerLabel)
+		}
+		issuer.AddProfile(req.Label, cfg)
+	} else {
+		s.ca.AddProfile(req.Label, cfg)
+		for _, issuer := range s.ca.Issuers() {
+			issuer.AddProfile(req.Label, cfg)
+		}
 	}
 
 	_, err = s.db.RegisterCertProfile(ctx, &model.CertProfile{
@@ -252,8 +274,6 @@ func (s *Service) RegisterProfile(ctx context.Context, req *pb.RegisterProfileRe
 	if err != nil {
 		return nil, v1.NewError(codes.Internal, "unable to register profile: %s", err.Error())
 	}
-
-	issuer.AddProfile(req.Label, cfg)
 
 	return toCertProfilePB(cfg, req.Label), nil
 }

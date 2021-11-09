@@ -10,6 +10,17 @@ import (
 )
 
 func TestRegisterCertProfile(t *testing.T) {
+	wm := &model.CertProfile{
+		Label:       "wildcard",
+		IssuerLabel: "*",
+		Config:      "# config",
+	}
+
+	mw, err := provider.RegisterCertProfile(ctx, wm)
+	require.NoError(t, err)
+	require.NotNil(t, mw)
+	defer provider.DeleteCertProfile(ctx, mw.Label)
+
 	issuer := certutil.RandomString(32)
 	m := &model.CertProfile{
 		Label:       certutil.RandomString(32),
@@ -54,7 +65,7 @@ func TestRegisterCertProfile(t *testing.T) {
 
 	list2, err := provider.GetCertProfilesByIssuer(ctx, issuer)
 	require.NoError(t, err)
-	assert.Len(t, list2, count)
+	assert.GreaterOrEqual(t, len(list2), count+1)
 
 	err = provider.DeleteCertProfile(ctx, m1.Label)
 	require.NoError(t, err)

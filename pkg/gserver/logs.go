@@ -30,12 +30,12 @@ func (s *Server) newLogUnaryInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		startTime := time.Now()
 		resp, err := handler(ctx, req)
-		defer logRequest(ctx, info, startTime, req, resp)
+		defer logRequest(ctx, info, startTime, req, resp, err)
 		return resp, err
 	}
 }
 
-func logRequest(ctx context.Context, info *grpc.UnaryServerInfo, startTime time.Time, req interface{}, resp interface{}) {
+func logRequest(ctx context.Context, info *grpc.UnaryServerInfo, startTime time.Time, req interface{}, resp interface{}, err error) {
 	duration := time.Since(startTime)
 	expensiveRequest := duration > warnUnaryRequestLatency
 
@@ -47,14 +47,22 @@ func logRequest(ctx context.Context, info *grpc.UnaryServerInfo, startTime time.
 	responseType := info.FullMethod
 
 	var code codes.Code
-	switch _resp := resp.(type) {
-	case *v1.TrustyError:
-		code = _resp.Code()
-	case *status.Status:
-		code = _resp.Code()
-	case error:
-		if s, ok := status.FromError(_resp); ok {
-			code = s.Code()
+	if err != nil {
+		switch _resp := err.(type) {
+		case v1.TrustyError:
+			code = _resp.Code()
+		case *v1.TrustyError:
+			code = _resp.Code()
+		case error:
+			if s, ok := status.FromError(err); ok {
+				code = s.Code()
+			} else {
+				logger.KV(xlog.ERROR, "err", err.Error())
+			}
+		default:
+			logger.KV(xlog.ERROR,
+				"type", reflect.TypeOf(err),
+				"err", err.Error())
 		}
 	}
 

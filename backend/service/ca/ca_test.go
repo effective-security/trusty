@@ -152,7 +152,7 @@ func TestProfileInfo(t *testing.T) {
 		{nil, "missing label parameter"},
 		{&pb.CertProfileInfoRequest{}, "missing label parameter"},
 		{&pb.CertProfileInfoRequest{Label: "test_server"}, ""},
-		{&pb.CertProfileInfoRequest{Label: "xxx"}, "issuer not found for profile: xxx"},
+		{&pb.CertProfileInfoRequest{Label: "xxx"}, "profile not found: xxx"},
 	}
 
 	for _, tc := range tcases {
@@ -202,7 +202,7 @@ func TestSignCertificate(t *testing.T) {
 		RequestFormat: pb.EncodingFormat_PEM,
 	})
 	require.Error(t, err)
-	assert.Equal(t, "\"xxx\" issuer does not support the request profile: \"test_server\"", err.Error())
+	assert.Equal(t, "issuer not found: xxx", err.Error())
 
 	_, err = authorityClient.SignCertificate(context.Background(), &pb.SignCertificateRequest{
 		Profile:       "test_server",

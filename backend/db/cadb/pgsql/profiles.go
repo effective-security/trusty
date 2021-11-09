@@ -121,7 +121,7 @@ func (p *Provider) GetCertProfilesByIssuer(ctx context.Context, issuer string) (
 		FROM
 			cert_profiles
 		WHERE 
-			issuer_label = $1;
+			issuer_label = $1 OR issuer_label = '*';
 			`, issuer)
 	if err != nil {
 		return nil, errors.WithStack(err)

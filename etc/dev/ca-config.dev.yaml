@@ -199,25 +199,6 @@ profiles:
     - code signing
     - key encipherment
 
-  SHAKEN:
-    issuer_label: SHAKEN_CA
-    expiry: 8760h
-    backdate: 30m
-    usages:
-    - signing
-    - digital signature
-    policies_critical: true
-    policies:
-    - oid: 2.16.840.1.114569.1.1.1
-    allowed_extensions:
-    - 1.3.6.1.5.5.7.1.26
-    allowed_fields:
-      subject: true
-      dns: false
-      ip: false
-      email: false
-    #allowed_names: ^C=US, O=Entity Name From Registration, CN=SHAKEN .*$
-
   SHAKEN_ICA:
     issuer_label: SHAKEN_L1_CA
     expiry: 43800h
@@ -238,3 +219,40 @@ profiles:
     allowed_extensions:
     - 2.5.29.32
 
+  SHAKEN:
+    issuer_label: SHAKEN_CA
+    expiry: 8760h
+    backdate: 30m
+    usages:
+    - signing
+    - digital signature
+    policies_critical: true
+    policies:
+    - oid: 2.16.840.1.114569.1.1.1
+    allowed_extensions:
+    - 1.3.6.1.5.5.7.1.26
+    allowed_fields:
+      subject: true
+      dns: false
+      ip: false
+      email: false
+    #allowed_names: ^C=US, O=Entity Name From Registration, CN=SHAKEN .*$
+
+  DELEGATED_SHAKEN:
+    issuer_label: "*"
+    expiry: 8760h
+    backdate: 30m
+    usages:
+    - signing
+    - digital signature
+    policies_critical: true
+    policies:
+    - oid: 2.16.840.1.114569.1.1.1
+    allowed_extensions:
+    - 1.3.6.1.5.5.7.1.26
+    allowed_fields:
+      subject: true
+      dns: false
+      ip: false
+      email: false
+    #allowed_names: ^C=US, O=Entity Name From Registration, CN=SHAKEN .*$
