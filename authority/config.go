@@ -68,6 +68,9 @@ type IssuerConfig struct {
 	// AIA specifies AIA configuration
 	AIA *AIAConfig `json:"aia,omitempty" yaml:"aia,omitempty"`
 
+	// AllowedProfiles if populated, allows only specified profiles
+	AllowedProfiles []string `json:"allowed_profiles" yaml:"allowed_profiles"`
+
 	// Profiles are populated after loading
 	Profiles map[string]*CertProfile `json:"-" yaml:"-"`
 }
@@ -291,7 +294,8 @@ func LoadConfig(path string) (*Config, error) {
 					}
 				}
 
-				if profile.IssuerLabel == iss.Label {
+				if profile.IssuerLabel == iss.Label ||
+					(profile.IssuerLabel == "*" && slices.ContainsString(iss.AllowedProfiles, name)) {
 					iss.Profiles[name] = profile
 				}
 			}
@@ -397,7 +401,7 @@ func (c *Config) Validate() error {
 			if profile.IssuerLabel == "" {
 				return errors.Errorf("profile has no issuer label: %s", name)
 			}
-			if !issuers[profile.IssuerLabel] {
+			if profile.IssuerLabel != "*" && !issuers[profile.IssuerLabel] {
 				return errors.Errorf("%q issuer not found for %q profile", profile.IssuerLabel, name)
 			}
 		}

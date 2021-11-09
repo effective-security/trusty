@@ -11,6 +11,7 @@ import (
 	"github.com/go-phorce/dolly/xlog"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
+	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/martinisecurity/trusty/pkg/csr"
 	"google.golang.org/grpc/codes"
@@ -64,14 +65,22 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 		}
 	}
 
-	ca, err := s.ca.GetIssuerByProfile(req.Profile)
-	if err != nil {
-		return nil, v1.NewError(codes.InvalidArgument, "issuer not found for profile: %s", req.Profile)
+	var err error
+	var ca *authority.Issuer
+	if req.IssuerLabel != "" {
+		ca, err = s.ca.GetIssuerByLabel(req.IssuerLabel)
+		if err != nil {
+			return nil, v1.NewError(codes.InvalidArgument, "issuer not found: %s", req.IssuerLabel)
+		}
+	} else {
+		ca, err = s.ca.GetIssuerByProfile(req.Profile)
+		if err != nil {
+			return nil, v1.NewError(codes.InvalidArgument, "issuer not found for profile: %s", req.Profile)
+		}
 	}
 
-	label := req.IssuerLabel
-	if label != "" && label != ca.Label() {
-		msg := fmt.Sprintf("%q issuer does not support the request profile: %q", label, req.Profile)
+	if ca.Profile(req.Profile) == nil {
+		msg := fmt.Sprintf("%q issuer does not support the request profile: %q", ca.Label(), req.Profile)
 		return nil, v1.NewError(codes.InvalidArgument, msg)
 	}
 

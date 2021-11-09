@@ -321,7 +321,9 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto, db c
 				return nil, errors.WithMessage(err, "unable to decode configuration")
 			}
 
-			cfg.Profiles = make(map[string]*authority.CertProfile)
+			if cfg.Profiles == nil {
+				cfg.Profiles = make(map[string]*authority.CertProfile)
+			}
 
 			signer, err := authority.NewSignerFromPEM(crypto, []byte(cfg.KeyFile))
 			if err != nil {
@@ -341,6 +343,9 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto, db c
 				}
 
 				cfg.Profiles[p.Label] = profile
+				if profile.IssuerLabel == "*" {
+					ca.AddProfile(p.Label, profile)
+				}
 			}
 
 			issuer, err := authority.CreateIssuer(cfg,

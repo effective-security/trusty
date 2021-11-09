@@ -2,7 +2,6 @@ package ca_test
 
 import (
 	"context"
-	"strings"
 	"testing"
 
 	"github.com/go-phorce/dolly/xpki/certutil"
@@ -11,6 +10,7 @@ import (
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/backend/service/ca"
 	"github.com/martinisecurity/trusty/pkg/csr"
+	"github.com/martinisecurity/trusty/pkg/inmemcrypto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
@@ -21,14 +21,21 @@ func TestRegisterIssuer(t *testing.T) {
 	ctx := context.Background()
 
 	iid := certutil.RandomString(8)
-	label := "SHAKEN_ICA_" + iid
-	profileLabel := "SHAKEN_DELEGATED_" + iid
+	issuerLabel := "SHAKEN_ICA_" + iid
+	profileLabel := "DELEGATED_SHAKEN2"
 
-	defer svc.CaDb().DeleteIssuer(ctx, label)
-	defer svc.CaDb().DeleteCertProfile(ctx, profileLabel)
+	defer svc.CaDb().DeleteIssuer(ctx, issuerLabel)
+
+	regProfRes, err := authorityClient.RegisterProfile(ctx, &pb.RegisterProfileRequest{
+		Label:  profileLabel,
+		Config: []byte(profileTemplate),
+	})
+	require.NoError(t, err)
+	assert.Equal(t, profileLabel, regProfRes.Label)
+	assert.Equal(t, "*", regProfRes.IssuerLabel)
 
 	prov := csr.NewProvider(svc.CA().Crypto().Default())
-	req := prov.NewSigningCertificateRequest(label, "ECDSA", 256, label, nil, nil)
+	req := prov.NewSigningCertificateRequest(issuerLabel, "ECDSA", 256, issuerLabel, nil, nil)
 
 	csrPEM, keyBytes, _, _, err := prov.CreateRequestAndExportKey(req)
 	require.NoError(t, err)
@@ -40,6 +47,8 @@ func TestRegisterIssuer(t *testing.T) {
 		RequestFormat: pb.EncodingFormat_PEM,
 	})
 	require.NoError(t, err)
+	require.NotEmpty(t, signRes.Certificate.Ikid)
+	require.NotEmpty(t, signRes.Certificate.Skid)
 
 	ii, err := authorityClient.GetIssuer(ctx, &pb.IssuerInfoRequest{
 		Ikid: signRes.Certificate.Ikid,
@@ -47,7 +56,7 @@ func TestRegisterIssuer(t *testing.T) {
 	require.NoError(t, err)
 
 	cp := authority.IssuerConfig{
-		Label:          label,
+		Label:          issuerLabel,
 		Type:           "shaken",
 		CertFile:       signRes.Certificate.Pem,
 		KeyFile:        string(keyBytes),
@@ -56,6 +65,7 @@ func TestRegisterIssuer(t *testing.T) {
 		AIA: &authority.AIAConfig{
 			CrlURL: "https://authenticate-api.iconectiv.com/download/v1/crl",
 		},
+		AllowedProfiles: []string{profileLabel},
 	}
 
 	cfg, err := yaml.Marshal(cp)
@@ -65,31 +75,40 @@ func TestRegisterIssuer(t *testing.T) {
 		Config: cfg,
 	})
 	require.NoError(t, err)
-	assert.Empty(t, regRes.Profiles)
-
-	certProf := strings.Replace(profileTemplate, "${LABEL}", label, 1)
-	regProfRes, err := authorityClient.RegisterProfile(ctx, &pb.RegisterProfileRequest{
-		Label:  profileLabel,
-		Config: []byte(certProf),
-	})
-	require.NoError(t, err)
-	assert.Equal(t, profileLabel, regProfRes.Label)
-	assert.Equal(t, label, regProfRes.IssuerLabel)
+	assert.NotEmpty(t, regRes.Profiles)
+	assert.Contains(t, regRes.Profiles, profileLabel)
 
 	ii2, err := authorityClient.GetIssuer(ctx, &pb.IssuerInfoRequest{
 		Label: regRes.Label,
 	})
 	require.NoError(t, err)
-	require.Len(t, ii2.Profiles, 1)
-	assert.Equal(t, regProfRes.Label, ii2.Profiles[0])
+	assert.Contains(t, ii2.Profiles, regProfRes.Label)
 
 	lres, err := svc.CaDb().ListIssuers(ctx, 100, 0)
 	require.NoError(t, err)
 	assert.NotEmpty(t, lres)
+
+	{
+		prov := csr.NewProvider(inmemcrypto.NewProvider())
+		req2 := prov.NewSigningCertificateRequest("Deletgated", "ECDSA", 256, "Delegated"+iid, nil, nil)
+
+		csrPEM2, _, _, err := prov.GenerateKeyAndRequest(req2)
+		require.NoError(t, err)
+		assert.NotEmpty(t, csrPEM)
+
+		signRes2, err := authorityClient.SignCertificate(ctx, &pb.SignCertificateRequest{
+			IssuerLabel:   issuerLabel,
+			Profile:       profileLabel,
+			Request:       csrPEM2,
+			RequestFormat: pb.EncodingFormat_PEM,
+		})
+		require.NoError(t, err)
+		assert.Equal(t, signRes.Certificate.Skid, signRes2.Certificate.Ikid)
+	}
 }
 
 const profileTemplate = `
-issuer_label: ${LABEL}
+issuer_label: "*"
 expiry: 8760h
 backdate: 30m
 usages:
