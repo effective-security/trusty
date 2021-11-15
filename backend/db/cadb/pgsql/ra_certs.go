@@ -90,7 +90,7 @@ func scanFullCertificate(row *sql.Row) (*model.Certificate, error) {
 	return res, nil
 }
 
-// scanShortCertificate does not scan Pem, IssuerPem
+// scanShortCertificate does not scan IssuerPem
 func scanShortCertificate(row *sql.Rows) (*model.Certificate, error) {
 	res := new(model.Certificate)
 	var locations string
@@ -105,6 +105,7 @@ func scanShortCertificate(row *sql.Rows) (*model.Certificate, error) {
 		&res.Subject,
 		&res.Issuer,
 		&res.ThumbprintSha256,
+		&res.Pem,
 		&res.Profile,
 		&res.Label,
 		&locations,
@@ -230,7 +231,7 @@ func (p *Provider) ListOrgCertificates(ctx context.Context, orgID uint64, limit 
 
 	res, err := p.db.QueryContext(ctx, `
 		SELECT
-			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,profile,label,locations,metadata
+			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,profile,label,locations,metadata
 		FROM
 			certificates
 		WHERE org_id = $1 AND id > $2
@@ -272,7 +273,7 @@ func (p *Provider) ListCertificates(ctx context.Context, ikid string, limit int,
 
 	res, err := p.db.QueryContext(ctx,
 		`SELECT
-			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,profile,label,locations,metadata
+			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,profile,label,locations,metadata
 		FROM
 			certificates
 		WHERE 

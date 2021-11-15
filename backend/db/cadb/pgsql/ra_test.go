@@ -105,7 +105,6 @@ func TestRegisterCertificate(t *testing.T) {
 	require.NotNil(t, r3)
 	assert.NotEqual(t, *r, *r3)
 	r3c := *r3
-	r3c.Pem = r.Pem
 	r3c.IssuersPem = r.IssuersPem
 	assert.Equal(t, *r, r3c)
 
