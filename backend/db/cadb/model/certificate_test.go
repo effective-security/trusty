@@ -56,6 +56,7 @@ func TestCertificate(t *testing.T) {
 		IssuersPem:       "issuers_pem",
 		Label:            "label",
 		Locations:        []string{"1"},
+		Metadata:         map[string]string{"requester": "test"},
 	}
 	dto := m.ToPB()
 	assert.Equal(t, uint64(123), dto.Id)
@@ -72,6 +73,7 @@ func TestCertificate(t *testing.T) {
 	assert.Equal(t, m.Pem, dto.Pem)
 	assert.Equal(t, m.IssuersPem, dto.IssuersPem)
 	assert.Equal(t, m.Locations, dto.Locations)
+	assert.Equal(t, m.Metadata, dto.Metadata)
 
 	fn := m.FileName()
 	assert.Contains(t, fn, "/")
@@ -87,9 +89,10 @@ func TestCertificate(t *testing.T) {
 
 	crt, err := certutil.ParseFromPEM([]byte(testCrt))
 	require.NoError(t, err)
-	m4 := model.NewCertificate(crt, 123, "ca", testCrt, testCrt, m.Label, nil)
+	m4 := model.NewCertificate(crt, 123, "ca", testCrt, testCrt, m.Label, nil, m.Metadata)
 	assert.Equal(t, uint64(0), m4.ID)
 	assert.Equal(t, m2.Label, m4.Label)
+	assert.Equal(t, m2.Metadata, m4.Metadata)
 }
 
 func TestRevokedCertificate(t *testing.T) {

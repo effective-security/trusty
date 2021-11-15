@@ -134,6 +134,8 @@ message SignCertificateRequest {
 	google.protobuf.Timestamp not_after = 10 [json_name="not_after"];
 	// Label is provided by a client
 	string label = 11;
+	// Metadata is provided by a client
+	map<string, string> metadata = 12;
 }
 
 // UpdateCertificateLabelRequest specifies certificate label update request

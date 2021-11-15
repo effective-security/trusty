@@ -72,7 +72,7 @@ ca_sql:
   data_source: file://${TRUSTY_CONFIG_DIR}/sql-conn-cadb.txt
   # the directory that contains migrations.
   migrations_dir: ${TRUSTY_CONFIG_DIR}/../../sql/cadb/migrations
-  #force_version: 2
+  #force_version: 1
 
 authority: ${TRUSTY_CONFIG_DIR}/ca-config.dev.yaml
 

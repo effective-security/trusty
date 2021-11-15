@@ -164,6 +164,13 @@
         "label": {
           "type": "string",
           "title": "Label of the certificate provided by the client"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Metadata of the certificate provided by the client"
         }
       },
       "title": "Certificate provides X509 Certificate information"
