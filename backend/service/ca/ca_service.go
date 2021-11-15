@@ -115,7 +115,7 @@ func (s *Service) CA() *authority.Authority {
 func (s *Service) registerIssuers(ctx context.Context) error {
 	for _, ca := range s.ca.Issuers() {
 		bundle := ca.Bundle()
-		mcert := model.NewCertificate(bundle.Cert, 0, "ca", bundle.CertPEM, bundle.CACertsPEM, ca.Label(), nil)
+		mcert := model.NewCertificate(bundle.Cert, 0, "ca", bundle.CertPEM, bundle.CACertsPEM, ca.Label(), nil, nil)
 
 		_, err := s.db.RegisterCertificate(ctx, mcert)
 		if err != nil {

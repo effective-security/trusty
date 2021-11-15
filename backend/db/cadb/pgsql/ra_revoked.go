@@ -2,6 +2,8 @@ package pgsql
 
 import (
 	"context"
+	"database/sql"
+	"encoding/json"
 	"strings"
 	"time"
 
@@ -31,15 +33,17 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 	crt := &revoked.Certificate
 	logger.Debugf("id=%d,subject=%q, skid=%s, ikid=%s", id, crt.Subject, crt.SKID, crt.IKID)
 
-	res := new(model.RevokedCertificate)
-	var locations string
-	err = p.db.QueryRowContext(ctx, `
-			INSERT INTO revoked(id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,label,locations,revoked_at,reason)
-				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+	b, err := json.Marshal(crt.Metadata)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	m, err := scanFullRevokedCertificate(p.db.QueryRowContext(ctx, `
+			INSERT INTO revoked(id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,label,locations,metadata,revoked_at,reason)
+				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
 			ON CONFLICT (sha256)
 			DO UPDATE
 				SET org_id=$2,issuers_pem=$12
-			RETURNING id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,label,locations,revoked_at,reason
+			RETURNING id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,label,locations,metadata,revoked_at,reason
 			;`, id, crt.OrgID, crt.SKID, crt.IKID, crt.SerialNumber,
 		crt.NotBefore, crt.NotAfter,
 		crt.Subject, crt.Issuer,
@@ -48,9 +52,21 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 		crt.Profile,
 		crt.Label,
 		strings.Join(crt.Locations, ","),
+		string(b),
 		revoked.RevokedAt,
 		revoked.Reason,
-	).Scan(&res.Certificate.ID,
+	))
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	return m, nil
+}
+
+func scanFullRevokedCertificate(row *sql.Row) (*model.RevokedCertificate, error) {
+	res := new(model.RevokedCertificate)
+	var locations string
+	var meta string
+	err := row.Scan(&res.Certificate.ID,
 		&res.Certificate.OrgID,
 		&res.Certificate.SKID,
 		&res.Certificate.IKID,
@@ -65,6 +81,7 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 		&res.Certificate.Profile,
 		&res.Certificate.Label,
 		&locations,
+		&meta,
 		&res.RevokedAt,
 		&res.Reason,
 	)
@@ -77,7 +94,46 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 	if len(locations) > 0 {
 		res.Certificate.Locations = strings.Split(locations, ",")
 	}
+	if len(meta) > 0 {
+		json.Unmarshal([]byte(meta), &res.Certificate.Metadata)
+	}
+	return res, nil
+}
 
+// scanShortRevokedCertificate does not scan Pem, IssuerPem
+func scanShortRevokedCertificate(row *sql.Rows) (*model.RevokedCertificate, error) {
+	res := new(model.RevokedCertificate)
+	var locations string
+	var meta string
+	err := row.Scan(&res.Certificate.ID,
+		&res.Certificate.OrgID,
+		&res.Certificate.SKID,
+		&res.Certificate.IKID,
+		&res.Certificate.SerialNumber,
+		&res.Certificate.NotBefore,
+		&res.Certificate.NotAfter,
+		&res.Certificate.Subject,
+		&res.Certificate.Issuer,
+		&res.Certificate.ThumbprintSha256,
+		&res.Certificate.Profile,
+		&res.Certificate.Label,
+		&locations,
+		&meta,
+		&res.RevokedAt,
+		&res.Reason,
+	)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	res.Certificate.NotAfter = res.Certificate.NotAfter.UTC()
+	res.Certificate.NotBefore = res.Certificate.NotBefore.UTC()
+	res.RevokedAt = res.RevokedAt.UTC()
+	if len(locations) > 0 {
+		res.Certificate.Locations = strings.Split(locations, ",")
+	}
+	if len(meta) > 0 {
+		json.Unmarshal([]byte(meta), &res.Certificate.Metadata)
+	}
 	return res, nil
 }
 
@@ -94,17 +150,18 @@ func (p *Provider) RemoveRevokedCertificate(ctx context.Context, id uint64) erro
 	return nil
 }
 
-// GetOrgRevokedCertificates returns list of Org's revoked certificates
-func (p *Provider) GetOrgRevokedCertificates(ctx context.Context, orgID uint64) (model.RevokedCertificates, error) {
-
+// ListOrgRevokedCertificates returns list of Org's revoked certificates
+func (p *Provider) ListOrgRevokedCertificates(ctx context.Context, orgID uint64, limit int, afterID uint64) (model.RevokedCertificates, error) {
 	res, err := p.db.QueryContext(ctx, `
 		SELECT
-			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,label,locations,revoked_at,reason
+			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,profile,label,locations,metadata,revoked_at,reason
 		FROM
 			revoked
-		WHERE org_id = $1
-		;
-		`, orgID)
+		WHERE org_id = $1 AND id > $2
+		ORDER BY
+			id ASC
+		LIMIT $3
+		;`, orgID, afterID, limit)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -112,37 +169,11 @@ func (p *Provider) GetOrgRevokedCertificates(ctx context.Context, orgID uint64) 
 
 	list := make([]*model.RevokedCertificate, 0, 100)
 	for res.Next() {
-		r := new(model.RevokedCertificate)
-		var locations string
-		err = res.Scan(
-			&r.Certificate.ID,
-			&r.Certificate.OrgID,
-			&r.Certificate.SKID,
-			&r.Certificate.IKID,
-			&r.Certificate.SerialNumber,
-			&r.Certificate.NotBefore,
-			&r.Certificate.NotAfter,
-			&r.Certificate.Subject,
-			&r.Certificate.Issuer,
-			&r.Certificate.ThumbprintSha256,
-			&r.Certificate.Pem,
-			&r.Certificate.IssuersPem,
-			&r.Certificate.Profile,
-			&r.Certificate.Label,
-			&locations,
-			&r.RevokedAt,
-			&r.Reason,
-		)
+		m, err := scanShortRevokedCertificate(res)
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
-		r.Certificate.NotAfter = r.Certificate.NotAfter.UTC()
-		r.Certificate.NotBefore = r.Certificate.NotBefore.UTC()
-		r.RevokedAt = r.RevokedAt.UTC()
-		if len(locations) > 0 {
-			r.Certificate.Locations = strings.Split(locations, ",")
-		}
-		list = append(list, r)
+		list = append(list, m)
 	}
 
 	return list, nil
@@ -162,7 +193,7 @@ func (p *Provider) ListRevokedCertificates(ctx context.Context, ikid string, lim
 
 	res, err := p.db.QueryContext(ctx,
 		`SELECT
-			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,profile,label,locations,revoked_at,reason
+			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,profile,label,locations,metadata,revoked_at,reason
 		FROM
 			revoked
 		WHERE 
@@ -180,36 +211,11 @@ func (p *Provider) ListRevokedCertificates(ctx context.Context, ikid string, lim
 	list := make([]*model.RevokedCertificate, 0, 100)
 
 	for res.Next() {
-		r := new(model.RevokedCertificate)
-		var locations string
-		err = res.Scan(
-			&r.Certificate.ID,
-			&r.Certificate.OrgID,
-			&r.Certificate.SKID,
-			&r.Certificate.IKID,
-			&r.Certificate.SerialNumber,
-			&r.Certificate.NotBefore,
-			&r.Certificate.NotAfter,
-			&r.Certificate.Subject,
-			&r.Certificate.Issuer,
-			&r.Certificate.ThumbprintSha256,
-			&r.Certificate.Profile,
-			&r.Certificate.Label,
-			&locations,
-			&r.RevokedAt,
-			&r.Reason,
-		)
+		m, err := scanShortRevokedCertificate(res)
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
-		r.Certificate.NotAfter = r.Certificate.NotAfter.UTC()
-		r.Certificate.NotBefore = r.Certificate.NotBefore.UTC()
-		r.RevokedAt = r.RevokedAt.UTC()
-		if len(locations) > 0 {
-			r.Certificate.Locations = strings.Split(locations, ",")
-		}
-
-		list = append(list, r)
+		list = append(list, m)
 	}
 
 	return list, nil
@@ -260,43 +266,15 @@ func (p *Provider) RevokeCertificate(ctx context.Context, crt *model.Certificate
 
 // GetRevokedCertificateByIKIDAndSerial returns revoked certificate
 func (p *Provider) GetRevokedCertificateByIKIDAndSerial(ctx context.Context, ikid, serial string) (*model.RevokedCertificate, error) {
-	res := new(model.RevokedCertificate)
-	var locations string
-	err := p.db.QueryRowContext(ctx, `
+	m, err := scanFullRevokedCertificate(p.db.QueryRowContext(ctx, `
 			SELECT
-			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,label,locations,revoked_at,reason
+			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,label,locations,metadata,revoked_at,reason
 			FROM revoked
 			WHERE ikid = $1 AND serial_number = $2;`,
-		ikid, serial).
-		Scan(
-			&res.Certificate.ID,
-			&res.Certificate.OrgID,
-			&res.Certificate.SKID,
-			&res.Certificate.IKID,
-			&res.Certificate.SerialNumber,
-			&res.Certificate.NotBefore,
-			&res.Certificate.NotAfter,
-			&res.Certificate.Subject,
-			&res.Certificate.Issuer,
-			&res.Certificate.ThumbprintSha256,
-			&res.Certificate.Pem,
-			&res.Certificate.IssuersPem,
-			&res.Certificate.Profile,
-			&res.Certificate.Label,
-			&locations,
-
-			&res.RevokedAt,
-			&res.Reason,
-		)
+		ikid, serial))
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	res.Certificate.NotBefore = res.Certificate.NotBefore.UTC()
-	res.Certificate.NotAfter = res.Certificate.NotAfter.UTC()
-	res.RevokedAt = res.RevokedAt.UTC()
-	if len(locations) > 0 {
-		res.Certificate.Locations = strings.Split(locations, ",")
-	}
 
-	return res, nil
+	return m, nil
 }

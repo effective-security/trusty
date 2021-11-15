@@ -87,20 +87,27 @@ func TestRegisterCertificate(t *testing.T) {
 	assert.Equal(t, rc.NotBefore.Unix(), r.NotBefore.Unix())
 	assert.Equal(t, rc.NotAfter.Unix(), r.NotAfter.Unix())
 	assert.Empty(t, rc.Locations)
+	assert.Empty(t, rc.Metadata)
 
 	r.Locations = []string{"1", "2", "3"}
+	r.Metadata = map[string]string{"requester": "denis"}
 
 	r2, err := provider.RegisterCertificate(ctx, r)
 	require.NoError(t, err)
 	require.NotNil(t, r)
 	assert.Equal(t, *r, *r2)
 	assert.Len(t, r2.Locations, 3)
+	assert.Len(t, r2.Metadata, 1)
 
 	list, err := provider.ListOrgCertificates(ctx, orgID, 10, 0)
 	require.NoError(t, err)
 	r3 := list.Find(r.ID)
 	require.NotNil(t, r3)
-	assert.Equal(t, *r, *r3)
+	assert.NotEqual(t, *r, *r3)
+	r3c := *r3
+	r3c.Pem = r.Pem
+	r3c.IssuersPem = r.IssuersPem
+	assert.Equal(t, *r, r3c)
 
 	list2, err := provider.ListCertificates(ctx, r3.IKID, 100, 0)
 	require.NoError(t, err)
@@ -185,6 +192,7 @@ func TestRegisterCertificateUniqueIdx(t *testing.T) {
 		Profile:          "client",
 		Label:            "label",
 		Locations:        []string{"l1", "l2"},
+		Metadata:         map[string]string{"requester": "test"},
 	}
 
 	r, err := provider.RegisterCertificate(ctx, rc)
@@ -205,6 +213,7 @@ func TestRegisterCertificateUniqueIdx(t *testing.T) {
 	assert.Equal(t, rc.Label, r.Label)
 	assert.Equal(t, rc.Locations, r.Locations)
 	assert.Equal(t, rc.Locations, r.Locations)
+	assert.Equal(t, rc.Metadata, r.Metadata)
 	assert.Equal(t, rc.NotBefore.Unix(), r.NotBefore.Unix())
 	assert.Equal(t, rc.NotAfter.Unix(), r.NotAfter.Unix())
 
@@ -246,6 +255,7 @@ func TestRegisterRevokedCertificate(t *testing.T) {
 			Profile:          "client",
 			Label:            "label",
 			Locations:        []string{"l1", "l2"},
+			Metadata:         map[string]string{"host": "local"},
 		},
 		RevokedAt: time.Now(),
 		Reason:    1,
@@ -270,14 +280,19 @@ func TestRegisterRevokedCertificate(t *testing.T) {
 	assert.Equal(t, rc.Profile, r.Profile)
 	assert.Equal(t, rc.Label, r.Label)
 	assert.Equal(t, rc.Locations, r.Locations)
+	assert.Equal(t, rc.Metadata, r.Metadata)
 	assert.Equal(t, rc.NotBefore.Unix(), r.NotBefore.Unix())
 	assert.Equal(t, rc.NotAfter.Unix(), r.NotAfter.Unix())
 
-	list, err := provider.GetOrgRevokedCertificates(ctx, orgID)
+	list, err := provider.ListOrgRevokedCertificates(ctx, orgID, 100, 0)
 	require.NoError(t, err)
 	r3 := list.Find(r.ID)
 	require.NotNil(t, r3)
-	assert.Equal(t, *mr, *r3)
+	assert.NotEqual(t, *mr, *r3)
+	r3c := *r3
+	r3c.Certificate.Pem = r.Pem
+	r3c.Certificate.IssuersPem = r.IssuersPem
+	assert.Equal(t, *mr, r3c)
 
 	list, err = provider.ListRevokedCertificates(ctx, r.IKID, 0, 0)
 	require.NoError(t, err)

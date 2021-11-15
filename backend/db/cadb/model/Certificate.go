@@ -13,21 +13,22 @@ import (
 
 // Certificate provides X509 Cert information
 type Certificate struct {
-	ID               uint64    `db:"id"`
-	OrgID            uint64    `db:"org_id"`
-	SKID             string    `db:"skid"`
-	IKID             string    `db:"ikid"`
-	SerialNumber     string    `db:"serial_number"`
-	NotBefore        time.Time `db:"not_before"`
-	NotAfter         time.Time `db:"no_tafter"`
-	Subject          string    `db:"subject"`
-	Issuer           string    `db:"issuer"`
-	ThumbprintSha256 string    `db:"sha256"`
-	Profile          string    `db:"profile"`
-	Pem              string    `db:"pem"`
-	IssuersPem       string    `db:"issuers_pem"`
-	Label            string    `db:"label"`
-	Locations        []string  `db:"locations"`
+	ID               uint64            `db:"id"`
+	OrgID            uint64            `db:"org_id"`
+	SKID             string            `db:"skid"`
+	IKID             string            `db:"ikid"`
+	SerialNumber     string            `db:"serial_number"`
+	NotBefore        time.Time         `db:"not_before"`
+	NotAfter         time.Time         `db:"no_tafter"`
+	Subject          string            `db:"subject"`
+	Issuer           string            `db:"issuer"`
+	ThumbprintSha256 string            `db:"sha256"`
+	Profile          string            `db:"profile"`
+	Pem              string            `db:"pem"`
+	IssuersPem       string            `db:"issuers_pem"`
+	Label            string            `db:"label"`
+	Locations        []string          `db:"locations"`
+	Metadata         map[string]string `db:"metadata"`
 }
 
 // Certificates defines a list of Certificate
@@ -51,6 +52,7 @@ func (r *Certificate) ToPB() *pb.Certificate {
 		IssuersPem:   r.IssuersPem,
 		Label:        r.Label,
 		Locations:    r.Locations,
+		Metadata:     r.Metadata,
 	}
 }
 
@@ -71,29 +73,6 @@ func (r *Certificate) FileName() string {
 	return r.IKID[:4] + "/" + sn
 }
 
-/*
-// ToDTO returns ToDTO
-func (r *Certificate) ToDTO() *v1.Certificate {
-	return &v1.Certificate{
-		ID:           strconv.FormatUint(r.ID, 10),
-		OrgID:        strconv.FormatUint(r.OrgID, 10),
-		SKID:         r.SKID,
-		IKID:         r.IKID,
-		SerialNumber: r.SerialNumber,
-		NotBefore:    r.NotBefore.UTC(),
-		NotAfter:     r.NotAfter.UTC(),
-		Subject:      r.Subject,
-		Issuer:       r.Issuer,
-		Sha256:       r.ThumbprintSha256,
-		Profile:      r.Profile,
-		Pem:          r.Pem,
-		IssuersPem:   r.IssuersPem,
-		Label:        r.Label,
-		Locations:    r.Locations,
-	}
-}
-*/
-
 // CertificateFromPB returns Certificate
 func CertificateFromPB(r *pb.Certificate) *Certificate {
 	return &Certificate{
@@ -112,11 +91,16 @@ func CertificateFromPB(r *pb.Certificate) *Certificate {
 		IssuersPem:       r.IssuersPem,
 		Label:            r.Label,
 		Locations:        r.Locations,
+		Metadata:         r.Metadata,
 	}
 }
 
 // NewCertificate returns Certificate
-func NewCertificate(r *x509.Certificate, orgID uint64, profile, pem, issuersPem, label string, locations []string) *Certificate {
+func NewCertificate(r *x509.Certificate,
+	orgID uint64,
+	profile, pem, issuersPem, label string,
+	locations []string,
+	meta map[string]string) *Certificate {
 	return &Certificate{
 		//ID:               r.Id,
 		OrgID:            orgID,
@@ -133,6 +117,7 @@ func NewCertificate(r *x509.Certificate, orgID uint64, profile, pem, issuersPem,
 		IssuersPem:       issuersPem,
 		Label:            label,
 		Locations:        locations,
+		Metadata:         meta,
 	}
 }
 
