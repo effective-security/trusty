@@ -31,6 +31,13 @@ func TestRegisterIssuer(t *testing.T) {
 	require.NotNil(t, m2)
 	assert.Equal(t, *m1, *m2)
 
+	m.Config += " modified"
+	m3, err := provider.RegisterIssuer(ctx, m)
+	require.NoError(t, err)
+	require.NotNil(t, m3)
+	assert.NotEqual(t, *m2, *m3)
+	assert.Equal(t, m.Config, m3.Config)
+
 	list, err := provider.ListIssuers(ctx, 100, 0)
 	require.NoError(t, err)
 	assert.NotEmpty(t, list)

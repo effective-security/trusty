@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-phorce/dolly/xlog"
+	"github.com/go-phorce/dolly/xpki/certutil"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/authority"
@@ -61,6 +62,7 @@ func (s *Service) ListIssuers(ctx context.Context, req *pb.ListIssuersRequest) (
 		Issuers: make([]*pb.IssuerInfo, 0, len(issuers)),
 	}
 
+	// TODO: pagination
 	for _, issuer := range issuers {
 		res.Issuers = append(res.Issuers, issuerInfo(issuer, req.Bundle))
 	}
@@ -212,8 +214,8 @@ func (s *Service) RegisterIssuer(ctx context.Context, req *pb.RegisterIssuerRequ
 
 	issuer, err := authority.CreateIssuer(cfg,
 		[]byte(cfg.CertFile),
-		[]byte(cfg.CABundleFile),
-		[]byte(cfg.RootBundleFile),
+		certutil.JoinPEM([]byte(cfg.CABundleFile), s.ca.CaBundle),
+		certutil.JoinPEM([]byte(cfg.RootBundleFile), s.ca.RootBundle),
 		signer,
 	)
 	if err != nil {

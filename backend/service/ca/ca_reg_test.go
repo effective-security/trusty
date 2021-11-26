@@ -21,8 +21,8 @@ func TestRegisterIssuer(t *testing.T) {
 	ctx := context.Background()
 
 	iid := certutil.RandomString(8)
-	issuerLabel := "SHAKEN_ICA_" + iid
-	profileLabel := "DELEGATED_SHAKEN2"
+	issuerLabel := "DELEGATED_ICA" + iid
+	profileLabel := "DELEGATED_TELCO2"
 
 	defer svc.CaDb().DeleteIssuer(ctx, issuerLabel)
 
@@ -42,7 +42,7 @@ func TestRegisterIssuer(t *testing.T) {
 	assert.NotEmpty(t, csrPEM)
 
 	signRes, err := authorityClient.SignCertificate(ctx, &pb.SignCertificateRequest{
-		Profile:       "SHAKEN_ICA",
+		Profile:       "DELEGATED_ICA",
 		Request:       csrPEM,
 		RequestFormat: pb.EncodingFormat_PEM,
 	})
@@ -50,18 +50,13 @@ func TestRegisterIssuer(t *testing.T) {
 	require.NotEmpty(t, signRes.Certificate.Ikid)
 	require.NotEmpty(t, signRes.Certificate.Skid)
 
-	ii, err := authorityClient.GetIssuer(ctx, &pb.IssuerInfoRequest{
-		Ikid: signRes.Certificate.Ikid,
-	})
-	require.NoError(t, err)
-
 	cp := authority.IssuerConfig{
-		Label:          issuerLabel,
-		Type:           "shaken",
-		CertFile:       signRes.Certificate.Pem,
-		KeyFile:        string(keyBytes),
-		CABundleFile:   signRes.Certificate.IssuersPem,
-		RootBundleFile: ii.Root,
+		Label:        issuerLabel,
+		Type:         "delegated",
+		CertFile:     signRes.Certificate.Pem,
+		KeyFile:      string(keyBytes),
+		CABundleFile: signRes.Certificate.IssuersPem,
+		//RootBundleFile: ,
 		AIA: &authority.AIAConfig{
 			CrlURL: "https://authenticate-api.iconectiv.com/download/v1/crl",
 		},
@@ -83,6 +78,8 @@ func TestRegisterIssuer(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.Contains(t, ii2.Profiles, regProfRes.Label)
+	assert.NotEmpty(t, ii2.Intermediates)
+	assert.NotEmpty(t, ii2.Root)
 
 	lres, err := svc.CaDb().ListIssuers(ctx, 100, 0)
 	require.NoError(t, err)

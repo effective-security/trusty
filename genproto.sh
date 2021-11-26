@@ -46,6 +46,7 @@ trap cleanup EXIT
 go get github.com/golang/protobuf/{proto,ptypes,protoc-gen-go}
 go get golang.org/x/tools/cmd/goimports
 go get github.com/gogo/googleapis/google/api
+go get github.com/ghodss/yaml
 # generate gateway code
 go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
 go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-openapiv2

@@ -5,6 +5,7 @@ import (
 	"crypto"
 
 	"github.com/go-phorce/dolly/xlog"
+	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/pkg/errors"
 )
@@ -22,6 +23,9 @@ type Authority struct {
 
 	// keep track of Wildcard profiles
 	profiles map[string]*CertProfile
+
+	RootBundle []byte
+	CaBundle   []byte
 }
 
 // NewAuthority returns new instance of Authority
@@ -37,6 +41,17 @@ func NewAuthority(cfg *Config, crypto *cryptoprov.Crypto) (*Authority, error) {
 		issuersByKeyID:   make(map[string]*Issuer),
 		profiles:         cfg.Profiles,
 	}
+	rootBundle, err := certutil.LoadPEMFiles(cfg.Authority.RootsBundleFiles...)
+	if err != nil {
+		return nil, errors.WithMessagef(err, "unable to load Root bundles")
+	}
+	ca.RootBundle = rootBundle
+
+	caBundle, err := certutil.LoadPEMFiles(cfg.Authority.CABundleFiles...)
+	if err != nil {
+		return nil, errors.WithMessagef(err, "unable to load CA bundles")
+	}
+	ca.CaBundle = caBundle
 
 	if ca.profiles == nil {
 		ca.profiles = make(map[string]*CertProfile)
@@ -49,7 +64,7 @@ func NewAuthority(cfg *Config, crypto *cryptoprov.Crypto) (*Authority, error) {
 		}
 
 		ccfg := isscfg.Copy()
-		issuer, err := NewIssuer(ccfg, crypto)
+		issuer, err := NewIssuerWithBundles(ccfg, crypto, ca.CaBundle, ca.RootBundle)
 		if err != nil {
 			return nil, errors.WithMessagef(err, "unable to create issuer: %q", isscfg.Label)
 		}
