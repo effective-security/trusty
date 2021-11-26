@@ -130,6 +130,11 @@ func (ca *Issuer) AddProfile(label string, p *CertProfile) {
 
 // NewIssuer creates Issuer from provided configuration
 func NewIssuer(cfg *IssuerConfig, prov *cryptoprov.Crypto) (*Issuer, error) {
+	return NewIssuerWithBundles(cfg, prov, nil, nil)
+}
+
+// NewIssuerWithBundles creates Issuer from provided configuration
+func NewIssuerWithBundles(cfg *IssuerConfig, prov *cryptoprov.Crypto, caPem, rootPem []byte) (*Issuer, error) {
 	// ensure that signer can be created before the key is generated
 	cryptoSigner, err := NewSignerFromFromFile(
 		prov,
@@ -146,6 +151,7 @@ func NewIssuer(cfg *IssuerConfig, prov *cryptoprov.Crypto) (*Issuer, error) {
 			return nil, errors.WithMessage(err, "failed to load ca-bundle")
 		}
 	}
+	intCAbytes = certutil.JoinPEM(intCAbytes, caPem)
 
 	if cfg.RootBundleFile != "" {
 		rootBytes, err = ioutil.ReadFile(cfg.RootBundleFile)
@@ -153,6 +159,7 @@ func NewIssuer(cfg *IssuerConfig, prov *cryptoprov.Crypto) (*Issuer, error) {
 			return nil, errors.WithMessagef(err, "failed to load root-bundle")
 		}
 	}
+	rootBytes = certutil.JoinPEM(rootBytes, rootPem)
 
 	certBytes, err := ioutil.ReadFile(cfg.CertFile)
 	if err != nil {

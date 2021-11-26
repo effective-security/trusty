@@ -35,11 +35,11 @@ type CAConfig struct {
 	// Issuers specifies the list of issuing authorities.
 	Issuers []IssuerConfig `json:"issuers,omitempty" yaml:"issuers,omitempty"`
 
-	// PrivateRoots specifies the list of private Root Certs files.
-	PrivateRoots []string `json:"private_roots,omitempty" yaml:"private_roots,omitempty"`
+	// RootsBundleFiles specifies locations of the Root bundle files
+	RootsBundleFiles []string `json:"root_bundles,omitempty" yaml:"root_bundles,omitempty"`
 
-	// PublicRoots specifies the list of public Root Certs files.
-	PublicRoots []string `json:"public_roots,omitempty" yaml:"public_roots,omitempty"`
+	// CABundleFiles specifies locations of the CA bundle files
+	CABundleFiles []string `json:"ca_bundles,omitempty" yaml:"ca_bundles,omitempty"`
 }
 
 // IssuerConfig contains configuration info for the issuing certificate

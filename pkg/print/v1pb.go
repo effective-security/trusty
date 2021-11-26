@@ -75,6 +75,7 @@ func Issuers(w io.Writer, issuers []*pb.IssuerInfo, withPem bool) {
 		fmt.Fprintf(w, "Label: %s\n", ci.Label)
 		fmt.Fprintf(w, "Profiles: %v\n", ci.Profiles)
 		fmt.Fprintf(w, "Subject: %s\n", certutil.NameToString(&bundle.Cert.Subject))
+		fmt.Fprintf(w, "  Issuer: %s\n", certutil.NameToString(&bundle.Cert.Issuer))
 		fmt.Fprintf(w, "  SKID: %s\n", bundle.SubjectID)
 		fmt.Fprintf(w, "  IKID: %s\n", bundle.IssuerID)
 		fmt.Fprintf(w, "  Serial: %s\n", bundle.Cert.SerialNumber.String())

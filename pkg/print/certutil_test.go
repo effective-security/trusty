@@ -132,6 +132,7 @@ func Test_Issuers(t *testing.T) {
 	assert.Contains(t, out, `Label: trusty.svc
 Profiles: [default peer timestamp test_client server client ocsp test_server codesign]
 Subject: C=US, L=WA, O=trusty.com, CN=[TEST] Trusty Level 2 CA
+  Issuer: C=US, L=WA, O=trusty.com, CN=[TEST] Trusty Level 1 CA
   SKID: 2e897da29a7b7b8aea10e0aa0900bc72eb31b62f
   IKID: 91bba6f326b11e030b0893b68362e35176d4e526
   Serial: 339118521149703476204197482799788296632679099480

@@ -11,6 +11,7 @@ import (
 	fauditor "github.com/go-phorce/dolly/audit/log"
 	"github.com/go-phorce/dolly/tasks"
 	"github.com/go-phorce/dolly/xlog"
+	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	"github.com/martinisecurity/trusty/authority"
@@ -350,8 +351,8 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto, db c
 
 			issuer, err := authority.CreateIssuer(cfg,
 				[]byte(cfg.CertFile),
-				[]byte(cfg.CABundleFile),
-				[]byte(cfg.RootBundleFile),
+				certutil.JoinPEM([]byte(cfg.CABundleFile), ca.CaBundle),
+				certutil.JoinPEM([]byte(cfg.RootBundleFile), ca.RootBundle),
 				signer,
 			)
 			if err != nil {
@@ -398,6 +399,8 @@ func providePublisher(cfg *config.Configuration) (certpublisher.Publisher, error
 	}
 	return pub, err
 }
+
+// TODO: init once via GetIDGenerator
 
 // IDGenerator for the app
 var IDGenerator = sonyflake.NewSonyflake(sonyflake.Settings{

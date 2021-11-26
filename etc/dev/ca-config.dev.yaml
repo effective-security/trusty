@@ -1,5 +1,11 @@
 ---
 authority:
+  ca_bundles: 
+  - /tmp/trusty/certs/shaken_cabundle.pem
+  - /tmp/trusty/certs/trusty_cabundle.pem
+  root_bundles: 
+  - /tmp/trusty/certs/shaken_root_ca.pem
+  - /tmp/trusty/certs/trusty_root_ca.pem
   issuers:
   -
     # specifies Issuer's label
@@ -9,9 +15,9 @@ authority:
     cert: /tmp/trusty/certs/trusty_l2_ca.pem
     key: /tmp/trusty/certs/trusty_l2_ca.key
     # location of the CA bundle file
-    ca_bundle: /tmp/trusty/certs/trusty_cabundle.pem
+    ca_bundle:
     # location of the Root CA file
-    root_bundle: /tmp/trusty/certs/trusty_root_ca.pem
+    root_bundle:
     aia:
       issuer_url: http://localhost:7880/v1/cert/${ISSUER_ID}
       crl_url: http://localhost:7880/v1/crl/${ISSUER_ID}
@@ -26,9 +32,9 @@ authority:
     cert: /tmp/trusty/certs/shaken_ca.pem
     key: /tmp/trusty/certs/shaken_ca.key
     # location of the CA bundle file
-    ca_bundle: /tmp/trusty/certs/shaken_cabundle.pem
+    ca_bundle: 
     # location of the Root CA file
-    root_bundle: /tmp/trusty/certs/shaken_root_ca.pem
+    root_bundle:
     aia:
       crl_url: https://authenticate-api.iconectiv.com/download/v1/crl
       issuer_url:
@@ -199,7 +205,9 @@ profiles:
     - code signing
     - key encipherment
 
-  SHAKEN_ICA:
+  # Delegated Issuing CA,
+  # issued by presense of SPC token with CA=true
+  DELEGATED_ICA:
     issuer_label: SHAKEN_L1_CA
     expiry: 43800h
     backdate: 30m
@@ -238,7 +246,8 @@ profiles:
       email: false
     #allowed_names: ^C=US, O=Entity Name From Registration, CN=SHAKEN .*$
 
-  DELEGATED_SHAKEN:
+  # issued by DELEGATED_ICA_{org_id}
+  DELEGATED_TELCO:
     issuer_label: "*"
     expiry: 8760h
     backdate: 30m
