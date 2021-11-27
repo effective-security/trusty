@@ -81,9 +81,19 @@ func (s *caSrv2C) ListOrgCertificates(ctx context.Context, req *pb.ListOrgCertif
 	return s.srv.ListOrgCertificates(ctx, req)
 }
 
-// RegisterIssuer registers the IssuerInfo
-func (s *caSrv2C) RegisterIssuer(ctx context.Context, req *pb.RegisterIssuerRequest, opts ...grpc.CallOption) (*pb.IssuerInfo, error) {
-	return s.srv.RegisterIssuer(ctx, req)
+// ListDelegatedIssuers returns the delegated issuing CAs
+func (s *caSrv2C) ListDelegatedIssuers(ctx context.Context, in *pb.ListIssuersRequest, opts ...grpc.CallOption) (*pb.IssuersInfoResponse, error) {
+	return s.srv.ListDelegatedIssuers(ctx, in)
+}
+
+// RegisterDelegatedIssuer creates new delegate issuer.
+func (s *caSrv2C) RegisterDelegatedIssuer(ctx context.Context, req *pb.SignCertificateRequest, opts ...grpc.CallOption) (*pb.IssuerInfo, error) {
+	return s.srv.RegisterDelegatedIssuer(ctx, req)
+}
+
+// ArchiveDelegatedIssuer archives a delegated issuer.
+func (s *caSrv2C) ArchiveDelegatedIssuer(ctx context.Context, req *pb.IssuerInfoRequest, opts ...grpc.CallOption) (*pb.IssuerInfo, error) {
+	return s.srv.ArchiveDelegatedIssuer(ctx, req)
 }
 
 // RegisterProfile registers the certificate profile

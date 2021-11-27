@@ -70,12 +70,12 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 	if req.IssuerLabel != "" {
 		ca, err = s.ca.GetIssuerByLabel(req.IssuerLabel)
 		if err != nil {
-			return nil, v1.NewError(codes.InvalidArgument, "issuer not found: %s", req.IssuerLabel)
+			return nil, v1.NewError(codes.NotFound, "issuer not found: %s", req.IssuerLabel)
 		}
 	} else {
 		ca, err = s.ca.GetIssuerByProfile(req.Profile)
 		if err != nil {
-			return nil, v1.NewError(codes.InvalidArgument, "issuer not found for profile: %s", req.Profile)
+			return nil, v1.NewError(codes.NotFound, "issuer not found for profile: %s", req.Profile)
 		}
 	}
 

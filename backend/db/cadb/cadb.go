@@ -93,6 +93,8 @@ type CaDb interface {
 
 	// RegisterIssuer registers Issuer config
 	RegisterIssuer(ctx context.Context, crt *model.Issuer) (*model.Issuer, error)
+	// UpdateIssuerStatus update the Issuer status
+	UpdateIssuerStatus(ctx context.Context, id uint64, status int) (*model.Issuer, error)
 	// DeleteIssuer deletes the Issuer
 	DeleteIssuer(ctx context.Context, label string) error
 

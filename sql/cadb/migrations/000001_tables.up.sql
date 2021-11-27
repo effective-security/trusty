@@ -246,6 +246,7 @@ CREATE TABLE IF NOT EXISTS public.issuers
 (
     id bigint NOT NULL,
     label character varying(32) COLLATE pg_catalog."default" NOT NULL,
+    status int NOT NULL,
     config text COLLATE pg_catalog."default" NOT NULL,
     created_at timestamp with time zone DEFAULT Now(),
     updated_at timestamp with time zone DEFAULT Now(),
@@ -255,6 +256,11 @@ CREATE TABLE IF NOT EXISTS public.issuers
 WITH (
     OIDS = FALSE
 );
+
+CREATE INDEX IF NOT EXISTS idx_issuers_status
+    ON public.issuers USING btree
+    (status);
+
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_issuers_label
     ON public.issuers USING btree

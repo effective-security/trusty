@@ -35,8 +35,12 @@ type CAClient interface {
 	UpdateCertificateLabel(ctx context.Context, in *pb.UpdateCertificateLabelRequest) (*pb.CertificateResponse, error)
 	// ListOrgCertificates returns the Org certificates
 	ListOrgCertificates(ctx context.Context, in *pb.ListOrgCertificatesRequest) (*pb.CertificatesResponse, error)
-	// RegisterIssuer registers the IssuerInfo
-	RegisterIssuer(ctx context.Context, in *pb.RegisterIssuerRequest) (*pb.IssuerInfo, error)
+	// ListDelegatedIssuers returns the delegated issuing CAs
+	ListDelegatedIssuers(ctx context.Context, in *pb.ListIssuersRequest) (*pb.IssuersInfoResponse, error)
+	// RegisterDelegatedIssuer creates new delegate issuer.
+	RegisterDelegatedIssuer(ctx context.Context, req *pb.SignCertificateRequest) (*pb.IssuerInfo, error)
+	// ArchiveDelegatedIssuer archives a delegated issuer.
+	ArchiveDelegatedIssuer(ctx context.Context, req *pb.IssuerInfoRequest) (*pb.IssuerInfo, error)
 	// RegisterProfile registers the certificate profile
 	RegisterProfile(ctx context.Context, in *pb.RegisterProfileRequest) (*pb.CertProfile, error)
 }
@@ -126,9 +130,19 @@ func (c *authorityClient) ListOrgCertificates(ctx context.Context, req *pb.ListO
 	return c.remote.ListOrgCertificates(ctx, req, c.callOpts...)
 }
 
-// RegisterIssuer registers the IssuerInfo
-func (c *authorityClient) RegisterIssuer(ctx context.Context, req *pb.RegisterIssuerRequest) (*pb.IssuerInfo, error) {
-	return c.remote.RegisterIssuer(ctx, req, c.callOpts...)
+// ListDelegatedIssuers returns the delegated issuing CAs
+func (c *authorityClient) ListDelegatedIssuers(ctx context.Context, in *pb.ListIssuersRequest) (*pb.IssuersInfoResponse, error) {
+	return c.remote.ListDelegatedIssuers(ctx, in, c.callOpts...)
+}
+
+// RegisterDelegatedIssuer creates new delegate issuer.
+func (c *authorityClient) RegisterDelegatedIssuer(ctx context.Context, req *pb.SignCertificateRequest) (*pb.IssuerInfo, error) {
+	return c.remote.RegisterDelegatedIssuer(ctx, req, c.callOpts...)
+}
+
+// ArchiveDelegatedIssuer archives a delegated issuer.
+func (c *authorityClient) ArchiveDelegatedIssuer(ctx context.Context, req *pb.IssuerInfoRequest) (*pb.IssuerInfo, error) {
+	return c.remote.ArchiveDelegatedIssuer(ctx, req, c.callOpts...)
 }
 
 // RegisterProfile registers the certificate profile
@@ -214,9 +228,19 @@ func (c *retryCAClient) ListOrgCertificates(ctx context.Context, req *pb.ListOrg
 	return c.authority.ListOrgCertificates(ctx, req, opts...)
 }
 
-// RegisterIssuer returns the issuing CAs
-func (c *retryCAClient) RegisterIssuer(ctx context.Context, req *pb.RegisterIssuerRequest, opts ...grpc.CallOption) (*pb.IssuerInfo, error) {
-	return c.authority.RegisterIssuer(ctx, req, opts...)
+// ListDelegatedIssuers returns the delegated issuing CAs
+func (c *retryCAClient) ListDelegatedIssuers(ctx context.Context, in *pb.ListIssuersRequest, opts ...grpc.CallOption) (*pb.IssuersInfoResponse, error) {
+	return c.authority.ListDelegatedIssuers(ctx, in, opts...)
+}
+
+// RegisterDelegatedIssuer creates new delegate issuer.
+func (c *retryCAClient) RegisterDelegatedIssuer(ctx context.Context, req *pb.SignCertificateRequest, opts ...grpc.CallOption) (*pb.IssuerInfo, error) {
+	return c.authority.RegisterDelegatedIssuer(ctx, req, opts...)
+}
+
+// ArchiveDelegatedIssuer archives a delegated issuer.
+func (c *retryCAClient) ArchiveDelegatedIssuer(ctx context.Context, req *pb.IssuerInfoRequest, opts ...grpc.CallOption) (*pb.IssuerInfo, error) {
+	return c.authority.ArchiveDelegatedIssuer(ctx, req, opts...)
 }
 
 // RegisterProfile registers the certificate profile

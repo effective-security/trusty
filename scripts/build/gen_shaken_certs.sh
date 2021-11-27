@@ -147,21 +147,21 @@ if [[ "$BUNDLE" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}c
 fi
 fi
 
-if [[ "$L1_CA" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}l1_ca.key) ]]; then
-    echo "*** generating L1 CA cert"
+if [[ "$L1_CA" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}delegated_l1_ca.key) ]]; then
+    echo "*** generating Delegated L1 CA cert"
     trusty-tool \
         --hsm-cfg=${HSM_CONFIG} ${CRYPTO_PROV} \
         csr gencert \
         --ca-config=${CA_CONFIG} \
-        --profile=SHAKEN_L1_CA \
-        --csr-profile ${CSR_DIR}/${CSR_PREFIX}l1_ca.json \
-        --key-label="${OUT_PREFIX}l1_ca*" \
+        --profile=DELEGATED_L1_CA \
+        --csr-profile ${CSR_DIR}/${CSR_PREFIX}delegated_l1_ca.json \
+        --key-label="${OUT_PREFIX}delegated_l1_ca*" \
         --ca-cert ${ROOT_CA_CERT} \
         --ca-key ${ROOT_CA_KEY} \
-        --out ${OUT_DIR}/${OUT_PREFIX}l1_ca
+        --out ${OUT_DIR}/${OUT_PREFIX}delegated_l1_ca
 
 if [[ "$BUNDLE" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}cabundle.pem) ]]; then
     echo "*** CA bundle"
-    cat ${OUT_DIR}/${OUT_PREFIX}l1_ca.pem >> ${OUT_DIR}/${OUT_PREFIX}cabundle.pem
+    cat ${OUT_DIR}/${OUT_PREFIX}delegated_l1_ca.pem >> ${OUT_DIR}/${OUT_PREFIX}cabundle.pem
 fi
 fi

@@ -130,8 +130,24 @@ func (m *MockCAServer) ListOrgCertificates(ctx context.Context, in *pb.ListOrgCe
 	return m.Resps[0].(*pb.CertificatesResponse), nil
 }
 
-// RegisterIssuer creates Issuer
-func (m *MockCAServer) RegisterIssuer(ctx context.Context, in *pb.RegisterIssuerRequest) (*pb.IssuerInfo, error) {
+// ListDelegatedIssuers returns the delegated issuing CAs
+func (m *MockCAServer) ListDelegatedIssuers(ctx context.Context, in *pb.ListIssuersRequest) (*pb.IssuersInfoResponse, error) {
+	if m.Err != nil {
+		return nil, m.Err
+	}
+	return m.Resps[0].(*pb.IssuersInfoResponse), nil
+}
+
+// RegisterDelegatedIssuer creates new delegate issuer.
+func (m *MockCAServer) RegisterDelegatedIssuer(ctx context.Context, req *pb.SignCertificateRequest) (*pb.IssuerInfo, error) {
+	if m.Err != nil {
+		return nil, m.Err
+	}
+	return m.Resps[0].(*pb.IssuerInfo), nil
+}
+
+// ArchiveDelegatedIssuer archives a delegated issuer.
+func (m *MockCAServer) ArchiveDelegatedIssuer(ctx context.Context, req *pb.IssuerInfoRequest) (*pb.IssuerInfo, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}

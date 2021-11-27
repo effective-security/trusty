@@ -111,7 +111,7 @@ profiles:
     allowed_extensions:
     - 2.5.29.32
 
-  SHAKEN_L1_CA:
+  DELEGATED_L1_CA:
     issuer_label: SHAKEN_ROOT
     expiry: 43800h
     backdate: 30m

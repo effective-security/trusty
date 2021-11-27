@@ -76,6 +76,14 @@ ca_sql:
 
 authority: ${TRUSTY_CONFIG_DIR}/ca-config.dev.yaml
 
+delegated_issuers:
+  crypto_provider: AWSKMS
+  issuer_label_prefix: DELEGATED_ICA_
+  aia:
+    crl_url: https://authenticate-api.iconectiv.com/download/v1/crl
+  allowed_profiles:
+  - DELEGATED_TELCO
+
 tasks:
   - name: certsmonitor
     schedule: "every 10 minutes"
@@ -219,8 +227,13 @@ servers:
       # allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
       allow:
         - /pb.CAService/SignCertificate:trusty-wfe,trusty-ca,trusty-admin,trusty-ra
+        - /pb.CAService/SignOCSP:trusty-wfe,trusty-ca,trusty-admin,trusty-ra
         - /pb.CAService/PublishCrls:trusty-ca,trusty-admin,trusty-ra
         - /pb.CAService/RevokeCertificate:trusty-ca,trusty-admin,trusty-ra
+        - /pb.CAService/RegisterDelegatedIssuer:trusty-ca,trusty-admin,trusty-ra
+        - /pb.CAService/ArchiveDelegatedIssuer:trusty-ca,trusty-admin,trusty-ra
+        - /pb.CAService/UpdateCertificateLabel:trusty-ca,trusty-admin,trusty-ra
+        - /pb.CAService/RegisterProfile:trusty-ca,trusty-admin,trusty-ra        
       # specifies to log allowed access to Any role
       log_allowed_any: false
       # specifies to log allowed access
