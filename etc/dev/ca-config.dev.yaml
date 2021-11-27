@@ -44,10 +44,10 @@ authority:
       ocsp_expiry:
   -
     # specifies Issuer's label
-    label: SHAKEN_L1_CA
-    type: shaken
-    cert: /tmp/trusty/certs/shaken_l1_ca.pem
-    key: /tmp/trusty/certs/shaken_l1_ca.key
+    label: DELEGATED_L1_CA
+    type: delegated
+    cert: /tmp/trusty/certs/shaken_delegated_l1_ca.pem
+    key: /tmp/trusty/certs/shaken_delegated_l1_ca.key
     # location of the CA bundle file
     ca_bundle: /tmp/trusty/certs/shaken_cabundle.pem
     # location of the Root CA file
@@ -208,7 +208,7 @@ profiles:
   # Delegated Issuing CA,
   # issued by presense of SPC token with CA=true
   DELEGATED_ICA:
-    issuer_label: SHAKEN_L1_CA
+    issuer_label: DELEGATED_L1_CA
     expiry: 43800h
     backdate: 30m
     usages:
@@ -226,6 +226,7 @@ profiles:
         value: https://stirshaken.com/CPS
     allowed_extensions:
     - 2.5.29.32
+    - 1.3.6.1.5.5.7.1.26
 
   SHAKEN:
     issuer_label: SHAKEN_CA

@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/dolly/xpki/certutil"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/authority"
@@ -173,69 +172,6 @@ func (s *Service) ListOrgCertificates(ctx context.Context, in *pb.ListOrgCertifi
 		List: list.ToDTO(),
 	}
 	return res, nil
-}
-
-// RegisterIssuer creates a persisted Issuer configuration
-func (s *Service) RegisterIssuer(ctx context.Context, req *pb.RegisterIssuerRequest) (*pb.IssuerInfo, error) {
-	var cfg = new(authority.IssuerConfig)
-	err := yaml.Unmarshal(req.Config, cfg)
-	if err != nil {
-		return nil, v1.NewError(codes.InvalidArgument, "unable to decode configuration: %s", err.Error())
-	}
-	if cfg.Profiles == nil {
-		cfg.Profiles = make(map[string]*authority.CertProfile)
-	}
-
-	signer, err := authority.NewSignerFromPEM(s.ca.Crypto(), []byte(cfg.KeyFile))
-	if err != nil {
-		return nil, v1.NewError(codes.InvalidArgument, "unable to create signer from private key: %s", err.Error())
-	}
-
-	profiles, err := s.db.GetCertProfilesByIssuer(ctx, cfg.Label)
-	if err != nil {
-		return nil, v1.NewError(codes.Internal, "unable to load profiles: %s", err.Error())
-	}
-
-	for _, p := range profiles {
-		var profile = new(authority.CertProfile)
-		err := yaml.Unmarshal([]byte(p.Config), profile)
-		if err != nil {
-			return nil, v1.NewError(codes.InvalidArgument, "unable to decode profile: %s", err.Error())
-		}
-
-		cfg.Profiles[p.Label] = profile
-	}
-
-	for name, profile := range s.ca.Profiles() {
-		if profile.IssuerLabel == "*" {
-			cfg.Profiles[name] = profile
-		}
-	}
-
-	issuer, err := authority.CreateIssuer(cfg,
-		[]byte(cfg.CertFile),
-		certutil.JoinPEM([]byte(cfg.CABundleFile), s.ca.CaBundle),
-		certutil.JoinPEM([]byte(cfg.RootBundleFile), s.ca.RootBundle),
-		signer,
-	)
-	if err != nil {
-		return nil, v1.NewError(codes.Internal, "failed to create issuer: %s", err.Error())
-	}
-
-	err = s.ca.AddIssuer(issuer)
-	if err != nil {
-		return nil, v1.NewError(codes.Internal, "failed to add issuer: %s", err.Error())
-	}
-
-	_, err = s.db.RegisterIssuer(ctx, &model.Issuer{
-		Label:  cfg.Label,
-		Config: string(req.Config),
-	})
-	if err != nil {
-		return nil, v1.NewError(codes.Internal, "failed to save issuer: %s", err.Error())
-	}
-
-	return issuerInfo(issuer, true), nil
 }
 
 // RegisterProfile registers the certificate profile

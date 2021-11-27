@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/pkg/gserver"
 )
 
@@ -52,6 +53,9 @@ type Configuration struct {
 	// Authority specifies configuration file for CA
 	Authority string `json:"authority" yaml:"authority"`
 
+	// DelegatedIssuers specifies configuration file for delegated Issuers
+	DelegatedIssuers DelegatedIssuers `json:"delegated_issuers" yaml:"delegated_issuers"`
+
 	// RegistrationAuthority contains configuration info for RA
 	RegistrationAuthority *RegistrationAuthority `json:"ra" yaml:"ra"`
 
@@ -80,6 +84,26 @@ type CryptoProv struct {
 
 	// PKCS11Manufacturers specifies the list of supported manufactures of PKCS11 tokens
 	PKCS11Manufacturers []string `json:"pkcs11_manufacturers,omitempty" yaml:"pkcs11_manufacturers,omitempty"`
+}
+
+// DelegatedIssuers specifies the configuration for delegated CA
+type DelegatedIssuers struct {
+	// Disabled specifies if the feature is disabled
+	Disabled *bool `json:"disabled,omitempty" yaml:"disabled,omitempty"`
+	// CryptoProvider specifies the name of Crypto provider to use,
+	// if not specified, then default will be used
+	CryptoProvider string `json:"crypto_provider,omitempty" yaml:"crypto_provider,omitempty"`
+	// IssuerLabelPrefix specifies prefix for the new issuer label, to be contantenated with OrgID
+	IssuerLabelPrefix string `json:"issuer_label_prefix,omitempty" yaml:"issuer_label_prefix,omitempty"`
+	// AIA specified AIA config
+	AIA *authority.AIAConfig `json:"aia,omitempty" yaml:"aia,omitempty"`
+	// AllowedProfiles specifies a list of allowed profiles for delegated CA
+	AllowedProfiles []string `json:"allowed_profiles,omitempty" yaml:"allowed_profiles,omitempty"`
+}
+
+// GetDisabled specifies if the feature is disabled
+func (c *DelegatedIssuers) GetDisabled() bool {
+	return c.Disabled != nil && *c.Disabled
 }
 
 // CertsMonitor specifies configurations for monitoring certs expiry

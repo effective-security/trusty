@@ -21,19 +21,47 @@ func (p *Provider) RegisterIssuer(ctx context.Context, m *model.Issuer) (*model.
 		return nil, errors.WithStack(err)
 	}
 
-	logger.Tracef("id=%d, label=%q", id, m.Label)
+	logger.Tracef("id=%d, status=%d, label=%q", id, m.Status, m.Label)
 
 	res := new(model.Issuer)
 	err = p.db.QueryRowContext(ctx, `
-			INSERT INTO issuers(id,label,config,created_at,updated_at)
-				VALUES($1, $2, $3, Now(),Now())
+			INSERT INTO issuers(id,label,status,config,created_at,updated_at)
+				VALUES($1, $2, $3, $4, Now(),Now())
 			ON CONFLICT (label)
 			DO UPDATE
-				SET config=$3
-			RETURNING id,label,config,created_at,updated_at
-			;`, id, m.Label, m.Config,
+				SET status=$3,config=$4,updated_at=Now()
+			RETURNING id,label,status,config,created_at,updated_at
+			;`, id, m.Label, m.Status, m.Config,
 	).Scan(&res.ID,
 		&res.Label,
+		&res.Status,
+		&res.Config,
+		&res.CreatedAt,
+		&res.UpdatedAt,
+	)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	res.CreatedAt = res.CreatedAt.UTC()
+	res.UpdatedAt = res.UpdatedAt.UTC()
+	return res, nil
+}
+
+// UpdateIssuerStatus update the Issuer status
+func (p *Provider) UpdateIssuerStatus(ctx context.Context, id uint64, status int) (*model.Issuer, error) {
+	logger.Noticef("id=%d, status=%d", id, status)
+
+	res := new(model.Issuer)
+
+	err := p.db.QueryRowContext(ctx, `
+	UPDATE issuers
+		SET status=$2,updated_at=Now()
+	WHERE id = $1
+	RETURNING id,label,status,config,created_at,updated_at
+	;`, id, status,
+	).Scan(&res.ID,
+		&res.Label,
+		&res.Status,
 		&res.Config,
 		&res.CreatedAt,
 		&res.UpdatedAt,
@@ -69,7 +97,7 @@ func (p *Provider) ListIssuers(ctx context.Context, limit int, afterID uint64) (
 
 	res, err := p.db.QueryContext(ctx,
 		`SELECT
-			id,label,config,created_at,updated_at
+			id,label,status,config,created_at,updated_at
 		FROM
 			issuers
 		WHERE 
@@ -91,6 +119,7 @@ func (p *Provider) ListIssuers(ctx context.Context, limit int, afterID uint64) (
 		err = res.Scan(
 			&r.ID,
 			&r.Label,
+			&r.Status,
 			&r.Config,
 			&r.CreatedAt,
 			&r.UpdatedAt,

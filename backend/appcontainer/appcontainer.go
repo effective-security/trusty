@@ -278,7 +278,9 @@ func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
 	}
 
 	cryptoprov.Register("AWSKMS", awskmscrypto.KmsLoader)
+	cryptoprov.Register("AWSKMS-delegated", awskmscrypto.KmsLoader)
 	cryptoprov.Register("GCPKMS", gcpkmscrypto.KmsLoader)
+	cryptoprov.Register("GCPKMS-delegated", gcpkmscrypto.KmsLoader)
 	crypto, err := cryptoprov.Load(cfg.CryptoProv.Default, cfg.CryptoProv.Providers)
 	if err != nil {
 		logger.Errorf("default=%s, providers=%v, err=[%+v]",

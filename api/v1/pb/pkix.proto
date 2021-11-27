@@ -229,3 +229,14 @@ message IssuerSerial {
 	// SerialNumber provides certificate's serial number
 	string serial_number = 2;
 }
+
+// X509Extension represents a raw extension to be included in the certificate.  The
+// "value" field must be hex encoded.
+message X509Extension {
+	// Id is the extension OID
+	repeated int32 id = 1;
+	// Critical flag
+	bool critical = 2;
+	// Value is base64 encoded extension value
+	string value = 3;
+}
