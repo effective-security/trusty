@@ -87,7 +87,7 @@ func (info *TLSInfo) ServerTLSWithReloader() (*tls.Config, error) {
 		info.TrustedCAFile,
 		info.ClientAuthType)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, errors.WithMessage(err, info.String())
 	}
 
 	if err = tlsutil.UpdateCipherSuites(info.tlsCfg, info.CipherSuites); err != nil {

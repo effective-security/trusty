@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/go-phorce/dolly/ctl"
+	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/cli"
 	"github.com/martinisecurity/trusty/pkg/csr"
@@ -89,15 +90,16 @@ func Sign(c ctl.Control, p interface{}) error {
 		Profile: *flags.Profile,
 	}
 
-	_, certPEM, err := issuer.Sign(signReq)
+	crt, _, err := issuer.Sign(signReq)
 	if err != nil {
 		return errors.WithMessage(err, "sign request")
 	}
+	pem, _ := certutil.EncodeToPEMString(true, crt)
 
 	if *flags.Output == "" {
-		print.CSRandCert(c.Writer(), nil, nil, certPEM)
+		print.CSRandCert(c.Writer(), nil, nil, []byte(pem+"\n"))
 	} else {
-		err = SaveCert(*flags.Output, nil, nil, certPEM)
+		err = SaveCert(*flags.Output, nil, nil, []byte(pem+"\n"))
 		if err != nil {
 			return errors.WithStack(err)
 		}

@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/ctl"
+	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/cli"
 	"github.com/martinisecurity/trusty/pkg/csr"
@@ -117,10 +118,13 @@ func GenCert(c ctl.Control, p interface{}) error {
 			Profile: *flags.Profile,
 		}
 
-		_, certPEM, err = issuer.Sign(signReq)
+		crt, _, err := issuer.Sign(signReq)
 		if err != nil {
 			return errors.WithMessage(err, "sign request")
 		}
+
+		pem, _ := certutil.EncodeToPEMString(true, crt)
+		certPEM = []byte(pem + "\n")
 	}
 
 	if *flags.Output == "" {
