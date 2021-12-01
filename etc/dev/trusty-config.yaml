@@ -82,7 +82,7 @@ delegated_issuers:
   aia:
     crl_url: https://authenticate-api.iconectiv.com/download/v1/crl
   allowed_profiles:
-  - DELEGATED_TELCO
+  - DELEGATED
 
 tasks:
   - name: certsmonitor
