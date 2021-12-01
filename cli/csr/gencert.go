@@ -101,6 +101,10 @@ func GenCert(c ctl.Control, p interface{}) error {
 		if err != nil {
 			return errors.WithStack(err)
 		}
+
+		crt, _ := certutil.ParseFromPEM(certPEM)
+		pem, _ := certutil.EncodeToPEMString(true, crt)
+		certPEM = []byte(pem + "\n")
 	} else {
 		issuer, err := authority.NewIssuer(isscfg, cryptoprov)
 		if err != nil {

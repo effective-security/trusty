@@ -205,29 +205,6 @@ profiles:
     - code signing
     - key encipherment
 
-  # Delegated Issuing CA,
-  # issued by presense of SPC token with CA=true
-  DELEGATED_ICA:
-    issuer_label: DELEGATED_L1_CA
-    expiry: 43800h
-    backdate: 30m
-    usages:
-      - cert sign
-      - crl sign
-    ca_constraint:
-      is_ca: true
-      max_path_len: 0
-    policies_critical: true
-    policies:
-    - oid: 2.16.840.1.114569.1.1.1
-    - oid: 1.3.6.1.4.1.57973.1.1
-      qualifiers:
-      - type: id-qt-cps
-        value: https://stirshaken.com/CPS
-    allowed_extensions:
-    - 2.5.29.32
-    - 1.3.6.1.5.5.7.1.26
-
   SHAKEN:
     issuer_label: SHAKEN_CA
     expiry: 8760h
@@ -247,10 +224,33 @@ profiles:
       email: false
     #allowed_names: ^C=US, O=Entity Name From Registration, CN=SHAKEN .*$
 
+  # Delegated Issuing CA,
+  # issued by presense of SPC token with CA=true
+  DELEGATED_ICA:
+    issuer_label: DELEGATED_L1_CA
+    expiry: 17520h # 2 years
+    backdate: 30m
+    usages:
+      - cert sign
+      - crl sign
+    ca_constraint:
+      is_ca: true
+      max_path_len: 0
+    policies_critical: true
+    policies:
+    - oid: 2.16.840.1.114569.1.1.1
+    - oid: 1.3.6.1.4.1.57973.1.1
+      qualifiers:
+      - type: id-qt-cps
+        value: https://stirshaken.com/CPS
+    allowed_extensions:
+    - 2.5.29.32
+    - 1.3.6.1.5.5.7.1.26
+
   # issued by DELEGATED_ICA_{org_id}
-  DELEGATED_TELCO:
+  DELEGATED:
     issuer_label: "*"
-    expiry: 8760h
+    expiry: 168h
     backdate: 30m
     usages:
     - signing
