@@ -22,6 +22,9 @@ Add this to your ~/.profile
 Note that these secrets can be random if you don't use a specific feature with GCP or Github.
 
 ```.sh
+export AWS_ACCESS_KEY_ID=notusedbyemulator
+export AWS_SECRET_ACCESS_KEY=notusedbyemulator
+export AWS_DEFAULT_REGION=us-west-2
 export TRUSTY_JWT_SEED=g...A
 # export CR_PAT=ghp_M...v
 ```
