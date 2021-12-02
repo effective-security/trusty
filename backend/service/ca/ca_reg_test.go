@@ -2,6 +2,8 @@ package ca_test
 
 import (
 	"context"
+	"crypto/x509/pkix"
+	"encoding/asn1"
 	"fmt"
 	"testing"
 
@@ -48,7 +50,7 @@ func TestRegisterIssuer(t *testing.T) {
 		},
 		Extensions: []*pb.X509Extension{
 			{
-				Id:    []int32{1, 3, 6, 1, 5, 5, 7, 1, 26},
+				Id:    []int64{1, 3, 6, 1, 5, 5, 7, 1, 26},
 				Value: "MAigBhYENzA5Sg==",
 			},
 		},
@@ -63,6 +65,7 @@ func TestRegisterIssuer(t *testing.T) {
 
 	crt, err := certutil.ParseFromPEM([]byte(regRes.Certificate))
 	require.NoError(t, err)
+	assert.NotNil(t, findExtension(crt.Extensions, asn1.ObjectIdentifier{1, 3, 6, 1, 5, 5, 7, 1, 26}))
 
 	_, err = certutil.ParseFromPEM([]byte(regRes.Root))
 	require.NoError(t, err)
@@ -103,6 +106,15 @@ func TestRegisterIssuer(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, certutil.GetSubjectID(crt), signRes2.Certificate.Ikid)
 	}
+}
+
+func findExtension(list []pkix.Extension, oid asn1.ObjectIdentifier) []byte {
+	for _, ex := range list {
+		if oid.Equal(ex.Id) {
+			return ex.Value
+		}
+	}
+	return nil
 }
 
 const profileTemplate = `

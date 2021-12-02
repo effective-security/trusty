@@ -89,8 +89,13 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 		Profile: req.Profile,
 		SAN:     req.San,
 		Subject: subj,
-		// TODO:
-		//Extensions: req.Extensions,
+	}
+	for _, ex := range req.Extensions {
+		cr.Extensions = append(cr.Extensions, csr.X509Extension{
+			ID:       toOID(ex.Id),
+			Critical: ex.Critical,
+			Value:    ex.Value,
+		})
 	}
 
 	if req.NotBefore != nil {
@@ -154,4 +159,13 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 		Certificate: mcert.ToPB(),
 	}
 	return res, nil
+}
+
+func toOID(s []int64) []int {
+	size := len(s)
+	oid := make([]int, size)
+	for i := 0; i < size; i++ {
+		oid[i] = int(s[i])
+	}
+	return oid
 }

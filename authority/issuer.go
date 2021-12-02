@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/pem"
 	"io"
@@ -379,12 +380,15 @@ func (ca *Issuer) Sign(req csr.SignRequest) (*x509.Certificate, []byte, error) {
 
 	for _, ext := range req.Extensions {
 		if !profile.IsAllowedExtention(ext.ID) {
-			return nil, nil, errors.New("extension not allowed: " + ext.ID.String())
+			return nil, nil, errors.Errorf("extension not allowed: %s", ext.ID.String())
 		}
 
 		rawValue, err := hex.DecodeString(ext.Value)
 		if err != nil {
-			return nil, nil, errors.WithMessagef(err, "failed to decode extension")
+			rawValue, err = base64.StdEncoding.DecodeString(ext.Value)
+			if err != nil {
+				return nil, nil, errors.WithMessagef(err, "failed to decode extension: %s", ext.Value)
+			}
 		}
 
 		safeTemplate.ExtraExtensions = append(safeTemplate.ExtraExtensions, pkix.Extension{

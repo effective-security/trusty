@@ -234,7 +234,7 @@ message IssuerSerial {
 // "value" field must be hex encoded.
 message X509Extension {
 	// Id is the extension OID
-	repeated int32 id = 1;
+	repeated int64 id = 1;
 	// Critical flag
 	bool critical = 2;
 	// Value is base64 encoded extension value
