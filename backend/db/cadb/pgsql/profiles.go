@@ -11,12 +11,8 @@ import (
 
 // RegisterCertProfile registers CertProfile config
 func (p *Provider) RegisterCertProfile(ctx context.Context, m *model.CertProfile) (*model.CertProfile, error) {
-	id, err := p.NextID()
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	err = db.Validate(m)
+	id := p.NextID()
+	err := db.Validate(m)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

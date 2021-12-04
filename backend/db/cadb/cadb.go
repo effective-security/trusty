@@ -11,6 +11,7 @@ import (
 	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/martinisecurity/trusty/backend/db/cadb/pgsql"
+	"github.com/martinisecurity/trusty/pkg/flake"
 	"github.com/pkg/errors"
 
 	// register Postgres driver
@@ -58,7 +59,7 @@ type CaReadonlyDb interface {
 
 // CaDb defines an interface for CRUD operations on Certs
 type CaDb interface {
-	db.IDGenerator
+	flake.IDGenerator
 	CaReadonlyDb
 	// RegisterRootCertificate registers Root Cert
 	RegisterRootCertificate(ctx context.Context, crt *model.RootCertificate) (*model.RootCertificate, error)
@@ -106,7 +107,7 @@ type CaDb interface {
 
 // Provider provides complete DB access
 type Provider interface {
-	db.IDGenerator
+	flake.IDGenerator
 	CaDb
 
 	// DB returns underlying DB connection
@@ -117,7 +118,7 @@ type Provider interface {
 }
 
 // New creates a Provider instance
-func New(driverName, dataSourceName, migrationsDir string, forceVersion int, nextID func() (uint64, error)) (Provider, error) {
+func New(driverName, dataSourceName, migrationsDir string, forceVersion int, idGen flake.IDGenerator) (Provider, error) {
 	ds, err := fileutil.LoadConfigWithSchema(dataSourceName)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -139,5 +140,5 @@ func New(driverName, dataSourceName, migrationsDir string, forceVersion int, nex
 		return nil, errors.WithMessagef(err, "unable to migrate cadb")
 	}
 
-	return pgsql.New(d, nextID)
+	return pgsql.New(d, idGen)
 }

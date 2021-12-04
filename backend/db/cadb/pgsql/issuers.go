@@ -11,12 +11,8 @@ import (
 
 // RegisterIssuer registers Issuer config
 func (p *Provider) RegisterIssuer(ctx context.Context, m *model.Issuer) (*model.Issuer, error) {
-	id, err := p.NextID()
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	err = db.Validate(m)
+	id := p.NextID()
+	err := db.Validate(m)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

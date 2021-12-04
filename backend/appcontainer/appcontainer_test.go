@@ -4,13 +4,11 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"sync"
 	"testing"
 
 	"github.com/go-phorce/dolly/algorithms/guid"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/tasks"
-	"github.com/go-phorce/dolly/xlog"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/backend/config"
@@ -18,8 +16,6 @@ import (
 	"github.com/martinisecurity/trusty/client"
 	"github.com/martinisecurity/trusty/pkg/certpublisher"
 	"github.com/martinisecurity/trusty/pkg/jwt"
-	"github.com/pkg/errors"
-	"github.com/sony/sonyflake"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -117,51 +113,4 @@ func TestAppContainer(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-}
-
-func TestIdGenerator(t *testing.T) {
-	used := map[uint64]bool{}
-	var lock sync.RWMutex
-
-	useCode := func(code uint64) error {
-		lock.Lock()
-		defer lock.Unlock()
-
-		if used[code] {
-			return errors.Errorf("duplicate: %d", code)
-		}
-		used[code] = true
-		return nil
-	}
-
-	var wg sync.WaitGroup
-
-	for i := 0; i < 50; i++ {
-		go func() {
-			defer wg.Done()
-			wg.Add(1)
-
-			for c := 0; c < 2000; c++ {
-				id, err := IDGenerator.NextID()
-				assert.NoError(t, err)
-				if err != nil {
-					return
-				}
-				err = useCode(id)
-				assert.NoError(t, err)
-				if err != nil {
-					return
-				}
-			}
-		}()
-	}
-	wg.Wait()
-}
-
-func TestIdGenDecompose(t *testing.T) {
-	m := sonyflake.Decompose(91553362838814981)
-	logger.KV(xlog.INFO,
-		"id", "89001757933306169",
-		"Decompose", m)
-	assert.NotEmpty(t, m["machine-id"])
 }

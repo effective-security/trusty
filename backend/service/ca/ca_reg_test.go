@@ -21,8 +21,7 @@ func TestRegisterIssuer(t *testing.T) {
 	svc := trustyServer.Service(config.CAServerName).(*ca.Service)
 	ctx := context.Background()
 
-	iid, err := svc.CaDb().NextID()
-	require.NoError(t, err)
+	iid := svc.CaDb().NextID()
 
 	profileLabel := "DELEGATED_TELCO2"
 

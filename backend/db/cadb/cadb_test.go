@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	db "github.com/martinisecurity/trusty/backend/db/cadb"
+	"github.com/martinisecurity/trusty/pkg/flake"
 	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -36,7 +37,7 @@ func TestMain(m *testing.M) {
 		cfg.CaSQL.DataSource,
 		cfg.CaSQL.MigrationsDir,
 		0,
-		testutils.IDGenerator().NextID,
+		flake.DefaultIDGenerator,
 	)
 	if err != nil {
 		panic(err.Error())

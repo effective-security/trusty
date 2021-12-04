@@ -14,12 +14,8 @@ import (
 
 // RegisterCertificate registers Cert
 func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certificate) (*model.Certificate, error) {
-	id, err := p.NextID()
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	err = db.Validate(crt)
+	id := p.NextID()
+	err := db.Validate(crt)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

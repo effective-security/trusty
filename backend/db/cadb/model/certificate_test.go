@@ -73,6 +73,7 @@ func TestCertificate(t *testing.T) {
 	assert.Equal(t, m.Pem, dto.Pem)
 	assert.Equal(t, m.IssuersPem, dto.IssuersPem)
 	assert.Equal(t, m.Locations, dto.Locations)
+	assert.Equal(t, m.Label, dto.Label)
 	assert.Equal(t, m.Metadata, dto.Metadata)
 
 	fn := m.FileName()
