@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/go-phorce/dolly/xlog"
+	"github.com/martinisecurity/trusty/pkg/flake"
 )
 
 var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/internal/cadb", "pgsql")
@@ -12,20 +13,17 @@ const (
 	defaultLimitOfRows = 1000
 )
 
-// NexIDFunc is callback to generate unique ID
-type NexIDFunc func() (uint64, error)
-
 // Provider represents SQL client instance
 type Provider struct {
-	db     *sql.DB
-	nextID NexIDFunc
+	db    *sql.DB
+	idGen flake.IDGenerator
 }
 
 // New creates a Provider instance
-func New(db *sql.DB, nextID NexIDFunc) (*Provider, error) {
+func New(db *sql.DB, idGen flake.IDGenerator) (*Provider, error) {
 	return &Provider{
-		db:     db,
-		nextID: nextID,
+		db:    db,
+		idGen: idGen,
 	}, nil
 }
 
@@ -49,6 +47,6 @@ func (p *Provider) DB() *sql.DB {
 }
 
 // NextID returns unique ID
-func (p *Provider) NextID() (uint64, error) {
-	return p.nextID()
+func (p *Provider) NextID() uint64 {
+	return p.idGen.NextID()
 }

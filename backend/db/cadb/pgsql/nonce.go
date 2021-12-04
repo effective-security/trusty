@@ -11,12 +11,8 @@ import (
 
 // CreateNonce returns Nonce
 func (p *Provider) CreateNonce(ctx context.Context, nonce *model.Nonce) (*model.Nonce, error) {
-	id, err := p.NextID()
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	err = db.Validate(nonce)
+	id := p.NextID()
+	err := db.Validate(nonce)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

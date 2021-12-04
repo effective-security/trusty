@@ -11,8 +11,7 @@ import (
 )
 
 func TestNonces(t *testing.T) {
-	id, err := provider.NextID()
-	require.NoError(t, err)
+	id := provider.NextID()
 
 	token := fmt.Sprintf("t-%d", id)
 

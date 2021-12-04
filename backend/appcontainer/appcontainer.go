@@ -3,9 +3,7 @@ package appcontainer
 import (
 	"context"
 	"io"
-	"net"
 	"os"
-	"time"
 
 	"github.com/go-phorce/dolly/audit"
 	fauditor "github.com/go-phorce/dolly/audit/log"
@@ -21,10 +19,10 @@ import (
 	"github.com/martinisecurity/trusty/pkg/awskmscrypto"
 	"github.com/martinisecurity/trusty/pkg/certpublisher"
 	"github.com/martinisecurity/trusty/pkg/discovery"
+	"github.com/martinisecurity/trusty/pkg/flake"
 	"github.com/martinisecurity/trusty/pkg/gcpkmscrypto"
 	"github.com/martinisecurity/trusty/pkg/jwt"
 	"github.com/pkg/errors"
-	"github.com/sony/sonyflake"
 	"go.uber.org/dig"
 	"google.golang.org/grpc/codes"
 	"gopkg.in/yaml.v2"
@@ -372,15 +370,12 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto, db c
 }
 
 func provideCaDB(cfg *config.Configuration) (cadb.CaDb, cadb.CaReadonlyDb, error) {
-	if IDGenerator == nil {
-		panic("IDGenerator is nil")
-	}
 	d, err := cadb.New(
 		cfg.CaSQL.Driver,
 		cfg.CaSQL.DataSource,
 		cfg.CaSQL.MigrationsDir,
 		cfg.CaSQL.ForceVersion,
-		IDGenerator.NextID)
+		flake.DefaultIDGenerator)
 	if err != nil {
 		return nil, nil, errors.WithStack(err)
 	}
@@ -401,33 +396,3 @@ func providePublisher(cfg *config.Configuration) (certpublisher.Publisher, error
 	}
 	return pub, err
 }
-
-// TODO: init once via GetIDGenerator
-
-// IDGenerator for the app
-var IDGenerator = sonyflake.NewSonyflake(sonyflake.Settings{
-	StartTime: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
-	// NOTE: we don't return error here,
-	// as Mac and test containers may not have InterfaceAddrs
-	MachineID: func() (uint16, error) {
-		as, err := net.InterfaceAddrs()
-		if err != nil {
-			logger.Errorf("reason=InterfaceAddrs, err=[%+v]", err)
-			return 0, nil
-		}
-
-		for _, a := range as {
-			ipnet, ok := a.(*net.IPNet)
-			if !ok || ipnet.IP.IsLoopback() {
-				continue
-			}
-			ip := ipnet.IP.To16()
-			last := len(ip)
-			id := uint16(ip[last-2])<<8 + uint16(ip[last-1])
-			logger.Noticef("machine_id=%d, ip=%v, ip_len=%d", id, ip.String(), last)
-			return id, nil
-		}
-		logger.Errorf("reason=no_private_ip")
-		return 0, nil
-	},
-})

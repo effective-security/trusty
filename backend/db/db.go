@@ -28,12 +28,6 @@ const (
 	MaxLenForShortURL = 256
 )
 
-// IDGenerator defines an interface to generate unique ID accross the cluster
-type IDGenerator interface {
-	// NextID generates a next unique ID.
-	NextID() (uint64, error)
-}
-
 // Validator provides schema validation interface
 type Validator interface {
 	// Validate returns error if the model is not valid

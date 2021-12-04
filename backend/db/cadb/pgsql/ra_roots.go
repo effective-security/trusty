@@ -10,12 +10,8 @@ import (
 
 // RegisterRootCertificate registers Root Cert
 func (p *Provider) RegisterRootCertificate(ctx context.Context, crt *model.RootCertificate) (*model.RootCertificate, error) {
-	id, err := p.NextID()
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	err = db.Validate(crt)
+	id := p.NextID()
+	err := db.Validate(crt)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

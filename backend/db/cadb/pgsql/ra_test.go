@@ -48,8 +48,7 @@ func TestRegisterRootCertificate(t *testing.T) {
 }
 
 func TestRegisterCertificate(t *testing.T) {
-	orgID, err := provider.NextID()
-	require.NoError(t, err)
+	orgID := provider.NextID()
 
 	rc := &model.Certificate{
 		OrgID:            orgID,
@@ -173,9 +172,7 @@ func TestRegisterCertificate(t *testing.T) {
 }
 
 func TestRegisterCertificateUniqueIdx(t *testing.T) {
-	orgID, err := provider.NextID()
-	require.NoError(t, err)
-
+	orgID := provider.NextID()
 	rc := &model.Certificate{
 		OrgID:            orgID,
 		SKID:             guid.MustCreate(),
@@ -235,8 +232,7 @@ func TestRegisterCertificateUniqueIdx(t *testing.T) {
 }
 
 func TestRegisterRevokedCertificate(t *testing.T) {
-	orgID, err := provider.NextID()
-	require.NoError(t, err)
+	orgID := provider.NextID()
 
 	mrc := &model.RevokedCertificate{
 		Certificate: model.Certificate{

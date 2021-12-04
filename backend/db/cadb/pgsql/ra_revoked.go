@@ -19,10 +19,7 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 	var err error
 
 	if id == 0 {
-		id, err = p.NextID()
-		if err != nil {
-			return nil, errors.WithStack(err)
-		}
+		id = p.NextID()
 	}
 
 	err = db.Validate(revoked)

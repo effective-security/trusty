@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/martinisecurity/trusty/backend/db/cadb"
+	"github.com/martinisecurity/trusty/pkg/flake"
 	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -24,7 +25,7 @@ func TestFactory(t *testing.T) {
 		cfg.CaSQL.DataSource,
 		cfg.CaSQL.MigrationsDir,
 		0,
-		testutils.IDGenerator().NextID,
+		flake.DefaultIDGenerator,
 	)
 	require.NoError(t, err)
 	defer cadbp.Close()
