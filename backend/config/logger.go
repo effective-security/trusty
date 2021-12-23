@@ -11,6 +11,9 @@ type Logger struct {
 
 	// MaxSizeMb contols how large a single log file can be before its rotated
 	MaxSizeMb int `json:"max_size_mb,omitempty" yaml:"max_size_mb,omitempty"`
+
+	// LogsName for Cloud logs
+	LogsName string `json:"log_name,omitempty" yaml:"log_name,omitempty"`
 }
 
 // RepoLogLevel contains information about the log level per repo. Use * to set up global level.

@@ -87,6 +87,9 @@ delegated_issuers:
 tasks:
   - name: certsmonitor
     schedule: "every 10 minutes"
+    args:
+    - issuer:/tmp/trusty/certs/shaken_ca.pem
+    - issuer:/tmp/trusty/certs/shaken_delegated_l1_ca.pem
   - name: stats
     schedule: "every 13 minutes"
 
