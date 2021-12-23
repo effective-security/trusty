@@ -28,6 +28,7 @@ import (
 	"github.com/martinisecurity/trusty/internal/version"
 	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/pkg/gserver"
+	"github.com/martinisecurity/trusty/pkg/stackdriver"
 	"github.com/pkg/errors"
 	"go.uber.org/dig"
 	kp "gopkg.in/alecthomas/kingpin.v2"
@@ -58,6 +59,7 @@ type appFlags struct {
 	cfgOverrideFile     *string
 	cpu                 *string
 	isStderr            *bool
+	isStackdriver       *bool
 	dryRun              *bool
 	hsmCfg              *string
 	caCfg               *string
@@ -341,6 +343,7 @@ func (a *App) loadConfig() error {
 	flags.cfgOverrideFile = app.Flag("cfg-override", "configuration override file").String()
 	flags.cpu = app.Flag("cpu", "enable CPU profiling, specify a file to store CPU profiling info").String()
 	flags.isStderr = app.Flag("std", "output logs to stderr").Bool()
+	flags.isStackdriver = app.Flag("stackdriver", "format logs for stackdriver").Bool()
 	flags.dryRun = app.Flag("dry-run", "verify config etc, and do not start the service").Bool()
 	flags.hsmCfg = app.Flag("hsm-cfg", "location of the HSM configuration file").String()
 	flags.caCfg = app.Flag("ca-cfg", "location of the CA configuration file").String()
@@ -453,7 +456,7 @@ func (a *App) initLogs() error {
 		os.MkdirAll(cfg.Logs.Directory, 0644)
 
 		var sink io.Writer
-		if a.flags != nil && *a.flags.isStderr {
+		if a.flags != nil && a.flags.isStderr != nil && *a.flags.isStderr {
 			sink = os.Stderr
 			xlog.SetFormatter(xlog.NewColorFormatter(sink, true))
 		} else {
@@ -467,6 +470,9 @@ func (a *App) initLogs() error {
 			return errors.WithMessage(err, "failed to initialize log rotate")
 		}
 		a.OnClose(logRotate)
+	} else if a.flags != nil && a.flags.isStackdriver != nil && *a.flags.isStackdriver {
+		formatter := stackdriver.NewFormatter(os.Stderr, cfg.Logs.LogsName)
+		xlog.SetFormatter(formatter)
 	} else {
 		formatter := xlog.NewColorFormatter(os.Stderr, true)
 		xlog.SetFormatter(formatter)
