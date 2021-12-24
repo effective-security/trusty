@@ -15,6 +15,7 @@ import (
 	"github.com/martinisecurity/trusty/kubeca/controller"
 	"github.com/martinisecurity/trusty/pkg/awskmscrypto"
 	"github.com/martinisecurity/trusty/pkg/gcpkmscrypto"
+	"github.com/martinisecurity/trusty/pkg/stackdriver"
 )
 
 func main() {
@@ -28,6 +29,7 @@ func main() {
 
 	f := controller.CertificateSigningRequestControllerFlags{}
 	var debugLogging bool
+	var withStackdriver bool
 	flag.BoolVar(&debugLogging, "debug", false, "Enable debug logging.")
 	flag.StringVar(&f.MetricsAddr, "metrics-addr", ":9090", "The address the metric endpoint binds to.")
 	flag.IntVar(&f.Port, "port", 9443, "The port for the controller.")
@@ -39,8 +41,14 @@ func main() {
 
 	flag.StringVar(&f.CaCfgPath, "ca-cfg", "/trusty/etc/ca-config.yaml", "Location of CA configuration file.")
 	flag.StringVar(&f.HsmCfgPath, "hsm-cfg", "/trusty/etc/aws-kms-us-west-2.json", "Location of HSM configuration file.")
+	flag.BoolVar(&withStackdriver, "stackdriver", false, "Enable stackdriver logs formatting.")
 
 	flag.Parse()
+
+	if withStackdriver {
+		formatter := stackdriver.NewFormatter(os.Stderr, "kubeca").WithCaller(true)
+		xlog.SetFormatter(formatter)
+	}
 
 	ctrl.SetLogger(zap.New(zap.UseDevMode(debugLogging)))
 
