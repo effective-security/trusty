@@ -8,12 +8,14 @@ import (
 
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/martinisecurity/trusty/kubeca/certinit"
+	"github.com/martinisecurity/trusty/pkg/stackdriver"
 )
 
 func main() {
 	xlog.GetFormatter().WithCaller(true)
 
 	var kubeConfig string
+	var withStackdriver bool
 	r := &certinit.Request{}
 	flag.StringVar(&kubeConfig, "kubeconfig", "", "(optional) path to kubeconfig file")
 	flag.StringVar(&r.Namespace, "namespace", "", "namespace as defined by pod.metadata.namespace")
@@ -26,7 +28,13 @@ func main() {
 	flag.StringVar(&r.ServiceNames, "service-names", "", "additional service names that resolve to this Pod; comma separated")
 	flag.BoolVar(&r.IncludeUnqualified, "include-unqualified", false, "include unqualified .svc domains in names from --query-k8s")
 	flag.StringVar(&r.SignerName, "signer", "", "signer name")
+	flag.BoolVar(&withStackdriver, "stackdriver", false, "Enable stackdriver logs formatting.")
 	flag.Parse()
+
+	if withStackdriver {
+		formatter := stackdriver.NewFormatter(os.Stderr, "kubecertinit").WithCaller(true)
+		xlog.SetFormatter(formatter)
+	}
 
 	// Create a Kubernetes client.
 	client, err := certinit.NewClient(kubeConfig, r.Namespace)

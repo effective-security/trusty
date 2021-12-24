@@ -19,6 +19,7 @@ type severity string
 const (
 	severityDebug    severity = "DEBUG"
 	severityInfo     severity = "INFO"
+	severityNotice   severity = "NOTICE"
 	severityWarning  severity = "WARNING"
 	severityError    severity = "ERROR"
 	severityCritical severity = "CRITICAL"
@@ -29,6 +30,7 @@ var levelsToSeverity = map[xlog.LogLevel]severity{
 	xlog.DEBUG:    severityDebug,
 	xlog.TRACE:    severityDebug,
 	xlog.INFO:     severityInfo,
+	xlog.NOTICE:   severityNotice,
 	xlog.WARNING:  severityWarning,
 	xlog.ERROR:    severityError,
 	xlog.CRITICAL: severityCritical,
@@ -65,6 +67,9 @@ func (c *formatter) FormatKV(pkg string, level xlog.LogLevel, depth int, entries
 // Format log entry string to the stream
 func (c *formatter) Format(pkg string, l xlog.LogLevel, depth int, entries ...interface{}) {
 	severity := levelsToSeverity[l]
+	if severity == "" {
+		severity = severityInfo
+	}
 
 	str := fmt.Sprint(entries...)
 	ee := entry{
