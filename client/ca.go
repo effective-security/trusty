@@ -80,7 +80,7 @@ func (c *authorityClient) SignCertificate(ctx context.Context, req *pb.SignCerti
 	return c.remote.SignCertificate(ctx, req, c.callOpts...)
 }
 
-// Issuers returns the issuing CAs
+// ListIssuers returns the issuing CAs
 func (c *authorityClient) ListIssuers(ctx context.Context, req *pb.ListIssuersRequest) (*pb.IssuersInfoResponse, error) {
 	return c.remote.ListIssuers(ctx, req, c.callOpts...)
 }

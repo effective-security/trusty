@@ -68,23 +68,6 @@ func (s *testSuite) TestNewAuthority() {
 	cfg, err = authority.LoadConfig(projFolder + "/etc/dev/ca-config.dev.yaml")
 	s.Require().NoError(err)
 
-	/*
-		//
-		// Test 0 default durations
-		//
-		cfg2 := cfg.Copy()
-		s.Require().Equal(*cfg, *cfg2)
-
-		cfg2.Authority.DefaultAIA = &authority.AIAConfig{
-			CRLExpiry:  0,
-			OCSPExpiry: 0,
-			CRLRenewal: 0,
-		}
-
-		_, err = authority.NewAuthority(cfg2, s.crypto)
-		s.Require().NoError(err)
-	*/
-
 	//
 	// Test invalid Issuer files
 	//
