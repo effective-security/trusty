@@ -23,7 +23,7 @@ VOLUME ["/var/trusty/certs", \
 "/opt/trusty/etc/prod", \
 "/opt/trusty/etc/dev"]
 
-EXPOSE 7880 7892
+EXPOSE 7880 7892 9090
 
 RUN groupadd -g 1000 -o nonroot
 RUN useradd -r -u 1000 -g nonroot nonroot
