@@ -1,8 +1,12 @@
 ---
 metrics:
   disabled: true
+  prometheus:
+    addr:
+
 logs:
   directory: /dev/null
+
 audit:
   directory: /dev/null
 

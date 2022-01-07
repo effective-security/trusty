@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"runtime/pprof"
@@ -30,6 +31,7 @@ import (
 	"github.com/martinisecurity/trusty/pkg/gserver"
 	"github.com/martinisecurity/trusty/pkg/stackdriver"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/dig"
 	kp "gopkg.in/alecthomas/kingpin.v2"
 )
@@ -61,6 +63,7 @@ type appFlags struct {
 	isStderr            *bool
 	isStackdriver       *bool
 	dryRun              *bool
+	promAddr            *string
 	hsmCfg              *string
 	caCfg               *string
 	sqlCa               *string
@@ -232,9 +235,11 @@ func (a *App) Run(startedCh chan<- bool) error {
 		}
 	}
 
-	err = a.setupMetrics()
-	if err != nil {
-		return errors.WithStack(err)
+	if !a.cfg.Metrics.GetDisabled() {
+		err = a.setupMetrics()
+		if err != nil {
+			return errors.WithStack(err)
+		}
 	}
 
 	_, err = a.Container()
@@ -349,6 +354,7 @@ func (a *App) loadConfig() error {
 	flags.caCfg = app.Flag("ca-cfg", "location of the CA configuration file").String()
 	flags.cryptoProvs = app.Flag("crypto-prov", "path to additional Crypto provider configurations").Strings()
 	flags.sqlCa = app.Flag("ca-sql", "SQL data source for CA").String()
+	flags.promAddr = app.Flag("prom-addr", "Address for Prometheus metrics end point").String()
 
 	flags.cisURLs = app.Flag("cis-listen-url", "URL for the CIS listening end-point").Strings()
 	flags.caURLs = app.Flag("ca-listen-url", "URL for the CA listening end-point").Strings()
@@ -400,6 +406,16 @@ func (a *App) loadConfig() error {
 	if *flags.sqlCa != "" {
 		cfg.CaSQL.DataSource = *flags.sqlCa
 	}
+	if *flags.promAddr != "" {
+		if cfg.Metrics.Prometheus == nil {
+			cfg.Metrics.Prometheus = &config.Prometheus{
+				Addr: *flags.promAddr,
+			}
+		} else {
+			cfg.Metrics.Prometheus.Addr = *flags.promAddr
+		}
+	}
+
 	if len(*flags.cryptoProvs) > 0 {
 		cfg.CryptoProv.Providers = *flags.cryptoProvs
 	}
@@ -532,6 +548,13 @@ func (a *App) setupMetrics() error {
 			promSink, err = metrics.NewPrometheusSink()
 			if err != nil {
 				return errors.WithStack(err)
+			}
+
+			if cfg.Metrics.Prometheus != nil && cfg.Metrics.Prometheus.Addr != "" {
+				go func() {
+					logger.Infof("status=starting_metrics, endpoint=%s", cfg.Metrics.Prometheus.Addr)
+					logger.Fatal(http.ListenAndServe(cfg.Metrics.Prometheus.Addr, promhttp.Handler()).Error())
+				}()
 			}
 		}
 		sink = promSink
