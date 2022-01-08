@@ -8,6 +8,9 @@ type Metrics struct {
 	// Provider specifies the metrics provider: prometheus|inmem
 	Provider string `json:"provider,omitempty" yaml:"provider,omitempty"`
 
+	// Prefix specifies the prefix added to all metrics
+	Prefix string `json:"prefix,omitempty" yaml:"prefix,omitempty"`
+
 	// Prometheus provider config
 	Prometheus *Prometheus `json:"prometheus,omitempty" yaml:"prometheus,omitempty"`
 }

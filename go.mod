@@ -7,10 +7,11 @@ require (
 	cloud.google.com/go/storage v1.16.0
 	github.com/aws/aws-sdk-go v1.40.8
 	github.com/cloudflare/cfssl v1.6.0
+	github.com/deckarep/golang-set v1.7.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-logr/logr v0.4.0
 	github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba
-	github.com/go-phorce/dolly v0.8.5-0.20211126192753-f9e3e77988d9
+	github.com/go-phorce/dolly v0.9.0
 	github.com/gogo/googleapis v1.4.1
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang-migrate/migrate/v4 v4.14.1
@@ -32,7 +33,6 @@ require (
 	github.com/prometheus/client_golang v1.11.0
 	github.com/rs/cors v1.8.0
 	github.com/soheilhy/cmux v0.1.4
-	github.com/sony/sonyflake v1.0.0
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/config v1.4.0
 	go.uber.org/dig v1.10.0
@@ -65,7 +65,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/daaku/go.zipexe v1.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/deckarep/golang-set v1.7.1 // indirect
 	github.com/evanphx/json-patch v4.11.0+incompatible // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/go-logr/zapr v0.4.0 // indirect
