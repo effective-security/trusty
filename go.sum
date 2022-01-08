@@ -246,8 +246,8 @@ github.com/go-openapi/swag v0.19.2/go.mod h1:POnQmlKehdgb5mhVOsnJFsivZCEZ/vjK9gh
 github.com/go-openapi/swag v0.19.5/go.mod h1:POnQmlKehdgb5mhVOsnJFsivZCEZ/vjK9gh66Z9tfKk=
 github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba h1:I45RdP92/rYpHoHrHBGRKl1Sp1xw5VFNUQJWHX2Tz/c=
 github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba/go.mod h1:UZQo6+h5O8HW6TPt7HaXd4Nc234FYx5aFvw9RKL2IUk=
-github.com/go-phorce/dolly v0.8.5-0.20211126192753-f9e3e77988d9 h1:O9W0d6yTw2tQJlPgBABttz/kaQq1ob5PsAPDUjWySmQ=
-github.com/go-phorce/dolly v0.8.5-0.20211126192753-f9e3e77988d9/go.mod h1:IAJG3wwnZ5GD4AMjBuNmS32zQTRBGPmqLEwvAUCur+s=
+github.com/go-phorce/dolly v0.9.0 h1:oqPLUMJCuRxjkI1dSrtQ8058uzpM2JFNzj86UNVOEEw=
+github.com/go-phorce/dolly v0.9.0/go.mod h1:IAJG3wwnZ5GD4AMjBuNmS32zQTRBGPmqLEwvAUCur+s=
 github.com/go-playground/locales v0.12.1/go.mod h1:IUMDtCfWo/w/mtMfIE/IG2K+Ey3ygWanZIBtBW0W2TM=
 github.com/go-playground/universal-translator v0.16.0/go.mod h1:1AnU7NaIRDWWzGEKwgtJRd2xk99HeFyHw3yid4rvQIY=
 github.com/go-sql-driver/mysql v1.4.0/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG5ZlKdlhCg5w=
@@ -725,8 +725,6 @@ github.com/snowflakedb/gosnowflake v1.3.5/go.mod h1:13Ky+lxzIm3VqNDZJdyvu9MCGy+W
 github.com/soheilhy/cmux v0.1.4 h1:0HKaf1o97UwFjHH9o5XsHUOF+tqmdA7KEzXLpiyaw0E=
 github.com/soheilhy/cmux v0.1.4/go.mod h1:IM3LyeVVIOuxMH7sFAkER9+bJ4dT7Ms6E4xg4kGIyLM=
 github.com/sony/gobreaker v0.4.1/go.mod h1:ZKptC7FHNvhBz7dN2LGjPVBz2sZJmc0/PkyDJOjmxWY=
-github.com/sony/sonyflake v1.0.0 h1:MpU6Ro7tfXwgn2l5eluf9xQvQJDROTBImNCfRXn/YeM=
-github.com/sony/sonyflake v1.0.0/go.mod h1:Jv3cfhf/UFtolOTTRd3q4Nl6ENqM+KfyZ5PseKfZGF4=
 github.com/spaolacci/murmur3 v0.0.0-20180118202830-f09979ecbc72/go.mod h1:JwIasOWyU6f++ZhiEuf87xNszmSA2myDM2Kzu9HwQUA=
 github.com/spf13/afero v1.1.2/go.mod h1:j4pytiNVoe2o6bmDsKpLACNPDBIoEAkihy7loJ1B0CQ=
 github.com/spf13/afero v1.2.2/go.mod h1:9ZxEEn6pIJ8Rxe320qSDBk6AsU0r9pR7Q4OcevTdifk=

@@ -48,10 +48,11 @@ audit:
 metrics:
   # specifies if the metrics provider is disabled
   disabled: false
+  prefix: trusty
   # the metrics provider: prometheus|inmem
   provider: prometheus
   prometheus:
-    addr: "127.0.0.1:9090"
+    addr: "127.0.0.1:19090"
 
 # configuration for crypto providers
 crypto_provider:
