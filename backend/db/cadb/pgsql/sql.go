@@ -3,8 +3,8 @@ package pgsql
 import (
 	"database/sql"
 
+	"github.com/effective-security/porto/pkg/flake"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/martinisecurity/trusty/pkg/flake"
 )
 
 var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/internal/cadb", "pgsql")

@@ -7,11 +7,11 @@ import (
 	"os"
 	"testing"
 
+	"github.com/effective-security/porto/pkg/discovery"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/retriable"
 	"github.com/go-phorce/dolly/xlog"
 	"github.com/martinisecurity/trusty/backend/service/swagger"
-	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/pkg/gserver"
 	"github.com/martinisecurity/trusty/tests/mockappcontainer"
 	"github.com/martinisecurity/trusty/tests/testutils"

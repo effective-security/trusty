@@ -7,6 +7,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/effective-security/porto/pkg/discovery"
 	"github.com/go-phorce/dolly/xhttp/header"
 	"github.com/go-phorce/dolly/xhttp/identity"
 	"github.com/go-phorce/dolly/xhttp/retriable"
@@ -17,7 +18,6 @@ import (
 	"github.com/martinisecurity/trusty/client"
 	"github.com/martinisecurity/trusty/client/embed"
 	"github.com/martinisecurity/trusty/internal/version"
-	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/pkg/gserver"
 	"github.com/martinisecurity/trusty/tests/mockappcontainer"
 	"github.com/martinisecurity/trusty/tests/testutils"

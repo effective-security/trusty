@@ -11,11 +11,11 @@ import (
 	// +kubebuilder:scaffold:imports
 
 	"github.com/go-phorce/dolly/xlog"
+	"github.com/go-phorce/dolly/xlog/stackdriver"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/martinisecurity/trusty/kubeca/controller"
 	"github.com/martinisecurity/trusty/pkg/awskmscrypto"
 	"github.com/martinisecurity/trusty/pkg/gcpkmscrypto"
-	"github.com/martinisecurity/trusty/pkg/stackdriver"
 )
 
 func main() {

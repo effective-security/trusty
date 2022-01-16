@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/go-phorce/dolly/xlog"
+	"github.com/go-phorce/dolly/xlog/stackdriver"
 	"github.com/martinisecurity/trusty/kubeca/certinit"
-	"github.com/martinisecurity/trusty/pkg/stackdriver"
 )
 
 func main() {

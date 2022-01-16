@@ -5,6 +5,8 @@ import (
 	"io"
 	"os"
 
+	"github.com/effective-security/porto/pkg/discovery"
+	"github.com/effective-security/porto/pkg/flake"
 	"github.com/go-phorce/dolly/audit"
 	fauditor "github.com/go-phorce/dolly/audit/log"
 	"github.com/go-phorce/dolly/tasks"
@@ -18,8 +20,6 @@ import (
 	"github.com/martinisecurity/trusty/client"
 	"github.com/martinisecurity/trusty/pkg/awskmscrypto"
 	"github.com/martinisecurity/trusty/pkg/certpublisher"
-	"github.com/martinisecurity/trusty/pkg/discovery"
-	"github.com/martinisecurity/trusty/pkg/flake"
 	"github.com/martinisecurity/trusty/pkg/gcpkmscrypto"
 	"github.com/martinisecurity/trusty/pkg/jwt"
 	"github.com/pkg/errors"
