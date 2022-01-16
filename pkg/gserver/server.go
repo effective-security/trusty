@@ -8,12 +8,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/effective-security/porto/pkg/discovery"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/netutil"
 	"github.com/go-phorce/dolly/rest"
 	"github.com/go-phorce/dolly/xhttp/authz"
 	"github.com/go-phorce/dolly/xlog"
-	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/pkg/jwt"
 	"github.com/martinisecurity/trusty/pkg/roles"
 	"github.com/pkg/errors"

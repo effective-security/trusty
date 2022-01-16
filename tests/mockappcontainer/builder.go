@@ -1,10 +1,10 @@
 package mockappcontainer
 
 import (
+	"github.com/effective-security/porto/pkg/discovery"
 	"github.com/go-phorce/dolly/audit"
 	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/martinisecurity/trusty/backend/config"
-	"github.com/martinisecurity/trusty/pkg/discovery"
 	"github.com/martinisecurity/trusty/pkg/jwt"
 	"go.uber.org/dig"
 )

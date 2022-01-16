@@ -9,9 +9,10 @@ require (
 	github.com/cloudflare/cfssl v1.6.0
 	github.com/deckarep/golang-set v1.7.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/effective-security/porto v0.0.0-20220116173907-b5d86c8c57a7
 	github.com/go-logr/logr v0.4.0
 	github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba
-	github.com/go-phorce/dolly v0.9.0
+	github.com/go-phorce/dolly v0.9.1-0.20220116181830-596228500e2d
 	github.com/gogo/googleapis v1.4.1
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang-migrate/migrate/v4 v4.14.1
@@ -25,7 +26,7 @@ require (
 	github.com/lib/pq v1.8.0
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/goreman v0.3.7
-	github.com/mattn/goveralls v0.0.9
+	github.com/mattn/goveralls v0.0.11
 	github.com/miekg/dns v1.1.43
 	github.com/oleiade/reflections v1.0.1
 	github.com/olekukonko/tablewriter v0.0.4
@@ -38,10 +39,10 @@ require (
 	go.uber.org/dig v1.10.0
 	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
-	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d
-	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
+	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f
+	golang.org/x/sys v0.0.0-20211019181941-9d821ace8654 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/tools v0.1.5
+	golang.org/x/tools v0.1.8
 	google.golang.org/api v0.53.0
 	google.golang.org/genproto v0.0.0-20210811021853-ddbe55d93216
 	google.golang.org/grpc v1.40.0
@@ -87,7 +88,6 @@ require (
 	github.com/jstemmer/go-junit-report v0.9.1 // indirect
 	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/kisielk/sqlstruct v0.0.0-20150923205031-648daed35d49 // indirect
-	github.com/kr/pretty v0.2.1 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mattn/go-runewidth v0.0.7 // indirect
 	github.com/mattn/go-sqlite3 v1.14.0 // indirect
@@ -99,18 +99,19 @@ require (
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.26.0 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect
+	github.com/rogpeppe/go-internal v1.6.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/ugorji/go/codec v1.2.6 // indirect
 	github.com/weppos/publicsuffix-go v0.13.0 // indirect
-	github.com/yuin/goldmark v1.4.0 // indirect
+	github.com/yuin/goldmark v1.4.1 // indirect
 	github.com/zmap/zcrypto v0.0.0-20201128221613-3719af1573cf // indirect
 	github.com/zmap/zlint/v3 v3.0.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.17.0 // indirect
-	golang.org/x/mod v0.4.2 // indirect
+	golang.org/x/mod v0.5.1 // indirect
 	golang.org/x/oauth2 v0.0.0-20210810183815-faf39c7919d5 // indirect
 	golang.org/x/term v0.0.0-20210220032956-6a3ed077a48d // indirect
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba // indirect
