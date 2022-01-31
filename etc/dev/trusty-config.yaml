@@ -119,8 +119,6 @@ servers:
       - status
       - cis
       - swagger
-    enable_grpc_gateway: false
-    heartbeat_secs: 30
     timeout:
       request: 3s
     swagger:
@@ -200,8 +198,6 @@ servers:
       - ca
       - cis
       - swagger
-    enable_grpc_gateway: false
-    heartbeat_secs: 30
     logger_skip_paths:
       - path: "/v1/status/node"
         agent: "Google"
