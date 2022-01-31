@@ -147,9 +147,9 @@ func Test_AppInstance_StartFailOnPort(t *testing.T) {
 	startedCh := make(chan bool)
 
 	var expError error
+	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		wg.Add(1)
 
 		expError = app.Run(startedCh)
 		if expError != nil {
@@ -202,9 +202,9 @@ func Test_AppInstance_CryptoProvError(t *testing.T) {
 	startedCh := make(chan bool)
 
 	var expError error
+	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		wg.Add(1)
 
 		expError = app.Run(startedCh)
 		if expError != nil {
@@ -253,9 +253,9 @@ func Test_AppInstance_StartStop(t *testing.T) {
 	startedCh := make(chan bool)
 
 	var expError error
+	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		wg.Add(1)
 
 		expError = app.Run(startedCh)
 		if expError != nil {

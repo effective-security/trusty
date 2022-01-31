@@ -3,7 +3,6 @@ package gserver
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
 	"net"
 	"net/http"
 	"strings"
@@ -269,7 +268,7 @@ func configureHandlers(s *Server, handler http.Handler) http.Handler {
 	if s.authz != nil {
 		handler, err = s.authz.NewHandler(handler)
 		if err != nil {
-			panic(fmt.Sprintf("%+v", err))
+			logger.Panicf("failed to create authz handler: %+v", err)
 		}
 	}
 

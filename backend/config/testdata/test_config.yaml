@@ -73,7 +73,6 @@ servers:
       - http://0.0.0.0:7880
     services:
       - status
-    heartbeat_secs: 30
     timeout:
       request: 3s
     keep_alive:
@@ -149,7 +148,6 @@ servers:
       - ca
       - cis
       - workflow
-    heartbeat_secs: 30
     timeout:
       request: 3s
     keep_alive:

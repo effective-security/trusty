@@ -71,9 +71,9 @@ func TestMain(m *testing.M) {
 	var rc int
 	var expError error
 
+	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		wg.Add(1)
 
 		expError = app.Run(startedCh)
 		if expError != nil {

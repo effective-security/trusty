@@ -34,17 +34,8 @@ type HTTPServerCfg struct {
 	// this can be used for /v1/status/node or /metrics
 	SkipLogPaths []xhttp.LoggerSkipPath `json:"logger_skip_paths,omitempty" yaml:"logger_skip_paths,omitempty"`
 
-	// AllowProfiling if set, will allow for per request CPU/Memory profiling triggered by the URI QueryString
-	AllowProfiling *bool `json:"allow_profiling,omitempty" yaml:"allow_profiling,omitempty"`
-
-	// ProfilerDir specifies the directories where per-request profile information is written, if not set will write to a TMP dir
-	ProfilerDir string `json:"profile_dir,omitempty" yaml:"profile_dir,omitempty"`
-
 	// Services is a list of services to enable for this HTTP Service
 	Services []string `json:"services" yaml:"services"`
-
-	// HeartbeatSecs specifies heartbeat interval in seconds [5 secs is a minimum]
-	HeartbeatSecs int `json:"heartbeat_secs" yaml:"heartbeat_secs"`
 
 	// IdentityMap contains configuration for the roles
 	IdentityMap roles.IdentityMap `json:"identity_map" yaml:"identity_map"`
@@ -66,9 +57,6 @@ type HTTPServerCfg struct {
 
 	// Swagger specifies the configuration for Swagger
 	Swagger SwaggerCfg `json:"swagger" yaml:"swagger"`
-
-	// EnableGRPCGateway allows gRPC GW
-	EnableGRPCGateway bool `json:"enable_grpc_gateway" yaml:"enable_grpc_gateway"`
 }
 
 // KeepAliveCfg settings

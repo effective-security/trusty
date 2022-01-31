@@ -39,14 +39,14 @@ func TestNewTLSListener(t *testing.T) {
 
 	var wg sync.WaitGroup
 
+	wg.Add(1)
 	go func() {
-		wg.Add(1)
 		defer wg.Done()
 		srv.Serve(tlsln)
 	}()
 
+	wg.Add(1)
 	go func() {
-		wg.Add(1)
 		defer wg.Done()
 
 		t.Logf("sending to %v", tlsln.Addr().String())
