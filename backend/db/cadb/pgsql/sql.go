@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/effective-security/porto/pkg/flake"
-	"github.com/go-phorce/dolly/xlog"
+	"github.com/effective-security/xlog"
 )
 
 var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/internal/cadb", "pgsql")

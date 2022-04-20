@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-phorce/dolly/metrics"
-	"github.com/go-phorce/dolly/xlog"
+	"github.com/effective-security/metrics"
+	"github.com/effective-security/xlog"
 	"github.com/miekg/dns"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"

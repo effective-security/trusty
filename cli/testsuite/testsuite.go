@@ -12,9 +12,10 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/effective-security/xpki/crypto11"
+	"github.com/effective-security/xpki/cryptoprov"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/go-phorce/dolly/testify/servefiles"
-	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/cli"
 	"github.com/martinisecurity/trusty/tests/mockpb"
@@ -60,7 +61,7 @@ func (s *Suite) WithFileServer() *Suite {
 
 // WithHSM specifies to use HSM provider
 func (s *Suite) WithHSM() *Suite {
-	cryptoprov.Register("SoftHSM", cryptoprov.Crypto11Loader)
+	cryptoprov.Register("SoftHSM", crypto11.LoadProvider)
 	s.withHSM = true
 	return s
 }

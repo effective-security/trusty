@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/go-phorce/dolly/xlog"
+	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
 )
 

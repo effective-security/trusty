@@ -1,11 +1,11 @@
 package status
 
 import (
-	"github.com/go-phorce/dolly/rest"
-	"github.com/go-phorce/dolly/xlog"
+	"github.com/effective-security/porto/gserver"
+	"github.com/effective-security/porto/restserver"
+	"github.com/effective-security/xlog"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/pkg/gserver"
 	"google.golang.org/grpc"
 )
 
@@ -50,7 +50,7 @@ func (s *Service) Close() {
 }
 
 // RegisterRoute adds the Status API endpoints to the overall URL router
-func (s *Service) RegisterRoute(r rest.Router) {
+func (s *Service) RegisterRoute(r restserver.Router) {
 	r.GET(v1.PathForStatusVersion, s.version())
 	r.GET(v1.PathForStatusServer, s.serverStatus())
 	r.GET(v1.PathForStatusCaller, s.callerStatus())

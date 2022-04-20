@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/go-phorce/dolly/algorithms/guid"
-	"github.com/go-phorce/dolly/fileutil"
-	"github.com/go-phorce/dolly/xpki/certutil"
+	"github.com/effective-security/porto/x/fileutil"
+	"github.com/effective-security/porto/x/guid"
+	"github.com/effective-security/xpki/certutil"
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/martinisecurity/trusty/pkg/certpublisher"

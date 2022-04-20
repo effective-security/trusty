@@ -1,8 +1,8 @@
 package config
 
 import (
-	"github.com/martinisecurity/trusty/authority"
-	"github.com/martinisecurity/trusty/pkg/gserver"
+	"github.com/effective-security/porto/gserver"
+	"github.com/effective-security/xpki/authority"
 )
 
 const (
@@ -60,7 +60,7 @@ type Configuration struct {
 	RegistrationAuthority *RegistrationAuthority `json:"ra" yaml:"ra"`
 
 	// HTTPServers specifies a list of servers that expose HTTP or gRPC services
-	HTTPServers map[string]*gserver.HTTPServerCfg `json:"servers" yaml:"servers"`
+	HTTPServers map[string]*gserver.Config `json:"servers" yaml:"servers"`
 
 	// TODO: refactor
 	// TrustyClient specifies configurations for the client to connect to the cluster

@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/dolly/xpki/certutil"
-	"github.com/go-phorce/dolly/xpki/cryptoprov"
+	"github.com/effective-security/xlog"
+	"github.com/effective-security/xpki/authority"
+	"github.com/effective-security/xpki/certutil"
+	"github.com/effective-security/xpki/cryptoprov"
+	"github.com/effective-security/xpki/csr"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
-	"github.com/martinisecurity/trusty/pkg/csr"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"gopkg.in/yaml.v2"
@@ -123,7 +123,7 @@ func (s *Service) RegisterDelegatedIssuer(ctx context.Context, req *pb.SignCerti
 		Profiles:        make(map[string]*authority.CertProfile),
 	}
 
-	signer, err := authority.NewSignerFromPEM(s.ca.Crypto(), keyBytes)
+	signer, err := s.ca.Crypto().NewSignerFromPEM(keyBytes)
 	if err != nil {
 		return nil, v1.NewError(codes.InvalidArgument, "unable to create signer from private key: %s", err.Error())
 	}

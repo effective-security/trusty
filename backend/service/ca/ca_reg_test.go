@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/go-phorce/dolly/xpki/certutil"
+	"github.com/effective-security/xpki/certutil"
+	"github.com/effective-security/xpki/cryptoprov/inmemcrypto"
+	"github.com/effective-security/xpki/csr"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/backend/service/ca"
-	"github.com/martinisecurity/trusty/pkg/csr"
-	"github.com/martinisecurity/trusty/pkg/inmemcrypto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

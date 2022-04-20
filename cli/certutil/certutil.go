@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/effective-security/xpki/certutil"
 	"github.com/go-phorce/dolly/ctl"
-	"github.com/go-phorce/dolly/xpki/certutil"
 	"github.com/martinisecurity/trusty/cli"
 	"github.com/martinisecurity/trusty/pkg/print"
 	"github.com/pkg/errors"

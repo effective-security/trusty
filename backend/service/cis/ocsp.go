@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/go-phorce/dolly/rest"
-	"github.com/go-phorce/dolly/xhttp/header"
-	"github.com/go-phorce/dolly/xhttp/httperror"
-	"github.com/go-phorce/dolly/xhttp/marshal"
-	"github.com/go-phorce/dolly/xlog"
+	"github.com/effective-security/porto/restserver"
+	"github.com/effective-security/porto/xhttp/header"
+	"github.com/effective-security/porto/xhttp/httperror"
+	"github.com/effective-security/porto/xhttp/marshal"
+	"github.com/effective-security/xlog"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"golang.org/x/crypto/ocsp"
@@ -45,12 +45,12 @@ type OCSPResponder interface {
 }
 
 // GetOcspHandler returns OCSP via GET
-func (s *Service) GetOcspHandler() rest.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
+func (s *Service) GetOcspHandler() restserver.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p restserver.Params) {
 		query := p.ByName("body")
 		base64Request, err := url.QueryUnescape(query)
 		if err != nil {
-			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("unable to parse query"))
+			marshal.WriteJSON(w, r, httperror.InvalidRequest("unable to parse query"))
 			return
 		}
 
@@ -73,7 +73,7 @@ func (s *Service) GetOcspHandler() rest.Handle {
 		}
 		requestBody, err := base64.StdEncoding.DecodeString(string(base64RequestBytes))
 		if err != nil {
-			marshal.WriteJSON(w, r, httperror.WithInvalidRequest("unable to parse request"))
+			marshal.WriteJSON(w, r, httperror.InvalidRequest("unable to parse request"))
 			return
 		}
 		s.ocspResponse(w, r, requestBody)
@@ -81,11 +81,11 @@ func (s *Service) GetOcspHandler() rest.Handle {
 }
 
 // OcspHandler returns OCSP
-func (s *Service) OcspHandler() rest.Handle {
-	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
+func (s *Service) OcspHandler() restserver.Handle {
+	return func(w http.ResponseWriter, r *http.Request, _ restserver.Params) {
 		requestBody, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to read request"))
+			marshal.WriteJSON(w, r, httperror.Unexpected("unable to read request"))
 			return
 		}
 

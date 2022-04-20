@@ -3,7 +3,7 @@ package cis
 import (
 	"context"
 
-	"github.com/go-phorce/dolly/xlog"
+	"github.com/effective-security/xlog"
 	"github.com/golang/protobuf/ptypes/empty"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"

@@ -1,7 +1,0 @@
-{
-    "profiles": {
-        "no_usage_profile": {
-            "expiry": "123h"
-        }
-    }
-}

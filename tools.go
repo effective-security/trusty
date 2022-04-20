@@ -7,9 +7,7 @@
 package tools
 
 import (
-	_ "github.com/cloudflare/cfssl/cmd/cfssl"
-	_ "github.com/cloudflare/cfssl/cmd/cfssl-certinfo"
-	_ "github.com/cloudflare/cfssl/cmd/cfssljson"
+	_ "github.com/effective-security/xpki/cmd/hsm-tool"
 	_ "github.com/go-phorce/cov-report/cmd/cov-report"
 	_ "github.com/mattn/goreman"
 	_ "github.com/mattn/goveralls"

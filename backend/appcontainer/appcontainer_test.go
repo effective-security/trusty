@@ -6,16 +6,15 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/go-phorce/dolly/algorithms/guid"
-	"github.com/go-phorce/dolly/audit"
-	"github.com/go-phorce/dolly/tasks"
-	"github.com/go-phorce/dolly/xpki/cryptoprov"
-	"github.com/martinisecurity/trusty/authority"
+	"github.com/effective-security/porto/pkg/tasks"
+	"github.com/effective-security/porto/x/guid"
+	"github.com/effective-security/xpki/authority"
+	"github.com/effective-security/xpki/cryptoprov"
+	"github.com/effective-security/xpki/jwt"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/backend/db/cadb"
 	"github.com/martinisecurity/trusty/client"
 	"github.com/martinisecurity/trusty/pkg/certpublisher"
-	"github.com/martinisecurity/trusty/pkg/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -65,7 +64,6 @@ func TestNewContainerFactory(t *testing.T) {
 			require.NoError(t, err)
 
 			err = container.Invoke(func(cfg *config.Configuration,
-				auditor audit.Auditor,
 				scheduler tasks.Scheduler,
 			) {
 			})
@@ -101,7 +99,6 @@ func TestAppContainer(t *testing.T) {
 	err = container.Invoke(func(
 		_ *config.Configuration,
 		_ *cryptoprov.Crypto,
-		_ audit.Auditor,
 		_ tasks.Scheduler,
 		_ cadb.CaDb,
 		_ cadb.CaReadonlyDb,

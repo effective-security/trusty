@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-phorce/dolly/xlog"
+	tcredentials "github.com/effective-security/porto/gserver/credentials"
+	"github.com/effective-security/xlog"
 	v1 "github.com/martinisecurity/trusty/api/v1"
-	tcredentials "github.com/martinisecurity/trusty/pkg/credentials"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

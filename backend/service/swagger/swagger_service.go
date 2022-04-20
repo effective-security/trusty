@@ -1,17 +1,9 @@
 package swagger
 
 import (
-	"io/ioutil"
-	"net/http"
-
-	"github.com/go-phorce/dolly/rest"
-	"github.com/go-phorce/dolly/xhttp/header"
-	"github.com/go-phorce/dolly/xhttp/httperror"
-	"github.com/go-phorce/dolly/xhttp/marshal"
-	"github.com/go-phorce/dolly/xlog"
-	v1 "github.com/martinisecurity/trusty/api/v1"
-	"github.com/martinisecurity/trusty/pkg/gserver"
-	"github.com/pkg/errors"
+	"github.com/effective-security/porto/gserver"
+	"github.com/effective-security/porto/restserver"
+	"github.com/effective-security/xlog"
 )
 
 // ServiceName provides the Service Name for this package
@@ -22,7 +14,7 @@ var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/se
 // Service defines the Swagger service
 type Service struct {
 	server *gserver.Server
-	cfg    *gserver.HTTPServerCfg
+	cfg    *gserver.Config
 }
 
 // Factory returns a factory of the service
@@ -57,25 +49,28 @@ func (s *Service) Close() {
 }
 
 // RegisterRoute adds the Status API endpoints to the overall URL router
-func (s *Service) RegisterRoute(r rest.Router) {
+func (s *Service) RegisterRoute(r restserver.Router) {
+	/* TODO: swagger
 	if s.cfg.Swagger.Enabled {
 		r.GET(v1.PathForSwagger, s.swagger())
 	}
+	*/
 }
 
-func (s *Service) swagger() rest.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
+/*
+func (s *Service) swagger() restserver.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p restserver.Params) {
 		svc := p.ByName("service")
 
 		f := s.cfg.Swagger.Files[svc]
 		if f == "" {
-			marshal.WriteJSON(w, r, httperror.WithNotFound("file not found for: %s", svc))
+			marshal.WriteJSON(w, r, httperror.NotFound("file not found for: %s", svc))
 			return
 
 		}
 		sw, err := ioutil.ReadFile(f)
 		if err != nil {
-			marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to load swagger file: %s", f).
+			marshal.WriteJSON(w, r, httperror.Unexpected("unable to load swagger file: %s", f).
 				WithCause(errors.WithStack(err)))
 			return
 		}
@@ -83,3 +78,4 @@ func (s *Service) swagger() rest.Handle {
 		w.Write(sw)
 	}
 }
+*/

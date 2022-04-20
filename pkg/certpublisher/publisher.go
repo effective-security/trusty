@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-phorce/dolly/xlog"
+	"github.com/effective-security/xlog"
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/pkg/storage"
 	"github.com/pkg/errors"

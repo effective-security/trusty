@@ -18,8 +18,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-phorce/dolly/algorithms/guid"
-	xcrtutil "github.com/go-phorce/dolly/xpki/certutil"
+	"github.com/effective-security/porto/x/guid"
+	xcrtutil "github.com/effective-security/xpki/certutil"
 	"github.com/martinisecurity/trusty/cli/certutil"
 	"github.com/martinisecurity/trusty/cli/testsuite"
 	"github.com/pkg/errors"

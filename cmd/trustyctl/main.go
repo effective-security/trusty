@@ -5,8 +5,8 @@ import (
 	"io"
 	"os"
 
+	"github.com/effective-security/xlog"
 	"github.com/go-phorce/dolly/ctl"
-	"github.com/go-phorce/dolly/xlog"
 	"github.com/martinisecurity/trusty/cli"
 	"github.com/martinisecurity/trusty/cli/ca"
 	"github.com/martinisecurity/trusty/cli/cis"

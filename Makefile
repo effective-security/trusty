@@ -43,6 +43,7 @@ tools:
 	go install github.com/mattn/goreman
 	go install github.com/mattn/goveralls
 	go install golang.org/x/tools/cmd/goimports
+	go install github.com/effective-security/xpki/cmd/hsm-tool
 
 folders:
 	mkdir -p /tmp/trusty/softhsm/tokens \
@@ -101,7 +102,7 @@ gen_test_certs:
 	./scripts/build/gen_certs.sh \
 		--hsm-config $(PROJ_ROOT)/etc/dev/kms/aws-dev-kms.json \
 		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.yaml \
-		--out-dir /tmp/trusty/certs \
+		--output-dir /tmp/trusty/certs \
 		--csr-dir $(PROJ_ROOT)/etc/dev/csr_profile \
 		--csr-prefix trusty_ \
 		--out-prefix trusty_ \

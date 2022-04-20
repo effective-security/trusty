@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-phorce/dolly/xpki/certutil"
-	"github.com/martinisecurity/trusty/pkg/csr"
-	"github.com/martinisecurity/trusty/pkg/inmemcrypto"
+	"github.com/effective-security/xpki/certutil"
+	"github.com/effective-security/xpki/cryptoprov/inmemcrypto"
+	"github.com/effective-security/xpki/csr"
 	"github.com/martinisecurity/trusty/pkg/print"
 	"github.com/pkg/errors"
 	capi "k8s.io/api/certificates/v1"

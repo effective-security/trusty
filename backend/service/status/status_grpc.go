@@ -3,7 +3,7 @@ package status
 import (
 	"context"
 
-	"github.com/go-phorce/dolly/xhttp/identity"
+	"github.com/effective-security/porto/xhttp/identity"
 	"github.com/golang/protobuf/ptypes/empty"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/internal/version"
@@ -44,11 +44,12 @@ func (s *Service) Caller(ctx context.Context, _ *empty.Empty) (*pb.CallerStatusR
 	var id, name string
 	if callerCtx != nil {
 		caller := callerCtx.Identity()
-		id = caller.UserID()
-		name = caller.Name()
+		//id = caller.UserID()
+		//name = caller.Name()
 		role = caller.Role()
 	}
 
+	// TODO: change CallerStatusResponse
 	res := &pb.CallerStatusResponse{
 		Id:   id,
 		Name: name,

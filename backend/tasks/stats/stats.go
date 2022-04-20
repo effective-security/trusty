@@ -3,9 +3,9 @@ package stats
 import (
 	"context"
 
-	"github.com/go-phorce/dolly/metrics"
-	"github.com/go-phorce/dolly/tasks"
-	"github.com/go-phorce/dolly/xlog"
+	"github.com/effective-security/metrics"
+	"github.com/effective-security/porto/pkg/tasks"
+	"github.com/effective-security/xlog"
 	"github.com/martinisecurity/trusty/backend/db/cadb"
 	"github.com/pkg/errors"
 )

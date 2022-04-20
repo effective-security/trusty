@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/go-phorce/dolly/netutil"
-	"github.com/go-phorce/dolly/xlog"
-	"github.com/martinisecurity/trusty/pkg/configloader"
+	"github.com/effective-security/porto/pkg/configloader"
+	"github.com/effective-security/porto/x/netutil"
+	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
 )
 

@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-phorce/dolly/algorithms/guid"
-	"github.com/go-phorce/dolly/xpki/certutil"
+	"github.com/effective-security/porto/x/guid"
+	"github.com/effective-security/xpki/certutil"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

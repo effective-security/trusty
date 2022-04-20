@@ -8,7 +8,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/go-phorce/dolly/xpki/certutil"
+	"github.com/effective-security/xpki/certutil"
 	"golang.org/x/crypto/ocsp"
 )
 

@@ -118,28 +118,28 @@ echo "ROOT_CA_CERT = $ROOT_CA_CERT"
 echo "ROOT_CA_KEY  = $ROOT_CA_KEY"
 
 if [[ "$ROOTCA" == "YES" && ("$FORCE" == "YES" || ! -f ${ROOT_CA_KEY}) ]]; then echo "*** generating ${ROOT_CA_CERT/.pem/''}"
-    trusty-tool \
-        --hsm-cfg=${HSM_CONFIG} ${CRYPTO_PROV} \
-        csr gencert --self-sign \
+    hsm-tool \
+        --cfg=${HSM_CONFIG} ${CRYPTO_PROV} \
+        csr gen-cert --self-sign \
         --ca-config=${CA_CONFIG} \
         --profile=SHAKEN_ROOT \
         --csr-profile ${CSR_DIR}/${CSR_PREFIX}root_ca.json \
         --key-label="${OUT_PREFIX}root_ca*" \
-        --out ${ROOT_CA_CERT/.pem/''}
+        --output ${ROOT_CA_CERT/.pem/''}
 fi
 
 if [[ "$CA" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}ca.key) ]]; then
     echo "*** generating CA cert"
-    trusty-tool \
-        --hsm-cfg=${HSM_CONFIG} ${CRYPTO_PROV} \
-        csr gencert \
+    hsm-tool \
+        --cfg=${HSM_CONFIG} ${CRYPTO_PROV} \
+        csr gen-cert \
         --ca-config=${CA_CONFIG} \
         --profile=SHAKEN_CA \
         --csr-profile ${CSR_DIR}/${CSR_PREFIX}ca.json \
         --key-label="${OUT_PREFIX}ca*" \
         --ca-cert ${ROOT_CA_CERT} \
         --ca-key ${ROOT_CA_KEY} \
-        --out ${OUT_DIR}/${OUT_PREFIX}ca
+        --output ${OUT_DIR}/${OUT_PREFIX}ca
 
 if [[ "$BUNDLE" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}cabundle.pem) ]]; then
     echo "*** CA bundle"
@@ -149,16 +149,16 @@ fi
 
 if [[ "$L1_CA" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}delegated_l1_ca.key) ]]; then
     echo "*** generating Delegated L1 CA cert"
-    trusty-tool \
-        --hsm-cfg=${HSM_CONFIG} ${CRYPTO_PROV} \
-        csr gencert \
+    hsm-tool \
+        --cfg=${HSM_CONFIG} ${CRYPTO_PROV} \
+        csr gen-cert \
         --ca-config=${CA_CONFIG} \
         --profile=DELEGATED_L1_CA \
         --csr-profile ${CSR_DIR}/${CSR_PREFIX}delegated_l1_ca.json \
         --key-label="${OUT_PREFIX}delegated_l1_ca*" \
         --ca-cert ${ROOT_CA_CERT} \
         --ca-key ${ROOT_CA_KEY} \
-        --out ${OUT_DIR}/${OUT_PREFIX}delegated_l1_ca
+        --output ${OUT_DIR}/${OUT_PREFIX}delegated_l1_ca
 
 if [[ "$BUNDLE" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}cabundle.pem) ]]; then
     echo "*** CA bundle"

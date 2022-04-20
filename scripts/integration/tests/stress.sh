@@ -12,7 +12,7 @@ echo "COUNT=$COUNT"
 
 for ((n=0;n<COUNT;n++))
 do
-bin/trusty-tool --hsm-cfg=inmem csr create --plain-key --csr-profile=etc/dev/csr_profile/trusty_client.json  --out $CSR
+bin/hsm-tool --cfg=inmem csr create --plain-key --csr-profile=etc/dev/csr_profile/trusty_client.json  --output $CSR
 bin/trustyctl -s https://localhost:7892 --timeout 3 --json \
     -c /tmp/trusty/certs/trusty_peer_ca.pem \
     -k /tmp/trusty/certs/trusty_peer_ca.key \

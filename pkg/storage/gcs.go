@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/go-phorce/dolly/xlog"
+	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
 	"google.golang.org/api/option"
 )

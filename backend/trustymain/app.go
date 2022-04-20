@@ -12,13 +12,15 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/effective-security/metrics"
+	"github.com/effective-security/metrics/prometheus"
+	"github.com/effective-security/porto/gserver"
 	"github.com/effective-security/porto/pkg/discovery"
-	"github.com/go-phorce/dolly/metrics"
-	"github.com/go-phorce/dolly/netutil"
-	"github.com/go-phorce/dolly/tasks"
-	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/dolly/xlog/logrotate"
-	"github.com/go-phorce/dolly/xlog/stackdriver"
+	"github.com/effective-security/porto/pkg/tasks"
+	"github.com/effective-security/porto/x/netutil"
+	"github.com/effective-security/xlog"
+	"github.com/effective-security/xlog/logrotate"
+	"github.com/effective-security/xlog/stackdriver"
 	"github.com/martinisecurity/trusty/backend/appcontainer"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/backend/service/ca"
@@ -29,7 +31,6 @@ import (
 	"github.com/martinisecurity/trusty/backend/tasks/certsmonitor"
 	"github.com/martinisecurity/trusty/backend/tasks/stats"
 	"github.com/martinisecurity/trusty/internal/version"
-	"github.com/martinisecurity/trusty/pkg/gserver"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/dig"
@@ -529,7 +530,7 @@ func (a *App) initCPUProfiler(file string) error {
 
 // can be initialized only once per process.
 // keep global for tests
-var promSink *metrics.PrometheusSink
+var promSink metrics.Sink
 
 func (a *App) setupMetrics() error {
 	cfg := a.cfg
@@ -538,14 +539,9 @@ func (a *App) setupMetrics() error {
 	var sink metrics.Sink
 
 	switch cfg.Metrics.Provider {
-	case "datadog":
-		sink, err = metrics.NewDogStatsdSink("127.0.0.1:8125", cfg.ServiceName)
-		if err != nil {
-			return errors.WithStack(err)
-		}
 	case "prometheus":
 		if promSink == nil {
-			promSink, err = metrics.NewPrometheusSink()
+			promSink, err = prometheus.NewSink()
 			if err != nil {
 				return errors.WithStack(err)
 			}
@@ -570,6 +566,8 @@ func (a *App) setupMetrics() error {
 			EnableServiceLabel:   false, // added in GlobalTags
 			FilterDefault:        true,
 			EnableRuntimeMetrics: true,
+			TimerGranularity:     time.Millisecond,
+			ProfileInterval:      time.Second,
 			GlobalPrefix:         cfg.Metrics.Prefix,
 			GlobalTags: []metrics.Tag{
 				{Name: "host", Value: a.hostname},

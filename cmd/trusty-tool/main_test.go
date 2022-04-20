@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-phorce/dolly/algorithms/guid"
+	"github.com/effective-security/porto/x/guid"
 	"github.com/go-phorce/dolly/ctl"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/internal/version"
@@ -74,8 +74,8 @@ func (s *testSuite) TearDownTest() {
 
 func TestGoVersion(t *testing.T) {
 	gv := runtime.Version()
-	vsCheck := strings.HasPrefix(gv, "go1.16") || strings.HasPrefix(gv, "go1.17")
-	assert.True(t, vsCheck, "should be built with go 1.16.+, got: %s", gv)
+	vsCheck := strings.HasPrefix(gv, "go1.18") || strings.HasPrefix(gv, "go1.17")
+	assert.True(t, vsCheck, "should be built with go 1.18.+, got: %s", gv)
 
 	v := version.Current()
 	assert.True(t, v.Float() > 0)

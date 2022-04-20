@@ -6,7 +6,7 @@ import (
 	"runtime/pprof"
 	"testing"
 
-	"github.com/go-phorce/dolly/algorithms/guid"
+	"github.com/effective-security/porto/x/guid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

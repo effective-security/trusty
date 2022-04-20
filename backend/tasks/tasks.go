@@ -1,7 +1,7 @@
 package tasks
 
 import (
-	"github.com/go-phorce/dolly/tasks"
+	"github.com/effective-security/porto/pkg/tasks"
 )
 
 // Status indicates whether the task failed or succeeded

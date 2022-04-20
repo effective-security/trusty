@@ -3,10 +3,10 @@ package ca
 import (
 	"context"
 
-	"github.com/go-phorce/dolly/xlog"
+	"github.com/effective-security/xlog"
+	"github.com/effective-security/xpki/authority"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"google.golang.org/grpc/codes"
 	"gopkg.in/yaml.v2"

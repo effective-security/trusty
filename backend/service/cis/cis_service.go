@@ -5,16 +5,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-phorce/dolly/metrics"
-	"github.com/go-phorce/dolly/rest"
-	"github.com/go-phorce/dolly/xlog"
+	"github.com/effective-security/metrics"
+	"github.com/effective-security/porto/gserver"
+	"github.com/effective-security/porto/restserver"
+	"github.com/effective-security/xlog"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/backend/db/cadb"
 	"github.com/martinisecurity/trusty/client"
 	"github.com/martinisecurity/trusty/client/embed/proxy"
-	"github.com/martinisecurity/trusty/pkg/gserver"
 	"github.com/martinisecurity/trusty/pkg/poller"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
@@ -80,7 +80,7 @@ func (s *Service) Close() {
 }
 
 // RegisterRoute adds the Status API endpoints to the overall URL router
-func (s *Service) RegisterRoute(r rest.Router) {
+func (s *Service) RegisterRoute(r restserver.Router) {
 	r.GET(v1.PathForCRLByID, s.GetCRLHandler())
 	r.GET(v1.PathForAIACertByID, s.GetCertHandler())
 	r.GET(v1.PathForOCSP+"/:body", s.GetOcspHandler())
