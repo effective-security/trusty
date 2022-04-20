@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/go-phorce/dolly/xlog"
+	"github.com/effective-security/xlog"
 	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/pkg/errors"

@@ -10,19 +10,20 @@ import (
 
 	// +kubebuilder:scaffold:imports
 
-	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/dolly/xlog/stackdriver"
-	"github.com/go-phorce/dolly/xpki/cryptoprov"
+	"github.com/effective-security/xlog"
+	"github.com/effective-security/xlog/stackdriver"
+	"github.com/effective-security/xpki/crypto11"
+	"github.com/effective-security/xpki/cryptoprov"
+	"github.com/effective-security/xpki/cryptoprov/awskmscrypto"
+	"github.com/effective-security/xpki/cryptoprov/gcpkmscrypto"
 	"github.com/martinisecurity/trusty/kubeca/controller"
-	"github.com/martinisecurity/trusty/pkg/awskmscrypto"
-	"github.com/martinisecurity/trusty/pkg/gcpkmscrypto"
 )
 
 func main() {
 	xlog.GetFormatter().WithCaller(true)
 
-	cryptoprov.Register("SoftHSM", cryptoprov.Crypto11Loader)
-	cryptoprov.Register("PKCS11", cryptoprov.Crypto11Loader)
+	cryptoprov.Register("SoftHSM", crypto11.LoadProvider)
+	cryptoprov.Register("PKCS11", crypto11.LoadProvider)
 	cryptoprov.Register("AWSKMS", awskmscrypto.KmsLoader)
 	cryptoprov.Register("GCPKMS", gcpkmscrypto.KmsLoader)
 	cryptoprov.Register("GCPKMS-roots", gcpkmscrypto.KmsLoader)

@@ -12,10 +12,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-phorce/dolly/rest"
-	"github.com/go-phorce/dolly/xhttp/header"
-	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/dolly/xpki/certutil"
+	"github.com/effective-security/porto/gserver"
+	"github.com/effective-security/porto/restserver"
+	"github.com/effective-security/porto/xhttp/header"
+	"github.com/effective-security/xlog"
+	"github.com/effective-security/xpki/certutil"
 	"github.com/golang/protobuf/ptypes/empty"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	"github.com/martinisecurity/trusty/api/v1/pb"
@@ -27,7 +28,6 @@ import (
 	"github.com/martinisecurity/trusty/backend/service/cis"
 	"github.com/martinisecurity/trusty/client"
 	"github.com/martinisecurity/trusty/client/embed"
-	"github.com/martinisecurity/trusty/pkg/gserver"
 	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -61,7 +61,7 @@ func TestMain(m *testing.M) {
 
 	httpAddr := testutils.CreateURLs("http", "")
 
-	httpcfg := &gserver.HTTPServerCfg{
+	httpcfg := &gserver.Config{
 		ListenURLs: []string{httpAddr},
 		Services:   []string{ca.ServiceName, cis.ServiceName},
 	}
@@ -142,7 +142,7 @@ func Test_getCRLHandler(t *testing.T) {
 		r, err := http.NewRequest(http.MethodGet, v1.PathForCRLDP, nil)
 		assert.NoError(t, err)
 
-		h(w, r, rest.Params{
+		h(w, r, restserver.Params{
 			{
 				Key:   "issuer_id",
 				Value: "notfound.crl",
@@ -157,7 +157,7 @@ func Test_getCRLHandler(t *testing.T) {
 			r, err := http.NewRequest(http.MethodGet, v1.PathForCRLDP, nil)
 			assert.NoError(t, err)
 
-			h(w, r, rest.Params{
+			h(w, r, restserver.Params{
 				{
 					Key:   "issuer_id",
 					Value: crl.IKID,
@@ -191,7 +191,7 @@ func Test_getCertHandler(t *testing.T) {
 		r, err := http.NewRequest(http.MethodGet, v1.PathForAIACerts, nil)
 		assert.NoError(t, err)
 
-		h(w, r, rest.Params{
+		h(w, r, restserver.Params{
 			{
 				Key:   "subject_id",
 				Value: "notfound",
@@ -206,7 +206,7 @@ func Test_getCertHandler(t *testing.T) {
 			r, err := http.NewRequest(http.MethodGet, v1.PathForAIACerts, nil)
 			assert.NoError(t, err)
 
-			h(w, r, rest.Params{
+			h(w, r, restserver.Params{
 				{
 					Key:   "subject_id",
 					Value: crt.SKID,

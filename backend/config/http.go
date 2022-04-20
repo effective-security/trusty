@@ -3,7 +3,7 @@ package config
 import (
 	"time"
 
-	"github.com/martinisecurity/trusty/pkg/gserver"
+	"github.com/effective-security/porto/gserver"
 )
 
 // TrustyClient specifies configurations for the client to connect to the cluster

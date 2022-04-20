@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-phorce/dolly/xlog"
+	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
 	capi "k8s.io/api/certificates/v1"
 	v1 "k8s.io/api/core/v1"

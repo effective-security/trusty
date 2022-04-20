@@ -1,13 +1,13 @@
 package embed
 
 import (
+	"github.com/effective-security/porto/gserver"
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/backend/service/ca"
 	"github.com/martinisecurity/trusty/backend/service/cis"
 	"github.com/martinisecurity/trusty/backend/service/status"
 	"github.com/martinisecurity/trusty/client"
 	"github.com/martinisecurity/trusty/client/embed/proxy"
-	"github.com/martinisecurity/trusty/pkg/gserver"
 )
 
 // NewStatusClient returns embedded StatusClient for running server

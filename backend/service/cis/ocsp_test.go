@@ -11,14 +11,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/go-phorce/dolly/rest"
-	"github.com/go-phorce/dolly/xhttp/header"
-	"github.com/go-phorce/dolly/xpki/certutil"
+	"github.com/effective-security/porto/restserver"
+	"github.com/effective-security/porto/xhttp/header"
+	"github.com/effective-security/xpki/certutil"
+	"github.com/effective-security/xpki/cryptoprov/inmemcrypto"
+	"github.com/effective-security/xpki/csr"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/backend/service/cis"
-	"github.com/martinisecurity/trusty/pkg/csr"
-	"github.com/martinisecurity/trusty/pkg/inmemcrypto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/ocsp"
@@ -42,7 +42,7 @@ func Test_ocspResponse(t *testing.T) {
 		r, err := http.NewRequest(http.MethodGet, v1.PathForOCSP, nil)
 		require.NoError(t, err)
 		w := httptest.NewRecorder()
-		h(w, r, rest.Params{
+		h(w, r, restserver.Params{
 			{
 				Key:   "body",
 				Value: "1225sdft345grtge",

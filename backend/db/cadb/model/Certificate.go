@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/go-phorce/dolly/xpki/certutil"
+	"github.com/effective-security/xpki/certutil"
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

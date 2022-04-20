@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/martinisecurity/trusty/pkg/configloader"
+	"github.com/effective-security/porto/pkg/configloader"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -51,8 +51,6 @@ func TestLoadConfig(t *testing.T) {
 	cis := c.HTTPServers["cis"]
 	require.NotNil(t, cis)
 	require.NotNil(t, cis.CORS)
-	require.NotEmpty(t, cis.Swagger.Files)
-	testDirAbs("cis.swagger", cis.Swagger.Files["cis"])
 }
 
 func TestLoadYAML(t *testing.T) {
@@ -92,7 +90,7 @@ func TestLoadYAMLOverrideByHostname(t *testing.T) {
 	assert.Equal(t, 99, c.Audit.MaxAgeDays)
 	assert.Equal(t, 99, c.Audit.MaxSizeMb)
 
-	assert.Len(t, c.LogLevels, 5)
+	assert.Len(t, c.LogLevels, 4)
 
 	assert.Equal(t, "/tmp/trusty/softhsm/unittest_hsm.json", c.CryptoProv.Default)
 	assert.Empty(t, c.CryptoProv.Providers)
@@ -139,7 +137,7 @@ func TestLoadYAMLWithOverride(t *testing.T) {
 	assert.Equal(t, 99, c.Audit.MaxAgeDays)
 	assert.Equal(t, 99, c.Audit.MaxSizeMb)
 
-	assert.Len(t, c.LogLevels, 5)
+	assert.Len(t, c.LogLevels, 4)
 
 	assert.Equal(t, "/tmp/trusty/softhsm/unittest_hsm.json", c.CryptoProv.Default)
 	assert.Empty(t, c.CryptoProv.Providers)

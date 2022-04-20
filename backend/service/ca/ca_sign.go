@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-phorce/dolly/metrics"
-	"github.com/go-phorce/dolly/xlog"
+	"github.com/effective-security/metrics"
+	"github.com/effective-security/xlog"
+	"github.com/effective-security/xpki/authority"
+	"github.com/effective-security/xpki/csr"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
-	"github.com/martinisecurity/trusty/pkg/csr"
 	"google.golang.org/grpc/codes"
 )
 

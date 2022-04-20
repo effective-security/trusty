@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/dolly/xlog/stackdriver"
+	"github.com/effective-security/xlog"
+	"github.com/effective-security/xlog/stackdriver"
 	"github.com/martinisecurity/trusty/kubeca/certinit"
 )
 

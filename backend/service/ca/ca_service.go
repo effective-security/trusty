@@ -4,18 +4,18 @@ import (
 	"context"
 	"sync"
 
-	"github.com/go-phorce/dolly/fileutil"
-	"github.com/go-phorce/dolly/rest"
-	"github.com/go-phorce/dolly/tasks"
-	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/dolly/xpki/certutil"
+	"github.com/effective-security/porto/gserver"
+	"github.com/effective-security/porto/pkg/tasks"
+	"github.com/effective-security/porto/restserver"
+	"github.com/effective-security/porto/x/fileutil"
+	"github.com/effective-security/xlog"
+	"github.com/effective-security/xpki/authority"
+	"github.com/effective-security/xpki/certutil"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/backend/db/cadb"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/martinisecurity/trusty/pkg/certpublisher"
-	"github.com/martinisecurity/trusty/pkg/gserver"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 )
@@ -75,7 +75,7 @@ func (s *Service) Close() {
 }
 
 // RegisterRoute adds the Status API endpoints to the overall URL router
-func (s *Service) RegisterRoute(r rest.Router) {
+func (s *Service) RegisterRoute(r restserver.Router) {
 }
 
 // RegisterGRPC registers gRPC handler

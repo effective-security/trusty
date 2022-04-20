@@ -4,11 +4,11 @@ import (
 	"context"
 	"strings"
 
+	"github.com/effective-security/porto/xhttp/marshal"
+	"github.com/effective-security/xlog"
+	"github.com/effective-security/xpki/authority"
+	csrapi "github.com/effective-security/xpki/csr"
 	"github.com/go-logr/logr"
-	"github.com/go-phorce/dolly/xhttp/marshal"
-	"github.com/go-phorce/dolly/xlog"
-	"github.com/martinisecurity/trusty/authority"
-	csrapi "github.com/martinisecurity/trusty/pkg/csr"
 	"github.com/martinisecurity/trusty/pkg/print"
 	"github.com/pkg/errors"
 	capi "k8s.io/api/certificates/v1"
@@ -43,15 +43,15 @@ func (r *CertificateSigningRequestSigningReconciler) Reconcile(ctx context.Conte
 
 	switch {
 	case !csr.DeletionTimestamp.IsZero():
-		log.Info("ignoring: CSR has been deleted")
+		log.KV(xlog.INFO, "ignoring", "CSR has been deleted")
 	case csr.Spec.SignerName == "":
-		log.Info("ignoring: CSR does not have a signer name: " + string(json))
+		log.KV(xlog.INFO, "ignoring", "CSR does not have a signer name: "+string(json))
 	case csr.Status.Certificate != nil:
-		log.Info("ignoring: CSR has already been signed")
+		log.KV(xlog.INFO, "ignoring", "CSR has already been signed")
 	case !isCertificateRequestApproved(&csr):
-		log.Info("ignoring: CSR is not approved")
+		log.KV(xlog.INFO, "ignoring", "CSR is not approved")
 	default:
-		log.Info("Received CSR: " + string(json))
+		log.KV(xlog.DEBUG, "csr", string(json))
 
 		/*
 			// TODO: check
@@ -82,7 +82,7 @@ func (r *CertificateSigningRequestSigningReconciler) Reconcile(ctx context.Conte
 
 			b := new(strings.Builder)
 			print.Certificate(b, cert)
-			log.Noticef("status=signed, certificate=%s", b.String())
+			log.KV(xlog.NOTICE, "status", "signed", "certificate", b.String())
 
 			if len(issuer.PEM()) > 0 {
 				raw = append(raw, []byte(`\n`)...)
@@ -100,7 +100,7 @@ func (r *CertificateSigningRequestSigningReconciler) Reconcile(ctx context.Conte
 			}
 			r.EventRecorder.Event(&csr, v1.EventTypeNormal, "Signed", "The CSR has been signed")
 		} else {
-			log.Info("ignoring: issuer not found for " + csr.Spec.SignerName)
+			log.KV(xlog.INFO, "ignoring", "issuer not found", "signer", csr.Spec.SignerName)
 		}
 	}
 	return ctrl.Result{}, nil

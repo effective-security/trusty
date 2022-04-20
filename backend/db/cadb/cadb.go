@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/effective-security/porto/pkg/flake"
-	"github.com/go-phorce/dolly/fileutil"
-	"github.com/go-phorce/dolly/xlog"
+	"github.com/effective-security/porto/x/fileutil"
+	"github.com/effective-security/xlog"
 	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/martinisecurity/trusty/backend/db/cadb/pgsql"

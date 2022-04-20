@@ -3,18 +3,16 @@ package ca
 import (
 	"context"
 	"crypto/rand"
-	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
-	"fmt"
 	"math/big"
 	"time"
 
-	"github.com/go-phorce/dolly/metrics"
-	"github.com/go-phorce/dolly/xlog"
+	"github.com/effective-security/metrics"
+	"github.com/effective-security/xlog"
+	"github.com/effective-security/xpki/authority"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/pkg/errors"
@@ -189,11 +187,6 @@ func (s *Service) createGenericCRL(ctx context.Context, issuer *authority.Issuer
 		return nil, errors.WithMessage(err, "failed to create CRL")
 	}
 
-	crl, err := x509.ParseCRL(crlBytes)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
 	mcrl, err := s.db.RegisterCrl(ctx, &model.Crl{
 		IKID:       issuer.SubjectKID(),
 		ThisUpdate: now,
@@ -204,18 +197,6 @@ func (s *Service) createGenericCRL(ctx context.Context, issuer *authority.Issuer
 	if err != nil {
 		return nil, errors.WithMessagef(err, "failed to register CRL")
 	}
-
-	s.server.Audit(
-		"CA",
-		"CRLSigned",
-		"",
-		"",
-		0,
-		fmt.Sprintf("ikid=%s, issuer=%q, next_update='%v'",
-			bundle.SubjectID,
-			bundle.Cert.Subject.String(),
-			crl.TBSCertList.NextUpdate.Format(time.RFC3339)),
-	)
 
 	return mcrl.ToDTO(), nil
 }
@@ -244,18 +225,6 @@ func (s *Service) publishCrl(ctx context.Context, ikID string) (*pb.CrlsResponse
 				)
 				return res, v1.NewError(codes.Internal, "failed to publish CRLs")
 			}
-
-			s.server.Audit(
-				"CA",
-				"CRLPublished",
-				"",
-				"",
-				0,
-				fmt.Sprintf("ikid=%s, issuer=%q, next_update='%v'",
-					issuer.SubjectKID(),
-					issuer.Bundle().Cert.Subject.String(),
-					crl.NextUpdate.AsTime().Format(time.RFC3339)),
-			)
 		}
 	}
 

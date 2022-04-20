@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/go-phorce/dolly/xhttp/header"
+	"github.com/effective-security/porto/xhttp/header"
 )
 
 // GetPublicServerURL returns complete server URL for given relative end-point

@@ -4,12 +4,12 @@ import (
 	"encoding/pem"
 	"net/http"
 
-	"github.com/go-phorce/dolly/metrics"
-	"github.com/go-phorce/dolly/rest"
-	"github.com/go-phorce/dolly/xhttp/header"
-	"github.com/go-phorce/dolly/xhttp/httperror"
-	"github.com/go-phorce/dolly/xhttp/marshal"
-	"github.com/go-phorce/dolly/xlog"
+	"github.com/effective-security/metrics"
+	"github.com/effective-security/porto/restserver"
+	"github.com/effective-security/porto/xhttp/header"
+	"github.com/effective-security/porto/xhttp/httperror"
+	"github.com/effective-security/porto/xhttp/marshal"
+	"github.com/effective-security/xlog"
 	"github.com/martinisecurity/trusty/backend/db"
 )
 
@@ -26,8 +26,8 @@ const (
 )
 
 // GetCRLHandler returns CRL
-func (s *Service) GetCRLHandler() rest.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
+func (s *Service) GetCRLHandler() restserver.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p restserver.Params) {
 		ikid := p.ByName("issuer_id")
 		/*
 			if strings.HasSuffix(ikid, ".crl") {
@@ -44,10 +44,10 @@ func (s *Service) GetCRLHandler() rest.Handle {
 				metrics.IncrCounter(mkAIADownloadCrlFailed, 1,
 					metrics.Tag{Name: ikidTag, Value: ikid},
 				)
-				marshal.WriteJSON(w, r, httperror.WithNotFound("unable to locate CRL"))
+				marshal.WriteJSON(w, r, httperror.NotFound("unable to locate CRL"))
 
 			} else {
-				marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to locate CRL").WithCause(err))
+				marshal.WriteJSON(w, r, httperror.Unexpected("unable to locate CRL").WithCause(err))
 			}
 			return
 		}
@@ -64,8 +64,8 @@ func (s *Service) GetCRLHandler() rest.Handle {
 }
 
 // GetCertHandler returns certificate
-func (s *Service) GetCertHandler() rest.Handle {
-	return func(w http.ResponseWriter, r *http.Request, p rest.Params) {
+func (s *Service) GetCertHandler() restserver.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p restserver.Params) {
 		skid := p.ByName("subject_id")
 		/*
 			if strings.HasSuffix(skid, ".crt") {
@@ -82,10 +82,10 @@ func (s *Service) GetCertHandler() rest.Handle {
 				metrics.IncrCounter(mkAIADownloadCertFailed, 1,
 					metrics.Tag{Name: skidTag, Value: skid},
 				)
-				marshal.WriteJSON(w, r, httperror.WithNotFound("unable to locate certificate"))
+				marshal.WriteJSON(w, r, httperror.NotFound("unable to locate certificate"))
 
 			} else {
-				marshal.WriteJSON(w, r, httperror.WithUnexpected("unable to locate certificate").WithCause(err))
+				marshal.WriteJSON(w, r, httperror.Unexpected("unable to locate certificate").WithCause(err))
 			}
 			return
 		}

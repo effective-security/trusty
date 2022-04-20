@@ -5,23 +5,25 @@ import (
 	"io"
 	"os"
 
+	"github.com/effective-security/porto/gserver/roles"
 	"github.com/effective-security/porto/pkg/discovery"
 	"github.com/effective-security/porto/pkg/flake"
-	"github.com/go-phorce/dolly/audit"
-	fauditor "github.com/go-phorce/dolly/audit/log"
-	"github.com/go-phorce/dolly/tasks"
-	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/dolly/xpki/certutil"
-	"github.com/go-phorce/dolly/xpki/cryptoprov"
+	"github.com/effective-security/porto/pkg/tasks"
+	"github.com/effective-security/xlog"
+	"github.com/effective-security/xpki/authority"
+	"github.com/effective-security/xpki/certutil"
+	"github.com/effective-security/xpki/crypto11"
+	"github.com/effective-security/xpki/cryptoprov"
+	"github.com/effective-security/xpki/cryptoprov/awskmscrypto"
+	"github.com/effective-security/xpki/cryptoprov/gcpkmscrypto"
+	"github.com/effective-security/xpki/dataprotection"
+	"github.com/effective-security/xpki/jwt"
 	v1 "github.com/martinisecurity/trusty/api/v1"
-	"github.com/martinisecurity/trusty/authority"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/backend/db/cadb"
 	"github.com/martinisecurity/trusty/client"
-	"github.com/martinisecurity/trusty/pkg/awskmscrypto"
+	"github.com/martinisecurity/trusty/pkg/accesstoken"
 	"github.com/martinisecurity/trusty/pkg/certpublisher"
-	"github.com/martinisecurity/trusty/pkg/gcpkmscrypto"
-	"github.com/martinisecurity/trusty/pkg/jwt"
 	"github.com/pkg/errors"
 	"go.uber.org/dig"
 	"google.golang.org/grpc/codes"
@@ -39,14 +41,11 @@ type ProvideConfigurationFn func() (*config.Configuration, error)
 // ProvideDiscoveryFn defines Discovery provider
 type ProvideDiscoveryFn func() (discovery.Discovery, error)
 
-// ProvideAuditorFn defines Auditor provider
-type ProvideAuditorFn func(cfg *config.Configuration, r CloseRegistrator) (audit.Auditor, error)
-
 // ProvideSchedulerFn defines Scheduler provider
 type ProvideSchedulerFn func() (tasks.Scheduler, error)
 
 // ProvideJwtFn defines JWT provider
-type ProvideJwtFn func(cfg *config.Configuration) (jwt.Parser, error)
+type ProvideJwtFn func(cfg *config.Configuration, crypto *cryptoprov.Crypto) (jwt.Parser, jwt.Signer, error)
 
 // ProvideCryptoFn defines Crypto provider
 type ProvideCryptoFn func(cfg *config.Configuration) (*cryptoprov.Crypto, error)
@@ -63,6 +62,12 @@ type ProvideClientFactoryFn func(cfg *config.Configuration) (client.Factory, err
 // ProvidePublisherFn defines Publisher provider
 type ProvidePublisherFn func(cfg *config.Configuration) (certpublisher.Publisher, error)
 
+// ProvideDataprotectionFn defines data protection provider
+type ProvideDataprotectionFn func() (dataprotection.Provider, error)
+
+// ProvideAccessTokenFn defines Access Token provider
+type ProvideAccessTokenFn func(dp dataprotection.Provider, parser jwt.Parser) (roles.AccessToken, error)
+
 // CloseRegistrator provides interface to release resources on close
 type CloseRegistrator interface {
 	OnClose(closer io.Closer)
@@ -74,7 +79,6 @@ type ContainerFactory struct {
 
 	configProvider        ProvideConfigurationFn
 	discoveryProvider     ProvideDiscoveryFn
-	auditorProvider       ProvideAuditorFn
 	schedulerProvider     ProvideSchedulerFn
 	cryptoProvider        ProvideCryptoFn
 	authorityProvider     ProvideAuthorityFn
@@ -82,6 +86,8 @@ type ContainerFactory struct {
 	jwtProvider           ProvideJwtFn
 	clientFactoryProvider ProvideClientFactoryFn
 	publisherProvider     ProvidePublisherFn
+	dpProvider            ProvideDataprotectionFn
+	atProvider            ProvideAccessTokenFn
 }
 
 // NewContainerFactory returns an instance of ContainerFactory
@@ -97,14 +103,15 @@ func NewContainerFactory(closer CloseRegistrator) *ContainerFactory {
 	// configure with default providers
 	return f.
 		WithDiscoveryProvider(provideDiscovery).
-		WithAuditorProvider(provideAuditor).
 		WithSchedulerProvider(defaultSchedulerProv).
 		WithCryptoProvider(provideCrypto).
 		WithAuthorityProvider(provideAuthority).
 		WithCaDbProvider(provideCaDB).
 		WithJwtProvider(provideJwt).
 		WithPublisher(providePublisher).
-		WithClientFactoryProvider(provideClientFactory)
+		WithClientFactoryProvider(provideClientFactory).
+		WithDataprotectionProvider(provideDp).
+		WithAccessTokenProvider(provideAccessToken)
 }
 
 // WithConfigurationProvider allows to specify configuration
@@ -116,6 +123,18 @@ func (f *ContainerFactory) WithConfigurationProvider(p ProvideConfigurationFn) *
 // WithDiscoveryProvider allows to specify Discovery
 func (f *ContainerFactory) WithDiscoveryProvider(p ProvideDiscoveryFn) *ContainerFactory {
 	f.discoveryProvider = p
+	return f
+}
+
+// WithDataprotectionProvider allows to specify Data protection provider
+func (f *ContainerFactory) WithDataprotectionProvider(p ProvideDataprotectionFn) *ContainerFactory {
+	f.dpProvider = p
+	return f
+}
+
+// WithAccessTokenProvider allows to specify Access Token provider
+func (f *ContainerFactory) WithAccessTokenProvider(p ProvideAccessTokenFn) *ContainerFactory {
+	f.atProvider = p
 	return f
 }
 
@@ -134,12 +153,6 @@ func (f *ContainerFactory) WithClientFactoryProvider(p ProvideClientFactoryFn) *
 // WithJwtProvider allows to specify custom JWT provider
 func (f *ContainerFactory) WithJwtProvider(p ProvideJwtFn) *ContainerFactory {
 	f.jwtProvider = p
-	return f
-}
-
-// WithAuditorProvider allows to specify custom Auditor
-func (f *ContainerFactory) WithAuditorProvider(p ProvideAuditorFn) *ContainerFactory {
-	f.auditorProvider = p
 	return f
 }
 
@@ -190,11 +203,6 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 		return nil, errors.WithStack(err)
 	}
 
-	err = container.Provide(f.auditorProvider)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
 	err = container.Provide(f.jwtProvider)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -225,6 +233,16 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 		return nil, errors.WithStack(err)
 	}
 
+	err = container.Provide(f.dpProvider)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	err = container.Provide(f.atProvider)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
 	return container, nil
 }
 
@@ -236,45 +254,29 @@ func provideDiscovery() (discovery.Discovery, error) {
 	return discovery.New(), nil
 }
 
-func provideAuditor(cfg *config.Configuration, r CloseRegistrator) (audit.Auditor, error) {
-	var auditor audit.Auditor
-	if cfg.Audit.Directory != "" && cfg.Audit.Directory != nullDevName {
-		os.MkdirAll(cfg.Audit.Directory, 0644)
-
-		// create auditor
-		var err error
-		auditor, err = fauditor.New(cfg.ServiceName+".log", cfg.Audit.Directory, cfg.Audit.MaxAgeDays, cfg.Audit.MaxSizeMb)
-		if err != nil {
-			logger.Errorf("reason=auditor, err=[%+v]", err)
-			return nil, errors.WithMessage(err, "failed to create Auditor")
-		}
-	} else {
-		auditor = auditornoop{}
-	}
-	if r != nil {
-		r.OnClose(auditor)
-	}
-	return auditor, nil
-}
-
-func provideJwt(cfg *config.Configuration) (jwt.Parser, error) {
-	var provider jwt.Parser
+func provideJwt(cfg *config.Configuration, crypto *cryptoprov.Crypto) (jwt.Parser, jwt.Signer, error) {
+	var provider jwt.Provider
 	var err error
 	if cfg.JWT != "" {
-		provider, err = jwt.Load(cfg.JWT)
+		provider, err = jwt.Load(cfg.JWT, crypto)
 		if err != nil {
-			return nil, errors.WithStack(err)
+			return nil, nil, errors.WithStack(err)
 		}
 	}
 
-	return provider, nil
+	return provider, provider, nil
 }
 
 func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
+	logger.KV(xlog.TRACE,
+		"default", cfg.CryptoProv.Default,
+		"providers", cfg.CryptoProv.Providers)
+
 	for _, m := range cfg.CryptoProv.PKCS11Manufacturers {
-		cryptoprov.Register(m, cryptoprov.Crypto11Loader)
+		cryptoprov.Register(m, crypto11.LoadProvider)
 	}
 
+	// TODO: review
 	cryptoprov.Register("AWSKMS", awskmscrypto.KmsLoader)
 	cryptoprov.Register("AWSKMS-delegated", awskmscrypto.KmsLoader)
 	cryptoprov.Register("GCPKMS", gcpkmscrypto.KmsLoader)
@@ -326,7 +328,7 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto, db c
 				cfg.Profiles = make(map[string]*authority.CertProfile)
 			}
 
-			signer, err := authority.NewSignerFromPEM(crypto, []byte(cfg.KeyFile))
+			signer, err := crypto.NewSignerFromPEM([]byte(cfg.KeyFile))
 			if err != nil {
 				return nil, errors.WithMessage(err, "unable to create signer from private key")
 			}
@@ -395,4 +397,20 @@ func providePublisher(cfg *config.Configuration) (certpublisher.Publisher, error
 		return nil, errors.WithStack(err)
 	}
 	return pub, err
+}
+
+func provideDp() (dataprotection.Provider, error) {
+	seed := os.Getenv("TRUSTY_JWT_SEED")
+	if seed == "" {
+		return nil, errors.Errorf("TRUSTY_JWT_SEED not defined")
+	}
+	p, err := dataprotection.NewSymmetric([]byte(seed))
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	return p, nil
+}
+
+func provideAccessToken(dp dataprotection.Provider, parser jwt.Parser) (roles.AccessToken, error) {
+	return accesstoken.New(dp, parser), nil
 }

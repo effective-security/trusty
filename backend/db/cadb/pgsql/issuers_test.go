@@ -3,7 +3,7 @@ package pgsql_test
 import (
 	"testing"
 
-	"github.com/go-phorce/dolly/xpki/certutil"
+	"github.com/effective-security/xpki/certutil"
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/stretchr/testify/assert"

@@ -9,15 +9,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/effective-security/porto/pkg/tlsconfig"
+	"github.com/effective-security/xlog"
+	"github.com/effective-security/xpki/crypto11"
+	"github.com/effective-security/xpki/cryptoprov"
+	"github.com/effective-security/xpki/cryptoprov/awskmscrypto"
+	"github.com/effective-security/xpki/cryptoprov/gcpkmscrypto"
+	"github.com/effective-security/xpki/cryptoprov/inmemcrypto"
 	"github.com/go-phorce/dolly/ctl"
-	"github.com/go-phorce/dolly/rest/tlsconfig"
-	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/dolly/xpki/cryptoprov"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/client"
-	"github.com/martinisecurity/trusty/pkg/awskmscrypto"
-	"github.com/martinisecurity/trusty/pkg/gcpkmscrypto"
-	"github.com/martinisecurity/trusty/pkg/inmemcrypto"
 	"github.com/pkg/errors"
 )
 
@@ -239,8 +240,8 @@ func (cli *Cli) EnsureCryptoProvider() error {
 		providers = *cli.flags.cryptoProvs
 	}
 
-	cryptoprov.Register("SoftHSM", cryptoprov.Crypto11Loader)
-	cryptoprov.Register("PKCS11", cryptoprov.Crypto11Loader)
+	cryptoprov.Register("SoftHSM", crypto11.LoadProvider)
+	cryptoprov.Register("PKCS11", crypto11.LoadProvider)
 	cryptoprov.Register("AWSKMS", awskmscrypto.KmsLoader)
 	cryptoprov.Register("GCPKMS", gcpkmscrypto.KmsLoader)
 	cryptoprov.Register("GCPKMS-roots", gcpkmscrypto.KmsLoader)
@@ -253,7 +254,7 @@ func (cli *Cli) EnsureCryptoProvider() error {
 	} else {
 		cli.crypto, err = cryptoprov.Load(defaultProvider, providers)
 		if err != nil {
-			return errors.WithMessage(err, "unable to initialize crypto providers")
+			return errors.WithMessagef(err, "unable to initialize crypto providers: %s", defaultProvider)
 		}
 	}
 

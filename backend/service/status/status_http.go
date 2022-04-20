@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/go-phorce/dolly/rest"
-	"github.com/go-phorce/dolly/xhttp/header"
-	"github.com/go-phorce/dolly/xhttp/marshal"
+	"github.com/effective-security/porto/restserver"
+	"github.com/effective-security/porto/xhttp/header"
+	"github.com/effective-security/porto/xhttp/marshal"
 	"github.com/martinisecurity/trusty/internal/version"
 	"github.com/martinisecurity/trusty/pkg/print"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -14,8 +14,8 @@ import (
 
 var alive = []byte("ALIVE")
 
-func (s *Service) version() rest.Handle {
-	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
+func (s *Service) version() restserver.Handle {
+	return func(w http.ResponseWriter, r *http.Request, _ restserver.Params) {
 		accept := r.Header.Get(header.Accept)
 		if accept == "" || strings.EqualFold(accept, header.ApplicationJSON) {
 			res, _ := s.Version(r.Context(), nil)
@@ -28,15 +28,15 @@ func (s *Service) version() rest.Handle {
 	}
 }
 
-func (s *Service) nodeStatus() rest.Handle {
-	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
+func (s *Service) nodeStatus() restserver.Handle {
+	return func(w http.ResponseWriter, r *http.Request, _ restserver.Params) {
 		w.Header().Set(header.ContentType, header.TextPlain)
 		w.Write(alive)
 	}
 }
 
-func (s *Service) serverStatus() rest.Handle {
-	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
+func (s *Service) serverStatus() restserver.Handle {
+	return func(w http.ResponseWriter, r *http.Request, _ restserver.Params) {
 		res, _ := s.Server(r.Context(), nil)
 
 		accept := r.Header.Get(header.Accept)
@@ -49,8 +49,8 @@ func (s *Service) serverStatus() rest.Handle {
 	}
 }
 
-func (s *Service) callerStatus() rest.Handle {
-	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
+func (s *Service) callerStatus() restserver.Handle {
+	return func(w http.ResponseWriter, r *http.Request, _ restserver.Params) {
 		res, _ := s.Caller(r.Context(), nil)
 		accept := r.Header.Get(header.Accept)
 		if accept == "" || strings.EqualFold(accept, header.ApplicationJSON) {
@@ -62,9 +62,9 @@ func (s *Service) callerStatus() rest.Handle {
 	}
 }
 
-func (s *Service) metricsHandler() rest.Handle {
+func (s *Service) metricsHandler() restserver.Handle {
 	handler := promhttp.Handler()
-	return func(w http.ResponseWriter, r *http.Request, _ rest.Params) {
+	return func(w http.ResponseWriter, r *http.Request, _ restserver.Params) {
 		handler.ServeHTTP(w, r)
 	}
 }

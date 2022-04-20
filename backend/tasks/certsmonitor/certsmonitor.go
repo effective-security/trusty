@@ -4,11 +4,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-phorce/dolly/fileutil"
-	metricsutil "github.com/go-phorce/dolly/metrics/util"
-	"github.com/go-phorce/dolly/tasks"
-	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/dolly/xpki/certutil"
+	"github.com/effective-security/porto/pkg/tasks"
+	"github.com/effective-security/porto/x/fileutil"
+	"github.com/effective-security/xlog"
+	"github.com/effective-security/xpki/certutil"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/pkg/errors"
 )
@@ -43,9 +42,9 @@ func (t *Task) run() {
 		} else {
 			logger.Infof("cert=%q, subject=%q, expires=%q", location, cert.Subject.CommonName, cert.NotAfter.Format(time.RFC3339))
 			if typ == typIssuer {
-				metricsutil.PublishCertExpirationInDays(cert, typ)
+				PublishCertExpirationInDays(cert, typ)
 			} else {
-				metricsutil.PublishShortLivedCertExpirationInDays(cert, typ)
+				PublishShortLivedCertExpirationInDays(cert, typ)
 			}
 		}
 	}

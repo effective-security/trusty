@@ -1,6 +1,6 @@
 package testutils
 
-import "github.com/go-phorce/dolly/tasks"
+import "github.com/effective-security/porto/pkg/tasks"
 
 // MockTask provides dummy task
 type MockTask struct {

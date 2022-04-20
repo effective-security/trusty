@@ -1,11 +1,11 @@
 package mockappcontainer
 
 import (
+	"github.com/effective-security/porto/gserver/roles"
 	"github.com/effective-security/porto/pkg/discovery"
-	"github.com/go-phorce/dolly/audit"
-	"github.com/go-phorce/dolly/xpki/cryptoprov"
+	"github.com/effective-security/xpki/cryptoprov"
+	"github.com/effective-security/xpki/jwt"
 	"github.com/martinisecurity/trusty/backend/config"
-	"github.com/martinisecurity/trusty/pkg/jwt"
 	"go.uber.org/dig"
 )
 
@@ -30,14 +30,6 @@ func (b *Builder) Container() *dig.Container {
 func (b *Builder) WithConfig(c *config.Configuration) *Builder {
 	b.container.Provide(func() *config.Configuration {
 		return c
-	})
-	return b
-}
-
-// WithAuditor sets Auditor
-func (b *Builder) WithAuditor(auditor audit.Auditor) *Builder {
-	b.container.Provide(func() audit.Auditor {
-		return auditor
 	})
 	return b
 }
@@ -70,6 +62,14 @@ func (b *Builder) WithJwtParser(j jwt.Parser) *Builder {
 func (b *Builder) WithDiscovery(d discovery.Discovery) *Builder {
 	b.container.Provide(func() discovery.Discovery {
 		return d
+	})
+	return b
+}
+
+// WithAccessToken sets roles.AccessToken
+func (b *Builder) WithAccessToken(a roles.AccessToken) *Builder {
+	b.container.Provide(func() roles.AccessToken {
+		return a
 	})
 	return b
 }

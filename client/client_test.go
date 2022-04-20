@@ -7,10 +7,10 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/effective-security/porto/gserver"
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/martinisecurity/trusty/client"
-	"github.com/martinisecurity/trusty/pkg/gserver"
 	"github.com/martinisecurity/trusty/tests/mockpb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

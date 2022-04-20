@@ -7,9 +7,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	// +kubebuilder:scaffold:imports
-	"github.com/go-phorce/dolly/xlog"
-	"github.com/go-phorce/dolly/xpki/cryptoprov"
-	"github.com/martinisecurity/trusty/authority"
+	"github.com/effective-security/xlog"
+	"github.com/effective-security/xpki/authority"
+	"github.com/effective-security/xpki/cryptoprov"
 )
 
 var (

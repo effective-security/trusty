@@ -7,18 +7,18 @@ import (
 	"os"
 	"testing"
 
+	"github.com/effective-security/porto/gserver"
 	"github.com/effective-security/porto/pkg/discovery"
-	"github.com/go-phorce/dolly/xhttp/header"
-	"github.com/go-phorce/dolly/xhttp/identity"
-	"github.com/go-phorce/dolly/xhttp/retriable"
-	"github.com/go-phorce/dolly/xlog"
+	"github.com/effective-security/porto/pkg/retriable"
+	"github.com/effective-security/porto/xhttp/header"
+	"github.com/effective-security/porto/xhttp/identity"
+	"github.com/effective-security/xlog"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/backend/service/status"
 	"github.com/martinisecurity/trusty/client"
 	"github.com/martinisecurity/trusty/client/embed"
 	"github.com/martinisecurity/trusty/internal/version"
-	"github.com/martinisecurity/trusty/pkg/gserver"
 	"github.com/martinisecurity/trusty/tests/mockappcontainer"
 	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/pkg/errors"
@@ -55,7 +55,7 @@ func TestMain(m *testing.M) {
 	httpsAddr = testutils.CreateURLs("https", "")
 	httpAddr = testutils.CreateURLs("http", "")
 
-	cfg := &gserver.HTTPServerCfg{
+	cfg := &gserver.Config{
 		ListenURLs: []string{httpsAddr, httpAddr},
 		ServerTLS: &gserver.TLSInfo{
 			CertFile:      "/tmp/trusty/certs/trusty_peer_wfe.pem",
@@ -66,9 +66,9 @@ func TestMain(m *testing.M) {
 	}
 
 	container := mockappcontainer.NewBuilder().
-		WithAuditor(nil).
 		WithCrypto(nil).
 		WithJwtParser(nil).
+		WithAccessToken(nil).
 		WithDiscovery(discovery.New()).
 		Container()
 
