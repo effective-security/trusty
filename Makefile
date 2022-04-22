@@ -166,18 +166,18 @@ coveralls-github:
 	goveralls -v -coverprofile=coverage.out -service=github -package ./...
 
 docker:
-	docker build --no-cache -f Dockerfile -t ekspand/trusty:master .
+	docker build --no-cache -f Dockerfile -t ekspand/trusty:main .
 
 docker-kubeca:	
-	docker build --no-cache -f Dockerfile.kubeca -t ekspand/kubeca:master .
-	docker build --no-cache -f Dockerfile.kubecertinit -t ekspand/kubecertinit:master .
+	docker build --no-cache -f Dockerfile.kubeca -t ekspand/kubeca:main .
+	docker build --no-cache -f Dockerfile.kubecertinit -t ekspand/kubecertinit:main .
 
 docker-compose:
 	docker-compose -f docker-compose.dev.yml up --abort-on-container-exit
 
 docker-push: docker
 	[ ! -z ${DOCKER_PASSWORD} ] && echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin || echo "skipping docker login"
-	docker push ekspand/trusty:master
+	docker push ekspand/trusty:main
 	#[ ! -z ${DOCKER_NUMBER} ] && docker push ekspand/trusty:${DOCKER_NUMBER} || echo "skipping docker version, pushing latest only"
 
 docker-citest:
