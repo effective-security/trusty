@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/effective-security/xpki/certutil"
+	"github.com/effective-security/xpki/x/print"
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/olekukonko/tablewriter"
 )
@@ -63,7 +64,7 @@ func Issuers(w io.Writer, issuers []*pb.IssuerInfo, withPem bool) {
 
 			crt, err := certutil.ParseFromPEM(certBytes)
 			if err == nil {
-				Certificate(w, crt)
+				print.Certificate(w, crt)
 			}
 
 			continue

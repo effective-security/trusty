@@ -44,6 +44,7 @@ tools:
 	go install github.com/mattn/goveralls
 	go install golang.org/x/tools/cmd/goimports
 	go install github.com/effective-security/xpki/cmd/hsm-tool
+	go install github.com/effective-security/xpki/cmd/xpki-tool
 
 folders:
 	mkdir -p /tmp/trusty/softhsm/tokens \
@@ -68,16 +69,12 @@ build_trustyctl:
 	echo "*** Building trustyctl"
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/trustyctl ./cmd/trustyctl
 
-build_tool:
-	echo "*** Building tool"
-	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/trusty-tool ./cmd/trusty-tool
-
 build_kube:
 	echo "*** Building kubeca"
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/kubeca ./cmd/kubeca
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/kubecertinit ./cmd/kubecertinit
 
-build: build_trusty build_trustyctl build_tool build_kube
+build: build_trusty build_trustyctl build_kube
 
 change_log:
 	echo "Recent changes:" > ./change_log.txt

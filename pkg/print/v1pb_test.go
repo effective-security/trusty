@@ -2,12 +2,15 @@ package print_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/pkg/print"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -169,4 +172,35 @@ func TestCrlTable(t *testing.T) {
 	print.CrlsTable(w, list)
 	out := w.String()
 	assert.Contains(t, out, "  ID  |  IKID  |")
+}
+
+func Test_Issuers(t *testing.T) {
+	var res pb.IssuersInfoResponse
+	err := loadJSON("testdata/issuers.json", &res)
+	require.NoError(t, err)
+
+	w := bytes.NewBuffer([]byte{})
+	print.Issuers(w, res.Issuers, true)
+	out := w.String()
+	assert.Contains(t, out, `Label: trusty.svc
+Profiles: [default peer timestamp test_client server client ocsp test_server codesign]
+Subject: C=US, L=WA, O=trusty.com, CN=[TEST] Trusty Level 2 CA
+  Issuer: C=US, L=WA, O=trusty.com, CN=[TEST] Trusty Level 1 CA
+  SKID: 2e897da29a7b7b8aea10e0aa0900bc72eb31b62f
+  IKID: 91bba6f326b11e030b0893b68362e35176d4e526
+  Serial: 339118521149703476204197482799788296632679099480
+`)
+}
+
+func loadJSON(filename string, v interface{}) error {
+	cfr, err := os.Open(filename)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	defer cfr.Close()
+	err = json.NewDecoder(cfr).Decode(v)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
 }

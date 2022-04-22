@@ -8,6 +8,7 @@ package tools
 
 import (
 	_ "github.com/effective-security/xpki/cmd/hsm-tool"
+	_ "github.com/effective-security/xpki/cmd/xpki-tool"
 	_ "github.com/go-phorce/cov-report/cmd/cov-report"
 	_ "github.com/mattn/goreman"
 	_ "github.com/mattn/goveralls"
