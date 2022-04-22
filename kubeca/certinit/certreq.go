@@ -13,7 +13,7 @@ import (
 	"github.com/effective-security/xpki/certutil"
 	"github.com/effective-security/xpki/cryptoprov/inmemcrypto"
 	"github.com/effective-security/xpki/csr"
-	"github.com/martinisecurity/trusty/pkg/print"
+	"github.com/effective-security/xpki/x/print"
 	"github.com/pkg/errors"
 	capi "k8s.io/api/certificates/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"

@@ -12,7 +12,7 @@ RUN mkdir -p /home/nonroot \
       /opt/trusty/bin /opt/trusty/sql /opt/trusty/etc/prod /opt/trusty/etc/dev \
       /var/trusty/certs /var/trusty/audit /var/trusty/logs \
       /trusty_certs /trusty_logs /trusty_audit
-COPY ./bin/trusty* ./bin/hsm-tool /opt/trusty/bin/
+COPY ./bin/trusty* ./bin/hsm-tool ./bin/xpki-tool /opt/trusty/bin/
 COPY ./scripts/build/* /opt/trusty/bin/
 COPY ./sql/ /opt/trusty/sql/
 
