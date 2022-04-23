@@ -125,7 +125,6 @@ services:
         --cfg=/opt/trusty/etc/dev/trusty-config.yaml
         --ca-sql=env://TRUSTY_CA_SQL_CONN
         --logs-dir=/var/trusty/logs
-        --audit-dir=/var/trusty/audit
         --host-name=168.138.72.101
         --cis-listen-url=http://168.138.72.101:7880
         --ca-listen-url=https://168.138.72.101:7892
@@ -201,7 +200,6 @@ services:
         --cfg=/opt/trusty/etc/dev/trusty-config.yaml
         --ca-sql=env://TRUSTY_CA_SQL_CONN
         --logs-dir=/var/trusty/logs
-        --audit-dir=/var/trusty/audit
         --host-name=168.138.72.102
         --cis-listen-url=http://168.138.72.102:7880
         --ca-listen-url=https://168.138.72.102:7892

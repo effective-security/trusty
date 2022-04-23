@@ -32,9 +32,6 @@ type Configuration struct {
 	// Metrics specifies the metrics pipeline configuration
 	Metrics Metrics `json:"metrics" yaml:"metrics"`
 
-	// Audit contains configuration for the audit logger
-	Audit Logger `json:"audit" yaml:"audit"`
-
 	// Logs contains configuration for the logger
 	Logs Logger `json:"logs" yaml:"logs"`
 

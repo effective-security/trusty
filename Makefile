@@ -50,7 +50,6 @@ folders:
 	mkdir -p /tmp/trusty/softhsm/tokens \
 		/tmp/trusty/certs \
 		/tmp/trusty/logs \
-		/tmp/trusty/audit \
 		/tmp/trusty/certs
 	chmod -R 0700 /tmp/trusty
 

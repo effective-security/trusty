@@ -58,7 +58,6 @@ func TestMain(m *testing.M) {
 	}
 
 	container := mockappcontainer.NewBuilder().
-		WithAuditor(nil).
 		WithCrypto(nil).
 		WithJwtParser(nil).
 		WithAccessToken(nil).
