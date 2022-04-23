@@ -73,7 +73,6 @@ type appFlags struct {
 	caURLs              *[]string
 	hostNames           *[]string
 	logsDir             *string
-	auditDir            *string
 	httpsCertFile       *string
 	httpsKeyFile        *string
 	httpsTrustedCAFile  *string
@@ -363,7 +362,6 @@ func (a *App) loadConfig() error {
 
 	flags.hostNames = app.Flag("host-name", "Set of host names to be used in CSR requests to obtaine a server certificate").Strings()
 	flags.logsDir = app.Flag("logs-dir", "Path to the logs folder.").String()
-	flags.auditDir = app.Flag("audit-dir", "Path to the audit folder.").String()
 
 	flags.httpsCertFile = app.Flag("https-server-cert", "Path to the server TLS cert file.").String()
 	flags.httpsKeyFile = app.Flag("https-server-key", "Path to the server TLS key file.").String()
@@ -394,9 +392,6 @@ func (a *App) loadConfig() error {
 
 	if *flags.logsDir != "" {
 		cfg.Logs.Directory = *flags.logsDir
-	}
-	if *flags.auditDir != "" {
-		cfg.Audit.Directory = *flags.auditDir
 	}
 	if *flags.hsmCfg != "" {
 		cfg.CryptoProv.Default = *flags.hsmCfg

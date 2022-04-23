@@ -86,10 +86,6 @@ func TestLoadYAMLOverrideByHostname(t *testing.T) {
 	assert.Equal(t, 3, c.Logs.MaxAgeDays)
 	assert.Equal(t, 10, c.Logs.MaxSizeMb)
 
-	assert.Equal(t, "/tmp/trusty/audit", c.Audit.Directory)
-	assert.Equal(t, 99, c.Audit.MaxAgeDays)
-	assert.Equal(t, 99, c.Audit.MaxSizeMb)
-
 	assert.Len(t, c.LogLevels, 4)
 
 	assert.Equal(t, "/tmp/trusty/softhsm/unittest_hsm.json", c.CryptoProv.Default)
@@ -132,10 +128,6 @@ func TestLoadYAMLWithOverride(t *testing.T) {
 	assert.Equal(t, "/tmp/trusty/logs", c.Logs.Directory)
 	assert.Equal(t, 3, c.Logs.MaxAgeDays)
 	assert.Equal(t, 10, c.Logs.MaxSizeMb)
-
-	assert.Equal(t, "/tmp/trusty/audit", c.Audit.Directory)
-	assert.Equal(t, 99, c.Audit.MaxAgeDays)
-	assert.Equal(t, 99, c.Audit.MaxSizeMb)
 
 	assert.Len(t, c.LogLevels, 4)
 

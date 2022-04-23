@@ -7,9 +7,6 @@ metrics:
 logs:
   directory: /dev/null
 
-audit:
-  directory: /dev/null
-
 servers:
   cis:
     disabled: false

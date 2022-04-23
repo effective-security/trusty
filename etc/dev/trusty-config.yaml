@@ -36,12 +36,6 @@ log_levels:
     package: "*"
     level: DEBUG
 
-# configuration for the audit logger
-audit:
-  directory: /tmp/trusty/audit
-  max_age_days: 14
-  max_size_mb: 10
-
 metrics:
   # specifies if the metrics provider is disabled
   disabled: false

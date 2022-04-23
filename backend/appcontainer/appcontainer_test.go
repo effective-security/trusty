@@ -34,8 +34,7 @@ func TestNewContainerFactory(t *testing.T) {
 		{
 			name: "no_logs",
 			cfg: &config.Configuration{
-				Logs:  config.Logger{Directory: "/dev/null"},
-				Audit: config.Logger{Directory: "/dev/null"},
+				Logs: config.Logger{Directory: "/dev/null"},
 			},
 		},
 		{
@@ -46,8 +45,7 @@ func TestNewContainerFactory(t *testing.T) {
 						Disabled: &falseVal,
 					},
 				*/
-				Logs:  config.Logger{Directory: output},
-				Audit: config.Logger{Directory: output},
+				Logs: config.Logger{Directory: output},
 			},
 		},
 	}
