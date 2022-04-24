@@ -99,17 +99,18 @@
     "pbCallerStatusResponse": {
       "type": "object",
       "properties": {
-        "id": {
+        "subject": {
           "type": "string",
-          "description": "Id of the caller."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the caller."
+          "description": "Subject of the caller."
         },
         "role": {
           "type": "string",
-          "description": "Role of the caller."
+          "description": "Rame of the caller."
+        },
+        "claims": {
+          "type": "string",
+          "format": "byte",
+          "title": "Claims from the token, json encoded map[string]interface{}"
         }
       },
       "title": "CallerStatusResponse returns the caller information"

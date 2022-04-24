@@ -95,10 +95,10 @@ message ServerStatusResponse {
 
 // CallerStatusResponse returns the caller information
 message CallerStatusResponse {
-    // Id of the caller.
-    string id = 1;
-    // Name of the caller.
-    string name = 2;
-    // Role of the caller.
-    string role = 3;
+    // Subject of the caller.
+    string subject = 1;
+    // Rame of the caller.
+    string role = 2;
+    // Claims from the token, json encoded map[string]interface{}
+    bytes claims = 3;
 }

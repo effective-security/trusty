@@ -45,21 +45,21 @@
           },
           {
             "name": "skid",
-            "description": "SKID specifies Subject Key ID to search.",
+            "description": "SKID specifies Subject Key ID to search",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "issuerSerial.ikid",
-            "description": "Ikid provides Issuer Key Identifier.",
+            "description": "Ikid provides Issuer Key Identifier",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "issuerSerial.serialNumber",
-            "description": "SerialNumber provides certificate's serial number.",
+            "description": "SerialNumber provides certificate's serial number",
             "in": "query",
             "required": false,
             "type": "string"

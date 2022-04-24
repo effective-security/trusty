@@ -37,9 +37,8 @@ func TestStatusServerToClient(t *testing.T) {
 	assert.Equal(t, sexp.String(), sres.String())
 
 	cexp := &pb.CallerStatusResponse{
-		Id:   "1234",
-		Name: "denis",
-		Role: "admin",
+		Subject: "1234",
+		Role:    "admin",
 	}
 	srv.Resps = []proto.Message{cexp}
 	cres, err := cli.Caller(ctx, Empty)

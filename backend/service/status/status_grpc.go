@@ -2,6 +2,7 @@ package status
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/effective-security/porto/xhttp/identity"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -40,20 +41,18 @@ func (s *Service) Server(_ context.Context, _ *empty.Empty) (*pb.ServerStatusRes
 // Caller returns the status of the caller.
 func (s *Service) Caller(ctx context.Context, _ *empty.Empty) (*pb.CallerStatusResponse, error) {
 	callerCtx := identity.FromContext(ctx)
-	role := identity.GuestRoleName
-	var id, name string
-	if callerCtx != nil {
-		caller := callerCtx.Identity()
-		//id = caller.UserID()
-		//name = caller.Name()
-		role = caller.Role()
+	caller := callerCtx.Identity()
+	var claims []byte
+
+	cl := caller.Claims()
+	if cl != nil {
+		claims, _ = json.Marshal(cl)
 	}
 
-	// TODO: change CallerStatusResponse
 	res := &pb.CallerStatusResponse{
-		Id:   id,
-		Name: name,
-		Role: role,
+		Subject: caller.Subject(),
+		Role:    caller.Role(),
+		Claims:  claims,
 	}
 
 	return res, nil

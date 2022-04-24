@@ -65,9 +65,9 @@ func TestServerStatusResponse(t *testing.T) {
 
 func TestCallerStatusResponse(t *testing.T) {
 	r := &pb.CallerStatusResponse{
-		Id:   "12341234-1234124",
-		Name: "local",
-		Role: "trustry",
+		Subject: "12341234-1234124",
+		Role:    "trusty",
+		Claims:  []byte(`{"sub":"d@test.com"}`),
 	}
 
 	w := bytes.NewBuffer([]byte{})
@@ -75,9 +75,9 @@ func TestCallerStatusResponse(t *testing.T) {
 	print.CallerStatusResponse(w, r)
 
 	out := w.String()
-	assert.Equal(t, "  Name | local             \n"+
-		"  ID   | 12341234-1234124  \n"+
-		"  Role | trustry           \n\n", out)
+	assert.Equal(t, "  Subject   | 12341234-1234124  \n"+
+		"  Role      | trusty            \n"+
+		"  claim:sub | d@test.com        \n\n", out)
 }
 
 func TestRoots(t *testing.T) {
