@@ -2,6 +2,7 @@ package print
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"strconv"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/effective-security/xpki/certutil"
+	"github.com/effective-security/xpki/jwt"
 	"github.com/effective-security/xpki/x/print"
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/olekukonko/tablewriter"
@@ -45,11 +47,43 @@ func CallerStatusResponse(w io.Writer, r *pb.CallerStatusResponse) {
 	table := tablewriter.NewWriter(w)
 	table.SetBorder(false)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.Append([]string{"Name", r.Name})
-	table.Append([]string{"ID", r.Id})
+	table.Append([]string{"Subject", r.Subject})
 	table.Append([]string{"Role", r.Role})
+
+	now := time.Now().Local()
+	var claims jwt.MapClaims
+	json.Unmarshal(r.Claims, &claims)
+	for k := range claims {
+		var val string
+		if dateClaims[k] {
+			ptim := claims.Time(k)
+			if ptim != nil {
+				tim := ptim.Local()
+				if k == "exp" {
+					inMins := tim.Sub(now) / time.Minute * time.Minute
+					val = fmt.Sprintf("%s, in %s", tim.Format(time.RFC3339), inMins.String())
+				} else {
+					ago := now.Sub(tim) / time.Minute * time.Minute
+					val = fmt.Sprintf("%s, %s ago", tim.Format(time.RFC3339), ago.String())
+				}
+			} else {
+				val = claims.String(k)
+			}
+		} else {
+			val = claims.String(k)
+		}
+
+		table.Append([]string{"claim:" + k, val})
+	}
+
 	table.Render()
 	fmt.Fprintln(w)
+}
+
+var dateClaims = map[string]bool{
+	"iat": true,
+	"nbf": true,
+	"exp": true,
 }
 
 // Issuers prints list of IssuerInfo

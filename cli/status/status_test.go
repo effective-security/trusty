@@ -92,7 +92,8 @@ func (s *testSuite) TestServer() {
 
 func (s *testSuite) TestCaller() {
 	expectedResponse := &pb.CallerStatusResponse{
-		Role: "test_role",
+		Subject: "guest",
+		Role:    "test_role",
 	}
 
 	s.MockStatus = &mockpb.MockStatusServer{
@@ -106,8 +107,8 @@ func (s *testSuite) TestCaller() {
 	s.Require().NoError(err)
 
 	if s.Cli.IsJSON() {
-		s.HasText("{\n\t\"role\": \"test_role\"\n}\n")
+		s.HasText("{\n\t\"role\": \"test_role\",\n\t\"subject\": \"guest\"\n}\n")
 	} else {
-		s.HasText("  Name |            \n  ID   |            \n  Role | test_role  \n\n")
+		s.HasText("  Subject | guest      \n  Role    | test_role  \n\n")
 	}
 }

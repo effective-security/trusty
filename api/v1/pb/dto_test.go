@@ -33,9 +33,8 @@ func Test_Decode_ValidDTO(t *testing.T) {
 		Version: expVer,
 	}
 	expCaller := &pb.CallerStatusResponse{
-		Id:   "local",
-		Name: "localhost",
-		Role: "trusty-peer",
+		Subject: "localhost",
+		Role:    "trusty-peer",
 	}
 
 	tcases := []struct {

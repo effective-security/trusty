@@ -7,7 +7,7 @@ Trusty is a Certification Authority.
 
 ## Requirements
 
-1. GoLang 1.16+
+1. GoLang 1.18+
 1. SoftHSM 2.6+
 1. protoc
 
