@@ -153,7 +153,7 @@ func (r *Request) requestCertificate(ctx context.Context, client MinCertificates
 		logger.Errorf("failed to parse chain: %+v", err)
 	} else {
 		b := new(strings.Builder)
-		print.Certificates(b, chain)
+		print.Certificates(b, chain, false)
 		logger.Infof("cert=[%v]", b.String())
 	}
 

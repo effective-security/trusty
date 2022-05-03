@@ -47,6 +47,7 @@ func CallerStatusResponse(w io.Writer, r *pb.CallerStatusResponse) {
 	table := tablewriter.NewWriter(w)
 	table.SetBorder(false)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetAutoWrapText(false)
 	table.Append([]string{"Subject", r.Subject})
 	table.Append([]string{"Role", r.Role})
 
@@ -98,7 +99,7 @@ func Issuers(w io.Writer, issuers []*pb.IssuerInfo, withPem bool) {
 
 			crt, err := certutil.ParseFromPEM(certBytes)
 			if err == nil {
-				print.Certificate(w, crt)
+				print.Certificate(w, crt, false)
 			}
 
 			continue
