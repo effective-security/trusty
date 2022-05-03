@@ -81,7 +81,7 @@ func (r *CertificateSigningRequestSigningReconciler) Reconcile(ctx context.Conte
 			}
 
 			b := new(strings.Builder)
-			print.Certificate(b, cert)
+			print.Certificate(b, cert, false)
 			log.KV(xlog.NOTICE, "status", "signed", "certificate", b.String())
 
 			if len(issuer.PEM()) > 0 {

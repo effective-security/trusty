@@ -249,10 +249,13 @@ servers:
             - spiffe://trusty/ra
           trusty-wfe:
             - spiffe://trusty/wfe
+          trusty-client:
+            - spiffe://trusty/client
       jwt:
         enabled: true
         audience: trusty
         default_authenticated_role: authenticated_jwt
+        subject_claim: email
         roles:
           trusty-admin:
           - denis@ekspand.com

@@ -15,22 +15,24 @@ echo "*** trusty: checking caller"
     -c /tmp/trusty/certs/trusty_peer_ca.pem \
     -k /tmp/trusty/certs/trusty_peer_ca.key \
     -r /tmp/trusty/certs/trusty_root_ca.pem \
-    caller | grep -c "Role | trusty-ca"
+    caller | grep -c "| trusty-ca"
 
 /opt/trusty/bin/trustyctl -V -D --cfg /opt/trusty/etc/dev/trusty-config.yaml -s $TRUSTY_CA_2 \
     -c /tmp/trusty/certs/trusty_peer_ra.pem \
     -k /tmp/trusty/certs/trusty_peer_ra.key \
     -r /tmp/trusty/certs/trusty_root_ca.pem \
-    caller | grep -c "Role | trusty-ra"
+    caller | grep -c "| trusty-ra"
 
 /opt/trusty/bin/trustyctl -V -D --cfg /opt/trusty/etc/dev/trusty-config.yaml -s $TRUSTY_CA_1 \
     -c /tmp/trusty/certs/trusty_peer_cis.pem \
     -k /tmp/trusty/certs/trusty_peer_cis.key \
     -r /tmp/trusty/certs/trusty_root_ca.pem \
-    caller | grep -c "Role | trusty-cis"
+    caller | grep -c "| trusty-cis"
 
 /opt/trusty/bin/trustyctl -V -D --cfg /opt/trusty/etc/dev/trusty-config.yaml -s $TRUSTY_CA_2 \
     -c /tmp/trusty/certs/trusty_peer_wfe.pem \
     -k /tmp/trusty/certs/trusty_peer_wfe.key \
     -r /tmp/trusty/certs/trusty_root_ca.pem \
-    caller | grep -c "Role | trusty-wfe"
+    caller | grep -c "| trusty-wfe"
+
+echo "*** trusty: checking caller done"

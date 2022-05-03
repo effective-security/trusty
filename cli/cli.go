@@ -242,9 +242,14 @@ func (cli *Cli) EnsureCryptoProvider() error {
 
 	cryptoprov.Register("SoftHSM", crypto11.LoadProvider)
 	cryptoprov.Register("PKCS11", crypto11.LoadProvider)
-	cryptoprov.Register("AWSKMS", awskmscrypto.KmsLoader)
-	cryptoprov.Register("GCPKMS", gcpkmscrypto.KmsLoader)
-	cryptoprov.Register("GCPKMS-roots", gcpkmscrypto.KmsLoader)
+
+	cryptoprov.Register(awskmscrypto.ProviderName, awskmscrypto.KmsLoader)
+	cryptoprov.Register(awskmscrypto.ProviderName+"-1", awskmscrypto.KmsLoader)
+	cryptoprov.Register(awskmscrypto.ProviderName+"-2", awskmscrypto.KmsLoader)
+
+	cryptoprov.Register(gcpkmscrypto.ProviderName, gcpkmscrypto.KmsLoader)
+	cryptoprov.Register(gcpkmscrypto.ProviderName+"-1", gcpkmscrypto.KmsLoader)
+	cryptoprov.Register(gcpkmscrypto.ProviderName+"-2", gcpkmscrypto.KmsLoader)
 
 	if defaultProvider == "inmem" || defaultProvider == "plain" {
 		cli.crypto, err = cryptoprov.New(inmemcrypto.NewProvider(), nil)
