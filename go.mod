@@ -7,7 +7,7 @@ require (
 	cloud.google.com/go/storage v1.16.0
 	github.com/aws/aws-sdk-go v1.40.8 // indirect
 	github.com/cloudflare/cfssl v1.6.1 // indirect
-	github.com/effective-security/porto v0.0.0-20220430172001-1463bb5b3002
+	github.com/effective-security/porto v0.0.0-20220515165505-c8985a28a85f
 	github.com/go-logr/logr v0.4.0
 	github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba
 	github.com/go-phorce/dolly v0.9.1-0.20220116181830-596228500e2d
