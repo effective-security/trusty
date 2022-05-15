@@ -109,7 +109,7 @@ servers:
     services:
       - status
       - cis
-      - swagger
+      #- swagger
     timeout:
       request: 3s
     #swagger:
@@ -188,7 +188,7 @@ servers:
       - status
       - ca
       - cis
-      - swagger
+      #- swagger
     logger_skip_paths:
       - path: "/v1/status/node"
         agent: "Google"
