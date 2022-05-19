@@ -110,6 +110,15 @@ Add the launch configuration to .vscode/launch.json:
 }
 ```
 
+## gRPC issues
+
+```sh
+export GRPC_GO_LOG_VERBOSITY_LEVEL=99
+export GRPC_GO_LOG_SEVERITY_LEVEL=info
+```
+
+and run commands
+
 ## Swagger
 
     make start-swagger

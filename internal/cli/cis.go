@@ -1,27 +1,26 @@
-package cis
+package cli
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/go-phorce/dolly/ctl"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/martinisecurity/trusty/backend/config"
-	"github.com/martinisecurity/trusty/cli"
 	"github.com/martinisecurity/trusty/pkg/print"
 	"github.com/pkg/errors"
 )
 
-// GetRootsFlags defines flags for Roots command
-type GetRootsFlags struct {
-	Pem *bool
+// CisCmd is the parent for cis command
+type CisCmd struct {
+	Roots GetRootsCmd `cmd:"" help:"list Root certificates"`
 }
 
-// Roots shows the root CAs
-func Roots(c ctl.Control, p interface{}) error {
-	flags := p.(*GetRootsFlags)
+// GetRootsCmd defines flags for Roots command
+type GetRootsCmd struct {
+	Pem bool
+}
 
-	cli := c.(*cli.Cli)
+// Run the command
+func (a *GetRootsCmd) Run(cli *Cli) error {
 	client, err := cli.Client(config.CISServerName)
 	if err != nil {
 		return errors.WithStack(err)
@@ -34,10 +33,9 @@ func Roots(c ctl.Control, p interface{}) error {
 	}
 
 	if cli.IsJSON() {
-		ctl.WriteJSON(c.Writer(), res)
-		fmt.Fprint(c.Writer(), "\n")
+		cli.WriteJSON(res)
 	} else {
-		print.Roots(c.Writer(), res.Roots, *flags.Pem)
+		print.Roots(cli.Writer(), res.Roots, a.Pem)
 	}
 	return nil
 }
