@@ -92,7 +92,7 @@ jobs:
         labels: ${{ steps.meta_trusty.outputs.labels }}
 
     - name: Docker kubeca meta
-      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       id: meta_kubeca
       uses: docker/metadata-action@v3
       with:
@@ -108,7 +108,7 @@ jobs:
           type=sha
 
     - name: Docker kubeca docker_build_kubecertinit
-      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       id: docker_build_kubeca
       uses: docker/build-push-action@v2
       with:
@@ -119,7 +119,7 @@ jobs:
         labels: ${{ steps.meta_kubeca.outputs.labels }}
 
     - name: Docker kubecertinit meta
-      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       id: meta_kubecertinit
       uses: docker/metadata-action@v3
       with:
@@ -135,7 +135,7 @@ jobs:
           type=sha
 
     - name: Docker kubecertinit build
-      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       id: docker_build_kubecertinit
       uses: docker/build-push-action@v2
       with:
