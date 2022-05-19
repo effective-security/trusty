@@ -1,19 +1,18 @@
-package status
+package cli
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/go-phorce/dolly/ctl"
 	"github.com/martinisecurity/trusty/backend/config"
-	"github.com/martinisecurity/trusty/cli"
 	"github.com/martinisecurity/trusty/pkg/print"
 	"github.com/pkg/errors"
 )
 
-// Version shows the service version
-func Version(c ctl.Control, _ interface{}) error {
-	cli := c.(*cli.Cli)
+// VersionCmd shows the service version
+type VersionCmd struct{}
+
+// Run the command
+func (a *VersionCmd) Run(cli *Cli) error {
 	client, err := cli.Client(config.WFEServerName)
 	if err != nil {
 		return errors.WithStack(err)
@@ -26,17 +25,18 @@ func Version(c ctl.Control, _ interface{}) error {
 	}
 
 	if cli.IsJSON() {
-		ctl.WriteJSON(c.Writer(), res)
-		fmt.Fprint(c.Writer(), "\n")
+		cli.WriteJSON(res)
 	} else {
-		print.ServerVersion(c.Writer(), res)
+		print.ServerVersion(cli.Writer(), res)
 	}
 	return nil
 }
 
-// Server shows trusty server status
-func Server(c ctl.Control, _ interface{}) error {
-	cli := c.(*cli.Cli)
+// ServerStatusCmd shows the service status
+type ServerStatusCmd struct{}
+
+// Run the command
+func (a *ServerStatusCmd) Run(cli *Cli) error {
 	client, err := cli.Client(config.WFEServerName)
 	if err != nil {
 		return errors.WithStack(err)
@@ -49,18 +49,19 @@ func Server(c ctl.Control, _ interface{}) error {
 	}
 
 	if cli.IsJSON() {
-		ctl.WriteJSON(c.Writer(), res)
-		fmt.Fprint(c.Writer(), "\n")
+		cli.WriteJSON(res)
 	} else {
-		print.ServerStatusResponse(c.Writer(), res)
+		print.ServerStatusResponse(cli.Writer(), res)
 	}
 
 	return nil
 }
 
-// Caller shows the Caller status
-func Caller(c ctl.Control, _ interface{}) error {
-	cli := c.(*cli.Cli)
+// CallerCmd shows the caller status
+type CallerCmd struct{}
+
+// Run the command
+func (a *CallerCmd) Run(cli *Cli) error {
 	client, err := cli.Client(config.WFEServerName)
 	if err != nil {
 		return errors.WithStack(err)
@@ -73,10 +74,9 @@ func Caller(c ctl.Control, _ interface{}) error {
 	}
 
 	if cli.IsJSON() {
-		ctl.WriteJSON(c.Writer(), res)
-		fmt.Fprint(c.Writer(), "\n")
+		cli.WriteJSON(res)
 	} else {
-		print.CallerStatusResponse(c.Writer(), res)
+		print.CallerStatusResponse(cli.Writer(), res)
 	}
 
 	return nil

@@ -10,7 +10,7 @@ export TRUSTY_CA_2=https://168.138.72.102:7892
 
 export TRUSTY_ROOT=/tmp/trusty/certs/trusty_root_ca.pem
 
-export TRUSTYCTL_FLAGS="-V -D --cfg /opt/trusty/etc/dev/trusty-config.yaml -r $TRUSTY_ROOT"
+export TRUSTYCTL_FLAGS="-D --cfg /opt/trusty/etc/dev/trusty-config.yaml -r $TRUSTY_ROOT"
 
 #echo "Trusted anchors"
 #cp $TRUSTY_ROOT /etc/pki/ca-trust/source/anchors/
