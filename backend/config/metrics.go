@@ -13,6 +13,8 @@ type Metrics struct {
 
 	// Prometheus provider config
 	Prometheus *Prometheus `json:"prometheus,omitempty" yaml:"prometheus,omitempty"`
+
+	EnableRuntimeMetrics bool `json:"runtime_metrics,omitempty" yaml:"runtime_metrics,omitempty"`
 }
 
 // GetDisabled specifies if the metrics provider is disabled

@@ -560,15 +560,15 @@ func (a *App) setupMetrics() error {
 			EnableHostnameLabel:  false, // added in GlobalTags
 			EnableServiceLabel:   false, // added in GlobalTags
 			FilterDefault:        true,
-			EnableRuntimeMetrics: true,
+			EnableRuntimeMetrics: cfg.Metrics.EnableRuntimeMetrics,
 			TimerGranularity:     time.Millisecond,
 			ProfileInterval:      time.Second,
 			GlobalPrefix:         cfg.Metrics.Prefix,
 			GlobalTags: []metrics.Tag{
 				{Name: "host", Value: a.hostname},
 				{Name: "service", Value: cfg.ServiceName},
-				{Name: "env", Value: cfg.Environment},
-				{Name: "region", Value: cfg.Region},
+				//{Name: "env", Value: cfg.Environment},
+				//{Name: "region", Value: cfg.Region},
 				{Name: "cluster_id", Value: cfg.ClusterName},
 			},
 		}
