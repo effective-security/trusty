@@ -7,10 +7,9 @@ require (
 	cloud.google.com/go/storage v1.16.0
 	github.com/aws/aws-sdk-go v1.40.8 // indirect
 	github.com/cloudflare/cfssl v1.6.1 // indirect
-	github.com/effective-security/porto v0.0.0-20220518133606-343e76c5fe1f
+	github.com/effective-security/porto v0.0.0-20220521210709-9e391c5dbe5e
 	github.com/go-logr/logr v0.4.0
 	github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba
-	github.com/go-phorce/dolly v0.9.1-0.20220116181830-596228500e2d
 	github.com/gogo/googleapis v1.4.1
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang-migrate/migrate/v4 v4.14.1
@@ -54,6 +53,7 @@ require (
 )
 
 require (
+	github.com/alecthomas/kong v0.4.0
 	github.com/effective-security/metrics v0.0.0-20220118120427-f740cb7dda2b
 	github.com/effective-security/xlog v0.0.0-20220119145654-f9e93d59bf04
 	github.com/effective-security/xpki v0.1.2-0.20220503145806-af5b3e0a38cc
@@ -61,7 +61,6 @@ require (
 
 require (
 	cloud.google.com/go/kms v1.1.0 // indirect
-	github.com/alecthomas/kong v0.4.0 // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
 	github.com/beorn7/perks v1.0.1 // indirect

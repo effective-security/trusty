@@ -32,6 +32,8 @@ import (
 	"github.com/martinisecurity/trusty/backend/tasks/stats"
 	"github.com/martinisecurity/trusty/internal/version"
 	"github.com/pkg/errors"
+	prom "github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/dig"
 	kp "gopkg.in/alecthomas/kingpin.v2"
@@ -536,6 +538,11 @@ func (a *App) setupMetrics() error {
 	switch cfg.Metrics.Provider {
 	case "prometheus":
 		if promSink == nil {
+			// Remove Go collector
+			prom.Unregister(collectors.NewGoCollector())
+			prom.Unregister(collectors.NewBuildInfoCollector())
+			prom.Unregister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
+
 			promSink, err = prometheus.NewSink()
 			if err != nil {
 				return errors.WithStack(err)
@@ -544,7 +551,9 @@ func (a *App) setupMetrics() error {
 			if cfg.Metrics.Prometheus != nil && cfg.Metrics.Prometheus.Addr != "" {
 				go func() {
 					logger.Infof("status=starting_metrics, endpoint=%s", cfg.Metrics.Prometheus.Addr)
-					logger.Fatal(http.ListenAndServe(cfg.Metrics.Prometheus.Addr, promhttp.Handler()).Error())
+					// remove Prom metrics
+					h := promhttp.HandlerFor(prom.DefaultGatherer, promhttp.HandlerOpts{})
+					logger.Fatal(http.ListenAndServe(cfg.Metrics.Prometheus.Addr, h).Error())
 				}()
 			}
 		}
