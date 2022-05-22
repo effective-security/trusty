@@ -40,7 +40,7 @@ metrics:
   # specifies if the metrics provider is disabled
   disabled: false
   prefix: trusty
-  runtime_metrics: false
+  runtime_metrics: true
   # the metrics provider: prometheus|inmem
   provider: prometheus
   prometheus:
