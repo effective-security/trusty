@@ -77,8 +77,8 @@ func StartCertificateSigningRequestController(f *CertificateSigningRequestContro
 		return err
 	}
 	if err := (&CertificateSigningRequestSigningReconciler{
-		Client:        mgr.GetClient(),
-		Log:           ctrl.Log.WithName(controllerName),
+		Client: mgr.GetClient(),
+		//Log:           ctrl.Log.WithName(controllerName),
 		Scheme:        mgr.GetScheme(),
 		Authority:     ca,
 		EventRecorder: mgr.GetEventRecorderFor(controllerName),
@@ -92,7 +92,7 @@ func StartCertificateSigningRequestController(f *CertificateSigningRequestContro
 	}
 	// +kubebuilder:scaffold:builder
 
-	logger.Info("starting controller")
+	logger.KV(xlog.INFO, "status", "starting controller")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		logger.KV(xlog.ERROR,
 			"reason", "unable to start controller",

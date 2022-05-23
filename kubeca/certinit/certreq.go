@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/certutil"
 	"github.com/effective-security/xpki/cryptoprov/inmemcrypto"
 	"github.com/effective-security/xpki/csr"
@@ -74,14 +75,14 @@ func (r *Request) requestCertificate(ctx context.Context, client MinCertificates
 		return errors.WithMessage(err, "unable to save key")
 	}
 
-	logger.Infof("wrote %s", keyFile)
+	logger.KV(xlog.INFO, "status", "wrote_key", "file", keyFile)
 
 	csrFile := path.Join(r.CertDir, "tls.csr")
 	if err := ioutil.WriteFile(csrFile, pemCsr, 0644); err != nil {
 		return errors.WithMessage(err, "unable to save CSR")
 	}
 
-	logger.Infof("wrote %s", csrFile)
+	logger.KV(xlog.INFO, "status", "wrote_csr", "file", csrFile)
 
 	// Submit a certificate signing request, wait for it to be approved, then save
 	// the signed certificate to the file system.
@@ -108,14 +109,14 @@ func (r *Request) requestCertificate(ctx context.Context, client MinCertificates
 
 	_, err = client.Get(ctx, certificateSigningRequestName, metaV1.GetOptions{})
 	if err != nil {
-		logger.Debugf("unable to get CSR: " + err.Error())
+		logger.KV(xlog.DEBUG, "status", "unable to get CSR", "err", err.Error())
 		_, err = client.Create(ctx, certificateSigningRequest, metaV1.CreateOptions{})
 		if err != nil {
 			return errors.WithMessage(err, "unable to create the certificate signing request")
 		}
-		logger.Info("waiting for certificate...")
+		logger.KV(xlog.INFO, "status", "waiting for certificate")
 	} else {
-		logger.Info("signing request already exists")
+		logger.KV(xlog.INFO, "status", "signing request already exists")
 	}
 
 	var certificate []byte
@@ -126,15 +127,17 @@ func (r *Request) requestCertificate(ctx context.Context, client MinCertificates
 				// If the request got deleted, waiting won't help.
 				return errors.Errorf("certificate signing request not found: " + certificateSigningRequestName)
 			}
-
-			logger.Errorf("unable to retrieve certificate signing request (%s): %v", certificateSigningRequestName, err)
+			logger.KV(xlog.ERROR, "status", "unable to retrieve certificate signing request",
+				"name", certificateSigningRequestName,
+				"err", err.Error(),
+			)
 			time.Sleep(5 * time.Second)
 			continue
 		}
 
 		certificate = csr.Status.Certificate
 		if len(certificate) > 0 {
-			logger.Infof("got certificate:\n%s", certificate)
+			logger.KV(xlog.INFO, "status", "got certificate")
 			break
 		}
 
@@ -144,7 +147,11 @@ func (r *Request) requestCertificate(ctx context.Context, client MinCertificates
 			}
 		}
 
-		logger.Infof("certificate signing request (%s) not issued; trying again in 5 seconds", certificateSigningRequestName)
+		logger.KV(xlog.INFO, "status", "csr not issued",
+			"name", certificateSigningRequestName,
+			"retry", "in 5 seconds",
+		)
+
 		time.Sleep(5 * time.Second)
 	}
 
@@ -154,7 +161,7 @@ func (r *Request) requestCertificate(ctx context.Context, client MinCertificates
 	} else {
 		b := new(strings.Builder)
 		print.Certificates(b, chain, false)
-		logger.Infof("cert=[%v]", b.String())
+		logger.KV(xlog.DEBUG, "cert", b.String())
 	}
 
 	certFile := path.Join(r.CertDir, "tls.crt")
@@ -162,7 +169,7 @@ func (r *Request) requestCertificate(ctx context.Context, client MinCertificates
 		return errors.WithMessage(err, "unable to save certificate")
 	}
 
-	logger.Infof("wrote %s", certFile)
+	logger.KV(xlog.INFO, "status", "wrote_cert", "file", certFile)
 
 	return nil
 }
