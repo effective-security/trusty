@@ -132,16 +132,16 @@ func (s *Service) registerIssuers(ctx context.Context) error {
 func (s *Service) registerCert(ctx context.Context, trust pb.Trust, location string) error {
 	crt, err := certutil.LoadFromPEM(location)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	pem, err := certutil.EncodeToPEMString(true, crt)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	c := model.NewRootCertificate(crt, int(trust), pem)
 	_, err = s.db.RegisterRootCertificate(ctx, c)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	logger.Infof("trust=%v, subject=%q", trust, c.Subject)
 	return nil
@@ -156,7 +156,7 @@ func (s *Service) registerRoots(ctx context.Context) error {
 		err := s.registerCert(ctx, pb.Trust_Private, r)
 		if err != nil {
 			logger.Errorf("err=[%+v]", err)
-			return err
+			return errors.WithStack(err)
 		}
 	}
 	for _, r := range s.cfg.RegistrationAuthority.PublicRoots {
@@ -167,7 +167,7 @@ func (s *Service) registerRoots(ctx context.Context) error {
 		err := s.registerCert(ctx, pb.Trust_Public, r)
 		if err != nil {
 			logger.Errorf("err=[%+v]", err)
-			return err
+			return errors.WithStack(err)
 		}
 	}
 
@@ -181,6 +181,7 @@ func (s *Service) registerRoots(ctx context.Context) error {
 func (s *Service) registerPublisherTask(ctx context.Context) {
 	issuers := s.ca.Issuers()
 	for _, issuer := range issuers {
+		issuer := issuer
 		if issuer.CrlRenewal() > 0 && issuer.CrlURL() != "" {
 			logger.KV(xlog.NOTICE,
 				"ikid", issuer.SubjectKID(),

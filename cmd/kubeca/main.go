@@ -20,8 +20,6 @@ import (
 )
 
 func main() {
-	xlog.GetFormatter().WithCaller(true)
-
 	cryptoprov.Register("SoftHSM", crypto11.LoadProvider)
 	cryptoprov.Register("PKCS11", crypto11.LoadProvider)
 	cryptoprov.Register(awskmscrypto.ProviderName, awskmscrypto.KmsLoader)
@@ -51,9 +49,10 @@ func main() {
 	flag.Parse()
 
 	if withStackdriver {
-		formatter := stackdriver.NewFormatter(os.Stderr, "kubeca").WithCaller(true)
+		formatter := stackdriver.NewFormatter(os.Stderr, "kubeca")
 		xlog.SetFormatter(formatter)
 	}
+	xlog.GetFormatter().WithCaller(true)
 
 	ctrl.SetLogger(zap.New(zap.UseDevMode(debugLogging)))
 
