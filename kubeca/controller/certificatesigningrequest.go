@@ -9,7 +9,6 @@ import (
 	"github.com/effective-security/xpki/authority"
 	csrapi "github.com/effective-security/xpki/csr"
 	"github.com/effective-security/xpki/x/print"
-	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	capi "k8s.io/api/certificates/v1"
 	v1 "k8s.io/api/core/v1"
@@ -22,7 +21,7 @@ import (
 // CertificateSigningRequestSigningReconciler reconciles a CertificateSigningRequest object
 type CertificateSigningRequestSigningReconciler struct {
 	client.Client
-	Log           logr.Logger
+	//Log           logr.Logger
 	Scheme        *runtime.Scheme
 	Authority     *authority.Authority
 	EventRecorder record.EventRecorder
@@ -34,7 +33,7 @@ type CertificateSigningRequestSigningReconciler struct {
 
 // Reconcile implementation
 func (r *CertificateSigningRequestSigningReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log := logger.WithValues("certificatesigningrequest", req.NamespacedName)
+	log := logger.WithValues("ns", req.NamespacedName)
 	var csr capi.CertificateSigningRequest
 	if err := r.Client.Get(ctx, req.NamespacedName, &csr); client.IgnoreNotFound(err) != nil {
 		return ctrl.Result{}, errors.WithMessagef(err, "error getting CSR")

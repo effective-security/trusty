@@ -79,8 +79,11 @@ func (r *Request) Create(ctx context.Context, client *CertClient) error {
 		return errors.New("missing required signer name parameter")
 	}
 
-	logger.Infof("Request, ns=%s, pod=%s, signer=%s, san=%q",
-		r.Namespace, r.PodName, r.SignerName, r.SAN)
+	logger.KV(xlog.INFO,
+		"ns", r.Namespace,
+		"pod", r.PodName,
+		"signer", r.SignerName,
+		"san", r.SAN)
 
 	// Gather the list of labels that will be added to the CreateCertificateSigningRequest object
 	r.labelsMap = make(map[string]string)
