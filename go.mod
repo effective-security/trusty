@@ -55,7 +55,7 @@ require (
 require (
 	github.com/alecthomas/kong v0.4.0
 	github.com/effective-security/metrics v0.0.0-20220118120427-f740cb7dda2b
-	github.com/effective-security/xlog v0.0.0-20220119145654-f9e93d59bf04
+	github.com/effective-security/xlog v0.0.0-20220524230729-a9ac7b835dd8
 	github.com/effective-security/xpki v0.1.2-0.20220503145806-af5b3e0a38cc
 )
 

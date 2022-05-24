@@ -282,10 +282,10 @@ func (a *App) Run(startedCh chan<- bool) error {
 		var svc gserver.Service
 		return disco.ForEach(&svc, func(key string) error {
 			if onstarted, ok := svc.(gserver.StartSubcriber); ok {
-				logger.Infof("onstarted=running, key=%s, service=%s", key, svc.Name())
+				logger.Infof("src=Run, onstarted=running, key=%s, service=%s", key, svc.Name())
 				return onstarted.OnStarted()
 			}
-			logger.Infof("onstarted=skipped, key=%s, service=%s", key, svc.Name())
+			logger.Infof("src=Run, onstarted=skipped, key=%s, service=%s", key, svc.Name())
 			return nil
 		})
 	})
@@ -375,6 +375,11 @@ func (a *App) loadConfig() error {
 
 	// Parse arguments
 	kp.MustParse(app.Parse(a.args))
+
+	if flags.isStackdriver != nil && *a.flags.isStackdriver {
+		formatter := stackdriver.NewFormatter(os.Stderr, "trusty")
+		xlog.SetFormatter(formatter)
+	}
 
 	f, err := config.DefaultFactory()
 	if err != nil {
@@ -466,7 +471,10 @@ func (a *App) loadConfig() error {
 
 func (a *App) initLogs() error {
 	cfg := a.cfg
-	if cfg.Logs.Directory != "" && cfg.Logs.Directory != nullDevName {
+	if a.flags != nil && a.flags.isStackdriver != nil && *a.flags.isStackdriver {
+		formatter := stackdriver.NewFormatter(os.Stderr, cfg.Logs.LogsName)
+		xlog.SetFormatter(formatter)
+	} else if cfg.Logs.Directory != "" && cfg.Logs.Directory != nullDevName {
 		os.MkdirAll(cfg.Logs.Directory, 0644)
 
 		var sink io.Writer
@@ -484,9 +492,6 @@ func (a *App) initLogs() error {
 			return errors.WithMessage(err, "failed to initialize log rotate")
 		}
 		a.OnClose(logRotate)
-	} else if a.flags != nil && a.flags.isStackdriver != nil && *a.flags.isStackdriver {
-		formatter := stackdriver.NewFormatter(os.Stderr, cfg.Logs.LogsName)
-		xlog.SetFormatter(formatter)
 	} else {
 		formatter := xlog.NewColorFormatter(os.Stderr, true)
 		xlog.SetFormatter(formatter)

@@ -30,7 +30,7 @@ func main() {
 	flag.Parse()
 
 	if withStackdriver {
-		formatter := stackdriver.NewFormatter(os.Stderr, "kubecertinit").WithCaller(true)
+		formatter := stackdriver.NewFormatter(os.Stderr, "kubecertinit")
 		xlog.SetFormatter(formatter)
 	}
 	xlog.GetFormatter().WithCaller(true)
