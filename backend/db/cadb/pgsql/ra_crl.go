@@ -3,6 +3,7 @@ package pgsql
 import (
 	"context"
 
+	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/xlog"
 	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
@@ -23,7 +24,7 @@ func (p *Provider) RegisterCrl(ctx context.Context, crl *model.Crl) (*model.Crl,
 		return nil, errors.WithStack(err)
 	}
 
-	logger.Debugf("issuer=%q, ikid=%s", crl.Issuer, crl.IKID)
+	logger.Tracef("issuer=%q, ikid=%s, ctx=%q", crl.Issuer, crl.IKID, correlation.ID(ctx))
 
 	res := new(model.Crl)
 
@@ -58,6 +59,7 @@ func (p *Provider) RegisterCrl(ctx context.Context, crl *model.Crl) (*model.Crl,
 
 // RemoveCrl removes CRL
 func (p *Provider) RemoveCrl(ctx context.Context, id uint64) error {
+	logger.Noticef("id=%d, ctx=%q", id, correlation.ID(ctx))
 	_, err := p.db.ExecContext(ctx, `DELETE FROM crls WHERE id=$1;`, id)
 	if err != nil {
 		logger.KV(xlog.ERROR, "err", err)
@@ -86,7 +88,7 @@ func (p *Provider) GetCrl(ctx context.Context, ikid string) (*model.Crl, error) 
 		&res.Pem,
 	)
 	if err != nil {
-		logger.KV(xlog.ERROR, "err", err)
+		//logger.KV(xlog.ERROR, "err", err)
 		return nil, errors.WithStack(err)
 	}
 	res.ThisUpdate = res.ThisUpdate.UTC()

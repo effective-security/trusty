@@ -3,6 +3,7 @@ package ca
 import (
 	"context"
 
+	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/authority"
 	v1 "github.com/martinisecurity/trusty/api/v1"
@@ -99,6 +100,7 @@ func (s *Service) GetCertificate(ctx context.Context, in *pb.GetCertificateReque
 	// TODO: IssuerSerial
 	if err != nil {
 		logger.KV(xlog.ERROR,
+			"ctx", correlation.ID(ctx),
 			"request", in,
 			"err", err,
 		)
@@ -115,6 +117,7 @@ func (s *Service) UpdateCertificateLabel(ctx context.Context, req *pb.UpdateCert
 	crt, err := s.db.UpdateCertificateLabel(ctx, req.Id, req.Label)
 	if err != nil {
 		logger.KV(xlog.ERROR,
+			"ctx", correlation.ID(ctx),
 			"request", req,
 			"err", err,
 		)
@@ -131,6 +134,7 @@ func (s *Service) ListCertificates(ctx context.Context, in *pb.ListByIssuerReque
 	list, err := s.db.ListCertificates(ctx, in.Ikid, int(in.Limit), in.After)
 	if err != nil {
 		logger.KV(xlog.ERROR,
+			"ctx", correlation.ID(ctx),
 			"request", in,
 			"err", err,
 		)
@@ -147,6 +151,7 @@ func (s *Service) ListRevokedCertificates(ctx context.Context, in *pb.ListByIssu
 	list, err := s.db.ListRevokedCertificates(ctx, in.Ikid, int(in.Limit), in.After)
 	if err != nil {
 		logger.KV(xlog.ERROR,
+			"ctx", correlation.ID(ctx),
 			"request", in,
 			"err", err,
 		)
@@ -163,6 +168,7 @@ func (s *Service) ListOrgCertificates(ctx context.Context, in *pb.ListOrgCertifi
 	list, err := s.db.ListOrgCertificates(ctx, in.OrgId, int(in.Limit), in.After)
 	if err != nil {
 		logger.KV(xlog.ERROR,
+			"ctx", correlation.ID(ctx),
 			"request", in,
 			"err", err,
 		)

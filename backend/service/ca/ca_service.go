@@ -8,6 +8,7 @@ import (
 	"github.com/effective-security/porto/pkg/tasks"
 	"github.com/effective-security/porto/restserver"
 	"github.com/effective-security/porto/x/fileutil"
+	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/authority"
 	"github.com/effective-security/xpki/certutil"
@@ -161,12 +162,12 @@ func (s *Service) registerRoots(ctx context.Context) error {
 	}
 	for _, r := range s.cfg.RegistrationAuthority.PublicRoots {
 		if err := fileutil.FileExists(r); err != nil {
-			logger.Warningf("err=[%+v]", err.Error())
+			logger.Warningf("ctx=%q, err=[%v]", correlation.ID(ctx), err.Error())
 			continue
 		}
 		err := s.registerCert(ctx, pb.Trust_Public, r)
 		if err != nil {
-			logger.Errorf("err=[%+v]", err)
+			logger.Errorf("ctx=%q, err=[%+v]", correlation.ID(ctx), err)
 			return errors.WithStack(err)
 		}
 	}
@@ -184,6 +185,7 @@ func (s *Service) registerPublisherTask(ctx context.Context) {
 		issuer := issuer
 		if issuer.CrlRenewal() > 0 && issuer.CrlURL() != "" {
 			logger.KV(xlog.NOTICE,
+				"ctx", correlation.ID(ctx),
 				"ikid", issuer.SubjectKID(),
 				"scheduled", "crl_publisher",
 				"interval", issuer.CrlRenewal().String(),
@@ -196,6 +198,7 @@ func (s *Service) registerPublisherTask(ctx context.Context) {
 				_, err := s.publishCrl(ctx, issuer.SubjectKID())
 				if err != nil {
 					logger.KV(xlog.ERROR,
+						"ctx", correlation.ID(ctx),
 						"ikid", issuer.SubjectKID(),
 						"task", taskName,
 						"err", err,
@@ -205,6 +208,7 @@ func (s *Service) registerPublisherTask(ctx context.Context) {
 			s.scheduler = s.scheduler.Add(task)
 		} else {
 			logger.KV(xlog.NOTICE,
+				"ctx", correlation.ID(ctx),
 				"ikid", issuer.SubjectKID(),
 				"skipped", "crl_publisher",
 				"interval", issuer.CrlRenewal().String(),

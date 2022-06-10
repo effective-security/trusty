@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/xlog"
 	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
@@ -20,7 +21,8 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 		return nil, errors.WithStack(err)
 	}
 
-	logger.Tracef("id=%d, subject=%q, skid=%s", id, crt.Subject, crt.SKID)
+	logger.Tracef("id=%d, subject=%q, skid=%s, ctx=%q",
+		id, crt.Subject, crt.SKID, correlation.ID(ctx))
 
 	b, err := json.Marshal(crt.Metadata)
 	if err != nil {
@@ -123,7 +125,7 @@ func scanShortCertificate(row *sql.Rows) (*model.Certificate, error) {
 
 // RemoveCertificate removes Cert
 func (p *Provider) RemoveCertificate(ctx context.Context, id uint64) error {
-	logger.Noticef("id=%d", id)
+	logger.Noticef("id=%d, ctx=%q", id, correlation.ID(ctx))
 	_, err := p.db.ExecContext(ctx, `DELETE FROM certificates WHERE id=$1;`, id)
 	if err != nil {
 		logger.Errorf("err=[%+v]", err)
@@ -135,6 +137,7 @@ func (p *Provider) RemoveCertificate(ctx context.Context, id uint64) error {
 
 // UpdateCertificateLabel update Certificate label
 func (p *Provider) UpdateCertificateLabel(ctx context.Context, id uint64, label string) (*model.Certificate, error) {
+	logger.Noticef("id=%d, label=%q, ctx=%q", id, label, correlation.ID(ctx))
 	m, err := scanFullCertificate(p.db.QueryRowContext(ctx, `
 			UPDATE certificates
 			SET label=$2
@@ -265,6 +268,7 @@ func (p *Provider) ListCertificates(ctx context.Context, ikid string, limit int,
 		"ikid", ikid,
 		"limit", limit,
 		"afterID", afterID,
+		"ctx", correlation.ID(ctx),
 	)
 
 	res, err := p.db.QueryContext(ctx,
