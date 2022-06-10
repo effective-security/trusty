@@ -3,6 +3,7 @@ package pgsql
 import (
 	"context"
 
+	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/xlog"
 	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
@@ -17,7 +18,7 @@ func (p *Provider) RegisterCertProfile(ctx context.Context, m *model.CertProfile
 		return nil, errors.WithStack(err)
 	}
 
-	logger.Tracef("id=%d, label=%q", id, m.Label)
+	logger.Tracef("id=%d, label=%q, ctx=%q", id, m.Label, correlation.ID(ctx))
 
 	res := new(model.CertProfile)
 	err = p.db.QueryRowContext(ctx, `
@@ -45,7 +46,7 @@ func (p *Provider) RegisterCertProfile(ctx context.Context, m *model.CertProfile
 
 // DeleteCertProfile deletes the CertProfile
 func (p *Provider) DeleteCertProfile(ctx context.Context, label string) error {
-	logger.Noticef("label=%s", label)
+	logger.Noticef("label=%s, ctx=%q", label, correlation.ID(ctx))
 	_, err := p.db.ExecContext(ctx, `DELETE FROM cert_profiles WHERE label=$1;`, label)
 	if err != nil {
 		logger.Errorf("err=[%+v]", err)
@@ -59,9 +60,10 @@ func (p *Provider) ListCertProfiles(ctx context.Context, limit int, afterID uint
 	if limit == 0 {
 		limit = 100
 	}
-	logger.KV(xlog.DEBUG,
+	logger.KV(xlog.TRACE,
 		"limit", limit,
 		"afterID", afterID,
+		"ctx", correlation.ID(ctx),
 	)
 
 	res, err := p.db.QueryContext(ctx,
@@ -107,8 +109,9 @@ func (p *Provider) ListCertProfiles(ctx context.Context, limit int, afterID uint
 
 // GetCertProfilesByIssuer returns list of CertProfile
 func (p *Provider) GetCertProfilesByIssuer(ctx context.Context, issuer string) ([]*model.CertProfile, error) {
-	logger.KV(xlog.DEBUG,
+	logger.KV(xlog.TRACE,
 		"issuer", issuer,
+		"ctx", correlation.ID(ctx),
 	)
 
 	res, err := p.db.QueryContext(ctx,

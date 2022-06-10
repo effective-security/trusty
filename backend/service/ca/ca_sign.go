@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/effective-security/metrics"
+	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/authority"
 	"github.com/effective-security/xpki/csr"
@@ -129,6 +130,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 	mcert, err = s.db.RegisterCertificate(ctx, mcert)
 	if err != nil {
 		logger.KV(xlog.ERROR,
+			"ctx", correlation.ID(ctx),
 			"status", "failed to register certificate",
 			"err", err)
 
@@ -143,6 +145,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 		_, err := s.publisher.PublishCertificate(context.Background(), mcert.ToPB(), fn)
 		if err != nil {
 			logger.KV(xlog.ERROR,
+				"ctx", correlation.ID(ctx),
 				"status", "failed to publish certificate",
 				"err", err)
 			metrics.IncrCounter(keyForCertPublishFailed, 1, tags...)
@@ -151,6 +154,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 	}
 
 	logger.KV(xlog.NOTICE,
+		"ctx", correlation.ID(ctx),
 		"status", "signed certificate",
 		"id", mcert.ID,
 		"subject", mcert.Subject,

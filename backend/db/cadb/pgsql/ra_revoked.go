@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/xlog"
 	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
@@ -28,7 +29,8 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 	}
 
 	crt := &revoked.Certificate
-	logger.Debugf("id=%d,subject=%q, skid=%s, ikid=%s", id, crt.Subject, crt.SKID, crt.IKID)
+	logger.Tracef("id=%d,subject=%q, skid=%s, ikid=%s, ctx=%q",
+		id, crt.Subject, crt.SKID, crt.IKID, correlation.ID(ctx))
 
 	b, err := json.Marshal(crt.Metadata)
 	if err != nil {
@@ -136,9 +138,10 @@ func scanShortRevokedCertificate(row *sql.Rows) (*model.RevokedCertificate, erro
 
 // RemoveRevokedCertificate removes revoked Certificate
 func (p *Provider) RemoveRevokedCertificate(ctx context.Context, id uint64) error {
+	logger.Noticef("id=%d, ctx=%q", id, correlation.ID(ctx))
 	_, err := p.db.ExecContext(ctx, `DELETE FROM revoked WHERE id=$1;`, id)
 	if err != nil {
-		logger.Errorf("err=[%+v]", err)
+		// logger.Errorf("err=[%+v]", err)
 		return errors.WithStack(err)
 	}
 
@@ -186,6 +189,7 @@ func (p *Provider) ListRevokedCertificates(ctx context.Context, ikid string, lim
 		"ikid", ikid,
 		"limit", limit,
 		"afterID", afterID,
+		"ctx", correlation.ID(ctx),
 	)
 
 	res, err := p.db.QueryContext(ctx,
@@ -234,7 +238,9 @@ func (p *Provider) RevokeCertificate(ctx context.Context, crt *model.Certificate
 	logger.KV(xlog.NOTICE, "id", crt.ID,
 		"subject", crt.Subject,
 		"skid", crt.SKID,
-		"ikid", crt.IKID)
+		"ikid", crt.IKID,
+		"ctx", correlation.ID(ctx),
+	)
 
 	tx, err := p.DB().BeginTx(ctx, nil)
 	if err != nil {

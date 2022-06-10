@@ -3,6 +3,7 @@ package pgsql
 import (
 	"context"
 
+	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/pkg/errors"
@@ -16,7 +17,7 @@ func (p *Provider) RegisterRootCertificate(ctx context.Context, crt *model.RootC
 		return nil, errors.WithStack(err)
 	}
 
-	logger.Debugf("subject=%q, skid=%s", crt.Subject, crt.SKID)
+	logger.Tracef("subject=%q, skid=%s, ctx=%q", crt.Subject, crt.SKID, correlation.ID(ctx))
 
 	res := new(model.RootCertificate)
 
@@ -48,9 +49,10 @@ func (p *Provider) RegisterRootCertificate(ctx context.Context, crt *model.RootC
 
 // RemoveRootCertificate removes Root Cert
 func (p *Provider) RemoveRootCertificate(ctx context.Context, id uint64) error {
+	logger.Noticef("id=%d, ctx=%q", id, correlation.ID(ctx))
 	_, err := p.db.ExecContext(ctx, `DELETE FROM roots WHERE id=$1;`, id)
 	if err != nil {
-		logger.Errorf("err=[%+v]", err)
+		//logger.Errorf("err=[%+v]", err)
 		return errors.WithStack(err)
 	}
 
