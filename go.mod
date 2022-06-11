@@ -7,7 +7,7 @@ require (
 	cloud.google.com/go/storage v1.16.0
 	github.com/aws/aws-sdk-go v1.40.8 // indirect
 	github.com/cloudflare/cfssl v1.6.1 // indirect
-	github.com/effective-security/porto v0.0.0-20220610172633-b39e8a5a6582
+	github.com/effective-security/porto v0.0.0-20220611145301-427b376a3ea1
 	github.com/go-logr/logr v0.4.0
 	github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba
 	github.com/gogo/googleapis v1.4.1
@@ -56,7 +56,7 @@ require (
 	github.com/alecthomas/kong v0.4.0
 	github.com/effective-security/metrics v0.0.0-20220118120427-f740cb7dda2b
 	github.com/effective-security/xlog v0.0.0-20220524230729-a9ac7b835dd8
-	github.com/effective-security/xpki v0.1.2-0.20220503145806-af5b3e0a38cc
+	github.com/effective-security/xpki v0.1.2-0.20220611144614-10460f38adac
 )
 
 require (

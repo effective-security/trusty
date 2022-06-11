@@ -162,7 +162,7 @@ servers:
       # allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
       allow:
       # specifies to log allowed access to Any role
-      log_allowed_any: false
+      log_allowed_any: true
       # specifies to log allowed access
       log_allowed: true
       # specifies to log denied access
@@ -229,7 +229,7 @@ servers:
         - /pb.CAService/UpdateCertificateLabel:trusty-ca,trusty-admin,trusty-ra
         - /pb.CAService/RegisterProfile:trusty-ca,trusty-admin,trusty-ra        
       # specifies to log allowed access to Any role
-      log_allowed_any: false
+      log_allowed_any: true
       # specifies to log allowed access
       log_allowed: true
       # specifies to log denied access

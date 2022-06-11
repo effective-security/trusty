@@ -154,7 +154,7 @@ func (s *Service) getCAClient() (client.CAClient, error) {
 	ca = s.ca
 	s.lock.RUnlock()
 	if ca != nil {
-		logger.KV(xlog.DEBUG, "status", "found CA client")
+		// logger.KV(xlog.DEBUG, "status", "found CA client")
 		return ca, nil
 	}
 
