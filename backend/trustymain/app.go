@@ -29,6 +29,7 @@ import (
 	"github.com/martinisecurity/trusty/backend/service/swagger"
 	trustyTasks "github.com/martinisecurity/trusty/backend/tasks"
 	"github.com/martinisecurity/trusty/backend/tasks/certsmonitor"
+	"github.com/martinisecurity/trusty/backend/tasks/healthcheck"
 	"github.com/martinisecurity/trusty/backend/tasks/stats"
 	"github.com/martinisecurity/trusty/internal/version"
 	"github.com/pkg/errors"
@@ -56,6 +57,7 @@ var ServiceFactories = map[string]gserver.ServiceFactory{
 var taskFactories = map[string]trustyTasks.Factory{
 	certsmonitor.TaskName: certsmonitor.Factory,
 	stats.TaskName:        stats.Factory,
+	healthcheck.TaskName:  healthcheck.Factory,
 }
 
 // appFlags specifies application flags

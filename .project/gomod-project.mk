@@ -77,9 +77,7 @@ export GOBIN=$(PROJ_ROOT)/bin
 export VENDOR_SRC=$(PROJ_ROOT)/vendor
 
 # tools path
-export TOOLS_PATH := ${PROJ_DIR}/.tools
-export TOOLS_BIN := ${TOOLS_PATH}/bin
-export PATH := ${PATH}:${PROJ_BIN}:${TOOLS_BIN}
+export PATH := ${PROJ_BIN}:${PATH}
 
 # List of all .go files in the project, exluding vendor and tools
 PROJ_GOFILES = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.gopath/*" -not -path "./.tools/*")

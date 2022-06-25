@@ -25,7 +25,7 @@ var (
 	// where server indicates it did not process the data. gRPC default is default is "FailFast(true)"
 	// but for trusty we default to "FailFast(false)" to minimize client request error responses due to
 	// transient failures.
-	defaultFailFast = grpc.FailFast(false)
+	defaultFailFast = grpc.WaitForReady(true)
 
 	// client-side request send limit, gRPC default is math.MaxInt32
 	// Make sure that "client-side send limit < server-side default send/recv limit"
@@ -112,7 +112,7 @@ func (c *Client) CIClient() CIClient {
 	return NewCIClient(c.conn, c.callOpts)
 }
 
-// Close shuts down the client's trusty connections.
+// Close shuts down the client's connections.
 func (c *Client) Close() error {
 	c.cancel()
 	if c.conn != nil {

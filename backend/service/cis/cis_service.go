@@ -3,9 +3,7 @@ package cis
 import (
 	"context"
 	"sync"
-	"time"
 
-	"github.com/effective-security/metrics"
 	"github.com/effective-security/porto/gserver"
 	"github.com/effective-security/porto/restserver"
 	"github.com/effective-security/xlog"
@@ -15,7 +13,6 @@ import (
 	"github.com/martinisecurity/trusty/backend/db/cadb"
 	"github.com/martinisecurity/trusty/client"
 	"github.com/martinisecurity/trusty/client/embed/proxy"
-	"github.com/martinisecurity/trusty/pkg/poller"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 )
@@ -96,43 +93,6 @@ func (s *Service) RegisterGRPC(r *grpc.Server) {
 // is ready to serve requests
 func (s *Service) OnStarted() error {
 	go s.getCAClient()
-
-	keyForCAGetCountCount := []string{"health", "ca", "get_client_count"}
-	keyForCAErrorCountCount := []string{"health", "ca", "error_count"}
-
-	pollCAClient := func(ctx context.Context) (interface{}, error) {
-		c, err := s.getCAClient()
-		if err != nil {
-			return nil, errors.WithStack(err)
-		}
-
-		ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
-		defer cancel()
-		_, err = c.ListIssuers(ctx, &pb.ListIssuersRequest{
-			Limit:  1,
-			After:  0,
-			Bundle: false,
-		})
-		if err != nil {
-			return nil, errors.WithStack(err)
-		}
-		metrics.IncrCounter(keyForCAGetCountCount, 1)
-		return c, nil
-	}
-
-	pollCAClientError := func(err error) {
-		metrics.IncrCounter(keyForCAErrorCountCount, 1)
-		logger.KV(xlog.ERROR,
-			"status", "failed to get CA client",
-			"err", err)
-
-	}
-
-	p := poller.New(nil, pollCAClient, pollCAClientError)
-
-	// poll every 120 seconds
-	p.Start(s.ctx, 120*time.Second)
-
 	return nil
 }
 
