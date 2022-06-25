@@ -28,6 +28,9 @@ func TestMain(m *testing.M) {
 	_ = os.MkdirAll(testDirPath, 0700)
 	defer os.RemoveAll(testDirPath)
 
+	// ensure task are not started
+	os.Setenv("TRUSTY_HOSTNAME", "UNIT_TEST")
+
 	// Run the tests
 	rc := m.Run()
 	os.Exit(rc)
@@ -269,10 +272,12 @@ func Test_AppInstance_StartStop(t *testing.T) {
 			// trigger stop
 			sigs <- syscall.SIGUSR2
 			sigs <- syscall.SIGTERM
+			t.Log("server stopping...")
 		}
 
 	case <-time.After(10 * time.Second):
 		t.Log("failed to start")
+		require.True(t, false, "failed to start")
 		break
 	}
 

@@ -17,7 +17,7 @@ logs:
   # contols how large a single log file can be before its rotated
   max_size_mb: 10
 
-log_levels: 
+log_levels:
   - repo: "*"
     level: TRACE
   - repo: github.com/martinisecurity/trusty
@@ -55,8 +55,8 @@ crypto_provider:
   #- /tmp/trusty/softhsm/unittest_hsm.json
   # the list of supported manufactures of PKCS11 tokens
   pkcs11_manufacturers:
-  - SoftHSM
-  - Gemalto NV
+    - SoftHSM
+    - Gemalto NV
 
 jwt_provider: ${TRUSTY_CONFIG_DIR}/jwt-provider.yaml
 
@@ -77,16 +77,19 @@ delegated_issuers:
   aia:
     crl_url: https://authenticate-api.iconectiv.com/download/v1/crl
   allowed_profiles:
-  - DELEGATED
+    - DELEGATED
 
 tasks:
   - name: certsmonitor
     schedule: "every 10 minutes"
     args:
-    - issuer:/tmp/trusty/certs/shaken_ca.pem
-    - issuer:/tmp/trusty/certs/shaken_delegated_l1_ca.pem
+      - issuer:/tmp/trusty/certs/shaken_ca.pem
+      - issuer:/tmp/trusty/certs/shaken_delegated_l1_ca.pem
   - name: stats
     schedule: "every 13 minutes"
+  - name: health_check
+    schedule: "every 60 seconds"
+    args: ["-hsmkeys", "-ca"]
 
 ra:
   # the list of private Root Certs files.
@@ -97,7 +100,7 @@ ra:
     - /tmp/trusty/certs/shaken_root_ca.pem
   publisher:
     base_url: https://dev.trustyca.com
-    # use gs:// for GCP, or file path 
+    # use gs:// for GCP, or file path
     cert_bucket: /tmp/trusty/dev-certs
     crl_bucket: /tmp/trusty/dev-crls
 
@@ -170,9 +173,9 @@ servers:
     # configuration for the Identity mappers
     identity_map:
       tls:
-        enabled:  false
+        enabled: false
       jwt:
-        enabled:  false
+        enabled: false
 
   ca:
     description: Certification Authority
@@ -211,7 +214,7 @@ servers:
       # allow any non-authenticated request access to this path and its children
       # /v1/* is allowed
       allow_any:
-      # allow any authenticated request that includes a non empty role
+        # allow any authenticated request that includes a non empty role
         - /pb.StatusService
         - /metrics
         - /v1/status
@@ -227,7 +230,7 @@ servers:
         - /pb.CAService/RegisterDelegatedIssuer:trusty-ca,trusty-admin,trusty-ra
         - /pb.CAService/ArchiveDelegatedIssuer:trusty-ca,trusty-admin,trusty-ra
         - /pb.CAService/UpdateCertificateLabel:trusty-ca,trusty-admin,trusty-ra
-        - /pb.CAService/RegisterProfile:trusty-ca,trusty-admin,trusty-ra        
+        - /pb.CAService/RegisterProfile:trusty-ca,trusty-admin,trusty-ra
       # specifies to log allowed access to Any role
       log_allowed_any: true
       # specifies to log allowed access
@@ -237,7 +240,7 @@ servers:
     # configuration for the Identity mappers
     identity_map:
       tls:
-        enabled:  true
+        enabled: true
         default_authenticated_role: authenticated_tls
         roles:
           trusty:
@@ -259,9 +262,9 @@ servers:
         subject_claim: email
         roles:
           trusty-admin:
-          - denis@ekspand.com
+            - denis@ekspand.com
 
-trusty_client: 
+trusty_client:
   client_tls:
     cert: /tmp/trusty/certs/trusty_client.pem
     key: /tmp/trusty/certs/trusty_client.key
