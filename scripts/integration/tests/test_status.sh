@@ -1,13 +1,15 @@
 #!/bin/bash
 set -e
 
-echo "*** trusty: checking status with curl against CIS endpoint"
-curl -f -v --fail $TRUSTY_CIS_1/v1/status
-
 echo "*** trusty status: checking against http endpoint: $TRUSTY_CA_1"
 /opt/trusty/bin/trustyctl $TRUSTYCTL_FLAGS -s $TRUSTY_CA_1 --timeout 10 status
 echo "*** trusty status: checking against http endpoint: $TRUSTY_CA_2"
 /opt/trusty/bin/trustyctl $TRUSTYCTL_FLAGS -s $TRUSTY_CA_2 --timeout 10 status
+echo "*** trusty status: checking against http endpoint: $TRUSTY_CIS_1"
+/opt/trusty/bin/trustyctl $TRUSTYCTL_FLAGS -s $TRUSTY_CIS_1 --timeout 10 status
+
+echo "*** trusty: checking status with curl against CIS endpoint"
+curl -f -v --fail $TRUSTY_CIS_1/v1/status
 
 echo "*** trusty: checking caller"
 

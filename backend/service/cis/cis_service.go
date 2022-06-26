@@ -109,7 +109,7 @@ func (s *Service) getCAClient() (client.CAClient, error) {
 	ca = s.ca
 	s.lock.RUnlock()
 	if ca != nil {
-		// logger.KV(xlog.DEBUG, "status", "found CA client")
+		logger.KV(xlog.DEBUG, "status", "existing CA client")
 		return ca, nil
 	}
 
@@ -119,9 +119,11 @@ func (s *Service) getCAClient() (client.CAClient, error) {
 		s.lock.Lock()
 		defer s.lock.Unlock()
 		s.ca = client.NewCAClientFromProxy(proxy.CAServerToClient(pb))
+		logger.KV(xlog.DEBUG, "status", "discovered CA client")
 		return s.ca, nil
 	}
 
+	logger.KV(xlog.DEBUG, "status", "creating remote CA client")
 	grpClient, err := s.clientFactory.NewClient("ca")
 	if err != nil {
 		logger.KV(xlog.ERROR,

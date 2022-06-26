@@ -29,7 +29,7 @@ type Task struct {
 	schedule string
 	crypto   *cryptoprov.Crypto
 	factory  client.Factory
-	client   *client.Client
+	client   client.CAClient
 }
 
 func (t *Task) run() {
@@ -46,15 +46,6 @@ func (t *Task) run() {
 	var err error
 	started := time.Now()
 	if t.factory != nil {
-		if t.client == nil {
-			t.client, err = t.factory.NewClient("ca")
-			if err != nil {
-				logger.KV(xlog.ERROR,
-					"task", TaskName,
-					"reason", "ca",
-					"err", err.Error())
-			}
-		}
 		err = t.healthCheckIssuers(ctx)
 		if err != nil {
 			logger.KV(xlog.ERROR,
@@ -96,11 +87,16 @@ func (t *Task) healthHsm() error {
 
 func (t *Task) healthCheckIssuers(ctx context.Context) error {
 	if t.client == nil {
-		return errors.Errorf("CA client not initialized")
+		client, err := t.factory.NewClient("ca")
+		if err != nil {
+			return errors.WithMessagef(err, "unable to create client")
+		}
+		t.client = client.CAClient()
 	}
+
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
-	li, err := t.client.CAClient().ListIssuers(ctx, &pb.ListIssuersRequest{
+	li, err := t.client.ListIssuers(ctx, &pb.ListIssuersRequest{
 		//Limit:  1,
 		After:  0,
 		Bundle: false,

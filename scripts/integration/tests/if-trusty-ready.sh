@@ -11,7 +11,7 @@ cmd="$*"
 
 echo "*** trusty: waiting for server..."
 
-until curl -k $TRUSTY_URL/v1/status; do
+until curl -f -v --fail -k $TRUSTY_URL/v1/status; do
   >&2 echo "trusty is unavailable $TRUSTY_URL - sleeping"
   sleep 6
 done
