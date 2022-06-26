@@ -15,16 +15,8 @@ import (
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
+	"github.com/martinisecurity/trusty/pkg/metricskey"
 	"google.golang.org/grpc/codes"
-)
-
-var (
-	keyForCertIssued        = []string{"cert", "issued"}
-	keyForCertRevoked       = []string{"cert", "revoked"}
-	keyForCertSignFailed    = []string{"cert", "sign-failed"}
-	keyForCertPublishFailed = []string{"cert", "publish-failed"}
-	keyForCrlPublished      = []string{"crl", "published"}
-	keyForCrlPublishFailed  = []string{"crl", "publish-failed"}
 )
 
 // SignCertificate returns the certificate
@@ -117,11 +109,11 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 			"status", "failed to sign certificate",
 			"err", err)
 
-		metrics.IncrCounter(keyForCertSignFailed, 1, tags...)
+		metrics.IncrCounter(metricskey.CAFailedSignCert, 1, tags...)
 		return nil, v1.NewError(codes.Internal, "failed to sign certificate request")
 	}
 
-	metrics.IncrCounter(keyForCertIssued, 1, tags...)
+	metrics.IncrCounter(metricskey.CACertIssued, 1, tags...)
 
 	mcert := model.NewCertificate(cert, req.OrgId, req.Profile, string(pem), ca.PEM(), req.Label, nil, req.Metadata)
 	fn := mcert.FileName()
@@ -148,7 +140,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 				"ctx", correlation.ID(ctx),
 				"status", "failed to publish certificate",
 				"err", err)
-			metrics.IncrCounter(keyForCertPublishFailed, 1, tags...)
+			metrics.IncrCounter(metricskey.CAFailedPublishCert, 1, tags...)
 			return nil, v1.NewError(codes.Internal, "failed to publish certificate")
 		}
 	}

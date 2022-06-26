@@ -1,7 +1,6 @@
 package cis
 
 import (
-	"context"
 	"sync"
 
 	"github.com/effective-security/porto/gserver"
@@ -32,8 +31,6 @@ type Service struct {
 	grpClient *client.Client
 	ca        client.CAClient
 	lock      sync.RWMutex
-	ctx       context.Context
-	cancel    context.CancelFunc
 }
 
 // Factory returns a factory of the service
@@ -49,7 +46,6 @@ func Factory(server *gserver.Server) interface{} {
 			db:            db,
 			clientFactory: clientFactory,
 		}
-		svc.ctx, svc.cancel = context.WithCancel(context.Background())
 
 		server.AddService(svc)
 	}
@@ -69,7 +65,6 @@ func (s *Service) IsReady() bool {
 
 // Close the subservices and it's resources
 func (s *Service) Close() {
-	s.cancel()
 	if s.grpClient != nil {
 		s.grpClient.Close()
 	}
