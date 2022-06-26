@@ -116,11 +116,6 @@ servers:
       #- swagger
     timeout:
       request: 3s
-    #swagger:
-    #  enabled: true
-    #  files:
-    #    cis: "${TRUSTY_CONFIG_DIR}/../../Documentation/dev-guide/apispec/swagger/cis.swagger.json"
-    #    status: "${TRUSTY_CONFIG_DIR}/../../Documentation/dev-guide/apispec/swagger/status.swagger.json"
     cors: &cors
       enabled: true
       max_age: 600
@@ -192,7 +187,6 @@ servers:
       - status
       - ca
       - cis
-      #- swagger
     logger_skip_paths:
       - path: "/v1/status/node"
         agent: "Google"
@@ -204,11 +198,6 @@ servers:
       min_time: 60s
       interval: 30s
       timeout: 180s
-    #swagger:
-    #  enabled: true
-    #  files:
-    #    ca: "${TRUSTY_CONFIG_DIR}/../../Documentation/dev-guide/apispec/swagger/ca.swagger.json"
-    #    status: "${TRUSTY_CONFIG_DIR}/../../Documentation/dev-guide/apispec/swagger/status.swagger.json"
     cors: *cors
     authz:
       # allow any non-authenticated request access to this path and its children

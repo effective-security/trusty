@@ -16,6 +16,7 @@ import (
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
+	"github.com/martinisecurity/trusty/pkg/metricskey"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/ocsp"
 	"google.golang.org/grpc/codes"
@@ -58,7 +59,7 @@ func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificat
 		{Name: "serial", Value: crt.SerialNumber},
 	}
 
-	metrics.IncrCounter(keyForCertRevoked, 1, tags...)
+	metrics.IncrCounter(metricskey.CACertRevoked, 1, tags...)
 
 	s.publishCrlInBackground(crt.IKID)
 

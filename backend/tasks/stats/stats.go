@@ -7,6 +7,7 @@ import (
 	"github.com/effective-security/porto/pkg/tasks"
 	"github.com/effective-security/xlog"
 	"github.com/martinisecurity/trusty/backend/db/cadb"
+	"github.com/martinisecurity/trusty/pkg/metricskey"
 	"github.com/pkg/errors"
 )
 
@@ -14,11 +15,6 @@ var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/ta
 
 // TaskName is the name of this task
 const TaskName = "stats"
-
-var (
-	keyForDbCertsCount   = []string{"db", "stats", "certs"}
-	keyForDbRevokedCount = []string{"db", "stats", "revoked"}
-)
 
 // Task defines the healthcheck task
 type Task struct {
@@ -35,7 +31,7 @@ func (t *Task) run() {
 	if err != nil {
 		logger.Errorf("err=[%+v]", err)
 	} else {
-		metrics.SetGauge(keyForDbCertsCount, float32(c))
+		metrics.SetGauge(metricskey.StatsDbCertsTotal, float32(c))
 		logger.Infof("certs_count=%d", c)
 	}
 
@@ -43,7 +39,7 @@ func (t *Task) run() {
 	if err != nil {
 		logger.Errorf("err=[%+v]", err)
 	} else {
-		metrics.SetGauge(keyForDbRevokedCount, float32(c))
+		metrics.SetGauge(metricskey.StatsDbRevokedTotal, float32(c))
 		logger.Infof("revoked_count=%d", c)
 	}
 }

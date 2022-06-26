@@ -7,11 +7,7 @@ import (
 	"time"
 
 	"github.com/effective-security/metrics"
-)
-
-var (
-	keyForCertExpiry = []string{"cert", "expiry", "days"}
-	keyForCrlExpiry  = []string{"crl", "expiry", "days"}
+	"github.com/martinisecurity/trusty/pkg/metricskey"
 )
 
 // PublishShortLivedCertExpirationInDays publish cert expiration time in Days for short lived certificates
@@ -19,7 +15,7 @@ func PublishShortLivedCertExpirationInDays(c *x509.Certificate, typ string) floa
 	expiresIn := c.NotAfter.Sub(time.Now().UTC())
 	expiresInDays := float32(expiresIn) / float32(time.Hour*24)
 	metrics.SetGauge(
-		keyForCertExpiry,
+		metricskey.CAExpiryCertDays,
 		expiresInDays,
 		metrics.Tag{Name: "cn", Value: c.Subject.CommonName},
 		metrics.Tag{Name: "type", Value: typ},
@@ -32,7 +28,7 @@ func PublishCertExpirationInDays(c *x509.Certificate, typ string) float32 {
 	expiresIn := c.NotAfter.Sub(time.Now().UTC())
 	expiresInDays := float32(expiresIn) / float32(time.Hour*24)
 	metrics.SetGauge(
-		keyForCertExpiry,
+		metricskey.CAExpiryCertDays,
 		expiresInDays,
 		metrics.Tag{Name: "cn", Value: c.Subject.CommonName},
 		metrics.Tag{Name: "type", Value: typ},
@@ -49,7 +45,7 @@ func PublishCRLExpirationInDays(c *pkix.CertificateList, issuer *x509.Certificat
 	expiresIn := c.TBSCertList.NextUpdate.Sub(time.Now().UTC())
 	expiresInDays := float32(expiresIn) / float32(time.Hour*24)
 	metrics.SetGauge(
-		keyForCrlExpiry,
+		metricskey.CAExpiryCrlDays,
 		expiresInDays,
 		metrics.Tag{Name: "cn", Value: issuer.Subject.CommonName},
 		metrics.Tag{Name: "sn", Value: issuer.SerialNumber.String()},

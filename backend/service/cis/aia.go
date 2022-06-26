@@ -11,13 +11,7 @@ import (
 	"github.com/effective-security/porto/xhttp/marshal"
 	"github.com/effective-security/xlog"
 	"github.com/martinisecurity/trusty/backend/db"
-)
-
-var (
-	mkAIADownloadCertSuccessful = []string{"aia", "download", "cert", "successful"}
-	mkAIADownloadCertFailed     = []string{"aia", "download", "cert", "failed"}
-	mkAIADownloadCrlSuccessful  = []string{"aia", "download", "crl", "successful"}
-	mkAIADownloadCrlFailed      = []string{"aia", "download", "crl", "failed"}
+	"github.com/martinisecurity/trusty/pkg/metricskey"
 )
 
 const (
@@ -41,7 +35,7 @@ func (s *Service) GetCRLHandler() restserver.Handle {
 		if err != nil {
 			if db.IsNotFoundError(err) {
 				// metrics for Not Found
-				metrics.IncrCounter(mkAIADownloadCrlFailed, 1,
+				metrics.IncrCounter(metricskey.AIADownloadFailedCrl, 1,
 					metrics.Tag{Name: ikidTag, Value: ikid},
 				)
 				marshal.WriteJSON(w, r, httperror.NotFound("unable to locate CRL"))
@@ -54,7 +48,7 @@ func (s *Service) GetCRLHandler() restserver.Handle {
 
 		block, _ := pem.Decode([]byte(m.Pem))
 
-		metrics.IncrCounter(mkAIADownloadCrlSuccessful, 1,
+		metrics.IncrCounter(metricskey.AIADownloadSuccessfulCrl, 1,
 			metrics.Tag{Name: ikidTag, Value: ikid},
 		)
 
@@ -79,7 +73,7 @@ func (s *Service) GetCertHandler() restserver.Handle {
 		if err != nil {
 			if db.IsNotFoundError(err) {
 				// metrics for Not Found
-				metrics.IncrCounter(mkAIADownloadCertFailed, 1,
+				metrics.IncrCounter(metricskey.AIADownloadFailedCert, 1,
 					metrics.Tag{Name: skidTag, Value: skid},
 				)
 				marshal.WriteJSON(w, r, httperror.NotFound("unable to locate certificate"))
@@ -91,7 +85,7 @@ func (s *Service) GetCertHandler() restserver.Handle {
 		}
 
 		block, _ := pem.Decode([]byte(m.Pem))
-		metrics.IncrCounter(mkAIADownloadCertSuccessful, 1,
+		metrics.IncrCounter(metricskey.AIADownloadSuccessfulCert, 1,
 			metrics.Tag{Name: skidTag, Value: skid},
 		)
 
