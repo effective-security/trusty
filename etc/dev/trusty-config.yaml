@@ -186,7 +186,6 @@ servers:
     services:
       - status
       - ca
-      - cis
     logger_skip_paths:
       - path: "/v1/status/node"
         agent: "Google"
