@@ -54,7 +54,7 @@ folders:
 	chmod -R 0700 /tmp/trusty
 
 version:
-	echo "*** building version"
+	echo "*** building version $(GIT_VERSION)"
 	gofmt -r '"GIT_VERSION" -> "$(GIT_VERSION)"' internal/version/current.template > internal/version/current.go
 
 proto:
