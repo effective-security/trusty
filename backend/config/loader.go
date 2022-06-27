@@ -35,6 +35,7 @@ func DefaultFactory() (*configloader.Factory, error) {
 		"/opt/trusty/etc/prod",
 		"/opt/trusty/etc/stage",
 		"/opt/trusty/etc/dev", // for CI test or stage the etc/dev must be after etc/prod
+		"/trusty/etc",         // in Kube
 	}
 
 	logger.Infof("searchDirs=[%s]", strings.Join(searchDirs, ","))
