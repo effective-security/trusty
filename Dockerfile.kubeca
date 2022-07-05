@@ -10,7 +10,7 @@ LABEL org.opencontainers.image.source=https://github.com/martinisecurity/trusty 
       org.opencontainers.image.description="Kube CA"
 
 #RUN mkdir -p /app
-COPY ./bin/kubeca /app/kubeca
+COPY ./bin/kubeca ./change_log.txt /app/
 WORKDIR /app
 
 USER nonroot:nonroot

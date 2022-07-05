@@ -13,14 +13,14 @@ RUN mkdir -p /home/nonroot \
       /var/trusty/certs /var/trusty/logs \
       /trusty_certs /trusty_logs
 COPY ./bin/trusty* ./bin/hsm-tool ./bin/xpki-tool /opt/trusty/bin/
-COPY ./scripts/build/* /opt/trusty/bin/
+COPY ./scripts/build/* ./change_log.txt /opt/trusty/bin/
 COPY ./sql/ /opt/trusty/sql/
 
 VOLUME ["/var/trusty/certs", \
-"/var/trusty/logs", \
-"/opt/trusty/sql", \
-"/opt/trusty/etc/prod", \
-"/opt/trusty/etc/dev"]
+      "/var/trusty/logs", \
+      "/opt/trusty/sql", \
+      "/opt/trusty/etc/prod", \
+      "/opt/trusty/etc/dev"]
 
 EXPOSE 7880 7892 9090
 

@@ -10,7 +10,7 @@ LABEL org.opencontainers.image.source=https://github.com/martinisecurity/trusty 
       org.opencontainers.image.description="Kube Cert Init"
 
 # RUN mkdir -p /app
-COPY ./bin/kubecertinit /app/kubecertinit
+COPY ./bin/kubecertinit ./change_log.txt /app/
 WORKDIR /app
 
 USER nonroot:nonroot

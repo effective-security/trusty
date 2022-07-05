@@ -52,8 +52,9 @@ jobs:
 
       - name: Install softhsm2
         run: sudo apt-get install softhsm2 opensc
+
       - name: Prepare
-        run: make vars tools folders generate  version hsmconfig
+        run: make vars tools folders generate  version hsmconfig change_log
 
       - name: UnitTest
         run: make build start-local-kms start-sql gen_test_certs gen_shaken_certs covtest

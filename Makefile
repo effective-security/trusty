@@ -19,7 +19,7 @@ BUILD_FLAGS=
 
 default: help
 
-all: clean folders tools generate hsmconfig start-local-kms start-sql build gen_test_certs gen_shaken_certs test
+all: clean folders tools generate hsmconfig start-local-kms start-sql build gen_test_certs gen_shaken_certs test change_log
 
 #
 # clean produced files
@@ -76,7 +76,10 @@ build_kube:
 build: build_trusty build_trustyctl build_kube
 
 change_log:
-	echo "Recent changes:" > ./change_log.txt
+	echo "Recent changes" > ./change_log.txt
+	echo "Build Version: $(GIT_VERSION)" >> ./change_log.txt
+	echo "Commit: $(GIT_HASH)" >> ./change_log.txt
+	echo "==================================" >> ./change_log.txt
 	git log -n 20 --pretty=oneline --abbrev-commit >> ./change_log.txt
 
 commit_version:
@@ -164,10 +167,10 @@ coveralls-github:
 	echo "Running coveralls"
 	goveralls -v -coverprofile=coverage.out -service=github -package ./...
 
-docker:
+docker: change_log
 	docker build --no-cache -f Dockerfile -t ekspand/trusty:main .
 
-docker-kubeca:	
+docker-kubeca: change_log
 	docker build --no-cache -f Dockerfile.kubeca -t ekspand/kubeca:main .
 	docker build --no-cache -f Dockerfile.kubecertinit -t ekspand/kubecertinit:main .
 
