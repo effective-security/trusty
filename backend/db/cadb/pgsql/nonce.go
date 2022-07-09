@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/martinisecurity/trusty/backend/db"
+	"github.com/effective-security/porto/x/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/pkg/errors"
 )
@@ -19,7 +19,7 @@ func (p *Provider) CreateNonce(ctx context.Context, nonce *model.Nonce) (*model.
 
 	res := new(model.Nonce)
 
-	err = p.db.QueryRowContext(ctx, `
+	err = p.sql.QueryRowContext(ctx, `
 			INSERT INTO nonces(id,nonce,used,created_at,expires_at,used_at)
 				VALUES($1,$2,$3,$4,$5,$6)
 			RETURNING id,nonce,used,created_at,expires_at,used_at
@@ -50,7 +50,7 @@ func (p *Provider) UseNonce(ctx context.Context, nonce string) (*model.Nonce, er
 	res := new(model.Nonce)
 	now := time.Now().UTC()
 
-	err := p.db.QueryRowContext(ctx, `
+	err := p.sql.QueryRowContext(ctx, `
 			UPDATE nonces
 				SET used=true, used_at=$2
 			WHERE nonce=$1 AND used=false
@@ -74,7 +74,7 @@ func (p *Provider) UseNonce(ctx context.Context, nonce string) (*model.Nonce, er
 
 // DeleteNonce deletes the nonce
 func (p *Provider) DeleteNonce(ctx context.Context, id uint64) error {
-	_, err := p.db.ExecContext(ctx, `DELETE FROM nonces WHERE id=$1;`, id)
+	_, err := p.sql.ExecContext(ctx, `DELETE FROM nonces WHERE id=$1;`, id)
 	if err != nil {
 		//logger.Errorf("err=[%+v]", err)
 		return errors.WithStack(err)

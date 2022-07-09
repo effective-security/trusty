@@ -3,8 +3,8 @@ package pgsql
 import (
 	"context"
 
+	"github.com/effective-security/porto/x/db"
 	"github.com/effective-security/porto/xhttp/correlation"
-	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/pkg/errors"
 )
@@ -21,7 +21,7 @@ func (p *Provider) RegisterRootCertificate(ctx context.Context, crt *model.RootC
 
 	res := new(model.RootCertificate)
 
-	err = p.db.QueryRowContext(ctx, `
+	err = p.sql.QueryRowContext(ctx, `
 			INSERT INTO roots(id,skid,not_before,no_tafter,subject,sha256,trust,pem)
 				VALUES($1, $2, $3, $4, $5, $6, $7, $8)
 			ON CONFLICT (skid)
@@ -50,7 +50,7 @@ func (p *Provider) RegisterRootCertificate(ctx context.Context, crt *model.RootC
 // RemoveRootCertificate removes Root Cert
 func (p *Provider) RemoveRootCertificate(ctx context.Context, id uint64) error {
 	logger.Noticef("id=%d, ctx=%q", id, correlation.ID(ctx))
-	_, err := p.db.ExecContext(ctx, `DELETE FROM roots WHERE id=$1;`, id)
+	_, err := p.sql.ExecContext(ctx, `DELETE FROM roots WHERE id=$1;`, id)
 	if err != nil {
 		//logger.Errorf("err=[%+v]", err)
 		return errors.WithStack(err)
@@ -64,7 +64,7 @@ func (p *Provider) RemoveRootCertificate(ctx context.Context, id uint64) error {
 // GetRootCertificates returns list of Root certs
 func (p *Provider) GetRootCertificates(ctx context.Context) (model.RootCertificates, error) {
 
-	res, err := p.db.QueryContext(ctx, `
+	res, err := p.sql.QueryContext(ctx, `
 		SELECT
 			id,skid,not_before,no_tafter,subject,sha256,trust,pem
 		FROM

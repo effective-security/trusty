@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/effective-security/porto/x/db"
 	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/xlog"
-	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/pkg/errors"
 )
@@ -36,7 +36,7 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	m, err := scanFullRevokedCertificate(p.db.QueryRowContext(ctx, `
+	m, err := scanFullRevokedCertificate(p.sql.QueryRowContext(ctx, `
 			INSERT INTO revoked(id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,label,locations,metadata,revoked_at,reason)
 				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
 			ON CONFLICT (sha256)
@@ -139,7 +139,7 @@ func scanShortRevokedCertificate(row *sql.Rows) (*model.RevokedCertificate, erro
 // RemoveRevokedCertificate removes revoked Certificate
 func (p *Provider) RemoveRevokedCertificate(ctx context.Context, id uint64) error {
 	logger.Noticef("id=%d, ctx=%q", id, correlation.ID(ctx))
-	_, err := p.db.ExecContext(ctx, `DELETE FROM revoked WHERE id=$1;`, id)
+	_, err := p.sql.ExecContext(ctx, `DELETE FROM revoked WHERE id=$1;`, id)
 	if err != nil {
 		// logger.Errorf("err=[%+v]", err)
 		return errors.WithStack(err)
@@ -152,7 +152,7 @@ func (p *Provider) RemoveRevokedCertificate(ctx context.Context, id uint64) erro
 
 // ListOrgRevokedCertificates returns list of Org's revoked certificates
 func (p *Provider) ListOrgRevokedCertificates(ctx context.Context, orgID uint64, limit int, afterID uint64) (model.RevokedCertificates, error) {
-	res, err := p.db.QueryContext(ctx, `
+	res, err := p.sql.QueryContext(ctx, `
 		SELECT
 			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,profile,label,locations,metadata,revoked_at,reason
 		FROM
@@ -192,7 +192,7 @@ func (p *Provider) ListRevokedCertificates(ctx context.Context, ikid string, lim
 		"ctx", correlation.ID(ctx),
 	)
 
-	res, err := p.db.QueryContext(ctx,
+	res, err := p.sql.QueryContext(ctx,
 		`SELECT
 			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,profile,label,locations,metadata,revoked_at,reason
 		FROM
@@ -269,7 +269,7 @@ func (p *Provider) RevokeCertificate(ctx context.Context, crt *model.Certificate
 
 // GetRevokedCertificateByIKIDAndSerial returns revoked certificate
 func (p *Provider) GetRevokedCertificateByIKIDAndSerial(ctx context.Context, ikid, serial string) (*model.RevokedCertificate, error) {
-	m, err := scanFullRevokedCertificate(p.db.QueryRowContext(ctx, `
+	m, err := scanFullRevokedCertificate(p.sql.QueryRowContext(ctx, `
 			SELECT
 			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,label,locations,metadata,revoked_at,reason
 			FROM revoked

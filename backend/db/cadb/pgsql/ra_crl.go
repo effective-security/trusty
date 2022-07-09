@@ -3,9 +3,9 @@ package pgsql
 import (
 	"context"
 
+	"github.com/effective-security/porto/x/db"
 	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/xlog"
-	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/pkg/errors"
 )
@@ -28,7 +28,7 @@ func (p *Provider) RegisterCrl(ctx context.Context, crl *model.Crl) (*model.Crl,
 
 	res := new(model.Crl)
 
-	err = p.db.QueryRowContext(ctx, `
+	err = p.sql.QueryRowContext(ctx, `
 			INSERT INTO crls(id,ikid,this_update,next_update,issuer,pem)
 				VALUES($1, $2, $3, $4, $5, $6)
 			ON CONFLICT (ikid)
@@ -60,7 +60,7 @@ func (p *Provider) RegisterCrl(ctx context.Context, crl *model.Crl) (*model.Crl,
 // RemoveCrl removes CRL
 func (p *Provider) RemoveCrl(ctx context.Context, id uint64) error {
 	logger.Noticef("id=%d, ctx=%q", id, correlation.ID(ctx))
-	_, err := p.db.ExecContext(ctx, `DELETE FROM crls WHERE id=$1;`, id)
+	_, err := p.sql.ExecContext(ctx, `DELETE FROM crls WHERE id=$1;`, id)
 	if err != nil {
 		logger.KV(xlog.ERROR, "err", err)
 		return errors.WithStack(err)
@@ -74,7 +74,7 @@ func (p *Provider) RemoveCrl(ctx context.Context, id uint64) error {
 // GetCrl returns CRL by a specified issuer
 func (p *Provider) GetCrl(ctx context.Context, ikid string) (*model.Crl, error) {
 	res := new(model.Crl)
-	err := p.db.QueryRowContext(ctx, `
+	err := p.sql.QueryRowContext(ctx, `
 		SELECT id,ikid,this_update,next_update,issuer,pem
 		FROM crls
 		WHERE ikid = $1

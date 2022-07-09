@@ -11,13 +11,17 @@ type prov struct {
 
 // New returns logr.Logger
 func New(logger xlog.KeyValueLogger) logr.Logger {
-	return &prov{logger: logger}
+	return logr.New(&prov{logger: logger})
 }
+
+// Init receives optional information about the logr library for LogSink
+// implementations that need it.
+func (p *prov) Init(info logr.RuntimeInfo) {}
 
 // Enabled tests whether this Logger is enabled.  For example, commandline
 // flags might be used to set the logging verbosity and disable some info
 // logs.
-func (p *prov) Enabled() bool {
+func (p *prov) Enabled(level int) bool {
 	return true
 }
 
@@ -27,7 +31,7 @@ func (p *prov) Enabled() bool {
 // the log line.  The key/value pairs can then be used to add additional
 // variable information.  The key/value pairs should alternate string
 // keys and arbitrary values.
-func (p *prov) Info(msg string, keysAndValues ...interface{}) {
+func (p *prov) Info(level int, msg string, keysAndValues ...interface{}) {
 	kv := append(keysAndValues, "msg", msg)
 	p.logger.KV(xlog.INFO, kv...)
 }
@@ -45,18 +49,11 @@ func (p *prov) Error(err error, msg string, keysAndValues ...interface{}) {
 	p.logger.KV(xlog.ERROR, kv...)
 }
 
-// V returns an Logger value for a specific verbosity level, relative to
-// this Logger.  In other words, V values are additive.  V higher verbosity
-// level means a log message is less important.  It's illegal to pass a log
-// level less than zero.
-func (p *prov) V(level int) logr.Logger {
-	return p
-}
-
 // WithValues adds some key-value pairs of context to a logger.
 // See Info for documentation on how key/value pairs work.
-func (p *prov) WithValues(keysAndValues ...interface{}) logr.Logger {
-	return New(p.logger.WithValues(keysAndValues))
+func (p *prov) WithValues(keysAndValues ...interface{}) logr.LogSink {
+	p.logger = p.logger.WithValues(keysAndValues...)
+	return p
 }
 
 // WithName adds a new element to the logger's name.
@@ -64,6 +61,7 @@ func (p *prov) WithValues(keysAndValues ...interface{}) logr.Logger {
 // suffixes to the logger's name.  It's strongly recommended
 // that name segments contain only letters, digits, and hyphens
 // (see the package documentation for more information).
-func (p *prov) WithName(name string) logr.Logger {
-	return New(p.logger.WithValues("src", name))
+func (p *prov) WithName(name string) logr.LogSink {
+	p.logger = p.logger.WithValues("src", name)
+	return p
 }

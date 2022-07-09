@@ -6,9 +6,9 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"github.com/effective-security/porto/x/db"
 	"github.com/martinisecurity/trusty/api/v1/pb"
 	"github.com/martinisecurity/trusty/backend/config"
-	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/pkg/print"
 	"github.com/pkg/errors"
 )

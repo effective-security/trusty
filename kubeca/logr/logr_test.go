@@ -29,6 +29,6 @@ func TestLogr(t *testing.T) {
 	logr.Error(errors.New("some error"), "error message", "k1", "v1")
 
 	result := b.String()
-	assert.Contains(t, result, "I | logr: src=Info, src=\"x\", k1=\"v1\", msg=\"test message\"\n")
-	assert.Contains(t, result, "E | logr: src=Error, src=\"x\", k1=\"v1\", msg=\"error message\", err=\"some error\"\n")
+	assert.Contains(t, result, "I | logr: src=Info, src=\"x\", k1=\"val1\", k1=\"v1\", msg=\"test message\"\n")
+	assert.Contains(t, result, "E | logr: src=Error, src=\"x\", k1=\"val1\", k1=\"v1\", msg=\"error message\", err=\"some error\"\n")
 }

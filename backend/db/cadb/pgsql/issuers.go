@@ -3,9 +3,9 @@ package pgsql
 import (
 	"context"
 
+	"github.com/effective-security/porto/x/db"
 	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/xlog"
-	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/pkg/errors"
 )
@@ -21,7 +21,7 @@ func (p *Provider) RegisterIssuer(ctx context.Context, m *model.Issuer) (*model.
 	logger.Tracef("id=%d, status=%d, label=%q, ctx=%q", id, m.Status, m.Label, correlation.ID(ctx))
 
 	res := new(model.Issuer)
-	err = p.db.QueryRowContext(ctx, `
+	err = p.sql.QueryRowContext(ctx, `
 			INSERT INTO issuers(id,label,status,config,created_at,updated_at)
 				VALUES($1, $2, $3, $4, Now(),Now())
 			ON CONFLICT (label)
@@ -50,7 +50,7 @@ func (p *Provider) UpdateIssuerStatus(ctx context.Context, id uint64, status int
 
 	res := new(model.Issuer)
 
-	err := p.db.QueryRowContext(ctx, `
+	err := p.sql.QueryRowContext(ctx, `
 	UPDATE issuers
 		SET status=$2,updated_at=Now()
 	WHERE id = $1
@@ -74,7 +74,7 @@ func (p *Provider) UpdateIssuerStatus(ctx context.Context, id uint64, status int
 // DeleteIssuer deletes the Issuer
 func (p *Provider) DeleteIssuer(ctx context.Context, label string) error {
 	logger.Noticef("label=%s, ctx=%q", label, correlation.ID(ctx))
-	_, err := p.db.ExecContext(ctx, `DELETE FROM issuers WHERE label=$1;`, label)
+	_, err := p.sql.ExecContext(ctx, `DELETE FROM issuers WHERE label=$1;`, label)
 	if err != nil {
 		logger.Errorf("err=[%+v]", err)
 		return errors.WithStack(err)
@@ -93,7 +93,7 @@ func (p *Provider) ListIssuers(ctx context.Context, limit int, afterID uint64) (
 		"ctx", correlation.ID(ctx),
 	)
 
-	res, err := p.db.QueryContext(ctx,
+	res, err := p.sql.QueryContext(ctx,
 		`SELECT
 			id,label,status,config,created_at,updated_at
 		FROM
