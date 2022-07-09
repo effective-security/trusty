@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/martinisecurity/trusty/internal/version"
+	"github.com/effective-security/trusty/internal/version"
 	"github.com/stretchr/testify/assert"
 )
 

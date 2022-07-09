@@ -8,16 +8,16 @@ import (
 	"github.com/effective-security/metrics"
 	"github.com/effective-security/porto/pkg/tasks"
 	"github.com/effective-security/porto/xhttp/correlation"
+	"github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/backend/config"
+	"github.com/effective-security/trusty/client"
+	"github.com/effective-security/trusty/pkg/metricskey"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/cryptoprov"
-	"github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/backend/config"
-	"github.com/martinisecurity/trusty/client"
-	"github.com/martinisecurity/trusty/pkg/metricskey"
 	"github.com/pkg/errors"
 )
 
-var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/tasks", "healthcheck")
+var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/backend/tasks", "healthcheck")
 
 // TaskName is the name of this task
 const TaskName = "health_check"

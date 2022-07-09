@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/effective-security/porto/pkg/tlsconfig"
+	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/xlog"
-	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/pkg/errors"
 )
 

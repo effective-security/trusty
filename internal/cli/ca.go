@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"github.com/effective-security/porto/x/db"
-	"github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/backend/config"
-	"github.com/martinisecurity/trusty/pkg/print"
+	"github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/backend/config"
+	"github.com/effective-security/trusty/pkg/print"
 	"github.com/pkg/errors"
 )
 

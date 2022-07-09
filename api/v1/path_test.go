@@ -3,7 +3,7 @@ package v1_test
 import (
 	"testing"
 
-	v1 "github.com/martinisecurity/trusty/api/v1"
+	v1 "github.com/effective-security/trusty/api/v1"
 	"github.com/stretchr/testify/assert"
 )
 

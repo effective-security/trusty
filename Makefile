@@ -7,7 +7,7 @@ export AWS_SECRET_ACCESS_KEY=notusedbyemulator
 export AWS_DEFAULT_REGION=us-west-2
 export TRUSTY_JWT_SEED=testseed
 
-export GOPRIVATE=github.com/martinisecurity,github.com/go-phorce
+export GOPRIVATE=github.com/effective-security,github.com/go-phorce
 export COVERAGE_EXCLUSIONS="vendor|tests|api/v1/pb/gw|main.go|testsuite.go|mocks.go|.pb.go|.pb.gw.go"
 export TRUSTY_DIR=${PROJ_ROOT}
 export GO111MODULE=on
@@ -68,12 +68,7 @@ build_trustyctl:
 	echo "*** Building trustyctl"
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/trustyctl ./cmd/trustyctl
 
-build_kube:
-	echo "*** Building kubeca"
-	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/kubeca ./cmd/kubeca
-	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/kubecertinit ./cmd/kubecertinit
-
-build: build_trusty build_trustyctl build_kube
+build: build_trusty build_trustyctl
 
 change_log:
 	echo "Recent changes" > ./change_log.txt
@@ -168,19 +163,15 @@ coveralls-github:
 	goveralls -v -coverprofile=coverage.out -service=github -package ./...
 
 docker: change_log
-	docker build --no-cache -f Dockerfile -t ekspand/trusty:main .
-
-docker-kubeca: change_log
-	docker build --no-cache -f Dockerfile.kubeca -t ekspand/kubeca:main .
-	docker build --no-cache -f Dockerfile.kubecertinit -t ekspand/kubecertinit:main .
+	docker build --no-cache -f Dockerfile -t effectivesecurity/trusty:main .
 
 docker-compose:
 	docker-compose -f docker-compose.dev.yml up --abort-on-container-exit
 
 docker-push: docker
 	[ ! -z ${DOCKER_PASSWORD} ] && echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin || echo "skipping docker login"
-	docker push ekspand/trusty:main
-	#[ ! -z ${DOCKER_NUMBER} ] && docker push ekspand/trusty:${DOCKER_NUMBER} || echo "skipping docker version, pushing latest only"
+	docker push effectivesecurity/trusty:main
+	#[ ! -z ${DOCKER_NUMBER} ] && docker push effectivesecurity/trusty:${DOCKER_NUMBER} || echo "skipping docker version, pushing latest only"
 
 docker-citest:
 	cd ./scripts/integration && ./setup.sh

@@ -5,13 +5,13 @@ import (
 
 	"github.com/effective-security/porto/gserver"
 	"github.com/effective-security/porto/restserver"
+	v1 "github.com/effective-security/trusty/api/v1"
+	pb "github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/backend/config"
+	"github.com/effective-security/trusty/backend/db/cadb"
+	"github.com/effective-security/trusty/client"
+	"github.com/effective-security/trusty/client/embed/proxy"
 	"github.com/effective-security/xlog"
-	v1 "github.com/martinisecurity/trusty/api/v1"
-	pb "github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/backend/config"
-	"github.com/martinisecurity/trusty/backend/db/cadb"
-	"github.com/martinisecurity/trusty/client"
-	"github.com/martinisecurity/trusty/client/embed/proxy"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 )
@@ -19,7 +19,7 @@ import (
 // ServiceName provides the Service Name for this package
 const ServiceName = "cis"
 
-var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/service", "cis")
+var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/backend/service", "cis")
 
 // Service defines the Status service
 type Service struct {

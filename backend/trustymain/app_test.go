@@ -11,8 +11,8 @@ import (
 
 	"github.com/effective-security/porto/pkg/configloader"
 	"github.com/effective-security/porto/x/guid"
-	"github.com/martinisecurity/trusty/backend/config"
-	"github.com/martinisecurity/trusty/tests/testutils"
+	"github.com/effective-security/trusty/backend/config"
+	"github.com/effective-security/trusty/tests/testutils"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

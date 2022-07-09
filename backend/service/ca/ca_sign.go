@@ -9,13 +9,13 @@ import (
 
 	"github.com/effective-security/metrics"
 	"github.com/effective-security/porto/xhttp/correlation"
+	v1 "github.com/effective-security/trusty/api/v1"
+	pb "github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/backend/db/cadb/model"
+	"github.com/effective-security/trusty/pkg/metricskey"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/authority"
 	"github.com/effective-security/xpki/csr"
-	v1 "github.com/martinisecurity/trusty/api/v1"
-	pb "github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/backend/db/cadb/model"
-	"github.com/martinisecurity/trusty/pkg/metricskey"
 	"google.golang.org/grpc/codes"
 )
 

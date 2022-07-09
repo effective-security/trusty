@@ -9,14 +9,14 @@ import (
 	"github.com/effective-security/porto/restserver"
 	"github.com/effective-security/porto/x/fileutil"
 	"github.com/effective-security/porto/xhttp/correlation"
+	pb "github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/backend/config"
+	"github.com/effective-security/trusty/backend/db/cadb"
+	"github.com/effective-security/trusty/backend/db/cadb/model"
+	"github.com/effective-security/trusty/pkg/certpublisher"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/authority"
 	"github.com/effective-security/xpki/certutil"
-	pb "github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/backend/config"
-	"github.com/martinisecurity/trusty/backend/db/cadb"
-	"github.com/martinisecurity/trusty/backend/db/cadb/model"
-	"github.com/martinisecurity/trusty/pkg/certpublisher"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 )
@@ -24,7 +24,7 @@ import (
 // ServiceName provides the Service Name for this package
 const ServiceName = "ca"
 
-var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/service", "ca")
+var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/backend/service", "ca")
 
 // Service defines the Status service
 type Service struct {

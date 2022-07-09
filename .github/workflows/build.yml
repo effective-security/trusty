@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - master
     tags:
       - "v*"
   pull_request:
@@ -74,7 +73,7 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            ekspand/trusty
+            effectivesecurity/trusty
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -92,60 +91,6 @@ jobs:
           push: true
           tags: ${{ steps.meta_trusty.outputs.tags }}
           labels: ${{ steps.meta_trusty.outputs.labels }}
-
-      - name: Docker kubeca meta
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        id: meta_kubeca
-        uses: docker/metadata-action@v3
-        with:
-          # list of Docker images to use as base name for tags
-          images: |
-            ekspand/kubeca
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha
-
-      - name: Docker kubeca docker_build_kubecertinit
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        id: docker_build_kubeca
-        uses: docker/build-push-action@v2
-        with:
-          file: ./Dockerfile.kubeca
-          context: .
-          push: true
-          tags: ${{ steps.meta_kubeca.outputs.tags }}
-          labels: ${{ steps.meta_kubeca.outputs.labels }}
-
-      - name: Docker kubecertinit meta
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        id: meta_kubecertinit
-        uses: docker/metadata-action@v3
-        with:
-          # list of Docker images to use as base name for tags
-          images: |
-            ekspand/kubecertinit
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha
-
-      - name: Docker kubecertinit build
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        id: docker_build_kubecertinit
-        uses: docker/build-push-action@v2
-        with:
-          file: ./Dockerfile.kubecertinit
-          context: .
-          push: true
-          tags: ${{ steps.meta_kubecertinit.outputs.tags }}
-          labels: ${{ steps.meta_kubecertinit.outputs.labels }}
 
       - name: Integration Test
         env:

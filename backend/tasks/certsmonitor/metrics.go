@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/effective-security/metrics"
-	"github.com/martinisecurity/trusty/pkg/metricskey"
+	"github.com/effective-security/trusty/pkg/metricskey"
 )
 
 // PublishShortLivedCertExpirationInDays publish cert expiration time in Days for short lived certificates

@@ -3,8 +3,8 @@ package cli
 import (
 	"context"
 
-	"github.com/martinisecurity/trusty/backend/config"
-	"github.com/martinisecurity/trusty/pkg/print"
+	"github.com/effective-security/trusty/backend/config"
+	"github.com/effective-security/trusty/pkg/print"
 	"github.com/pkg/errors"
 )
 

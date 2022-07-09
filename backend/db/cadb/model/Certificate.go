@@ -6,8 +6,8 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/xpki/certutil"
-	"github.com/martinisecurity/trusty/api/v1/pb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

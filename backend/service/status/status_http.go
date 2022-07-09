@@ -7,8 +7,8 @@ import (
 	"github.com/effective-security/porto/restserver"
 	"github.com/effective-security/porto/xhttp/header"
 	"github.com/effective-security/porto/xhttp/marshal"
-	"github.com/martinisecurity/trusty/internal/version"
-	"github.com/martinisecurity/trusty/pkg/print"
+	"github.com/effective-security/trusty/internal/version"
+	"github.com/effective-security/trusty/pkg/print"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 

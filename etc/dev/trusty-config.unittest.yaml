@@ -15,9 +15,9 @@ servers:
 
 ra:
   publisher:
-    # use gs:// for GCP, or file path 
-    cert_bucket: /tmp/trusty/martini-dev-certs
-    crl_bucket: /tmp/trusty/martini-dev-crls
+    # use gs:// for GCP, or file path
+    cert_bucket: /tmp/trusty/dev-certs
+    crl_bucket: /tmp/trusty/dev-crls
 
 tasks: []
 
@@ -27,8 +27,8 @@ crypto_provider:
   default: ${TRUSTY_CONFIG_DIR}/kms/aws-dev-kms.json
   # the list of locations of the configuration files
   providers:
-  - /tmp/trusty/softhsm/unittest_hsm.json
+    - /tmp/trusty/softhsm/unittest_hsm.json
   # the list of supported manufactures of PKCS11 tokens
   pkcs11_manufacturers:
-  - SoftHSM
-  - Gemalto NV
+    - SoftHSM
+    - Gemalto NV

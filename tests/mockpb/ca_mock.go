@@ -3,8 +3,8 @@ package mockpb
 import (
 	"context"
 
+	"github.com/effective-security/trusty/api/v1/pb"
 	"github.com/gogo/protobuf/proto"
-	"github.com/martinisecurity/trusty/api/v1/pb"
 )
 
 // MockCAServer for testing

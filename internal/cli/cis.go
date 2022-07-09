@@ -3,9 +3,9 @@ package cli
 import (
 	"context"
 
+	"github.com/effective-security/trusty/backend/config"
+	"github.com/effective-security/trusty/pkg/print"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/martinisecurity/trusty/backend/config"
-	"github.com/martinisecurity/trusty/pkg/print"
 	"github.com/pkg/errors"
 )
 

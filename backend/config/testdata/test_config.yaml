@@ -1,6 +1,6 @@
 ---
 service: trusty-pod
-region : local
+region: local
 cluster: ${NODENAME}
 environment: test
 
@@ -13,20 +13,16 @@ logs:
   # contols how large a single log file can be before its rotated
   max_size_mb: 10
 
-log_levels: 
-  -
-    repo: "*"
+log_levels:
+  - repo: "*"
     level: TRACE
-  -
-    repo: github.com/martinisecurity/trusty
+  - repo: github.com/effective-security/trusty
     package: "*"
     level: TRACE
-  -
-    repo: github.com/martinisecurity/trusty/health
+  - repo: github.com/effective-security/trusty/health
     package: xhttp
     level: ERROR
-  -  
-    repo: github.com/martinisecurity/trusty/backend/service
+  - repo: github.com/effective-security/trusty/backend/service
     package: "*"
     level: DEBUG
 
@@ -98,8 +94,8 @@ servers:
         - sec-ch-ua
         - sec-ch-ua-mobile
     # configuration for the authorization module
-    authz: &authz
-      # allow any non-authenticated request access to this path and its children
+    authz:
+      &authz # allow any non-authenticated request access to this path and its children
       allow_any:
         - /v1/auth
         - /v1/status
@@ -147,13 +143,13 @@ servers:
     cors: *cors
     authz: *authz
 
-trusty_client: 
+trusty_client:
   client_tls:
     cert: /tmp/trusty/certs/trusty_${ENVIRONMENT}_client.pem
     key: /tmp/trusty/certs/trusty_${ENVIRONMENT}_client.pem
     trusted_ca: /tmp/trusty/certs/trusty_${ENVIRONMENT}_root_ca.pem
   server_url:
-    cis: 
-    - http://localhost:7880
-    wfe: 
-    - https://localhost:7891
+    cis:
+      - http://localhost:7880
+    wfe:
+      - https://localhost:7891

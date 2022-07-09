@@ -5,9 +5,9 @@ import (
 	"os"
 
 	"github.com/alecthomas/kong"
+	"github.com/effective-security/trusty/internal/cli"
+	"github.com/effective-security/trusty/internal/version"
 	"github.com/effective-security/xpki/x/ctl"
-	"github.com/martinisecurity/trusty/internal/cli"
-	"github.com/martinisecurity/trusty/internal/version"
 )
 
 type app struct {

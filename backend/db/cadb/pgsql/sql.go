@@ -8,7 +8,7 @@ import (
 	"github.com/effective-security/xlog"
 )
 
-var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/internal/cadb", "pgsql")
+var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/internal/cadb", "pgsql")
 
 const (
 	defaultLimitOfRows = 1000

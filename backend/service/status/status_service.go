@@ -3,16 +3,16 @@ package status
 import (
 	"github.com/effective-security/porto/gserver"
 	"github.com/effective-security/porto/restserver"
+	v1 "github.com/effective-security/trusty/api/v1"
+	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/xlog"
-	v1 "github.com/martinisecurity/trusty/api/v1"
-	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"google.golang.org/grpc"
 )
 
 // ServiceName provides the Service Name for this package
 const ServiceName = "status"
 
-var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/service", "status")
+var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/backend/service", "status")
 
 // Service defines the Status service
 type Service struct {

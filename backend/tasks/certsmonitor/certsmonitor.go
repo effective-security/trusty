@@ -6,13 +6,13 @@ import (
 
 	"github.com/effective-security/porto/pkg/tasks"
 	"github.com/effective-security/porto/x/fileutil"
+	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/certutil"
-	"github.com/martinisecurity/trusty/backend/config"
 	"github.com/pkg/errors"
 )
 
-var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/tasks", "certsmonitor")
+var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/backend/tasks", "certsmonitor")
 
 // TaskName is the name of this task
 const TaskName = "certsmonitor"

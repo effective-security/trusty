@@ -9,10 +9,10 @@ import (
 
 	"github.com/effective-security/porto/x/fileutil"
 	"github.com/effective-security/porto/x/guid"
+	"github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/backend/db/cadb/model"
+	"github.com/effective-security/trusty/pkg/certpublisher"
 	"github.com/effective-security/xpki/certutil"
-	"github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/backend/db/cadb/model"
-	"github.com/martinisecurity/trusty/pkg/certpublisher"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

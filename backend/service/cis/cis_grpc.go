@@ -3,11 +3,11 @@ package cis
 import (
 	"context"
 
+	v1 "github.com/effective-security/trusty/api/v1"
+	pb "github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/xlog"
 	"github.com/golang/protobuf/ptypes/empty"
-	v1 "github.com/martinisecurity/trusty/api/v1"
-	pb "github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"google.golang.org/grpc/codes"
 )
 

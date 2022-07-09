@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/effective-security/porto/tests/testutils"
-	"github.com/martinisecurity/trusty/backend/config"
+	"github.com/effective-security/trusty/backend/config"
 )
 
 // CreateURLs returns URL with a random port

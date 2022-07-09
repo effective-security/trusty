@@ -1,9 +1,9 @@
 FROM ekspand/trusty-docker-base:latest
-LABEL org.opencontainers.image.authors="Martini Security <denis@martinisecurity.com>" \
-      org.opencontainers.image.url="https://github.com/martinisecurity/trusty" \
-      org.opencontainers.image.source="https://github.com/martinisecurity/trusty" \
-      org.opencontainers.image.documentation="https://github.com/martinisecurity/trusty" \
-      org.opencontainers.image.vendor="Martini Security" \
+LABEL org.opencontainers.image.authors="Effective Security <denis@effectivesecurity.pt>" \
+      org.opencontainers.image.url="https://github.com/effective-security/trusty" \
+      org.opencontainers.image.source="https://github.com/effective-security/trusty" \
+      org.opencontainers.image.documentation="https://github.com/effective-security/trusty" \
+      org.opencontainers.image.vendor="Effective Security" \
       org.opencontainers.image.description="Trusty CA"
 
 ENV PATH=$PATH:/opt/trusty/bin
