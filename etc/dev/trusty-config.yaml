@@ -20,19 +20,19 @@ logs:
 log_levels:
   - repo: "*"
     level: TRACE
-  - repo: github.com/martinisecurity/trusty
+  - repo: github.com/effective-security/trusty
     package: "*"
     level: TRACE
-  - repo: github.com/martinisecurity/trusty/pkg
+  - repo: github.com/effective-security/trusty/pkg
     package: "*"
     level: DEBUG
-  - repo: github.com/martinisecurity/trusty/backend
+  - repo: github.com/effective-security/trusty/backend
     package: "*"
     level: DEBUG
-  - repo: github.com/martinisecurity/trusty/health
+  - repo: github.com/effective-security/trusty/health
     package: xhttp
     level: ERROR
-  - repo: github.com/martinisecurity/trusty/backend/service
+  - repo: github.com/effective-security/trusty/backend/service
     package: "*"
     level: DEBUG
 
@@ -251,6 +251,7 @@ servers:
         roles:
           trusty-admin:
             - denis@ekspand.com
+            - denis@effectivesecurity.pt
 
 trusty_client:
   client_tls:

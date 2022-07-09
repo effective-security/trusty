@@ -5,13 +5,13 @@ import (
 
 	"github.com/effective-security/metrics"
 	"github.com/effective-security/porto/pkg/tasks"
+	"github.com/effective-security/trusty/backend/db/cadb"
+	"github.com/effective-security/trusty/pkg/metricskey"
 	"github.com/effective-security/xlog"
-	"github.com/martinisecurity/trusty/backend/db/cadb"
-	"github.com/martinisecurity/trusty/pkg/metricskey"
 	"github.com/pkg/errors"
 )
 
-var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/tasks", "stats")
+var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/backend/tasks", "stats")
 
 // TaskName is the name of this task
 const TaskName = "stats"

@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/effective-security/trusty/pkg/accesstoken"
 	"github.com/effective-security/xpki/dataprotection"
 	"github.com/effective-security/xpki/jwt"
-	"github.com/martinisecurity/trusty/pkg/accesstoken"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/pkg", "storage")
+var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/pkg", "storage")
 
 // Options collects the options for all supported storage types
 type Options struct {

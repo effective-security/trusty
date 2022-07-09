@@ -8,8 +8,8 @@ import (
 	"time"
 
 	tcredentials "github.com/effective-security/porto/gserver/credentials"
+	v1 "github.com/effective-security/trusty/api/v1"
 	"github.com/effective-security/xlog"
-	v1 "github.com/martinisecurity/trusty/api/v1"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -18,7 +18,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty", "client")
+var logger = xlog.NewPackageLogger("github.com/effective-security/trusty", "client")
 
 var (
 	// client-side handling retrying of request failures where data was not written to the wire or

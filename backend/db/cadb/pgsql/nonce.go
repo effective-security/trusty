@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/effective-security/porto/x/db"
-	"github.com/martinisecurity/trusty/backend/db/cadb/model"
+	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/pkg/errors"
 )
 

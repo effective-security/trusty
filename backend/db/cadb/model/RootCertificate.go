@@ -4,8 +4,8 @@ import (
 	"crypto/x509"
 	"time"
 
+	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/xpki/certutil"
-	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

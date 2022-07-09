@@ -3,8 +3,8 @@ package healthcheck
 import (
 	"testing"
 
-	"github.com/martinisecurity/trusty/backend/config"
-	"github.com/martinisecurity/trusty/tests/testutils"
+	"github.com/effective-security/trusty/backend/config"
+	"github.com/effective-security/trusty/tests/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/dig"

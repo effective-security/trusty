@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/effective-security/porto/pkg/flake"
-	db "github.com/martinisecurity/trusty/backend/db/cadb"
-	"github.com/martinisecurity/trusty/tests/testutils"
+	db "github.com/effective-security/trusty/backend/db/cadb"
+	"github.com/effective-security/trusty/tests/testutils"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

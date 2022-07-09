@@ -10,6 +10,12 @@ import (
 	"github.com/effective-security/porto/pkg/discovery"
 	"github.com/effective-security/porto/pkg/flake"
 	"github.com/effective-security/porto/pkg/tasks"
+	v1 "github.com/effective-security/trusty/api/v1"
+	"github.com/effective-security/trusty/backend/config"
+	"github.com/effective-security/trusty/backend/db/cadb"
+	"github.com/effective-security/trusty/client"
+	"github.com/effective-security/trusty/pkg/accesstoken"
+	"github.com/effective-security/trusty/pkg/certpublisher"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/authority"
 	"github.com/effective-security/xpki/certutil"
@@ -19,19 +25,13 @@ import (
 	"github.com/effective-security/xpki/cryptoprov/gcpkmscrypto"
 	"github.com/effective-security/xpki/dataprotection"
 	"github.com/effective-security/xpki/jwt"
-	v1 "github.com/martinisecurity/trusty/api/v1"
-	"github.com/martinisecurity/trusty/backend/config"
-	"github.com/martinisecurity/trusty/backend/db/cadb"
-	"github.com/martinisecurity/trusty/client"
-	"github.com/martinisecurity/trusty/pkg/accesstoken"
-	"github.com/martinisecurity/trusty/pkg/certpublisher"
 	"github.com/pkg/errors"
 	"go.uber.org/dig"
 	"google.golang.org/grpc/codes"
 	"gopkg.in/yaml.v2"
 )
 
-var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/internal", "appcontainer")
+var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/internal", "appcontainer")
 
 // ContainerFactoryFn defines an app container factory interface
 type ContainerFactoryFn func() (*dig.Container, error)

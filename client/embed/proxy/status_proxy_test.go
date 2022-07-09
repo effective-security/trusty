@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
+	pb "github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/tests/mockpb"
 	"github.com/gogo/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/empty"
-	pb "github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/tests/mockpb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

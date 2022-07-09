@@ -9,9 +9,9 @@ import (
 	"github.com/effective-security/porto/pkg/flake"
 	"github.com/effective-security/porto/x/db/migrate"
 	"github.com/effective-security/porto/x/fileutil"
+	"github.com/effective-security/trusty/backend/db/cadb/model"
+	"github.com/effective-security/trusty/backend/db/cadb/pgsql"
 	"github.com/effective-security/xlog"
-	"github.com/martinisecurity/trusty/backend/db/cadb/model"
-	"github.com/martinisecurity/trusty/backend/db/cadb/pgsql"
 	"github.com/pkg/errors"
 
 	// register Postgres driver
@@ -20,7 +20,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/db", "cadb")
+var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/backend/db", "cadb")
 
 // CaReadonlyDb defines an interface for Read operations on Certs
 type CaReadonlyDb interface {

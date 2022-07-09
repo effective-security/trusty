@@ -3,9 +3,9 @@ package mockpb
 import (
 	"context"
 
+	"github.com/effective-security/trusty/api/v1/pb"
 	"github.com/gogo/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/martinisecurity/trusty/api/v1/pb"
 )
 
 // MockStatusServer for testing

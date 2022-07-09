@@ -4,11 +4,11 @@ import (
 	"context"
 
 	"github.com/effective-security/porto/xhttp/correlation"
+	v1 "github.com/effective-security/trusty/api/v1"
+	pb "github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/authority"
-	v1 "github.com/martinisecurity/trusty/api/v1"
-	pb "github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"google.golang.org/grpc/codes"
 	"gopkg.in/yaml.v2"
 )

@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/pkg/storage"
 	"github.com/effective-security/xlog"
-	"github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/pkg/storage"
 	"github.com/pkg/errors"
 )
 
-var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/pkg", "certpublisher")
+var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/pkg", "certpublisher")
 
 // Publisher interface
 type Publisher interface {

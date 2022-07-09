@@ -3,9 +3,9 @@ package mockappcontainer
 import (
 	"github.com/effective-security/porto/gserver/roles"
 	"github.com/effective-security/porto/pkg/discovery"
+	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/xpki/cryptoprov"
 	"github.com/effective-security/xpki/jwt"
-	"github.com/martinisecurity/trusty/backend/config"
 	"go.uber.org/dig"
 )
 

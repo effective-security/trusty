@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 
-	pb "github.com/martinisecurity/trusty/api/v1/pb"
+	pb "github.com/effective-security/trusty/api/v1/pb"
 	"google.golang.org/grpc"
 )
 

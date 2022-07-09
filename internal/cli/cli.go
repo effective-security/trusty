@@ -10,15 +10,15 @@ import (
 
 	"github.com/alecthomas/kong"
 	"github.com/effective-security/porto/pkg/tlsconfig"
+	"github.com/effective-security/trusty/backend/config"
+	"github.com/effective-security/trusty/client"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/x/ctl"
-	"github.com/martinisecurity/trusty/backend/config"
-	"github.com/martinisecurity/trusty/client"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
 
-var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/internal", "cli")
+var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/internal", "cli")
 
 // Cli provides CLI context to run commands
 type Cli struct {

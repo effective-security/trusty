@@ -15,20 +15,20 @@ import (
 	"github.com/effective-security/porto/gserver"
 	"github.com/effective-security/porto/restserver"
 	"github.com/effective-security/porto/xhttp/header"
+	v1 "github.com/effective-security/trusty/api/v1"
+	"github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/backend/appcontainer"
+	"github.com/effective-security/trusty/backend/config"
+	"github.com/effective-security/trusty/backend/db/cadb"
+	"github.com/effective-security/trusty/backend/db/cadb/model"
+	"github.com/effective-security/trusty/backend/service/ca"
+	"github.com/effective-security/trusty/backend/service/cis"
+	"github.com/effective-security/trusty/client"
+	"github.com/effective-security/trusty/client/embed"
+	"github.com/effective-security/trusty/tests/testutils"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/certutil"
 	"github.com/golang/protobuf/ptypes/empty"
-	v1 "github.com/martinisecurity/trusty/api/v1"
-	"github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/backend/appcontainer"
-	"github.com/martinisecurity/trusty/backend/config"
-	"github.com/martinisecurity/trusty/backend/db/cadb"
-	"github.com/martinisecurity/trusty/backend/db/cadb/model"
-	"github.com/martinisecurity/trusty/backend/service/ca"
-	"github.com/martinisecurity/trusty/backend/service/cis"
-	"github.com/martinisecurity/trusty/client"
-	"github.com/martinisecurity/trusty/client/embed"
-	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -50,7 +50,7 @@ var (
 
 func TestMain(m *testing.M) {
 	xlog.GetFormatter().WithCaller(true)
-	xlog.SetPackageLogLevel("github.com/martinisecurity/trusty/internal/cadb", "pgsql", xlog.DEBUG)
+	xlog.SetPackageLogLevel("github.com/effective-security/trusty/internal/cadb", "pgsql", xlog.DEBUG)
 
 	var err error
 

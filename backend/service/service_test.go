@@ -5,11 +5,11 @@ import (
 	"testing"
 
 	"github.com/effective-security/porto/gserver"
-	v1 "github.com/martinisecurity/trusty/api/v1"
-	"github.com/martinisecurity/trusty/backend/service"
-	"github.com/martinisecurity/trusty/backend/service/ca"
-	"github.com/martinisecurity/trusty/backend/service/status"
-	"github.com/martinisecurity/trusty/backend/service/swagger"
+	v1 "github.com/effective-security/trusty/api/v1"
+	"github.com/effective-security/trusty/backend/service"
+	"github.com/effective-security/trusty/backend/service/ca"
+	"github.com/effective-security/trusty/backend/service/status"
+	"github.com/effective-security/trusty/backend/service/swagger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

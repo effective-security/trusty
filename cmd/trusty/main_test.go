@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/effective-security/porto/x/guid"
-	"github.com/martinisecurity/trusty/internal/version"
+	"github.com/effective-security/trusty/internal/version"
 	"github.com/stretchr/testify/assert"
 )
 

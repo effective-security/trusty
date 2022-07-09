@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/martinisecurity/trusty/backend/trustymain"
+	"github.com/effective-security/trusty/backend/trustymain"
 )
 
 const (

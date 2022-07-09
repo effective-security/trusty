@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty", "config")
+var logger = xlog.NewPackageLogger("github.com/effective-security/trusty", "config")
 
 const (
 	// ConfigFileName is default name for the configuration file

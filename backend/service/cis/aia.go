@@ -10,8 +10,8 @@ import (
 	"github.com/effective-security/porto/xhttp/header"
 	"github.com/effective-security/porto/xhttp/httperror"
 	"github.com/effective-security/porto/xhttp/marshal"
+	"github.com/effective-security/trusty/pkg/metricskey"
 	"github.com/effective-security/xlog"
-	"github.com/martinisecurity/trusty/pkg/metricskey"
 )
 
 const (

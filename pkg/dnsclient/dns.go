@@ -15,7 +15,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/pkg", "dnsclient")
+var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/pkg", "dnsclient")
 
 // Resolver queries for DNS records
 type Resolver interface {

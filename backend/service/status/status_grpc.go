@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 
 	"github.com/effective-security/porto/xhttp/identity"
+	pb "github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/internal/version"
 	"github.com/golang/protobuf/ptypes/empty"
-	pb "github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/internal/version"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

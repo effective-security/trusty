@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/pkg/print"
+	"github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/pkg/print"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

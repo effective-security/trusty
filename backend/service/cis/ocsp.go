@@ -10,9 +10,9 @@ import (
 	"github.com/effective-security/porto/xhttp/header"
 	"github.com/effective-security/porto/xhttp/httperror"
 	"github.com/effective-security/porto/xhttp/marshal"
+	v1 "github.com/effective-security/trusty/api/v1"
+	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/xlog"
-	v1 "github.com/martinisecurity/trusty/api/v1"
-	pb "github.com/martinisecurity/trusty/api/v1/pb"
 	"golang.org/x/crypto/ocsp"
 	"google.golang.org/grpc/codes"
 )

@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/effective-security/porto/pkg/flake"
+	db "github.com/effective-security/trusty/backend/db/cadb"
+	"github.com/effective-security/trusty/tests/testutils"
 	"github.com/effective-security/xlog"
-	db "github.com/martinisecurity/trusty/backend/db/cadb"
-	"github.com/martinisecurity/trusty/tests/testutils"
 	"github.com/pkg/errors"
 )
 

@@ -1,7 +1,7 @@
 # trusty
 
-![Build](https://github.com/martinisecurity/trusty/workflows/Build/badge.svg?branch=master)
-[![Coverage Status](https://coveralls.io/repos/github/martinisecurity/trusty/badge.svg?branch=master)](https://coveralls.io/github/martinisecurity/trusty?branch=master)
+![Build](https://github.com/effective-security/trusty/workflows/Build/badge.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/effective-security/trusty/badge.svg?branch=master)](https://coveralls.io/github/effective-security/trusty?branch=master)
 
 Trusty is a Certification Authority.
 
@@ -26,7 +26,6 @@ export AWS_ACCESS_KEY_ID=notusedbyemulator
 export AWS_SECRET_ACCESS_KEY=notusedbyemulator
 export AWS_DEFAULT_REGION=us-west-2
 export TRUSTY_JWT_SEED=g...A
-# export CR_PAT=ghp_M...v
 ```
 
 ## Build

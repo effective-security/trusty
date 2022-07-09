@@ -1,5 +1,5 @@
 {
-    "common_name": "Martini Security SHAKEN R1",
+    "common_name": "Effective Security SHAKEN R1",
     "key": {
         "algo": "ecdsa",
         "size": 256
@@ -9,7 +9,7 @@
             "C": "US",
             "ST": "WA",
             "L": "Seattle",
-            "O": "Martini Security, LLC."
+            "O": "Effective Security, LLC."
         }
     ]
 }

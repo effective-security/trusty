@@ -9,7 +9,7 @@ import (
 // ServiceName provides the Service Name for this package
 const ServiceName = "swagger"
 
-var logger = xlog.NewPackageLogger("github.com/martinisecurity/trusty/backend/service", "swagger")
+var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/backend/service", "swagger")
 
 // Service defines the Swagger service
 type Service struct {
