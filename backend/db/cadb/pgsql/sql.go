@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/effective-security/porto/pkg/flake"
+	"github.com/effective-security/porto/x/db"
 	"github.com/effective-security/xlog"
 )
 
@@ -15,35 +16,37 @@ const (
 
 // Provider represents SQL client instance
 type Provider struct {
-	db    *sql.DB
+	conn  *sql.DB
+	sql   db.SQL
 	idGen flake.IDGenerator
 }
 
 // New creates a Provider instance
 func New(db *sql.DB, idGen flake.IDGenerator) (*Provider, error) {
 	return &Provider{
-		db:    db,
+		conn:  db,
+		sql:   db,
 		idGen: idGen,
 	}, nil
 }
 
 // Close connection and release resources
 func (p *Provider) Close() (err error) {
-	if p.db == nil {
+	if p.conn == nil {
 		return
 	}
 
-	if err = p.db.Close(); err != nil {
+	if err = p.conn.Close(); err != nil {
 		logger.Errorf("err=[%+v]", err)
 	} else {
-		p.db = nil
+		p.conn = nil
 	}
 	return
 }
 
 // DB returns underlying DB connection
 func (p *Provider) DB() *sql.DB {
-	return p.db
+	return p.conn
 }
 
 // NextID returns unique ID

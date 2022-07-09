@@ -9,7 +9,7 @@ import (
 // GetCertsCount returns number of certs
 func (p *Provider) GetCertsCount(ctx context.Context) (uint64, error) {
 	count := uint64(0)
-	err := p.db.QueryRowContext(ctx, `SELECT COUNT(id) FROM certificates;`).Scan(&count)
+	err := p.sql.QueryRowContext(ctx, `SELECT COUNT(id) FROM certificates;`).Scan(&count)
 	if err != nil {
 		return 0, errors.WithStack(err)
 	}
@@ -19,7 +19,7 @@ func (p *Provider) GetCertsCount(ctx context.Context) (uint64, error) {
 // GetRevokedCount returns number of revoked certs
 func (p *Provider) GetRevokedCount(ctx context.Context) (uint64, error) {
 	count := uint64(0)
-	err := p.db.QueryRowContext(ctx, `SELECT COUNT(id) FROM revoked;`).Scan(&count)
+	err := p.sql.QueryRowContext(ctx, `SELECT COUNT(id) FROM revoked;`).Scan(&count)
 	if err != nil {
 		return 0, errors.WithStack(err)
 	}

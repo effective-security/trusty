@@ -9,12 +9,12 @@ import (
 	"time"
 
 	"github.com/effective-security/metrics"
+	"github.com/effective-security/porto/x/db"
 	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/authority"
 	v1 "github.com/martinisecurity/trusty/api/v1"
 	pb "github.com/martinisecurity/trusty/api/v1/pb"
-	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/martinisecurity/trusty/pkg/metricskey"
 	"github.com/pkg/errors"

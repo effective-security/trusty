@@ -75,7 +75,7 @@ delegated_issuers:
   crypto_provider: AWSKMS
   issuer_label_prefix: DELEGATED_ICA_
   aia:
-    crl_url: https://authenticate-api.iconectiv.com/download/v1/crl
+    #crl_url: https://authenticate-api.iconectiv.com/download/v1/crl
   allowed_profiles:
     - DELEGATED
 

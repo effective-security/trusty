@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/effective-security/porto/gserver/roles"
 	"github.com/effective-security/porto/pkg/discovery"
@@ -283,6 +284,13 @@ func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
 	cryptoprov.Register(gcpkmscrypto.ProviderName, gcpkmscrypto.KmsLoader)
 	cryptoprov.Register(gcpkmscrypto.ProviderName+"-1", gcpkmscrypto.KmsLoader) // root
 	cryptoprov.Register(gcpkmscrypto.ProviderName+"-2", gcpkmscrypto.KmsLoader) // delegated
+
+	if strings.Contains(cfg.CryptoProv.Default, "aws-dev-kms") &&
+		os.Getenv("AWS_ACCESS_KEY_ID") == "" {
+		os.Setenv("AWS_ACCESS_KEY_ID", "notusedbyemulator")
+		os.Setenv("AWS_SECRET_ACCESS_KEY", "notusedbyemulator")
+		os.Setenv("AWS_DEFAULT_REGION", "us-west-2")
+	}
 
 	crypto, err := cryptoprov.Load(cfg.CryptoProv.Default, cfg.CryptoProv.Providers)
 	if err != nil {

@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/effective-security/porto/pkg/flake"
+	"github.com/effective-security/porto/x/db/migrate"
 	"github.com/effective-security/porto/x/fileutil"
 	"github.com/effective-security/xlog"
-	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/martinisecurity/trusty/backend/db/cadb/pgsql"
 	"github.com/pkg/errors"
@@ -135,7 +135,7 @@ func New(driverName, dataSourceName, migrationsDir string, forceVersion int, idG
 		return nil, errors.WithMessagef(err, "unable to ping DB: %s", driverName)
 	}
 
-	err = db.Migrate("cadb", migrationsDir, forceVersion, d)
+	err = migrate.Postgres("cadb", migrationsDir, forceVersion, d)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "unable to migrate cadb")
 	}

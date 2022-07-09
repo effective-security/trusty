@@ -6,11 +6,11 @@ import (
 
 	"github.com/effective-security/metrics"
 	"github.com/effective-security/porto/restserver"
+	"github.com/effective-security/porto/x/db"
 	"github.com/effective-security/porto/xhttp/header"
 	"github.com/effective-security/porto/xhttp/httperror"
 	"github.com/effective-security/porto/xhttp/marshal"
 	"github.com/effective-security/xlog"
-	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/pkg/metricskey"
 )
 

@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/effective-security/porto/x/db"
 	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/xlog"
-	"github.com/martinisecurity/trusty/backend/db"
 	"github.com/martinisecurity/trusty/backend/db/cadb/model"
 	"github.com/pkg/errors"
 )
@@ -29,7 +29,7 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 		return nil, errors.WithStack(err)
 	}
 
-	row := p.db.QueryRowContext(ctx, `
+	row := p.sql.QueryRowContext(ctx, `
 			INSERT INTO certificates(id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,label,locations,metadata)
 				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
 			ON CONFLICT (sha256)
@@ -126,7 +126,7 @@ func scanShortCertificate(row *sql.Rows) (*model.Certificate, error) {
 // RemoveCertificate removes Cert
 func (p *Provider) RemoveCertificate(ctx context.Context, id uint64) error {
 	logger.Noticef("id=%d, ctx=%q", id, correlation.ID(ctx))
-	_, err := p.db.ExecContext(ctx, `DELETE FROM certificates WHERE id=$1;`, id)
+	_, err := p.sql.ExecContext(ctx, `DELETE FROM certificates WHERE id=$1;`, id)
 	if err != nil {
 		logger.Errorf("err=[%+v]", err)
 		return errors.WithStack(err)
@@ -138,7 +138,7 @@ func (p *Provider) RemoveCertificate(ctx context.Context, id uint64) error {
 // UpdateCertificateLabel update Certificate label
 func (p *Provider) UpdateCertificateLabel(ctx context.Context, id uint64, label string) (*model.Certificate, error) {
 	logger.Noticef("id=%d, label=%q, ctx=%q", id, label, correlation.ID(ctx))
-	m, err := scanFullCertificate(p.db.QueryRowContext(ctx, `
+	m, err := scanFullCertificate(p.sql.QueryRowContext(ctx, `
 			UPDATE certificates
 			SET label=$2
 			WHERE id=$1
@@ -152,7 +152,7 @@ func (p *Provider) UpdateCertificateLabel(ctx context.Context, id uint64, label 
 
 // GetCertificate returns registered Certificate
 func (p *Provider) GetCertificate(ctx context.Context, id uint64) (*model.Certificate, error) {
-	m, err := scanFullCertificate(p.db.QueryRowContext(ctx, `
+	m, err := scanFullCertificate(p.sql.QueryRowContext(ctx, `
 		SELECT
 			id,org_id,skid,ikid,serial_number,
 			not_before,no_tafter,
@@ -175,7 +175,7 @@ func (p *Provider) GetCertificate(ctx context.Context, id uint64) (*model.Certif
 
 // GetCertificateBySKID returns registered Certificate
 func (p *Provider) GetCertificateBySKID(ctx context.Context, skid string) (*model.Certificate, error) {
-	m, err := scanFullCertificate(p.db.QueryRowContext(ctx, `
+	m, err := scanFullCertificate(p.sql.QueryRowContext(ctx, `
 			SELECT
 				id,org_id,skid,ikid,serial_number,
 				not_before,no_tafter,
@@ -198,7 +198,7 @@ func (p *Provider) GetCertificateBySKID(ctx context.Context, skid string) (*mode
 
 // GetCertificateByIKIDAndSerial returns registered Certificate
 func (p *Provider) GetCertificateByIKIDAndSerial(ctx context.Context, ikid, serial string) (*model.Certificate, error) {
-	m, err := scanFullCertificate(p.db.QueryRowContext(ctx, `
+	m, err := scanFullCertificate(p.sql.QueryRowContext(ctx, `
 			SELECT
 				id,org_id,skid,ikid,serial_number,
 				not_before,no_tafter,
@@ -228,7 +228,7 @@ func (p *Provider) ListOrgCertificates(ctx context.Context, orgID uint64, limit 
 		limit = 500
 	}
 
-	res, err := p.db.QueryContext(ctx, `
+	res, err := p.sql.QueryContext(ctx, `
 		SELECT
 			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,profile,label,locations,metadata
 		FROM
@@ -271,7 +271,7 @@ func (p *Provider) ListCertificates(ctx context.Context, ikid string, limit int,
 		"ctx", correlation.ID(ctx),
 	)
 
-	res, err := p.db.QueryContext(ctx,
+	res, err := p.sql.QueryContext(ctx,
 		`SELECT
 			id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,profile,label,locations,metadata
 		FROM
