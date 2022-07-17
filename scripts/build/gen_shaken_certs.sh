@@ -25,7 +25,7 @@ do
 key="$1"
 
 case $key in
-    -o|--out-dir)
+    -o|--output-dir|--out-dir)
     OUT_DIR="$2"
     shift # past argument
     shift # past value
