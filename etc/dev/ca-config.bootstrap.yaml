@@ -142,4 +142,5 @@ profiles:
           - type: id-qt-cps
             value: https://stirshaken.com/CPS
     allowed_extensions:
+      - 2.5.29.31
       - 2.5.29.32
