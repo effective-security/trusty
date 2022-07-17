@@ -1,0 +1,14 @@
+---
+san:
+  - localhost
+  - 127.0.0.1
+  - spiffe://trusty/ca
+common_name: ca.trusty.com
+key:
+  algo: ecdsa
+  size: 256
+names:
+  - C: US
+    L: WA
+    O: trusty.com
+    OU: CA

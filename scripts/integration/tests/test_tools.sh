@@ -26,13 +26,13 @@ echo "*** hsm-tool: hsm remove"
 echo "*** hsm-tool: csr create"
 /opt/trusty/bin/hsm-tool $TOOL_FLAGS csr create \
         --plain-key \
-        --csr-profile=/opt/trusty/etc/dev/csr_profile/trusty_l1_ca.json \
+        --csr-profile=/opt/trusty/etc/dev/csr_profile/trusty_l1_ca.yaml \
         --key-label="ci_csrtest_issuer1_ca*"
 echo "*** hsm-tool: csr gencert"
 /opt/trusty/bin/hsm-tool $TOOL_FLAGS csr gen-cert \
         --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml \
         --profile=L1_CA \
-        --csr-profile=/opt/trusty/etc/dev/csr_profile/trusty_l1_ca.json \
+        --csr-profile=/opt/trusty/etc/dev/csr_profile/trusty_l1_ca.yaml \
         --key-label="ci_test_issuer1_ca*" \
         --ca-cert=/opt/trusty/etc/dev/roots/trusty_root_ca.pem \
         --ca-key=/opt/trusty/etc/dev/roots/trusty_root_ca.key \

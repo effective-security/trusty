@@ -25,7 +25,7 @@ authority:
         crl_renewal: 12h
         ocsp_expiry: 1h
     - # specifies Issuer's label
-      label: SHAKEN_CA
+      label: SHAKEN_G1_CA
       type: shaken
       cert: /tmp/trusty/certs/shaken_ca.pem
       key: /tmp/trusty/certs/shaken_ca.key
@@ -201,7 +201,7 @@ profiles:
       - key encipherment
 
   SHAKEN:
-    issuer_label: SHAKEN_CA
+    issuer_label: SHAKEN_G1_CA
     expiry: 8760h
     backdate: 30m
     usages:

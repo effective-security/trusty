@@ -1,0 +1,11 @@
+---
+common_name: trusty
+san:
+  - spiffe://trusty/all
+key:
+  algo: rsa
+  size: 2048
+names:
+  - C: US
+    L: WA
+    O: trusty.com

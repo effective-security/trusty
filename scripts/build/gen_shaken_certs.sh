@@ -16,6 +16,7 @@
 #   --l1_ca                 - specifies if delegated Level 1 CA certificate and key should be generated
 #   --bundle                - specifies if Int CA Bundle should be created
 #   --force                 - specifies to force issuing the cert even if it exists
+#   --verbose               - specifies to enable verbose logs
 #
 
 POSITIONAL=()
@@ -89,6 +90,10 @@ case $key in
     BUNDLE=YES
     shift # past argument
     ;;
+    --verbose)
+    FLAGS="-D"
+    shift # past argument
+    ;;
     *)
     echo "invalid flag $key: use --help to see the option"
     exit 1
@@ -105,6 +110,7 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 
 HOSTNAME=`hostname`
 
+echo "FLAGS        = ${FLAGS}"
 echo "OUT_DIR      = ${OUT_DIR}"
 echo "OUT_PREFIX   = ${OUT_PREFIX}"
 echo "CSR_DIR      = ${CSR_DIR}"
@@ -117,26 +123,31 @@ echo "FORCE        = ${FORCE}"
 echo "ROOT_CA_CERT = $ROOT_CA_CERT"
 echo "ROOT_CA_KEY  = $ROOT_CA_KEY"
 
+if [[ "$FLAGS" == "-D" ]]; then echo "*** hsm-tool "
+    hsm-tool --version; 
+fi
+
 if [[ "$ROOTCA" == "YES" && ("$FORCE" == "YES" || ! -f ${ROOT_CA_KEY}) ]]; then echo "*** generating ${ROOT_CA_CERT/.pem/''}"
-    hsm-tool \
-        --cfg=${HSM_CONFIG} ${CRYPTO_PROV} \
+    echo "*** generating R1 coot cert: ${ROOT_CA_CERT}"
+    hsm-tool ${FLAGS} \
+        --cfg ${HSM_CONFIG} ${CRYPTO_PROV} \
         csr gen-cert --self-sign \
-        --ca-config=${CA_CONFIG} \
-        --profile=SHAKEN_ROOT \
-        --csr-profile ${CSR_DIR}/${CSR_PREFIX}root_ca.json \
-        --key-label="${OUT_PREFIX}root_ca*" \
+        --ca-config ${CA_CONFIG} \
+        --profile SHAKEN_ROOT \
+        --csr-profile ${CSR_DIR}/${CSR_PREFIX}root_ca.yaml \
+        --key-label "${OUT_PREFIX}root_ca*" \
         --output ${ROOT_CA_CERT/.pem/''}
 fi
 
 if [[ "$CA" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}ca.key) ]]; then
-    echo "*** generating CA cert"
-    hsm-tool \
-        --cfg=${HSM_CONFIG} ${CRYPTO_PROV} \
+    echo "*** generating G1 CA cert: ${OUT_DIR}/${OUT_PREFIX}ca.pem"
+    hsm-tool ${FLAGS} \
+        --cfg ${HSM_CONFIG} ${CRYPTO_PROV} \
         csr gen-cert \
-        --ca-config=${CA_CONFIG} \
-        --profile=SHAKEN_CA \
-        --csr-profile ${CSR_DIR}/${CSR_PREFIX}ca.json \
-        --key-label="${OUT_PREFIX}ca*" \
+        --ca-config ${CA_CONFIG} \
+        --profile SHAKEN_G1_CA \
+        --csr-profile ${CSR_DIR}/${CSR_PREFIX}ca.yaml \
+        --key-label "${OUT_PREFIX}ca*" \
         --ca-cert ${ROOT_CA_CERT} \
         --ca-key ${ROOT_CA_KEY} \
         --output ${OUT_DIR}/${OUT_PREFIX}ca
@@ -148,14 +159,14 @@ fi
 fi
 
 if [[ "$L1_CA" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}delegated_l1_ca.key) ]]; then
-    echo "*** generating Delegated L1 CA cert"
-    hsm-tool \
-        --cfg=${HSM_CONFIG} ${CRYPTO_PROV} \
+    echo "*** generating Delegated L1 CA cert: ${OUT_DIR}/${OUT_PREFIX}delegated_l1_ca.pem"
+    hsm-tool ${FLAGS} \
+        --cfg ${HSM_CONFIG} ${CRYPTO_PROV} \
         csr gen-cert \
-        --ca-config=${CA_CONFIG} \
-        --profile=DELEGATED_L1_CA \
-        --csr-profile ${CSR_DIR}/${CSR_PREFIX}delegated_l1_ca.json \
-        --key-label="${OUT_PREFIX}delegated_l1_ca*" \
+        --ca-config ${CA_CONFIG} \
+        --profile DELEGATED_L1_CA \
+        --csr-profile ${CSR_DIR}/${CSR_PREFIX}delegated_l1_ca.yaml \
+        --key-label "${OUT_PREFIX}delegated_l1_ca*" \
         --ca-cert ${ROOT_CA_CERT} \
         --ca-key ${ROOT_CA_KEY} \
         --output ${OUT_DIR}/${OUT_PREFIX}delegated_l1_ca

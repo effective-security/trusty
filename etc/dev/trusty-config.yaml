@@ -49,7 +49,7 @@ metrics:
 # configuration for crypto providers
 crypto_provider:
   #  the location of the configuration file for default provider
-  default: ${TRUSTY_CONFIG_DIR}/kms/aws-dev-kms.json
+  default: ${TRUSTY_CONFIG_DIR}/kms/aws-dev-kms.yaml
   # the list of locations of the configuration files
   providers:
   #- /tmp/trusty/softhsm/unittest_hsm.json
