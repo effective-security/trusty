@@ -1,5 +1,5 @@
 ---
-common_name: Delegated Intermediate CA L1
+common_name: Test Delegated Intermediate CA L1
 key:
   algo: ecdsa
   size: 256
@@ -9,9 +9,3 @@ names:
     L: Seattle
     OU: Dev
     O: Effective Security, LLC.
-extensions:
-  - id: 2.5.29.31 # CRL Distribution Points
-    critical: false
-    # Full Name: URI:https://authenticate-api.iconectiv.com/download/v1/crl
-    # CRL Issuer: DirName:L = Bridgewater, ST = NJ, CN = STI-PA CRL, C = US, O = STI-PA
-    value: hex:30819b308198a03aa038863668747470733a2f2f61757468656e7469636174652d6170692e69636f6e65637469762e636f6d2f646f776e6c6f61642f76312f63726ca25aa45830563114301206035504070c0b4272696467657761746572310b300906035504080c024e4a3113301106035504030c0a5354492d50412043524c310b3009060355040613025553310f300d060355040a0c065354492d5041

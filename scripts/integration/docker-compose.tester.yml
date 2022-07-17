@@ -77,19 +77,51 @@ services:
       - "7892" # CA
     environment:
       - TRUSTY_JWT_SEED=testseed
-      - TRUSTY_GITHUB_CLIENT_ID=not_used_in_test
-      - TRUSTY_GITHUB_CLIENT_SECRET=not_used_in_test
-      - TRUSTY_GOOGLE_CLIENT_ID=not_used_in_test
-      - TRUSTY_GOOGLE_CLIENT_SECRET=not_used_in_test
-      - TRUSTY_MAILGUN_PRIVATE_KEY=not_used_in_test
-      - TRUSTY_STRIPE_API_KEY=sk_test_123
-      - TRUSTY_STRIPE_WEBHOOK_SECRET=not_used_in_test
       - TRUSTY_CA_SQL_CONN=host=168.138.72.100 port=25433 user=postgres password=postgres sslmode=disable dbname=cadb
     entrypoint:
       - /bin/bash
       - -c
-      - >-
-        /opt/trusty/sql/cadb/wait_sql.sh 168.138.72.100 25433 postgres postgres echo "CA DB is ready" && mkdir -p /tmp/trusty/softhsm/tokens /tmp/trusty/certs && cp /opt/trusty/etc/dev/roots/trusty_root_ca.pem /tmp/trusty/certs/trusty_root_ca.pem && /opt/trusty/bin/config-softhsm.sh --tokens-dir /tmp/trusty/softhsm/tokens --pin-file /tmp/trusty/softhsm/trusty_unittest.txt --generate-pin -s trusty_unittest -o /tmp/trusty/softhsm/unittest_hsm.json --delete --list-slots --list-object && /opt/trusty/bin/gen_certs.sh --hsm-config /tmp/trusty/softhsm/unittest_hsm.json --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml --out-dir /tmp/trusty/certs --csr-dir /opt/trusty/etc/dev/csr_profile --root-ca /opt/trusty/etc/dev/roots/trusty_root_ca.pem --root-ca-key /opt/trusty/etc/dev/roots/trusty_root_ca.key --csr-prefix trusty_ --out-prefix trusty_ --san 168.138.72.101 --ca1 --ca2 --bundle --client --peer --force && /opt/trusty/bin/gen_shaken_certs.sh --hsm-config /tmp/trusty/softhsm/unittest_hsm.json --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml --out-dir /tmp/trusty/certs --csr-dir /opt/trusty/etc/dev/csr_profile --csr-prefix shaken_ --out-prefix shaken_ --root-ca /tmp/trusty/certs/shaken_root_ca.pem --root-ca-key /tmp/trusty/certs/shaken_root_ca.key --root --ca --l1_ca --bundle --force && /opt/trusty/bin/trusty --std --hsm-cfg=/tmp/trusty/softhsm/unittest_hsm.json --crypto-prov=/opt/trusty/tests/aws-test-kms.json --cfg=/opt/trusty/etc/dev/trusty-config.yaml --ca-sql=env://TRUSTY_CA_SQL_CONN --logs-dir=/var/trusty/logs --host-name=168.138.72.101 --cis-listen-url=http://168.138.72.101:7880 --ca-listen-url=https://168.138.72.101:7892
+      - |
+        /opt/trusty/sql/cadb/wait_sql.sh 168.138.72.100 25433 postgres postgres echo "CA DB is ready" && \
+        mkdir -p /tmp/trusty/softhsm/tokens /tmp/trusty/certs && \
+        cp /opt/trusty/etc/dev/roots/trusty_root_ca.pem /tmp/trusty/certs/trusty_root_ca.pem && \
+        /opt/trusty/bin/config-softhsm.sh \
+          --tokens-dir /tmp/trusty/softhsm/tokens \
+          --pin-file /tmp/trusty/softhsm/trusty_unittest.txt \
+          --generate-pin \
+          -s trusty_unittest \
+          -o /tmp/trusty/softhsm/unittest_hsm.json \
+          --delete --list-slots --list-object && \
+        /opt/trusty/bin/gen_certs.sh \
+          --hsm-config /tmp/trusty/softhsm/unittest_hsm.json \
+          --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml \
+          --out-dir /tmp/trusty/certs \
+          --csr-dir /opt/trusty/etc/dev/csr_profile \
+          --root-ca /opt/trusty/etc/dev/roots/trusty_root_ca.pem \
+          --root-ca-key /opt/trusty/etc/dev/roots/trusty_root_ca.key \
+          --csr-prefix trusty_ \
+          --out-prefix trusty_ \
+          --san 168.138.72.101 \
+          --ca1 --ca2 --bundle --client --peer --force && \
+        /opt/trusty/bin/gen_shaken_certs.sh \
+          --hsm-config /tmp/trusty/softhsm/unittest_hsm.json \
+          --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml \
+          --out-dir /tmp/trusty/certs \
+          --csr-dir /opt/trusty/etc/dev/csr_profile \
+          --csr-prefix shaken_ \
+          --out-prefix shaken_ \
+          --root-ca /tmp/trusty/certs/shaken_root_ca.pem \
+          --root-ca-key /tmp/trusty/certs/shaken_root_ca.key \
+          --root --ca --l1_ca --bundle --force && \
+        /opt/trusty/bin/trusty --std \
+          --hsm-cfg=/tmp/trusty/softhsm/unittest_hsm.json \
+          --crypto-prov=/opt/trusty/tests/aws-test-kms.json \
+          --cfg=/opt/trusty/etc/dev/trusty-config.yaml \
+          --ca-sql=env://TRUSTY_CA_SQL_CONN \
+          --logs-dir=/var/trusty/logs \
+          --host-name=168.138.72.101 \
+          --cis-listen-url=http://168.138.72.101:7880 \
+          --ca-listen-url=https://168.138.72.101:7892
 
   # NODE 2 on local-kms
   trusty-node2:
@@ -121,19 +153,42 @@ services:
       - AWS_SECRET_ACCESS_KEY=notusedbyemulator
       - AWS_DEFAULT_REGION=us-west-2
       - TRUSTY_JWT_SEED=testseed
-      - TRUSTY_GITHUB_CLIENT_ID=not_used_in_test
-      - TRUSTY_GITHUB_CLIENT_SECRET=not_used_in_test
-      - TRUSTY_GOOGLE_CLIENT_ID=not_used_in_test
-      - TRUSTY_GOOGLE_CLIENT_SECRET=not_used_in_test
-      - TRUSTY_MAILGUN_PRIVATE_KEY=not_used_in_test
-      - TRUSTY_STRIPE_API_KEY=sk_test_123
-      - TRUSTY_STRIPE_WEBHOOK_SECRET=not_used_in_test
       - TRUSTY_CA_SQL_CONN=host=168.138.72.100 port=25433 user=postgres password=postgres sslmode=disable dbname=cadb
     entrypoint:
       - /bin/bash
       - -c
-      - >-
-        /opt/trusty/sql/cadb/wait_sql.sh 168.138.72.100 25433 postgres postgres echo "CA DB is ready" && mkdir -p /tmp/trusty/certs && cp /opt/trusty/etc/dev/roots/trusty_root_ca.pem /tmp/trusty/certs/trusty_root_ca.pem && /opt/trusty/bin/gen_certs.sh --hsm-config /opt/trusty/tests/aws-test-kms.json --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml --out-dir /tmp/trusty/certs --csr-dir /opt/trusty/etc/dev/csr_profile --root-ca /opt/trusty/etc/dev/roots/trusty_root_ca.pem --root-ca-key /opt/trusty/etc/dev/roots/trusty_root_ca.key --csr-prefix trusty_ --out-prefix trusty_ --san 168.138.72.102 --ca1 --ca2 --bundle --client --peer --force && /opt/trusty/bin/gen_shaken_certs.sh --hsm-config /opt/trusty/tests/aws-test-kms.json --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml --out-dir /tmp/trusty/certs --csr-dir /opt/trusty/etc/dev/csr_profile --csr-prefix shaken_ --out-prefix shaken_ --root-ca /tmp/trusty/certs/shaken_root_ca.pem --root-ca-key /tmp/trusty/certs/shaken_root_ca.key --root --ca --l1_ca --bundle --force && /opt/trusty/bin/trusty --std --hsm-cfg=/opt/trusty/tests/aws-test-kms.json --cfg=/opt/trusty/etc/dev/trusty-config.yaml --ca-sql=env://TRUSTY_CA_SQL_CONN --logs-dir=/var/trusty/logs --host-name=168.138.72.102 --cis-listen-url=http://168.138.72.102:7880 --ca-listen-url=https://168.138.72.102:7892
+      - |
+        /opt/trusty/sql/cadb/wait_sql.sh 168.138.72.100 25433 postgres postgres echo "CA DB is ready" && \
+        mkdir -p /tmp/trusty/certs && cp /opt/trusty/etc/dev/roots/trusty_root_ca.pem /tmp/trusty/certs/trusty_root_ca.pem && \
+        /opt/trusty/bin/gen_certs.sh \
+          --hsm-config /opt/trusty/tests/aws-test-kms.json \
+          --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml \
+          --out-dir /tmp/trusty/certs \
+          --csr-dir /opt/trusty/etc/dev/csr_profile \
+          --root-ca /opt/trusty/etc/dev/roots/trusty_root_ca.pem \
+          --root-ca-key /opt/trusty/etc/dev/roots/trusty_root_ca.key \
+          --csr-prefix trusty_ \
+          --out-prefix trusty_ \
+          --san 168.138.72.102 \
+          --ca1 --ca2 --bundle --client --peer --force && \
+        /opt/trusty/bin/gen_shaken_certs.sh \
+          --hsm-config /opt/trusty/tests/aws-test-kms.json \
+          --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml \
+          --out-dir /tmp/trusty/certs \
+          --csr-dir /opt/trusty/etc/dev/csr_profile \
+          --csr-prefix shaken_ \
+          --out-prefix shaken_ \
+          --root-ca /tmp/trusty/certs/shaken_root_ca.pem \
+          --root-ca-key /tmp/trusty/certs/shaken_root_ca.key \
+          --root --ca --l1_ca --bundle --force && \
+        /opt/trusty/bin/trusty --std \
+          --hsm-cfg=/opt/trusty/tests/aws-test-kms.json \
+          --cfg=/opt/trusty/etc/dev/trusty-config.yaml \
+          --ca-sql=env://TRUSTY_CA_SQL_CONN \
+          --logs-dir=/var/trusty/logs \
+          --host-name=168.138.72.102 \
+          --cis-listen-url=http://168.138.72.102:7880 \
+          --ca-listen-url=https://168.138.72.102:7892
   test-runner:
     image: effectivesecurity/trusty:${ITEST_IMAGE_TAG}
     domainname: tester.trusty.ca
@@ -158,16 +213,29 @@ services:
       - AWS_ACCESS_KEY_ID=notusedbyemulator
       - AWS_SECRET_ACCESS_KEY=notusedbyemulator
       - AWS_DEFAULT_REGION=us-west-2
-      - TRUSTY_GITHUB_CLIENT_ID=not_used_in_test
-      - TRUSTY_GITHUB_CLIENT_SECRET=not_used_in_test
-      - TRUSTY_GOOGLE_CLIENT_ID=not_used_in_test
-      - TRUSTY_GOOGLE_CLIENT_SECRET=not_used_in_test
-      - TRUSTY_MAILGUN_PRIVATE_KEY=not_used_in_test
-      - TRUSTY_STRIPE_API_KEY=sk_test_123
-      - TRUSTY_STRIPE_WEBHOOK_SECRET=not_used_in_test
       - TRUSTY_JWT_SEED=testseed
     entrypoint:
       - /bin/bash
       - -c
-      - >-
-        mkdir -p /tmp/trusty/softhsm/tokens /tmp/trusty/certs && cp /opt/trusty/etc/dev/roots/trusty_root_ca.pem /tmp/trusty/certs/trusty_root_ca.pem && /opt/trusty/sql/cadb/create_sql.sh 168.138.72.100 25433 postgres postgres echo "CA DB is ready" && /opt/trusty/bin/config-softhsm.sh --tokens-dir /tmp/trusty/softhsm/tokens --pin-file /tmp/trusty/softhsm/trusty_unittest.txt --generate-pin -s trusty_unittest -o /tmp/trusty/softhsm/unittest_hsm.json --delete --list-slots --list-object && /opt/trusty/bin/gen_certs.sh --hsm-config inmem --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml --out-dir /tmp/trusty/certs --csr-dir /opt/trusty/etc/dev/csr_profile --root-ca /opt/trusty/etc/dev/roots/trusty_root_ca.pem --root-ca-key /opt/trusty/etc/dev/roots/trusty_root_ca.key --csr-prefix trusty_ --out-prefix trusty_ --root --ca1 --ca2 --bundle --client --peer && /opt/trusty/tests/if-trusty-ready.sh /opt/trusty/tests/run.sh
+      - |
+        mkdir -p /tmp/trusty/softhsm/tokens /tmp/trusty/certs && \
+        cp /opt/trusty/etc/dev/roots/trusty_root_ca.pem /tmp/trusty/certs/trusty_root_ca.pem && \
+        /opt/trusty/sql/cadb/create_sql.sh 168.138.72.100 25433 postgres postgres echo "CA DB is ready" && \
+        /opt/trusty/bin/config-softhsm.sh \
+          --tokens-dir /tmp/trusty/softhsm/tokens \
+          --pin-file /tmp/trusty/softhsm/trusty_unittest.txt \
+          --generate-pin \
+          -s trusty_unittest \
+          -o /tmp/trusty/softhsm/unittest_hsm.json \
+          --delete --list-slots --list-object && \
+        /opt/trusty/bin/gen_certs.sh \
+          --hsm-config inmem \
+          --ca-config /opt/trusty/etc/dev/ca-config.bootstrap.yaml \
+          --out-dir /tmp/trusty/certs \
+          --csr-dir /opt/trusty/etc/dev/csr_profile \
+          --root-ca /opt/trusty/etc/dev/roots/trusty_root_ca.pem \
+          --root-ca-key /opt/trusty/etc/dev/roots/trusty_root_ca.key \
+          --csr-prefix trusty_ \
+          --out-prefix trusty_ \
+          --root --ca1 --ca2 --bundle --client --peer && \
+        /opt/trusty/tests/if-trusty-ready.sh /opt/trusty/tests/run.sh

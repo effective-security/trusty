@@ -1,5 +1,5 @@
 ---
-common_name: "[TEST] Trusty Root CA"
+common_name: "Test Trusty Root CA"
 key:
   algo: ecdsa
   size: 256
