@@ -19,7 +19,7 @@ BUILD_FLAGS=
 
 default: help
 
-all: clean folders tools generate hsmconfig start-local-kms start-sql build gen_test_certs gen_shaken_certs test change_log
+all: clean folders tools generate start-local-kms start-sql build gen_test_certs gen_shaken_certs test change_log
 
 #
 # clean produced files
@@ -79,15 +79,6 @@ change_log:
 
 commit_version:
 	git add .; git commit -m "Updated version"
-
-hsmconfig:
-	echo "*** Running hsmconfig"
-	./scripts/build/config-softhsm.sh \
-		--tokens-dir /tmp/trusty/softhsm/tokens/ \
-		--pin-file /tmp/trusty/softhsm/trusty_unittest.txt \
-		--generate-pin -s trusty_unittest \
-		-o /tmp/trusty/softhsm/unittest_hsm.json \
-		--delete --list-slots --list-object
 
 gen_test_certs:
 	echo "*** Running gen_test_certs"
