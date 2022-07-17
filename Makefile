@@ -94,7 +94,7 @@ gen_test_certs:
 	echo "*** generating test CAs"
 	tar -xzvf $(PROJ_ROOT)/etc/dev/roots/trusty_root_ca.key.tar.gz -C $(PROJ_ROOT)/etc/dev/roots/
 	./scripts/build/gen_certs.sh \
-		--hsm-config $(PROJ_ROOT)/etc/dev/kms/aws-dev-kms.json \
+		--hsm-config $(PROJ_ROOT)/etc/dev/kms/aws-dev-kms.yaml \
 		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.yaml \
 		--output-dir /tmp/trusty/certs \
 		--csr-dir $(PROJ_ROOT)/etc/dev/csr_profile \
@@ -108,7 +108,7 @@ gen_test_certs:
 
 gen_shaken_certs:
 	./scripts/build/gen_shaken_certs.sh \
-		--hsm-config $(PROJ_ROOT)/etc/dev/kms/aws-dev-kms.json \
+		--hsm-config $(PROJ_ROOT)/etc/dev/kms/aws-dev-kms.yaml \
 		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.yaml \
 		--out-dir /tmp/trusty/certs \
 		--csr-dir $(PROJ_ROOT)/etc/dev/csr_profile \

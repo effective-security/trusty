@@ -21,6 +21,7 @@
 #   --bundle                - specifies if Int CA Bundle should be created
 #   --san                   - specifies SAN for server and peer certs
 #   --force                 - specifies to force issuing the cert even if it exists
+#   --verbose               - specifies to enable verbose logs
 #
 
 POSITIONAL=()
@@ -119,7 +120,11 @@ case $key in
     SAN="$2"
     shift # past argument
     shift # past value
-    ;;    
+    ;;
+    --verbose)
+    FLAGS="-D"
+    shift # past argument
+    ;;
     *)
     echo "invalid flag $key: use --help to see the option"
     exit 1
@@ -137,6 +142,7 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 
 HOSTNAME=`hostname`
 
+echo "FLAGS        = ${FLAGS}"
 echo "OUT_DIR      = ${OUT_DIR}"
 echo "OUT_PREFIX   = ${OUT_PREFIX}"
 echo "CSR_DIR      = ${CSR_DIR}"
@@ -151,26 +157,30 @@ echo "SAN          = ${SAN}"
 echo "ROOT_CA_CERT = ${ROOT_CA_CERT}"
 echo "ROOT_CA_KEY  = ${ROOT_CA_KEY}"
 
+if [[ "$FLAGS" == "-D" ]]; then echo "*** hsm-tool "
+    hsm-tool --version; 
+fi
+
 if [[ "$ROOTCA" == "YES" && ("$FORCE" == "YES" || ! -f ${ROOT_CA_KEY}) ]]; then echo "*** generating ${ROOT_CA_CERT/.pem/''}"
-    hsm-tool \
-        --cfg=${HSM_CONFIG} ${CRYPTO_PROV} \
+    hsm-tool ${FLAGS} \
+        --cfg ${HSM_CONFIG} ${CRYPTO_PROV} \
         csr gen-cert --self-sign \
         --ca-config ${CA_CONFIG} \
         --profile ROOT \
-        --csr-profile ${CSR_DIR}/${CSR_PREFIX}root_ca.json \
+        --csr-profile ${CSR_DIR}/${CSR_PREFIX}root_ca.yaml \
         --key-label "${KEY_LABEL}${OUT_PREFIX}root_ca*" \
         --output ${ROOT_CA_CERT/.pem/''}
 fi
 
 if [[ "$CA1" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}l1_ca.key) ]]; then
     echo "*** generating L1 CA cert"
-    hsm-tool \
-        --cfg=${HSM_CONFIG} ${CRYPTO_PROV} \
-        csr gen-cert\
-        --ca-config=${CA_CONFIG} \
-        --profile=L1_CA \
-        --csr-profile ${CSR_DIR}/${CSR_PREFIX}l1_ca.json \
-        --key-label="${KEY_LABEL}${OUT_PREFIX}l1_ca*" \
+    hsm-tool ${FLAGS} \
+        --cfg ${HSM_CONFIG} ${CRYPTO_PROV} \
+        csr gen-cert \
+        --ca-config ${CA_CONFIG} \
+        --profile L1_CA \
+        --csr-profile ${CSR_DIR}/${CSR_PREFIX}l1_ca.yaml \
+        --key-label "${KEY_LABEL}${OUT_PREFIX}l1_ca*" \
         --ca-cert ${ROOT_CA_CERT} \
         --ca-key ${ROOT_CA_KEY} \
         --output ${OUT_DIR}/${OUT_PREFIX}l1_ca
@@ -178,13 +188,13 @@ fi
 
 if [[ "$CA2" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}l2_ca.key) ]]; then
     echo "*** generating L2 CA cert"
-    hsm-tool \
+    hsm-tool ${FLAGS} \
         --cfg=${HSM_CONFIG}  ${CRYPTO_PROV} \
-        csr gen-cert\
-        --ca-config=${CA_CONFIG} \
-        --profile=L2_CA \
-        --csr-profile ${CSR_DIR}/${CSR_PREFIX}l2_ca.json \
-        --key-label="${KEY_LABEL}${OUT_PREFIX}l2_ca*" \
+        csr gen-cert \
+        --ca-config ${CA_CONFIG} \
+        --profile L2_CA \
+        --csr-profile ${CSR_DIR}/${CSR_PREFIX}l2_ca.yaml \
+        --key-label "${KEY_LABEL}${OUT_PREFIX}l2_ca*" \
         --ca-cert ${OUT_DIR}/${OUT_PREFIX}l1_ca.pem \
         --ca-key ${OUT_DIR}/${OUT_PREFIX}l1_ca.key \
         --output ${OUT_DIR}/${OUT_PREFIX}l2_ca
@@ -202,15 +212,15 @@ fi
 
 if [[ "$ADMIN" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}admin.key) ]]; then
     echo "*** generating admin cert"
-    hsm-tool \
-        --cfg=${HSM_CONFIG}  ${CRYPTO_PROV} \
+    hsm-tool ${FLAGS} \
+        --cfg ${HSM_CONFIG}  ${CRYPTO_PROV} \
         csr gen-cert --plain-key \
         --ca-config=${CA_CONFIG} \
-        --profile=client \
+        --profile client \
         --ca-cert ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem \
         --ca-key ${OUT_DIR}/${OUT_PREFIX}l2_ca.key \
-        --csr-profile ${CSR_DIR}/${CSR_PREFIX}admin.json \
-        --key-label="${KEY_LABEL}${OUT_PREFIX}admin*" \
+        --csr-profile ${CSR_DIR}/${CSR_PREFIX}admin.yaml \
+        --key-label "${KEY_LABEL}${OUT_PREFIX}admin*" \
         --output ${OUT_DIR}/${OUT_PREFIX}admin
 
         cat ${OUT_DIR}/${OUT_PREFIX}cabundle.pem >> ${OUT_DIR}/${OUT_PREFIX}admin.pem
@@ -218,15 +228,15 @@ fi
 
 if [[ "$SERVER" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}server.key) ]]; then
     echo "*** generating server cert"
-    hsm-tool \
-        --cfg=${HSM_CONFIG}  ${CRYPTO_PROV} \
+    hsm-tool ${FLAGS} \
+        --cfg ${HSM_CONFIG}  ${CRYPTO_PROV} \
         csr gen-cert --plain-key \
-        --ca-config=${CA_CONFIG} \
-        --profile=server \
+        --ca-config ${CA_CONFIG} \
+        --profile server \
         --ca-cert ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem \
         --ca-key ${OUT_DIR}/${OUT_PREFIX}l2_ca.key \
-        --csr-profile ${CSR_DIR}/${CSR_PREFIX}server.json \
-        --san=localhost,${SAN},${HOSTNAME} \
+        --csr-profile ${CSR_DIR}/${CSR_PREFIX}server.yaml \
+        --san localhost,${SAN},${HOSTNAME} \
         --key-label="${KEY_LABEL}${OUT_PREFIX}server*" \
         --output ${OUT_DIR}/${OUT_PREFIX}server
 
@@ -235,16 +245,16 @@ fi
 
 if [[ "$CLIENT" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}client.key) ]]; then
     echo "*** generating client cert"
-    hsm-tool \
-        --cfg=${HSM_CONFIG}  ${CRYPTO_PROV} \
+    hsm-tool ${FLAGS} \
+        --cfg ${HSM_CONFIG}  ${CRYPTO_PROV} \
         csr gen-cert --plain-key \
-        --ca-config=${CA_CONFIG} \
-        --profile=client \
+        --ca-config ${CA_CONFIG} \
+        --profile client \
         --ca-cert ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem \
         --ca-key ${OUT_DIR}/${OUT_PREFIX}l2_ca.key \
-        --csr-profile ${CSR_DIR}/${CSR_PREFIX}client.json \
-        --san=spiffe://trusty/client \
-        --key-label="${KEY_LABEL}${OUT_PREFIX}client*" \
+        --csr-profile ${CSR_DIR}/${CSR_PREFIX}client.yaml \
+        --san spiffe://trusty/client \
+        --key-label "${KEY_LABEL}${OUT_PREFIX}client*" \
         --output ${OUT_DIR}/${OUT_PREFIX}client
 
     cat ${OUT_DIR}/${OUT_PREFIX}cabundle.pem >> ${OUT_DIR}/${OUT_PREFIX}client.pem
@@ -252,16 +262,16 @@ fi
 
 if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}peer_ca.key) ]]; then
     echo "*** generating peer_ca cert"
-    hsm-tool \
-        --cfg=${HSM_CONFIG}  ${CRYPTO_PROV} \
+    hsm-tool ${FLAGS} \
+        --cfg ${HSM_CONFIG}  ${CRYPTO_PROV} \
         csr gen-cert --plain-key \
-        --ca-config=${CA_CONFIG} \
-        --profile=peer \
+        --ca-config ${CA_CONFIG} \
+        --profile peer \
         --ca-cert ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem \
         --ca-key ${OUT_DIR}/${OUT_PREFIX}l2_ca.key \
-        --csr-profile ${CSR_DIR}/${CSR_PREFIX}peer_ca.json \
-        --san=localhost,${SAN},${HOSTNAME},spiffe://trusty/ca \
-        --key-label="${KEY_LABEL}${OUT_PREFIX}peer_ca*" \
+        --csr-profile ${CSR_DIR}/${CSR_PREFIX}peer_ca.yaml \
+        --san localhost,${SAN},${HOSTNAME},spiffe://trusty/ca \
+        --key-label "${KEY_LABEL}${OUT_PREFIX}peer_ca*" \
         --output ${OUT_DIR}/${OUT_PREFIX}peer_ca
 
     cat ${OUT_DIR}/${OUT_PREFIX}cabundle.pem >> ${OUT_DIR}/${OUT_PREFIX}peer_ca.pem
@@ -269,16 +279,16 @@ fi
 
 if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}peer_ra.key) ]]; then
     echo "*** generating peer_ra cert"
-    hsm-tool \
-        --cfg=${HSM_CONFIG}  ${CRYPTO_PROV} \
+    hsm-tool ${FLAGS} \
+        --cfg ${HSM_CONFIG}  ${CRYPTO_PROV} \
         csr gen-cert --plain-key \
-        --ca-config=${CA_CONFIG} \
-        --profile=peer \
+        --ca-config ${CA_CONFIG} \
+        --profile peer \
         --ca-cert ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem \
         --ca-key ${OUT_DIR}/${OUT_PREFIX}l2_ca.key \
-        --csr-profile ${CSR_DIR}/${CSR_PREFIX}peer_ra.json \
-        --san=localhost,${SAN},${HOSTNAME},spiffe://trusty/ra \
-        --key-label="${KEY_LABEL}${OUT_PREFIX}peer_ra*" \
+        --csr-profile ${CSR_DIR}/${CSR_PREFIX}peer_ra.yaml \
+        --san localhost,${SAN},${HOSTNAME},spiffe://trusty/ra \
+        --key-label "${KEY_LABEL}${OUT_PREFIX}peer_ra*" \
         --output ${OUT_DIR}/${OUT_PREFIX}peer_ra
 
     cat ${OUT_DIR}/${OUT_PREFIX}cabundle.pem >> ${OUT_DIR}/${OUT_PREFIX}peer_ra.pem
@@ -286,16 +296,16 @@ fi
 
 if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}peer_cis.key) ]]; then
     echo "*** generating peer_cis cert"
-    hsm-tool \
-        --cfg=${HSM_CONFIG}  ${CRYPTO_PROV} \
+    hsm-tool ${FLAGS} \
+        --cfg ${HSM_CONFIG}  ${CRYPTO_PROV} \
         csr gen-cert --plain-key \
-        --ca-config=${CA_CONFIG} \
-        --profile=peer \
+        --ca-config ${CA_CONFIG} \
+        --profile peer \
         --ca-cert ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem \
         --ca-key ${OUT_DIR}/${OUT_PREFIX}l2_ca.key \
-        --csr-profile ${CSR_DIR}/${CSR_PREFIX}peer_cis.json \
-        --san=localhost,${SAN},${HOSTNAME},spiffe://trusty/cis \
-        --key-label="${KEY_LABEL}${OUT_PREFIX}peer_cis*" \
+        --csr-profile ${CSR_DIR}/${CSR_PREFIX}peer_cis.yaml \
+        --san localhost,${SAN},${HOSTNAME},spiffe://trusty/cis \
+        --key-label "${KEY_LABEL}${OUT_PREFIX}peer_cis*" \
         --output ${OUT_DIR}/${OUT_PREFIX}peer_cis
 
     cat ${OUT_DIR}/${OUT_PREFIX}cabundle.pem >> ${OUT_DIR}/${OUT_PREFIX}peer_cis.pem
@@ -303,16 +313,16 @@ fi
 
 if [[ "$PEERS" == "YES" && ("$FORCE" == "YES" || ! -f ${OUT_DIR}/${OUT_PREFIX}peer_wfe.key) ]]; then
     echo "*** generating peer_wfe cert"
-    hsm-tool \
-        --cfg=${HSM_CONFIG}  ${CRYPTO_PROV} \
+    hsm-tool ${FLAGS} \
+        --cfg ${HSM_CONFIG}  ${CRYPTO_PROV} \
         csr gen-cert --plain-key \
         --ca-config=${CA_CONFIG} \
-        --profile=peer \
+        --profile peer \
         --ca-cert ${OUT_DIR}/${OUT_PREFIX}l2_ca.pem \
         --ca-key ${OUT_DIR}/${OUT_PREFIX}l2_ca.key \
-        --csr-profile ${CSR_DIR}/${CSR_PREFIX}peer_wfe.json \
-        --san=localhost,${SAN},${HOSTNAME},spiffe://trusty/wfe \
-        --key-label="${KEY_LABEL}${OUT_PREFIX}peer_wfe*" \
+        --csr-profile ${CSR_DIR}/${CSR_PREFIX}peer_wfe.yaml \
+        --san localhost,${SAN},${HOSTNAME},spiffe://trusty/wfe \
+        --key-label "${KEY_LABEL}${OUT_PREFIX}peer_wfe*" \
         --output ${OUT_DIR}/${OUT_PREFIX}peer_wfe
 
     cat ${OUT_DIR}/${OUT_PREFIX}cabundle.pem >> ${OUT_DIR}/${OUT_PREFIX}peer_wfe.pem

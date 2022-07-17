@@ -1,0 +1,11 @@
+---
+common_name: Delegated Intermediate CA L1
+key:
+  algo: ecdsa
+  size: 256
+names:
+  - C: US
+    ST: WA
+    L: Seattle
+    OU: Dev
+    O: Effective Security, LLC.
