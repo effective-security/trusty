@@ -1,14 +1,13 @@
 # trusty
 
-![Build](https://github.com/effective-security/trusty/workflows/Build/badge.svg?branch=master)
-[![Coverage Status](https://coveralls.io/repos/github/effective-security/trusty/badge.svg?branch=master)](https://coveralls.io/github/effective-security/trusty?branch=master)
+![Build](https://github.com/effective-security/trusty/workflows/Build/badge.svg?branch=main)
+[![Coverage Status](https://coveralls.io/repos/github/effective-security/trusty/badge.svg?branch=main)](https://coveralls.io/github/effective-security/trusty?branch=main)
 
 Trusty is a Certification Authority.
 
 ## Requirements
 
 1. GoLang 1.18+
-1. SoftHSM 2.6+
 1. protoc
 
 ```.sh
@@ -103,13 +102,15 @@ Add the launch configuration to .vscode/launch.json:
                 "--cfg",
                 "${workspaceRoot}/etc/dev/trusty-config.yaml"
             ],
-            "showLog": true
+            "showLog": false
         }
     ]
 }
 ```
 
 ## gRPC issues
+
+To enable gRPC logs:
 
 ```sh
 export GRPC_GO_LOG_VERBOSITY_LEVEL=99

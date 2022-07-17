@@ -27,7 +27,7 @@ crypto_provider:
   default: ${TRUSTY_CONFIG_DIR}/kms/aws-dev-kms.yaml
   # the list of locations of the configuration files
   providers:
-    - /tmp/trusty/softhsm/unittest_hsm.json
+  #  - /tmp/trusty/softhsm/unittest_hsm.json
   # the list of supported manufactures of PKCS11 tokens
   pkcs11_manufacturers:
     - SoftHSM
