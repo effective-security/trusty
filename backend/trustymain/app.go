@@ -609,12 +609,12 @@ func (a *App) scheduleTasks() error {
 	for _, task := range a.cfg.Tasks {
 		tf := taskFactories[task.Name]
 		if tf == nil {
-			return errors.Errorf("api=scheduleTasks, reason=not_registered, task=%q", task.Name)
+			return errors.Errorf("task not registered: %s", task.Name)
 		}
 
 		err := a.container.Invoke(tf(a.scheduler, task.Name, task.Schedule, task.Args...))
 		if err != nil {
-			return errors.WithMessagef(err, "failed to create a task: %q", task.Name)
+			return errors.WithMessagef(err, "failed to create a task: %s", task.Name)
 		}
 		logger.KV(xlog.INFO, "task", task.Name, "schedule", task.Schedule)
 	}

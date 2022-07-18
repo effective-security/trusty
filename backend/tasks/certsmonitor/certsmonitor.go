@@ -33,18 +33,25 @@ type Task struct {
 }
 
 func (t *Task) run() {
-	logger.Infof("api=run, task=%s, count=%d", TaskName, len(t.certsMap))
+	logger.Infof("task=%s, count=%d", TaskName, len(t.certsMap))
 
 	for location, typ := range t.certsMap {
-		cert, err := certutil.LoadFromPEM(location)
+		chain, err := certutil.LoadChainFromPEM(location)
 		if err != nil {
-			logger.Errorf("api=certsmonitor, file=%q, err=[%+v]", location, err.Error())
+			logger.Errorf("file=%q, err=[%+v]", location, err.Error())
 		} else {
-			logger.Infof("cert=%q, subject=%q, expires=%q", location, cert.Subject.CommonName, cert.NotAfter.Format(time.RFC3339))
-			if typ == typIssuer {
-				PublishCertExpirationInDays(cert, typ)
-			} else {
-				PublishShortLivedCertExpirationInDays(cert, typ)
+
+			for idx, cert := range chain {
+				if idx > 0 {
+					typ = typIssuer
+				}
+				logger.Infof("type=%s,cert=%q, cn=%q, expires=%q",
+					typ, location, cert.Subject.CommonName, cert.NotAfter.Format(time.RFC3339))
+				if typ == typIssuer {
+					PublishCertExpirationInDays(cert, typ)
+				} else {
+					PublishShortLivedCertExpirationInDays(cert, typ)
+				}
 			}
 		}
 	}
@@ -76,7 +83,7 @@ func create(
 	}
 
 	if conf != nil {
-		task.certsMap = certsMapFromLocations(conf.CertsMonitor.Locations)
+		task.certsMap = certsMapFromLocations(args)
 		if !conf.TrustyClient.ClientTLS.Empty() &&
 			fileutil.FileExists(conf.TrustyClient.ClientTLS.CertFile) == nil {
 			task.certsMap[conf.TrustyClient.ClientTLS.CertFile] = typClient
@@ -90,7 +97,7 @@ func create(
 		}
 
 		for location, typ := range task.certsMap {
-			logger.Infof("api=create, type=%q, location=%q,", typ, location)
+			logger.Infof("type=%q, location=%q,", typ, location)
 		}
 	}
 	return task, nil

@@ -65,9 +65,6 @@ type Configuration struct {
 
 	// Tasks specifies array of tasks
 	Tasks []Task `json:"tasks" yaml:"tasks"`
-
-	// CertsMonitor specifies the configuration for cert monitor
-	CertsMonitor CertsMonitor `json:"certs_monitor" yaml:"certs_monitor"`
 }
 
 // CryptoProv specifies the configuration for crypto providers
@@ -101,13 +98,6 @@ type DelegatedIssuers struct {
 // GetDisabled specifies if the feature is disabled
 func (c *DelegatedIssuers) GetDisabled() bool {
 	return c.Disabled != nil && *c.Disabled
-}
-
-// CertsMonitor specifies configurations for monitoring certs expiry
-type CertsMonitor struct {
-
-	// Locations specifies the list of files to monitor. It may have a prefix with cert type, in format {type}:{location}
-	Locations []string `json:"locations" yaml:"locations"`
 }
 
 // Task specifies configuration of a single task.

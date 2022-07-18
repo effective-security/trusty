@@ -24,7 +24,7 @@ type Task struct {
 }
 
 func (t *Task) run() {
-	logger.Infof("api=run, task=%s", TaskName)
+	logger.Infof("task=%s", TaskName)
 	ctx := context.Background()
 
 	c, err := t.ca.GetCertsCount(ctx)

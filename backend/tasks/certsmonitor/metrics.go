@@ -19,6 +19,7 @@ func PublishShortLivedCertExpirationInDays(c *x509.Certificate, typ string) floa
 		expiresInDays,
 		metrics.Tag{Name: "cn", Value: c.Subject.CommonName},
 		metrics.Tag{Name: "type", Value: typ},
+		metrics.Tag{Name: "iki", Value: hex.EncodeToString(c.AuthorityKeyId)},
 	)
 	return expiresInDays
 }
@@ -33,7 +34,7 @@ func PublishCertExpirationInDays(c *x509.Certificate, typ string) float32 {
 		metrics.Tag{Name: "cn", Value: c.Subject.CommonName},
 		metrics.Tag{Name: "type", Value: typ},
 		metrics.Tag{Name: "sn", Value: c.SerialNumber.String()},
-		metrics.Tag{Name: "ski", Value: hex.EncodeToString(c.SubjectKeyId)},
+		metrics.Tag{Name: "iki", Value: hex.EncodeToString(c.SubjectKeyId)},
 	)
 	return expiresInDays
 }
@@ -49,7 +50,7 @@ func PublishCRLExpirationInDays(c *pkix.CertificateList, issuer *x509.Certificat
 		expiresInDays,
 		metrics.Tag{Name: "cn", Value: issuer.Subject.CommonName},
 		metrics.Tag{Name: "sn", Value: issuer.SerialNumber.String()},
-		metrics.Tag{Name: "ski", Value: hex.EncodeToString(issuer.SubjectKeyId)},
+		metrics.Tag{Name: "iki", Value: hex.EncodeToString(issuer.SubjectKeyId)},
 	)
 	return expiresInDays
 }
