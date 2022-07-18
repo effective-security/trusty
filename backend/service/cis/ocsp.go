@@ -99,7 +99,7 @@ func (s *Service) ocspResponse(w http.ResponseWriter, r *http.Request, requestBo
 	// seems unnecessariliy restrictive.
 	w.Header().Add(header.ContentType, "application/ocsp-response")
 
-	// logger.Tracef("api=ocsp, req=%x", requestBody)
+	// logger.Tracef("req=%x", requestBody)
 
 	res, err := s.ca.SignOCSP(r.Context(), &pb.OCSPRequest{Der: requestBody})
 	if err != nil {
