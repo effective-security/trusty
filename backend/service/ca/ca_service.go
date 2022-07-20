@@ -123,7 +123,7 @@ func (s *Service) registerIssuers(ctx context.Context) error {
 			logger.KV(xlog.ERROR,
 				"status", "failed to register issuer",
 				"serial", mcert.SerialNumber,
-				"err", err)
+				"err", err.Error())
 			return errors.WithStack(err)
 		}
 	}
@@ -201,7 +201,7 @@ func (s *Service) registerPublisherTask(ctx context.Context) {
 						"ctx", correlation.ID(ctx),
 						"ikid", issuer.SubjectKID(),
 						"task", taskName,
-						"err", err,
+						"err", err.Error(),
 					)
 				}
 			})

@@ -198,6 +198,9 @@ func Test_AppInstance_CryptoProvError(t *testing.T) {
 		"--ca-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--hsm-cfg", cfg.CryptoProv.Default,
 		"--crypto-prov", cfg.CryptoProv.Default,
+		"--crypto-prov", projFolder + "etc/dev/kms/aws-dev-kms-unitest.yaml",
+		"--crypto-prov", projFolder + "etc/dev/kms/aws-dev-kms-shaken.yaml",
+		"--crypto-prov", projFolder + "etc/dev/kms/aws-dev-kms.yaml",
 	}).WithSignal(sigs)
 	defer app.Close()
 

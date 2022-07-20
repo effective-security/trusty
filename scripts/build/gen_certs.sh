@@ -66,7 +66,7 @@ case $key in
     shift # past value
     ;;
     --crypto)
-    CRYPTO_PROV="--crypto-prov=$2"
+    CRYPTO_PROV="--crypto=$2"
     shift # past argument
     shift # past value
     ;;

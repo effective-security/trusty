@@ -53,7 +53,7 @@ jobs:
         run: make vars tools folders generate  version change_log
 
       - name: UnitTest
-        run: make build start-local-kms start-sql gen_test_certs gen_shaken_certs covtest
+        run: make build start-local-deps gen_test_certs gen_shaken_certs covtest
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1

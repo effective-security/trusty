@@ -102,7 +102,7 @@ func (s *Service) GetCertificate(ctx context.Context, in *pb.GetCertificateReque
 		logger.KV(xlog.ERROR,
 			"ctx", correlation.ID(ctx),
 			"request", in,
-			"err", err,
+			"err", err.Error(),
 		)
 		return nil, v1.NewError(codes.Internal, "unable to find certificate")
 	}
@@ -119,7 +119,7 @@ func (s *Service) UpdateCertificateLabel(ctx context.Context, req *pb.UpdateCert
 		logger.KV(xlog.ERROR,
 			"ctx", correlation.ID(ctx),
 			"request", req,
-			"err", err,
+			"err", err.Error(),
 		)
 		return nil, v1.NewError(codes.Internal, "unable to update certificate")
 	}
@@ -136,7 +136,7 @@ func (s *Service) ListCertificates(ctx context.Context, in *pb.ListByIssuerReque
 		logger.KV(xlog.ERROR,
 			"ctx", correlation.ID(ctx),
 			"request", in,
-			"err", err,
+			"err", err.Error(),
 		)
 		return nil, v1.NewError(codes.Internal, "unable to list certificates")
 	}
@@ -153,7 +153,7 @@ func (s *Service) ListRevokedCertificates(ctx context.Context, in *pb.ListByIssu
 		logger.KV(xlog.ERROR,
 			"ctx", correlation.ID(ctx),
 			"request", in,
-			"err", err,
+			"err", err.Error(),
 		)
 		return nil, v1.NewError(codes.Internal, "unable to list certificates")
 	}
@@ -170,7 +170,7 @@ func (s *Service) ListOrgCertificates(ctx context.Context, in *pb.ListOrgCertifi
 		logger.KV(xlog.ERROR,
 			"ctx", correlation.ID(ctx),
 			"request", in,
-			"err", err,
+			"err", err.Error(),
 		)
 		return nil, v1.NewError(codes.Internal, "unable to get certificates")
 	}

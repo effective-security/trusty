@@ -1,3 +1,4 @@
 ---
 manufacturer: AWSKMS
-attributes: Endpoint=http://localhost:24599,Region=us-west-2
+model: trusty
+attributes: Endpoint=http://localhost:14551,Region=us-west-2

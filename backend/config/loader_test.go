@@ -88,8 +88,7 @@ func TestLoadYAMLOverrideByHostname(t *testing.T) {
 
 	assert.Len(t, c.LogLevels, 4)
 
-	assert.Equal(t, "/tmp/trusty/softhsm/unittest_hsm.json", c.CryptoProv.Default)
-	assert.Empty(t, c.CryptoProv.Providers)
+	assert.NotEmpty(t, c.CryptoProv.Providers)
 	assert.Len(t, c.CryptoProv.PKCS11Manufacturers, 2)
 
 	require.NotEmpty(t, c.Authority)
@@ -131,8 +130,8 @@ func TestLoadYAMLWithOverride(t *testing.T) {
 
 	assert.Len(t, c.LogLevels, 4)
 
-	assert.Equal(t, "/tmp/trusty/softhsm/unittest_hsm.json", c.CryptoProv.Default)
-	assert.Empty(t, c.CryptoProv.Providers)
+	//assert.Equal(t, "/tmp/trusty/softhsm/unittest_hsm.json", c.CryptoProv.Default)
+	assert.NotEmpty(t, c.CryptoProv.Providers)
 	assert.Len(t, c.CryptoProv.PKCS11Manufacturers, 2)
 
 	require.NotEmpty(t, c.Authority)

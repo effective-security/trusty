@@ -21,14 +21,16 @@ import (
 	"github.com/effective-security/xpki/certutil"
 	"github.com/effective-security/xpki/crypto11"
 	"github.com/effective-security/xpki/cryptoprov"
-	"github.com/effective-security/xpki/cryptoprov/awskmscrypto"
-	"github.com/effective-security/xpki/cryptoprov/gcpkmscrypto"
 	"github.com/effective-security/xpki/dataprotection"
 	"github.com/effective-security/xpki/jwt"
 	"github.com/pkg/errors"
 	"go.uber.org/dig"
 	"google.golang.org/grpc/codes"
 	"gopkg.in/yaml.v2"
+
+	// register providers
+	_ "github.com/effective-security/xpki/cryptoprov/awskmscrypto"
+	_ "github.com/effective-security/xpki/cryptoprov/gcpkmscrypto"
 )
 
 var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/internal", "appcontainer")
@@ -276,14 +278,6 @@ func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
 	for _, m := range cfg.CryptoProv.PKCS11Manufacturers {
 		cryptoprov.Register(m, crypto11.LoadProvider)
 	}
-
-	cryptoprov.Register(awskmscrypto.ProviderName, awskmscrypto.KmsLoader)
-	cryptoprov.Register(awskmscrypto.ProviderName+"-1", awskmscrypto.KmsLoader)
-	cryptoprov.Register(awskmscrypto.ProviderName+"-2", awskmscrypto.KmsLoader)
-
-	cryptoprov.Register(gcpkmscrypto.ProviderName, gcpkmscrypto.KmsLoader)
-	cryptoprov.Register(gcpkmscrypto.ProviderName+"-1", gcpkmscrypto.KmsLoader) // root
-	cryptoprov.Register(gcpkmscrypto.ProviderName+"-2", gcpkmscrypto.KmsLoader) // delegated
 
 	if strings.Contains(cfg.CryptoProv.Default, "aws-dev-kms") &&
 		os.Getenv("AWS_ACCESS_KEY_ID") == "" {

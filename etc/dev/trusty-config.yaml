@@ -52,7 +52,7 @@ crypto_provider:
   default: ${TRUSTY_CONFIG_DIR}/kms/aws-dev-kms.yaml
   # the list of locations of the configuration files
   providers:
-  #- /tmp/trusty/softhsm/unittest_hsm.json
+    - ${TRUSTY_CONFIG_DIR}/kms/aws-dev-kms-shaken.yaml
   # the list of supported manufactures of PKCS11 tokens
   pkcs11_manufacturers:
     - SoftHSM
@@ -73,6 +73,7 @@ authority: ${TRUSTY_CONFIG_DIR}/ca-config.dev.yaml
 
 delegated_issuers:
   crypto_provider: AWSKMS
+  crypto_model: shaken
   issuer_label_prefix: DELEGATED_ICA_
   aia:
     #crl_url: https://authenticate-api.iconectiv.com/download/v1/crl

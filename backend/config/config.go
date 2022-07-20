@@ -87,6 +87,9 @@ type DelegatedIssuers struct {
 	// CryptoProvider specifies the name of Crypto provider to use,
 	// if not specified, then default will be used
 	CryptoProvider string `json:"crypto_provider,omitempty" yaml:"crypto_provider,omitempty"`
+	// CryptoModel specifies the name of Crypto model to use,
+	// if not specified, then default will be used
+	CryptoModel string `json:"crypto_model,omitempty" yaml:"crypto_model,omitempty"`
 	// IssuerLabelPrefix specifies prefix for the new issuer label, to be contantenated with OrgID
 	IssuerLabelPrefix string `json:"issuer_label_prefix,omitempty" yaml:"issuer_label_prefix,omitempty"`
 	// AIA specified AIA config

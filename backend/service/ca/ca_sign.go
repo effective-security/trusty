@@ -107,7 +107,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 	if err != nil {
 		logger.KV(xlog.ERROR,
 			"status", "failed to sign certificate",
-			"err", err)
+			"err", err.Error())
 
 		metrics.IncrCounter(metricskey.CAFailedSignCert, 1, tags...)
 		return nil, v1.NewError(codes.Internal, "failed to sign certificate request")
@@ -124,7 +124,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 		logger.KV(xlog.ERROR,
 			"ctx", correlation.ID(ctx),
 			"status", "failed to register certificate",
-			"err", err)
+			"err", err.Error())
 
 		if strings.Contains(err.Error(), "certificates_skid") {
 			return nil, v1.NewError(codes.AlreadyExists, "the key was already used")
@@ -139,7 +139,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 			logger.KV(xlog.ERROR,
 				"ctx", correlation.ID(ctx),
 				"status", "failed to publish certificate",
-				"err", err)
+				"err", err.Error())
 			metrics.IncrCounter(metricskey.CAFailedPublishCert, 1, tags...)
 			return nil, v1.NewError(codes.Internal, "failed to publish certificate")
 		}

@@ -1,0 +1,61 @@
+version: "3"
+
+networks:
+  private:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 168.139.57.0/24
+
+services:
+  sql:
+    image: ekspand/docker-centos7-postgres:latest
+    networks:
+      private:
+        ipv4_address: 168.139.57.20
+    volumes:
+      # Mounts the volumes from build container to the container in test
+      # docker-compose command runs with ./sql as CWD, 
+      # the source path in the volume definitions are relative to ./sql
+      - ./sql:/trusty_sql
+    ports:
+      - "15432:15432" # SQL
+    environment:
+      - POSTGRES_PORT=15432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    entrypoint:
+      - /bin/bash
+      - -c
+      - /start_postgres.sh
+
+  kms1:
+    image: nsmithuk/local-kms
+    networks:
+      private:
+        ipv4_address: 168.139.57.21
+    ports:
+      - "14551:14551" # KMS
+    environment:
+      - PORT=14551
+
+  kms2:
+    image: nsmithuk/local-kms
+    networks:
+      private:
+        ipv4_address: 168.139.57.22
+    ports:
+      - "14552:14552" # KMS
+    environment:
+      - PORT=14552
+
+  kms3:
+    image: nsmithuk/local-kms
+    networks:
+      private:
+        ipv4_address: 168.139.57.23
+    ports:
+      - "14553:14553" # KMS
+    environment:
+      - PORT=14553
