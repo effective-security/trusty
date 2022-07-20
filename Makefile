@@ -19,7 +19,7 @@ BUILD_FLAGS=
 
 default: help
 
-all: clean folders tools generate start-local-kms start-sql build gen_test_certs gen_shaken_certs test change_log
+all: clean folders tools generate start-local-deps build gen_test_certs gen_shaken_certs test change_log
 
 #
 # clean produced files
@@ -99,7 +99,8 @@ gen_test_certs:
 
 gen_shaken_certs:
 	./scripts/build/gen_shaken_certs.sh \
-		--hsm-config $(PROJ_ROOT)/etc/dev/kms/aws-dev-kms.yaml \
+		--hsm-config $(PROJ_ROOT)/etc/dev/kms/aws-dev-kms-shaken.yaml \
+		--crypto $(PROJ_ROOT)/etc/dev/kms/aws-dev-kms.yaml \
 		--ca-config $(PROJ_ROOT)/etc/dev/ca-config.bootstrap.yaml \
 		--out-dir /tmp/trusty/certs \
 		--csr-dir $(PROJ_ROOT)/etc/dev/csr_profile \
@@ -109,45 +110,17 @@ gen_shaken_certs:
 		--root-ca-key /tmp/trusty/certs/shaken_root_ca.key \
 		--root --ca --l1_ca --bundle --force
 
-start-local-kms:
-	# Container state will be true (it's already running), false (exists but stopped), or missing (does not exist).
-	# Annoyingly, when there is no such container and Docker returns an error, it also writes a blank line to stdout.
-	# Hence the sed to trim whitespace.
-	LKMS_CONTAINER_STATE=$$(echo $$(docker inspect -f "{{.State.Running}}" trusty-unittest-local-kms 2>/dev/null || echo "missing") | sed -e 's/^[ \t]*//'); \
-	if [ "$$LKMS_CONTAINER_STATE" = "missing" ]; then \
-		docker pull nsmithuk/local-kms && \
-		docker run \
-			-d -e 'PORT=24599' \
-			-p 24599:24599 \
-			--name trusty-unittest-local-kms \
-			nsmithuk/local-kms && \
-			sleep 1; \
-	elif [ "$$LKMS_CONTAINER_STATE" = "false" ]; then docker start trusty-unittest-local-kms && sleep 1; fi;
-
-start-sql:
-	# Container state will be true (it's already running), false (exists but stopped), or missing (does not exist).
-	# Annoyingly, when there is no such container and Docker returns an error, it also writes a blank line to stdout.
-	# Hence the sed to trim whitespace.
-	CONTAINER_STATE=$$(echo $$(docker inspect -f "{{.State.Running}}" trusty-unittest-postgres 2>/dev/null || echo "missing") | sed -e 's/^[ \t]*//'); \
-	if [ "$$CONTAINER_STATE" = "missing" ]; then \
-		docker pull ekspand/docker-centos7-postgres:latest && \
-		docker run \
-			-d -p 15432:15432 \
-			-e 'POSTGRES_USER=postgres' \
-			-e 'POSTGRES_PASSWORD=postgres' \
-			-e 'POSTGRES_PORT=15432' \
-			-v ${PROJ_ROOT}/sql:/trusty_sql \
-			--name trusty-unittest-postgres \
-			ekspand/docker-centos7-postgres:latest /start_postgres.sh && \
-		sleep 9; \
-	elif [ "$$CONTAINER_STATE" = "false" ]; then docker start trusty-unittest-postgres && sleep 9; fi;
-	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h localhost -p 15432 -U postgres -a -f /trusty_sql/cadb/create.sql
-	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h localhost -p 15432 -U postgres -lqt
+start-local-deps:
+	echo "*** starting local-kms"
+	docker-compose -f docker-compose.trusty.yml -p trusty up -d --force-recreate --remove-orphans
+	sleep 3
+	docker exec -e 'PGPASSWORD=postgres' trusty_sql_1 psql -h localhost -p 15432 -U postgres -a -f /trusty_sql/cadb/create.sql
+	docker exec -e 'PGPASSWORD=postgres' trusty_sql_1 psql -h localhost -p 15432 -U postgres -lqt
 	echo "host=localhost port=15432 user=postgres password=postgres sslmode=disable dbname=cadb" > etc/dev/sql-conn-cadb.txt
 
 drop-sql:
-	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h localhost -p 15432 -U postgres -a -f /trusty_sql/cadb/drop.sql
-	docker exec -e 'PGPASSWORD=postgres' trusty-unittest-postgres psql -h localhost -p 15432 -U postgres -lqt
+	docker exec -e 'PGPASSWORD=postgres' trusty_sql_1 psql -h localhost -p 15432 -U postgres -a -f /trusty_sql/cadb/drop.sql
+	docker exec -e 'PGPASSWORD=postgres' trusty_sql_1 psql -h localhost -p 15432 -U postgres -lqt
 
 coveralls-github:
 	echo "Running coveralls"

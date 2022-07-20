@@ -1,0 +1,4 @@
+---
+manufacturer: AWSKMS
+model: shaken
+attributes: Endpoint=http://localhost:14552,Region=us-west-2

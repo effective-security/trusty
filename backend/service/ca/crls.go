@@ -39,7 +39,7 @@ func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificat
 		logger.KV(xlog.ERROR,
 			"ctx", correlation.ID(ctx),
 			"request", in,
-			"err", err,
+			"err", err.Error(),
 		)
 		return nil, v1.NewError(codes.Internal, "unable to find certificate")
 	}
@@ -49,7 +49,7 @@ func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificat
 		logger.KV(xlog.ERROR,
 			"ctx", correlation.ID(ctx),
 			"request", in,
-			"err", err,
+			"err", err.Error(),
 		)
 		return nil, v1.NewError(codes.Internal, "unable to revoke certificate")
 	}
@@ -86,7 +86,7 @@ func (s *Service) GetCRL(ctx context.Context, in *pb.GetCrlRequest) (*pb.CrlResp
 	logger.KV(xlog.TRACE,
 		"ctx", correlation.ID(ctx),
 		"ikid", in.Ikid,
-		"err", err,
+		"err", err.Error(),
 	)
 
 	resp, err := s.publishCrl(ctx, in.Ikid)
@@ -94,7 +94,7 @@ func (s *Service) GetCRL(ctx context.Context, in *pb.GetCrlRequest) (*pb.CrlResp
 		logger.KV(xlog.ERROR,
 			"ctx", correlation.ID(ctx),
 			"ikid", in.Ikid,
-			"err", err,
+			"err", err.Error(),
 		)
 		return nil, v1.NewError(codes.Internal, "unable to publish CRL")
 	}
@@ -142,7 +142,7 @@ func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPRes
 	if err != nil && !db.IsNotFoundError(err) {
 		logger.KV(xlog.ERROR,
 			"ctx", correlation.ID(ctx),
-			"ikid", ikid, "serial", serial, "err", err)
+			"ikid", ikid, "serial", serial, "err", err.Error())
 		return nil, v1.NewError(codes.Internal, "unable to get revoked certificate")
 	}
 
@@ -160,7 +160,7 @@ func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPRes
 	if err != nil {
 		logger.KV(xlog.ERROR,
 			"ctx", correlation.ID(ctx),
-			"err", err)
+			"err", err.Error())
 		return nil, v1.NewError(codes.Internal, "unable to sign OCSP")
 	}
 
@@ -226,7 +226,7 @@ func (s *Service) publishCrl(ctx context.Context, ikID string) (*pb.CrlsResponse
 				logger.KV(xlog.ERROR,
 					"ctx", correlation.ID(ctx),
 					"ikid", issuer.SubjectKID(),
-					"err", err,
+					"err", err.Error(),
 				)
 				return res, v1.NewError(codes.Internal, "failed to generate CRLs")
 			}
@@ -237,7 +237,7 @@ func (s *Service) publishCrl(ctx context.Context, ikID string) (*pb.CrlsResponse
 				logger.KV(xlog.ERROR,
 					"ctx", correlation.ID(ctx),
 					"ikid", issuer.SubjectKID(),
-					"err", err,
+					"err", err.Error(),
 				)
 				return res, v1.NewError(codes.Internal, "failed to publish CRLs")
 			}
@@ -253,7 +253,7 @@ func (s *Service) publishCrlInBackground(ikID string) {
 		if err != nil {
 			logger.KV(xlog.ERROR,
 				"ikid", ikID,
-				"err", err,
+				"err", err.Error(),
 			)
 		}
 	}()

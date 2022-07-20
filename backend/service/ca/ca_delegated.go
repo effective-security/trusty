@@ -91,6 +91,7 @@ func (s *Service) RegisterDelegatedIssuer(ctx context.Context, req *pb.SignCerti
 
 	crypto, err := s.delegatedCrypto()
 	if err != nil {
+		logger.KV(xlog.ERROR, "err", err)
 		return nil, v1.NewError(codes.Internal, "unable to load crypto provider")
 	}
 	prov := csr.NewProvider(crypto)
@@ -174,9 +175,13 @@ func (s *Service) RegisterDelegatedIssuer(ctx context.Context, req *pb.SignCerti
 
 func (s *Service) delegatedCrypto() (cryptoprov.Provider, error) {
 	if s.cfg.DelegatedIssuers.CryptoProvider != "" {
-		prov, err := s.ca.Crypto().ByManufacturer(s.cfg.DelegatedIssuers.CryptoProvider)
+		prov, err := s.ca.Crypto().ByManufacturer(
+			s.cfg.DelegatedIssuers.CryptoProvider,
+			s.cfg.DelegatedIssuers.CryptoModel)
 		if err != nil {
-			return nil, errors.WithMessagef(err, "unable to load crypto provider %s", s.cfg.DelegatedIssuers.CryptoProvider)
+			return nil, errors.WithMessagef(err, "unable to load crypto provider %s, model %q",
+				s.cfg.DelegatedIssuers.CryptoProvider,
+				s.cfg.DelegatedIssuers.CryptoModel)
 		}
 		return prov, nil
 	}
