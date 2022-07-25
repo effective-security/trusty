@@ -1,8 +1,10 @@
 ---
 common_name: trusty-admin
+san:
+  - spiffe://trusty/admin
 key:
-  algo: rsa
-  size: 2048
+  algo: ecdsa
+  size: 256
 names:
   - C: US
     L: WA

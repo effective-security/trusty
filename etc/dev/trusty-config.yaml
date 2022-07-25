@@ -106,6 +106,34 @@ ra:
     # use gs:// for GCP, or file path
     cert_bucket: /tmp/trusty/dev-certs
     crl_bucket: /tmp/trusty/dev-crls
+  gen_certs:
+    schedule: every 3 minutes
+    profiles:
+      - profile: peer
+        disabled: false
+        cert_file: /tmp/trusty/certs/trusty_peer_ca.pem
+        key_file: /tmp/trusty/certs/trusty_peer_ca.key
+        renewal: 165h
+        san:
+          - env.HOSTNAME
+          - localhost
+        csr_profile: ${TRUSTY_CONFIG_DIR}/csr_profile/trusty_peer.yaml
+      - profile: client
+        disabled: false
+        cert_file: /tmp/trusty/certs/trusty_client.pem
+        key_file: /tmp/trusty/certs/trusty_client.key
+        renewal: 62h
+        san:
+          - spiffe://trusty/client
+        csr_profile: ${TRUSTY_CONFIG_DIR}/csr_profile/trusty_client.yaml
+      - profile: client
+        disabled: false
+        cert_file: /tmp/trusty/certs/trusty_admin.pem
+        key_file: /tmp/trusty/certs/trusty_admin.key
+        renewal: 62h
+        san:
+          - spiffe://trusty/admin
+        csr_profile: ${TRUSTY_CONFIG_DIR}/csr_profile/trusty_admin.yaml
 
 servers:
   cis:
@@ -234,8 +262,6 @@ servers:
         enabled: true
         default_authenticated_role: authenticated_tls
         roles:
-          trusty:
-            - spiffe://trusty/all
           trusty-cis:
             - spiffe://trusty/cis
           trusty-ca:
@@ -246,6 +272,8 @@ servers:
             - spiffe://trusty/wfe
           trusty-client:
             - spiffe://trusty/client
+          trusty-admin:
+            - spiffe://trusty/admin
       jwt:
         enabled: true
         audience: trusty

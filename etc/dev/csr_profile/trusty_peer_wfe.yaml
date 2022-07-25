@@ -5,8 +5,8 @@ san:
   - spiffe://trusty/wfe
 common_name: wfe.trusty.com
 key:
-  algo: rsa
-  size: 2048
+  algo: ecdsa
+  size: 256
 names:
   - C: US
     L: WA

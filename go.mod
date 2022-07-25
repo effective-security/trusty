@@ -50,7 +50,7 @@ require (
 	github.com/effective-security/metrics v0.0.0-20220118120427-f740cb7dda2b
 	github.com/effective-security/porto v0.0.0-20220720201540-c50477fbdc48
 	github.com/effective-security/xlog v0.0.0-20220524230729-a9ac7b835dd8
-	github.com/effective-security/xpki v0.2.0
+	github.com/effective-security/xpki v0.2.1-0.20220724202340-9e88618c27be
 )
 
 require (
@@ -85,6 +85,7 @@ require (
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
+	github.com/spf13/afero v1.9.2 // indirect
 	github.com/ugorji/go/codec v1.2.6 // indirect
 	github.com/yuin/goldmark v1.4.1 // indirect
 	go.opencensus.io v0.23.0 // indirect

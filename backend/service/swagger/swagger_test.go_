@@ -37,7 +37,6 @@ var serviceFactories = map[string]gserver.ServiceFactory{
 
 func TestMain(m *testing.M) {
 	var err error
-	xlog.SetPackageLogLevel("github.com/go-phorce/dolly/xhttp", "retriable", xlog.DEBUG)
 
 	httpsAddr = testutils.CreateURLs("https", "")
 	httpAddr = testutils.CreateURLs("http", "")
