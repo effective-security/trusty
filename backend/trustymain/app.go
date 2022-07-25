@@ -251,6 +251,11 @@ func (a *App) Run(startedCh chan<- bool) error {
 		return errors.WithStack(err)
 	}
 
+	err = a.genCert()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
 	isDryRun := a.flags.dryRun != nil && *a.flags.dryRun
 	if isDryRun {
 		logger.Info("status=exit_on_dry_run")
@@ -261,7 +266,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 		if !svcCfg.Disabled {
 			httpServer, err := gserver.Start(name, svcCfg, a.container, ServiceFactories)
 			if err != nil {
-				logger.Errorf("reason=Start, server=%s, err=[%+v]", name, err)
+				logger.Errorf("reason=Start, server=%s, err=[%s]", name, err.Error())
 
 				a.stopServers()
 				return errors.WithStack(err)
@@ -294,6 +299,17 @@ func (a *App) Run(startedCh chan<- bool) error {
 	if err != nil {
 		a.stopServers()
 		return errors.WithStack(err)
+	}
+
+	if caSrvCfg := a.cfg.HTTPServers[config.CAServerName]; caSrvCfg != nil &&
+		!caSrvCfg.Disabled &&
+		a.cfg.RegistrationAuthority.GenCerts.Schedule != "" {
+		t, err := tasks.NewTask(a.cfg.RegistrationAuthority.GenCerts.Schedule)
+		if err != nil {
+			a.stopServers()
+			return errors.WithStack(err)
+		}
+		a.scheduler.Add(t.Do("certs-renew", a.genCert))
 	}
 
 	if startedCh != nil {

@@ -20,7 +20,6 @@ import (
 	"github.com/effective-security/trusty/internal/version"
 	"github.com/effective-security/trusty/tests/mockappcontainer"
 	"github.com/effective-security/trusty/tests/testutils"
-	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -50,7 +49,6 @@ var serviceFactories = map[string]gserver.ServiceFactory{
 
 func TestMain(m *testing.M) {
 	var err error
-	xlog.SetPackageLogLevel("github.com/go-phorce/dolly/xhttp", "retriable", xlog.DEBUG)
 
 	httpsAddr = testutils.CreateURLs("https", "")
 	httpAddr = testutils.CreateURLs("http", "")

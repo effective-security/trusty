@@ -5,8 +5,8 @@ san:
   - spiffe://trusty/cis
 common_name: cis.trusty.com
 key:
-  algo: rsa
-  size: 2048
+  algo: ecdsa
+  size: 256
 names:
   - C: US
     L: WA

@@ -1,10 +1,10 @@
 ---
 common_name: trusty
 san:
-  - spiffe://trusty/all
+  - spiffe://trusty/client
 key:
-  algo: rsa
-  size: 2048
+  algo: ecdsa
+  size: 256
 names:
   - C: US
     L: WA
