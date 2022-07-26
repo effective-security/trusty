@@ -104,6 +104,7 @@ servers:
         - /v1/cert
         - /v1/crl
         - /v1/ocsp
+        - /v1/ocspca
         - /v1/roots
         - /pb.CIService
         - /pb.StatusService

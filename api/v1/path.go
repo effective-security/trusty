@@ -73,6 +73,9 @@ const (
 
 	// URIForOCSP provides base URI for OCSP
 	PathForOCSP = "/v1/ocsp"
+
+	// PathForOCSPByID provides OCSP for a specific issuer
+	PathForOCSPByID = "/v1/ocspca/:issuer_id"
 )
 
 // CA service API

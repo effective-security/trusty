@@ -19,8 +19,8 @@ profiles:
       - ipsec user
       - ipsec end system
     allowed_extensions:
-      - 1.3.6.1.5.5.7.1.1
-      - 2.5.29.17
+      - 1.3.6.1.5.5.7.1.1 # AIA
+      - 2.5.29.17 # SAN
 
   server:
     issuer_label: L2_CA
@@ -32,8 +32,8 @@ profiles:
       - server auth
       - ipsec end system
     allowed_extensions:
-      - 1.3.6.1.5.5.7.1.1
-      - 2.5.29.17
+      - 1.3.6.1.5.5.7.1.1 # AIA
+      - 2.5.29.17 # SAN
 
   client:
     issuer_label: L2_CA
@@ -45,8 +45,8 @@ profiles:
       - client auth
       - ipsec user
     allowed_extensions:
-      - 1.3.6.1.5.5.7.1.1
-      - 2.5.29.17
+      - 1.3.6.1.5.5.7.1.1 # AIA
+      - 2.5.29.17 # SAN
 
   ROOT:
     expiry: 43800h
