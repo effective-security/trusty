@@ -18,11 +18,21 @@ var (
 	HealthKmsKeysStatusFailedCount = []string{"health", "status", "failed", "kms", "keys"}
 	// HealthCAStatusFailedCount is counter metric for failed CA status
 	HealthCAStatusFailedCount = []string{"health", "status", "failed", "ca", "issuers"}
+	// HealthOCSPStatusFailedCount is counter metric for failed OCSP responder status
+	HealthOCSPStatusFailedCount = []string{"health", "status", "failed", "ocsp"}
 
 	// HealthKmsKeysStatusSuccessfulCount is counter metric for successful HSM Keys status
 	HealthKmsKeysStatusSuccessfulCount = []string{"health", "status", "successful", "kms", "keys"}
 	// HealthCAStatusSuccessfulCount is counter metric for successful CA status
 	HealthCAStatusSuccessfulCount = []string{"health", "status", "successful", "ca", "issuers"}
+	// HealthOCSPStatusSuccessfulCount is counter metric for successful OCSP responder status
+	HealthOCSPStatusSuccessfulCount = []string{"health", "status", "successful", "ocsp"}
+
+	// HealthOCSPStatusTotalCount is counter metric for total OCSP requests
+	HealthOCSPStatusTotalCount = []string{"health", "status", "total", "ocsp"}
+
+	// HealthOCSPCheckPerf is sample metric for total time taken for  OCSP health check
+	HealthOCSPCheckPerf = []string{"health", "perf", "ocsp"}
 )
 
 // CA

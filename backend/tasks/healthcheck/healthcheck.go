@@ -1,11 +1,17 @@
 package healthcheck
 
 import (
+	"bytes"
 	"context"
+	"crypto"
 	"flag"
+	"fmt"
+	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/effective-security/metrics"
+	"github.com/effective-security/porto/pkg/retriable"
 	"github.com/effective-security/porto/pkg/tasks"
 	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/trusty/api/v1/pb"
@@ -13,8 +19,10 @@ import (
 	"github.com/effective-security/trusty/client"
 	"github.com/effective-security/trusty/pkg/metricskey"
 	"github.com/effective-security/xlog"
+	"github.com/effective-security/xpki/certutil"
 	"github.com/effective-security/xpki/cryptoprov"
 	"github.com/pkg/errors"
+	"golang.org/x/crypto/ocsp"
 )
 
 var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/backend/tasks", "healthcheck")
@@ -24,12 +32,14 @@ const TaskName = "health_check"
 
 // Task defines the healthcheck task
 type Task struct {
-	conf     *config.Configuration
-	name     string
-	schedule string
-	crypto   *cryptoprov.Crypto
-	factory  client.Factory
-	client   client.CAClient
+	conf       *config.Configuration
+	name       string
+	schedule   string
+	crypto     *cryptoprov.Crypto
+	factory    client.Factory
+	caClient   client.CAClient
+	ocspClient *retriable.Client
+	ocspCerts  []string
 }
 
 func (t *Task) run() {
@@ -68,6 +78,22 @@ func (t *Task) run() {
 				"err", err.Error())
 		}
 	}
+
+	for _, cert := range t.ocspCerts {
+		go func(cert string) {
+			started := time.Now()
+			_, err := t.healthCheckOCSP(ctx, cert)
+			if err != nil {
+				logger.KV(xlog.ERROR,
+					"task", TaskName,
+					"reason", "ocsp",
+					"cert", cert,
+					"elapsed", time.Since(started).String(),
+					"ctx", correlation.ID(ctx),
+					"err", err.Error())
+			}
+		}(cert)
+	}
 }
 
 func (t *Task) healthHsm() error {
@@ -86,17 +112,17 @@ func (t *Task) healthHsm() error {
 }
 
 func (t *Task) healthCheckIssuers(ctx context.Context) error {
-	if t.client == nil {
+	if t.caClient == nil {
 		client, err := t.factory.NewClient("ca")
 		if err != nil {
 			return errors.WithMessagef(err, "unable to create client")
 		}
-		t.client = client.CAClient()
+		t.caClient = client.CAClient()
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
-	li, err := t.client.ListIssuers(ctx, &pb.ListIssuersRequest{
+	li, err := t.caClient.ListIssuers(ctx, &pb.ListIssuersRequest{
 		//Limit:  1,
 		After:  0,
 		Bundle: false,
@@ -110,6 +136,78 @@ func (t *Task) healthCheckIssuers(ctx context.Context) error {
 	return nil
 }
 
+const httpTimeout = 3 * time.Second
+
+func (t *Task) healthCheckOCSP(ctx context.Context, cert string) (*int, error) {
+	chain, err := certutil.LoadChainFromPEM(cert)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	if len(chain) < 2 {
+		return nil, errors.Errorf("invalid chain of length %d: %s",
+			len(chain), cert)
+	}
+
+	cid := correlation.ID(ctx)
+	crt := chain[0]
+	issuer := chain[1]
+
+	if len(crt.OCSPServer) == 0 {
+		return nil, errors.Errorf("certificate does not have OCSP URL: %s",
+			cert)
+	}
+
+	req, err := certutil.CreateOCSPRequest(crt, issuer, crypto.SHA256)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	ur, err := url.Parse(crt.OCSPServer[0])
+	if err != nil {
+		return nil, errors.WithMessagef(err, "invalid OCSP URL: %s", crt.OCSPServer[0])
+	}
+	tag := metrics.Tag{Name: "host", Value: ur.Host}
+
+	defer metrics.MeasureSince(metricskey.HealthOCSPCheckPerf, time.Now())
+
+	metrics.IncrCounter(metricskey.HealthOCSPStatusTotalCount, 1, tag)
+
+	w := bytes.NewBuffer([]byte{})
+	host := fmt.Sprintf("%s://%s", ur.Scheme, ur.Host)
+	ur.Hostname()
+	_, _, err = t.ocspClient.Request(
+		ctx,
+		http.MethodPost,
+		[]string{host},
+		ur.Path,
+		req,
+		w)
+	if err != nil {
+		metrics.IncrCounter(metricskey.HealthOCSPStatusFailedCount, 1, tag)
+		logger.KV(xlog.ERROR,
+			"host", ur.Host,
+			"ctx", cid,
+			"err", err.Error())
+		return nil, errors.WithStack(err)
+	}
+
+	metrics.IncrCounter(metricskey.HealthOCSPStatusSuccessfulCount, 1, tag)
+
+	res, err := ocsp.ParseResponseForCert(w.Bytes(), crt, issuer)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	logger.KV(xlog.INFO,
+		"host", ur.Host,
+		"ocsp_status", res.Status,
+		"ctx", cid,
+		"with_cert", res.Certificate != nil,
+	)
+
+	return &res.Status, nil
+}
+
 func create(
 	name string,
 	conf *config.Configuration,
@@ -119,6 +217,7 @@ func create(
 	flagSet := flag.NewFlagSet("flags", flag.ContinueOnError)
 	caPtr := flagSet.Bool("ca", false, "check status of CA")
 	hsmkeysPtr := flagSet.Bool("hsmkeys", false, "list keys in HSM or KMS")
+	ocspPtr := flagSet.String("ocsp", "", "check status of OCSP")
 
 	err := flagSet.Parse(args)
 	if err != nil {
@@ -140,6 +239,15 @@ func create(
 		if err != nil {
 			return nil, errors.WithMessage(err, "unable to initialize crypto providers")
 		}
+	}
+
+	if ocspPtr != nil && *ocspPtr != "" {
+		task.ocspCerts = append(task.ocspCerts, *ocspPtr)
+		task.ocspClient = retriable.New(
+			retriable.WithName("ocsphealth"),
+			retriable.WithTLS(nil),
+			retriable.WithTimeout(httpTimeout),
+		)
 	}
 	return task, nil
 }

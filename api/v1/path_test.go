@@ -18,5 +18,6 @@ func TestPaths(t *testing.T) {
 	assert.Equal(t, "/v1/crl/:issuer_id", v1.PathForCRLByID)
 	assert.Equal(t, "/v1/cert/:subject_id", v1.PathForAIACertByID)
 	assert.Equal(t, "/v1/ocsp", v1.PathForOCSP)
+	assert.Equal(t, "/v1/ocspca/:issuer_id", v1.PathForOCSPByID)
 
 }

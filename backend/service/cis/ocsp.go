@@ -97,7 +97,10 @@ func (s *Service) ocspResponse(w http.ResponseWriter, r *http.Request, requestBo
 	// All responses after this point will be OCSP.
 	// We could check for the content type of the request, but that
 	// seems unnecessariliy restrictive.
-	w.Header().Add(header.ContentType, "application/ocsp-response")
+	wh := w.Header()
+	wh.Set(header.ContentType, "application/ocsp-response")
+	wh.Set("Cache-Control", "no-store")
+	wh.Set("Pragma", "no-cache")
 
 	// logger.Tracef("req=%x", requestBody)
 

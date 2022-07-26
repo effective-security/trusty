@@ -52,7 +52,10 @@ func (s *Service) GetCRLHandler() restserver.Handle {
 			metrics.Tag{Name: ikidTag, Value: ikid},
 		)
 
-		w.Header().Set(header.ContentType, "application/pkix-crl")
+		wh := w.Header()
+		wh.Set(header.ContentType, "application/pkix-crl")
+		wh.Set("Cache-Control", "no-store")
+		wh.Set("Pragma", "no-cache")
 		w.Write(block.Bytes)
 	}
 }

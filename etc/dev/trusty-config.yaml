@@ -93,6 +93,9 @@ tasks:
   - name: health_check
     schedule: "every 60 seconds"
     args: ["-hsmkeys", "-ca"]
+  - name: health_check
+    schedule: "every 60 seconds"
+    args: ["-ocsp", "/tmp/trusty/certs/trusty_client.pem"]
 
 ra:
   # the list of private Root Certs files.

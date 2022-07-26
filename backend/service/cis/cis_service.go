@@ -75,8 +75,12 @@ func (s *Service) Close() {
 func (s *Service) RegisterRoute(r restserver.Router) {
 	r.GET(v1.PathForCRLByID, s.GetCRLHandler())
 	r.GET(v1.PathForAIACertByID, s.GetCertHandler())
+
 	r.GET(v1.PathForOCSP+"/:body", s.GetOcspHandler())
 	r.POST(v1.PathForOCSP, s.OcspHandler())
+
+	r.GET(v1.PathForOCSPByID+"/:body", s.GetOcspHandler())
+	r.POST(v1.PathForOCSPByID, s.OcspHandler())
 }
 
 // RegisterGRPC registers gRPC handler
