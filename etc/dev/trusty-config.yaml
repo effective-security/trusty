@@ -35,6 +35,9 @@ log_levels:
   - repo: github.com/effective-security/trusty/backend/service
     package: "*"
     level: DEBUG
+  - repo: github.com/effective-security/xpki
+    package: authority
+    level: DEBUG
 
 metrics:
   # specifies if the metrics provider is disabled
