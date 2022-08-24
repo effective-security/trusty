@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/effective-security/porto/gserver"
+	"github.com/effective-security/porto/x/guid"
 	"github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/backend/service/ca"
@@ -245,6 +246,8 @@ func TestE2E(t *testing.T) {
 	})
 	require.NoError(t, err)
 
+	assert.Contains(t, res.Certificate.Subject, "SERIALNUMBER=")
+
 	ikid := res.Certificate.Ikid
 	lRes, err := authorityClient.ListCertificates(ctx, &pb.ListByIssuerRequest{
 		Limit: 100,
@@ -384,6 +387,7 @@ func generateServerCSR() []byte {
 			OU: "unit1",
 		},
 	}, []string{"127.0.0.1", "localhost"})
+	req.SerialNumber = guid.MustCreate()
 
 	csrPEM, _, _, _ := prov.GenerateKeyAndRequest(req)
 	return csrPEM

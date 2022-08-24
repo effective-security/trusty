@@ -83,15 +83,10 @@ profiles:
   SHAKEN_ROOT:
     expiry: 219150h
     backdate: 30m
-    # SHAKEN requires EKU to be non critial
-    #usages:
-    # - cert sign
+    usages:
+      - cert sign
     # SHAKEN has indirect CDP
     # - crl sign
-    extensions:
-      - id: 2.5.29.15 # EKU
-        critical: false
-        value: hex:03020204 # cert sign
     ca_constraint:
       is_ca: true
       max_path_len: -1
@@ -100,15 +95,11 @@ profiles:
     issuer_label: SHAKEN_ROOT
     expiry: 43800h
     backdate: 30m
-    # SHAKEN requires EKU to be non critial
-    #usages:
-    # - cert sign
+    usages:
+      - cert sign
     # SHAKEN has indirect CDP
     # - crl sign
     extensions:
-      - id: 2.5.29.15 # EKU
-        critical: false
-        value: hex:03020204 # cert sign
       - id: 2.5.29.31 # CRL Distribution Points
         critical: false
         # Full Name: URI:https://authenticate-api.iconectiv.com/download/v1/crl

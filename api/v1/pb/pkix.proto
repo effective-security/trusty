@@ -131,6 +131,7 @@ message X509Name {
 	string locality = 3;
 	string organisation = 4;
 	string organisational_unit = 5;
+	string serial_number = 6;
 }
 
 // X509Subject specifies X509 Subject

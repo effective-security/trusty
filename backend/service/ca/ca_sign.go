@@ -44,16 +44,18 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 	var subj *csr.X509Subject
 	if req.Subject != nil {
 		subj = &csr.X509Subject{
-			CommonName: req.Subject.CommonName,
-			Names:      make([]csr.X509Name, len(req.Subject.Names)),
+			CommonName:   req.Subject.CommonName,
+			Names:        make([]csr.X509Name, len(req.Subject.Names)),
+			SerialNumber: req.Subject.SerialNumber,
 		}
 		for i, n := range req.Subject.Names {
 			subj.Names[i] = csr.X509Name{
-				C:  n.Country,
-				ST: n.State,
-				L:  n.Locality,
-				O:  n.Organisation,
-				OU: n.OrganisationalUnit,
+				C:            n.Country,
+				ST:           n.State,
+				L:            n.Locality,
+				O:            n.Organisation,
+				OU:           n.OrganisationalUnit,
+				SerialNumber: n.SerialNumber,
 			}
 		}
 	}

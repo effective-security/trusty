@@ -14,7 +14,7 @@ import (
 	"net/http"
 
 	extPb "github.com/effective-security/trusty/api/v1/pb"
-	extEmpty "github.com/golang/protobuf/ptypes/empty"
+	extEmptypb "github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/utilities"
 	"google.golang.org/grpc"
@@ -34,7 +34,7 @@ var _ = utilities.NewDoubleArray
 var _ = metadata.Join
 
 func request_StatusService_Version_0(ctx context.Context, marshaler runtime.Marshaler, client extPb.StatusServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq extEmpty.Empty
+	var protoReq extEmptypb.Empty
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.Version(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -43,7 +43,7 @@ func request_StatusService_Version_0(ctx context.Context, marshaler runtime.Mars
 }
 
 func local_request_StatusService_Version_0(ctx context.Context, marshaler runtime.Marshaler, server extPb.StatusServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq extEmpty.Empty
+	var protoReq extEmptypb.Empty
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.Version(ctx, &protoReq)
@@ -52,7 +52,7 @@ func local_request_StatusService_Version_0(ctx context.Context, marshaler runtim
 }
 
 func request_StatusService_Server_0(ctx context.Context, marshaler runtime.Marshaler, client extPb.StatusServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq extEmpty.Empty
+	var protoReq extEmptypb.Empty
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.Server(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -61,7 +61,7 @@ func request_StatusService_Server_0(ctx context.Context, marshaler runtime.Marsh
 }
 
 func local_request_StatusService_Server_0(ctx context.Context, marshaler runtime.Marshaler, server extPb.StatusServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq extEmpty.Empty
+	var protoReq extEmptypb.Empty
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.Server(ctx, &protoReq)
@@ -70,7 +70,7 @@ func local_request_StatusService_Server_0(ctx context.Context, marshaler runtime
 }
 
 func request_StatusService_Caller_0(ctx context.Context, marshaler runtime.Marshaler, client extPb.StatusServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq extEmpty.Empty
+	var protoReq extEmptypb.Empty
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.Caller(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -79,7 +79,7 @@ func request_StatusService_Caller_0(ctx context.Context, marshaler runtime.Marsh
 }
 
 func local_request_StatusService_Caller_0(ctx context.Context, marshaler runtime.Marshaler, server extPb.StatusServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq extEmpty.Empty
+	var protoReq extEmptypb.Empty
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.Caller(ctx, &protoReq)

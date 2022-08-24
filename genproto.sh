@@ -10,11 +10,11 @@ if ! [[ "$0" =~ genproto.sh ]]; then
 	exit 255
 fi
 
-if [[ $(protoc --version | cut -f2 -d' ') != "3.6.1" ]]; then
-	echo "could not find protoc 3.6.1, is it installed + in PATH?"
+if [[ $(protoc --version | cut -f2 -d' ') != "3.19.4" ]]; then
+	echo "could not find protoc 3.19.4, is it installed + in PATH?"
 	echo "to install:"
 	echo ""
-	echo "curl -L https://github.com/google/protobuf/releases/download/v3.6.1/protoc-3.6.1-linux-x86_64.zip -o /tmp/protoc.zip"
+	echo "curl -L https://github.com/google/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip -o /tmp/protoc.zip"
 	echo "unzip /tmp/protoc.zip -d /usr/local/protoc"
 	echo "export PATH=$PATH:/usr/local/protoc/bin"
 	exit 255
