@@ -14,26 +14,96 @@ jobs:
     env:
       EVENT_NUMBER: ${{ github.event.number }}
     steps:
-      - name: Install Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ matrix.go-version }}
+      - name: Create code coverage status for the current commit
+        if: github.event_name == 'pull_request'
+        run: |
+          curl "https://${GIT_USER}:${GIT_TOKEN}@api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${COMMIT_SHA}" -d "{\"state\": \"pending\",\"target_url\": \"https://github.com/${GITHUB_REPOSITORY}/pull/${PULL_NUMBER}/checks?check_run_id=${RUN_ID}\",\"description\": \"in progress — This check has started... \",\"context\": \"code cov\"}"
+        env:
+          GIT_TOKEN: ${{ secrets.BUILDER_PAT }}
+          GIT_USER: ${{ secrets.BUILDER_USER }}
 
       - name: Configure git for private modules
         env:
           TOKEN: ${{ secrets.BUILDER_PAT }}
         run: git config --global url."https://dissoupov:${TOKEN}@github.com".insteadOf "https://github.com"
 
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v3
+        # with:
+        #   fetch-depth: 0
+        #   submodules: true
+
+      - name: Fetch History
+        run: git fetch --prune --unshallow
+
+      # - name: Setup Golang with cache
+      #   uses: ./.github/actions/go-cache
+      #   with:
+      #     go-version-file: go.mod
+
+      - name: Setup Go
+        uses: actions/setup-go@v3
         with:
-          fetch-depth: 0
+          go-version-file: go.mod
+
+      - name: Find Go cache locations
+        id: go-cache-paths
+        shell: bash
+        run: |
+          echo "::set-output name=go-build::$(go env GOCACHE)"
+          echo "::set-output name=go-mod::$(go env GOMODCACHE)"
+
+      # Cache go build cache, used to speedup go test
+      - name: Go Build Cache
+        id: go-build-cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.go-cache-paths.outputs.go-build }}
+          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}-${{ env.GO_CACHE_BUSTER }}
+          restore-keys: ${{ runner.os }}-go-build-${{ inputs.cache-key-suffix }}
+
+      # Cache go mod cache, used to speedup builds
+      - name: Go Mod Cache
+        id: go-mod-cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.go-cache-paths.outputs.go-mod }}
+          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}-${{ env.GO_CACHE_BUSTER }}
+          restore-keys: ${{ runner.os }}-go-mod-${{ inputs.cache-key-suffix }}
+
+      - name: Go Artifacts
+        if: steps.go-mod-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          go mod download
+          go mod tidy
 
       - name: Prepare
         run: make vars tools folders generate  version change_log
 
       - name: UnitTest
-        run: make build start-local-deps gen_test_certs gen_shaken_certs covtest
+        run: make build start-local-deps gen_test_certs gen_shaken_certs
+
+      - name: Test
+        if: github.event_name == 'push'
+        run: make test
+
+      - name: CovTest
+        if: github.event_name == 'pull_request'
+        run: make covtest
+
+      - name: Generate covarege Status
+        if: github.event_name == 'pull_request'
+        run: |
+          set -x
+
+          total=`go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+'`
+          echo "${GIT_USER}: total cov: $total"
+          (( $(echo "$total > ${MIN_TESTCOV}" | bc -l) )) && STATE=success || STATE=failure
+          curl "https://${GIT_USER}:${GIT_TOKEN}@api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${COMMIT_SHA}" -d "{\"state\": \"${STATE}\",\"target_url\": \"https://github.com/${GITHUB_REPOSITORY}/pull/${PULL_NUMBER}/checks?check_run_id=${RUN_ID}\",\"description\": \"${total}%\",\"context\": \"code cov\"}"
+        env:
+          GIT_TOKEN: ${{ secrets.BUILDER_PAT }}
+          GIT_USER: ${{ secrets.BUILDER_USER }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
