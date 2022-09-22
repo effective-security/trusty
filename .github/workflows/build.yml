@@ -165,8 +165,8 @@ jobs:
           echo "ITEST_IMAGE_TAG=$ITEST_IMAGE_TAG"
           make docker-citest
 
-      - name: coveralls
-        # if: github.event_name == 'pull_request'
-        env:
-          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: make coveralls-github
+      # - name: coveralls
+      #   # if: github.event_name == 'pull_request'
+      #   env:
+      #     COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: make coveralls-github
