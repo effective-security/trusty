@@ -70,7 +70,7 @@ func (r *Certificate) FileName() string {
 		}
 		sn = base64.RawURLEncoding.EncodeToString(b[:l])
 	}
-	return r.IKID[:4] + "/" + sn
+	return r.IKID[:4] + "/" + sn + ".pem"
 }
 
 // CertificateFromPB returns Certificate
