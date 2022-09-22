@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/effective-security/porto/x/db"
+	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/pkg/print"
@@ -75,7 +75,7 @@ func (a *ListCertsCmd) Run(cli *Cli) error {
 
 	after := uint64(0)
 	if a.After != "" {
-		after, err = db.ID(a.After)
+		after, err = xdb.ID(a.After)
 		if err != nil {
 			return errors.WithMessage(err, "unable to parse --after")
 		}
@@ -116,7 +116,7 @@ func (a *ListRevokedCertsCmd) Run(cli *Cli) error {
 
 	after := uint64(0)
 	if a.After != "" {
-		after, err = db.ID(a.After)
+		after, err = xdb.ID(a.After)
 		if err != nil {
 			return errors.WithMessage(err, "unable to parse --after")
 		}

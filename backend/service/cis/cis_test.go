@@ -26,7 +26,6 @@ import (
 	"github.com/effective-security/trusty/client"
 	"github.com/effective-security/trusty/client/embed"
 	"github.com/effective-security/trusty/tests/testutils"
-	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/certutil"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
@@ -49,9 +48,6 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	xlog.GetFormatter().WithCaller(true)
-	xlog.SetPackageLogLevel("github.com/effective-security/trusty/internal/cadb", "pgsql", xlog.DEBUG)
-
 	var err error
 
 	cfg, err := testutils.LoadConfig(projFolder, "UNIT_TEST")

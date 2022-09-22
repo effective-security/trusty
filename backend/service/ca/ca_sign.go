@@ -50,12 +50,12 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 		}
 		for i, n := range req.Subject.Names {
 			subj.Names[i] = csr.X509Name{
-				C:            n.Country,
-				ST:           n.State,
-				L:            n.Locality,
-				O:            n.Organisation,
-				OU:           n.OrganisationalUnit,
-				SerialNumber: n.SerialNumber,
+				Country:            n.Country,
+				Province:           n.State,
+				Locality:           n.Locality,
+				Organization:       n.Organisation,
+				OrganizationalUnit: n.OrganisationalUnit,
+				SerialNumber:       n.SerialNumber,
 			}
 		}
 	}

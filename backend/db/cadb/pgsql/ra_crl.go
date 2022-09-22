@@ -3,7 +3,7 @@ package pgsql
 import (
 	"context"
 
-	"github.com/effective-security/porto/x/db"
+	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/xlog"
@@ -19,7 +19,7 @@ func (p *Provider) RegisterCrl(ctx context.Context, crl *model.Crl) (*model.Crl,
 		id = p.NextID()
 	}
 
-	err = db.Validate(crl)
+	err = xdb.Validate(crl)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

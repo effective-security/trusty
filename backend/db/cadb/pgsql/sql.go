@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/effective-security/porto/pkg/flake"
-	"github.com/effective-security/porto/x/db"
+	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/xlog"
 )
 
@@ -17,7 +17,7 @@ const (
 // Provider represents SQL client instance
 type Provider struct {
 	conn  *sql.DB
-	sql   db.SQL
+	sql   xdb.SQL
 	idGen flake.IDGenerator
 }
 

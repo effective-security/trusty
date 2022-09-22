@@ -3,7 +3,7 @@ package pgsql
 import (
 	"context"
 
-	"github.com/effective-security/porto/x/db"
+	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/xlog"
@@ -13,7 +13,7 @@ import (
 // RegisterIssuer registers Issuer config
 func (p *Provider) RegisterIssuer(ctx context.Context, m *model.Issuer) (*model.Issuer, error) {
 	id := p.NextID()
-	err := db.Validate(m)
+	err := xdb.Validate(m)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

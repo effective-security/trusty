@@ -68,7 +68,6 @@ func (t timeoutError) Timeout() bool {
 // LookupHost is a mock
 //
 // Note: see comments on LookupMX regarding email.only
-//
 func (mock *Mock) LookupHost(_ context.Context, hostname string) ([]net.IP, error) {
 	if hostname == "always.invalid" ||
 		hostname == "invalid.invalid" ||
@@ -110,7 +109,6 @@ func (mock *Mock) LookupCAA(_ context.Context, domain string) ([]*dns.CAA, error
 // records. The mock LookupHost returns an address of 127.0.0.1 for
 // all domains except for special cases, so MX-only domains must be
 // handled in both LookupHost and LookupMX.
-//
 func (mock *Mock) LookupMX(_ context.Context, domain string) ([]string, error) {
 	switch strings.TrimRight(domain, ".") {
 	case "digicert.com", "certcentral.com":

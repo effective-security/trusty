@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/effective-security/metrics"
-	"github.com/effective-security/porto/x/db"
+	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/porto/xhttp/correlation"
 	v1 "github.com/effective-security/trusty/api/v1"
 	pb "github.com/effective-security/trusty/api/v1/pb"
@@ -139,7 +139,7 @@ func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPRes
 
 	ikid := ica.Bundle().IssuerID
 	ri, err := s.db.GetRevokedCertificateByIKIDAndSerial(ctx, ikid, serial)
-	if err != nil && !db.IsNotFoundError(err) {
+	if err != nil && !xdb.IsNotFoundError(err) {
 		logger.KV(xlog.ERROR,
 			"ctx", correlation.ID(ctx),
 			"ikid", ikid, "serial", serial, "err", err.Error())

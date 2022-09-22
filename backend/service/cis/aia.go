@@ -6,7 +6,7 @@ import (
 
 	"github.com/effective-security/metrics"
 	"github.com/effective-security/porto/restserver"
-	"github.com/effective-security/porto/x/db"
+	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/porto/xhttp/header"
 	"github.com/effective-security/porto/xhttp/httperror"
 	"github.com/effective-security/porto/xhttp/marshal"
@@ -33,7 +33,7 @@ func (s *Service) GetCRLHandler() restserver.Handle {
 		ctx := r.Context()
 		m, err := s.db.GetCrl(ctx, ikid)
 		if err != nil {
-			if db.IsNotFoundError(err) {
+			if xdb.IsNotFoundError(err) {
 				// metrics for Not Found
 				metrics.IncrCounter(metricskey.AIADownloadFailedCrl, 1,
 					metrics.Tag{Name: ikidTag, Value: ikid},
@@ -74,7 +74,7 @@ func (s *Service) GetCertHandler() restserver.Handle {
 		ctx := r.Context()
 		m, err := s.db.GetCertificateBySKID(ctx, skid)
 		if err != nil {
-			if db.IsNotFoundError(err) {
+			if xdb.IsNotFoundError(err) {
 				// metrics for Not Found
 				metrics.IncrCounter(metricskey.AIADownloadFailedCert, 1,
 					metrics.Tag{Name: skidTag, Value: skid},

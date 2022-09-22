@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/effective-security/porto/x/db"
+	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/pkg/errors"
 )
@@ -12,7 +12,7 @@ import (
 // CreateNonce returns Nonce
 func (p *Provider) CreateNonce(ctx context.Context, nonce *model.Nonce) (*model.Nonce, error) {
 	id := p.NextID()
-	err := db.Validate(nonce)
+	err := xdb.Validate(nonce)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
