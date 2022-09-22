@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/effective-security/porto/x/db"
+	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/xlog"
@@ -23,7 +23,7 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 		id = p.NextID()
 	}
 
-	err = db.Validate(revoked)
+	err = xdb.Validate(revoked)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -224,7 +224,7 @@ func (p *Provider) ListRevokedCertificates(ctx context.Context, ikid string, lim
 
 // RevokeCertificate removes Certificate and creates RevokedCertificate
 func (p *Provider) RevokeCertificate(ctx context.Context, crt *model.Certificate, at time.Time, reason int) (*model.RevokedCertificate, error) {
-	err := db.Validate(crt)
+	err := xdb.Validate(crt)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

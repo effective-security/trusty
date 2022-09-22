@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/effective-security/porto/x/db"
+	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/xlog"
@@ -16,7 +16,7 @@ import (
 // RegisterCertificate registers Cert
 func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certificate) (*model.Certificate, error) {
 	id := p.NextID()
-	err := db.Validate(crt)
+	err := xdb.Validate(crt)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

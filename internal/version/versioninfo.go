@@ -19,7 +19,9 @@ type Info struct {
 // the build string is expected to be in the format
 // major.minor-commit
 // and can be populated from git using
-// 	GIT_VERSION := $(shell git describe --dirty --always --tags --long)
+//
+//	GIT_VERSION := $(shell git describe --dirty --always --tags --long)
+//
 // and then using gofmt to substitute it into a template
 func (v *Info) PopulateFromBuild() {
 	fmt.Sscanf(v.Build, "%d.%d.%d", &v.Major, &v.Minor, &v.Commit)

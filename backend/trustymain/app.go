@@ -498,7 +498,7 @@ func (a *App) initLogs() error {
 		var sink io.Writer
 		if a.flags != nil && a.flags.isStderr != nil && *a.flags.isStderr {
 			sink = os.Stderr
-			xlog.SetFormatter(xlog.NewColorFormatter(sink, true))
+			xlog.SetFormatter(xlog.NewPrettyFormatter(os.Stderr).Options(xlog.FormatSkipTime, xlog.FormatWithColor))
 		} else {
 			// do not redirect stderr to our log files
 			log.SetOutput(os.Stderr)
@@ -511,7 +511,7 @@ func (a *App) initLogs() error {
 		}
 		a.OnClose(logRotate)
 	} else {
-		formatter := xlog.NewColorFormatter(os.Stderr, true)
+		formatter := xlog.NewPrettyFormatter(os.Stderr).Options(xlog.FormatSkipTime, xlog.FormatWithColor)
 		xlog.SetFormatter(formatter)
 	}
 
@@ -529,7 +529,7 @@ func (a *App) initLogs() error {
 	}
 	logger.Infof("status=service_starting, version='%v', args=%v",
 		version.Current(), os.Args)
-	xlog.GetFormatter().WithCaller(true)
+	xlog.GetFormatter().Options(xlog.FormatWithLocation)
 	return nil
 }
 

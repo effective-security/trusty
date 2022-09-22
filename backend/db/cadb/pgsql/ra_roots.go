@@ -3,7 +3,7 @@ package pgsql
 import (
 	"context"
 
-	"github.com/effective-security/porto/x/db"
+	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/pkg/errors"
@@ -12,7 +12,7 @@ import (
 // RegisterRootCertificate registers Root Cert
 func (p *Provider) RegisterRootCertificate(ctx context.Context, crt *model.RootCertificate) (*model.RootCertificate, error) {
 	id := p.NextID()
-	err := db.Validate(crt)
+	err := xdb.Validate(crt)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

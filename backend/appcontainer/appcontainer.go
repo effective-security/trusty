@@ -382,6 +382,7 @@ func provideCaDB(cfg *config.Configuration) (cadb.CaDb, cadb.CaReadonlyDb, error
 		cfg.CaSQL.DataSource,
 		cfg.CaSQL.MigrationsDir,
 		cfg.CaSQL.ForceVersion,
+		cfg.CaSQL.MigrateVersion,
 		flake.DefaultIDGenerator)
 	if err != nil {
 		return nil, nil, errors.WithStack(err)

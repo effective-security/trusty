@@ -38,7 +38,6 @@ const (
 )
 
 func TestMain(m *testing.M) {
-	xlog.GetFormatter().WithCaller(true)
 	var err error
 	xlog.SetGlobalLogLevel(xlog.ERROR)
 
@@ -383,8 +382,8 @@ func generateServerCSR() []byte {
 	prov := csr.NewProvider(inmemcrypto.NewProvider())
 	req := prov.NewSigningCertificateRequest("label", "ECDSA", 256, "localhost", []csr.X509Name{
 		{
-			O:  "org1",
-			OU: "unit1",
+			Organization:       "org1",
+			OrganizationalUnit: "unit1",
 		},
 	}, []string{"127.0.0.1", "localhost"})
 	req.SerialNumber = guid.MustCreate()

@@ -24,7 +24,7 @@ func TestFactory(t *testing.T) {
 		cfg.CaSQL.Driver,
 		cfg.CaSQL.DataSource,
 		cfg.CaSQL.MigrationsDir,
-		0,
+		0, 0,
 		flake.DefaultIDGenerator,
 	)
 	require.NoError(t, err)

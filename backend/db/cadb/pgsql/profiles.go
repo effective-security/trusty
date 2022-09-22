@@ -3,7 +3,7 @@ package pgsql
 import (
 	"context"
 
-	"github.com/effective-security/porto/x/db"
+	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/xlog"
@@ -13,7 +13,7 @@ import (
 // RegisterCertProfile registers CertProfile config
 func (p *Provider) RegisterCertProfile(ctx context.Context, m *model.CertProfile) (*model.CertProfile, error) {
 	id := p.NextID()
-	err := db.Validate(m)
+	err := xdb.Validate(m)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

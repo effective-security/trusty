@@ -14,4 +14,7 @@ type SQL struct {
 
 	// ForceVersion specifies to force version.
 	ForceVersion int `json:"force_version,omitempty" yaml:"force_version,omitempty"`
+
+	// MigrateVersion specifies to migrate version.
+	MigrateVersion int `json:"migrate_version,omitempty" yaml:"migrate_version,omitempty"`
 }

@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/effective-security/porto/pkg/flake"
-	"github.com/effective-security/porto/x/db/migrate"
 	"github.com/effective-security/porto/x/fileutil"
+	"github.com/effective-security/porto/x/xdb/migrate"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/trusty/backend/db/cadb/pgsql"
 	"github.com/effective-security/xlog"
@@ -118,7 +118,7 @@ type Provider interface {
 }
 
 // New creates a Provider instance
-func New(driverName, dataSourceName, migrationsDir string, forceVersion int, idGen flake.IDGenerator) (Provider, error) {
+func New(driverName, dataSourceName, migrationsDir string, forceVersion, migrateVersion int, idGen flake.IDGenerator) (Provider, error) {
 	ds, err := fileutil.LoadConfigWithSchema(dataSourceName)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -135,7 +135,7 @@ func New(driverName, dataSourceName, migrationsDir string, forceVersion int, idG
 		return nil, errors.WithMessagef(err, "unable to ping DB: %s", driverName)
 	}
 
-	err = migrate.Postgres("cadb", migrationsDir, forceVersion, d)
+	err = migrate.Postgres("cadb", migrationsDir, forceVersion, migrateVersion, d)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "unable to migrate cadb")
 	}

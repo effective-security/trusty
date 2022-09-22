@@ -94,7 +94,7 @@ gen_test_certs:
 		--key-label test_ \
 		--root-ca $(PROJ_ROOT)/etc/dev/roots/trusty_root_ca.pem \
 		--root-ca-key $(PROJ_ROOT)/etc/dev/roots/trusty_root_ca.key \
-		--ca1 --ca2  --peer --bundle --force
+		--ca1 --ca2  --peer --client --bundle --force
 	cp $(PROJ_ROOT)/etc/dev/roots/trusty_root_ca.pem /tmp/trusty/certs/trusty_root_ca.pem
 
 gen_shaken_certs:
