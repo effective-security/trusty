@@ -404,8 +404,8 @@ github.com/effective-security/porto v0.0.0-20220922131216-cafab54ac9dd h1:3/wGAB
 github.com/effective-security/porto v0.0.0-20220922131216-cafab54ac9dd/go.mod h1:DYlI4JgDwHW6mkogY4lb5DbpoFO/mO1IzPBptspsC3Q=
 github.com/effective-security/xlog v0.0.0-20220818044154-4d280a49975d h1:5Yz4xP+w+ss67oxQgOTy6doyevIjYWwmy3GSo4MBZtc=
 github.com/effective-security/xlog v0.0.0-20220818044154-4d280a49975d/go.mod h1:MgiEiGSIXe0WWCX37/HkNKgsuKy3IbyQ6XVhOCBcsiM=
-github.com/effective-security/xpki v0.2.1-0.20220906090035-4c5ba6383254 h1:wT8nOHiQeVsoTt+Nwn5otrQTM+xOzg8lvfOH6Z45n5M=
-github.com/effective-security/xpki v0.2.1-0.20220906090035-4c5ba6383254/go.mod h1:sK5Ni22p7g4Ewt37ZciTKbRlU+KcfApU04UMSHp65JE=
+github.com/effective-security/xpki v0.3.1-0.20220927175415-1b5e885b2f5a h1:F1guD0Xu5zQtsogWXRfI3G9dpbxxR+IzzAhW6/j3WAQ=
+github.com/effective-security/xpki v0.3.1-0.20220927175415-1b5e885b2f5a/go.mod h1:sK5Ni22p7g4Ewt37ZciTKbRlU+KcfApU04UMSHp65JE=
 github.com/elazarl/goproxy v0.0.0-20180725130230-947c36da3153/go.mod h1:/Zj4wYkgs4iZTTu3o/KG3Itv/qCCa8VVMlb3i9OVuzc=
 github.com/emicklei/go-restful v0.0.0-20170410110728-ff4f55a20633/go.mod h1:otzb+WCGbkyDHkqmQmT5YD2WR4BBwUdeQoFo8l/7tVs=
 github.com/emicklei/go-restful v2.9.5+incompatible/go.mod h1:otzb+WCGbkyDHkqmQmT5YD2WR4BBwUdeQoFo8l/7tVs=
