@@ -3,7 +3,6 @@ package ca
 import (
 	"context"
 
-	"github.com/effective-security/porto/xhttp/correlation"
 	v1 "github.com/effective-security/trusty/api/v1"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
@@ -99,8 +98,7 @@ func (s *Service) GetCertificate(ctx context.Context, in *pb.GetCertificateReque
 	}
 	// TODO: IssuerSerial
 	if err != nil {
-		logger.KV(xlog.ERROR,
-			"ctx", correlation.ID(ctx),
+		logger.ContextKV(ctx, xlog.ERROR,
 			"request", in,
 			"err", err.Error(),
 		)
@@ -116,8 +114,7 @@ func (s *Service) GetCertificate(ctx context.Context, in *pb.GetCertificateReque
 func (s *Service) UpdateCertificateLabel(ctx context.Context, req *pb.UpdateCertificateLabelRequest) (*pb.CertificateResponse, error) {
 	crt, err := s.db.UpdateCertificateLabel(ctx, req.Id, req.Label)
 	if err != nil {
-		logger.KV(xlog.ERROR,
-			"ctx", correlation.ID(ctx),
+		logger.ContextKV(ctx, xlog.ERROR,
 			"request", req,
 			"err", err.Error(),
 		)
@@ -133,8 +130,7 @@ func (s *Service) UpdateCertificateLabel(ctx context.Context, req *pb.UpdateCert
 func (s *Service) ListCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.CertificatesResponse, error) {
 	list, err := s.db.ListCertificates(ctx, in.Ikid, int(in.Limit), in.After)
 	if err != nil {
-		logger.KV(xlog.ERROR,
-			"ctx", correlation.ID(ctx),
+		logger.ContextKV(ctx, xlog.ERROR,
 			"request", in,
 			"err", err.Error(),
 		)
@@ -150,8 +146,7 @@ func (s *Service) ListCertificates(ctx context.Context, in *pb.ListByIssuerReque
 func (s *Service) ListRevokedCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.RevokedCertificatesResponse, error) {
 	list, err := s.db.ListRevokedCertificates(ctx, in.Ikid, int(in.Limit), in.After)
 	if err != nil {
-		logger.KV(xlog.ERROR,
-			"ctx", correlation.ID(ctx),
+		logger.ContextKV(ctx, xlog.ERROR,
 			"request", in,
 			"err", err.Error(),
 		)
@@ -167,8 +162,7 @@ func (s *Service) ListRevokedCertificates(ctx context.Context, in *pb.ListByIssu
 func (s *Service) ListOrgCertificates(ctx context.Context, in *pb.ListOrgCertificatesRequest) (*pb.CertificatesResponse, error) {
 	list, err := s.db.ListOrgCertificates(ctx, in.OrgId, int(in.Limit), in.After)
 	if err != nil {
-		logger.KV(xlog.ERROR,
-			"ctx", correlation.ID(ctx),
+		logger.ContextKV(ctx, xlog.ERROR,
 			"request", in,
 			"err", err.Error(),
 		)

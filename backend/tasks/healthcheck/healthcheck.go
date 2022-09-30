@@ -58,11 +58,10 @@ func (t *Task) run() {
 	if t.factory != nil {
 		err = t.healthCheckIssuers(ctx)
 		if err != nil {
-			logger.KV(xlog.ERROR,
+			logger.ContextKV(ctx, xlog.ERROR,
 				"task", TaskName,
 				"reason", "healthCheckIssuers",
 				"elapsed", time.Since(started).String(),
-				"ctx", correlation.ID(ctx),
 				"err", err.Error())
 		}
 	}
@@ -70,11 +69,10 @@ func (t *Task) run() {
 	if t.crypto != nil {
 		err = t.healthHsm()
 		if err != nil {
-			logger.KV(xlog.ERROR,
+			logger.ContextKV(ctx, xlog.ERROR,
 				"task", TaskName,
 				"reason", "healthHsm",
 				"elapsed", time.Since(started).String(),
-				"ctx", correlation.ID(ctx),
 				"err", err.Error())
 		}
 	}
@@ -84,12 +82,11 @@ func (t *Task) run() {
 			started := time.Now()
 			_, err := t.healthCheckOCSP(ctx, cert)
 			if err != nil {
-				logger.KV(xlog.ERROR,
+				logger.ContextKV(ctx, xlog.ERROR,
 					"task", TaskName,
 					"reason", "ocsp",
 					"cert", cert,
 					"elapsed", time.Since(started).String(),
-					"ctx", correlation.ID(ctx),
 					"err", err.Error())
 			}
 		}(cert)
@@ -149,7 +146,6 @@ func (t *Task) healthCheckOCSP(ctx context.Context, cert string) (*int, error) {
 			len(chain), cert)
 	}
 
-	cid := correlation.ID(ctx)
 	crt := chain[0]
 	issuer := chain[1]
 
@@ -185,9 +181,8 @@ func (t *Task) healthCheckOCSP(ctx context.Context, cert string) (*int, error) {
 		w)
 	if err != nil {
 		metrics.IncrCounter(metricskey.HealthOCSPStatusFailedCount, 1, tag)
-		logger.KV(xlog.ERROR,
+		logger.ContextKV(ctx, xlog.ERROR,
 			"host", ur.Host,
-			"ctx", cid,
 			"err", err.Error())
 		return nil, errors.WithStack(err)
 	}
@@ -198,10 +193,9 @@ func (t *Task) healthCheckOCSP(ctx context.Context, cert string) (*int, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	logger.KV(xlog.INFO,
+	logger.ContextKV(ctx, xlog.DEBUG,
 		"host", ur.Host,
 		"ocsp_status", res.Status,
-		"ctx", cid,
 		"with_cert", res.Certificate != nil,
 	)
 

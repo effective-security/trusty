@@ -264,11 +264,10 @@ func (p *Provider) ListCertificates(ctx context.Context, ikid string, limit int,
 	if limit > 500 {
 		limit = 500
 	}
-	logger.KV(xlog.DEBUG,
+	logger.ContextKV(ctx, xlog.DEBUG,
 		"ikid", ikid,
 		"limit", limit,
 		"afterID", afterID,
-		"ctx", correlation.ID(ctx),
 	)
 
 	res, err := p.sql.QueryContext(ctx,

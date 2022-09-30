@@ -185,11 +185,10 @@ func (p *Provider) ListRevokedCertificates(ctx context.Context, ikid string, lim
 		limit = 1000
 	}
 
-	logger.KV(xlog.DEBUG,
+	logger.ContextKV(ctx, xlog.DEBUG,
 		"ikid", ikid,
 		"limit", limit,
 		"afterID", afterID,
-		"ctx", correlation.ID(ctx),
 	)
 
 	res, err := p.sql.QueryContext(ctx,
@@ -235,11 +234,10 @@ func (p *Provider) RevokeCertificate(ctx context.Context, crt *model.Certificate
 		Reason:      reason,
 	}
 
-	logger.KV(xlog.NOTICE, "id", crt.ID,
+	logger.ContextKV(ctx, xlog.NOTICE, "id", crt.ID,
 		"subject", crt.Subject,
 		"skid", crt.SKID,
 		"ikid", crt.IKID,
-		"ctx", correlation.ID(ctx),
 	)
 
 	tx, err := p.DB().BeginTx(ctx, nil)
