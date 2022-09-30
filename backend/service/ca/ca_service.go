@@ -184,8 +184,7 @@ func (s *Service) registerPublisherTask(ctx context.Context) {
 	for _, issuer := range issuers {
 		issuer := issuer
 		if issuer.CrlRenewal() > 0 && issuer.CrlURL() != "" {
-			logger.KV(xlog.NOTICE,
-				"ctx", correlation.ID(ctx),
+			logger.ContextKV(ctx, xlog.NOTICE,
 				"ikid", issuer.SubjectKID(),
 				"scheduled", "crl_publisher",
 				"interval", issuer.CrlRenewal().String(),
@@ -197,8 +196,7 @@ func (s *Service) registerPublisherTask(ctx context.Context) {
 			task = task.Do(taskName, func() {
 				_, err := s.publishCrl(ctx, issuer.SubjectKID())
 				if err != nil {
-					logger.KV(xlog.ERROR,
-						"ctx", correlation.ID(ctx),
+					logger.ContextKV(ctx, xlog.ERROR,
 						"ikid", issuer.SubjectKID(),
 						"task", taskName,
 						"err", err.Error(),
@@ -207,8 +205,7 @@ func (s *Service) registerPublisherTask(ctx context.Context) {
 			})
 			s.scheduler = s.scheduler.Add(task)
 		} else {
-			logger.KV(xlog.NOTICE,
-				"ctx", correlation.ID(ctx),
+			logger.ContextKV(ctx, xlog.NOTICE,
 				"ikid", issuer.SubjectKID(),
 				"skipped", "crl_publisher",
 				"interval", issuer.CrlRenewal().String(),

@@ -10,7 +10,6 @@ import (
 
 	"github.com/effective-security/metrics"
 	"github.com/effective-security/porto/x/xdb"
-	"github.com/effective-security/porto/xhttp/correlation"
 	v1 "github.com/effective-security/trusty/api/v1"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
@@ -36,8 +35,7 @@ func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificat
 		return nil, v1.NewError(codes.InvalidArgument, "invalid parameter")
 	}
 	if err != nil {
-		logger.KV(xlog.ERROR,
-			"ctx", correlation.ID(ctx),
+		logger.ContextKV(ctx, xlog.ERROR,
 			"request", in,
 			"err", err.Error(),
 		)
@@ -46,8 +44,7 @@ func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificat
 
 	revoked, err := s.db.RevokeCertificate(ctx, crt, time.Now().UTC(), int(in.Reason))
 	if err != nil {
-		logger.KV(xlog.ERROR,
-			"ctx", correlation.ID(ctx),
+		logger.ContextKV(ctx, xlog.ERROR,
 			"request", in,
 			"err", err.Error(),
 		)
@@ -83,16 +80,14 @@ func (s *Service) GetCRL(ctx context.Context, in *pb.GetCrlRequest) (*pb.CrlResp
 		}, nil
 	}
 
-	logger.KV(xlog.TRACE,
-		"ctx", correlation.ID(ctx),
+	logger.ContextKV(ctx, xlog.TRACE,
 		"ikid", in.Ikid,
 		"err", err.Error(),
 	)
 
 	resp, err := s.publishCrl(ctx, in.Ikid)
 	if err != nil {
-		logger.KV(xlog.ERROR,
-			"ctx", correlation.ID(ctx),
+		logger.ContextKV(ctx, xlog.ERROR,
 			"ikid", in.Ikid,
 			"err", err.Error(),
 		)
@@ -140,8 +135,7 @@ func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPRes
 	ikid := ica.Bundle().IssuerID
 	ri, err := s.db.GetRevokedCertificateByIKIDAndSerial(ctx, ikid, serial)
 	if err != nil && !xdb.IsNotFoundError(err) {
-		logger.KV(xlog.ERROR,
-			"ctx", correlation.ID(ctx),
+		logger.ContextKV(ctx, xlog.ERROR,
 			"ikid", ikid, "serial", serial, "err", err.Error())
 		return nil, v1.NewError(codes.Internal, "unable to get revoked certificate")
 	}
@@ -152,14 +146,11 @@ func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPRes
 		req.RevokedAt = ri.RevokedAt
 	}
 
-	logger.KV(xlog.TRACE,
-		"ctx", correlation.ID(ctx),
-		"ikid", ikid, "serial", serial, "status", req.Status)
+	logger.ContextKV(ctx, xlog.TRACE, "ikid", ikid, "serial", serial, "status", req.Status)
 
 	der, err := ica.SignOCSP(req)
 	if err != nil {
-		logger.KV(xlog.ERROR,
-			"ctx", correlation.ID(ctx),
+		logger.ContextKV(ctx, xlog.ERROR,
 			"err", err.Error())
 		return nil, v1.NewError(codes.Internal, "unable to sign OCSP")
 	}
@@ -214,8 +205,7 @@ func (s *Service) createGenericCRL(ctx context.Context, issuer *authority.Issuer
 }
 
 func (s *Service) publishCrl(ctx context.Context, ikID string) (*pb.CrlsResponse, error) {
-	logger.KV(xlog.INFO,
-		"ctx", correlation.ID(ctx),
+	logger.ContextKV(ctx, xlog.INFO,
 		"ikid", ikID)
 
 	res := &pb.CrlsResponse{}
@@ -223,8 +213,7 @@ func (s *Service) publishCrl(ctx context.Context, ikID string) (*pb.CrlsResponse
 		if ikID == "" || ikID == issuer.SubjectKID() {
 			crl, err := s.createGenericCRL(ctx, issuer)
 			if err != nil {
-				logger.KV(xlog.ERROR,
-					"ctx", correlation.ID(ctx),
+				logger.ContextKV(ctx, xlog.ERROR,
 					"ikid", issuer.SubjectKID(),
 					"err", err.Error(),
 				)
@@ -234,8 +223,7 @@ func (s *Service) publishCrl(ctx context.Context, ikID string) (*pb.CrlsResponse
 
 			_, err = s.publisher.PublishCRL(ctx, crl)
 			if err != nil {
-				logger.KV(xlog.ERROR,
-					"ctx", correlation.ID(ctx),
+				logger.ContextKV(ctx, xlog.ERROR,
 					"ikid", issuer.SubjectKID(),
 					"err", err.Error(),
 				)

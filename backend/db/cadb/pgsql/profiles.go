@@ -60,10 +60,9 @@ func (p *Provider) ListCertProfiles(ctx context.Context, limit int, afterID uint
 	if limit == 0 {
 		limit = 100
 	}
-	logger.KV(xlog.TRACE,
+	logger.ContextKV(ctx, xlog.TRACE,
 		"limit", limit,
 		"afterID", afterID,
-		"ctx", correlation.ID(ctx),
 	)
 
 	res, err := p.sql.QueryContext(ctx,
@@ -109,9 +108,8 @@ func (p *Provider) ListCertProfiles(ctx context.Context, limit int, afterID uint
 
 // GetCertProfilesByIssuer returns list of CertProfile
 func (p *Provider) GetCertProfilesByIssuer(ctx context.Context, issuer string) ([]*model.CertProfile, error) {
-	logger.KV(xlog.TRACE,
+	logger.ContextKV(ctx, xlog.TRACE,
 		"issuer", issuer,
-		"ctx", correlation.ID(ctx),
 	)
 
 	res, err := p.sql.QueryContext(ctx,

@@ -87,10 +87,9 @@ func (p *Provider) ListIssuers(ctx context.Context, limit int, afterID uint64) (
 	if limit == 0 {
 		limit = 100
 	}
-	logger.KV(xlog.TRACE,
+	logger.ContextKV(ctx, xlog.TRACE,
 		"limit", limit,
 		"afterID", afterID,
-		"ctx", correlation.ID(ctx),
 	)
 
 	res, err := p.sql.QueryContext(ctx,

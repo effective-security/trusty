@@ -400,10 +400,10 @@ github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25Kn
 github.com/edsrzf/mmap-go v0.0.0-20170320065105-0bce6a688712/go.mod h1:YO35OhQPt3KJa3ryjFM5Bs14WD66h8eGKpfaBNrHW5M=
 github.com/effective-security/metrics v0.0.0-20220118120427-f740cb7dda2b h1:04WN0NliJj3iYMx0VARSYZ+988kJmekiIcnvgnABjXY=
 github.com/effective-security/metrics v0.0.0-20220118120427-f740cb7dda2b/go.mod h1:/ybrmYnI3g1zrYQFIx6QjzyX1H2616Q0xcQRGrJa4cU=
-github.com/effective-security/porto v0.0.0-20220922131216-cafab54ac9dd h1:3/wGAB55gdFaOCz8fOX6SkuktVvWf0AyL+2J1TdXfwc=
-github.com/effective-security/porto v0.0.0-20220922131216-cafab54ac9dd/go.mod h1:DYlI4JgDwHW6mkogY4lb5DbpoFO/mO1IzPBptspsC3Q=
-github.com/effective-security/xlog v0.0.0-20220818044154-4d280a49975d h1:5Yz4xP+w+ss67oxQgOTy6doyevIjYWwmy3GSo4MBZtc=
-github.com/effective-security/xlog v0.0.0-20220818044154-4d280a49975d/go.mod h1:MgiEiGSIXe0WWCX37/HkNKgsuKy3IbyQ6XVhOCBcsiM=
+github.com/effective-security/porto v0.0.0-20220929112952-2661570d2e86 h1:8gqoBrKY+DjN4/9aYslp8WhKgxO4XPev7Sq7onchA7o=
+github.com/effective-security/porto v0.0.0-20220929112952-2661570d2e86/go.mod h1:b8jt/JezcGtpxYKRL4aUqdfwsNPeC/Ay8oCRiCgjF44=
+github.com/effective-security/xlog v0.0.0-20220928192849-43ec53f20323 h1:S5yW8fIvRp39yQ3O/REQwZ0VZVan6g9d5v51zOrMNHY=
+github.com/effective-security/xlog v0.0.0-20220928192849-43ec53f20323/go.mod h1:MgiEiGSIXe0WWCX37/HkNKgsuKy3IbyQ6XVhOCBcsiM=
 github.com/effective-security/xpki v0.3.1-0.20220927175415-1b5e885b2f5a h1:F1guD0Xu5zQtsogWXRfI3G9dpbxxR+IzzAhW6/j3WAQ=
 github.com/effective-security/xpki v0.3.1-0.20220927175415-1b5e885b2f5a/go.mod h1:sK5Ni22p7g4Ewt37ZciTKbRlU+KcfApU04UMSHp65JE=
 github.com/elazarl/goproxy v0.0.0-20180725130230-947c36da3153/go.mod h1:/Zj4wYkgs4iZTTu3o/KG3Itv/qCCa8VVMlb3i9OVuzc=

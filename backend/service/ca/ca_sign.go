@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/effective-security/metrics"
-	"github.com/effective-security/porto/xhttp/correlation"
 	v1 "github.com/effective-security/trusty/api/v1"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
@@ -123,8 +122,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 
 	mcert, err = s.db.RegisterCertificate(ctx, mcert)
 	if err != nil {
-		logger.KV(xlog.ERROR,
-			"ctx", correlation.ID(ctx),
+		logger.ContextKV(ctx, xlog.ERROR,
 			"status", "failed to register certificate",
 			"err", err.Error())
 
@@ -138,8 +136,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 	if s.publisher != nil {
 		_, err := s.publisher.PublishCertificate(context.Background(), mcert.ToPB(), fn)
 		if err != nil {
-			logger.KV(xlog.ERROR,
-				"ctx", correlation.ID(ctx),
+			logger.ContextKV(ctx, xlog.ERROR,
 				"status", "failed to publish certificate",
 				"err", err.Error())
 			metrics.IncrCounter(metricskey.CAFailedPublishCert, 1, tags...)
@@ -147,8 +144,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 		}
 	}
 
-	logger.KV(xlog.NOTICE,
-		"ctx", correlation.ID(ctx),
+	logger.ContextKV(ctx, xlog.NOTICE,
 		"status", "signed certificate",
 		"id", mcert.ID,
 		"subject", mcert.Subject,
