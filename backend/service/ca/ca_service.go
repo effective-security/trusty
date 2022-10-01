@@ -135,7 +135,7 @@ func (s *Service) registerCert(ctx context.Context, trust pb.Trust, location str
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	pem, err := certutil.EncodeToPEMString(true, crt)
+	pem, err := certutil.EncodeToPEMString(false, crt)
 	if err != nil {
 		return errors.WithStack(err)
 	}
