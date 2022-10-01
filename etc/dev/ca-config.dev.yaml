@@ -211,7 +211,6 @@ profiles:
     usages:
       - signing
       - digital signature
-    policies_critical: true
     policies:
       - oid: 2.16.840.1.114569.1.1.1
     allowed_extensions:
@@ -235,7 +234,6 @@ profiles:
     ca_constraint:
       is_ca: true
       max_path_len: 0
-    policies_critical: true
     policies:
       - oid: 2.16.840.1.114569.1.1.1
       - oid: 1.3.6.1.4.1.57973.1.1
@@ -254,7 +252,6 @@ profiles:
     usages:
       - signing
       - digital signature
-    policies_critical: true
     policies:
       - oid: 2.16.840.1.114569.1.1.1
     allowed_extensions:
