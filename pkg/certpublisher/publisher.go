@@ -47,6 +47,11 @@ func (p *publisher) PublishCertificate(ctx context.Context, cert *pb.Certificate
 	if err != nil {
 		return "", errors.WithMessagef(err, "unable to write file to: "+location)
 	}
+
+	err = storage.SetContentType(ctx, location, "application/pem-certificate-chain")
+	if err != nil {
+		logger.ContextKV(ctx, xlog.WARNING, "reason", "SetContentType", "err", err.Error())
+	}
 	return location, nil
 }
 
