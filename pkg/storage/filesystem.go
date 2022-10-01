@@ -90,6 +90,11 @@ func (conn *FilesystemConnection) GetWriter(ctx context.Context, path string) (r
 	return fp, nil
 }
 
+// SetContentType updates object with content type, if supported
+func (conn *FilesystemConnection) SetContentType(ctx context.Context, path, contentType string) error {
+	return errors.New("operation not suppurted")
+}
+
 // Delete the file at path.
 func (conn *FilesystemConnection) Delete(ctx context.Context, path string) error {
 	file, err := conn.getPath(path, false)

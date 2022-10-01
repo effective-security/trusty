@@ -129,6 +129,23 @@ func (conn *GoogleCloudStorageConnection) GetWriter(ctx context.Context, path st
 	return obj.NewWriter(ctx), nil
 }
 
+// SetContentType updates object with content type, if supported
+func (conn *GoogleCloudStorageConnection) SetContentType(ctx context.Context, path, contentType string) error {
+	obj, err := conn.getRemoteObject(ctx, path)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	attrs, err := obj.Update(ctx, storage.ObjectAttrsToUpdate{
+		ContentType: contentType,
+	})
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	logger.ContextKV(ctx, xlog.DEBUG, "attrs", attrs)
+
+	return nil
+}
+
 // Delete the file pointed to by path.
 func (conn *GoogleCloudStorageConnection) Delete(ctx context.Context, path string) (err error) {
 	obj, err := conn.getRemoteObject(ctx, path)
