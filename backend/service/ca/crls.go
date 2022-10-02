@@ -155,6 +155,11 @@ func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPRes
 		return nil, v1.NewError(codes.Internal, "unable to sign OCSP")
 	}
 
+	metrics.IncrCounter(metricskey.CAOcspSigned, 1,
+		metrics.Tag{Name: "ikid", Value: ikid},
+		metrics.Tag{Name: "status", Value: req.Status},
+	)
+
 	return &pb.OCSPResponse{Der: der}, nil
 }
 

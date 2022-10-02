@@ -106,7 +106,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 
 	cert, pem, err := ca.Sign(cr)
 	if err != nil {
-		logger.KV(xlog.ERROR,
+		logger.ContextKV(ctx, xlog.ERROR,
 			"status", "failed to sign certificate",
 			"err", err.Error())
 

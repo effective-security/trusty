@@ -6,12 +6,14 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/effective-security/metrics"
 	"github.com/effective-security/porto/restserver"
 	"github.com/effective-security/porto/xhttp/header"
 	"github.com/effective-security/porto/xhttp/httperror"
 	"github.com/effective-security/porto/xhttp/marshal"
 	v1 "github.com/effective-security/trusty/api/v1"
 	pb "github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/pkg/metricskey"
 	"github.com/effective-security/xlog"
 	"golang.org/x/crypto/ocsp"
 	"google.golang.org/grpc/codes"
@@ -106,7 +108,8 @@ func (s *Service) ocspResponse(w http.ResponseWriter, r *http.Request, requestBo
 
 	res, err := s.ca.SignOCSP(r.Context(), &pb.OCSPRequest{Der: requestBody})
 	if err != nil {
-		logger.KV(xlog.WARNING, "err", err.Error())
+		logger.ContextKV(r.Context(), xlog.WARNING, "err", err.Error())
+		metrics.IncrCounter(metricskey.AIADownloadFailedOCSP, 1)
 
 		if trustyErr, ok := err.(v1.TrustyError); ok {
 			switch trustyErr.Code() {
@@ -122,6 +125,8 @@ func (s *Service) ocspResponse(w http.ResponseWriter, r *http.Request, requestBo
 		w.Write(internalErrorErrorResponse)
 		return
 	}
+
+	metrics.IncrCounter(metricskey.AIADownloadSuccessfulOCSP, 1)
 
 	w.Write(res.Der)
 }
