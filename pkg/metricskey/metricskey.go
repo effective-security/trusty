@@ -43,6 +43,8 @@ var (
 	CACertRevoked = []string{"ca", "cert", "revoked"}
 	// CACrlPublished is counter metric for published CRL
 	CACrlPublished = []string{"ca", "crl", "published"}
+	// CAOcspSigned is counter metric for signed ocsp
+	CAOcspSigned = []string{"ca", "ocsp", "signed"}
 
 	// CAFailedSignCert is counter metric
 	CAFailedSignCert = []string{"ca", "failed", "sign", "cert"}
@@ -63,9 +65,13 @@ var (
 	AIADownloadSuccessfulCert = []string{"aia", "download", "successful", "cert"}
 	// AIADownloadSuccessfulCrl is counter metric
 	AIADownloadSuccessfulCrl = []string{"aia", "download", "successful", "crl"}
+	// AIADownloadSuccessfulOCSP is counter metric
+	AIADownloadSuccessfulOCSP = []string{"aia", "download", "successful", "ocsp"}
 
 	// AIADownloadFailedCert is counter metric
 	AIADownloadFailedCert = []string{"aia", "download", "failed", "cert"}
 	// AIADownloadFailedCrl is counter metric
 	AIADownloadFailedCrl = []string{"aia", "download", "failed", "crl"}
+	// AIADownloadFailedOCSP is counter metric
+	AIADownloadFailedOCSP = []string{"aia", "download", "failed", "ocsp"}
 )
