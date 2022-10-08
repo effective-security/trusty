@@ -5,7 +5,7 @@ go 1.19
 require (
 	cloud.google.com/go v0.99.0 // indirect
 	cloud.google.com/go/storage v1.16.0
-	github.com/aws/aws-sdk-go v1.40.8 // indirect
+	github.com/aws/aws-sdk-go v1.44.75 // indirect
 	github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba
 	github.com/gogo/googleapis v1.4.1
 	github.com/gogo/protobuf v1.3.2
@@ -47,10 +47,10 @@ require (
 
 require (
 	github.com/alecthomas/kong v0.4.0
-	github.com/effective-security/metrics v0.0.0-20220118120427-f740cb7dda2b
+	github.com/effective-security/metrics v0.0.0-20221008074337-6b800e7e672f
 	github.com/effective-security/porto v0.0.0-20220929112952-2661570d2e86
-	github.com/effective-security/xlog v0.0.0-20220928192849-43ec53f20323
-	github.com/effective-security/xpki v0.4.1-0.20221002074733-e6780f49d662
+	github.com/effective-security/xlog v0.0.0-20221008085823-05b9d4781678
+	github.com/effective-security/xpki v0.4.1-0.20221008090551-0073572e2534
 )
 
 require (
