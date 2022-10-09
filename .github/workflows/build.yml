@@ -30,8 +30,6 @@ env:
 jobs:
   TestAndDeploy:
     runs-on: ubuntu-latest
-    env:
-      EVENT_NUMBER: ${{ github.event.number }}
     steps:
       - name: Create code coverage status for the current commit
         if: github.event_name == 'pull_request'
@@ -55,7 +53,7 @@ jobs:
       - name: Fetch History
         run: |
           git fetch --prune --unshallow
-          mkdir -p /tmp/.buildx-cache
+          mkdir -p /tmp/.buildx-cache /tmp/.buildx-cache-new
 
       - name: Setup Go
         uses: actions/setup-go@v3
@@ -76,7 +74,7 @@ jobs:
         with:
           path: ${{ steps.go-cache-paths.outputs.go-build }}
           key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}-${{ env.GO_CACHE_BUSTER }}
-          restore-keys: ${{ runner.os }}-go-build-${{ inputs.cache-key-suffix }}
+          restore-keys: ${{ runner.os }}-go-build-
 
       # Cache go mod cache, used to speedup builds
       - name: Go Mod Cache
@@ -85,7 +83,7 @@ jobs:
         with:
           path: ${{ steps.go-cache-paths.outputs.go-mod }}
           key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}-${{ env.GO_CACHE_BUSTER }}
-          restore-keys: ${{ runner.os }}-go-mod-${{ inputs.cache-key-suffix }}
+          restore-keys: ${{ runner.os }}-go-mod-
 
       - name: Go Artifacts
         if: steps.go-mod-cache.outputs.cache-hit != 'true'
@@ -97,7 +95,7 @@ jobs:
       - name: Prepare
         run: make vars tools folders generate  version change_log
 
-      - name: UnitTest
+      - name: Build
         run: make build start-local-deps gen_test_certs gen_shaken_certs
 
       - name: Test
@@ -106,15 +104,12 @@ jobs:
 
       - name: CovTest
         if: github.event_name == 'pull_request'
-        run: make covtest
-
-      - name: Generate covarege Status
-        if: github.event_name == 'pull_request'
         run: |
-          set -x
-          total=`go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+'`
-          echo "${GIT_USER}: total cov: $total"
-          (( $(echo "$total > ${MIN_TESTCOV}" | bc -l) )) && STATE=success || STATE=failure
+          make covtest
+          set -x && \
+          total=`go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+'` && \
+          echo "${GIT_USER}: total cov: $total" && \
+          (( $(echo "$total > ${MIN_TESTCOV}" | bc -l) )) && STATE=success || STATE=failure && \
           curl "https://${GIT_USER}:${GIT_TOKEN}@api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${COMMIT_SHA}" -d "{\"state\": \"${STATE}\",\"target_url\": \"https://github.com/${GITHUB_REPOSITORY}/pull/${PULL_NUMBER}/checks?check_run_id=${RUN_ID}\",\"description\": \"${total}%\",\"context\": \"code cov\"}"
         env:
           GIT_TOKEN: ${{ secrets.BUILDER_PAT }}
@@ -184,9 +179,3 @@ jobs:
           labels: ${{ steps.meta_trusty.outputs.labels }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
-
-      # - name: coveralls
-      #   # if: github.event_name == 'pull_request'
-      #   env:
-      #     COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: make coveralls-github
