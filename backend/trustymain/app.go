@@ -29,6 +29,7 @@ import (
 	"github.com/effective-security/trusty/backend/tasks/healthcheck"
 	"github.com/effective-security/trusty/backend/tasks/stats"
 	"github.com/effective-security/trusty/internal/version"
+	"github.com/effective-security/trusty/pkg/metricskey"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xlog/logrotate"
 	"github.com/effective-security/xlog/stackdriver"
@@ -530,6 +531,14 @@ func (a *App) initLogs() error {
 	logger.Infof("status=service_starting, version='%v', args=%v",
 		version.Current(), os.Args)
 	xlog.GetFormatter().Options(xlog.FormatWithLocation)
+
+	xlog.OnError(func(pkg string) {
+		metrics.IncrCounter(metricskey.StatsLogErrors, 1, metrics.Tag{
+			Name:  "pkg",
+			Value: pkg,
+		})
+	})
+
 	return nil
 }
 
