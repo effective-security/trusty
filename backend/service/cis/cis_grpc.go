@@ -3,7 +3,7 @@ package cis
 import (
 	"context"
 
-	v1 "github.com/effective-security/trusty/api/v1"
+	"github.com/effective-security/porto/xhttp/pberror"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/xlog"
@@ -18,7 +18,7 @@ func (s *Service) GetRoots(ctx context.Context, _ *empty.Empty) (*pb.RootsRespon
 		logger.KV(xlog.ERROR,
 			"status", "unable to query root certificates",
 			"err", err)
-		return nil, v1.NewError(codes.Internal, "unable to query root certificates")
+		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to query root certificates")
 	}
 
 	res := &pb.RootsResponse{
@@ -42,7 +42,7 @@ func (s *Service) GetCertificate(ctx context.Context, in *pb.GetCertificateReque
 			"request", in,
 			"err", err,
 		)
-		return nil, v1.NewError(codes.Internal, "unable to find certificate")
+		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to find certificate")
 	}
 	res := &pb.CertificateResponse{
 		Certificate: crt.ToPB(),

@@ -3,7 +3,7 @@ package ca
 import (
 	"context"
 
-	v1 "github.com/effective-security/trusty/api/v1"
+	"github.com/effective-security/porto/xhttp/pberror"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/xlog"
@@ -15,7 +15,7 @@ import (
 // ProfileInfo returns the certificate profile info
 func (s *Service) ProfileInfo(ctx context.Context, req *pb.CertProfileInfoRequest) (*pb.CertProfile, error) {
 	if req == nil || req.Label == "" {
-		return nil, v1.NewError(codes.InvalidArgument, "missing label parameter")
+		return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, "missing label parameter")
 	}
 
 	var profile *authority.CertProfile
@@ -29,7 +29,7 @@ func (s *Service) ProfileInfo(ctx context.Context, req *pb.CertProfileInfoReques
 	}
 
 	if profile == nil {
-		return nil, v1.NewError(codes.NotFound, "profile not found: %s", req.Label)
+		return nil, pberror.NewFromCtx(ctx, codes.NotFound, "profile not found: %s", req.Label)
 	}
 
 	return toCertProfilePB(profile, req.Label), nil
@@ -44,11 +44,11 @@ func (s *Service) GetIssuer(ctx context.Context, req *pb.IssuerInfoRequest) (*pb
 	} else if req.Ikid != "" {
 		issuer, err = s.ca.GetIssuerByKeyID(req.Ikid)
 	} else {
-		return nil, v1.NewError(codes.InvalidArgument, "either label or ikid are required")
+		return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, "either label or ikid are required")
 	}
 
 	if err != nil {
-		return nil, v1.NewError(codes.NotFound, "issuer not found")
+		return nil, pberror.NewFromCtx(ctx, codes.NotFound, "issuer not found")
 	}
 	return issuerInfo(issuer, true), nil
 }
@@ -102,7 +102,7 @@ func (s *Service) GetCertificate(ctx context.Context, in *pb.GetCertificateReque
 			"request", in,
 			"err", err.Error(),
 		)
-		return nil, v1.NewError(codes.Internal, "unable to find certificate")
+		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to find certificate")
 	}
 	res := &pb.CertificateResponse{
 		Certificate: crt.ToPB(),
@@ -118,7 +118,7 @@ func (s *Service) UpdateCertificateLabel(ctx context.Context, req *pb.UpdateCert
 			"request", req,
 			"err", err.Error(),
 		)
-		return nil, v1.NewError(codes.Internal, "unable to update certificate")
+		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to update certificate")
 	}
 	res := &pb.CertificateResponse{
 		Certificate: crt.ToPB(),
@@ -134,7 +134,7 @@ func (s *Service) ListCertificates(ctx context.Context, in *pb.ListByIssuerReque
 			"request", in,
 			"err", err.Error(),
 		)
-		return nil, v1.NewError(codes.Internal, "unable to list certificates")
+		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to list certificates")
 	}
 	res := &pb.CertificatesResponse{
 		List: list.ToDTO(),
@@ -150,7 +150,7 @@ func (s *Service) ListRevokedCertificates(ctx context.Context, in *pb.ListByIssu
 			"request", in,
 			"err", err.Error(),
 		)
-		return nil, v1.NewError(codes.Internal, "unable to list certificates")
+		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to list certificates")
 	}
 	res := &pb.RevokedCertificatesResponse{
 		List: list.ToDTO(),
@@ -166,7 +166,7 @@ func (s *Service) ListOrgCertificates(ctx context.Context, in *pb.ListOrgCertifi
 			"request", in,
 			"err", err.Error(),
 		)
-		return nil, v1.NewError(codes.Internal, "unable to get certificates")
+		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to get certificates")
 	}
 	res := &pb.CertificatesResponse{
 		List: list.ToDTO(),
@@ -179,7 +179,7 @@ func (s *Service) RegisterProfile(ctx context.Context, req *pb.RegisterProfileRe
 	var cfg = new(authority.CertProfile)
 	err := yaml.Unmarshal(req.Config, cfg)
 	if err != nil {
-		return nil, v1.NewError(codes.InvalidArgument, "unable to decode configuration: %s", err.Error())
+		return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, "unable to decode configuration: %s", err.Error())
 	}
 
 	isWildcard := cfg.IssuerLabel == "*"
@@ -190,11 +190,11 @@ func (s *Service) RegisterProfile(ctx context.Context, req *pb.RegisterProfileRe
 	if !isWildcard {
 		issuer, err = s.ca.GetIssuerByProfile(req.Label)
 		if err == nil && issuer.Label() != cfg.IssuerLabel {
-			return nil, v1.NewError(codes.InvalidArgument, "%q profile already served by %q issuer", req.Label, issuer.Label())
+			return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, "%q profile already served by %q issuer", req.Label, issuer.Label())
 		}
 		issuer, err = s.ca.GetIssuerByLabel(cfg.IssuerLabel)
 		if err != nil {
-			return nil, v1.NewError(codes.InvalidArgument, "issuer not found: %s", cfg.IssuerLabel)
+			return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, "issuer not found: %s", cfg.IssuerLabel)
 		}
 		issuer.AddProfile(req.Label, cfg)
 	} else {
@@ -210,7 +210,7 @@ func (s *Service) RegisterProfile(ctx context.Context, req *pb.RegisterProfileRe
 		Config:      string(req.Config),
 	})
 	if err != nil {
-		return nil, v1.NewError(codes.Internal, "unable to register profile: %s", err.Error())
+		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to register profile: %s", err.Error())
 	}
 
 	return toCertProfilePB(cfg, req.Label), nil
