@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/effective-security/metrics"
-	v1 "github.com/effective-security/trusty/api/v1"
+	"github.com/effective-security/porto/xhttp/pberror"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/trusty/pkg/metricskey"
@@ -21,10 +21,10 @@ import (
 // SignCertificate returns the certificate
 func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRequest) (*pb.CertificateResponse, error) {
 	if req == nil || req.Profile == "" {
-		return nil, v1.NewError(codes.InvalidArgument, "missing profile")
+		return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, "missing profile")
 	}
 	if len(req.Request) == 0 {
-		return nil, v1.NewError(codes.InvalidArgument, "missing request")
+		return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, "missing request")
 	}
 
 	var pemReq string
@@ -37,7 +37,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 		_ = pem.Encode(b, &pem.Block{Type: "CERTIFICATE REQUEST", Bytes: req.Request})
 		pemReq = b.String()
 	default:
-		return nil, v1.NewError(codes.InvalidArgument, "unsupported request_format: %v", req.RequestFormat)
+		return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, "unsupported request_format: %v", req.RequestFormat)
 	}
 
 	var subj *csr.X509Subject
@@ -64,18 +64,18 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 	if req.IssuerLabel != "" {
 		ca, err = s.ca.GetIssuerByLabel(req.IssuerLabel)
 		if err != nil {
-			return nil, v1.NewError(codes.NotFound, "issuer not found: %s", req.IssuerLabel)
+			return nil, pberror.NewFromCtx(ctx, codes.NotFound, "issuer not found: %s", req.IssuerLabel)
 		}
 	} else {
 		ca, err = s.ca.GetIssuerByProfile(req.Profile)
 		if err != nil {
-			return nil, v1.NewError(codes.NotFound, "issuer not found for profile: %s", req.Profile)
+			return nil, pberror.NewFromCtx(ctx, codes.NotFound, "issuer not found for profile: %s", req.Profile)
 		}
 	}
 
 	if ca.Profile(req.Profile) == nil {
 		msg := fmt.Sprintf("%q issuer does not support the requested profile: %q", ca.Label(), req.Profile)
-		return nil, v1.NewError(codes.InvalidArgument, msg)
+		return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, msg)
 	}
 
 	cr := csr.SignRequest{
@@ -111,7 +111,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 			"err", err.Error())
 
 		metrics.IncrCounter(metricskey.CAFailedSignCert, 1, tags...)
-		return nil, v1.NewError(codes.Internal, "failed to sign certificate request")
+		return nil, pberror.NewFromCtx(ctx, codes.Internal, "failed to sign certificate request")
 	}
 
 	metrics.IncrCounter(metricskey.CACertIssued, 1, tags...)
@@ -127,10 +127,10 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 			"err", err.Error())
 
 		if strings.Contains(err.Error(), "certificates_skid") {
-			return nil, v1.NewError(codes.AlreadyExists, "the key was already used")
+			return nil, pberror.NewFromCtx(ctx, codes.AlreadyExists, "the key was already used")
 		}
 
-		return nil, v1.NewError(codes.Internal, "failed to register certificate")
+		return nil, pberror.NewFromCtx(ctx, codes.Internal, "failed to register certificate")
 	}
 
 	if s.publisher != nil {
@@ -140,7 +140,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 				"status", "failed to publish certificate",
 				"err", err.Error())
 			metrics.IncrCounter(metricskey.CAFailedPublishCert, 1, tags...)
-			return nil, v1.NewError(codes.Internal, "failed to publish certificate")
+			return nil, pberror.NewFromCtx(ctx, codes.Internal, "failed to publish certificate")
 		}
 	}
 

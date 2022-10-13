@@ -10,7 +10,7 @@ import (
 
 	"github.com/effective-security/metrics"
 	"github.com/effective-security/porto/x/xdb"
-	v1 "github.com/effective-security/trusty/api/v1"
+	"github.com/effective-security/porto/xhttp/pberror"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/trusty/pkg/metricskey"
@@ -32,14 +32,14 @@ func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificat
 	} else if len(in.Skid) > 0 {
 		crt, err = s.db.GetCertificateBySKID(ctx, in.Skid)
 	} else {
-		return nil, v1.NewError(codes.InvalidArgument, "invalid parameter")
+		return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, "invalid parameter")
 	}
 	if err != nil {
 		logger.ContextKV(ctx, xlog.ERROR,
 			"request", in,
 			"err", err.Error(),
 		)
-		return nil, v1.NewError(codes.Internal, "unable to find certificate")
+		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to find certificate")
 	}
 
 	revoked, err := s.db.RevokeCertificate(ctx, crt, time.Now().UTC(), int(in.Reason))
@@ -48,7 +48,7 @@ func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificat
 			"request", in,
 			"err", err.Error(),
 		)
-		return nil, v1.NewError(codes.Internal, "unable to revoke certificate")
+		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to revoke certificate")
 	}
 
 	tags := []metrics.Tag{
@@ -91,7 +91,7 @@ func (s *Service) GetCRL(ctx context.Context, in *pb.GetCrlRequest) (*pb.CrlResp
 			"ikid", in.Ikid,
 			"err", err.Error(),
 		)
-		return nil, v1.NewError(codes.Internal, "unable to publish CRL")
+		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to publish CRL")
 	}
 
 	res := &pb.CrlResponse{}
@@ -108,7 +108,7 @@ func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPRes
 	ocspRequest, err := ocsp.ParseRequest(in.Der)
 	if err != nil ||
 		ocspRequest.SerialNumber == nil {
-		return nil, v1.NewError(codes.InvalidArgument, "invalid request")
+		return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, "invalid request")
 	}
 
 	var ica *authority.Issuer
@@ -117,11 +117,11 @@ func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPRes
 	} else if len(ocspRequest.IssuerNameHash) > 0 {
 		ica, err = s.ca.GetIssuerByNameHash(ocspRequest.HashAlgorithm, ocspRequest.IssuerNameHash)
 	} else {
-		return nil, v1.NewError(codes.InvalidArgument, "issuer not specified")
+		return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, "issuer not specified")
 	}
 
 	if err != nil {
-		return nil, v1.NewError(codes.NotFound, "issuer not found")
+		return nil, pberror.NewFromCtx(ctx, codes.NotFound, "issuer not found")
 	}
 
 	serial := ocspRequest.SerialNumber.String()
@@ -137,7 +137,7 @@ func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPRes
 	if err != nil && !xdb.IsNotFoundError(err) {
 		logger.ContextKV(ctx, xlog.ERROR,
 			"ikid", ikid, "serial", serial, "err", err.Error())
-		return nil, v1.NewError(codes.Internal, "unable to get revoked certificate")
+		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to get revoked certificate")
 	}
 
 	if ri != nil {
@@ -152,7 +152,7 @@ func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPRes
 	if err != nil {
 		logger.ContextKV(ctx, xlog.ERROR,
 			"err", err.Error())
-		return nil, v1.NewError(codes.Internal, "unable to sign OCSP")
+		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to sign OCSP")
 	}
 
 	metrics.IncrCounter(metricskey.CAOcspSigned, 1,
@@ -222,7 +222,7 @@ func (s *Service) publishCrl(ctx context.Context, ikID string) (*pb.CrlsResponse
 					"ikid", issuer.SubjectKID(),
 					"err", err.Error(),
 				)
-				return res, v1.NewError(codes.Internal, "failed to generate CRLs")
+				return res, pberror.NewFromCtx(ctx, codes.Internal, "failed to generate CRLs")
 			}
 			res.Clrs = append(res.Clrs, crl)
 
@@ -232,7 +232,7 @@ func (s *Service) publishCrl(ctx context.Context, ikID string) (*pb.CrlsResponse
 					"ikid", issuer.SubjectKID(),
 					"err", err.Error(),
 				)
-				return res, v1.NewError(codes.Internal, "failed to publish CRLs")
+				return res, pberror.NewFromCtx(ctx, codes.Internal, "failed to publish CRLs")
 			}
 		}
 	}

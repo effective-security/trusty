@@ -8,7 +8,7 @@ import (
 	"time"
 
 	tcredentials "github.com/effective-security/porto/gserver/credentials"
-	v1 "github.com/effective-security/trusty/api/v1"
+	"github.com/effective-security/porto/xhttp/pberror"
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
@@ -233,8 +233,8 @@ func toErr(ctx context.Context, err error) error {
 	if err == nil {
 		return nil
 	}
-	err = v1.Error(err)
-	if _, ok := err.(v1.TrustyError); ok {
+	err = pberror.Error(err)
+	if _, ok := err.(pberror.GRPCError); ok {
 		return err
 	}
 	if ev, ok := status.FromError(err); ok {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	v1 "github.com/effective-security/trusty/api/v1"
+	"github.com/effective-security/porto/xhttp/pberror"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/client"
 	"github.com/effective-security/trusty/client/embed/proxy"
@@ -57,7 +57,7 @@ func TestStatusWithNewClientMock(t *testing.T) {
 	assert.NotNil(t, client.ActiveConnection())
 
 	cli := client.StatusClient()
-	expErr := v1.ErrGRPCPermissionDenied
+	expErr := pberror.ErrGRPCPermissionDenied
 
 	t.Run("Version", func(t *testing.T) {
 		vexp := &pb.ServerVersion{Build: "1234", Runtime: "go1.15"}

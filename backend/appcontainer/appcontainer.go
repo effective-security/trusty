@@ -10,7 +10,7 @@ import (
 	"github.com/effective-security/porto/pkg/discovery"
 	"github.com/effective-security/porto/pkg/flake"
 	"github.com/effective-security/porto/pkg/tasks"
-	v1 "github.com/effective-security/trusty/api/v1"
+	"github.com/effective-security/porto/xhttp/pberror"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/backend/db/cadb"
 	"github.com/effective-security/trusty/client"
@@ -368,7 +368,7 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto, db c
 
 			err = ca.AddIssuer(issuer)
 			if err != nil {
-				return nil, v1.NewError(codes.Internal, "unable to add issuer: %s", err.Error())
+				return nil, pberror.New(codes.Internal, "unable to add issuer: %s", err.Error())
 			}
 		}
 	}
