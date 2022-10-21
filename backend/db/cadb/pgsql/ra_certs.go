@@ -18,7 +18,7 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 	id := p.NextID()
 	err := xdb.Validate(crt)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	logger.Tracef("id=%d, subject=%q, skid=%s, ctx=%q",
@@ -48,7 +48,7 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 	)
 	m, err := scanFullCertificate(row)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 	return m, nil
 }
@@ -145,7 +145,7 @@ func (p *Provider) UpdateCertificateLabel(ctx context.Context, id uint64, label 
 			RETURNING id,org_id,skid,ikid,serial_number,not_before,no_tafter,subject,issuer,sha256,pem,issuers_pem,profile,label,locations,metadata
 			;`, id, label))
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 	return m, nil
 }
@@ -168,7 +168,7 @@ func (p *Provider) GetCertificate(ctx context.Context, id uint64) (*model.Certif
 		;
 		`, id))
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 	return m, nil
 }
@@ -191,7 +191,7 @@ func (p *Provider) GetCertificateBySKID(ctx context.Context, skid string) (*mode
 			;
 			`, skid))
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 	return m, nil
 }
@@ -214,7 +214,7 @@ func (p *Provider) GetCertificateByIKIDAndSerial(ctx context.Context, ikid, seri
 			;
 			`, ikid, serial))
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 	return m, nil
 }
@@ -248,7 +248,7 @@ func (p *Provider) ListOrgCertificates(ctx context.Context, orgID uint64, limit 
 	for res.Next() {
 		m, err := scanShortCertificate(res)
 		if err != nil {
-			return nil, errors.WithStack(err)
+			return nil, err
 		}
 		list = append(list, m)
 	}
@@ -292,7 +292,7 @@ func (p *Provider) ListCertificates(ctx context.Context, ikid string, limit int,
 	for res.Next() {
 		m, err := scanShortCertificate(res)
 		if err != nil {
-			return nil, errors.WithStack(err)
+			return nil, err
 		}
 		list = append(list, m)
 	}

@@ -60,8 +60,8 @@ type ReadWriteConnection interface {
 	// Delete the file pointed to by path.
 	Delete(ctx context.Context, path string) error
 
-	// SetContentType updates object with content type, if supported
-	SetContentType(ctx context.Context, path, contentType string) error
+	// SetMetadata updates object with metadata, if supported
+	SetMetadata(ctx context.Context, path string, meta map[string]string) error
 
 	// Wait for something to complete after close
 	Wait() error
@@ -229,17 +229,16 @@ func WriteFile(ctx context.Context, path string, data []byte, options ...*Option
 	return n, err
 }
 
-// SetContentType updates object with content type, if supported
-func SetContentType(ctx context.Context, path, contentType string, options ...*Options) error {
+// SetMetadata updates object with metadata, if supported
+func SetMetadata(ctx context.Context, path string, meta map[string]string, options ...*Options) error {
 	conn, err := ConnectionFromPath(path, options...)
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	err = conn.SetContentType(ctx, path, contentType)
+	err = conn.SetMetadata(ctx, path, meta)
 	closeError := conn.Close()
 	if err != nil {
 		return errors.WithStack(err)
 	}
 	return closeError
-
 }
