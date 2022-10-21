@@ -148,6 +148,9 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 		"status", "signed certificate",
 		"id", mcert.ID,
 		"subject", mcert.Subject,
+		"label", mcert.Label,
+		"locations", mcert.Locations,
+		"meta", mcert.Metadata,
 	)
 	res := &pb.CertificateResponse{
 		Certificate: mcert.ToPB(),
