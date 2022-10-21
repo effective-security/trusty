@@ -50,7 +50,7 @@ func (p *publisher) PublishCertificate(ctx context.Context, cert *pb.Certificate
 
 	err = storage.SetMetadata(ctx, location, map[string]string{
 		"Content-Type":  "application/pem-certificate-chain",
-		"Cache-Control": "public, max-age=3600",
+		"Cache-Control": "public, max-age=31536000",
 	})
 	if err != nil {
 		logger.ContextKV(ctx, xlog.WARNING, "reason", "SetMetadata", "err", err.Error())
@@ -76,7 +76,7 @@ func (p *publisher) PublishCRL(ctx context.Context, crl *pb.Crl) (string, error)
 
 	err = storage.SetMetadata(ctx, fileName, map[string]string{
 		"Content-Type":  "application/pkix-crl",
-		"Cache-Control": "public, max-age=3600",
+		"Cache-Control": "public, max-age=900", // 15 mins
 	})
 	if err != nil {
 		logger.ContextKV(ctx, xlog.WARNING, "reason", "SetMetadata", "err", err.Error())
