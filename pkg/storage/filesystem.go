@@ -90,8 +90,8 @@ func (conn *FilesystemConnection) GetWriter(ctx context.Context, path string) (r
 	return fp, nil
 }
 
-// SetContentType updates object with content type, if supported
-func (conn *FilesystemConnection) SetContentType(ctx context.Context, path, contentType string) error {
+// SetMetadata updates object with metadata, if supported
+func (conn *FilesystemConnection) SetMetadata(ctx context.Context, path string, meta map[string]string) error {
 	return errors.New("operation not suppurted")
 }
 

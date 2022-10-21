@@ -129,15 +129,35 @@ func (conn *GoogleCloudStorageConnection) GetWriter(ctx context.Context, path st
 	return obj.NewWriter(ctx), nil
 }
 
-// SetContentType updates object with content type, if supported
-func (conn *GoogleCloudStorageConnection) SetContentType(ctx context.Context, path, contentType string) error {
+// SetMetadata updates object with metadata, if supported
+func (conn *GoogleCloudStorageConnection) SetMetadata(ctx context.Context, path string, meta map[string]string) error {
 	obj, err := conn.getRemoteObject(ctx, path)
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	attrs, err := obj.Update(ctx, storage.ObjectAttrsToUpdate{
-		ContentType: contentType,
-	})
+
+	u := storage.ObjectAttrsToUpdate{}
+	for k, v := range meta {
+		switch strings.ToLower(k) {
+		case "contenttype", "content-type":
+			u.ContentType = v
+		case "contentencoding", "content-encoding":
+			u.ContentEncoding = v
+		case "cachecontrol", "cache-control":
+			u.CacheControl = v
+		case "contentlanguage", "content-language":
+			u.ContentLanguage = v
+		case "contentdisposition", "content-disposition":
+			u.ContentDisposition = v
+		default:
+			if u.Metadata == nil {
+				u.Metadata = map[string]string{k: v}
+			} else {
+				u.Metadata[k] = v
+			}
+		}
+	}
+	attrs, err := obj.Update(ctx, u)
 	if err != nil {
 		return errors.WithStack(err)
 	}

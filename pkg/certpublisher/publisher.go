@@ -48,9 +48,12 @@ func (p *publisher) PublishCertificate(ctx context.Context, cert *pb.Certificate
 		return "", errors.WithMessagef(err, "unable to write file to: "+location)
 	}
 
-	err = storage.SetContentType(ctx, location, "application/pem-certificate-chain")
+	err = storage.SetMetadata(ctx, location, map[string]string{
+		"Content-Type":  "application/pem-certificate-chain",
+		"Cache-Control": "public, max-age=3600",
+	})
 	if err != nil {
-		logger.ContextKV(ctx, xlog.WARNING, "reason", "SetContentType", "err", err.Error())
+		logger.ContextKV(ctx, xlog.WARNING, "reason", "SetMetadata", "err", err.Error())
 	}
 	return location, nil
 }
@@ -69,6 +72,14 @@ func (p *publisher) PublishCRL(ctx context.Context, crl *pb.Crl) (string, error)
 	_, err := storage.WriteFile(ctx, fileName, block.Bytes)
 	if err != nil {
 		return "", errors.WithMessagef(err, "unable to write file to: "+fileName)
+	}
+
+	err = storage.SetMetadata(ctx, fileName, map[string]string{
+		"Content-Type":  "application/pkix-crl",
+		"Cache-Control": "public, max-age=3600",
+	})
+	if err != nil {
+		logger.ContextKV(ctx, xlog.WARNING, "reason", "SetMetadata", "err", err.Error())
 	}
 	return fileName, nil
 }
