@@ -43,15 +43,15 @@ type Task struct {
 }
 
 func (t *Task) run() {
+	ctx := correlation.WithID(context.Background())
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Errorf("task=%s, reason=recover, err=[%+v]", TaskName, r)
+			logger.ContextKV(ctx, xlog.ERROR,
+				"task", TaskName,
+				"reason", "recover",
+				"err", r)
 		}
 	}()
-
-	logger.Infof("task=%s", TaskName)
-
-	ctx := correlation.WithID(context.Background())
 
 	var err error
 	started := time.Now()
@@ -67,7 +67,7 @@ func (t *Task) run() {
 	}
 
 	if t.crypto != nil {
-		err = t.healthHsm()
+		err = t.healthHsm(ctx)
 		if err != nil {
 			logger.ContextKV(ctx, xlog.ERROR,
 				"task", TaskName,
@@ -93,7 +93,7 @@ func (t *Task) run() {
 	}
 }
 
-func (t *Task) healthHsm() error {
+func (t *Task) healthHsm(ctx context.Context) error {
 	if keyProv, ok := t.crypto.Default().(cryptoprov.KeyManager); ok {
 		ki, err := keyProv.EnumKeys(keyProv.CurrentSlotID(), "")
 		if err != nil {
@@ -103,7 +103,7 @@ func (t *Task) healthHsm() error {
 		count := len(ki)
 		metrics.IncrCounter(metricskey.HealthKmsKeysStatusSuccessfulCount, 1)
 		metrics.SetGauge(metricskey.StatsKmsKeysTotal, float32(count))
-		logger.Infof("keys=%d", count)
+		logger.ContextKV(ctx, xlog.DEBUG, "keys", count)
 	}
 	return nil
 }
@@ -129,7 +129,7 @@ func (t *Task) healthCheckIssuers(ctx context.Context) error {
 		return errors.WithStack(err)
 	}
 	metrics.IncrCounter(metricskey.HealthCAStatusSuccessfulCount, 1)
-	logger.Infof("issuers=%d", len(li.Issuers))
+	logger.ContextKV(ctx, xlog.DEBUG, "issuers", len(li.Issuers))
 	return nil
 }
 
