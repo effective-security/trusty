@@ -1,4 +1,4 @@
-FROM ekspand/trusty-docker-base:latest
+FROM effectivesecurity/trusty-docker-base:main
 LABEL org.opencontainers.image.authors="Effective Security <denis@effectivesecurity.pt>" \
       org.opencontainers.image.url="https://github.com/effective-security/trusty" \
       org.opencontainers.image.source="https://github.com/effective-security/trusty" \
