@@ -35,7 +35,7 @@ func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificat
 		return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, "invalid parameter")
 	}
 	if err != nil {
-		logger.ContextKV(ctx, xlog.ERROR,
+		logger.ContextKV(ctx, xlog.WARNING,
 			"request", in,
 			"err", err.Error(),
 		)

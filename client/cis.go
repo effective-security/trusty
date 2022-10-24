@@ -24,7 +24,7 @@ type cisClient struct {
 // NewCIClient returns instance of CIService client
 func NewCIClient(conn *grpc.ClientConn, callOpts []grpc.CallOption) CIClient {
 	return &cisClient{
-		remote:   RetryCIClient(conn),
+		remote:   pb.NewCIServiceClient(conn),
 		callOpts: callOpts,
 	}
 }
@@ -48,23 +48,4 @@ func (c *cisClient) GetCertificate(ctx context.Context, in *pb.GetCertificateReq
 
 type retryCIClient struct {
 	cis pb.CIServiceClient
-}
-
-// TODO: implement retry for gRPC client interceptor
-
-// RetryCIClient implements a CIServiceClient.
-func RetryCIClient(conn *grpc.ClientConn) pb.CIServiceClient {
-	return &retryCIClient{
-		cis: pb.NewCIServiceClient(conn),
-	}
-}
-
-// Roots returns the root CAs
-func (c *retryCIClient) GetRoots(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*pb.RootsResponse, error) {
-	return c.cis.GetRoots(ctx, in, opts...)
-}
-
-// GetCertificate returns the certificate
-func (c *retryCIClient) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest, opts ...grpc.CallOption) (*pb.CertificateResponse, error) {
-	return c.cis.GetCertificate(ctx, in, opts...)
 }
