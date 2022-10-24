@@ -210,7 +210,7 @@ func TestSignCertificate(t *testing.T) {
 		RequestFormat: pb.EncodingFormat_PEM,
 	})
 	require.Error(t, err)
-	assert.Equal(t, "failed to sign certificate request", err.Error())
+	assert.Equal(t, "failed to sign certificate", err.Error())
 
 	res, err := authorityClient.SignCertificate(context.Background(), &pb.SignCertificateRequest{
 		Profile:       "test_server",

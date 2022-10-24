@@ -15,6 +15,7 @@ import (
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/authority"
 	"github.com/effective-security/xpki/csr"
+	"github.com/effective-security/xpki/x/slices"
 	"google.golang.org/grpc/codes"
 )
 
@@ -106,12 +107,17 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 
 	cert, pem, err := ca.Sign(cr)
 	if err != nil {
-		logger.ContextKV(ctx, xlog.ERROR,
+		logger.ContextKV(ctx, xlog.WARNING,
 			"status", "failed to sign certificate",
 			"err", err.Error())
 
 		metrics.IncrCounter(metricskey.CAFailedSignCert, 1, tags...)
-		return nil, pberror.NewFromCtx(ctx, codes.Internal, "failed to sign certificate request")
+
+		str := err.Error()
+		if slices.ContainsString([]string{"invalid", "not allowed", "missing", "parse"}, str) {
+			return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, "failed to sign certificate: %s", str)
+		}
+		return nil, pberror.NewFromCtx(ctx, codes.Internal, "failed to sign certificate")
 	}
 
 	metrics.IncrCounter(metricskey.CACertIssued, 1, tags...)

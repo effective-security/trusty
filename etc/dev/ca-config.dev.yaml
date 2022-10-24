@@ -230,7 +230,6 @@ profiles:
     backdate: 30m
     usages:
       - cert sign
-      - crl sign
     ca_constraint:
       is_ca: true
       max_path_len: 0

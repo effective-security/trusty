@@ -12,6 +12,7 @@ import (
 	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/codes"
 )
 
 func TestStatusWithNewCtxClient(t *testing.T) {
@@ -69,7 +70,8 @@ func TestStatusWithNewClientMock(t *testing.T) {
 		srv.Err = expErr
 		_, err = cli.Version(ctx)
 		require.Error(t, err)
-		assert.Equal(t, expErr.Error(), err.Error())
+		assert.Equal(t, "permission denied", err.Error())
+		assert.Equal(t, codes.PermissionDenied, err.(pberror.GRPCError).Code())
 	})
 
 	t.Run("ServerStatus", func(t *testing.T) {
@@ -86,7 +88,8 @@ func TestStatusWithNewClientMock(t *testing.T) {
 		srv.Err = expErr
 		_, err = cli.Server(ctx)
 		require.Error(t, err)
-		assert.Equal(t, expErr.Error(), err.Error())
+		assert.Equal(t, "permission denied", err.Error())
+		assert.Equal(t, codes.PermissionDenied, err.(pberror.GRPCError).Code())
 	})
 
 	t.Run("CallerStatus", func(t *testing.T) {
@@ -101,6 +104,7 @@ func TestStatusWithNewClientMock(t *testing.T) {
 		srv.Err = expErr
 		_, err = cli.Caller(ctx)
 		require.Error(t, err)
-		assert.Equal(t, expErr.Error(), err.Error())
+		assert.Equal(t, "permission denied", err.Error())
+		assert.Equal(t, codes.PermissionDenied, err.(pberror.GRPCError).Code())
 	})
 }
