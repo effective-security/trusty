@@ -133,12 +133,10 @@ func TestPublishCrlsAndOCSP(t *testing.T) {
 
 func TestNotFound(t *testing.T) {
 	_, err := authorityClient.RevokeCertificate(context.Background(), &pb.RevokeCertificateRequest{Id: 123})
-	require.Error(t, err)
-	assert.Equal(t, "unable to find certificate", err.Error())
+	assert.EqualError(t, err, "unexpected: unable to find certificate")
 
 	_, err = authorityClient.RevokeCertificate(context.Background(), &pb.RevokeCertificateRequest{Skid: "123123"})
-	require.Error(t, err)
-	assert.Equal(t, "unable to find certificate", err.Error())
+	assert.EqualError(t, err, "unexpected: unable to find certificate")
 
 	crlRes, err := authorityClient.GetCRL(context.Background(), &pb.GetCrlRequest{Ikid: "123123"})
 	require.NoError(t, err)

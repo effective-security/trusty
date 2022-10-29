@@ -11,12 +11,10 @@ import (
 	"github.com/effective-security/porto/xhttp/header"
 	"github.com/effective-security/porto/xhttp/httperror"
 	"github.com/effective-security/porto/xhttp/marshal"
-	"github.com/effective-security/porto/xhttp/pberror"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/pkg/metricskey"
 	"github.com/effective-security/xlog"
 	"golang.org/x/crypto/ocsp"
-	"google.golang.org/grpc/codes"
 )
 
 var (
@@ -111,15 +109,13 @@ func (s *Service) ocspResponse(w http.ResponseWriter, r *http.Request, requestBo
 		logger.ContextKV(r.Context(), xlog.WARNING, "err", err.Error())
 		metrics.IncrCounter(metricskey.AIADownloadFailedOCSP, 1)
 
-		if trustyErr, ok := err.(pberror.GRPCError); ok {
-			switch trustyErr.Code() {
-			case codes.InvalidArgument:
-				w.Write(malformedRequestErrorResponse)
-				return
-			case codes.NotFound:
-				w.Write(unauthorizedErrorResponse)
-				return
-			}
+		switch httperror.Status(err) {
+		case http.StatusBadRequest:
+			w.Write(malformedRequestErrorResponse)
+			return
+		case http.StatusNotFound:
+			w.Write(unauthorizedErrorResponse)
+			return
 		}
 
 		w.Write(internalErrorErrorResponse)

@@ -141,7 +141,7 @@ func TestListIssuers(t *testing.T) {
 		Label: "xxx",
 	})
 	require.Error(t, err)
-	assert.Equal(t, "issuer not found", err.Error())
+	assert.Equal(t, "not_found: issuer not found", err.Error())
 }
 
 func TestProfileInfo(t *testing.T) {
@@ -149,10 +149,10 @@ func TestProfileInfo(t *testing.T) {
 		req *pb.CertProfileInfoRequest
 		err string
 	}{
-		{nil, "missing label parameter"},
-		{&pb.CertProfileInfoRequest{}, "missing label parameter"},
+		{nil, "bad_request: missing label parameter"},
+		{&pb.CertProfileInfoRequest{}, "bad_request: missing label parameter"},
 		{&pb.CertProfileInfoRequest{Label: "test_server"}, ""},
-		{&pb.CertProfileInfoRequest{Label: "xxx"}, "profile not found: xxx"},
+		{&pb.CertProfileInfoRequest{Label: "xxx"}, "not_found: profile not found: xxx"},
 	}
 
 	for _, tc := range tcases {
@@ -171,13 +171,13 @@ func TestProfileInfo(t *testing.T) {
 func TestSignCertificate(t *testing.T) {
 	_, err := authorityClient.SignCertificate(context.Background(), nil)
 	require.Error(t, err)
-	assert.Equal(t, "missing profile", err.Error())
+	assert.Equal(t, "bad_request: missing profile", err.Error())
 
 	_, err = authorityClient.SignCertificate(context.Background(), &pb.SignCertificateRequest{
 		Profile: "test",
 	})
 	require.Error(t, err)
-	assert.Equal(t, "missing request", err.Error())
+	assert.Equal(t, "bad_request: missing request", err.Error())
 
 	_, err = authorityClient.SignCertificate(context.Background(), &pb.SignCertificateRequest{
 		Profile:       "test",
@@ -185,7 +185,7 @@ func TestSignCertificate(t *testing.T) {
 		RequestFormat: pb.EncodingFormat_PKCS7,
 	})
 	require.Error(t, err)
-	assert.Equal(t, "unsupported request_format: PKCS7", err.Error())
+	assert.Equal(t, "bad_request: unsupported request_format: PKCS7", err.Error())
 
 	_, err = authorityClient.SignCertificate(context.Background(), &pb.SignCertificateRequest{
 		Profile:       "test",
@@ -193,7 +193,7 @@ func TestSignCertificate(t *testing.T) {
 		RequestFormat: pb.EncodingFormat_PEM,
 	})
 	require.Error(t, err)
-	assert.Equal(t, "issuer not found for profile: test", err.Error())
+	assert.Equal(t, "not_found: issuer not found for profile: test", err.Error())
 
 	_, err = authorityClient.SignCertificate(context.Background(), &pb.SignCertificateRequest{
 		Profile:       "test_server",
@@ -202,7 +202,7 @@ func TestSignCertificate(t *testing.T) {
 		RequestFormat: pb.EncodingFormat_PEM,
 	})
 	require.Error(t, err)
-	assert.Equal(t, "issuer not found: xxx", err.Error())
+	assert.Equal(t, "not_found: issuer not found: xxx", err.Error())
 
 	_, err = authorityClient.SignCertificate(context.Background(), &pb.SignCertificateRequest{
 		Profile:       "test_server",
@@ -210,7 +210,7 @@ func TestSignCertificate(t *testing.T) {
 		RequestFormat: pb.EncodingFormat_PEM,
 	})
 	require.Error(t, err)
-	assert.Equal(t, "failed to sign certificate", err.Error())
+	assert.Equal(t, "unexpected: failed to sign certificate", err.Error())
 
 	res, err := authorityClient.SignCertificate(context.Background(), &pb.SignCertificateRequest{
 		Profile:       "test_server",
@@ -375,7 +375,7 @@ func TestGetCert(t *testing.T) {
 			Label: "label",
 		})
 	require.Error(t, err)
-	assert.Equal(t, "unable to update certificate", err.Error())
+	assert.Equal(t, "rpc error: code = Internal desc = unable to update certificate", err.Error())
 }
 
 func generateServerCSR() []byte {

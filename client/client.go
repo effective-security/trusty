@@ -15,7 +15,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
-	"google.golang.org/grpc/status"
 )
 
 var logger = xlog.NewPackageLogger("github.com/effective-security/trusty", "client")
@@ -233,19 +232,13 @@ func toErr(ctx context.Context, err error) error {
 	if err == nil {
 		return nil
 	}
-	err = pberror.Error(err)
-	if _, ok := err.(pberror.GRPCError); ok {
-		return err
-	}
-	if ev, ok := status.FromError(err); ok {
-		code := ev.Code()
-		switch code {
-		case codes.DeadlineExceeded:
-			fallthrough
-		case codes.Canceled:
-			if ctx.Err() != nil {
-				err = ctx.Err()
-			}
+	code := pberror.Code(err)
+	switch code {
+	case codes.DeadlineExceeded:
+		fallthrough
+	case codes.Canceled:
+		if ctx.Err() != nil {
+			err = ctx.Err()
 		}
 	}
 	return err

@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 
-	"github.com/effective-security/porto/xhttp/pberror"
+	"github.com/effective-security/porto/xhttp/httperror"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
@@ -45,7 +45,7 @@ var emptyReq = &empty.Empty{}
 func (c *statusClient) Version(ctx context.Context) (*pb.ServerVersion, error) {
 	res, err := c.remote.Version(ctx, emptyReq, c.callOpts...)
 	if err != nil {
-		return nil, pberror.Error(err)
+		return nil, httperror.NewFromPb(err)
 	}
 	return res, nil
 }
@@ -54,7 +54,7 @@ func (c *statusClient) Version(ctx context.Context) (*pb.ServerVersion, error) {
 func (c *statusClient) Server(ctx context.Context) (*pb.ServerStatusResponse, error) {
 	res, err := c.remote.Server(ctx, emptyReq, c.callOpts...)
 	if err != nil {
-		return nil, pberror.Error(err)
+		return nil, httperror.NewFromPb(err)
 	}
 	return res, nil
 }
@@ -63,7 +63,7 @@ func (c *statusClient) Server(ctx context.Context) (*pb.ServerStatusResponse, er
 func (c *statusClient) Caller(ctx context.Context) (*pb.CallerStatusResponse, error) {
 	res, err := c.remote.Caller(ctx, emptyReq, c.callOpts...)
 	if err != nil {
-		return nil, pberror.Error(err)
+		return nil, httperror.NewFromPb(err)
 	}
 	return res, nil
 }
