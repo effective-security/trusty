@@ -112,15 +112,15 @@ gen_shaken_certs:
 
 start-local-deps:
 	echo "*** starting local-kms"
-	docker-compose -f docker-compose.trusty.yml -p trusty up -d --force-recreate --remove-orphans
+	docker compose -f docker-compose.trusty.yml -p trusty up -d --force-recreate --remove-orphans
 	sleep 3
-	docker exec -e 'PGPASSWORD=postgres' trusty_sql_1 psql -h localhost -p 15432 -U postgres -a -f /trusty_sql/cadb/create.sql
-	docker exec -e 'PGPASSWORD=postgres' trusty_sql_1 psql -h localhost -p 15432 -U postgres -lqt
+	docker exec -e 'PGPASSWORD=postgres' trusty-sql-1 psql -h localhost -p 15432 -U postgres -a -f /trusty_sql/cadb/create.sql
+	docker exec -e 'PGPASSWORD=postgres' trusty-sql-1 psql -h localhost -p 15432 -U postgres -lqt
 	echo "host=localhost port=15432 user=postgres password=postgres sslmode=disable dbname=cadb" > etc/dev/sql-conn-cadb.txt
 
 drop-sql:
-	docker exec -e 'PGPASSWORD=postgres' trusty_sql_1 psql -h localhost -p 15432 -U postgres -a -f /trusty_sql/cadb/drop.sql
-	docker exec -e 'PGPASSWORD=postgres' trusty_sql_1 psql -h localhost -p 15432 -U postgres -lqt
+	docker exec -e 'PGPASSWORD=postgres' trusty-sql-1 psql -h localhost -p 15432 -U postgres -a -f /trusty_sql/cadb/drop.sql
+	docker exec -e 'PGPASSWORD=postgres' trusty-sql-1 psql -h localhost -p 15432 -U postgres -lqt
 
 coveralls-github:
 	echo "Running coveralls"
