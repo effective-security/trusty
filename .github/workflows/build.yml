@@ -53,7 +53,6 @@ jobs:
       - name: Fetch History
         run: |
           git fetch --prune --unshallow
-          mkdir -p /tmp/.buildx-cache /tmp/.buildx-cache-new
 
       - name: Setup Go
         uses: actions/setup-go@v3
@@ -64,8 +63,8 @@ jobs:
         id: go-cache-paths
         shell: bash
         run: |
-          echo "::set-output name=go-build::$(go env GOCACHE)"
-          echo "::set-output name=go-mod::$(go env GOMODCACHE)"
+          echo "go-build=$(go env GOCACHE)" >> $GITHUB_OUTPUT
+          echo "go-mod=$(go env GOMODCACHE)" >> $GITHUB_OUTPUT
 
       # Cache go build cache, used to speedup go test
       - name: Go Build Cache
@@ -73,8 +72,8 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ steps.go-cache-paths.outputs.go-build }}
-          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}-${{ env.GO_CACHE_BUSTER }}
-          restore-keys: ${{ runner.os }}-go-build-
+          key: ${{ runner.os }}-go-build-${{ env.GO_CACHE_BUSTER }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-build-${{ env.GO_CACHE_BUSTER }}-
 
       # Cache go mod cache, used to speedup builds
       - name: Go Mod Cache
@@ -82,8 +81,8 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ steps.go-cache-paths.outputs.go-mod }}
-          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}-${{ env.GO_CACHE_BUSTER }}
-          restore-keys: ${{ runner.os }}-go-mod-
+          key: ${{ runner.os }}-go-mod-${{ env.GO_CACHE_BUSTER }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-mod-${{ env.GO_CACHE_BUSTER }}-
 
       - name: Go Artifacts
         if: steps.go-mod-cache.outputs.cache-hit != 'true'
