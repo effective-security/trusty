@@ -18,7 +18,7 @@ func (p *Provider) RegisterIssuer(ctx context.Context, m *model.Issuer) (*model.
 		return nil, err
 	}
 
-	logger.Tracef("id=%d, status=%d, label=%q, ctx=%q", id, m.Status, m.Label, correlation.ID(ctx))
+	logger.KV(xlog.TRACE, "id", id, "status", m.Status, "label", m.Label, "ctx", correlation.ID(ctx))
 
 	res := new(model.Issuer)
 	err = p.sql.QueryRowContext(ctx, `
@@ -46,7 +46,7 @@ func (p *Provider) RegisterIssuer(ctx context.Context, m *model.Issuer) (*model.
 
 // UpdateIssuerStatus update the Issuer status
 func (p *Provider) UpdateIssuerStatus(ctx context.Context, id uint64, status int) (*model.Issuer, error) {
-	logger.Noticef("id=%d, status=%d, ctx=%q", id, status, correlation.ID(ctx))
+	logger.KV(xlog.NOTICE, "id", id, "status", status, "ctx", correlation.ID(ctx))
 
 	res := new(model.Issuer)
 
@@ -73,7 +73,7 @@ func (p *Provider) UpdateIssuerStatus(ctx context.Context, id uint64, status int
 
 // DeleteIssuer deletes the Issuer
 func (p *Provider) DeleteIssuer(ctx context.Context, label string) error {
-	logger.Noticef("label=%s, ctx=%q", label, correlation.ID(ctx))
+	logger.KV(xlog.NOTICE, "label", label, "ctx", correlation.ID(ctx))
 	_, err := p.sql.ExecContext(ctx, `DELETE FROM issuers WHERE label=$1;`, label)
 	if err != nil {
 		logger.Errorf("err=[%+v]", err)

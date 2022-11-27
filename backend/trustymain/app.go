@@ -186,7 +186,7 @@ func (a *App) Container() (*dig.Container, error) {
 	if a.container == nil {
 		a.container, err = a.containerFactory()
 		if err != nil {
-			return nil, errors.WithStack(err)
+			return nil, err
 		}
 	}
 	return a.container, nil
@@ -198,7 +198,7 @@ func (a *App) Configuration() (*config.Configuration, error) {
 	if a.cfg == nil {
 		err = a.loadConfig()
 		if err != nil {
-			return nil, errors.WithStack(err)
+			return nil, err
 		}
 	}
 	return a.cfg, nil
@@ -222,12 +222,12 @@ func (a *App) Run(startedCh chan<- bool) error {
 
 	_, err = a.Configuration()
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	err = a.initLogs()
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	ver := version.Current().String()
@@ -236,30 +236,30 @@ func (a *App) Run(startedCh chan<- bool) error {
 	if a.flags.cpu != nil {
 		err = a.initCPUProfiler(*a.flags.cpu)
 		if err != nil {
-			return errors.WithStack(err)
+			return err
 		}
 	}
 
 	if !a.cfg.Metrics.GetDisabled() {
 		err = a.setupMetrics()
 		if err != nil {
-			return errors.WithStack(err)
+			return err
 		}
 	}
 
 	_, err = a.Container()
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	err = a.genCert()
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	isDryRun := a.flags.dryRun != nil && *a.flags.dryRun
 	if isDryRun {
-		logger.Info("status=exit_on_dry_run")
+		logger.KV(xlog.INFO, "status", "exit_on_dry_run")
 		return nil
 	}
 
@@ -281,7 +281,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 	err = a.scheduleTasks()
 	if err != nil {
 		a.stopServers()
-		return errors.WithStack(err)
+		return err
 	}
 	a.scheduler.Start()
 
@@ -299,7 +299,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 	})
 	if err != nil {
 		a.stopServers()
-		return errors.WithStack(err)
+		return err
 	}
 
 	if caSrvCfg := a.cfg.HTTPServers[config.CAServerName]; caSrvCfg != nil &&
@@ -335,9 +335,9 @@ func (a *App) Run(startedCh chan<- bool) error {
 	if sig == syscall.SIGUSR2 {
 		select {
 		case <-time.After(time.Second * 15):
-			logger.Info("status=SIGUSR2, waiting=SIGTERM")
+			logger.KV(xlog.INFO, "status", "SIGUSR2", "waiting", "SIGTERM")
 		case sig = <-a.sigs:
-			logger.Infof("status=exiting, reason=received_signal, sig=%v", sig)
+			logger.KV(xlog.INFO, "status", "exiting", "reason", "received_signal", "sig", sig)
 		}
 	}
 

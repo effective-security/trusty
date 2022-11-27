@@ -60,7 +60,7 @@ func New(servers []string, readTimeout time.Duration, maxTries int) *Client {
 // WithRestrictedAddresses will allow loopback addresses for TESTING purposes.
 // This method should *ONLY* be called from tests (unit or integration).
 func (c *Client) WithRestrictedAddresses() *Client {
-	logger.Notice("WARNING=use_for_test_only")
+	logger.KV(xlog.NOTICE, "WARNING", "use_for_test_only")
 	c.allowRestrictedAddresses = true
 	return c
 }
