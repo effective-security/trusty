@@ -37,7 +37,7 @@ type ListIssuersCmd struct {
 func (a *ListIssuersCmd) Run(cli *Cli) error {
 	client, err := cli.Client(config.CAServerName)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	defer client.Close()
 
@@ -47,7 +47,7 @@ func (a *ListIssuersCmd) Run(cli *Cli) error {
 		Bundle: a.Bundle,
 	})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if cli.IsJSON() {
@@ -69,7 +69,7 @@ type ListCertsCmd struct {
 func (a *ListCertsCmd) Run(cli *Cli) error {
 	client, err := cli.Client(config.CAServerName)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	defer client.Close()
 
@@ -87,7 +87,7 @@ func (a *ListCertsCmd) Run(cli *Cli) error {
 		After: after,
 	})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if cli.IsJSON() {
@@ -110,7 +110,7 @@ type ListRevokedCertsCmd struct {
 func (a *ListRevokedCertsCmd) Run(cli *Cli) error {
 	client, err := cli.Client(config.CAServerName)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	defer client.Close()
 
@@ -128,7 +128,7 @@ func (a *ListRevokedCertsCmd) Run(cli *Cli) error {
 		After: after,
 	})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if cli.IsJSON() {
@@ -149,7 +149,7 @@ type GetProfileCmd struct {
 func (a *GetProfileCmd) Run(cli *Cli) error {
 	client, err := cli.Client(config.CAServerName)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	defer client.Close()
 
@@ -157,7 +157,7 @@ func (a *GetProfileCmd) Run(cli *Cli) error {
 		Label: a.Label,
 	})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	cli.WriteJSON(res)
@@ -181,7 +181,7 @@ type SignCmd struct {
 func (a *SignCmd) Run(cli *Cli) error {
 	client, err := cli.Client(config.CAServerName)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	defer client.Close()
 
@@ -200,7 +200,7 @@ func (a *SignCmd) Run(cli *Cli) error {
 		San:           a.SAN,
 	})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	pem := res.Certificate.Pem
@@ -233,7 +233,7 @@ type PublishCrlsCmd struct {
 func (a *PublishCrlsCmd) Run(cli *Cli) error {
 	client, err := cli.Client(config.CAServerName)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	defer client.Close()
 
@@ -241,7 +241,7 @@ func (a *PublishCrlsCmd) Run(cli *Cli) error {
 		Ikid: a.Ikid,
 	})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if cli.IsJSON() {
@@ -270,7 +270,7 @@ func (a *RevokeCmd) Run(cli *Cli) error {
 
 	client, err := cli.Client(config.CAServerName)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	defer client.Close()
 
@@ -289,7 +289,7 @@ func (a *RevokeCmd) Run(cli *Cli) error {
 		Reason:       pb.Reason(a.Reason),
 	})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	cli.WriteJSON(res)
@@ -308,7 +308,7 @@ type UpdateCertLabelCmd struct {
 func (a *UpdateCertLabelCmd) Run(cli *Cli) error {
 	client, err := cli.Client(config.CAServerName)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	defer client.Close()
 
@@ -317,7 +317,7 @@ func (a *UpdateCertLabelCmd) Run(cli *Cli) error {
 		Label: a.Label,
 	})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	cli.WriteJSON(res)
@@ -341,7 +341,7 @@ func (a *GetCertificateCmd) Run(cli *Cli) error {
 
 	client, err := cli.Client(config.CAServerName)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	defer client.Close()
 
@@ -359,7 +359,7 @@ func (a *GetCertificateCmd) Run(cli *Cli) error {
 		IssuerSerial: is,
 	})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	cli.WriteJSON(res)

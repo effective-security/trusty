@@ -24,7 +24,7 @@ func DefaultFactory() (*configloader.Factory, error) {
 
 	nodeInfo, err := netutil.NewNodeInfo(nil)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	cwd, _ := filepath.Abs(filepath.Dir(os.Args[0]))

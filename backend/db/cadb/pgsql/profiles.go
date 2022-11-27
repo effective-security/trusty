@@ -15,7 +15,7 @@ func (p *Provider) RegisterCertProfile(ctx context.Context, m *model.CertProfile
 	id := p.NextID()
 	err := xdb.Validate(m)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	logger.Tracef("id=%d, label=%q, ctx=%q", id, m.Label, correlation.ID(ctx))

@@ -23,7 +23,6 @@ import (
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/cryptoprov/inmemcrypto"
 	"github.com/effective-security/xpki/csr"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -43,7 +42,7 @@ func TestMain(m *testing.M) {
 
 	cfg, err := testutils.LoadConfig(projFolder, "UNIT_TEST")
 	if err != nil {
-		panic(errors.WithStack(err))
+		panic(err)
 	}
 
 	httpAddr := testutils.CreateURLs("http", "")

@@ -267,10 +267,10 @@ func (a *App) Run(startedCh chan<- bool) error {
 		if !svcCfg.Disabled {
 			httpServer, err := gserver.Start(name, svcCfg, a.container, ServiceFactories)
 			if err != nil {
-				logger.Errorf("reason=Start, server=%s, err=[%s]", name, err.Error())
+				//logger.Errorf("reason=Start, server=%s, err=[%s]", name, err.Error())
 
 				a.stopServers()
-				return errors.WithStack(err)
+				return err
 			}
 			a.servers[httpServer.Name()] = httpServer
 		} else {
@@ -308,7 +308,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 		t, err := tasks.NewTask(a.cfg.RegistrationAuthority.GenCerts.Schedule)
 		if err != nil {
 			a.stopServers()
-			return errors.WithStack(err)
+			return err
 		}
 		a.scheduler.Add(t.Do("certs-renew", a.genCert))
 	}
@@ -577,7 +577,7 @@ func (a *App) setupMetrics() error {
 
 			promSink, err = prometheus.NewSink()
 			if err != nil {
-				return errors.WithStack(err)
+				return err
 			}
 
 			if cfg.Metrics.Prometheus != nil && cfg.Metrics.Prometheus.Addr != "" {
@@ -624,7 +624,7 @@ func (a *App) setupMetrics() error {
 
 		prov, err := metrics.NewGlobal(mcfg, sink)
 		if err != nil {
-			return errors.WithStack(err)
+			return err
 		}
 		prov.SetGauge([]string{"version"}, version.Current().Float())
 	}

@@ -263,7 +263,7 @@ func provideJwt(cfg *config.Configuration, crypto *cryptoprov.Crypto) (jwt.Parse
 	if cfg.JWT != "" {
 		provider, err = jwt.Load(cfg.JWT, crypto)
 		if err != nil {
-			return nil, nil, errors.WithStack(err)
+			return nil, nil, err
 		}
 	}
 
@@ -291,7 +291,7 @@ func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
 		logger.Errorf("default=%s, providers=%v, err=[%+v]",
 			cfg.CryptoProv.Default, cfg.CryptoProv.Providers,
 			err)
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 	return crypto, nil
 }
@@ -299,11 +299,11 @@ func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
 func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto, db cadb.CaDb) (*authority.Authority, error) {
 	caCfg, err := authority.LoadConfig(cfg.Authority)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 	ca, err := authority.NewAuthority(caCfg, crypto)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	ctx := context.Background()
@@ -385,7 +385,7 @@ func provideCaDB(cfg *config.Configuration) (cadb.CaDb, cadb.CaReadonlyDb, error
 		cfg.CaSQL.MigrateVersion,
 		flake.DefaultIDGenerator)
 	if err != nil {
-		return nil, nil, errors.WithStack(err)
+		return nil, nil, err
 	}
 	return d, d, nil
 }
@@ -400,7 +400,7 @@ func providePublisher(cfg *config.Configuration) (certpublisher.Publisher, error
 		CRLBucket:   cfg.RegistrationAuthority.Publisher.CRLBucket,
 	})
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 	return pub, err
 }
@@ -412,7 +412,7 @@ func provideDp() (dataprotection.Provider, error) {
 	}
 	p, err := dataprotection.NewSymmetric([]byte(seed))
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 	return p, nil
 }

@@ -129,7 +129,7 @@ func (t *Task) healthCheckIssuers(ctx context.Context) error {
 	})
 	if err != nil {
 		metrics.IncrCounter(metricskey.HealthCAStatusFailedCount, 1)
-		return errors.WithStack(err)
+		return err
 	}
 	metrics.IncrCounter(metricskey.HealthCAStatusSuccessfulCount, 1)
 	logger.ContextKV(ctx, xlog.DEBUG, "issuers", len(li.Issuers))
@@ -141,7 +141,7 @@ const httpTimeout = 3 * time.Second
 func (t *Task) healthCheckOCSP(ctx context.Context, cert string) (*int, error) {
 	chain, err := certutil.LoadChainFromPEM(cert)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	if len(chain) < 2 {
@@ -159,7 +159,7 @@ func (t *Task) healthCheckOCSP(ctx context.Context, cert string) (*int, error) {
 
 	req, err := certutil.CreateOCSPRequest(crt, issuer, crypto.SHA256)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	ur, err := url.Parse(crt.OCSPServer[0])

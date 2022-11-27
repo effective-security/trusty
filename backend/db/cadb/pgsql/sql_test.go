@@ -9,7 +9,6 @@ import (
 	db "github.com/effective-security/trusty/backend/db/cadb"
 	"github.com/effective-security/trusty/tests/testutils"
 	"github.com/effective-security/xlog"
-	"github.com/pkg/errors"
 )
 
 var (
@@ -26,7 +25,7 @@ func TestMain(m *testing.M) {
 
 	cfg, err := testutils.LoadConfig(projFolder, "UNIT_TEST")
 	if err != nil {
-		panic(errors.WithStack(err))
+		panic(err)
 	}
 
 	p, err := db.New(

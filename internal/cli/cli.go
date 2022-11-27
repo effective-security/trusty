@@ -109,7 +109,7 @@ func (c *Cli) AfterApply(app *kong.Kong, vars kong.Vars) error {
 		val := strings.TrimLeft(c.LogLevel, "=")
 		l, err := xlog.ParseLevel(strings.ToUpper(val))
 		if err != nil {
-			return errors.WithStack(err)
+			return err
 		}
 		xlog.SetGlobalLogLevel(l)
 	}
