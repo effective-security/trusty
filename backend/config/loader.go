@@ -38,7 +38,7 @@ func DefaultFactory() (*configloader.Factory, error) {
 		"/trusty/etc",         // in Kube
 	}
 
-	logger.Infof("searchDirs=[%s]", strings.Join(searchDirs, ","))
+	logger.KV(xlog.INFO, "searchDirs", strings.Join(searchDirs, ","))
 
 	return configloader.NewFactory(nodeInfo, searchDirs, "TRUSTY_")
 }
