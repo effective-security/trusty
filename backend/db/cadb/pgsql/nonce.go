@@ -37,7 +37,7 @@ func (p *Provider) CreateNonce(ctx context.Context, nonce *model.Nonce) (*model.
 		&res.UsedAt,
 	)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 	res.CreatedAt = res.CreatedAt.UTC()
 	res.UsedAt = res.UsedAt.UTC()
