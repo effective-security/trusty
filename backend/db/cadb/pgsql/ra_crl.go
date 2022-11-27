@@ -21,7 +21,7 @@ func (p *Provider) RegisterCrl(ctx context.Context, crl *model.Crl) (*model.Crl,
 
 	err = xdb.Validate(crl)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	logger.Tracef("issuer=%q, ikid=%s, ctx=%q", crl.Issuer, crl.IKID, correlation.ID(ctx))

@@ -23,7 +23,7 @@ type GetRootsCmd struct {
 func (a *GetRootsCmd) Run(cli *Cli) error {
 	client, err := cli.Client(config.CISServerName)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	defer client.Close()
 

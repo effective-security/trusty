@@ -15,7 +15,7 @@ func (p *Provider) RegisterIssuer(ctx context.Context, m *model.Issuer) (*model.
 	id := p.NextID()
 	err := xdb.Validate(m)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	logger.Tracef("id=%d, status=%d, label=%q, ctx=%q", id, m.Status, m.Label, correlation.ID(ctx))

@@ -14,7 +14,7 @@ func (p *Provider) RegisterRootCertificate(ctx context.Context, crt *model.RootC
 	id := p.NextID()
 	err := xdb.Validate(crt)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	logger.Tracef("subject=%q, skid=%s, ctx=%q", crt.Subject, crt.SKID, correlation.ID(ctx))

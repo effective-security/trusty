@@ -25,7 +25,7 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 
 	err = xdb.Validate(revoked)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	crt := &revoked.Certificate
@@ -225,7 +225,7 @@ func (p *Provider) ListRevokedCertificates(ctx context.Context, ikid string, lim
 func (p *Provider) RevokeCertificate(ctx context.Context, crt *model.Certificate, at time.Time, reason int) (*model.RevokedCertificate, error) {
 	err := xdb.Validate(crt)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	revoked := &model.RevokedCertificate{

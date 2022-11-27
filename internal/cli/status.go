@@ -15,7 +15,7 @@ type VersionCmd struct{}
 func (a *VersionCmd) Run(cli *Cli) error {
 	client, err := cli.Client(config.WFEServerName)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	defer client.Close()
 
@@ -39,7 +39,7 @@ type ServerStatusCmd struct{}
 func (a *ServerStatusCmd) Run(cli *Cli) error {
 	client, err := cli.Client(config.WFEServerName)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	defer client.Close()
 
@@ -64,7 +64,7 @@ type CallerCmd struct{}
 func (a *CallerCmd) Run(cli *Cli) error {
 	client, err := cli.Client(config.WFEServerName)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	defer client.Close()
 

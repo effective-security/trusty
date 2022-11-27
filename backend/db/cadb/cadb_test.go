@@ -10,7 +10,6 @@ import (
 	"github.com/effective-security/porto/pkg/flake"
 	db "github.com/effective-security/trusty/backend/db/cadb"
 	"github.com/effective-security/trusty/tests/testutils"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -29,7 +28,7 @@ func TestMain(m *testing.M) {
 
 	cfg, err := testutils.LoadConfig(projFolder, "UNIT_TEST")
 	if err != nil {
-		panic(errors.WithStack(err))
+		panic(err)
 	}
 
 	p, err := db.New(

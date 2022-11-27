@@ -133,11 +133,11 @@ func (s *Service) registerIssuers(ctx context.Context) error {
 func (s *Service) registerCert(ctx context.Context, trust pb.Trust, location string) error {
 	crt, err := certutil.LoadFromPEM(location)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	pem, err := certutil.EncodeToPEMString(false, crt)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	c := model.NewRootCertificate(crt, int(trust), pem)
 	_, err = s.db.RegisterRootCertificate(ctx, c)
@@ -157,7 +157,7 @@ func (s *Service) registerRoots(ctx context.Context) error {
 		err := s.registerCert(ctx, pb.Trust_Private, r)
 		if err != nil {
 			logger.Errorf("err=[%+v]", err)
-			return errors.WithStack(err)
+			return err
 		}
 	}
 	for _, r := range s.cfg.RegistrationAuthority.PublicRoots {
@@ -168,7 +168,7 @@ func (s *Service) registerRoots(ctx context.Context) error {
 		err := s.registerCert(ctx, pb.Trust_Public, r)
 		if err != nil {
 			logger.Errorf("ctx=%q, err=[%+v]", correlation.ID(ctx), err)
-			return errors.WithStack(err)
+			return err
 		}
 	}
 

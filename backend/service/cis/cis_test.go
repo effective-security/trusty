@@ -28,7 +28,6 @@ import (
 	"github.com/effective-security/trusty/tests/testutils"
 	"github.com/effective-security/xpki/certutil"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -52,7 +51,7 @@ func TestMain(m *testing.M) {
 
 	cfg, err := testutils.LoadConfig(projFolder, "UNIT_TEST")
 	if err != nil {
-		panic(errors.WithStack(err))
+		panic(err)
 	}
 
 	httpAddr := testutils.CreateURLs("http", "")
@@ -68,24 +67,24 @@ func TestMain(m *testing.M) {
 		}).
 		CreateContainerWithDependencies()
 	if err != nil {
-		panic(errors.WithStack(err))
+		panic(err)
 	}
 
 	trustyServer, err = gserver.Start(config.CISServerName, httpcfg, container, serviceFactories)
 	if err != nil || trustyServer == nil {
-		panic(errors.WithStack(err))
+		panic(err)
 	}
 	cisClient = embed.NewCIClient(trustyServer)
 
 	err = trustyServer.Service(ca.ServiceName).(*ca.Service).OnStarted()
 	if err != nil {
-		panic(errors.WithStack(err))
+		panic(err)
 	}
 
 	svc := trustyServer.Service(cis.ServiceName).(*cis.Service)
 	err = svc.OnStarted()
 	if err != nil {
-		panic(errors.WithStack(err))
+		panic(err)
 	}
 
 	for i := 0; i < 10; i++ {
