@@ -19,6 +19,7 @@ func PublishShortLivedCertExpirationInDays(c *x509.Certificate, typ string) floa
 		expiresInDays,
 		metrics.Tag{Name: "cn", Value: c.Subject.CommonName},
 		metrics.Tag{Name: "type", Value: typ},
+		metrics.Tag{Name: "sn", Value: c.SerialNumber.String()},
 		metrics.Tag{Name: "iki", Value: hex.EncodeToString(c.AuthorityKeyId)},
 	)
 	return expiresInDays

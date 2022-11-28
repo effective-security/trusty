@@ -85,7 +85,7 @@ func (f *factory) NewClient(svc string, ops ...Option) (*Client, error) {
 		return nil, errors.Errorf("service %s not found", svc)
 	}
 
-	logger.KV(xlog.INFO, "host", targetHosts[0], "tls", f.cfg.ClientTLS.String())
+	logger.KV(xlog.DEBUG, "host", targetHosts[0], "tls", f.cfg.ClientTLS.String())
 
 	if dops.tlsCfg == nil && strings.HasPrefix(targetHosts[0], "https://") {
 		var tlsCert, tlsKey string
