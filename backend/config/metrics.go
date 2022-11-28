@@ -15,6 +15,8 @@ type Metrics struct {
 	Prometheus *Prometheus `json:"prometheus,omitempty" yaml:"prometheus,omitempty"`
 
 	EnableRuntimeMetrics bool `json:"runtime_metrics,omitempty" yaml:"runtime_metrics,omitempty"`
+
+	GlobalTags []string `json:"global_tags,omitempty" yaml:"global_tags,omitempty"`
 }
 
 // GetDisabled specifies if the metrics provider is disabled

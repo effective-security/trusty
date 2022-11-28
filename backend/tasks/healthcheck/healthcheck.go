@@ -17,6 +17,7 @@ import (
 	"github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/client"
+	"github.com/effective-security/trusty/internal/version"
 	"github.com/effective-security/trusty/pkg/metricskey"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/certutil"
@@ -91,6 +92,8 @@ func (t *Task) run() {
 			}
 		}(cert)
 	}
+
+	metrics.SetGauge([]string{"version"}, version.Current().Float())
 }
 
 func (t *Task) healthHsm(ctx context.Context) error {

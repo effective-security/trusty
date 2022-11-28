@@ -1,10 +1,12 @@
 package certsmonitor
 
 import (
+	"context"
 	"strings"
 	"time"
 
 	"github.com/effective-security/porto/pkg/tasks"
+	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/certutil"
 	"github.com/pkg/errors"
@@ -30,20 +32,30 @@ type Task struct {
 }
 
 func (t *Task) run() {
-	logger.Infof("task=%s, count=%d", TaskName, len(t.certsMap))
+	ctx := correlation.WithID(context.Background())
+
+	logger.ContextKV(ctx, xlog.TRACE,
+		"task", TaskName,
+		"certs_count", len(t.certsMap))
 
 	for location, typ := range t.certsMap {
 		chain, err := certutil.LoadChainFromPEM(location)
 		if err != nil {
-			logger.Errorf("file=%q, err=[%+v]", location, err.Error())
+			logger.ContextKV(ctx, xlog.ERROR,
+				"file", location,
+				"err", err.Error())
 		} else {
 
 			for idx, cert := range chain {
 				if idx > 0 {
 					typ = typIssuer
 				}
-				logger.Infof("type=%s,cert=%q, cn=%q, expires=%q",
-					typ, location, cert.Subject.CommonName, cert.NotAfter.Format(time.RFC3339))
+				logger.ContextKV(ctx, xlog.INFO,
+					"type", typ,
+					"cert", location,
+					"cn", cert.Subject.CommonName,
+					"expires", cert.NotAfter.Format(time.RFC3339),
+				)
 				if typ == typIssuer {
 					PublishCertExpirationInDays(cert, typ)
 				} else {

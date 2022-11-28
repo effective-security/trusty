@@ -596,7 +596,7 @@ func (a *App) setupMetrics() error {
 	}
 
 	if sink != nil {
-		cfg := &metrics.Config{
+		mcfg := &metrics.Config{
 			EnableHostname:       false,
 			EnableHostnameLabel:  false, // added in GlobalTags
 			EnableServiceLabel:   false, // added in GlobalTags
@@ -605,15 +605,24 @@ func (a *App) setupMetrics() error {
 			TimerGranularity:     time.Millisecond,
 			ProfileInterval:      time.Second,
 			GlobalPrefix:         cfg.Metrics.Prefix,
-			GlobalTags: []metrics.Tag{
-				{Name: "host", Value: a.hostname},
-				{Name: "service", Value: cfg.ServiceName},
-				//{Name: "env", Value: cfg.Environment},
-				//{Name: "region", Value: cfg.Region},
-				{Name: "cluster_id", Value: cfg.ClusterName},
-			},
 		}
-		prov, err := metrics.NewGlobal(cfg, sink)
+
+		for _, tag := range cfg.Metrics.GlobalTags {
+			switch tag {
+			case "host":
+				mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: a.hostname})
+			case "service":
+				mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: cfg.ServiceName})
+			case "env":
+				mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: a.cfg.Environment})
+			case "region":
+				mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: a.cfg.Region})
+			case "cluster_id":
+				mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: a.cfg.ClusterName})
+			}
+		}
+
+		prov, err := metrics.NewGlobal(mcfg, sink)
 		if err != nil {
 			return errors.WithStack(err)
 		}
