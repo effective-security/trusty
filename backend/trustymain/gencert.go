@@ -35,7 +35,7 @@ func (a *App) genCert() error {
 		db = d
 	})
 	if err != nil {
-		return errors.WithStack(err)
+		return errors.Wrap(err, "failed to create authority")
 	}
 	ctx := context.Background()
 	crypto := inmemcrypto.NewProvider()
@@ -45,7 +45,7 @@ func (a *App) genCert() error {
 		}
 		ca, err := ca.GetIssuerByProfile(gcCfg.Profile)
 		if err != nil {
-			return errors.WithStack(err)
+			return err
 		}
 
 		certDir := filepath.Dir(gcCfg.CertFile)
