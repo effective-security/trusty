@@ -62,6 +62,14 @@ var (
 	CAExpiryCrlDays = []string{"ca", "expiry", "crl", "days"}
 )
 
+// Certs
+var (
+	// CertExpiryDays is gauge metric
+	CertExpiryDays = []string{"cert", "expiry", "days"}
+	// CertExpiryHours is gauge metric
+	CertExpiryHours = []string{"cert", "expiry", "hours"}
+)
+
 // AIA
 var (
 	// AIADownloadSuccessfulCert is counter metric

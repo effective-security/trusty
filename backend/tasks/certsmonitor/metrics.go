@@ -14,19 +14,33 @@ import (
 func PublishShortLivedCertExpirationInDays(c *x509.Certificate, typ string) float32 {
 	expiresIn := c.NotAfter.Sub(time.Now().UTC())
 	expiresInDays := float32(expiresIn) / float32(time.Hour*24)
+
+	tags := []metrics.Tag{
+		{Name: "cn", Value: c.Subject.CommonName},
+		{Name: "type", Value: typ},
+		{Name: "sn", Value: c.SerialNumber.String()},
+		{Name: "iki", Value: hex.EncodeToString(c.AuthorityKeyId)},
+		{Name: "ski", Value: hex.EncodeToString(c.SubjectKeyId)},
+	}
 	metrics.SetGauge(
-		metricskey.CAExpiryCertDays,
+		metricskey.CertExpiryDays,
 		expiresInDays,
-		metrics.Tag{Name: "cn", Value: c.Subject.CommonName},
-		metrics.Tag{Name: "type", Value: typ},
-		metrics.Tag{Name: "sn", Value: c.SerialNumber.String()},
-		metrics.Tag{Name: "iki", Value: hex.EncodeToString(c.AuthorityKeyId)},
+		tags...,
 	)
+	if expiresInDays < 7 {
+		expiresInHours := float32(expiresIn) / float32(time.Hour)
+		metrics.SetGauge(
+			metricskey.CertExpiryHours,
+			expiresInHours,
+			tags...,
+		)
+	}
+
 	return expiresInDays
 }
 
-// PublishCertExpirationInDays publish cert expiration time in Days
-func PublishCertExpirationInDays(c *x509.Certificate, typ string) float32 {
+// PublishCACertExpirationInDays publish CA cert expiration time in Days
+func PublishCACertExpirationInDays(c *x509.Certificate, typ string) float32 {
 	expiresIn := c.NotAfter.Sub(time.Now().UTC())
 	expiresInDays := float32(expiresIn) / float32(time.Hour*24)
 	metrics.SetGauge(
@@ -35,14 +49,15 @@ func PublishCertExpirationInDays(c *x509.Certificate, typ string) float32 {
 		metrics.Tag{Name: "cn", Value: c.Subject.CommonName},
 		metrics.Tag{Name: "type", Value: typ},
 		metrics.Tag{Name: "sn", Value: c.SerialNumber.String()},
-		metrics.Tag{Name: "iki", Value: hex.EncodeToString(c.SubjectKeyId)},
+		metrics.Tag{Name: "ski", Value: hex.EncodeToString(c.SubjectKeyId)},
+		metrics.Tag{Name: "iki", Value: hex.EncodeToString(c.AuthorityKeyId)},
 	)
 	return expiresInDays
 }
 
 // PublishCRLExpirationInDays publish CRL expiration time in Days
 func PublishCRLExpirationInDays(c *pkix.CertificateList, issuer *x509.Certificate) float32 {
-	PublishCertExpirationInDays(issuer, "issuer")
+	PublishCACertExpirationInDays(issuer, "issuer")
 
 	expiresIn := c.TBSCertList.NextUpdate.Sub(time.Now().UTC())
 	expiresInDays := float32(expiresIn) / float32(time.Hour*24)

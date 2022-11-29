@@ -2,6 +2,7 @@ package certsmonitor
 
 import (
 	"context"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -33,6 +34,15 @@ type Task struct {
 
 func (t *Task) run() {
 	ctx := correlation.WithID(context.Background())
+	defer func() {
+		if r := recover(); r != nil {
+			logger.ContextKV(ctx, xlog.ERROR,
+				"task", TaskName,
+				"reason", "recover",
+				"err", r,
+				"stack", debug.Stack())
+		}
+	}()
 
 	logger.ContextKV(ctx, xlog.TRACE,
 		"task", TaskName,
@@ -45,7 +55,6 @@ func (t *Task) run() {
 				"file", location,
 				"err", err.Error())
 		} else {
-
 			for idx, cert := range chain {
 				if idx > 0 {
 					typ = typIssuer
@@ -57,7 +66,7 @@ func (t *Task) run() {
 					"expires", cert.NotAfter.Format(time.RFC3339),
 				)
 				if typ == typIssuer {
-					PublishCertExpirationInDays(cert, typ)
+					PublishCACertExpirationInDays(cert, typ)
 				} else {
 					PublishShortLivedCertExpirationInDays(cert, typ)
 				}
