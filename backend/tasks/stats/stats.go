@@ -2,9 +2,11 @@ package stats
 
 import (
 	"context"
+	"runtime/debug"
 
 	"github.com/effective-security/metrics"
 	"github.com/effective-security/porto/pkg/tasks"
+	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/trusty/backend/db/cadb"
 	"github.com/effective-security/trusty/pkg/metricskey"
 	"github.com/effective-security/xlog"
@@ -24,23 +26,35 @@ type Task struct {
 }
 
 func (t *Task) run() {
-	logger.Infof("task=%s", TaskName)
-	ctx := context.Background()
+	ctx := correlation.WithID(context.Background())
+	defer func() {
+		if r := recover(); r != nil {
+			logger.ContextKV(ctx, xlog.ERROR,
+				"task", TaskName,
+				"reason", "recover",
+				"err", r,
+				"stack", debug.Stack())
+		}
+	}()
+
+	logger.ContextKV(ctx, xlog.TRACE,
+		"task", TaskName,
+	)
 
 	c, err := t.ca.GetCertsCount(ctx)
 	if err != nil {
-		logger.Errorf("err=[%+v]", err)
+		logger.ContextKV(ctx, xlog.ERROR, "err", err)
 	} else {
 		metrics.SetGauge(metricskey.StatsDbCertsTotal, float32(c))
-		logger.Infof("certs_count=%d", c)
+		logger.ContextKV(ctx, xlog.INFO, "certs_count", c)
 	}
 
 	c, err = t.ca.GetRevokedCount(ctx)
 	if err != nil {
-		logger.Errorf("err=[%+v]", err)
+		logger.ContextKV(ctx, xlog.ERROR, "err", err)
 	} else {
 		metrics.SetGauge(metricskey.StatsDbRevokedTotal, float32(c))
-		logger.Infof("revoked_count=%d", c)
+		logger.ContextKV(ctx, xlog.INFO, "revoked_count", c)
 	}
 }
 

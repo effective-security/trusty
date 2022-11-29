@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"runtime/debug"
 	"time"
 
 	"github.com/effective-security/metrics"
@@ -50,7 +51,8 @@ func (t *Task) run() {
 			logger.ContextKV(ctx, xlog.ERROR,
 				"task", TaskName,
 				"reason", "recover",
-				"err", r)
+				"err", r,
+				"stack", debug.Stack())
 		}
 	}()
 
