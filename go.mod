@@ -50,7 +50,7 @@ require (
 	github.com/effective-security/metrics v0.0.0-20221008074337-6b800e7e672f
 	github.com/effective-security/porto v0.0.0-20221029165306-24a2b0218820
 	github.com/effective-security/xlog v0.0.0-20221008085823-05b9d4781678
-	github.com/effective-security/xpki v0.4.1-0.20221011114807-cfb95d90a67b
+	github.com/effective-security/xpki v0.4.1-0.20221024022730-bc5b70bf657f
 )
 
 require (

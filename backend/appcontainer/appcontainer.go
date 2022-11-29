@@ -299,11 +299,11 @@ func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
 func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto, db cadb.CaDb) (*authority.Authority, error) {
 	caCfg, err := authority.LoadConfig(cfg.Authority)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessagef(err, "failed to load config")
 	}
 	ca, err := authority.NewAuthority(caCfg, crypto)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessagef(err, "failed to create authority")
 	}
 
 	ctx := context.Background()
@@ -311,7 +311,7 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto, db c
 	for {
 		list, err := db.ListIssuers(ctx, 100, last)
 		if err != nil {
-			return nil, errors.WithStack(err)
+			return nil, errors.WithMessagef(err, "failed to list issuers")
 		}
 		batch := len(list)
 		logger.KV(xlog.TRACE, "batch", batch, "after", last)
@@ -326,7 +326,7 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto, db c
 			var cfg = new(authority.IssuerConfig)
 			err := yaml.Unmarshal([]byte(l.Config), cfg)
 			if err != nil {
-				return nil, errors.WithMessage(err, "unable to decode configuration")
+				return nil, errors.Wrap(err, "unable to decode configuration")
 			}
 
 			if cfg.Profiles == nil {
@@ -347,7 +347,7 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto, db c
 				var profile = new(authority.CertProfile)
 				err := yaml.Unmarshal([]byte(p.Config), profile)
 				if err != nil {
-					return nil, errors.WithMessagef(err, "unable to decode profile: %s", p.Label)
+					return nil, errors.Wrapf(err, "unable to decode profile: %s", p.Label)
 				}
 
 				cfg.Profiles[p.Label] = profile
