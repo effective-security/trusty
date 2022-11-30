@@ -164,9 +164,9 @@ func (c *Client) exchangeOne(ctx context.Context, hostname string, qtype uint16)
 			)
 
 			if err != nil {
-				logger.Errorf("hostname=%q, type=%v, err=[%+v]", hostname, qtypeStr, err.Error())
+				logger.KV(xlog.ERROR, "hostname", hostname, "type", qtypeStr, "err", err.Error())
 			} else {
-				logger.Warningf("hostname=%q, type=%v", hostname, qtypeStr)
+				logger.KV(xlog.WARNING, "hostname", hostname, "type", qtypeStr)
 			}
 			return
 		case r := <-ch:
@@ -184,7 +184,7 @@ func (c *Client) exchangeOne(ctx context.Context, hostname string, qtype uint16)
 					chosenServer = c.servers[chosenServerIndex]
 					continue
 				} else if isRetryable && !hasRetriesLeft {
-					logger.Errorf("reason=out_of_retries, hostname=%q, type=%v", hostname, qtypeStr)
+					logger.KV(xlog.ERROR, "reason", "out_of_retries", "hostname", hostname, "type", qtypeStr)
 				}
 			}
 			resp, err = r.m, r.err

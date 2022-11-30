@@ -49,7 +49,7 @@ func (p *Provider) DeleteCertProfile(ctx context.Context, label string) error {
 	logger.Noticef("label=%s, ctx=%q", label, correlation.ID(ctx))
 	_, err := p.sql.ExecContext(ctx, `DELETE FROM cert_profiles WHERE label=$1;`, label)
 	if err != nil {
-		logger.Errorf("err=[%+v]", err)
+		logger.ContextKV(ctx, xlog.ERROR, "err", err)
 		return errors.WithStack(err)
 	}
 	return nil

@@ -156,7 +156,7 @@ func (s *Service) registerRoots(ctx context.Context) error {
 		}
 		err := s.registerCert(ctx, pb.Trust_Private, r)
 		if err != nil {
-			logger.Errorf("err=[%+v]", err)
+			logger.ContextKV(ctx, xlog.ERROR, "err", err)
 			return err
 		}
 	}
@@ -167,7 +167,7 @@ func (s *Service) registerRoots(ctx context.Context) error {
 		}
 		err := s.registerCert(ctx, pb.Trust_Public, r)
 		if err != nil {
-			logger.Errorf("ctx=%q, err=[%+v]", correlation.ID(ctx), err)
+			logger.ContextKV(ctx, xlog.ERROR, "err", err)
 			return err
 		}
 	}

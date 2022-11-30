@@ -171,7 +171,7 @@ func (a *App) Close() error {
 		if closer != nil {
 			err := closer.Close()
 			if err != nil {
-				logger.Errorf("err=[%+v]", err.Error())
+				logger.KV(xlog.ERROR, "err", err)
 			}
 		}
 	}
@@ -267,8 +267,6 @@ func (a *App) Run(startedCh chan<- bool) error {
 		if !svcCfg.Disabled {
 			httpServer, err := gserver.Start(name, svcCfg, a.container, ServiceFactories)
 			if err != nil {
-				//logger.Errorf("reason=Start, server=%s, err=[%s]", name, err.Error())
-
 				a.stopServers()
 				return err
 			}
@@ -507,7 +505,6 @@ func (a *App) initLogs() error {
 
 		logRotate, err := logrotate.Initialize(cfg.Logs.Directory, cfg.ServiceName, cfg.Logs.MaxAgeDays, cfg.Logs.MaxSizeMb, true, sink)
 		if err != nil {
-			logger.Errorf("reason=logrotate, folder=%q, err=[%+v]", cfg.Logs.Directory, err)
 			return errors.WithMessage(err, "failed to initialize log rotate")
 		}
 		a.OnClose(logRotate)

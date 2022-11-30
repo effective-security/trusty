@@ -37,7 +37,7 @@ func (p *Provider) Close() (err error) {
 	}
 
 	if err = p.conn.Close(); err != nil {
-		logger.Errorf("err=[%+v]", err)
+		logger.KV(xlog.ERROR, "err", err)
 	} else {
 		p.conn = nil
 	}

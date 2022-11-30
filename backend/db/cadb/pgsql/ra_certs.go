@@ -128,7 +128,7 @@ func (p *Provider) RemoveCertificate(ctx context.Context, id uint64) error {
 	logger.Noticef("id=%d, ctx=%q", id, correlation.ID(ctx))
 	_, err := p.sql.ExecContext(ctx, `DELETE FROM certificates WHERE id=$1;`, id)
 	if err != nil {
-		logger.Errorf("err=[%+v]", err)
+		logger.ContextKV(ctx, xlog.ERROR, "err", err)
 		return errors.WithStack(err)
 	}
 

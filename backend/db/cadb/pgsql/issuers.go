@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/effective-security/porto/x/xdb"
-	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
@@ -18,7 +17,7 @@ func (p *Provider) RegisterIssuer(ctx context.Context, m *model.Issuer) (*model.
 		return nil, err
 	}
 
-	logger.KV(xlog.TRACE, "id", id, "status", m.Status, "label", m.Label, "ctx", correlation.ID(ctx))
+	logger.ContextKV(ctx, xlog.TRACE, "id", id, "status", m.Status, "label", m.Label)
 
 	res := new(model.Issuer)
 	err = p.sql.QueryRowContext(ctx, `
@@ -46,7 +45,7 @@ func (p *Provider) RegisterIssuer(ctx context.Context, m *model.Issuer) (*model.
 
 // UpdateIssuerStatus update the Issuer status
 func (p *Provider) UpdateIssuerStatus(ctx context.Context, id uint64, status int) (*model.Issuer, error) {
-	logger.KV(xlog.NOTICE, "id", id, "status", status, "ctx", correlation.ID(ctx))
+	logger.ContextKV(ctx, xlog.NOTICE, "id", id, "status", status)
 
 	res := new(model.Issuer)
 
@@ -73,10 +72,10 @@ func (p *Provider) UpdateIssuerStatus(ctx context.Context, id uint64, status int
 
 // DeleteIssuer deletes the Issuer
 func (p *Provider) DeleteIssuer(ctx context.Context, label string) error {
-	logger.KV(xlog.NOTICE, "label", label, "ctx", correlation.ID(ctx))
+	logger.ContextKV(ctx, xlog.NOTICE, "label", label)
 	_, err := p.sql.ExecContext(ctx, `DELETE FROM issuers WHERE label=$1;`, label)
 	if err != nil {
-		logger.Errorf("err=[%+v]", err)
+		logger.ContextKV(ctx, xlog.ERROR, "err", err)
 		return errors.WithStack(err)
 	}
 	return nil
