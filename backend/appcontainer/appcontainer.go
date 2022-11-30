@@ -288,9 +288,7 @@ func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
 
 	crypto, err := cryptoprov.Load(cfg.CryptoProv.Default, cfg.CryptoProv.Providers)
 	if err != nil {
-		logger.Errorf("default=%s, providers=%v, err=[%+v]",
-			cfg.CryptoProv.Default, cfg.CryptoProv.Providers,
-			err)
+		//logger.KV(xlog.ERROR, "default", cfg.CryptoProv.Default, "providers", cfg.CryptoProv.Providers, "err", err)
 		return nil, err
 	}
 	return crypto, nil

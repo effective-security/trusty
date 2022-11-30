@@ -60,7 +60,7 @@ func (a *App) genCert() error {
 			fileutil.FileExists(gcCfg.KeyFile) == nil {
 			d, err := time.ParseDuration(gcCfg.Renewal)
 			if err != nil {
-				logger.Errorf("reason=config, profile=%s, err=[%+v]", gcCfg.Profile, err)
+				logger.KV(xlog.ERROR, "reason", "config", "profile", gcCfg.Profile, "err", err)
 				d = 24 * time.Hour
 			}
 			cutoff := time.Now().Add(d).UTC()

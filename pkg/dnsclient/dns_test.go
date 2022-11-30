@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/effective-security/xlog"
 	"github.com/miekg/dns"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -185,13 +186,13 @@ func serveLoopResolver(stopChan chan bool) {
 	go func() {
 		err := tcpServer.ListenAndServe()
 		if err != nil {
-			logger.Errorf("reason=tcpServer.ListenAndServe, err=[%+v]", err)
+			logger.KV(xlog.ERROR, "reason", "tcpServer.ListenAndServe", "err", err)
 		}
 	}()
 	go func() {
 		err := udpServer.ListenAndServe()
 		if err != nil {
-			logger.Errorf("reason=udpServer.ListenAndServe, err=[%+v]", err)
+			logger.KV(xlog.ERROR, "reason", "udpServer.ListenAndServe", "err", err)
 		}
 	}()
 	go func() {

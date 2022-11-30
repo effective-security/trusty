@@ -3,7 +3,6 @@ package config
 import (
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/effective-security/porto/pkg/configloader"
 	"github.com/effective-security/porto/x/netutil"
@@ -38,7 +37,7 @@ func DefaultFactory() (*configloader.Factory, error) {
 		"/trusty/etc",         // in Kube
 	}
 
-	logger.KV(xlog.INFO, "searchDirs", strings.Join(searchDirs, ","))
+	logger.KV(xlog.INFO, "searchDirs", searchDirs)
 
 	return configloader.NewFactory(nodeInfo, searchDirs, "TRUSTY_")
 }
