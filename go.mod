@@ -48,9 +48,9 @@ require (
 require (
 	github.com/alecthomas/kong v0.4.0
 	github.com/effective-security/metrics v0.0.0-20221008074337-6b800e7e672f
-	github.com/effective-security/porto v0.0.0-20221029165306-24a2b0218820
-	github.com/effective-security/xlog v0.0.0-20221008085823-05b9d4781678
-	github.com/effective-security/xpki v0.4.1-0.20221024022730-bc5b70bf657f
+	github.com/effective-security/porto v0.0.0-20221211105647-dc8168b73871
+	github.com/effective-security/xlog v0.0.0-20221211184536-d7003989048a
+	github.com/effective-security/xpki v0.5.0
 )
 
 require (
