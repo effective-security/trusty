@@ -22,6 +22,17 @@ import (
 
 var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/backend/db", "cadb")
 
+// Table names
+const (
+	TableNameForCertificates = "certificates"
+	TableNameForRevoked      = "revoked"
+	TableNameForCrls         = "crls"
+	TableNameForIssuers      = "issuers"
+	TableNameForRoots        = "roots"
+	TableNameForCertProfiles = "cert_profiles"
+	TableNameForNonces       = "nonces"
+)
+
 // CaReadonlyDb defines an interface for Read operations on Certs
 type CaReadonlyDb interface {
 	// GetRootCertificatesr returns list of Root certs
@@ -51,10 +62,8 @@ type CaReadonlyDb interface {
 	// GetCertProfilesByIssuer returns list of CertProfile
 	GetCertProfilesByIssuer(ctx context.Context, issuer string) ([]*model.CertProfile, error)
 
-	// GetCertsCount returns number of certs
-	GetCertsCount(ctx context.Context) (uint64, error)
-	// GetRevokedCount returns number of revoked certs
-	GetRevokedCount(ctx context.Context) (uint64, error)
+	// GetTableRowsCount returns number of rows
+	GetTableRowsCount(ctx context.Context, table string) (uint64, error)
 }
 
 // CaDb defines an interface for CRUD operations on Certs

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/effective-security/porto/x/guid"
+	"github.com/effective-security/trusty/backend/db/cadb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/xpki/certutil"
 	"github.com/stretchr/testify/assert"
@@ -137,11 +138,11 @@ func TestRegisterCertificate(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, r4.Label+"1", r5.Label)
 
-	cc, err := provider.GetCertsCount(ctx)
+	cc, err := provider.GetTableRowsCount(ctx, cadb.TableNameForCertificates)
 	require.NoError(t, err)
 	assert.Greater(t, cc, uint64(0))
 
-	cr, err := provider.GetRevokedCount(ctx)
+	cr, err := provider.GetTableRowsCount(ctx, cadb.TableNameForRevoked)
 	require.NoError(t, err)
 	assert.GreaterOrEqual(t, cr, uint64(0))
 
@@ -155,11 +156,11 @@ func TestRegisterCertificate(t *testing.T) {
 	revoked2.Certificate.Locations = r.Locations
 	assert.Equal(t, *revoked, *revoked2)
 
-	cc2, err := provider.GetCertsCount(ctx)
+	cc2, err := provider.GetTableRowsCount(ctx, cadb.TableNameForCertificates)
 	require.NoError(t, err)
 	assert.Greater(t, cc, cc2)
 
-	cr2, err := provider.GetRevokedCount(ctx)
+	cr2, err := provider.GetTableRowsCount(ctx, cadb.TableNameForRevoked)
 	require.NoError(t, err)
 	assert.Greater(t, cr2, cr)
 
