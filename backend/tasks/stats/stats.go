@@ -18,11 +18,21 @@ var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/backend
 // TaskName is the name of this task
 const TaskName = "stats"
 
+var tables = []string{
+	cadb.TableNameForCertificates,
+	cadb.TableNameForRevoked,
+	cadb.TableNameForCrls,
+	cadb.TableNameForIssuers,
+	cadb.TableNameForRoots,
+	cadb.TableNameForCertProfiles,
+	cadb.TableNameForNonces,
+}
+
 // Task defines the healthcheck task
 type Task struct {
 	name     string
 	schedule string
-	ca       cadb.CaReadonlyDb
+	cadb     cadb.CaReadonlyDb
 }
 
 func (t *Task) run() {
@@ -41,20 +51,16 @@ func (t *Task) run() {
 		"task", TaskName,
 	)
 
-	c, err := t.ca.GetCertsCount(ctx)
-	if err != nil {
-		logger.ContextKV(ctx, xlog.ERROR, "err", err)
-	} else {
-		metrics.SetGauge(metricskey.StatsDbCertsTotal, float32(c))
-		logger.ContextKV(ctx, xlog.INFO, "certs_count", c)
-	}
+	for _, table := range tables {
+		count, err := t.cadb.GetTableRowsCount(ctx, table)
+		if err != nil {
+			logger.ContextKV(ctx, xlog.ERROR, "table", table, "err", err)
+		} else {
+			k := append(metricskey.StatsDbTableTotalPrefix, table)
+			metrics.SetGauge(k, float32(count))
 
-	c, err = t.ca.GetRevokedCount(ctx)
-	if err != nil {
-		logger.ContextKV(ctx, xlog.ERROR, "err", err)
-	} else {
-		metrics.SetGauge(metricskey.StatsDbRevokedTotal, float32(c))
-		logger.ContextKV(ctx, xlog.INFO, "revoked_count", c)
+			logger.ContextKV(ctx, xlog.TRACE, "table", table, "rows", count)
+		}
 	}
 }
 
@@ -64,7 +70,7 @@ func create(
 	schedule string,
 ) (*Task, error) {
 	task := &Task{
-		ca:       ca,
+		cadb:     ca,
 		name:     name,
 		schedule: schedule,
 	}

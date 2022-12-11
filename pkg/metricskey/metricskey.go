@@ -2,11 +2,8 @@ package metricskey
 
 // Stats
 var (
-	// StatsDbCertsTotal is gauge metric for total certificates issued in db
-	StatsDbCertsTotal = []string{"stats", "total", "db", "certs"}
-
-	// StatsDbRevokedTotal is gauge metric for total certificates revoked in db
-	StatsDbRevokedTotal = []string{"stats", "total", "db", "revoked"}
+	// StatsDbTableTotalPrefix is base for gauge metric for total rows in a table
+	StatsDbTableTotalPrefix = []string{"stats", "total", "db_table"}
 
 	// StatsKmsKeysTotal is gauge metric for number of HSM keys
 	StatsKmsKeysTotal = []string{"stats", "total", "kms", "keys"}
