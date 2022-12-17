@@ -572,14 +572,22 @@ func (a *App) setupMetrics() error {
 			prom.Unregister(collectors.NewBuildInfoCollector())
 			prom.Unregister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
 
-			promSink, err = prometheus.NewSink()
+			ops := prometheus.Opts{
+				Expiration: cfg.Metrics.Prometheus.Expiration,
+				Registerer: prom.DefaultRegisterer,
+				// TODO: descriptions
+			}
+
+			promSink, err = prometheus.NewSinkFrom(ops)
 			if err != nil {
 				return err
 			}
 
 			if cfg.Metrics.Prometheus != nil && cfg.Metrics.Prometheus.Addr != "" {
 				go func() {
-					logger.Infof("status=starting_metrics, endpoint=%s", cfg.Metrics.Prometheus.Addr)
+					logger.KV(xlog.INFO,
+						"status", "starting_metrics",
+						"endpoint", cfg.Metrics.Prometheus.Addr)
 					// remove Prom metrics
 					h := promhttp.HandlerFor(prom.DefaultGatherer, promhttp.HandlerOpts{})
 					logger.Fatal(http.ListenAndServe(cfg.Metrics.Prometheus.Addr, h).Error())
@@ -602,6 +610,8 @@ func (a *App) setupMetrics() error {
 			TimerGranularity:     time.Millisecond,
 			ProfileInterval:      time.Second,
 			GlobalPrefix:         cfg.Metrics.Prefix,
+			AllowedPrefixes:      cfg.Metrics.AllowedPrefixes,
+			BlockedPrefixes:      cfg.Metrics.BlockedPrefixes,
 		}
 
 		for _, tag := range cfg.Metrics.GlobalTags {

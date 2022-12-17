@@ -44,9 +44,14 @@ metrics:
   disabled: false
   prefix: trusty
   runtime_metrics: true
+  allowed_prefixes:
+  - trusty
+  blocked_prefixes:
+  - promhttp
   # the metrics provider: prometheus|inmem
   provider: prometheus
   prometheus:
+    expiration: 1m
     addr: "127.0.0.1:19090"
 
 # configuration for crypto providers
