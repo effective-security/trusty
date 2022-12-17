@@ -8,6 +8,9 @@ var (
 	// StatsKmsKeysTotal is gauge metric for number of HSM keys
 	StatsKmsKeysTotal = []string{"stats", "total", "kms", "keys"}
 
+	// StatsCAIssuersTotal is gauge metric for CA issuers
+	StatsCAIssuersTotal = []string{"stats", "total", "ca", "issuers"}
+
 	// StatsLogErrors is counter metric for log errors
 	StatsLogErrors = []string{"stats", "log", "errors"}
 )
