@@ -16,7 +16,7 @@ func PublishShortLivedCertExpirationInDays(c *x509.Certificate, typ string) floa
 	expiresInDays := float32(expiresIn) / float32(time.Hour*24)
 
 	tags := []metrics.Tag{
-		{Name: "cn", Value: c.Subject.CommonName},
+		{Name: "cn", Value: getCN(c)},
 		{Name: "type", Value: typ},
 		{Name: "sn", Value: c.SerialNumber.String()},
 		{Name: "iki", Value: hex.EncodeToString(c.AuthorityKeyId)},
@@ -46,7 +46,7 @@ func PublishCACertExpirationInDays(c *x509.Certificate, typ string) float32 {
 	metrics.SetGauge(
 		metricskey.CAExpiryCertDays,
 		expiresInDays,
-		metrics.Tag{Name: "cn", Value: c.Subject.CommonName},
+		metrics.Tag{Name: "cn", Value: getCN(c)},
 		metrics.Tag{Name: "type", Value: typ},
 		metrics.Tag{Name: "sn", Value: c.SerialNumber.String()},
 		metrics.Tag{Name: "ski", Value: hex.EncodeToString(c.SubjectKeyId)},
@@ -64,9 +64,20 @@ func PublishCRLExpirationInDays(c *pkix.CertificateList, issuer *x509.Certificat
 	metrics.SetGauge(
 		metricskey.CAExpiryCrlDays,
 		expiresInDays,
-		metrics.Tag{Name: "cn", Value: issuer.Subject.CommonName},
+		metrics.Tag{Name: "cn", Value: getCN(issuer)},
 		metrics.Tag{Name: "sn", Value: issuer.SerialNumber.String()},
 		metrics.Tag{Name: "iki", Value: hex.EncodeToString(issuer.SubjectKeyId)},
 	)
 	return expiresInDays
+}
+
+func getCN(cert *x509.Certificate) string {
+	cn := cert.Subject.CommonName
+	if cn == "" && len(cert.URIs) == 1 && cert.URIs[0].Scheme == "spiffe" {
+		cn = cert.URIs[0].String()
+	}
+	if cn == "" {
+		cn = "n_a"
+	}
+	return cn
 }
