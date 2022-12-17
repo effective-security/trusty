@@ -27,7 +27,7 @@ func TestFactory(t *testing.T) {
 
 	scheduler := &testutils.MockTask{}
 
-	f := Factory(scheduler, "test_run", "Every 30 minutes")
+	f := Factory(scheduler, "test_run", "Every 30 minutes", "--log-error", "true")
 	require.NotNil(t, f)
 
 	err = c.Invoke(f)
