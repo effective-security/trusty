@@ -2,8 +2,8 @@ package metricskey
 
 // Stats
 var (
-	// StatsDbTableTotalPrefix is base for gauge metric for total rows in a table
-	StatsDbTableTotalPrefix = []string{"stats", "total", "db_table"}
+	// StatsDbTableRowsTotal is base for gauge metric for total rows in a table
+	StatsDbTableRowsTotal = []string{"stats", "total", "table", "rows"}
 
 	// StatsKmsKeysTotal is gauge metric for number of HSM keys
 	StatsKmsKeysTotal = []string{"stats", "total", "kms", "keys"}

@@ -56,7 +56,7 @@ func (t *Task) run() {
 		if err != nil {
 			logger.ContextKV(ctx, xlog.ERROR, "table", table, "err", err)
 		} else {
-			metrics.SetGauge(metricskey.StatsDbTableTotalPrefix, float32(count),
+			metrics.SetGauge(metricskey.StatsDbTableRowsTotal, float32(count),
 				metrics.Tag{Name: "table", Value: table})
 
 			logger.ContextKV(ctx, xlog.TRACE, "table", table, "rows", count)

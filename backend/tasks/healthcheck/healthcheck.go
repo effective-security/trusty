@@ -34,14 +34,15 @@ const TaskName = "health_check"
 
 // Task defines the healthcheck task
 type Task struct {
-	conf       *config.Configuration
-	name       string
-	schedule   string
-	crypto     *cryptoprov.Crypto
-	factory    client.Factory
-	caClient   client.CAClient
-	ocspClient *retriable.Client
-	ocspCerts  []string
+	conf         *config.Configuration
+	name         string
+	schedule     string
+	crypto       *cryptoprov.Crypto
+	factory      client.Factory
+	caClient     client.CAClient
+	ocspClient   *retriable.Client
+	ocspCerts    []string
+	withErrorPtr bool
 }
 
 func (t *Task) run() {
@@ -96,6 +97,10 @@ func (t *Task) run() {
 	}
 
 	metrics.SetGauge([]string{"version"}, version.Current().Float())
+
+	if t.withErrorPtr {
+		logger.ContextKV(ctx, xlog.ERROR, "task", TaskName, "reason", "test")
+	}
 }
 
 func (t *Task) healthHsm(ctx context.Context) error {
@@ -229,6 +234,7 @@ func create(
 	caPtr := flagSet.Bool("ca", false, "check status of CA")
 	hsmkeysPtr := flagSet.Bool("hsmkeys", false, "list keys in HSM or KMS")
 	ocspPtr := flagSet.String("ocsp", "", "check status of OCSP")
+	withErrorPtr := flagSet.Bool("log-error", false, "log a test error")
 
 	err := flagSet.Parse(args)
 	if err != nil {
@@ -236,9 +242,10 @@ func create(
 	}
 
 	task := &Task{
-		conf:     conf,
-		name:     name,
-		schedule: schedule,
+		conf:         conf,
+		name:         name,
+		schedule:     schedule,
+		withErrorPtr: *withErrorPtr,
 	}
 
 	if caPtr != nil && *caPtr {
