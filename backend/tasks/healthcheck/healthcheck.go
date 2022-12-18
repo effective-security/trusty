@@ -42,14 +42,14 @@ type Task struct {
 	caClient     client.CAClient
 	ocspClient   *retriable.Client
 	ocspCerts    []string
-	withErrorPtr bool
+	withErrorLog bool
+	ctx          context.Context
 }
 
 func (t *Task) run() {
-	ctx := correlation.WithID(context.Background())
 	defer func() {
 		if r := recover(); r != nil {
-			logger.ContextKV(ctx, xlog.ERROR,
+			logger.ContextKV(t.ctx, xlog.ERROR,
 				"task", TaskName,
 				"reason", "recover",
 				"err", r,
@@ -60,9 +60,9 @@ func (t *Task) run() {
 	var err error
 	started := time.Now()
 	if t.factory != nil {
-		err = t.healthCheckIssuers(ctx)
+		err = t.healthCheckIssuers(t.ctx)
 		if err != nil {
-			logger.ContextKV(ctx, xlog.ERROR,
+			logger.ContextKV(t.ctx, xlog.ERROR,
 				"task", TaskName,
 				"reason", "healthCheckIssuers",
 				"elapsed", time.Since(started).String(),
@@ -71,9 +71,9 @@ func (t *Task) run() {
 	}
 
 	if t.crypto != nil {
-		err = t.healthHsm(ctx)
+		err = t.healthHsm(t.ctx)
 		if err != nil {
-			logger.ContextKV(ctx, xlog.ERROR,
+			logger.ContextKV(t.ctx, xlog.ERROR,
 				"task", TaskName,
 				"reason", "healthHsm",
 				"elapsed", time.Since(started).String(),
@@ -84,9 +84,9 @@ func (t *Task) run() {
 	for _, cert := range t.ocspCerts {
 		go func(cert string) {
 			started := time.Now()
-			_, err := t.healthCheckOCSP(ctx, cert)
+			_, err := t.healthCheckOCSP(t.ctx, cert)
 			if err != nil {
-				logger.ContextKV(ctx, xlog.ERROR,
+				logger.ContextKV(t.ctx, xlog.ERROR,
 					"task", TaskName,
 					"reason", "ocsp",
 					"cert", cert,
@@ -98,8 +98,8 @@ func (t *Task) run() {
 
 	metrics.SetGauge([]string{"version"}, version.Current().Float())
 
-	if t.withErrorPtr {
-		logger.ContextKV(ctx, xlog.ERROR, "task", TaskName, "reason", "test")
+	if t.withErrorLog {
+		logger.ContextKV(t.ctx, xlog.ERROR, "task", TaskName, "reason", "test")
 	}
 }
 
@@ -245,7 +245,8 @@ func create(
 		conf:         conf,
 		name:         name,
 		schedule:     schedule,
-		withErrorPtr: *withErrorPtr,
+		withErrorLog: *withErrorPtr,
+		ctx:          correlation.WithID(context.Background()),
 	}
 
 	if caPtr != nil && *caPtr {

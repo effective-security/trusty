@@ -30,13 +30,13 @@ type Task struct {
 	name     string
 	schedule string
 	certsMap map[string]string // map => location:type
+	ctx      context.Context
 }
 
 func (t *Task) run() {
-	ctx := correlation.WithID(context.Background())
 	defer func() {
 		if r := recover(); r != nil {
-			logger.ContextKV(ctx, xlog.ERROR,
+			logger.ContextKV(t.ctx, xlog.ERROR,
 				"task", TaskName,
 				"reason", "recover",
 				"err", r,
@@ -44,14 +44,14 @@ func (t *Task) run() {
 		}
 	}()
 
-	logger.ContextKV(ctx, xlog.TRACE,
+	logger.ContextKV(t.ctx, xlog.TRACE,
 		"task", TaskName,
 		"certs_count", len(t.certsMap))
 
 	for location, typ := range t.certsMap {
 		chain, err := certutil.LoadChainFromPEM(location)
 		if err != nil {
-			logger.ContextKV(ctx, xlog.ERROR,
+			logger.ContextKV(t.ctx, xlog.ERROR,
 				"file", location,
 				"err", err.Error())
 		} else {
@@ -59,7 +59,7 @@ func (t *Task) run() {
 				if idx > 0 {
 					typ = typIssuer
 				}
-				logger.ContextKV(ctx, xlog.INFO,
+				logger.ContextKV(t.ctx, xlog.INFO,
 					"type", typ,
 					"cert", location,
 					"cn", cert.Subject.CommonName,
@@ -96,6 +96,7 @@ func create(
 	task := &Task{
 		name:     name,
 		schedule: schedule,
+		ctx:      correlation.WithID(context.Background()),
 	}
 
 	task.certsMap = certsMapFromLocations(args)

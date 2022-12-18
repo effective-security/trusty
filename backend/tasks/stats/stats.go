@@ -33,13 +33,13 @@ type Task struct {
 	name     string
 	schedule string
 	cadb     cadb.CaReadonlyDb
+	ctx      context.Context
 }
 
 func (t *Task) run() {
-	ctx := correlation.WithID(context.Background())
 	defer func() {
 		if r := recover(); r != nil {
-			logger.ContextKV(ctx, xlog.ERROR,
+			logger.ContextKV(t.ctx, xlog.ERROR,
 				"task", TaskName,
 				"reason", "recover",
 				"err", r,
@@ -47,19 +47,17 @@ func (t *Task) run() {
 		}
 	}()
 
-	logger.ContextKV(ctx, xlog.TRACE,
-		"task", TaskName,
-	)
+	logger.ContextKV(t.ctx, xlog.TRACE, "task", TaskName)
 
 	for _, table := range tables {
-		count, err := t.cadb.GetTableRowsCount(ctx, table)
+		count, err := t.cadb.GetTableRowsCount(t.ctx, table)
 		if err != nil {
-			logger.ContextKV(ctx, xlog.ERROR, "table", table, "err", err)
+			logger.ContextKV(t.ctx, xlog.ERROR, "table", table, "err", err)
 		} else {
 			metrics.SetGauge(metricskey.StatsDbTableRowsTotal, float32(count),
 				metrics.Tag{Name: "table", Value: table})
 
-			logger.ContextKV(ctx, xlog.TRACE, "table", table, "rows", count)
+			logger.ContextKV(t.ctx, xlog.TRACE, "table", table, "rows", count)
 		}
 	}
 }
@@ -73,6 +71,7 @@ func create(
 		cadb:     ca,
 		name:     name,
 		schedule: schedule,
+		ctx:      correlation.WithID(context.Background()),
 	}
 
 	return task, nil
