@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/effective-security/metrics"
 	"github.com/effective-security/porto/restserver"
 	"github.com/effective-security/porto/xhttp/header"
 	"github.com/effective-security/porto/xhttp/httperror"
@@ -107,7 +106,7 @@ func (s *Service) ocspResponse(w http.ResponseWriter, r *http.Request, requestBo
 	res, err := s.ca.SignOCSP(r.Context(), &pb.OCSPRequest{Der: requestBody})
 	if err != nil {
 		logger.ContextKV(r.Context(), xlog.WARNING, "err", err.Error())
-		metrics.IncrCounter(metricskey.AIADownloadFailedOCSP, 1)
+		metricskey.AIADownloadFailOCSP.IncrCounter(1)
 
 		switch httperror.Status(err) {
 		case http.StatusBadRequest:
@@ -122,7 +121,7 @@ func (s *Service) ocspResponse(w http.ResponseWriter, r *http.Request, requestBo
 		return
 	}
 
-	metrics.IncrCounter(metricskey.AIADownloadSuccessfulOCSP, 1)
+	metricskey.AIADownloadSuccessOCSP.IncrCounter(1)
 
 	w.Write(res.Der)
 }

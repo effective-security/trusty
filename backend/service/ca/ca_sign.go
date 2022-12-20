@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/effective-security/metrics"
 	"github.com/effective-security/porto/xhttp/pberror"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
@@ -100,18 +99,13 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 		cr.NotAfter = req.NotAfter.AsTime()
 	}
 
-	tags := []metrics.Tag{
-		{Name: "profile", Value: req.Profile},
-		{Name: "issuer", Value: ca.Label()},
-	}
-
 	cert, pem, err := ca.Sign(cr)
 	if err != nil {
 		logger.ContextKV(ctx, xlog.WARNING,
 			"status", "failed to sign certificate",
 			"err", err.Error())
 
-		metrics.IncrCounter(metricskey.CAFailedSignCert, 1, tags...)
+		metricskey.CAFailSignCert.IncrCounter(1, ca.Label(), req.Profile)
 
 		str := err.Error()
 		if slices.ContainsString([]string{"invalid", "not allowed", "missing", "parse"}, str) {
@@ -120,7 +114,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 		return nil, pberror.NewFromCtx(ctx, codes.Internal, "failed to sign certificate")
 	}
 
-	metrics.IncrCounter(metricskey.CACertIssued, 1, tags...)
+	metricskey.CACertIssued.IncrCounter(1, ca.Label(), req.Profile)
 
 	mcert := model.NewCertificate(cert, req.OrgId, req.Profile, string(pem), ca.PEM(), req.Label, nil, req.Metadata)
 	fn := mcert.FileName()
@@ -145,7 +139,8 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 			logger.ContextKV(ctx, xlog.ERROR,
 				"status", "failed to publish certificate",
 				"err", err.Error())
-			metrics.IncrCounter(metricskey.CAFailedPublishCert, 1, tags...)
+
+			metricskey.CAFailPublishCert.IncrCounter(1, ca.Label())
 			return nil, pberror.NewFromCtx(ctx, codes.Internal, "failed to publish certificate")
 		}
 	}

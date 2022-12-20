@@ -4,7 +4,6 @@ import (
 	"context"
 	"runtime/debug"
 
-	"github.com/effective-security/metrics"
 	"github.com/effective-security/porto/pkg/tasks"
 	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/trusty/backend/db/cadb"
@@ -54,8 +53,7 @@ func (t *Task) run() {
 		if err != nil {
 			logger.ContextKV(t.ctx, xlog.ERROR, "table", table, "err", err)
 		} else {
-			metrics.SetGauge(metricskey.StatsDbTableRowsTotal, float32(count),
-				metrics.Tag{Name: "table", Value: table})
+			metricskey.StatsDbTableRowsTotal.SetGauge(float64(count), table)
 
 			logger.ContextKV(t.ctx, xlog.TRACE, "table", table, "rows", count)
 		}

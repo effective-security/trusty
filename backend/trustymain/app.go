@@ -15,6 +15,7 @@ import (
 	"github.com/effective-security/metrics"
 	"github.com/effective-security/metrics/prometheus"
 	"github.com/effective-security/porto/gserver"
+	pmetricskey "github.com/effective-security/porto/metricskey"
 	"github.com/effective-security/porto/pkg/discovery"
 	"github.com/effective-security/porto/pkg/tasks"
 	"github.com/effective-security/porto/x/netutil"
@@ -530,10 +531,7 @@ func (a *App) initLogs() error {
 	xlog.GetFormatter().Options(xlog.FormatWithLocation)
 
 	xlog.OnError(func(pkg string) {
-		metrics.IncrCounter(metricskey.StatsLogErrors, 1, metrics.Tag{
-			Name:  "pkg",
-			Value: pkg,
-		})
+		metricskey.HealthLogErrors.IncrCounter(1, pkg)
 	})
 
 	return nil
@@ -564,6 +562,34 @@ func (a *App) setupMetrics() error {
 	var err error
 	var sink metrics.Sink
 
+	mcfg := &metrics.Config{
+		EnableHostname:       false,
+		EnableHostnameLabel:  false, // added in GlobalTags
+		EnableServiceLabel:   false, // added in GlobalTags
+		FilterDefault:        true,
+		EnableRuntimeMetrics: cfg.Metrics.EnableRuntimeMetrics,
+		TimerGranularity:     time.Millisecond,
+		ProfileInterval:      time.Second,
+		GlobalPrefix:         cfg.Metrics.Prefix,
+		AllowedPrefixes:      cfg.Metrics.AllowedPrefixes,
+		BlockedPrefixes:      cfg.Metrics.BlockedPrefixes,
+	}
+
+	for _, tag := range cfg.Metrics.GlobalTags {
+		switch tag {
+		case "host":
+			mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: a.hostname})
+		case "service":
+			mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: cfg.ServiceName})
+		case "env":
+			mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: a.cfg.Environment})
+		case "region":
+			mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: a.cfg.Region})
+		case "cluster_id":
+			mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: a.cfg.ClusterName})
+		}
+	}
+
 	switch cfg.Metrics.Provider {
 	case "prometheus":
 		if promSink == nil {
@@ -572,10 +598,12 @@ func (a *App) setupMetrics() error {
 			prom.Unregister(collectors.NewBuildInfoCollector())
 			prom.Unregister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
 
+			allmetrics := append(metricskey.Metrics, pmetricskey.Metrics...)
+
 			ops := prometheus.Opts{
 				Expiration: cfg.Metrics.Prometheus.Expiration,
 				Registerer: prom.DefaultRegisterer,
-				// TODO: descriptions
+				Help:       mcfg.Help(allmetrics),
 			}
 
 			promSink, err = prometheus.NewSinkFrom(ops)
@@ -601,39 +629,10 @@ func (a *App) setupMetrics() error {
 	}
 
 	if sink != nil {
-		mcfg := &metrics.Config{
-			EnableHostname:       false,
-			EnableHostnameLabel:  false, // added in GlobalTags
-			EnableServiceLabel:   false, // added in GlobalTags
-			FilterDefault:        true,
-			EnableRuntimeMetrics: cfg.Metrics.EnableRuntimeMetrics,
-			TimerGranularity:     time.Millisecond,
-			ProfileInterval:      time.Second,
-			GlobalPrefix:         cfg.Metrics.Prefix,
-			AllowedPrefixes:      cfg.Metrics.AllowedPrefixes,
-			BlockedPrefixes:      cfg.Metrics.BlockedPrefixes,
-		}
-
-		for _, tag := range cfg.Metrics.GlobalTags {
-			switch tag {
-			case "host":
-				mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: a.hostname})
-			case "service":
-				mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: cfg.ServiceName})
-			case "env":
-				mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: a.cfg.Environment})
-			case "region":
-				mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: a.cfg.Region})
-			case "cluster_id":
-				mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: a.cfg.ClusterName})
-			}
-		}
-
-		prov, err := metrics.NewGlobal(mcfg, sink)
+		_, err := metrics.NewGlobal(mcfg, sink)
 		if err != nil {
 			return err
 		}
-		prov.SetGauge([]string{"version"}, version.Current().Float())
 	}
 
 	return nil
