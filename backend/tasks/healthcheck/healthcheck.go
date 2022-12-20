@@ -11,7 +11,6 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/effective-security/metrics"
 	"github.com/effective-security/porto/pkg/retriable"
 	"github.com/effective-security/porto/pkg/tasks"
 	"github.com/effective-security/porto/xhttp/correlation"
@@ -95,22 +94,24 @@ func (t *Task) run() {
 		}(cert)
 	}
 
-	metrics.SetGauge([]string{"version"}, version.Current().Float())
+	ver := version.Current()
+	metricskey.HealthVersion.SetGauge(float64(ver.Commit))
 }
 
 func (t *Task) healthHsm(ctx context.Context) error {
 	if keyProv, ok := t.crypto.Default().(cryptoprov.KeyManager); ok {
 		ki, err := keyProv.EnumKeys(keyProv.CurrentSlotID(), "")
 		if err != nil {
-			metrics.IncrCounter(metricskey.HealthKmsKeysStatusFailedCount, 1)
-			metrics.IncrCounter(metricskey.HealthKmsKeysStatusSuccessfulCount, 0)
+			metricskey.HealthKmsKeysStatusFailCount.IncrCounter(1)
+			metricskey.HealthKmsKeysStatusSuccessCount.IncrCounter(0)
 			return err
 		}
 		count := len(ki)
-		metrics.IncrCounter(metricskey.HealthKmsKeysStatusFailedCount, 0)
-		metrics.IncrCounter(metricskey.HealthKmsKeysStatusSuccessfulCount, 1)
+		metricskey.HealthKmsKeysStatusFailCount.IncrCounter(0)
+		metricskey.HealthKmsKeysStatusSuccessCount.IncrCounter(1)
 
-		metrics.SetGauge(metricskey.StatsKmsKeysTotal, float32(count))
+		metricskey.StatsKmsKeysTotal.SetGauge(float64(count))
+
 		logger.ContextKV(ctx, xlog.DEBUG, "keys", count)
 	}
 	return nil
@@ -133,15 +134,15 @@ func (t *Task) healthCheckIssuers(ctx context.Context) error {
 		Bundle: false,
 	})
 	if err != nil {
-		metrics.IncrCounter(metricskey.HealthCAStatusFailedCount, 1)
-		metrics.IncrCounter(metricskey.HealthCAStatusSuccessfulCount, 0)
+		metricskey.HealthCAStatusFailCount.IncrCounter(1)
+		metricskey.HealthCAStatusSuccessCount.IncrCounter(0)
 		return err
 	}
-	metrics.IncrCounter(metricskey.HealthCAStatusFailedCount, 0)
-	metrics.IncrCounter(metricskey.HealthCAStatusSuccessfulCount, 1)
+	metricskey.HealthCAStatusFailCount.IncrCounter(0)
+	metricskey.HealthCAStatusSuccessCount.IncrCounter(1)
 
 	count := len(li.Issuers)
-	metrics.SetGauge(metricskey.StatsCAIssuersTotal, float32(count))
+	metricskey.StatsCAIssuersTotal.SetGauge(float64(count))
 	logger.ContextKV(ctx, xlog.DEBUG, "issuers", count)
 
 	return nil
@@ -164,8 +165,10 @@ func (t *Task) healthCheckOCSP(ctx context.Context, cert string) (*int, error) {
 	issuer := chain[1]
 
 	if len(crt.OCSPServer) == 0 {
-		return nil, errors.Errorf("certificate does not have OCSP URL: %s",
-			cert)
+		logger.ContextKV(t.ctx, xlog.ERROR,
+			"reason", "no_ocsp_url",
+			"cert", cert)
+		return nil, nil
 	}
 
 	req, err := certutil.CreateOCSPRequest(crt, issuer, crypto.SHA256)
@@ -177,11 +180,8 @@ func (t *Task) healthCheckOCSP(ctx context.Context, cert string) (*int, error) {
 	if err != nil {
 		return nil, errors.WithMessagef(err, "invalid OCSP URL: %s", crt.OCSPServer[0])
 	}
-	tag := metrics.Tag{Name: "ocsp_host", Value: ur.Host}
 
-	defer metrics.MeasureSince(metricskey.HealthOCSPCheckPerf, time.Now())
-
-	metrics.IncrCounter(metricskey.HealthOCSPStatusTotalCount, 1, tag)
+	defer metricskey.HealthOCSPCheckPerf.MeasureSince(time.Now(), ur.Host)
 
 	w := bytes.NewBuffer([]byte{})
 	host := fmt.Sprintf("%s://%s", ur.Scheme, ur.Host)
@@ -194,8 +194,8 @@ func (t *Task) healthCheckOCSP(ctx context.Context, cert string) (*int, error) {
 		req,
 		w)
 	if err != nil {
-		metrics.IncrCounter(metricskey.HealthOCSPStatusFailedCount, 1, tag)
-		metrics.IncrCounter(metricskey.HealthOCSPStatusSuccessfulCount, 0, tag)
+		metricskey.HealthOCSPStatusFailCount.IncrCounter(1, ur.Host)
+		metricskey.HealthOCSPStatusSuccessCount.IncrCounter(0, ur.Host)
 
 		logger.ContextKV(ctx, xlog.ERROR,
 			"host", ur.Host,
@@ -203,8 +203,8 @@ func (t *Task) healthCheckOCSP(ctx context.Context, cert string) (*int, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	metrics.IncrCounter(metricskey.HealthOCSPStatusSuccessfulCount, 1, tag)
-	metrics.IncrCounter(metricskey.HealthOCSPStatusFailedCount, 0, tag)
+	metricskey.HealthOCSPStatusFailCount.IncrCounter(0, ur.Host)
+	metricskey.HealthOCSPStatusSuccessCount.IncrCounter(1, ur.Host)
 
 	res, err := ocsp.ParseResponseForCert(w.Bytes(), crt, issuer)
 	if err != nil {

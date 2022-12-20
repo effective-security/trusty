@@ -4,7 +4,6 @@ import (
 	"encoding/pem"
 	"net/http"
 
-	"github.com/effective-security/metrics"
 	"github.com/effective-security/porto/restserver"
 	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/porto/xhttp/header"
@@ -35,9 +34,7 @@ func (s *Service) GetCRLHandler() restserver.Handle {
 		if err != nil {
 			if xdb.IsNotFoundError(err) {
 				// metrics for Not Found
-				metrics.IncrCounter(metricskey.AIADownloadFailedCrl, 1,
-					metrics.Tag{Name: ikidTag, Value: ikid},
-				)
+				metricskey.AIADownloadFailCrl.IncrCounter(1)
 				marshal.WriteJSON(w, r, httperror.NotFound("unable to locate CRL"))
 
 			} else {
@@ -48,9 +45,7 @@ func (s *Service) GetCRLHandler() restserver.Handle {
 
 		block, _ := pem.Decode([]byte(m.Pem))
 
-		metrics.IncrCounter(metricskey.AIADownloadSuccessfulCrl, 1,
-			metrics.Tag{Name: ikidTag, Value: ikid},
-		)
+		metricskey.AIADownloadSuccessCrl.IncrCounter(1)
 
 		wh := w.Header()
 		wh.Set(header.ContentType, "application/pkix-crl")
@@ -76,9 +71,7 @@ func (s *Service) GetCertHandler() restserver.Handle {
 		if err != nil {
 			if xdb.IsNotFoundError(err) {
 				// metrics for Not Found
-				metrics.IncrCounter(metricskey.AIADownloadFailedCert, 1,
-					metrics.Tag{Name: skidTag, Value: skid},
-				)
+				metricskey.AIADownloadFailCert.IncrCounter(1)
 				marshal.WriteJSON(w, r, httperror.NotFound("unable to locate certificate"))
 
 			} else {
@@ -88,9 +81,7 @@ func (s *Service) GetCertHandler() restserver.Handle {
 		}
 
 		block, _ := pem.Decode([]byte(m.Pem))
-		metrics.IncrCounter(metricskey.AIADownloadSuccessfulCert, 1,
-			metrics.Tag{Name: skidTag, Value: skid},
-		)
+		metricskey.AIADownloadSuccessCert.IncrCounter(1)
 
 		w.Header().Set(header.ContentType, "application/pkix-cert")
 		w.Write(block.Bytes)

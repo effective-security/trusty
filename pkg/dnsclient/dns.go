@@ -66,9 +66,9 @@ func (c *Client) WithRestrictedAddresses() *Client {
 }
 
 var (
-	metricsKeyForTotalLookup    = []string{"dnsclient", "perf", "lookup"}
-	metricsKeyForQuery          = []string{"dnsclient", "perf", "query"}
-	metricsKeyForTimeoutCounter = []string{"dnsclient", "timeout", "query"}
+	metricsKeyForTotalLookup    = "dnsclient_perf_lookup"
+	metricsKeyForQuery          = "dnsclient_perf_query"
+	metricsKeyForTimeoutCounter = "dnsclient_timeout_query"
 )
 
 // exchangeOne performs a single DNS exchange with a randomly chosen server

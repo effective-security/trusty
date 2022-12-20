@@ -8,7 +8,6 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/effective-security/metrics"
 	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/porto/xhttp/pberror"
 	pb "github.com/effective-security/trusty/api/v1/pb"
@@ -51,12 +50,7 @@ func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificat
 		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to revoke certificate")
 	}
 
-	tags := []metrics.Tag{
-		{Name: "ikid", Value: crt.IKID},
-		{Name: "serial", Value: crt.SerialNumber},
-	}
-
-	metrics.IncrCounter(metricskey.CACertRevoked, 1, tags...)
+	metricskey.CACertRevoked.IncrCounter(1, crt.IKID)
 
 	s.publishCrlInBackground(crt.IKID)
 
@@ -155,10 +149,7 @@ func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPRes
 		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to sign OCSP")
 	}
 
-	metrics.IncrCounter(metricskey.CAOcspSigned, 1,
-		metrics.Tag{Name: "ikid", Value: ikid},
-		metrics.Tag{Name: "status", Value: req.Status},
-	)
+	metricskey.CAOcspSigned.IncrCounter(1, ikid, req.Status)
 
 	return &pb.OCSPResponse{Der: der}, nil
 }
