@@ -175,7 +175,7 @@ func (a *App) Close() error {
 			}
 		}
 	}
-	logger.Warning("status=closed")
+	logger.KV(xlog.WARNING, "status", "closed")
 
 	return nil
 }
@@ -231,7 +231,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 	}
 
 	ver := version.Current().String()
-	logger.Infof("hostname=%s, ip=%s, version=%s", a.hostname, ipaddr, ver)
+	logger.KV(xlog.INFO, "hostname", a.hostname, "ip", ipaddr, "version", ver)
 
 	if a.flags.cpu != nil {
 		err = a.initCPUProfiler(*a.flags.cpu)
@@ -272,7 +272,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 			}
 			a.servers[httpServer.Name()] = httpServer
 		} else {
-			logger.Infof("reason=skip_disabled, server=%s", name)
+			logger.KV(xlog.INFO, "reason", "skip_disabled", "server", name)
 		}
 	}
 
@@ -288,10 +288,10 @@ func (a *App) Run(startedCh chan<- bool) error {
 		var svc gserver.Service
 		return disco.ForEach(&svc, func(key string) error {
 			if onstarted, ok := svc.(gserver.StartSubcriber); ok {
-				logger.Infof("src=Run, onstarted=running, key=%s, service=%s", key, svc.Name())
+				logger.KV(xlog.INFO, "src", "Run", "onstarted", "running", "key", key, "service", svc.Name())
 				return onstarted.OnStarted()
 			}
-			logger.Infof("src=Run, onstarted=skipped, key=%s, service=%s", key, svc.Name())
+			logger.KV(xlog.INFO, "src", "Run", "onstarted", "skipped", "key", key, "service", svc.Name())
 			return nil
 		})
 	})
@@ -321,7 +321,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 
 	// Block until a signal is received.
 	sig := <-a.sigs
-	logger.Warningf("status=shuting_down, sig=%v", sig)
+	logger.KV(xlog.WARNING, "status", "shuting_down", "sig", sig)
 
 	a.stopServers()
 
@@ -411,7 +411,7 @@ func (a *App) loadConfig() error {
 	if err != nil {
 		return errors.WithMessagef(err, "failed to load configuration %q", *flags.cfgFile)
 	}
-	logger.Infof("status=loaded, cfg=%q", *flags.cfgFile)
+	logger.KV(xlog.INFO, "status", "loaded", "cfg", *flags.cfgFile)
 	a.cfg = cfg
 
 	if *flags.logsDir != "" {
@@ -522,11 +522,10 @@ func (a *App) initLogs() error {
 			} else {
 				xlog.SetPackageLogLevel(ll.Repo, ll.Package, l)
 			}
-			logger.Infof("logger=%q, level=%v", ll.Repo, l)
+			logger.KV(xlog.INFO, "logger", ll.Repo, "level", l)
 		}
 	}
-	logger.Infof("status=service_starting, version='%v', args=%v",
-		version.Current(), os.Args)
+	logger.KV(xlog.INFO, "status", "service_starting", "version", version.Current(), "args", os.Args)
 	xlog.GetFormatter().Options(xlog.FormatWithLocation)
 
 	xlog.OnError(func(pkg string) {
@@ -546,7 +545,7 @@ func (a *App) initCPUProfiler(file string) error {
 		if err != nil {
 			return errors.WithMessage(err, "unable to create CPU profile")
 		}
-		logger.Infof("status=starting_cpu_profiling, file=%q", file)
+		logger.KV(xlog.INFO, "status", "starting_cpu_profiling", "file", file)
 
 		pprof.StartCPUProfile(cpuf)
 		a.OnClose(&cpuProfileCloser{file: file})
@@ -579,7 +578,7 @@ func (a *App) setupMetrics() error {
 
 			if cfg.Metrics.Prometheus != nil && cfg.Metrics.Prometheus.Addr != "" {
 				go func() {
-					logger.Infof("status=starting_metrics, endpoint=%s", cfg.Metrics.Prometheus.Addr)
+					logger.KV(xlog.INFO, "status", "starting_metrics", "endpoint", cfg.Metrics.Prometheus.Addr)
 					// remove Prom metrics
 					h := promhttp.HandlerFor(prom.DefaultGatherer, promhttp.HandlerOpts{})
 					logger.Fatal(http.ListenAndServe(cfg.Metrics.Prometheus.Addr, h).Error())

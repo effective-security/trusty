@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/effective-security/porto/x/xdb"
-	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
@@ -24,7 +23,7 @@ func (p *Provider) RegisterCrl(ctx context.Context, crl *model.Crl) (*model.Crl,
 		return nil, err
 	}
 
-	logger.Tracef("issuer=%q, ikid=%s, ctx=%q", crl.Issuer, crl.IKID, correlation.ID(ctx))
+	logger.ContextKV(ctx, xlog.TRACE, "issuer", crl.Issuer, "ikid", crl.IKID)
 
 	res := new(model.Crl)
 
@@ -59,14 +58,14 @@ func (p *Provider) RegisterCrl(ctx context.Context, crl *model.Crl) (*model.Crl,
 
 // RemoveCrl removes CRL
 func (p *Provider) RemoveCrl(ctx context.Context, id uint64) error {
-	logger.Noticef("id=%d, ctx=%q", id, correlation.ID(ctx))
+	logger.ContextKV(ctx, xlog.NOTICE, "id", id)
 	_, err := p.sql.ExecContext(ctx, `DELETE FROM crls WHERE id=$1;`, id)
 	if err != nil {
 		logger.KV(xlog.ERROR, "err", err)
 		return errors.WithStack(err)
 	}
 
-	logger.Noticef("id=%d", id)
+	logger.ContextKV(ctx, xlog.NOTICE, "id", id)
 
 	return nil
 }

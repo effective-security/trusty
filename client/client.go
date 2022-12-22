@@ -197,14 +197,14 @@ func (c *Client) dial(target string, creds credentials.TransportCredentials, dop
 	target = strings.TrimPrefix(target, "unixs://")
 	target = strings.TrimPrefix(target, "unix://")
 
-	logger.Debugf("scr=dial, target=%q, with_timeout=%v", target, c.cfg.DialTimeout)
+	logger.KV(xlog.DEBUG, "scr", "dial", "target", target, "with_timeout", c.cfg.DialTimeout)
 
 	conn, err := grpc.DialContext(dctx, target, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	logger.Debugf("scr=dial, target=%q, status=connecton_created", target)
+	logger.KV(xlog.DEBUG, "scr", "dial, target", target, "status", "connecton_created")
 	return conn, nil
 }
 

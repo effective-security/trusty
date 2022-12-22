@@ -100,7 +100,7 @@ func create(
 
 	task.certsMap = certsMapFromLocations(args)
 	for location, typ := range task.certsMap {
-		logger.Infof("type=%q, location=%q,", typ, location)
+		logger.KV(xlog.INFO, "type", typ, "location", location)
 	}
 	return task, nil
 }
