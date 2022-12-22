@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/effective-security/porto/x/xdb"
-	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
+	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
 )
 
@@ -17,7 +17,7 @@ func (p *Provider) RegisterRootCertificate(ctx context.Context, crt *model.RootC
 		return nil, err
 	}
 
-	logger.Tracef("subject=%q, skid=%s, ctx=%q", crt.Subject, crt.SKID, correlation.ID(ctx))
+	logger.ContextKV(ctx, xlog.TRACE, "subject", crt.Subject, "skid", crt.SKID)
 
 	res := new(model.RootCertificate)
 
@@ -49,14 +49,14 @@ func (p *Provider) RegisterRootCertificate(ctx context.Context, crt *model.RootC
 
 // RemoveRootCertificate removes Root Cert
 func (p *Provider) RemoveRootCertificate(ctx context.Context, id uint64) error {
-	logger.Noticef("id=%d, ctx=%q", id, correlation.ID(ctx))
+	logger.ContextKV(ctx, xlog.NOTICE, "id", id)
 	_, err := p.sql.ExecContext(ctx, `DELETE FROM roots WHERE id=$1;`, id)
 	if err != nil {
 		//logger.ContextKV(ctx, xlog.ERROR, "err", err)
 		return errors.WithStack(err)
 	}
 
-	logger.Noticef("id=%d", id)
+	logger.ContextKV(ctx, xlog.NOTICE, "id", id)
 
 	return nil
 }

@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/effective-security/porto/x/xdb"
-	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
@@ -21,8 +20,7 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 		return nil, err
 	}
 
-	logger.Tracef("id=%d, subject=%q, skid=%s, ctx=%q",
-		id, crt.Subject, crt.SKID, correlation.ID(ctx))
+	logger.ContextKV(ctx, xlog.TRACE, "id", id, "subject", crt.Subject, "skid", crt.SKID)
 
 	b, err := json.Marshal(crt.Metadata)
 	if err != nil {
@@ -125,7 +123,7 @@ func scanShortCertificate(row *sql.Rows) (*model.Certificate, error) {
 
 // RemoveCertificate removes Cert
 func (p *Provider) RemoveCertificate(ctx context.Context, id uint64) error {
-	logger.Noticef("id=%d, ctx=%q", id, correlation.ID(ctx))
+	logger.ContextKV(ctx, xlog.NOTICE, "id", id)
 	_, err := p.sql.ExecContext(ctx, `DELETE FROM certificates WHERE id=$1;`, id)
 	if err != nil {
 		logger.ContextKV(ctx, xlog.ERROR, "err", err)
@@ -137,7 +135,7 @@ func (p *Provider) RemoveCertificate(ctx context.Context, id uint64) error {
 
 // UpdateCertificateLabel update Certificate label
 func (p *Provider) UpdateCertificateLabel(ctx context.Context, id uint64, label string) (*model.Certificate, error) {
-	logger.Noticef("id=%d, label=%q, ctx=%q", id, label, correlation.ID(ctx))
+	logger.ContextKV(ctx, xlog.NOTICE, "id", id, "label", label)
 	m, err := scanFullCertificate(p.sql.QueryRowContext(ctx, `
 			UPDATE certificates
 			SET label=$2

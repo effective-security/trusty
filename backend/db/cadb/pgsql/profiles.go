@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/effective-security/porto/x/xdb"
-	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
@@ -18,7 +17,7 @@ func (p *Provider) RegisterCertProfile(ctx context.Context, m *model.CertProfile
 		return nil, err
 	}
 
-	logger.Tracef("id=%d, label=%q, ctx=%q", id, m.Label, correlation.ID(ctx))
+	logger.ContextKV(ctx, xlog.TRACE, "id", id, "label", m.Label)
 
 	res := new(model.CertProfile)
 	err = p.sql.QueryRowContext(ctx, `
@@ -46,7 +45,7 @@ func (p *Provider) RegisterCertProfile(ctx context.Context, m *model.CertProfile
 
 // DeleteCertProfile deletes the CertProfile
 func (p *Provider) DeleteCertProfile(ctx context.Context, label string) error {
-	logger.Noticef("label=%s, ctx=%q", label, correlation.ID(ctx))
+	logger.ContextKV(ctx, xlog.NOTICE, "label", label)
 	_, err := p.sql.ExecContext(ctx, `DELETE FROM cert_profiles WHERE label=$1;`, label)
 	if err != nil {
 		logger.ContextKV(ctx, xlog.ERROR, "err", err)
