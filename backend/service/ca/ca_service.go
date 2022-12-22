@@ -8,7 +8,6 @@ import (
 	"github.com/effective-security/porto/pkg/tasks"
 	"github.com/effective-security/porto/restserver"
 	"github.com/effective-security/porto/x/fileutil"
-	"github.com/effective-security/porto/xhttp/correlation"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/backend/db/cadb"
@@ -144,14 +143,14 @@ func (s *Service) registerCert(ctx context.Context, trust pb.Trust, location str
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	logger.Infof("trust=%v, subject=%q", trust, c.Subject)
+	logger.ContextKV(ctx, xlog.INFO, "trust", trust, "subject", c.Subject)
 	return nil
 }
 
 func (s *Service) registerRoots(ctx context.Context) error {
 	for _, r := range s.cfg.RegistrationAuthority.PrivateRoots {
 		if err := fileutil.FileExists(r); err != nil {
-			logger.Warningf("err=[%+v]", err.Error())
+			logger.ContextKV(ctx, xlog.WARNING, "err", err.Error())
 			continue
 		}
 		err := s.registerCert(ctx, pb.Trust_Private, r)
@@ -162,7 +161,7 @@ func (s *Service) registerRoots(ctx context.Context) error {
 	}
 	for _, r := range s.cfg.RegistrationAuthority.PublicRoots {
 		if err := fileutil.FileExists(r); err != nil {
-			logger.Warningf("ctx=%q, err=[%v]", correlation.ID(ctx), err.Error())
+			logger.ContextKV(ctx, xlog.WARNING, "err", err.Error())
 			continue
 		}
 		err := s.registerCert(ctx, pb.Trust_Public, r)

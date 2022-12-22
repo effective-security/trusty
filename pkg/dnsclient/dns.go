@@ -128,7 +128,7 @@ func (c *Client) exchangeOne(ctx context.Context, hostname string, qtype uint16)
 		ch := make(chan dnsResp, 1)
 
 		go func() {
-			logger.Tracef("hostname=%q, type=%v, server=%s", hostname, qtypeStr, chosenServer)
+			logger.KV(xlog.TRACE, "hostname", hostname, "type", qtypeStr, "server", chosenServer)
 
 			started := time.Now().UTC()
 			rsp, _, err := c.dnsClient.Exchange(m, chosenServer)
@@ -201,11 +201,11 @@ func (c *Client) LookupTXT(ctx context.Context, hostname string) ([]string, []st
 	dnsType := dns.TypeTXT
 	r, err := c.exchangeOne(ctx, hostname, dnsType)
 	if err != nil {
-		logger.Tracef("reason=exchangeOne, host=%s, err=[%+v]", hostname, err.Error())
+		logger.KV(xlog.TRACE, "reason", "exchangeOne", "host", hostname, "err", err.Error())
 		return nil, nil, &Error{dnsType, hostname, err, -1}
 	}
 	if r.Rcode != dns.RcodeSuccess {
-		logger.Tracef("reason=exchangeOne, host=%s, rc=%d", hostname, r.Rcode)
+		logger.KV(xlog.TRACE, "reason", "exchangeOne", "host", hostname, "rc", r.Rcode)
 		return nil, nil, &Error{dnsType, hostname, nil, r.Rcode}
 	}
 
@@ -228,11 +228,11 @@ func (c *Client) LookupTXT(ctx context.Context, hostname string) ([]string, []st
 func (c *Client) lookupIP(ctx context.Context, hostname string, ipType uint16) ([]dns.RR, error) {
 	resp, err := c.exchangeOne(ctx, hostname, ipType)
 	if err != nil {
-		logger.Tracef("reason=exchangeOne, type=%d, host=%s, err=[%+v]", ipType, hostname, err.Error())
+		logger.KV(xlog.TRACE, "reason", "exchangeOne", "type", ipType, "host", hostname, "err", err.Error())
 		return nil, &Error{ipType, hostname, err, -1}
 	}
 	if resp.Rcode != dns.RcodeSuccess {
-		logger.Tracef("reason=exchangeOne, type=%d, host=%s, rc=%d", ipType, hostname, resp.Rcode)
+		logger.KV(xlog.TRACE, "reason", "exchangeOne", "type", ipType, "host", hostname, "rc", resp.Rcode)
 		return nil, &Error{ipType, hostname, nil, resp.Rcode}
 	}
 	return resp.Answer, nil
@@ -254,11 +254,9 @@ func (c *Client) LookupHost(ctx context.Context, hostname string) ([]net.IP, err
 		defer wg.Done()
 		recordsA, errA = c.lookupIP(ctx, hostname, dns.TypeA)
 		if errA != nil {
-			logger.Tracef("reason=lookupIP, type=A, host=%s, err=[%+v]",
-				hostname, errA.Error())
+			logger.KV(xlog.TRACE, "reason", "lookupIP", "type=A", "host", hostname, "err", errA.Error())
 		} else {
-			logger.Tracef("reason=lookupIP, type=A, host=%s, records=%d",
-				hostname, len(recordsA))
+			logger.KV(xlog.TRACE, "reason", "lookupIP", "type=A", "host", hostname, "records", len(recordsA))
 		}
 	}()
 	wg.Add(1)
@@ -266,10 +264,9 @@ func (c *Client) LookupHost(ctx context.Context, hostname string) ([]net.IP, err
 		defer wg.Done()
 		recordsAAAA, errAAAA = c.lookupIP(ctx, hostname, dns.TypeAAAA)
 		if errAAAA != nil {
-			logger.Tracef("reason=lookupIP, type=AAAA, host=%s, err=[%+v]", hostname, errAAAA.Error())
+			logger.KV(xlog.TRACE, "reason", "lookupIP", "type", "AAAA", "host", hostname, "err", errAAAA.Error())
 		} else {
-			logger.Tracef("reason=lookupIP, type=AAAA, host=%s, records=%d",
-				hostname, len(recordsAAAA))
+			logger.KV(xlog.TRACE, "reason", "lookupIP", "type", "AAAA", "host", hostname, "records", len(recordsAAAA))
 		}
 	}()
 	wg.Wait()
@@ -308,12 +305,12 @@ func (c *Client) LookupCAA(ctx context.Context, hostname string) ([]*dns.CAA, er
 	dnsType := dns.TypeCAA
 	r, err := c.exchangeOne(ctx, hostname, dnsType)
 	if err != nil {
-		logger.Tracef("reason=exchangeOne, host=%s, err=[%+v]", hostname, err.Error())
+		logger.KV(xlog.TRACE, "reason", "exchangeOne", "host", hostname, "err", err.Error())
 		return nil, &Error{dnsType, hostname, err, -1}
 	}
 
 	if r.Rcode == dns.RcodeServerFailure {
-		logger.Tracef("reason=exchangeOne, host=%s, rc=%d", hostname, r.Rcode)
+		logger.KV(xlog.TRACE, "reason", "exchangeOne", "host", hostname, "rc", r.Rcode)
 		return nil, &Error{dnsType, hostname, nil, r.Rcode}
 	}
 
@@ -332,11 +329,11 @@ func (c *Client) LookupMX(ctx context.Context, hostname string) ([]string, error
 	dnsType := dns.TypeMX
 	r, err := c.exchangeOne(ctx, hostname, dnsType)
 	if err != nil {
-		logger.Tracef("reason=exchangeOne, host=%s, err=[%+v]", hostname, err.Error())
+		logger.KV(xlog.TRACE, "reason", "exchangeOne", "host", hostname, "err", err.Error())
 		return nil, &Error{dnsType, hostname, err, -1}
 	}
 	if r.Rcode != dns.RcodeSuccess {
-		logger.Tracef("reason=exchangeOne, host=%s, rc=%d", hostname, r.Rcode)
+		logger.KV(xlog.TRACE, "reason", "exchangeOne", "host", hostname, "rc", r.Rcode)
 		return nil, &Error{dnsType, hostname, nil, r.Rcode}
 	}
 

@@ -66,14 +66,12 @@ func (a *App) genCert() error {
 			cutoff := time.Now().Add(d).UTC()
 			cert, err := certutil.LoadFromPEM(gcCfg.CertFile)
 			if err != nil {
-				logger.Infof("reason=load, profile=%s, err=%q", gcCfg.Profile, err.Error())
+				logger.KV(xlog.INFO, "reason", "load", "profile", gcCfg.Profile, "err", err.Error())
 			} else if cutoff.Before(cert.NotAfter.UTC()) {
 				// try to load file with the key to ensure it matches and valid
 				_, err = tlsconfig.LoadX509KeyPairWithOCSP(gcCfg.CertFile, gcCfg.KeyFile)
 				if err == nil {
-					logger.Infof("reason=valid, profile=%s, notAfter=%q",
-						gcCfg.Profile,
-						cert.NotAfter.Format(time.RFC3339))
+					logger.KV(xlog.INFO, "reason", "valid", "profile", gcCfg.Profile, "notAfter", cert.NotAfter.Format(time.RFC3339))
 					continue
 				}
 			}
@@ -133,14 +131,15 @@ func (a *App) genCert() error {
 				"err", err)
 			// DO NOT fail on register error
 		}
-		logger.Noticef("status=signed, cert=%q, key=%q, profile=%s, ikid=%s, sn=%s, ocsp=%v, crl=%v",
-			gcCfg.CertFile,
-			gcCfg.KeyFile,
-			gcCfg.Profile,
-			mcert.IKID,
-			mcert.SerialNumber,
-			crt.OCSPServer,
-			crt.CRLDistributionPoints,
+		logger.KV(xlog.NOTICE,
+			"status", "signed",
+			"cert", gcCfg.CertFile,
+			"key", gcCfg.KeyFile,
+			"profile", gcCfg.Profile,
+			"ikid", mcert.IKID,
+			"sn", mcert.SerialNumber,
+			"ocsp", crt.OCSPServer,
+			"crl", crt.CRLDistributionPoints,
 		)
 	}
 	return nil

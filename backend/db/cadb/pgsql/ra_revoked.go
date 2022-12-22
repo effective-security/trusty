@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/effective-security/porto/x/xdb"
-	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
@@ -29,8 +28,7 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 	}
 
 	crt := &revoked.Certificate
-	logger.Tracef("id=%d,subject=%q, skid=%s, ikid=%s, ctx=%q",
-		id, crt.Subject, crt.SKID, crt.IKID, correlation.ID(ctx))
+	logger.ContextKV(ctx, xlog.TRACE, "id", id, "subject", crt.Subject, "skid", crt.SKID, "ikid", crt.IKID)
 
 	b, err := json.Marshal(crt.Metadata)
 	if err != nil {
@@ -138,14 +136,14 @@ func scanShortRevokedCertificate(row *sql.Rows) (*model.RevokedCertificate, erro
 
 // RemoveRevokedCertificate removes revoked Certificate
 func (p *Provider) RemoveRevokedCertificate(ctx context.Context, id uint64) error {
-	logger.Noticef("id=%d, ctx=%q", id, correlation.ID(ctx))
+	logger.ContextKV(ctx, xlog.NOTICE, "id", id)
 	_, err := p.sql.ExecContext(ctx, `DELETE FROM revoked WHERE id=$1;`, id)
 	if err != nil {
 		// logger.ContextKV(ctx, xlog.ERROR, "err", err)
 		return errors.WithStack(err)
 	}
 
-	logger.Noticef("id=%d", id)
+	logger.ContextKV(ctx, xlog.NOTICE, "id", id)
 
 	return nil
 }
