@@ -96,6 +96,8 @@ func (t *Task) run() {
 
 	ver := version.Current()
 	metricskey.HealthVersion.SetGauge(float64(ver.Commit))
+	// emit an empty `log_errors` metric to have it available in Grafana
+	metricskey.HealthLogErrors.IncrCounter(0, "ping")
 }
 
 func (t *Task) healthHsm(ctx context.Context) error {

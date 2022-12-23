@@ -45,7 +45,7 @@ var (
 	HealthCAStatusFailCount = metrics.Describe{
 		Type: metrics.TypeCounter,
 		Name: "health_status_fail_ca_issuers",
-		Help: "health_status_fail_ca_issuers provides counter for failed status check on CA issuers",
+		Help: "provides counter for failed status check on CA issuers",
 		//RequiredTags: []string{},
 	}
 
