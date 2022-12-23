@@ -532,6 +532,7 @@ func (a *App) initLogs() error {
 	xlog.OnError(func(pkg string) {
 		metricskey.HealthLogErrors.IncrCounter(1, pkg)
 	})
+	metricskey.HealthLogErrors.IncrCounter(0, "trusty")
 
 	return nil
 }
@@ -597,12 +598,10 @@ func (a *App) setupMetrics() error {
 			prom.Unregister(collectors.NewBuildInfoCollector())
 			prom.Unregister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
 
-			allmetrics := append(metricskey.Metrics, pmetricskey.Metrics...)
-
 			ops := prometheus.Opts{
 				Expiration: cfg.Metrics.Prometheus.Expiration,
 				Registerer: prom.DefaultRegisterer,
-				Help:       mcfg.Help(allmetrics),
+				Help:       mcfg.Help(metricskey.Metrics, pmetricskey.Metrics),
 			}
 
 			promSink, err = prometheus.NewSinkFrom(ops)
