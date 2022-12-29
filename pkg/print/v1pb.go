@@ -53,7 +53,7 @@ func CallerStatusResponse(w io.Writer, r *pb.CallerStatusResponse) {
 
 	now := time.Now().Local()
 	var claims jwt.MapClaims
-	json.Unmarshal(r.Claims, &claims)
+	_ = json.Unmarshal(r.Claims, &claims)
 	for k := range claims {
 		var val string
 		if dateClaims[k] {

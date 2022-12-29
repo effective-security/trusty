@@ -92,7 +92,7 @@ func scanFullRevokedCertificate(row *sql.Row) (*model.RevokedCertificate, error)
 		res.Certificate.Locations = strings.Split(locations, ",")
 	}
 	if len(meta) > 0 {
-		json.Unmarshal([]byte(meta), &res.Certificate.Metadata)
+		_ = json.Unmarshal([]byte(meta), &res.Certificate.Metadata)
 	}
 	return res, nil
 }
@@ -129,7 +129,7 @@ func scanShortRevokedCertificate(row *sql.Rows) (*model.RevokedCertificate, erro
 		res.Certificate.Locations = strings.Split(locations, ",")
 	}
 	if len(meta) > 0 {
-		json.Unmarshal([]byte(meta), &res.Certificate.Metadata)
+		_ = json.Unmarshal([]byte(meta), &res.Certificate.Metadata)
 	}
 	return res, nil
 }
@@ -245,13 +245,13 @@ func (p *Provider) RevokeCertificate(ctx context.Context, crt *model.Certificate
 
 	err = p.RemoveCertificate(ctx, crt.ID)
 	if err != nil {
-		tx.Rollback()
+		_ = tx.Rollback()
 		return nil, errors.WithStack(err)
 	}
 
 	revoked, err = p.RegisterRevokedCertificate(ctx, revoked)
 	if err != nil {
-		tx.Rollback()
+		_ = tx.Rollback()
 		return nil, errors.WithStack(err)
 	}
 	// Finally, if no errors are recieved from the queries, commit the transaction

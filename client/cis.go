@@ -46,6 +46,8 @@ func (c *cisClient) GetCertificate(ctx context.Context, in *pb.GetCertificateReq
 	return c.remote.GetCertificate(ctx, in, c.callOpts...)
 }
 
+/*
 type retryCIClient struct {
 	cis pb.CIServiceClient
 }
+*/

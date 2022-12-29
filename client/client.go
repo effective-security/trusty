@@ -5,7 +5,6 @@ import (
 	"math"
 	"os"
 	"strings"
-	"time"
 
 	tcredentials "github.com/effective-security/porto/gserver/credentials"
 	"github.com/effective-security/porto/xhttp/pberror"
@@ -40,18 +39,18 @@ var (
 	// client-side non-streaming retry limit, only applied to requests where server responds with
 	// a error code clearly indicating it was unable to process the request such as codes.Unavailable.
 	// If set to 0, retry is disabled.
-	defaultUnaryMaxRetries uint = 100
+	//defaultUnaryMaxRetries uint = 100
 
 	// client-side streaming retry limit, only applied to requests where server responds with
 	// a error code clearly indicating it was unable to process the request such as codes.Unavailable.
 	// If set to 0, retry is disabled.
-	defaultStreamMaxRetries = ^uint(0) // max uint
+	//defaultStreamMaxRetries = ^uint(0) // max uint
 
 	// client-side retry backoff wait between requests.
-	defaultBackoffWaitBetween = 25 * time.Millisecond
+	//defaultBackoffWaitBetween = 25 * time.Millisecond
 
 	// client-side retry backoff default jitter fraction.
-	defaultBackoffJitterFraction = 0.10
+	//defaultBackoffJitterFraction = 0.10
 )
 
 // defaultCallOpts defines a list of default "gRPC.CallOption".

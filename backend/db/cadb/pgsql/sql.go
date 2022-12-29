@@ -11,7 +11,7 @@ import (
 var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/internal/cadb", "pgsql")
 
 const (
-	defaultLimitOfRows = 1000
+// defaultLimitOfRows = 1000
 )
 
 // Provider represents SQL client instance

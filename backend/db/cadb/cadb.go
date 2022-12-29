@@ -11,7 +11,8 @@ import (
 	"github.com/effective-security/porto/x/xdb/migrate"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/trusty/backend/db/cadb/pgsql"
-	"github.com/effective-security/xlog"
+
+	//"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
 
 	// register Postgres driver
@@ -20,7 +21,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/backend/db", "cadb")
+//var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/backend/db", "cadb")
 
 // Table names
 const (

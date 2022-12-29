@@ -49,11 +49,11 @@ func (a *App) genCert() error {
 		}
 
 		certDir := filepath.Dir(gcCfg.CertFile)
-		os.MkdirAll(certDir, 0755)
+		_ = os.MkdirAll(certDir, 0755)
 
 		keyDir := filepath.Dir(gcCfg.KeyFile)
 		if keyDir != certDir {
-			os.MkdirAll(keyDir, 0755)
+			_ = os.MkdirAll(keyDir, 0755)
 		}
 
 		if fileutil.FileExists(gcCfg.CertFile) == nil &&

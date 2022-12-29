@@ -282,7 +282,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 		a.stopServers()
 		return err
 	}
-	a.scheduler.Start()
+	_ = a.scheduler.Start()
 
 	// Notify services
 	err = a.container.Invoke(func(disco discovery.Discovery) error {
@@ -350,7 +350,7 @@ func (a *App) Server(name string) *gserver.Server {
 
 func (a *App) stopServers() {
 	if a.scheduler != nil {
-		a.scheduler.Stop()
+		_ = a.scheduler.Stop()
 	}
 	for _, running := range a.servers {
 		running.Close()
@@ -493,7 +493,7 @@ func (a *App) initLogs() error {
 		formatter := stackdriver.NewFormatter(os.Stderr, cfg.Logs.LogsName)
 		xlog.SetFormatter(formatter)
 	} else if cfg.Logs.Directory != "" && cfg.Logs.Directory != nullDevName {
-		os.MkdirAll(cfg.Logs.Directory, 0644)
+		_ = os.MkdirAll(cfg.Logs.Directory, 0644)
 
 		var sink io.Writer
 		if a.flags != nil && a.flags.isStderr != nil && *a.flags.isStderr {
@@ -546,7 +546,7 @@ func (a *App) initCPUProfiler(file string) error {
 		}
 		logger.KV(xlog.INFO, "status", "starting_cpu_profiling", "file", file)
 
-		pprof.StartCPUProfile(cpuf)
+		_ = pprof.StartCPUProfile(cpuf)
 		a.OnClose(&cpuProfileCloser{file: file})
 	}
 	return nil

@@ -13,11 +13,12 @@ import (
 	"github.com/effective-security/xlog"
 )
 
+/*
 const (
 	ikidTag = "ikid"
 	skidTag = "skid"
 )
-
+*/
 // GetCRLHandler returns CRL
 func (s *Service) GetCRLHandler() restserver.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p restserver.Params) {
@@ -51,7 +52,7 @@ func (s *Service) GetCRLHandler() restserver.Handle {
 		wh.Set(header.ContentType, "application/pkix-crl")
 		wh.Set("Cache-Control", "no-store")
 		wh.Set("Pragma", "no-cache")
-		w.Write(block.Bytes)
+		_, _ = w.Write(block.Bytes)
 	}
 }
 
@@ -84,6 +85,6 @@ func (s *Service) GetCertHandler() restserver.Handle {
 		metricskey.AIADownloadSuccessCert.IncrCounter(1)
 
 		w.Header().Set(header.ContentType, "application/pkix-cert")
-		w.Write(block.Bytes)
+		_, _ = w.Write(block.Bytes)
 	}
 }

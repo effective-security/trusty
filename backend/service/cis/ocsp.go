@@ -19,9 +19,9 @@ import (
 var (
 	malformedRequestErrorResponse = []byte{0x30, 0x03, 0x0A, 0x01, 0x01}
 	internalErrorErrorResponse    = []byte{0x30, 0x03, 0x0A, 0x01, 0x02}
-	tryLaterErrorResponse         = []byte{0x30, 0x03, 0x0A, 0x01, 0x03}
-	sigRequredErrorResponse       = []byte{0x30, 0x03, 0x0A, 0x01, 0x05}
-	unauthorizedErrorResponse     = []byte{0x30, 0x03, 0x0A, 0x01, 0x06}
+	//tryLaterErrorResponse         = []byte{0x30, 0x03, 0x0A, 0x01, 0x03}
+	//sigRequredErrorResponse       = []byte{0x30, 0x03, 0x0A, 0x01, 0x05}
+	unauthorizedErrorResponse = []byte{0x30, 0x03, 0x0A, 0x01, 0x06}
 )
 
 // OCSPResponder represents the logical source of OCSP responses, i.e.,
@@ -110,18 +110,18 @@ func (s *Service) ocspResponse(w http.ResponseWriter, r *http.Request, requestBo
 
 		switch httperror.Status(err) {
 		case http.StatusBadRequest:
-			w.Write(malformedRequestErrorResponse)
+			_, _ = w.Write(malformedRequestErrorResponse)
 			return
 		case http.StatusNotFound:
-			w.Write(unauthorizedErrorResponse)
+			_, _ = w.Write(unauthorizedErrorResponse)
 			return
 		}
 
-		w.Write(internalErrorErrorResponse)
+		_, _ = w.Write(internalErrorErrorResponse)
 		return
 	}
 
 	metricskey.AIADownloadSuccessOCSP.IncrCounter(1)
 
-	w.Write(res.Der)
+	_, _ = w.Write(res.Der)
 }

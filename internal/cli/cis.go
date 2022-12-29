@@ -33,7 +33,7 @@ func (a *GetRootsCmd) Run(cli *Cli) error {
 	}
 
 	if cli.IsJSON() {
-		cli.WriteJSON(res)
+		_ = cli.WriteJSON(res)
 	} else {
 		print.Roots(cli.Writer(), res.Roots, a.Pem)
 	}

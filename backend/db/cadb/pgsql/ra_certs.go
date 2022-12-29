@@ -81,7 +81,7 @@ func scanFullCertificate(row *sql.Row) (*model.Certificate, error) {
 		res.Locations = strings.Split(locations, ",")
 	}
 	if len(meta) > 0 {
-		json.Unmarshal([]byte(meta), &res.Metadata)
+		_ = json.Unmarshal([]byte(meta), &res.Metadata)
 	}
 	return res, nil
 }
@@ -116,7 +116,7 @@ func scanShortCertificate(row *sql.Rows) (*model.Certificate, error) {
 		res.Locations = strings.Split(locations, ",")
 	}
 	if len(meta) > 0 {
-		json.Unmarshal([]byte(meta), &res.Metadata)
+		_ = json.Unmarshal([]byte(meta), &res.Metadata)
 	}
 	return res, nil
 }
