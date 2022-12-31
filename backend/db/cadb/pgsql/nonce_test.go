@@ -24,7 +24,7 @@ func TestNonces(t *testing.T) {
 	m1, err := provider.CreateNonce(ctx, m)
 	require.NoError(t, err)
 	require.NotNil(t, m1)
-	defer provider.DeleteNonce(ctx, m1.ID)
+	_ = provider.DeleteNonce(ctx, m1.ID)
 
 	assert.Equal(t, m.Nonce, m1.Nonce)
 	assert.Equal(t, m.Used, m1.Used)

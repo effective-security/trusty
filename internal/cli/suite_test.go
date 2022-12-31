@@ -108,7 +108,7 @@ func (s *testSuite) SetupMockGRPC() *grpc.Server {
 	var err error
 
 	for i := 0; i < 5; i++ {
-		addr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort("localhost", "0"))
+		addr, _ := net.ResolveTCPAddr("tcp", net.JoinHostPort("localhost", "0"))
 
 		s.T().Logf("%s: starting on %s", s.T().Name(), addr)
 
@@ -122,7 +122,7 @@ func (s *testSuite) SetupMockGRPC() *grpc.Server {
 
 	s.ctl.Server = lis.Addr().String()
 
-	go serv.Serve(lis)
+	_ = serv.Serve(lis)
 
 	// allow to start
 	time.Sleep(1 * time.Second)

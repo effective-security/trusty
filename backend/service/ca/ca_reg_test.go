@@ -56,7 +56,7 @@ func TestRegisterIssuer(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	defer svc.CaDb().DeleteIssuer(ctx, regRes.Label)
+	_ = svc.CaDb().DeleteIssuer(ctx, regRes.Label)
 	assert.NotEmpty(t, regRes.Profiles)
 	assert.Contains(t, regRes.Profiles, profileLabel)
 	assert.NotEmpty(t, regRes.Intermediates)

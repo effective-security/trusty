@@ -249,13 +249,6 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 	return container, nil
 }
 
-/*
-const (
-
-	nullDevName = "/dev/null"
-
-)
-*/
 func provideDiscovery() (discovery.Discovery, error) {
 	return discovery.New(), nil
 }

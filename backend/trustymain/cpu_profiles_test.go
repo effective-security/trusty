@@ -13,13 +13,13 @@ import (
 
 func TestCpuProfileCloser(t *testing.T) {
 	output := path.Join(os.TempDir(), "trusty", guid.MustCreate())
-	os.MkdirAll(output, 0777)
+	_ = os.MkdirAll(output, 0777)
 	defer os.Remove(output)
 
 	cpuf, err := os.Create(path.Join(output, "profiler"))
 	require.NoError(t, err)
 
-	pprof.StartCPUProfile(cpuf)
+	_ = pprof.StartCPUProfile(cpuf)
 	closer := &cpuProfileCloser{}
 
 	err = closer.Close()

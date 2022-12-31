@@ -26,7 +26,7 @@ func TestRegisterRootCertificate(t *testing.T) {
 	r, err := provider.RegisterRootCertificate(ctx, rc)
 	require.NoError(t, err)
 	require.NotNil(t, r)
-	defer provider.RemoveRootCertificate(ctx, r.ID)
+	_ = provider.RemoveRootCertificate(ctx, r.ID)
 
 	assert.Equal(t, rc.SKID, r.SKID)
 	assert.Equal(t, rc.Subject, r.Subject)
@@ -70,7 +70,7 @@ func TestRegisterCertificate(t *testing.T) {
 	r, err := provider.RegisterCertificate(ctx, rc)
 	require.NoError(t, err)
 	require.NotNil(t, r)
-	defer provider.RemoveCertificate(ctx, r.ID)
+	_ = provider.RemoveCertificate(ctx, r.ID)
 
 	assert.Equal(t, rc.OrgID, r.OrgID)
 	assert.Equal(t, rc.SKID, r.SKID)
@@ -195,7 +195,7 @@ func TestRegisterCertificateUniqueIdx(t *testing.T) {
 	r, err := provider.RegisterCertificate(ctx, rc)
 	require.NoError(t, err)
 	require.NotNil(t, r)
-	defer provider.RemoveCertificate(ctx, r.ID)
+	_ = provider.RemoveCertificate(ctx, r.ID)
 
 	assert.Equal(t, rc.OrgID, r.OrgID)
 	assert.Equal(t, rc.SKID, r.SKID)
@@ -260,7 +260,7 @@ func TestRegisterRevokedCertificate(t *testing.T) {
 	mr, err := provider.RegisterRevokedCertificate(ctx, mrc)
 	require.NoError(t, err)
 	require.NotNil(t, mr)
-	defer provider.RemoveRevokedCertificate(ctx, mr.Certificate.ID)
+	_ = provider.RemoveRevokedCertificate(ctx, mr.Certificate.ID)
 
 	rc := &mrc.Certificate
 	r := &mr.Certificate
@@ -313,7 +313,7 @@ func TestRegisterCrl(t *testing.T) {
 	r, err := provider.RegisterCrl(ctx, rc)
 	require.NoError(t, err)
 	require.NotNil(t, r)
-	defer provider.RemoveCrl(ctx, r.ID)
+	_ = provider.RemoveCrl(ctx, r.ID)
 
 	assert.Equal(t, rc.IKID, r.IKID)
 	assert.Equal(t, rc.Issuer, r.Issuer)
@@ -356,7 +356,7 @@ func TestListCertificate(t *testing.T) {
 		r, err := provider.RegisterCertificate(ctx, rc)
 		require.NoError(t, err)
 		require.NotNil(t, r)
-		defer provider.RemoveCertificate(ctx, r.ID)
+		_ = provider.RemoveCertificate(ctx, r.ID)
 	}
 
 	list, err := provider.ListCertificates(ctx, ikid, 1000, 0)

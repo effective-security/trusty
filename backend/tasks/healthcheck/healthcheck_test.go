@@ -20,7 +20,7 @@ func TestFactory(t *testing.T) {
 	require.NoError(t, err)
 
 	c := dig.New()
-	c.Provide(func() *config.Configuration {
+	_ = c.Provide(func() *config.Configuration {
 		return cfg
 	})
 	require.NoError(t, err)

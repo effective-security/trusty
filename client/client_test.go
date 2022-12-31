@@ -71,7 +71,7 @@ func setupStatusMockGRPC(t *testing.T, m *mockpb.MockStatusServer) (*client.Clie
 	client, err := client.NewFromURL(lis.Addr().String())
 	require.NoError(t, err)
 
-	go serv.Serve(lis)
+	_ = serv.Serve(lis)
 
 	return client, serv
 }

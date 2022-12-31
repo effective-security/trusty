@@ -20,7 +20,7 @@ func TestRegisterIssuer(t *testing.T) {
 	m1, err := provider.RegisterIssuer(ctx, m)
 	require.NoError(t, err)
 	require.NotNil(t, m)
-	defer provider.DeleteIssuer(ctx, m1.Label)
+	_ = provider.DeleteIssuer(ctx, m1.Label)
 
 	assert.NotEmpty(t, m1.ID)
 	assert.Equal(t, m.Label, m1.Label)
