@@ -122,7 +122,9 @@ func (s *testSuite) SetupMockGRPC() *grpc.Server {
 
 	s.ctl.Server = lis.Addr().String()
 
-	_ = serv.Serve(lis)
+	go func() {
+		_ = serv.Serve(lis)
+	}()
 
 	// allow to start
 	time.Sleep(1 * time.Second)
