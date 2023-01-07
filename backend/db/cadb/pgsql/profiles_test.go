@@ -19,7 +19,9 @@ func TestRegisterCertProfile(t *testing.T) {
 	mw, err := provider.RegisterCertProfile(ctx, wm)
 	require.NoError(t, err)
 	require.NotNil(t, mw)
-	defer provider.DeleteCertProfile(ctx, mw.Label)
+	defer func() {
+		_ = provider.DeleteCertProfile(ctx, mw.Label)
+	}()
 
 	issuer := certutil.RandomString(32)
 	m := &model.CertProfile{
@@ -31,7 +33,9 @@ func TestRegisterCertProfile(t *testing.T) {
 	m1, err := provider.RegisterCertProfile(ctx, m)
 	require.NoError(t, err)
 	require.NotNil(t, m)
-	defer provider.DeleteCertProfile(ctx, m1.Label)
+	defer func() {
+		_ = provider.DeleteCertProfile(ctx, m1.Label)
+	}()
 
 	assert.NotEmpty(t, m1.ID)
 	assert.Equal(t, m.Label, m1.Label)
@@ -56,7 +60,9 @@ func TestRegisterCertProfile(t *testing.T) {
 		m1, err := provider.RegisterCertProfile(ctx, m)
 		require.NoError(t, err)
 		require.NotNil(t, m)
-		defer provider.DeleteCertProfile(ctx, m1.Label)
+		defer func() {
+			_ = provider.DeleteCertProfile(ctx, m1.Label)
+		}()
 	}
 
 	list, err := provider.ListCertProfiles(ctx, 100, 0)

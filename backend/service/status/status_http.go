@@ -23,7 +23,7 @@ func (s *Service) version() restserver.Handle {
 		} else {
 			v := version.Current()
 			w.Header().Set(header.ContentType, header.TextPlain)
-			w.Write([]byte(v.Build))
+			_, _ = w.Write([]byte(v.Build))
 		}
 	}
 }
@@ -31,7 +31,7 @@ func (s *Service) version() restserver.Handle {
 func (s *Service) nodeStatus() restserver.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ restserver.Params) {
 		w.Header().Set(header.ContentType, header.TextPlain)
-		w.Write(alive)
+		_, _ = w.Write(alive)
 	}
 }
 

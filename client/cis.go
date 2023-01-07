@@ -45,7 +45,3 @@ func (c *cisClient) GetRoots(ctx context.Context, in *empty.Empty) (*pb.RootsRes
 func (c *cisClient) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error) {
 	return c.remote.GetCertificate(ctx, in, c.callOpts...)
 }
-
-type retryCIClient struct {
-	cis pb.CIServiceClient
-}

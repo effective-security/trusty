@@ -1,7 +1,6 @@
 package cadb_test
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -16,7 +15,6 @@ import (
 
 var (
 	provider db.Provider
-	ctx      = context.Background()
 )
 
 const (

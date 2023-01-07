@@ -51,7 +51,7 @@ func (a *ListIssuersCmd) Run(cli *Cli) error {
 	}
 
 	if cli.IsJSON() {
-		cli.WriteJSON(res)
+		_ = cli.WriteJSON(res)
 	} else {
 		print.Issuers(cli.Writer(), res.Issuers, a.Bundle)
 	}
@@ -91,7 +91,7 @@ func (a *ListCertsCmd) Run(cli *Cli) error {
 	}
 
 	if cli.IsJSON() {
-		cli.WriteJSON(res)
+		_ = cli.WriteJSON(res)
 	} else {
 		print.CertificatesTable(cli.Writer(), res.List)
 	}
@@ -132,7 +132,7 @@ func (a *ListRevokedCertsCmd) Run(cli *Cli) error {
 	}
 
 	if cli.IsJSON() {
-		cli.WriteJSON(res)
+		_ = cli.WriteJSON(res)
 	} else {
 		print.RevokedCertificatesTable(cli.Writer(), res.List)
 	}
@@ -160,7 +160,7 @@ func (a *GetProfileCmd) Run(cli *Cli) error {
 		return err
 	}
 
-	cli.WriteJSON(res)
+	_ = cli.WriteJSON(res)
 	// TODO: printer
 	return nil
 }
@@ -215,7 +215,7 @@ func (a *SignCmd) Run(cli *Cli) error {
 			return errors.WithStack(err)
 		}
 	} else if cli.IsJSON() {
-		cli.WriteJSON(res)
+		_ = cli.WriteJSON(res)
 	} else {
 		fmt.Fprint(cli.Writer(), pem)
 		fmt.Fprint(cli.Writer(), "\n")
@@ -245,7 +245,7 @@ func (a *PublishCrlsCmd) Run(cli *Cli) error {
 	}
 
 	if cli.IsJSON() {
-		cli.WriteJSON(res)
+		_ = cli.WriteJSON(res)
 	} else {
 		print.CrlsTable(cli.Writer(), res.Clrs)
 	}
@@ -292,7 +292,7 @@ func (a *RevokeCmd) Run(cli *Cli) error {
 		return err
 	}
 
-	cli.WriteJSON(res)
+	_ = cli.WriteJSON(res)
 
 	// TODO: printer
 	return nil
@@ -320,7 +320,7 @@ func (a *UpdateCertLabelCmd) Run(cli *Cli) error {
 		return err
 	}
 
-	cli.WriteJSON(res)
+	_ = cli.WriteJSON(res)
 	// TODO: printer
 	return nil
 }
@@ -362,7 +362,7 @@ func (a *GetCertificateCmd) Run(cli *Cli) error {
 		return err
 	}
 
-	cli.WriteJSON(res)
+	_ = cli.WriteJSON(res)
 	// TODO: printer
 	return nil
 }

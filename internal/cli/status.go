@@ -25,7 +25,7 @@ func (a *VersionCmd) Run(cli *Cli) error {
 	}
 
 	if cli.IsJSON() {
-		cli.WriteJSON(res)
+		_ = cli.WriteJSON(res)
 	} else {
 		print.ServerVersion(cli.Writer(), res)
 	}
@@ -49,7 +49,7 @@ func (a *ServerStatusCmd) Run(cli *Cli) error {
 	}
 
 	if cli.IsJSON() {
-		cli.WriteJSON(res)
+		_ = cli.WriteJSON(res)
 	} else {
 		print.ServerStatusResponse(cli.Writer(), res)
 	}
@@ -74,7 +74,7 @@ func (a *CallerCmd) Run(cli *Cli) error {
 	}
 
 	if cli.IsJSON() {
-		cli.WriteJSON(res)
+		_ = cli.WriteJSON(res)
 	} else {
 		print.CallerStatusResponse(cli.Writer(), res)
 	}

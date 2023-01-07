@@ -23,7 +23,7 @@ const projFolder = "../../"
 
 func TestNewContainerFactory(t *testing.T) {
 	output := path.Join(os.TempDir(), "tests", "trusty", guid.MustCreate())
-	os.MkdirAll(output, 0777)
+	_ = os.MkdirAll(output, 0777)
 	defer os.Remove(output)
 
 	tcases := []struct {

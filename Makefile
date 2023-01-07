@@ -38,7 +38,7 @@ tools:
 	go install golang.org/x/tools/cmd/gorename
 	go install golang.org/x/tools/cmd/godoc
 	go install golang.org/x/tools/cmd/guru
-	go install golang.org/x/lint/golint
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
 	go install github.com/go-phorce/cov-report/cmd/cov-report
 	go install github.com/mattn/goreman
 	go install github.com/mattn/goveralls

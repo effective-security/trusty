@@ -192,7 +192,7 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 		return nil, errors.WithStack(err)
 	}
 
-	container.Provide(func() CloseRegistrator {
+	_ = container.Provide(func() CloseRegistrator {
 		return f.closer
 	})
 
@@ -249,10 +249,6 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 	return container, nil
 }
 
-const (
-	nullDevName = "/dev/null"
-)
-
 func provideDiscovery() (discovery.Discovery, error) {
 	return discovery.New(), nil
 }
@@ -276,7 +272,7 @@ func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
 		"providers", cfg.CryptoProv.Providers)
 
 	for _, m := range cfg.CryptoProv.PKCS11Manufacturers {
-		cryptoprov.Register(m, crypto11.LoadProvider)
+		_ = cryptoprov.Register(m, crypto11.LoadProvider)
 	}
 
 	if strings.Contains(cfg.CryptoProv.Default, "aws-dev-kms") &&

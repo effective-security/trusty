@@ -91,7 +91,9 @@ func (s *Service) RegisterGRPC(r *grpc.Server) {
 // OnStarted is called when the server started and
 // is ready to serve requests
 func (s *Service) OnStarted() error {
-	go s.getCAClient()
+	go func() {
+		_, _ = s.getCAClient()
+	}()
 	return nil
 }
 
