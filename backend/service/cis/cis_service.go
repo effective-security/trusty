@@ -120,7 +120,7 @@ func (s *Service) getCAClient() (client.CAClient, error) {
 	}
 
 	var pb pb.CAServiceServer
-	err := s.server.Discovery().Find(&pb)
+	err := s.server.Discovery().Find(config.CISServerName, &pb)
 	if err == nil {
 		s.lock.Lock()
 		defer s.lock.Unlock()

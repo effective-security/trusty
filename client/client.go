@@ -141,7 +141,7 @@ func newClient(cfg *Config) (*Client, error) {
 		// grpc: the credentials require transport level security
 		tk := os.Getenv("TRUSTY_AUTH_TOKEN")
 		if tk != "" {
-			bundle.UpdateAuthToken(tk)
+			bundle.UpdateAuthToken("Bearer", tk)
 			dopts = append(dopts, grpc.WithPerRPCCredentials(bundle.PerRPCCredentials()))
 		}
 	}

@@ -257,11 +257,15 @@ func create(
 
 	if ocspPtr != nil && *ocspPtr != "" {
 		task.ocspCerts = append(task.ocspCerts, *ocspPtr)
-		task.ocspClient = retriable.New(
+		task.ocspClient, err = retriable.New(
+			retriable.ClientConfig{},
 			retriable.WithName("ocsphealth"),
 			retriable.WithTLS(nil),
 			retriable.WithTimeout(httpTimeout),
 		)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return task, nil
 }
