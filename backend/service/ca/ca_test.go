@@ -374,7 +374,7 @@ func TestGetCert(t *testing.T) {
 			Label: "label",
 		})
 	require.Error(t, err)
-	assert.Equal(t, "rpc error: code = Internal desc = unable to update certificate", err.Error())
+	assert.Equal(t, "not_found: unable to update certificate", err.Error())
 }
 
 func generateServerCSR() []byte {

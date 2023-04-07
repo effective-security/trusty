@@ -10,7 +10,6 @@ import (
 	"github.com/effective-security/porto/pkg/discovery"
 	"github.com/effective-security/porto/pkg/flake"
 	"github.com/effective-security/porto/pkg/tasks"
-	"github.com/effective-security/porto/xhttp/pberror"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/backend/db/cadb"
 	"github.com/effective-security/trusty/client"
@@ -25,7 +24,6 @@ import (
 	"github.com/effective-security/xpki/jwt"
 	"github.com/pkg/errors"
 	"go.uber.org/dig"
-	"google.golang.org/grpc/codes"
 	"gopkg.in/yaml.v2"
 
 	// register providers
@@ -362,7 +360,7 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto, db c
 
 			err = ca.AddIssuer(issuer)
 			if err != nil {
-				return nil, pberror.New(codes.Internal, "unable to add issuer: %s", err.Error())
+				return nil, errors.Wrapf(err, "unable to add issuer: %s", issuer.Label())
 			}
 		}
 	}

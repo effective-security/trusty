@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/effective-security/porto/xhttp/pberror"
+	"github.com/effective-security/porto/xhttp/httperror"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/client"
 	"github.com/effective-security/trusty/client/embed/proxy"
@@ -57,7 +57,7 @@ func TestStatusWithNewClientMock(t *testing.T) {
 	assert.NotNil(t, client.ActiveConnection())
 
 	cli := client.StatusClient()
-	expErr := pberror.ErrGRPCPermissionDenied
+	expErr := httperror.Unauthorized("permission denied")
 
 	t.Run("Version", func(t *testing.T) {
 		vexp := &pb.ServerVersion{Build: "1234", Runtime: "go1.15"}
@@ -69,7 +69,7 @@ func TestStatusWithNewClientMock(t *testing.T) {
 		srv.Err = expErr
 		_, err = cli.Version(ctx)
 		require.Error(t, err)
-		assert.Equal(t, "forbidden: permission denied", err.Error())
+		assert.Equal(t, "unauthorized: permission denied", err.Error())
 	})
 
 	t.Run("ServerStatus", func(t *testing.T) {
@@ -86,7 +86,7 @@ func TestStatusWithNewClientMock(t *testing.T) {
 		srv.Err = expErr
 		_, err = cli.Server(ctx)
 		require.Error(t, err)
-		assert.Equal(t, "forbidden: permission denied", err.Error())
+		assert.Equal(t, "unauthorized: permission denied", err.Error())
 	})
 
 	t.Run("CallerStatus", func(t *testing.T) {
@@ -101,6 +101,6 @@ func TestStatusWithNewClientMock(t *testing.T) {
 		srv.Err = expErr
 		_, err = cli.Caller(ctx)
 		require.Error(t, err)
-		assert.Equal(t, "forbidden: permission denied", err.Error())
+		assert.Equal(t, "unauthorized: permission denied", err.Error())
 	})
 }

@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/effective-security/porto/xhttp/pberror"
+	"github.com/effective-security/porto/xhttp/httperror"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
-	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/authority"
 	"github.com/effective-security/xpki/certutil"
 	"github.com/effective-security/xpki/cryptoprov"
@@ -22,8 +21,7 @@ import (
 func (s *Service) ListDelegatedIssuers(ctx context.Context, req *pb.ListIssuersRequest) (*pb.IssuersInfoResponse, error) {
 	list, err := s.db.ListIssuers(ctx, int(req.Limit), req.After)
 	if err != nil {
-		logger.KV(xlog.ERROR, "request", req, "err", err)
-		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to list issuers")
+		return nil, httperror.WrapWithCtx(ctx, err, "unable to list issuers")
 	}
 
 	res := &pb.IssuersInfoResponse{}
@@ -33,8 +31,7 @@ func (s *Service) ListDelegatedIssuers(ctx context.Context, req *pb.ListIssuersR
 		var cfg = new(authority.IssuerConfig)
 		err := yaml.Unmarshal([]byte(issuer.Config), cfg)
 		if err != nil {
-			logger.KV(xlog.ERROR, "issuer", issuer, "err", err)
-			return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to decode configuration")
+			return nil, httperror.WrapWithCtx(ctx, err, "unable to decode configuration: issuer=%s", issuer.Label)
 		}
 
 		ii := &pb.IssuerInfo{
@@ -61,28 +58,28 @@ func (s *Service) ArchiveDelegatedIssuer(ctx context.Context, req *pb.IssuerInfo
 // RegisterDelegatedIssuer creates new delegate issuer.
 func (s *Service) RegisterDelegatedIssuer(ctx context.Context, req *pb.SignCertificateRequest) (*pb.IssuerInfo, error) {
 	if req.Label == "" || req.Profile == "" || len(req.Request) > 0 || req.OrgId == 0 {
-		return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, "invalid request")
+		return nil, httperror.NewGrpcFromCtx(ctx, codes.InvalidArgument, "invalid request")
 	}
 
 	if s.cfg.DelegatedIssuers.GetDisabled() {
-		return nil, pberror.NewFromCtx(ctx, codes.Unimplemented, "delegated issuers not allowed")
+		return nil, httperror.NewGrpcFromCtx(ctx, codes.Unimplemented, "delegated issuers not allowed")
 	}
 
 	iss, err := s.ca.GetIssuerByLabel(req.Label)
 	if err == nil && iss != nil {
-		return nil, pberror.NewFromCtx(ctx, codes.AlreadyExists, "issuer already registered with this label")
+		return nil, httperror.NewGrpcFromCtx(ctx, codes.AlreadyExists, "issuer already registered with this label")
 	}
 
 	// ensure issuer exists pefore creating a key
 	iss, err = s.ca.GetIssuerByProfile(req.Profile)
 	if err != nil {
-		return nil, pberror.NewFromCtx(ctx, codes.NotFound, "issuer not found for profile: %s", req.Profile)
+		return nil, httperror.WrapWithCtx(ctx, err, "issuer not found for profile: %s", req.Profile)
 	}
 
 	delegatedIssuerLabel := fmt.Sprintf("%s%d", s.cfg.DelegatedIssuers.IssuerLabelPrefix, req.OrgId)
 	profiles, err := s.db.GetCertProfilesByIssuer(ctx, delegatedIssuerLabel)
 	if err != nil {
-		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to load profiles: %s", err.Error())
+		return nil, httperror.WrapWithCtx(ctx, err, "unable to load profiles: %s", err.Error())
 	}
 
 	now := time.Now()
@@ -91,16 +88,14 @@ func (s *Service) RegisterDelegatedIssuer(ctx context.Context, req *pb.SignCerti
 
 	crypto, err := s.delegatedCrypto()
 	if err != nil {
-		logger.KV(xlog.ERROR, "err", err)
-		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to load crypto provider")
+		return nil, httperror.WrapWithCtx(ctx, err, "unable to load crypto provider")
 	}
 	prov := csr.NewProvider(crypto)
 	sreq := prov.NewSigningCertificateRequest(keyLabel, "ECDSA", 256, "", nil, nil)
 
 	csrPEM, keyBytes, _, _, err := prov.CreateRequestAndExportKey(sreq)
 	if err != nil {
-		logger.KV(xlog.ERROR, "err", err)
-		return nil, pberror.NewFromCtx(ctx, codes.Internal, "failed to create key")
+		return nil, httperror.WrapWithCtx(ctx, err, "failed to create key")
 	}
 
 	req.Request = csrPEM
@@ -108,8 +103,7 @@ func (s *Service) RegisterDelegatedIssuer(ctx context.Context, req *pb.SignCerti
 
 	signRes, err := s.SignCertificate(ctx, req)
 	if err != nil {
-		logger.KV(xlog.ERROR, "err", err)
-		return nil, pberror.NewFromCtx(ctx, codes.Internal, "failed to create key")
+		return nil, httperror.WrapWithCtx(ctx, err, "failed to create key")
 	}
 
 	cfg := &authority.IssuerConfig{
@@ -126,14 +120,14 @@ func (s *Service) RegisterDelegatedIssuer(ctx context.Context, req *pb.SignCerti
 
 	signer, err := s.ca.Crypto().NewSignerFromPEM(keyBytes)
 	if err != nil {
-		return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, "unable to create signer from private key: %s", err.Error())
+		return nil, httperror.NewGrpcFromCtx(ctx, codes.InvalidArgument, "unable to create signer from private key: %s", err.Error())
 	}
 
 	for _, p := range profiles {
 		var profile = new(authority.CertProfile)
 		err := yaml.Unmarshal([]byte(p.Config), profile)
 		if err != nil {
-			return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, "unable to decode profile: %s", err.Error())
+			return nil, httperror.NewGrpcFromCtx(ctx, codes.InvalidArgument, "unable to decode profile: %s", err.Error())
 		}
 
 		cfg.Profiles[p.Label] = profile
@@ -152,12 +146,12 @@ func (s *Service) RegisterDelegatedIssuer(ctx context.Context, req *pb.SignCerti
 		signer,
 	)
 	if err != nil {
-		return nil, pberror.NewFromCtx(ctx, codes.Internal, "failed to create issuer: %s", err.Error())
+		return nil, httperror.WrapWithCtx(ctx, err, "failed to create issuer: %s", err.Error())
 	}
 
 	err = s.ca.AddIssuer(issuer)
 	if err != nil {
-		return nil, pberror.NewFromCtx(ctx, codes.Internal, "failed to add issuer: %s", err.Error())
+		return nil, httperror.WrapWithCtx(ctx, err, "failed to add issuer: %s", err.Error())
 	}
 
 	jsoncfg, _ := yaml.Marshal(cfg)
@@ -167,7 +161,7 @@ func (s *Service) RegisterDelegatedIssuer(ctx context.Context, req *pb.SignCerti
 		Config: string(jsoncfg),
 	})
 	if err != nil {
-		return nil, pberror.NewFromCtx(ctx, codes.Internal, "failed to save issuer: %s", err.Error())
+		return nil, httperror.WrapWithCtx(ctx, err, "failed to save issuer: %s", err.Error())
 	}
 
 	return issuerInfo(issuer, true), nil
