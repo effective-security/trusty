@@ -32,7 +32,7 @@ require (
 	go.uber.org/config v1.4.0 // indirect
 	go.uber.org/dig v1.13.0
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
-	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
+	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
 	golang.org/x/net v0.4.0
 	golang.org/x/sys v0.3.0 // indirect
 	golang.org/x/text v0.5.0 // indirect
@@ -48,7 +48,7 @@ require (
 require (
 	github.com/alecthomas/kong v0.4.0
 	github.com/effective-security/metrics v0.2.1-0.20221221085612-58ef13855049
-	github.com/effective-security/porto v0.0.0-20230407151205-57c8e9364086
+	github.com/effective-security/porto v0.0.0-20230407174440-06e006d86489
 	github.com/effective-security/xlog v0.5.0
 	github.com/effective-security/xpki v0.7.0
 )
