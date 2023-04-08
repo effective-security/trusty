@@ -90,15 +90,11 @@ func TestMain(m *testing.M) {
 func TestVersionHttpText(t *testing.T) {
 	w := httptest.NewRecorder()
 
-	client := retriable.New()
+	client, err := retriable.New(retriable.ClientConfig{Hosts: []string{httpAddr}})
+	require.NoError(t, err)
 
 	ctx := retriable.WithHeaders(context.Background(), textContentHeaders)
-	hdr, _, err := client.Request(ctx,
-		http.MethodGet,
-		[]string{httpAddr},
-		v1.PathForStatusVersion,
-		nil,
-		w)
+	hdr, _, err := client.Get(ctx, v1.PathForStatusVersion, w)
 	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -111,14 +107,11 @@ func TestVersionHttpText(t *testing.T) {
 func TestVersionHttpJSON(t *testing.T) {
 	res := new(pb.ServerVersion)
 
-	client := retriable.New()
+	client, err := retriable.New(retriable.ClientConfig{Hosts: []string{httpAddr}})
+	require.NoError(t, err)
+
 	ctx := retriable.WithHeaders(context.Background(), jsonContentHeaders)
-	hdr, rc, err := client.Request(ctx,
-		http.MethodGet,
-		[]string{httpAddr},
-		v1.PathForStatusVersion,
-		nil,
-		res)
+	hdr, rc, err := client.Get(ctx, v1.PathForStatusVersion, res)
 	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, rc)
@@ -141,13 +134,10 @@ func TestVersionGrpc(t *testing.T) {
 func TestNodeStatusHttp(t *testing.T) {
 	w := httptest.NewRecorder()
 
-	client := retriable.New()
-	hdr, _, err := client.Request(context.Background(),
-		http.MethodGet,
-		[]string{httpAddr},
-		v1.PathForStatusNode,
-		nil,
-		w)
+	client, err := retriable.New(retriable.ClientConfig{Hosts: []string{httpAddr}})
+	require.NoError(t, err)
+
+	hdr, _, err := client.Get(context.Background(), v1.PathForStatusNode, w)
 	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -160,15 +150,12 @@ func TestNodeStatusHttp(t *testing.T) {
 
 func TestServerStatusHttp(t *testing.T) {
 	w := httptest.NewRecorder()
-	client := retriable.New()
+	client, err := retriable.New(retriable.ClientConfig{Hosts: []string{httpAddr}})
+	require.NoError(t, err)
+
 	ctx := retriable.WithHeaders(context.Background(), textContentHeaders)
 
-	hdr, _, err := client.Request(ctx,
-		http.MethodGet,
-		[]string{httpAddr},
-		v1.PathForStatusServer,
-		nil,
-		w)
+	hdr, _, err := client.Get(ctx, v1.PathForStatusServer, w)
 	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -177,15 +164,12 @@ func TestServerStatusHttp(t *testing.T) {
 
 func TestServerStatusHttpJSON(t *testing.T) {
 	res := new(pb.ServerStatusResponse)
-	client := retriable.New()
+	client, err := retriable.New(retriable.ClientConfig{Hosts: []string{httpAddr}})
+	require.NoError(t, err)
+
 	ctx := retriable.WithHeaders(context.Background(), jsonContentHeaders)
 
-	hdr, sc, err := client.Request(ctx,
-		http.MethodGet,
-		[]string{httpAddr},
-		v1.PathForStatusServer,
-		nil,
-		res)
+	hdr, sc, err := client.Get(ctx, v1.PathForStatusServer, res)
 	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, sc)
@@ -207,15 +191,12 @@ func TestServerStatusGrpc(t *testing.T) {
 
 func TestCallerStatusHttp(t *testing.T) {
 	w := httptest.NewRecorder()
-	client := retriable.New()
+	client, err := retriable.New(retriable.ClientConfig{Hosts: []string{httpAddr}})
+	require.NoError(t, err)
+
 	ctx := retriable.WithHeaders(context.Background(), textContentHeaders)
 
-	hdr, _, err := client.Request(ctx,
-		http.MethodGet,
-		[]string{httpAddr},
-		v1.PathForStatusCaller,
-		nil,
-		w)
+	hdr, _, err := client.Get(ctx, v1.PathForStatusCaller, w)
 	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -224,15 +205,12 @@ func TestCallerStatusHttp(t *testing.T) {
 
 func TestCallerStatusHttpJSON(t *testing.T) {
 	res := new(pb.CallerStatusResponse)
-	client := retriable.New()
+	client, err := retriable.New(retriable.ClientConfig{Hosts: []string{httpAddr}})
+	require.NoError(t, err)
+
 	ctx := retriable.WithHeaders(context.Background(), jsonContentHeaders)
 
-	hdr, sc, err := client.Request(ctx,
-		http.MethodGet,
-		[]string{httpAddr},
-		v1.PathForStatusCaller,
-		nil,
-		res)
+	hdr, sc, err := client.Get(ctx, v1.PathForStatusCaller, res)
 	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, sc)
@@ -241,10 +219,7 @@ func TestCallerStatusHttpJSON(t *testing.T) {
 }
 
 func TestCallerStatusGrpc(t *testing.T) {
-	res := new(pb.CallerStatusResponse)
-
 	res, err := statusClient.Caller(context.Background())
 	require.NoError(t, err)
-
 	assert.Equal(t, identity.GuestRoleName, res.Role)
 }

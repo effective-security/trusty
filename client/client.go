@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	tcredentials "github.com/effective-security/porto/gserver/credentials"
-	"github.com/effective-security/porto/xhttp/pberror"
+	"github.com/effective-security/porto/xhttp/httperror"
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
@@ -141,7 +141,7 @@ func newClient(cfg *Config) (*Client, error) {
 		// grpc: the credentials require transport level security
 		tk := os.Getenv("TRUSTY_AUTH_TOKEN")
 		if tk != "" {
-			bundle.UpdateAuthToken(tk)
+			bundle.UpdateAuthToken("Bearer", tk)
 			dopts = append(dopts, grpc.WithPerRPCCredentials(bundle.PerRPCCredentials()))
 		}
 	}
@@ -215,7 +215,7 @@ func toErr(ctx context.Context, err error) error {
 	if err == nil {
 		return nil
 	}
-	code := pberror.Code(err)
+	code := httperror.GRPCCode(err)
 	switch code {
 	case codes.DeadlineExceeded:
 		fallthrough

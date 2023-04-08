@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/effective-security/porto/x/xdb"
-	"github.com/effective-security/porto/xhttp/pberror"
+	"github.com/effective-security/porto/xhttp/httperror"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/trusty/pkg/metricskey"
@@ -31,23 +31,15 @@ func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificat
 	} else if len(in.Skid) > 0 {
 		crt, err = s.db.GetCertificateBySKID(ctx, in.Skid)
 	} else {
-		return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, "invalid parameter")
+		return nil, httperror.NewGrpcFromCtx(ctx, codes.InvalidArgument, "invalid parameter")
 	}
 	if err != nil {
-		logger.ContextKV(ctx, xlog.WARNING,
-			"request", in,
-			"err", err.Error(),
-		)
-		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to find certificate")
+		return nil, httperror.WrapWithCtx(ctx, err, "unable to find certificate")
 	}
 
 	revoked, err := s.db.RevokeCertificate(ctx, crt, time.Now().UTC(), int(in.Reason))
 	if err != nil {
-		logger.ContextKV(ctx, xlog.ERROR,
-			"request", in,
-			"err", err.Error(),
-		)
-		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to revoke certificate")
+		return nil, httperror.WrapWithCtx(ctx, err, "unable to revoke certificate")
 	}
 
 	metricskey.CACertRevoked.IncrCounter(1, crt.IKID)
@@ -81,11 +73,7 @@ func (s *Service) GetCRL(ctx context.Context, in *pb.GetCrlRequest) (*pb.CrlResp
 
 	resp, err := s.publishCrl(ctx, in.Ikid)
 	if err != nil {
-		logger.ContextKV(ctx, xlog.ERROR,
-			"ikid", in.Ikid,
-			"err", err.Error(),
-		)
-		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to publish CRL")
+		return nil, httperror.WrapWithCtx(ctx, err, "unable to publish CRL")
 	}
 
 	res := &pb.CrlResponse{}
@@ -102,7 +90,7 @@ func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPRes
 	ocspRequest, err := ocsp.ParseRequest(in.Der)
 	if err != nil ||
 		ocspRequest.SerialNumber == nil {
-		return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, "invalid request")
+		return nil, httperror.NewGrpcFromCtx(ctx, codes.InvalidArgument, "invalid request")
 	}
 
 	var ica *authority.Issuer
@@ -111,11 +99,11 @@ func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPRes
 	} else if len(ocspRequest.IssuerNameHash) > 0 {
 		ica, err = s.ca.GetIssuerByNameHash(ocspRequest.HashAlgorithm, ocspRequest.IssuerNameHash)
 	} else {
-		return nil, pberror.NewFromCtx(ctx, codes.InvalidArgument, "issuer not specified")
+		return nil, httperror.NewGrpcFromCtx(ctx, codes.InvalidArgument, "issuer not specified")
 	}
 
 	if err != nil {
-		return nil, pberror.NewFromCtx(ctx, codes.NotFound, "issuer not found")
+		return nil, httperror.NewGrpcFromCtx(ctx, codes.NotFound, "issuer not found")
 	}
 
 	serial := ocspRequest.SerialNumber.String()
@@ -129,9 +117,7 @@ func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPRes
 	ikid := ica.Bundle().IssuerID
 	ri, err := s.db.GetRevokedCertificateByIKIDAndSerial(ctx, ikid, serial)
 	if err != nil && !xdb.IsNotFoundError(err) {
-		logger.ContextKV(ctx, xlog.ERROR,
-			"ikid", ikid, "serial", serial, "err", err.Error())
-		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to get revoked certificate")
+		return nil, httperror.WrapWithCtx(ctx, err, "unable to get revoked certificate")
 	}
 
 	if ri != nil {
@@ -144,9 +130,7 @@ func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPRes
 
 	der, err := ica.SignOCSP(req)
 	if err != nil {
-		logger.ContextKV(ctx, xlog.ERROR,
-			"err", err.Error())
-		return nil, pberror.NewFromCtx(ctx, codes.Internal, "unable to sign OCSP")
+		return nil, httperror.WrapWithCtx(ctx, err, "unable to sign OCSP")
 	}
 
 	metricskey.CAOcspSigned.IncrCounter(1, ikid, req.Status)
@@ -209,21 +193,13 @@ func (s *Service) publishCrl(ctx context.Context, ikID string) (*pb.CrlsResponse
 		if ikID == "" || ikID == issuer.SubjectKID() {
 			crl, err := s.createGenericCRL(ctx, issuer)
 			if err != nil {
-				logger.ContextKV(ctx, xlog.ERROR,
-					"ikid", issuer.SubjectKID(),
-					"err", err.Error(),
-				)
-				return res, pberror.NewFromCtx(ctx, codes.Internal, "failed to generate CRLs")
+				return res, httperror.WrapWithCtx(ctx, err, "failed to generate CRLs")
 			}
 			res.Clrs = append(res.Clrs, crl)
 
 			_, err = s.publisher.PublishCRL(ctx, crl)
 			if err != nil {
-				logger.ContextKV(ctx, xlog.ERROR,
-					"ikid", issuer.SubjectKID(),
-					"err", err.Error(),
-				)
-				return res, pberror.NewFromCtx(ctx, codes.Internal, "failed to publish CRLs")
+				return res, httperror.WrapWithCtx(ctx, err, "failed to publish CRLs")
 			}
 		}
 	}
