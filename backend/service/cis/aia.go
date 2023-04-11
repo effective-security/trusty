@@ -68,7 +68,7 @@ func (s *Service) GetCertHandler() restserver.Handle {
 		logger.KV(xlog.TRACE, "skid", skid)
 
 		ctx := r.Context()
-		m, err := s.db.GetCertificateBySKID(ctx, skid)
+		list, err := s.db.GetCertificatesBySKID(ctx, skid)
 		if err != nil {
 			if xdb.IsNotFoundError(err) {
 				// metrics for Not Found
@@ -79,9 +79,12 @@ func (s *Service) GetCertHandler() restserver.Handle {
 				marshal.WriteJSON(w, r, httperror.Unexpected("unable to locate certificate").WithCause(err))
 			}
 			return
+		} else if len(list) == 0 {
+			marshal.WriteJSON(w, r, httperror.NotFound("unable to locate certificate"))
+			return
 		}
 
-		block, _ := pem.Decode([]byte(m.Pem))
+		block, _ := pem.Decode([]byte(list[0].Pem))
 		metricskey.AIADownloadSuccessCert.IncrCounter(1)
 
 		w.Header().Set(header.ContentType, "application/pkix-cert")

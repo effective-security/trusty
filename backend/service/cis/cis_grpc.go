@@ -29,12 +29,17 @@ func (s *Service) GetCertificate(ctx context.Context, in *pb.GetCertificateReque
 	var err error
 	if in.Id != 0 {
 		crt, err = s.db.GetCertificate(ctx, in.Id)
+		if err != nil {
+			return nil, httperror.WrapWithCtx(ctx, err, "unable to find certificate")
+		}
 	} else {
-		crt, err = s.db.GetCertificateBySKID(ctx, in.Skid)
+		crts, err := s.db.GetCertificatesBySKID(ctx, in.Skid)
+		if err != nil {
+			return nil, httperror.WrapWithCtx(ctx, err, "unable to find certificate")
+		}
+		crt = crts[0]
 	}
-	if err != nil {
-		return nil, httperror.WrapWithCtx(ctx, err, "unable to find certificate")
-	}
+
 	res := &pb.CertificateResponse{
 		Certificate: crt.ToPB(),
 	}

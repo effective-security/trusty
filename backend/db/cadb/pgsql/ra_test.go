@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/effective-security/porto/x/guid"
+	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/trusty/backend/db/cadb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/xpki/certutil"
@@ -48,6 +49,12 @@ func TestRegisterRootCertificate(t *testing.T) {
 	r3 := list.Find(r.ID)
 	require.NotNil(t, r3)
 	assert.Equal(t, *r, *r3)
+}
+
+func TestGetCertificatesBySKID(t *testing.T) {
+	_, err := provider.GetCertificatesBySKID(ctx, "notfound")
+	assert.EqualError(t, err, "sql: no rows in result set")
+	assert.True(t, xdb.IsNotFoundError(err))
 }
 
 func TestRegisterCertificate(t *testing.T) {
@@ -103,6 +110,16 @@ func TestRegisterCertificate(t *testing.T) {
 	assert.Len(t, r2.Locations, 3)
 	assert.Len(t, r2.Metadata, 1)
 
+	rcx := *r2
+	rcx.ThumbprintSha256 = certutil.RandomString(64)
+	// the same IKID, Serial
+	_, err = provider.RegisterCertificate(ctx, &rcx)
+	assert.EqualError(t, err, "pq: duplicate key value violates unique constraint \"idx_certificates_ikid_serial\"")
+	// another SN
+	rcx.SerialNumber = certutil.RandomString(10)
+	_, err = provider.RegisterCertificate(ctx, &rcx)
+	assert.NoError(t, err)
+
 	list, err := provider.ListOrgCertificates(ctx, orgID, 10, 0)
 	require.NoError(t, err)
 	r3 := list.Find(r.ID)
@@ -128,10 +145,10 @@ func TestRegisterCertificate(t *testing.T) {
 	require.NotNil(t, r4)
 	assert.Equal(t, *r, *r4)
 
-	r4, err = provider.GetCertificateBySKID(ctx, r2.SKID)
+	r4l, err := provider.GetCertificatesBySKID(ctx, r2.SKID)
 	require.NoError(t, err)
-	require.NotNil(t, r4)
-	assert.Equal(t, *r, *r4)
+	assert.Len(t, r4l, 2)
+	//assert.Equal(t, *r, *r4l[0])
 
 	r4, err = provider.GetCertificateByIKIDAndSerial(ctx, r2.IKID, r2.SerialNumber)
 	require.NoError(t, err)
@@ -229,7 +246,7 @@ func TestRegisterCertificateUniqueIdx(t *testing.T) {
 	rc.ThumbprintSha256 = certutil.RandomString(64)
 	_, err = provider.RegisterCertificate(ctx, rc)
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "pq: duplicate key value violates unique constraint \"idx_certificates_skid\"")
+	assert.Contains(t, err.Error(), "pq: duplicate key value violates unique constraint \"idx_certificates_ikid_serial\"")
 
 	// change skid
 	rc.SKID = guid.MustCreate()

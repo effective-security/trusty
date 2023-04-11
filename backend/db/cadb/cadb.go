@@ -36,8 +36,8 @@ type CaReadonlyDb interface {
 	GetRootCertificates(ctx context.Context) (model.RootCertificates, error)
 	// GetCertificate returns registered Certificate
 	GetCertificate(ctx context.Context, id uint64) (*model.Certificate, error)
-	// GetCertificateBySKID returns registered Certificate
-	GetCertificateBySKID(ctx context.Context, skid string) (*model.Certificate, error)
+	// GetCertificatesBySKID returns registered Certificates matching SKID
+	GetCertificatesBySKID(ctx context.Context, skid string) ([]*model.Certificate, error)
 	// GetCertificateByIKIDAndSerial returns registered Certificate
 	GetCertificateByIKIDAndSerial(ctx context.Context, ikid, serial string) (*model.Certificate, error)
 	// GetRevokedCertificateByIKIDAndSerial returns revoked certificate
