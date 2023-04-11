@@ -51,7 +51,7 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 	return m, nil
 }
 
-func scanFullCertificate(row *sql.Row) (*model.Certificate, error) {
+func scanFullCertificate(row xdb.Scanner) (*model.Certificate, error) {
 	res := new(model.Certificate)
 	var locations string
 	var meta string
@@ -171,9 +171,9 @@ func (p *Provider) GetCertificate(ctx context.Context, id uint64) (*model.Certif
 	return m, nil
 }
 
-// GetCertificateBySKID returns registered Certificate
-func (p *Provider) GetCertificateBySKID(ctx context.Context, skid string) (*model.Certificate, error) {
-	m, err := scanFullCertificate(p.sql.QueryRowContext(ctx, `
+// GetCertificatesBySKID returns registered Certificate by SKID
+func (p *Provider) GetCertificatesBySKID(ctx context.Context, skid string) ([]*model.Certificate, error) {
+	res, err := p.sql.QueryContext(ctx, `
 			SELECT
 				id,org_id,skid,ikid,serial_number,
 				not_before,no_tafter,
@@ -187,11 +187,25 @@ func (p *Provider) GetCertificateBySKID(ctx context.Context, skid string) (*mode
 			FROM certificates
 			WHERE skid = $1
 			;
-			`, skid))
+			`, skid)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
-	return m, nil
+	list := make([]*model.Certificate, 0, 100)
+
+	for res.Next() {
+		m, err := scanFullCertificate(res)
+		if err != nil {
+			return nil, err
+		}
+		list = append(list, m)
+	}
+
+	if len(list) == 0 {
+		return nil, errors.WithStack(sql.ErrNoRows)
+	}
+
+	return list, nil
 }
 
 // GetCertificateByIKIDAndSerial returns registered Certificate

@@ -26,15 +26,22 @@ func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificat
 	var err error
 	if in.Id != 0 {
 		crt, err = s.db.GetCertificate(ctx, in.Id)
+		if err != nil {
+			return nil, httperror.WrapWithCtx(ctx, err, "unable to find certificate")
+		}
 	} else if in.IssuerSerial != nil {
 		crt, err = s.db.GetCertificateByIKIDAndSerial(ctx, in.IssuerSerial.Ikid, in.IssuerSerial.SerialNumber)
+		if err != nil {
+			return nil, httperror.WrapWithCtx(ctx, err, "unable to find certificate")
+		}
 	} else if len(in.Skid) > 0 {
-		crt, err = s.db.GetCertificateBySKID(ctx, in.Skid)
+		crts, err := s.db.GetCertificatesBySKID(ctx, in.Skid)
+		if err != nil {
+			return nil, httperror.WrapWithCtx(ctx, err, "unable to find certificate")
+		}
+		crt = crts[0]
 	} else {
 		return nil, httperror.NewGrpcFromCtx(ctx, codes.InvalidArgument, "invalid parameter")
-	}
-	if err != nil {
-		return nil, httperror.WrapWithCtx(ctx, err, "unable to find certificate")
 	}
 
 	revoked, err := s.db.RevokeCertificate(ctx, crt, time.Now().UTC(), int(in.Reason))
