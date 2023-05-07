@@ -14,7 +14,7 @@ import (
 	"github.com/effective-security/xpki/csr"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // ListDelegatedIssuers returns the delegated issuing CAs
@@ -57,7 +57,7 @@ func (s *Service) ArchiveDelegatedIssuer(ctx context.Context, req *pb.IssuerInfo
 
 // RegisterDelegatedIssuer creates new delegate issuer.
 func (s *Service) RegisterDelegatedIssuer(ctx context.Context, req *pb.SignCertificateRequest) (*pb.IssuerInfo, error) {
-	if req.Label == "" || req.Profile == "" || len(req.Request) > 0 || req.OrgId == 0 {
+	if req.Label == "" || req.Profile == "" || len(req.Request) > 0 || req.OrgID == 0 {
 		return nil, httperror.NewGrpcFromCtx(ctx, codes.InvalidArgument, "invalid request")
 	}
 
@@ -76,7 +76,7 @@ func (s *Service) RegisterDelegatedIssuer(ctx context.Context, req *pb.SignCerti
 		return nil, httperror.WrapWithCtx(ctx, err, "issuer not found for profile: %s", req.Profile)
 	}
 
-	delegatedIssuerLabel := fmt.Sprintf("%s%d", s.cfg.DelegatedIssuers.IssuerLabelPrefix, req.OrgId)
+	delegatedIssuerLabel := fmt.Sprintf("%s%d", s.cfg.DelegatedIssuers.IssuerLabelPrefix, req.OrgID)
 	profiles, err := s.db.GetCertProfilesByIssuer(ctx, delegatedIssuerLabel)
 	if err != nil {
 		return nil, httperror.WrapWithCtx(ctx, err, "unable to load profiles: %s", err.Error())
@@ -84,7 +84,7 @@ func (s *Service) RegisterDelegatedIssuer(ctx context.Context, req *pb.SignCerti
 
 	now := time.Now()
 	keyLabel := fmt.Sprintf("%s-delegated-%d-%02d%02d%02d-%02d%02d",
-		s.cfg.ClusterName, req.OrgId, now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute())
+		s.cfg.ClusterName, req.OrgID, now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute())
 
 	crypto, err := s.delegatedCrypto()
 	if err != nil {

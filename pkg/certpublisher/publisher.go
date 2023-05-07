@@ -60,7 +60,7 @@ func (p *publisher) PublishCertificate(ctx context.Context, cert *pb.Certificate
 
 // PublishCRL publishes issued CRL
 func (p *publisher) PublishCRL(ctx context.Context, crl *pb.Crl) (string, error) {
-	fileName := fmt.Sprintf("%s/%s.crl", p.cfg.CRLBucket, crl.Ikid)
+	fileName := fmt.Sprintf("%s/%s.crl", p.cfg.CRLBucket, crl.IKID)
 
 	logger.KV(xlog.INFO, "location", fileName)
 

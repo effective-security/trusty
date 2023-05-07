@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/porto/xhttp/httperror"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
@@ -81,22 +82,22 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 	cr := csr.SignRequest{
 		Request: pemReq,
 		Profile: req.Profile,
-		SAN:     req.San,
+		SAN:     req.SAN,
 		Subject: subj,
 	}
 	for _, ex := range req.Extensions {
 		cr.Extensions = append(cr.Extensions, csr.X509Extension{
-			ID:       toOID(ex.Id),
+			ID:       toOID(ex.ID),
 			Critical: ex.Critical,
 			Value:    ex.Value,
 		})
 	}
 
-	if req.NotBefore != nil {
-		cr.NotBefore = req.NotBefore.AsTime()
+	if req.NotBefore != "" {
+		cr.NotBefore = xdb.ParseTime(req.NotBefore).UTC()
 	}
-	if req.NotAfter != nil {
-		cr.NotAfter = req.NotAfter.AsTime()
+	if req.NotAfter != "" {
+		cr.NotAfter = xdb.ParseTime(req.NotAfter).UTC()
 	}
 
 	cert, pem, err := ca.Sign(cr)
@@ -116,7 +117,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 
 	metricskey.CACertIssued.IncrCounter(1, ca.Label(), req.Profile)
 
-	mcert := model.NewCertificate(cert, req.OrgId, req.Profile, string(pem), ca.PEM(), req.Label, nil, req.Metadata)
+	mcert := model.NewCertificate(cert, req.OrgID, req.Profile, string(pem), ca.PEM(), req.Label, nil, req.Metadata)
 	fn := mcert.FileName()
 	mcert.Locations = append(mcert.Locations, s.cfg.RegistrationAuthority.Publisher.BaseURL+"/"+fn)
 

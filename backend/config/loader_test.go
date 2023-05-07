@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 const projFolder = "../../"
@@ -43,9 +43,9 @@ func TestLoadConfig(t *testing.T) {
 			assert.True(t, filepath.IsAbs(dir), "dir %q should be an absoluite path, have: %s", name, dir)
 		}
 	}
-	testDirAbs("TrustyClient.ClientTLS.TrustedCAFile", c.TrustyClient.ClientTLS.TrustedCAFile)
-	testDirAbs("TrustyClient.ClientTLS.CertFile", c.TrustyClient.ClientTLS.CertFile)
-	testDirAbs("TrustyClient.ClientTLS.KeyFile", c.TrustyClient.ClientTLS.KeyFile)
+	testDirAbs("Client.ClientTLS.TrustedCAFile", c.Client.ClientTLS.TrustedCAFile)
+	testDirAbs("Client.ClientTLS.CertFile", c.Client.ClientTLS.CertFile)
+	testDirAbs("Client.ClientTLS.KeyFile", c.Client.ClientTLS.KeyFile)
 	testDirAbs("Authority", c.Authority)
 
 	cis := c.HTTPServers["cis"]

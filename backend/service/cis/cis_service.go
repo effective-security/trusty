@@ -4,13 +4,14 @@ import (
 	"sync"
 
 	"github.com/effective-security/porto/gserver"
+	"github.com/effective-security/porto/pkg/rpcclient"
 	"github.com/effective-security/porto/restserver"
 	v1 "github.com/effective-security/trusty/api/v1"
+	"github.com/effective-security/trusty/api/v1/client"
 	pb "github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/api/v1/pb/proxypb"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/backend/db/cadb"
-	"github.com/effective-security/trusty/client"
-	"github.com/effective-security/trusty/client/embed/proxy"
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
@@ -28,8 +29,8 @@ type Service struct {
 	cfg           *config.Configuration
 	clientFactory client.Factory
 
-	grpClient *client.Client
-	ca        client.CAClient
+	grpClient *rpcclient.Client
+	ca        pb.CAServer
 	lock      sync.RWMutex
 }
 
@@ -85,7 +86,7 @@ func (s *Service) RegisterRoute(r restserver.Router) {
 
 // RegisterGRPC registers gRPC handler
 func (s *Service) RegisterGRPC(r *grpc.Server) {
-	pb.RegisterCIServiceServer(r, s)
+	pb.RegisterCISServer(r, s)
 }
 
 // OnStarted is called when the server started and
@@ -105,12 +106,12 @@ func (s *Service) Db() cadb.CaDb {
 
 // CAClient returns client.CAClient
 // Used in Unittests
-func (s *Service) CAClient() client.CAClient {
+func (s *Service) CAClient() pb.CAServer {
 	return s.ca
 }
 
-func (s *Service) getCAClient() (client.CAClient, error) {
-	var ca client.CAClient
+func (s *Service) getCAClient() (pb.CAServer, error) {
+	var ca pb.CAServer
 	s.lock.RLock()
 	ca = s.ca
 	s.lock.RUnlock()
@@ -119,12 +120,12 @@ func (s *Service) getCAClient() (client.CAClient, error) {
 		return ca, nil
 	}
 
-	var pb pb.CAServiceServer
+	var pb pb.CAServer
 	err := s.server.Discovery().Find("", &pb)
 	if err == nil {
 		s.lock.Lock()
 		defer s.lock.Unlock()
-		s.ca = client.NewCAClientFromProxy(proxy.CAServerToClient(pb))
+		s.ca = proxypb.NewCAClientFromProxy(proxypb.CAServerToClient(pb))
 		logger.KV(xlog.DEBUG, "status", "discovered CA client")
 		return s.ca, nil
 	}
@@ -144,7 +145,7 @@ func (s *Service) getCAClient() (client.CAClient, error) {
 		s.grpClient.Close()
 	}
 	s.grpClient = grpClient
-	s.ca = grpClient.CAClient()
+	s.ca = client.CAClient(s.grpClient)
 
 	logger.KV(xlog.INFO, "status", "created CA client")
 

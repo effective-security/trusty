@@ -10,9 +10,9 @@ import (
 	"github.com/effective-security/porto/pkg/discovery"
 	"github.com/effective-security/porto/pkg/flake"
 	"github.com/effective-security/porto/pkg/tasks"
+	"github.com/effective-security/trusty/api/v1/client"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/backend/db/cadb"
-	"github.com/effective-security/trusty/client"
 	"github.com/effective-security/trusty/pkg/accesstoken"
 	"github.com/effective-security/trusty/pkg/certpublisher"
 	"github.com/effective-security/xlog"
@@ -24,7 +24,7 @@ import (
 	"github.com/effective-security/xpki/jwt"
 	"github.com/pkg/errors"
 	"go.uber.org/dig"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 
 	// register providers
 	_ "github.com/effective-security/xpki/cryptoprov/awskmscrypto"
@@ -185,63 +185,28 @@ func (f *ContainerFactory) WithAuthorityProvider(p ProvideAuthorityFn) *Containe
 func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, error) {
 	container := dig.New()
 
-	err := container.Provide(f.configProvider)
-	if err != nil {
-		return nil, errors.WithStack(err)
+	constructors := []any{
+		f.configProvider,
+		func() CloseRegistrator {
+			return f.closer
+		},
+		f.discoveryProvider,
+		f.schedulerProvider,
+		f.jwtProvider,
+		f.cryptoProvider,
+		f.authorityProvider,
+		f.cadbProvider,
+		f.clientFactoryProvider,
+		f.publisherProvider,
+		f.dpProvider,
+		f.atProvider,
 	}
 
-	_ = container.Provide(func() CloseRegistrator {
-		return f.closer
-	})
-
-	err = container.Provide(f.discoveryProvider)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	err = container.Provide(f.schedulerProvider)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	err = container.Provide(f.jwtProvider)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	err = container.Provide(f.cryptoProvider)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	err = container.Provide(f.authorityProvider)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	err = container.Provide(f.cadbProvider)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	err = container.Provide(f.clientFactoryProvider)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	err = container.Provide(f.publisherProvider)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	err = container.Provide(f.dpProvider)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	err = container.Provide(f.atProvider)
-	if err != nil {
-		return nil, errors.WithStack(err)
+	for idx, c := range constructors {
+		err := container.Provide(c)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to provide constructor %d: %T", idx, c)
+		}
 	}
 
 	return container, nil
@@ -383,7 +348,7 @@ func provideCaDB(cfg *config.Configuration) (cadb.CaDb, cadb.CaReadonlyDb, error
 }
 
 func provideClientFactory(cfg *config.Configuration) (client.Factory, error) {
-	return client.NewFactory(&cfg.TrustyClient), nil
+	return client.NewFactory(&cfg.Client), nil
 }
 
 func providePublisher(cfg *config.Configuration) (certpublisher.Publisher, error) {

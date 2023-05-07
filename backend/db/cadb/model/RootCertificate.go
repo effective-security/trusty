@@ -2,23 +2,22 @@ package model
 
 import (
 	"crypto/x509"
-	"time"
 
+	"github.com/effective-security/porto/x/xdb"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/xpki/certutil"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // RootCertificate provides X509 Root Certificate information
 type RootCertificate struct {
-	ID               uint64    `db:"id"`
-	SKID             string    `db:"skid"`
-	NotBefore        time.Time `db:"not_before"`
-	NotAfter         time.Time `db:"no_tafter"`
-	Subject          string    `db:"subject"`
-	ThumbprintSha256 string    `db:"sha256"`
-	Trust            int       `db:"trust"`
-	Pem              string    `db:"pem"`
+	ID               uint64   `db:"id"`
+	SKID             string   `db:"skid"`
+	NotBefore        xdb.Time `db:"not_before"`
+	NotAfter         xdb.Time `db:"no_tafter"`
+	Subject          string   `db:"subject"`
+	ThumbprintSha256 string   `db:"sha256"`
+	Trust            int      `db:"trust"`
+	Pem              string   `db:"pem"`
 }
 
 // RootCertificates defines a list of RootCertificate
@@ -27,10 +26,10 @@ type RootCertificates []*RootCertificate
 // ToDTO returns DTO
 func (r *RootCertificate) ToDTO() *pb.RootCertificate {
 	return &pb.RootCertificate{
-		Id:        r.ID,
-		Skid:      r.SKID,
-		NotBefore: timestamppb.New(r.NotBefore),
-		NotAfter:  timestamppb.New(r.NotAfter),
+		ID:        r.ID,
+		SKID:      r.SKID,
+		NotBefore: r.NotBefore.String(),
+		NotAfter:  r.NotAfter.String(),
 		Subject:   r.Subject,
 		Sha256:    r.ThumbprintSha256,
 		Trust:     pb.Trust(r.Trust),
@@ -43,8 +42,8 @@ func NewRootCertificate(r *x509.Certificate, trust int, pem string) *RootCertifi
 	return &RootCertificate{
 		//ID:
 		SKID:             certutil.GetSubjectKeyID(r),
-		NotBefore:        r.NotBefore.UTC(),
-		NotAfter:         r.NotAfter.UTC(),
+		NotBefore:        xdb.Time(r.NotBefore),
+		NotAfter:         xdb.Time(r.NotAfter),
 		Subject:          r.Subject.String(),
 		ThumbprintSha256: certutil.SHA256Hex(r.Raw),
 		Trust:            trust,

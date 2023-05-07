@@ -51,8 +51,6 @@ func (p *Provider) RegisterCrl(ctx context.Context, crl *model.Crl) (*model.Crl,
 		logger.KV(xlog.ERROR, "err", err)
 		return nil, errors.WithStack(err)
 	}
-	res.ThisUpdate = res.ThisUpdate.UTC()
-	res.NextUpdate = res.NextUpdate.UTC()
 	return res, nil
 }
 
@@ -90,8 +88,6 @@ func (p *Provider) GetCrl(ctx context.Context, ikid string) (*model.Crl, error) 
 		//logger.KV(xlog.ERROR, "err", err)
 		return nil, errors.WithStack(err)
 	}
-	res.ThisUpdate = res.ThisUpdate.UTC()
-	res.NextUpdate = res.NextUpdate.UTC()
 
 	return res, nil
 }

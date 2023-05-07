@@ -3,17 +3,14 @@ package print_test
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/pkg/print"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func TestPrintServerVersion(t *testing.T) {
@@ -23,7 +20,7 @@ func TestPrintServerVersion(t *testing.T) {
 	}
 	w := bytes.NewBuffer([]byte{})
 
-	print.ServerVersion(w, r)
+	print.Print(w, r)
 
 	out := w.String()
 	assert.Equal(t, "1.1.1 (go1.15.1)\n", out)
@@ -35,32 +32,31 @@ func TestServerStatusResponse(t *testing.T) {
 		Runtime: "go1.15.1",
 	}
 
-	now := time.Now()
-
 	r := &pb.ServerStatusResponse{
 		Status: &pb.ServerStatus{
 			Hostname:   "dissoupov",
-			ListenUrls: []string{"https://0.0.0.0:7891"},
+			ListenURLs: []string{"https://0.0.0.0:7891"},
 			Name:       "Trusty",
 			Nodename:   "local",
-			StartedAt:  timestamppb.New(now),
+			StartedAt:  "2020-10-01T00:00:00Z",
 		},
 		Version: ver,
 	}
 
 	w := bytes.NewBuffer([]byte{})
 
-	print.ServerStatusResponse(w, r)
+	print.Print(w, r)
 
 	out := w.String()
-	assert.Contains(t, out, "  Name        | Trusty ")
-	assert.Contains(t, out, "  Node        | local  ")
-	assert.Contains(t, out, "  Host        | dissoupov ")
-	assert.Contains(t, out, "  Listen URLs | https://0.0.0.0:7891")
-	assert.Contains(t, out, "  Version     | 1.1.1    ")
-	assert.Contains(t, out, "  Runtime     | go1.15.1 ")
-	assert.Contains(t, out, fmt.Sprintf("  Started     | %s ", now.Format(time.RFC3339)))
-	assert.Contains(t, out, "  Uptime      | 0s ")
+	assert.Equal(t,
+		"  Name        | Trusty                \n"+
+			"  Node        | local                 \n"+
+			"  Host        | dissoupov             \n"+
+			"  Listen URLs | https://0.0.0.0:7891  \n"+
+			"  Version     | 1.1.1                 \n"+
+			"  Runtime     | go1.15.1              \n"+
+			"  Started     | 2020-10-01T00:00:00Z  \n\n",
+		out)
 }
 
 func TestCallerStatusResponse(t *testing.T) {
@@ -72,7 +68,7 @@ func TestCallerStatusResponse(t *testing.T) {
 
 	w := bytes.NewBuffer([]byte{})
 
-	print.CallerStatusResponse(w, r)
+	print.Print(w, r)
 
 	out := w.String()
 	assert.Equal(t, "  Subject   | 12341234-1234124  \n"+
@@ -83,95 +79,102 @@ func TestCallerStatusResponse(t *testing.T) {
 func TestRoots(t *testing.T) {
 	list := []*pb.RootCertificate{
 		{
-			Id:      123,
-			Subject: "CN=cert",
-			Skid:    "23423",
+			ID:        123,
+			Subject:   "CN=cert",
+			SKID:      "23423",
+			NotBefore: "2012-11-01T22:08:41+00:00",
+			NotAfter:  "2012-12-01T22:08:41+00:00",
 		},
 	}
 	w := bytes.NewBuffer([]byte{})
 	print.Roots(w, list, true)
 	out := w.String()
-	assert.Contains(t, out,
+	assert.Equal(t,
 		"==================================== 1 ====================================\n"+
 			"Subject: CN=cert\n"+
 			"  ID: 123\n"+
 			"  SKID: 23423\n"+
 			"  Thumbprint: \n"+
-			"  Trust: Any\n")
+			"  Trust: Any\n"+
+			"  Issued: 2012-12-01T22:08:41+00:00\n"+
+			"  Expires: 2012-11-01T22:08:41+00:00\n\n\n",
+		out,
+	)
 }
 
 func TestCertificatesTable(t *testing.T) {
-	nb, err := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
-	require.NoError(t, err)
-	na, err := time.Parse(time.RFC3339, "2012-12-01T22:08:41+00:00")
-	require.NoError(t, err)
-
 	list := []*pb.Certificate{
 		{
-			Id:        123,
-			OrgId:     1000,
+			ID:        123,
+			OrgID:     1000,
 			Profile:   "prof",
 			Subject:   "CN=cert",
 			Issuer:    "CN=ca",
-			Ikid:      "1233",
-			Skid:      "23423",
-			NotBefore: timestamppb.New(nb.UTC()),
-			NotAfter:  timestamppb.New(na.UTC()),
+			IKID:      "1233",
+			SKID:      "23423",
+			NotBefore: "2012-11-01T22:08:41+00:00",
+			NotAfter:  "2012-12-01T22:08:41+00:00",
+			Locations: []string{"https://test.org/api/v1/certificates/123"},
+			Label:     "label",
+			Metadata:  map[string]string{"key": "value"},
 		},
 	}
 	w := bytes.NewBuffer([]byte{})
 	print.CertificatesTable(w, list)
 	out := w.String()
-	assert.Contains(t, out, "  ID  | ORGID | SKID  | SERIAL |")
+	assert.Equal(t,
+		"  ID  | ORGID | SKID  | SERIAL |           FROM            |            TO             | SUBJECT | PROFILE | LABEL  \n"+
+			"------+-------+-------+--------+---------------------------+---------------------------+---------+---------+--------\n"+
+			"  123 | 1000  | 23423 |        | 2012-11-01T22:08:41+00:00 | 2012-12-01T22:08:41+00:00 | CN=cert | prof    | label  \n\n",
+		out,
+	)
 }
 
 func TestRevokedCertificatesTable(t *testing.T) {
-	nb, err := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
-	require.NoError(t, err)
-	na, err := time.Parse(time.RFC3339, "2012-12-01T22:08:41+00:00")
-	require.NoError(t, err)
 	list := []*pb.RevokedCertificate{
 		{
 			Certificate: &pb.Certificate{
-				Id:        123,
-				OrgId:     1000,
+				ID:        123,
+				OrgID:     1000,
 				Profile:   "prof",
 				Subject:   "CN=cert",
 				Issuer:    "CN=ca",
-				Ikid:      "1233",
-				Skid:      "23423",
+				IKID:      "1233",
+				SKID:      "23423",
 				Label:     "label",
-				NotBefore: timestamppb.New(nb.UTC()),
-				NotAfter:  timestamppb.New(na.UTC()),
+				NotBefore: "2012-11-01T22:08:41+00:00",
+				NotAfter:  "2012-12-01T22:08:41+00:00",
 			},
 			Reason:    1,
-			RevokedAt: timestamppb.New(na),
+			RevokedAt: "2012-11-01T22:08:41+00:00",
 		},
 	}
 	w := bytes.NewBuffer([]byte{})
 	print.RevokedCertificatesTable(w, list)
 	out := w.String()
-	assert.Contains(t, out, "  ID  | ORGID | SKID  | SERIAL |")
+	assert.Equal(t, out,
+		"  ID  | ORGID | SKID  | SERIAL |           FROM            |            TO             | SUBJECT | PROFILE | LABEL |          REVOKED          |     REASON      \n"+
+			"------+-------+-------+--------+---------------------------+---------------------------+---------+---------+-------+---------------------------+-----------------\n"+
+			"  123 | 1000  | 23423 |        | 2012-11-01T22:08:41+00:00 | 2012-12-01T22:08:41+00:00 | CN=cert | prof    | label | 2012-11-01T22:08:41+00:00 | KEY_COMPROMISE  \n\n")
 }
 
 func TestCrlTable(t *testing.T) {
-	nb, err := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
-	require.NoError(t, err)
-	na, err := time.Parse(time.RFC3339, "2012-12-01T22:08:41+00:00")
-	require.NoError(t, err)
 	list := []*pb.Crl{
 		{
-			Id:         123,
-			Ikid:       "123456",
+			ID:         123,
+			IKID:       "123456",
 			Issuer:     "CN=ca",
-			ThisUpdate: timestamppb.New(nb.UTC()),
-			NextUpdate: timestamppb.New(na.UTC()),
+			ThisUpdate: "2012-11-01T22:08:41+00:00",
+			NextUpdate: "2012-12-01T22:08:41+00:00",
 		},
 	}
 	w := bytes.NewBuffer([]byte{})
 	print.CrlsTable(w, list)
 	out := w.String()
-	assert.Contains(t, out, "  ID  |  IKID  |")
+	assert.Equal(t, out,
+		"  ID  |  IKID  |        THIS UPDATE        |        NEXT UPDATE        | ISSUER  \n"+
+			"------+--------+---------------------------+---------------------------+---------\n"+
+			"  123 | 123456 | 2012-11-01T22:08:41+00:00 | 2012-12-01T22:08:41+00:00 | CN=ca   \n\n")
 }
 
 func Test_Issuers(t *testing.T) {

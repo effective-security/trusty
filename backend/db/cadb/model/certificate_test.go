@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/xpki/certutil"
 	"github.com/stretchr/testify/assert"
@@ -19,17 +20,17 @@ func TestCrl(t *testing.T) {
 	m := &model.Crl{
 		ID:         123,
 		IKID:       "ikid",
-		ThisUpdate: nb.UTC(),
-		NextUpdate: na.UTC(),
+		ThisUpdate: xdb.UTC(nb),
+		NextUpdate: xdb.UTC(na),
 		Issuer:     "issuer",
 		Pem:        "pem",
 	}
 
 	dto := m.ToDTO()
-	assert.Equal(t, uint64(123), dto.Id)
-	assert.Equal(t, m.IKID, dto.Ikid)
-	assert.Equal(t, m.ThisUpdate, dto.ThisUpdate.AsTime().UTC())
-	assert.Equal(t, m.NextUpdate, dto.NextUpdate.AsTime().UTC())
+	assert.Equal(t, uint64(123), dto.ID)
+	assert.Equal(t, m.IKID, dto.IKID)
+	assert.Equal(t, m.ThisUpdate.String(), dto.ThisUpdate)
+	assert.Equal(t, m.NextUpdate.String(), dto.NextUpdate)
 	assert.Equal(t, m.Issuer, dto.Issuer)
 	assert.Equal(t, m.Pem, dto.Pem)
 }
@@ -46,8 +47,8 @@ func TestCertificate(t *testing.T) {
 		SKID:             "skid",
 		IKID:             "ikid",
 		SerialNumber:     "1231234123121232",
-		NotBefore:        nb.UTC(),
-		NotAfter:         na.UTC(),
+		NotBefore:        xdb.UTC(nb),
+		NotAfter:         xdb.UTC(na),
 		Subject:          "subject",
 		Issuer:           "issuer",
 		ThumbprintSha256: "sha256",
@@ -59,13 +60,13 @@ func TestCertificate(t *testing.T) {
 		Metadata:         map[string]string{"requester": "test"},
 	}
 	dto := m.ToPB()
-	assert.Equal(t, uint64(123), dto.Id)
-	assert.Equal(t, uint64(234), dto.OrgId)
-	assert.Equal(t, m.SKID, dto.Skid)
-	assert.Equal(t, m.IKID, dto.Ikid)
+	assert.Equal(t, uint64(123), dto.ID)
+	assert.Equal(t, uint64(234), dto.OrgID)
+	assert.Equal(t, m.SKID, dto.SKID)
+	assert.Equal(t, m.IKID, dto.IKID)
 	assert.Equal(t, m.SerialNumber, dto.SerialNumber)
-	assert.Equal(t, m.NotBefore, dto.NotBefore.AsTime().UTC())
-	assert.Equal(t, m.NotAfter, dto.NotAfter.AsTime().UTC())
+	assert.Equal(t, m.NotBefore.String(), dto.NotBefore)
+	assert.Equal(t, m.NotAfter.String(), dto.NotAfter)
 	assert.Equal(t, m.Subject, dto.Subject)
 	assert.Equal(t, m.Issuer, dto.Issuer)
 	assert.Equal(t, m.ThumbprintSha256, dto.Sha256)
@@ -109,8 +110,8 @@ func TestRevokedCertificate(t *testing.T) {
 			SKID:             "skid",
 			IKID:             "ikid",
 			SerialNumber:     "serial_number",
-			NotBefore:        nb.UTC(),
-			NotAfter:         na.UTC(),
+			NotBefore:        xdb.UTC(nb),
+			NotAfter:         xdb.UTC(na),
 			Subject:          "subject",
 			Issuer:           "issuer",
 			ThumbprintSha256: "sha256",
@@ -124,13 +125,13 @@ func TestRevokedCertificate(t *testing.T) {
 	dto := r.ToDTO()
 	m := r.Certificate
 	pbc := dto.Certificate
-	assert.Equal(t, uint64(123), pbc.Id)
-	assert.Equal(t, uint64(234), pbc.OrgId)
-	assert.Equal(t, m.SKID, pbc.Skid)
-	assert.Equal(t, m.IKID, pbc.Ikid)
+	assert.Equal(t, uint64(123), pbc.ID)
+	assert.Equal(t, uint64(234), pbc.OrgID)
+	assert.Equal(t, m.SKID, pbc.SKID)
+	assert.Equal(t, m.IKID, pbc.IKID)
 	assert.Equal(t, m.SerialNumber, pbc.SerialNumber)
-	assert.Equal(t, m.NotBefore, pbc.NotBefore.AsTime().UTC())
-	assert.Equal(t, m.NotAfter, pbc.NotAfter.AsTime().UTC())
+	assert.Equal(t, m.NotBefore.String(), pbc.NotBefore)
+	assert.Equal(t, m.NotAfter.String(), pbc.NotAfter)
 	assert.Equal(t, m.Subject, pbc.Subject)
 	assert.Equal(t, m.Issuer, pbc.Issuer)
 	assert.Equal(t, m.ThumbprintSha256, pbc.Sha256)

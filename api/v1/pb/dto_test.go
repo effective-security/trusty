@@ -4,13 +4,11 @@ import (
 	"encoding/json"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/effective-security/trusty/api/v1/pb"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func Test_Decode_ValidDTO(t *testing.T) {
@@ -26,9 +24,9 @@ func Test_Decode_ValidDTO(t *testing.T) {
 	expStatus := &pb.ServerStatusResponse{
 		Status: &pb.ServerStatus{
 			Hostname:   "dissoupov",
-			ListenUrls: []string{"https://0.0.0.0:7891"},
+			ListenURLs: []string{"https://0.0.0.0:7891"},
 			Name:       "Trusty",
-			StartedAt:  timestamppb.New(time.Unix(1620736448, 827047031)),
+			StartedAt:  "2020-10-01T00:00:00Z",
 		},
 		Version: expVer,
 	}
@@ -53,10 +51,11 @@ func Test_Decode_ValidDTO(t *testing.T) {
 			func(t *testing.T) {
 				err := loadJson(tc.filename, tc.dto)
 				require.NoError(t, err)
-				require.NotNil(t, tc.dto)
 
 				if tc.exp != nil {
-					assert.Equal(t, tc.exp, tc.dto)
+					js1, _ := json.Marshal(tc.exp)
+					js2, _ := json.Marshal(tc.dto)
+					assert.EqualValues(t, js1, js2, tc.filename)
 				}
 			},
 		)

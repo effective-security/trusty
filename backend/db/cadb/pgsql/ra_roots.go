@@ -42,8 +42,6 @@ func (p *Provider) RegisterRootCertificate(ctx context.Context, crt *model.RootC
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	res.NotAfter = res.NotAfter.UTC()
-	res.NotBefore = res.NotBefore.UTC()
 	return res, nil
 }
 
@@ -93,8 +91,6 @@ func (p *Provider) GetRootCertificates(ctx context.Context) (model.RootCertifica
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
-		r.NotAfter = r.NotAfter.UTC()
-		r.NotBefore = r.NotBefore.UTC()
 		list = append(list, r)
 	}
 

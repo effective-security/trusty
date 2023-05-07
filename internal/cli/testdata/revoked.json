@@ -1,73 +1,52 @@
 {                                                                                                                                                                                                                                                                                
-"list": [                                                                                                                                                                                                                                                                
+"RevokedCertificates": [                                                                                                                                                                                                                                                                
         {                                                                                                                                                                                                                                                                
-                "certificate": {                                                                                                                                                                                                                                         
-                        "id": 80126629610782820,                                                                                                                                                                                                                         
-                        "ikid": "401456c5ce07f25ba068e2d191921e807ad486e4",                                                                                                                                                                                              
-                        "issuer": "CN=[TEST] Trusty Level 2 CA,O=trusty.com,L=WA,C=US",                                                                                                                                                                                  
-                        "not_after": {                                                                                                                                                                                                                                   
-                                "seconds": 1625594520                                                                                                                                                                                                                    
-                        },                                                                                                                                                                                                                                               
-                        "not_before": {                                                                                                                                                                                                                                  
-                                "seconds": 1625594220                                                                                                                                                                                                                    
-                        },                                                                                                                                                                                                                                               
-                        "profile": "test_server",                                                                                                                                                                                                                        
-                        "serial_number": "334092561073930277773526382617858305785673577155",                                                                                                                                                                             
-                        "sha256": "e99e90cb4e6f85ffda9c938e5d36d0f2b57e997480f4401708d7d030b51d035c",                                                                                                                                                                    
-                        "skid": "0497254f850cb2113c176df79004300b50c04327",                                                                                                                                                                                              
-                        "subject": "CN=localhost,OU=unit1,O=org1"                                                                                                                                                                                                        
+                "Certificate": {                                                                                                                                                                                                                                         
+                        "ID": 80126629610782820,                                                                                                                                                                                                                         
+                        "IKID": "401456c5ce07f25ba068e2d191921e807ad486e4",                                                                                                                                                                                              
+                        "Issuer": "CN=[TEST] Trusty Level 2 CA,O=trusty.com,L=WA,C=US",                                                                                                                                                                                  
+                        "NotAfter": "2026-05-09T13:16:00Z",
+                        "NotBefore": "2021-05-10T13:16:00Z",                                                                                                                                                                                                                                               
+                        "Profile": "test_server",                                                                                                                                                                                                                        
+                        "SerialNumber": "334092561073930277773526382617858305785673577155",                                                                                                                                                                             
+                        "Sha256": "e99e90cb4e6f85ffda9c938e5d36d0f2b57e997480f4401708d7d030b51d035c",                                                                                                                                                                    
+                        "SKID": "0497254f850cb2113c176df79004300b50c04327",                                                                                                                                                                                              
+                        "Subject": "CN=localhost,OU=unit1,O=org1"                                                                                                                                                                                                        
                 },                                                                                                                                                                                                                                                       
-                "reason": 5,                                                                                                                                                                                                                                             
-                "revoked_at": {                                                                                                                                                                                                                                          
-                        "nanos": 953608000,
-                        "seconds": 1625595992
-                }
+                "Reason": 5,                                                                                                                                                                                                                                             
+                "RevokedAt": "2021-07-06T13:59:53.010531Z"
         },
         {
-                "certificate": {
-                        "id": 80126629694668900,
-                        "ikid": "401456c5ce07f25ba068e2d191921e807ad486e4",
-                        "issuer": "CN=[TEST] Trusty Level 2 CA,O=trusty.com,L=WA,C=US",
-                        "not_after": {
-                                "seconds": 1625594520
-                        },
-                        "not_before": {
-                                "seconds": 1625594220
-                        },
-                        "profile": "test_server",
-                        "serial_number": "589033541194552811533621505301265233195297748696",
-                        "sha256": "2c64c33b177b87290d889637f925dd217c530b1231f49c0a19f404a5f5fe0914",
-                        "skid": "8e889f0c285a95fbedddab25413a994f5a1d7dae",
-                        "subject": "CN=localhost,OU=unit1,O=org1"
+                "Certificate": {
+                        "ID": 80126629694668900,
+                        "IKID": "401456c5ce07f25ba068e2d191921e807ad486e4",
+                        "Issuer": "CN=[TEST] Trusty Level 2 CA,O=trusty.com,L=WA,C=US",
+                        "NotAfter": "2026-05-09T13:16:00Z",
+                        "NotBefore": "2021-05-10T13:16:00Z",
+                        "Profile": "test_server",
+                        "SerialNumber": "589033541194552811533621505301265233195297748696",
+                        "Sha256": "2c64c33b177b87290d889637f925dd217c530b1231f49c0a19f404a5f5fe0914",
+                        "SKID": "8e889f0c285a95fbedddab25413a994f5a1d7dae",
+                        "Subject": "CN=localhost,OU=unit1,O=org1"
                 },
-                "reason": 5,
-                "revoked_at": {
-                        "nanos": 10531000,
-                        "seconds": 1625595993
-                }
+                "Reason": 5,
+                "RevokedAt": "2021-07-06T13:59:53.010531Z"
         },
         {
-                "certificate": {
-                        "id": 80126629862441060,
-                        "ikid": "401456c5ce07f25ba068e2d191921e807ad486e4",
-                        "issuer": "CN=[TEST] Trusty Level 2 CA,O=trusty.com,L=WA,C=US",
-                        "not_after": {
-                                "seconds": 1625594520
-                        },
-                        "not_before": {
-                                "seconds": 1625594220
-                        },
-                        "profile": "test_server",
-                        "serial_number": "178677235862271884969213590180660371727936814653",
-                        "sha256": "1f2756592a59fa135c893a697f5165c634f9184ff7229a430a4b5f8178ecb9d9",
-                        "skid": "dc0ae59c7e9d65413218f9846018b5663d747180",
-                        "subject": "CN=localhost,OU=unit1,O=org1"
+                "Certificate": {
+                        "ID": 80126629862441060,
+                        "IKID": "401456c5ce07f25ba068e2d191921e807ad486e4",
+                        "Issuer": "CN=[TEST] Trusty Level 2 CA,O=trusty.com,L=WA,C=US",
+                        "NotAfter": "2026-05-09T13:16:00Z",
+                        "NotBefore": "2021-05-10T13:16:00Z",
+                        "Profile": "test_server",
+                        "SerialNumber": "178677235862271884969213590180660371727936814653",
+                        "Sha256": "1f2756592a59fa135c893a697f5165c634f9184ff7229a430a4b5f8178ecb9d9",
+                        "SKID": "dc0ae59c7e9d65413218f9846018b5663d747180",
+                        "Subject": "CN=localhost,OU=unit1,O=org1"
                 },
-                "reason": 5,
-                "revoked_at": {
-                        "nanos": 105116000,
-                        "seconds": 1625595993
-                }
+                "Reason": 5,
+                "RevokedAt": "2021-07-06T13:59:53.010531Z"
         }
         ]
 }

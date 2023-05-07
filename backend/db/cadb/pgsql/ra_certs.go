@@ -75,8 +75,6 @@ func scanFullCertificate(row xdb.Scanner) (*model.Certificate, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	res.NotAfter = res.NotAfter.UTC()
-	res.NotBefore = res.NotBefore.UTC()
 	if len(locations) > 0 {
 		res.Locations = strings.Split(locations, ",")
 	}
@@ -110,8 +108,6 @@ func scanShortCertificate(row *sql.Rows) (*model.Certificate, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	res.NotAfter = res.NotAfter.UTC()
-	res.NotBefore = res.NotBefore.UTC()
 	if len(locations) > 0 {
 		res.Locations = strings.Split(locations, ",")
 	}

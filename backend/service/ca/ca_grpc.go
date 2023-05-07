@@ -8,7 +8,7 @@ import (
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/xpki/authority"
 	"google.golang.org/grpc/codes"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // ProfileInfo returns the certificate profile info
@@ -40,8 +40,8 @@ func (s *Service) GetIssuer(ctx context.Context, req *pb.IssuerInfoRequest) (*pb
 	var err error
 	if req.Label != "" {
 		issuer, err = s.ca.GetIssuerByLabel(req.Label)
-	} else if req.Ikid != "" {
-		issuer, err = s.ca.GetIssuerByKeyID(req.Ikid)
+	} else if req.IKID != "" {
+		issuer, err = s.ca.GetIssuerByKeyID(req.IKID)
 	} else {
 		return nil, httperror.NewGrpcFromCtx(ctx, codes.InvalidArgument, "either label or ikid are required")
 	}
@@ -90,13 +90,13 @@ func issuerInfo(issuer *authority.Issuer, withBundle bool) *pb.IssuerInfo {
 func (s *Service) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error) {
 	var crt *model.Certificate
 	var err error
-	if in.Id != 0 {
-		crt, err = s.db.GetCertificate(ctx, in.Id)
+	if in.ID != 0 {
+		crt, err = s.db.GetCertificate(ctx, in.ID)
 		if err != nil {
 			return nil, httperror.WrapWithCtx(ctx, err, "unable to find certificate")
 		}
 	} else {
-		crts, err := s.db.GetCertificatesBySKID(ctx, in.Skid)
+		crts, err := s.db.GetCertificatesBySKID(ctx, in.SKID)
 		if err != nil {
 			return nil, httperror.WrapWithCtx(ctx, err, "unable to find certificate")
 		}
@@ -111,7 +111,7 @@ func (s *Service) GetCertificate(ctx context.Context, in *pb.GetCertificateReque
 
 // UpdateCertificateLabel returns the updated certificate
 func (s *Service) UpdateCertificateLabel(ctx context.Context, req *pb.UpdateCertificateLabelRequest) (*pb.CertificateResponse, error) {
-	crt, err := s.db.UpdateCertificateLabel(ctx, req.Id, req.Label)
+	crt, err := s.db.UpdateCertificateLabel(ctx, req.ID, req.Label)
 	if err != nil {
 		return nil, httperror.WrapWithCtx(ctx, err, "unable to update certificate")
 	}
@@ -123,36 +123,36 @@ func (s *Service) UpdateCertificateLabel(ctx context.Context, req *pb.UpdateCert
 
 // ListCertificates returns stream of Certificates
 func (s *Service) ListCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.CertificatesResponse, error) {
-	list, err := s.db.ListCertificates(ctx, in.Ikid, int(in.Limit), in.After)
+	list, err := s.db.ListCertificates(ctx, in.IKID, int(in.Limit), in.After)
 	if err != nil {
 		return nil, httperror.WrapWithCtx(ctx, err, "unable to list certificates")
 	}
 	res := &pb.CertificatesResponse{
-		List: list.ToDTO(),
+		Certificates: list.ToDTO(),
 	}
 	return res, nil
 }
 
 // ListRevokedCertificates returns stream of Revoked Certificates
 func (s *Service) ListRevokedCertificates(ctx context.Context, in *pb.ListByIssuerRequest) (*pb.RevokedCertificatesResponse, error) {
-	list, err := s.db.ListRevokedCertificates(ctx, in.Ikid, int(in.Limit), in.After)
+	list, err := s.db.ListRevokedCertificates(ctx, in.IKID, int(in.Limit), in.After)
 	if err != nil {
 		return nil, httperror.WrapWithCtx(ctx, err, "unable to list certificates")
 	}
 	res := &pb.RevokedCertificatesResponse{
-		List: list.ToDTO(),
+		RevokedCertificates: list.ToDTO(),
 	}
 	return res, nil
 }
 
 // ListOrgCertificates returns the Org certificates
 func (s *Service) ListOrgCertificates(ctx context.Context, in *pb.ListOrgCertificatesRequest) (*pb.CertificatesResponse, error) {
-	list, err := s.db.ListOrgCertificates(ctx, in.OrgId, int(in.Limit), in.After)
+	list, err := s.db.ListOrgCertificates(ctx, in.OrgID, int(in.Limit), in.After)
 	if err != nil {
 		return nil, httperror.WrapWithCtx(ctx, err, "unable to get certificates")
 	}
 	res := &pb.CertificatesResponse{
-		List: list.ToDTO(),
+		Certificates: list.ToDTO(),
 	}
 	return res, nil
 }
@@ -205,8 +205,8 @@ func toCertProfilePB(cfg *authority.CertProfile, label string) *pb.CertProfile {
 		IssuerLabel: cfg.IssuerLabel,
 		Description: cfg.Description,
 		Usages:      cfg.Usage,
-		CaConstraint: &pb.CAConstraint{
-			IsCa:       cfg.CAConstraint.IsCA,
+		CAConstraint: &pb.CAConstraint{
+			IsCA:       cfg.CAConstraint.IsCA,
 			MaxPathLen: int32(cfg.CAConstraint.MaxPathLen),
 		},
 		OcspNoCheck:       cfg.OCSPNoCheck,
@@ -232,7 +232,7 @@ func toCertProfilePB(cfg *authority.CertProfile, label string) *pb.CertProfile {
 	}
 	for _, pol := range cfg.Policies {
 		pbPol := &pb.CertificatePolicy{
-			Id: pol.ID.String(),
+			ID: pol.ID.String(),
 		}
 		for _, q := range pol.Qualifiers {
 			pbPol.Qualifiers = append(pbPol.Qualifiers, &pb.CertificatePolicyQualifier{
