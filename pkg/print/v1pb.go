@@ -29,14 +29,10 @@ func ServerStatusResponse(w io.Writer, r *pb.ServerStatusResponse) {
 	table.Append([]string{"Name", r.Status.Name})
 	table.Append([]string{"Node", r.Status.Nodename})
 	table.Append([]string{"Host", r.Status.Hostname})
-	table.Append([]string{"Listen URLs", strings.Join(r.Status.ListenUrls, ",")})
+	table.Append([]string{"Listen URLs", strings.Join(r.Status.ListenURLs, ",")})
 	table.Append([]string{"Version", r.Version.Build})
 	table.Append([]string{"Runtime", r.Version.Runtime})
-
-	startedAt := r.Status.StartedAt.AsTime().Local()
-	uptime := time.Now().Sub(startedAt) / time.Second * time.Second
-	table.Append([]string{"Started", startedAt.Format(time.RFC3339)})
-	table.Append([]string{"Uptime", uptime.String()})
+	table.Append([]string{"Started", r.Status.StartedAt})
 
 	table.Render()
 	fmt.Fprintln(w)
@@ -183,22 +179,15 @@ func Issuers(w io.Writer, issuers []*pb.IssuerInfo, withPem bool) {
 
 // Roots prints list of RootCertificate
 func Roots(w io.Writer, roots []*pb.RootCertificate, withPem bool) {
-	now := time.Now()
-
 	for cnt, ci := range roots {
-		na := ci.NotAfter.AsTime().Local()
-		nb := ci.NotBefore.AsTime().Local()
-		issuedIn := now.Sub(nb) / time.Minute * time.Minute
-		expiresIn := na.Sub(now) / time.Minute * time.Minute
-
 		fmt.Fprintf(w, "==================================== %d ====================================\n", cnt+1)
 		fmt.Fprintf(w, "Subject: %s\n", ci.Subject)
-		fmt.Fprintf(w, "  ID: %d\n", ci.Id)
-		fmt.Fprintf(w, "  SKID: %s\n", ci.Skid)
+		fmt.Fprintf(w, "  ID: %d\n", ci.ID)
+		fmt.Fprintf(w, "  SKID: %s\n", ci.SKID)
 		fmt.Fprintf(w, "  Thumbprint: %s\n", ci.Sha256)
 		fmt.Fprintf(w, "  Trust: %v\n", ci.Trust)
-		fmt.Fprintf(w, "  Issued: %s (%s ago)\n", nb.String(), issuedIn.String())
-		fmt.Fprintf(w, "  Expires: %s (in %s)\n", na.String(), expiresIn.String())
+		fmt.Fprintf(w, "  Issued: %s\n", ci.NotAfter)
+		fmt.Fprintf(w, "  Expires: %s\n", ci.NotBefore)
 		if withPem {
 			fmt.Fprintf(w, "\n%s\n", ci.Pem)
 		}
@@ -210,16 +199,16 @@ func CertificatesTable(w io.Writer, list []*pb.Certificate) {
 	table := tablewriter.NewWriter(w)
 	table.SetBorder(false)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetHeader([]string{"Id", "OrgId", "SKID", "Serial", "From", "To", "Subject", "Profile", "Label"})
+	table.SetHeader([]string{"Id", "OrgID", "SKID", "Serial", "From", "To", "Subject", "Profile", "Label"})
 
 	for _, c := range list {
 		table.Append([]string{
-			strconv.FormatUint(c.Id, 10),
-			strconv.FormatUint(c.OrgId, 10),
-			c.Skid,
+			strconv.FormatUint(c.ID, 10),
+			strconv.FormatUint(c.OrgID, 10),
+			c.SKID,
 			c.SerialNumber,
-			c.NotBefore.AsTime().Local().Format(time.RFC3339),
-			c.NotAfter.AsTime().Local().Format(time.RFC3339),
+			c.NotBefore,
+			c.NotAfter,
 			c.Subject,
 			c.Profile,
 			c.Label,
@@ -234,21 +223,21 @@ func RevokedCertificatesTable(w io.Writer, list []*pb.RevokedCertificate) {
 	table := tablewriter.NewWriter(w)
 	table.SetBorder(false)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetHeader([]string{"Id", "OrgId", "SKID", "Serial", "From", "To", "Subject", "Profile", "Label", "Revoked", "Reason"})
+	table.SetHeader([]string{"Id", "OrgID", "SKID", "Serial", "From", "To", "Subject", "Profile", "Label", "Revoked", "Reason"})
 
 	for _, r := range list {
 		c := r.Certificate
 		table.Append([]string{
-			strconv.FormatUint(c.Id, 10),
-			strconv.FormatUint(c.OrgId, 10),
-			c.Skid,
+			strconv.FormatUint(c.ID, 10),
+			strconv.FormatUint(c.OrgID, 10),
+			c.SKID,
 			c.SerialNumber,
-			c.NotBefore.AsTime().Local().Format(time.RFC3339),
-			c.NotAfter.AsTime().Local().Format(time.RFC3339),
+			c.NotBefore,
+			c.NotAfter,
 			c.Subject,
 			c.Profile,
 			c.Label,
-			r.RevokedAt.AsTime().Local().Format(time.RFC3339),
+			r.RevokedAt,
 			r.Reason.String(),
 		})
 	}
@@ -266,13 +255,49 @@ func CrlsTable(w io.Writer, list []*pb.Crl) {
 
 	for _, c := range list {
 		table.Append([]string{
-			strconv.FormatUint(c.Id, 10),
-			c.Ikid,
-			c.ThisUpdate.AsTime().Local().Format(time.RFC3339),
-			c.NextUpdate.AsTime().Local().Format(time.RFC3339),
+			strconv.FormatUint(c.ID, 10),
+			c.IKID,
+			c.ThisUpdate,
+			c.NextUpdate,
 			c.Issuer,
 		})
 	}
 	table.Render()
 	fmt.Fprintln(w)
+}
+
+// RevokedCertificate prints RevokedCertificate
+func RevokedCertificate(w io.Writer, ci *pb.RevokedCertificate, withPem bool) {
+	fmt.Fprintf(w, "Revoked: %s\n", ci.RevokedAt)
+	fmt.Fprintf(w, "  Reason: %s\n", ci.Reason)
+	Certificate(w, ci.Certificate, withPem)
+}
+
+// Certificate prints Certificate
+func Certificate(w io.Writer, ci *pb.Certificate, withPem bool) {
+	fmt.Fprintf(w, "Subject: %s\n", ci.Subject)
+	fmt.Fprintf(w, "  Issuer: %s\n", ci.Issuer)
+	fmt.Fprintf(w, "  ID: %d\n", ci.ID)
+	fmt.Fprintf(w, "  SKID: %s\n", ci.SKID)
+	fmt.Fprintf(w, "  SN: %s\n", ci.SerialNumber)
+	fmt.Fprintf(w, "  Thumbprint: %s\n", ci.Sha256)
+	fmt.Fprintf(w, "  Issued: %s\n", ci.NotAfter)
+	fmt.Fprintf(w, "  Expires: %s\n", ci.NotBefore)
+	fmt.Fprintf(w, "  Profile: %s\n", ci.Profile)
+	if len(ci.Locations) > 0 {
+		fmt.Fprintf(w, "  Locations:\n")
+		for _, v := range ci.Locations {
+			fmt.Fprintf(w, "    %s\n", v)
+		}
+
+	}
+	if len(ci.Metadata) > 0 {
+		fmt.Fprintf(w, "  Metadata:\n")
+		for k, v := range ci.Metadata {
+			fmt.Fprintf(w, "    %s: %s\n", k, v)
+		}
+	}
+	if withPem {
+		fmt.Fprintf(w, "\n%s\n", ci.Pem)
+	}
 }

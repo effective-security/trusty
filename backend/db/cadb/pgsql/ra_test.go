@@ -17,8 +17,8 @@ func TestRegisterRootCertificate(t *testing.T) {
 	rc := &model.RootCertificate{
 		SKID:             guid.MustCreate(),
 		Subject:          "subj",
-		NotBefore:        time.Now().Add(-time.Hour).UTC(),
-		NotAfter:         time.Now().Add(time.Hour).UTC(),
+		NotBefore:        xdb.FromNow(-time.Hour),
+		NotAfter:         xdb.FromNow(time.Hour),
 		ThumbprintSha256: certutil.RandomString(64),
 		Trust:            1,
 		Pem:              "pem",
@@ -36,8 +36,8 @@ func TestRegisterRootCertificate(t *testing.T) {
 	assert.Equal(t, rc.ThumbprintSha256, r.ThumbprintSha256)
 	assert.Equal(t, rc.Trust, r.Trust)
 	assert.Equal(t, rc.Pem, r.Pem)
-	assert.Equal(t, rc.NotBefore.Unix(), r.NotBefore.Unix())
-	assert.Equal(t, rc.NotAfter.Unix(), r.NotAfter.Unix())
+	assert.Equal(t, rc.NotBefore, r.NotBefore)
+	assert.Equal(t, rc.NotAfter, r.NotAfter)
 
 	r2, err := provider.RegisterRootCertificate(ctx, rc)
 	require.NoError(t, err)
@@ -67,8 +67,8 @@ func TestRegisterCertificate(t *testing.T) {
 		SerialNumber:     certutil.RandomString(10),
 		Subject:          "subj",
 		Issuer:           "iss",
-		NotBefore:        time.Now().Add(-time.Hour).UTC(),
-		NotAfter:         time.Now().Add(time.Hour).UTC(),
+		NotBefore:        xdb.FromNow(-time.Hour),
+		NotAfter:         xdb.FromNow(time.Hour),
 		ThumbprintSha256: certutil.RandomString(64),
 		Pem:              "pem",
 		IssuersPem:       "ipem",
@@ -95,8 +95,8 @@ func TestRegisterCertificate(t *testing.T) {
 	assert.Equal(t, rc.Profile, r.Profile)
 	assert.Equal(t, rc.Label, r.Label)
 	assert.Equal(t, rc.Locations, r.Locations)
-	assert.Equal(t, rc.NotBefore.Unix(), r.NotBefore.Unix())
-	assert.Equal(t, rc.NotAfter.Unix(), r.NotAfter.Unix())
+	assert.Equal(t, rc.NotBefore, r.NotBefore)
+	assert.Equal(t, rc.NotAfter, r.NotAfter)
 	assert.Empty(t, rc.Locations)
 	assert.Empty(t, rc.Metadata)
 
@@ -202,8 +202,8 @@ func TestRegisterCertificateUniqueIdx(t *testing.T) {
 		SerialNumber:     certutil.RandomString(10),
 		Subject:          "subj",
 		Issuer:           "iss",
-		NotBefore:        time.Now().Add(-time.Hour).UTC(),
-		NotAfter:         time.Now().Add(time.Hour).UTC(),
+		NotBefore:        xdb.FromNow(-time.Hour),
+		NotAfter:         xdb.FromNow(time.Hour),
 		ThumbprintSha256: certutil.RandomString(64),
 		Pem:              "pem",
 		IssuersPem:       "ipem",
@@ -234,8 +234,8 @@ func TestRegisterCertificateUniqueIdx(t *testing.T) {
 	assert.Equal(t, rc.Locations, r.Locations)
 	assert.Equal(t, rc.Locations, r.Locations)
 	assert.Equal(t, rc.Metadata, r.Metadata)
-	assert.Equal(t, rc.NotBefore.Unix(), r.NotBefore.Unix())
-	assert.Equal(t, rc.NotAfter.Unix(), r.NotAfter.Unix())
+	assert.Equal(t, rc.NotBefore, r.NotBefore)
+	assert.Equal(t, rc.NotAfter, r.NotAfter)
 
 	r2, err := provider.RegisterCertificate(ctx, rc)
 	require.NoError(t, err)
@@ -266,8 +266,8 @@ func TestRegisterRevokedCertificate(t *testing.T) {
 			SerialNumber:     certutil.RandomString(10),
 			Subject:          "subj",
 			Issuer:           "iss",
-			NotBefore:        time.Now().Add(-time.Hour).UTC(),
-			NotAfter:         time.Now().Add(time.Hour).UTC(),
+			NotBefore:        xdb.FromNow(-time.Hour),
+			NotAfter:         xdb.FromNow(time.Hour),
 			ThumbprintSha256: certutil.RandomString(64),
 			Pem:              "pem",
 			IssuersPem:       "ipem",
@@ -276,7 +276,7 @@ func TestRegisterRevokedCertificate(t *testing.T) {
 			Locations:        []string{"l1", "l2"},
 			Metadata:         map[string]string{"host": "local"},
 		},
-		RevokedAt: time.Now(),
+		RevokedAt: xdb.FromNow(0),
 		Reason:    1,
 	}
 
@@ -302,8 +302,8 @@ func TestRegisterRevokedCertificate(t *testing.T) {
 	assert.Equal(t, rc.Label, r.Label)
 	assert.Equal(t, rc.Locations, r.Locations)
 	assert.Equal(t, rc.Metadata, r.Metadata)
-	assert.Equal(t, rc.NotBefore.Unix(), r.NotBefore.Unix())
-	assert.Equal(t, rc.NotAfter.Unix(), r.NotAfter.Unix())
+	assert.Equal(t, rc.NotBefore, r.NotBefore)
+	assert.Equal(t, rc.NotAfter, r.NotAfter)
 
 	list, err := provider.ListOrgRevokedCertificates(ctx, orgID, 100, 0)
 	require.NoError(t, err)
@@ -330,8 +330,8 @@ func TestRegisterCrl(t *testing.T) {
 	rc := &model.Crl{
 		IKID:       guid.MustCreate(),
 		Issuer:     "iss",
-		ThisUpdate: time.Now().Add(-time.Hour).UTC(),
-		NextUpdate: time.Now().Add(time.Hour).UTC(),
+		ThisUpdate: xdb.FromNow(-time.Hour),
+		NextUpdate: xdb.FromNow(time.Hour),
 		Pem:        "pem",
 	}
 
@@ -345,16 +345,16 @@ func TestRegisterCrl(t *testing.T) {
 	assert.Equal(t, rc.IKID, r.IKID)
 	assert.Equal(t, rc.Issuer, r.Issuer)
 	assert.Equal(t, rc.Pem, r.Pem)
-	assert.Equal(t, rc.ThisUpdate.Unix(), r.ThisUpdate.Unix())
-	assert.Equal(t, rc.NextUpdate.Unix(), r.NextUpdate.Unix())
+	assert.Equal(t, rc.ThisUpdate, r.ThisUpdate)
+	assert.Equal(t, rc.NextUpdate, r.NextUpdate)
 
 	r2, err := provider.GetCrl(ctx, r.IKID)
 	require.NoError(t, err)
 	assert.Equal(t, rc.IKID, r2.IKID)
 	assert.Equal(t, rc.Issuer, r2.Issuer)
 	assert.Equal(t, rc.Pem, r2.Pem)
-	assert.Equal(t, rc.ThisUpdate.Unix(), r2.ThisUpdate.Unix())
-	assert.Equal(t, rc.NextUpdate.Unix(), r2.NextUpdate.Unix())
+	assert.Equal(t, rc.ThisUpdate, r2.ThisUpdate)
+	assert.Equal(t, rc.NextUpdate, r2.NextUpdate)
 }
 
 func TestListCertificate(t *testing.T) {
@@ -370,8 +370,8 @@ func TestListCertificate(t *testing.T) {
 			SerialNumber:     certutil.RandomString(10),
 			Subject:          "subj",
 			Issuer:           "iss",
-			NotBefore:        time.Now().Add(-time.Hour).UTC(),
-			NotAfter:         time.Now().Add(time.Hour).UTC(),
+			NotBefore:        xdb.FromNow(-time.Hour),
+			NotAfter:         xdb.FromNow(time.Hour),
 			ThumbprintSha256: certutil.RandomString(64),
 			Pem:              "pem",
 			IssuersPem:       "ipem",

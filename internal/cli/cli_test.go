@@ -30,7 +30,7 @@ func TestContext(t *testing.T) {
 
 	out := bytes.NewBuffer([]byte{})
 	c.WithWriter(out)
-	err := c.WriteJSON(struct{}{})
+	err := c.Print(struct{}{})
 	require.NoError(t, err)
 	assert.Equal(t, "{}\n", out.String())
 }

@@ -67,10 +67,15 @@ Commands:
     show the roots
 ```
 
+## Export the host to be used
+
+  export TRUSTY_SERVER=https://localhost:7892
+
+
 ## Server status
 
 ```.sh
-bin/trustyctl -s https://localhost:7892 status
+bin/trustyctl status
 
   Name        | ca                         
   Node        |                            

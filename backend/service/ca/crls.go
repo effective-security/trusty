@@ -24,18 +24,18 @@ import (
 func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificateRequest) (*pb.RevokedCertificateResponse, error) {
 	var crt *model.Certificate
 	var err error
-	if in.Id != 0 {
-		crt, err = s.db.GetCertificate(ctx, in.Id)
+	if in.ID != 0 {
+		crt, err = s.db.GetCertificate(ctx, in.ID)
 		if err != nil {
 			return nil, httperror.WrapWithCtx(ctx, err, "unable to find certificate")
 		}
 	} else if in.IssuerSerial != nil {
-		crt, err = s.db.GetCertificateByIKIDAndSerial(ctx, in.IssuerSerial.Ikid, in.IssuerSerial.SerialNumber)
+		crt, err = s.db.GetCertificateByIKIDAndSerial(ctx, in.IssuerSerial.IKID, in.IssuerSerial.SerialNumber)
 		if err != nil {
 			return nil, httperror.WrapWithCtx(ctx, err, "unable to find certificate")
 		}
-	} else if len(in.Skid) > 0 {
-		crts, err := s.db.GetCertificatesBySKID(ctx, in.Skid)
+	} else if len(in.SKID) > 0 {
+		crts, err := s.db.GetCertificatesBySKID(ctx, in.SKID)
 		if err != nil {
 			return nil, httperror.WrapWithCtx(ctx, err, "unable to find certificate")
 		}
@@ -61,32 +61,32 @@ func (s *Service) RevokeCertificate(ctx context.Context, in *pb.RevokeCertificat
 
 // PublishCrls returns published CRLs
 func (s *Service) PublishCrls(ctx context.Context, req *pb.PublishCrlsRequest) (*pb.CrlsResponse, error) {
-	return s.publishCrl(ctx, req.Ikid)
+	return s.publishCrl(ctx, req.IKID)
 }
 
 // GetCRL returns the CRL
 func (s *Service) GetCRL(ctx context.Context, in *pb.GetCrlRequest) (*pb.CrlResponse, error) {
-	crl, err := s.db.GetCrl(ctx, in.Ikid)
+	crl, err := s.db.GetCrl(ctx, in.IKID)
 	if err == nil {
 		return &pb.CrlResponse{
-			Clr: crl.ToDTO(),
+			Crl: crl.ToDTO(),
 		}, nil
 	}
 
 	logger.ContextKV(ctx, xlog.TRACE,
-		"ikid", in.Ikid,
+		"ikid", in.IKID,
 		"err", err.Error(),
 	)
 
-	resp, err := s.publishCrl(ctx, in.Ikid)
+	resp, err := s.publishCrl(ctx, in.IKID)
 	if err != nil {
 		return nil, httperror.WrapWithCtx(ctx, err, "unable to publish CRL")
 	}
 
 	res := &pb.CrlResponse{}
 
-	if len(resp.Clrs) > 0 {
-		res.Clr = resp.Clrs[0]
+	if len(resp.Crls) > 0 {
+		res.Crl = resp.Crls[0]
 	}
 
 	return res, nil
@@ -130,7 +130,7 @@ func (s *Service) SignOCSP(ctx context.Context, in *pb.OCSPRequest) (*pb.OCSPRes
 	if ri != nil {
 		req.Status = authority.OCSPStatusRevoked
 		req.Reason = ocsp.Unspecified
-		req.RevokedAt = ri.RevokedAt
+		req.RevokedAt = ri.RevokedAt.UTC()
 	}
 
 	logger.ContextKV(ctx, xlog.TRACE, "ikid", ikid, "serial", serial, "status", req.Status)
@@ -166,7 +166,7 @@ func (s *Service) createGenericCRL(ctx context.Context, issuer *authority.Issuer
 			sn, _ = sn.SetString(ri.Certificate.SerialNumber, 10)
 			revokedCerts = append(revokedCerts, pkix.RevokedCertificate{
 				SerialNumber:   sn,
-				RevocationTime: ri.RevokedAt,
+				RevocationTime: ri.RevokedAt.UTC(),
 			})
 			last = ri.Certificate.ID
 		}
@@ -179,8 +179,8 @@ func (s *Service) createGenericCRL(ctx context.Context, issuer *authority.Issuer
 
 	mcrl, err := s.db.RegisterCrl(ctx, &model.Crl{
 		IKID:       issuer.SubjectKID(),
-		ThisUpdate: now,
-		NextUpdate: expiryTime,
+		ThisUpdate: xdb.Time(now),
+		NextUpdate: xdb.Time(expiryTime),
 		Issuer:     bundle.Subject.String(),
 		Pem:        string(pem.EncodeToMemory(&pem.Block{Type: "X509 CRL", Bytes: crlBytes})),
 	})
@@ -202,7 +202,7 @@ func (s *Service) publishCrl(ctx context.Context, ikID string) (*pb.CrlsResponse
 			if err != nil {
 				return res, httperror.WrapWithCtx(ctx, err, "failed to generate CRLs")
 			}
-			res.Clrs = append(res.Clrs, crl)
+			res.Crls = append(res.Crls, crl)
 
 			_, err = s.publisher.PublishCRL(ctx, crl)
 			if err != nil {

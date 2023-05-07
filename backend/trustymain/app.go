@@ -441,13 +441,13 @@ func (a *App) loadConfig() error {
 		cfg.CryptoProv.Providers = *flags.cryptoProvs
 	}
 	if *flags.clientCertFile != "" {
-		cfg.TrustyClient.ClientTLS.CertFile = *flags.clientCertFile
+		cfg.Client.ClientTLS.CertFile = *flags.clientCertFile
 	}
 	if *flags.clientKeyFile != "" {
-		cfg.TrustyClient.ClientTLS.KeyFile = *flags.clientKeyFile
+		cfg.Client.ClientTLS.KeyFile = *flags.clientKeyFile
 	}
 	if *flags.clientTrustedCAFile != "" {
-		cfg.TrustyClient.ClientTLS.TrustedCAFile = *flags.clientTrustedCAFile
+		cfg.Client.ClientTLS.TrustedCAFile = *flags.clientTrustedCAFile
 	}
 
 	for name, httpCfg := range cfg.HTTPServers {

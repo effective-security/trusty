@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/effective-security/porto/gserver"
 	"github.com/effective-security/porto/pkg/discovery"
@@ -14,20 +15,20 @@ import (
 	"github.com/effective-security/porto/xhttp/identity"
 	v1 "github.com/effective-security/trusty/api/v1"
 	pb "github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/api/v1/pb/proxypb"
 	"github.com/effective-security/trusty/backend/service/status"
-	"github.com/effective-security/trusty/client"
-	"github.com/effective-security/trusty/client/embed"
 	"github.com/effective-security/trusty/internal/version"
 	"github.com/effective-security/trusty/tests/mockappcontainer"
 	"github.com/effective-security/trusty/tests/testutils"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 var (
 	trustyServer *gserver.Server
-	statusClient client.StatusClient
+	statusClient pb.StatusServer
 	httpAddr     string
 	httpsAddr    string
 )
@@ -75,8 +76,19 @@ func TestMain(m *testing.M) {
 		panic(errors.WithStack(err))
 	}
 
-	// TODO: channel for <-trustyServer.ServerReady()
-	statusClient = embed.NewStatusClient(trustyServer)
+	svc := trustyServer.Service(status.ServiceName).(*status.Service)
+	statusClient = proxypb.NewStatusClientFromProxy(proxypb.StatusServerToClient(svc))
+
+	// err = svc.OnStarted()
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	for i := 0; i < 10; i++ {
+		if !svc.IsReady() {
+			time.Sleep(time.Second)
+		}
+	}
 
 	// Run the tests
 	rc := m.Run()
@@ -90,7 +102,7 @@ func TestMain(m *testing.M) {
 func TestVersionHttpText(t *testing.T) {
 	w := httptest.NewRecorder()
 
-	client, err := retriable.New(retriable.ClientConfig{Hosts: []string{httpAddr}})
+	client, err := retriable.Default(httpAddr)
 	require.NoError(t, err)
 
 	ctx := retriable.WithHeaders(context.Background(), textContentHeaders)
@@ -107,7 +119,7 @@ func TestVersionHttpText(t *testing.T) {
 func TestVersionHttpJSON(t *testing.T) {
 	res := new(pb.ServerVersion)
 
-	client, err := retriable.New(retriable.ClientConfig{Hosts: []string{httpAddr}})
+	client, err := retriable.Default(httpAddr)
 	require.NoError(t, err)
 
 	ctx := retriable.WithHeaders(context.Background(), jsonContentHeaders)
@@ -123,7 +135,7 @@ func TestVersionHttpJSON(t *testing.T) {
 
 func TestVersionGrpc(t *testing.T) {
 	res := new(pb.ServerVersion)
-	res, err := statusClient.Version(context.Background())
+	res, err := statusClient.Version(context.Background(), &emptypb.Empty{})
 	require.NoError(t, err)
 
 	ver := version.Current()
@@ -134,7 +146,7 @@ func TestVersionGrpc(t *testing.T) {
 func TestNodeStatusHttp(t *testing.T) {
 	w := httptest.NewRecorder()
 
-	client, err := retriable.New(retriable.ClientConfig{Hosts: []string{httpAddr}})
+	client, err := retriable.Default(httpAddr)
 	require.NoError(t, err)
 
 	hdr, _, err := client.Get(context.Background(), v1.PathForStatusNode, w)
@@ -143,14 +155,12 @@ func TestNodeStatusHttp(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	assert.Contains(t, hdr.Get(header.ContentType), "text/plain")
-
-	res := string(w.Body.Bytes())
-	assert.Equal(t, "ALIVE", res)
+	assert.Equal(t, "ALIVE", w.Body.String())
 }
 
 func TestServerStatusHttp(t *testing.T) {
 	w := httptest.NewRecorder()
-	client, err := retriable.New(retriable.ClientConfig{Hosts: []string{httpAddr}})
+	client, err := retriable.Default(httpAddr)
 	require.NoError(t, err)
 
 	ctx := retriable.WithHeaders(context.Background(), textContentHeaders)
@@ -164,7 +174,7 @@ func TestServerStatusHttp(t *testing.T) {
 
 func TestServerStatusHttpJSON(t *testing.T) {
 	res := new(pb.ServerStatusResponse)
-	client, err := retriable.New(retriable.ClientConfig{Hosts: []string{httpAddr}})
+	client, err := retriable.Default(httpAddr)
 	require.NoError(t, err)
 
 	ctx := retriable.WithHeaders(context.Background(), jsonContentHeaders)
@@ -181,7 +191,7 @@ func TestServerStatusHttpJSON(t *testing.T) {
 
 func TestServerStatusGrpc(t *testing.T) {
 	res := new(pb.ServerStatusResponse)
-	res, err := statusClient.Server(context.Background())
+	res, err := statusClient.Server(context.Background(), &emptypb.Empty{})
 	require.NoError(t, err)
 
 	require.NotNil(t, res.Status)
@@ -191,7 +201,7 @@ func TestServerStatusGrpc(t *testing.T) {
 
 func TestCallerStatusHttp(t *testing.T) {
 	w := httptest.NewRecorder()
-	client, err := retriable.New(retriable.ClientConfig{Hosts: []string{httpAddr}})
+	client, err := retriable.Default(httpAddr)
 	require.NoError(t, err)
 
 	ctx := retriable.WithHeaders(context.Background(), textContentHeaders)
@@ -205,7 +215,7 @@ func TestCallerStatusHttp(t *testing.T) {
 
 func TestCallerStatusHttpJSON(t *testing.T) {
 	res := new(pb.CallerStatusResponse)
-	client, err := retriable.New(retriable.ClientConfig{Hosts: []string{httpAddr}})
+	client, err := retriable.Default(httpAddr)
 	require.NoError(t, err)
 
 	ctx := retriable.WithHeaders(context.Background(), jsonContentHeaders)
@@ -219,7 +229,7 @@ func TestCallerStatusHttpJSON(t *testing.T) {
 }
 
 func TestCallerStatusGrpc(t *testing.T) {
-	res, err := statusClient.Caller(context.Background())
+	res, err := statusClient.Caller(context.Background(), &emptypb.Empty{})
 	require.NoError(t, err)
 	assert.Equal(t, identity.GuestRoleName, res.Role)
 }

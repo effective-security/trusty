@@ -8,7 +8,6 @@ import (
 
 	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/trusty/api/v1/pb"
-	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/pkg/print"
 	"github.com/pkg/errors"
 )
@@ -35,13 +34,12 @@ type ListIssuersCmd struct {
 
 // Run the command
 func (a *ListIssuersCmd) Run(cli *Cli) error {
-	client, err := cli.Client(config.CAServerName)
+	client, err := cli.CAClient()
 	if err != nil {
 		return err
 	}
-	defer client.Close()
 
-	res, err := client.CAClient().ListIssuers(context.Background(), &pb.ListIssuersRequest{
+	res, err := client.ListIssuers(context.Background(), &pb.ListIssuersRequest{
 		Limit:  a.Limit,
 		After:  a.After,
 		Bundle: a.Bundle,
@@ -50,28 +48,28 @@ func (a *ListIssuersCmd) Run(cli *Cli) error {
 		return err
 	}
 
-	if cli.IsJSON() {
-		_ = cli.WriteJSON(res)
-	} else {
+	if a.Bundle {
 		print.Issuers(cli.Writer(), res.Issuers, a.Bundle)
+	} else {
+		_ = cli.Print(res)
 	}
+
 	return nil
 }
 
 // ListCertsCmd prints certificates
 type ListCertsCmd struct {
-	Ikid  string `kong:"arg" required:"" help:"Issuer key ID"`
+	IKID  string `kong:"arg" required:"" help:"Issuer key ID"`
 	Limit int
 	After string
 }
 
 // Run the command
 func (a *ListCertsCmd) Run(cli *Cli) error {
-	client, err := cli.Client(config.CAServerName)
+	client, err := cli.CAClient()
 	if err != nil {
 		return err
 	}
-	defer client.Close()
 
 	after := uint64(0)
 	if a.After != "" {
@@ -81,8 +79,8 @@ func (a *ListCertsCmd) Run(cli *Cli) error {
 		}
 	}
 
-	res, err := client.CAClient().ListCertificates(context.Background(), &pb.ListByIssuerRequest{
-		Ikid:  a.Ikid,
+	res, err := client.ListCertificates(context.Background(), &pb.ListByIssuerRequest{
+		IKID:  a.IKID,
 		Limit: int64(a.Limit),
 		After: after,
 	})
@@ -90,29 +88,24 @@ func (a *ListCertsCmd) Run(cli *Cli) error {
 		return err
 	}
 
-	if cli.IsJSON() {
-		_ = cli.WriteJSON(res)
-	} else {
-		print.CertificatesTable(cli.Writer(), res.List)
-	}
+	_ = cli.Print(res)
 
 	return nil
 }
 
 // ListRevokedCertsCmd prints revoked certificates
 type ListRevokedCertsCmd struct {
-	Ikid  string `kong:"arg" required:"" help:"Issuer key ID"`
+	IKID  string `kong:"arg" required:"" help:"Issuer key ID"`
 	Limit int
 	After string
 }
 
 // Run the command
 func (a *ListRevokedCertsCmd) Run(cli *Cli) error {
-	client, err := cli.Client(config.CAServerName)
+	client, err := cli.CAClient()
 	if err != nil {
 		return err
 	}
-	defer client.Close()
 
 	after := uint64(0)
 	if a.After != "" {
@@ -122,8 +115,8 @@ func (a *ListRevokedCertsCmd) Run(cli *Cli) error {
 		}
 	}
 
-	res, err := client.CAClient().ListRevokedCertificates(context.Background(), &pb.ListByIssuerRequest{
-		Ikid:  a.Ikid,
+	res, err := client.ListRevokedCertificates(context.Background(), &pb.ListByIssuerRequest{
+		IKID:  a.IKID,
 		Limit: int64(a.Limit),
 		After: after,
 	})
@@ -131,11 +124,7 @@ func (a *ListRevokedCertsCmd) Run(cli *Cli) error {
 		return err
 	}
 
-	if cli.IsJSON() {
-		_ = cli.WriteJSON(res)
-	} else {
-		print.RevokedCertificatesTable(cli.Writer(), res.List)
-	}
+	_ = cli.Print(res)
 
 	return nil
 }
@@ -147,21 +136,20 @@ type GetProfileCmd struct {
 
 // Run the command
 func (a *GetProfileCmd) Run(cli *Cli) error {
-	client, err := cli.Client(config.CAServerName)
+	client, err := cli.CAClient()
 	if err != nil {
 		return err
 	}
-	defer client.Close()
 
-	res, err := client.CAClient().ProfileInfo(context.Background(), &pb.CertProfileInfoRequest{
+	res, err := client.ProfileInfo(context.Background(), &pb.CertProfileInfoRequest{
 		Label: a.Label,
 	})
 	if err != nil {
 		return err
 	}
 
-	_ = cli.WriteJSON(res)
-	// TODO: printer
+	_ = cli.Print(res)
+
 	return nil
 }
 
@@ -179,25 +167,24 @@ type SignCmd struct {
 
 // Run the command
 func (a *SignCmd) Run(cli *Cli) error {
-	client, err := cli.Client(config.CAServerName)
+	client, err := cli.CAClient()
 	if err != nil {
 		return err
 	}
-	defer client.Close()
 
 	csr, err := cli.ReadFile(a.Csr)
 	if err != nil {
 		return errors.WithMessagef(err, "failed to load request")
 	}
 
-	res, err := client.CAClient().SignCertificate(context.Background(), &pb.SignCertificateRequest{
+	res, err := client.SignCertificate(context.Background(), &pb.SignCertificateRequest{
 		RequestFormat: pb.EncodingFormat_PEM,
 		Request:       csr,
 		Profile:       a.Profile,
 		IssuerLabel:   a.IssuerLabel,
 		Label:         a.Label,
 		Token:         a.Token,
-		San:           a.SAN,
+		SAN:           a.SAN,
 	})
 	if err != nil {
 		return err
@@ -209,16 +196,17 @@ func (a *SignCmd) Run(cli *Cli) error {
 	}
 	pem += res.Certificate.IssuersPem
 
+	w := cli.Writer()
 	if a.Out != "" {
 		err = ioutil.WriteFile(a.Out, []byte(pem), 0664)
 		if err != nil {
 			return errors.WithStack(err)
 		}
 	} else if cli.IsJSON() {
-		_ = cli.WriteJSON(res)
+		_ = print.JSON(w, res)
 	} else {
-		fmt.Fprint(cli.Writer(), pem)
-		fmt.Fprint(cli.Writer(), "\n")
+		fmt.Fprint(w, pem)
+		fmt.Fprint(w, "\n")
 	}
 
 	return nil
@@ -226,30 +214,24 @@ func (a *SignCmd) Run(cli *Cli) error {
 
 // PublishCrlsCmd publish one or all CRLs
 type PublishCrlsCmd struct {
-	Ikid string
+	IKID string
 }
 
 // Run the command
 func (a *PublishCrlsCmd) Run(cli *Cli) error {
-	client, err := cli.Client(config.CAServerName)
+	client, err := cli.CAClient()
 	if err != nil {
 		return err
 	}
-	defer client.Close()
 
-	res, err := client.CAClient().PublishCrls(context.Background(), &pb.PublishCrlsRequest{
-		Ikid: a.Ikid,
+	res, err := client.PublishCrls(context.Background(), &pb.PublishCrlsRequest{
+		IKID: a.IKID,
 	})
 	if err != nil {
 		return err
 	}
 
-	if cli.IsJSON() {
-		_ = cli.WriteJSON(res)
-	} else {
-		print.CrlsTable(cli.Writer(), res.Clrs)
-	}
-
+	_ = cli.Print(res)
 	return nil
 }
 
@@ -268,23 +250,22 @@ func (a *RevokeCmd) Run(cli *Cli) error {
 		return errors.New("no certificate specified")
 	}
 
-	client, err := cli.Client(config.CAServerName)
+	client, err := cli.CAClient()
 	if err != nil {
 		return err
 	}
-	defer client.Close()
 
 	var is *pb.IssuerSerial
 	if a.IKID != "" && a.Serial != "" {
 		is = &pb.IssuerSerial{
-			Ikid:         a.IKID,
+			IKID:         a.IKID,
 			SerialNumber: a.Serial,
 		}
 	}
 
-	res, err := client.CAClient().RevokeCertificate(context.Background(), &pb.RevokeCertificateRequest{
-		Id:           a.ID,
-		Skid:         a.SKID,
+	res, err := client.RevokeCertificate(context.Background(), &pb.RevokeCertificateRequest{
+		ID:           a.ID,
+		SKID:         a.SKID,
 		IssuerSerial: is,
 		Reason:       pb.Reason(a.Reason),
 	})
@@ -292,9 +273,8 @@ func (a *RevokeCmd) Run(cli *Cli) error {
 		return err
 	}
 
-	_ = cli.WriteJSON(res)
+	_ = cli.Print(res)
 
-	// TODO: printer
 	return nil
 }
 
@@ -306,22 +286,20 @@ type UpdateCertLabelCmd struct {
 
 // Run the command
 func (a *UpdateCertLabelCmd) Run(cli *Cli) error {
-	client, err := cli.Client(config.CAServerName)
+	client, err := cli.CAClient()
 	if err != nil {
 		return err
 	}
-	defer client.Close()
 
-	res, err := client.CAClient().UpdateCertificateLabel(context.Background(), &pb.UpdateCertificateLabelRequest{
-		Id:    a.ID,
+	res, err := client.UpdateCertificateLabel(context.Background(), &pb.UpdateCertificateLabelRequest{
+		ID:    a.ID,
 		Label: a.Label,
 	})
 	if err != nil {
 		return err
 	}
 
-	_ = cli.WriteJSON(res)
-	// TODO: printer
+	_ = cli.Print(res)
 	return nil
 }
 
@@ -339,30 +317,28 @@ func (a *GetCertificateCmd) Run(cli *Cli) error {
 		return errors.New("no certificate specified")
 	}
 
-	client, err := cli.Client(config.CAServerName)
+	client, err := cli.CAClient()
 	if err != nil {
 		return err
 	}
-	defer client.Close()
 
 	var is *pb.IssuerSerial
 	if a.IKID != "" && a.Serial != "" {
 		is = &pb.IssuerSerial{
-			Ikid:         a.IKID,
+			IKID:         a.IKID,
 			SerialNumber: a.Serial,
 		}
 	}
 
-	res, err := client.CAClient().GetCertificate(context.Background(), &pb.GetCertificateRequest{
-		Id:           a.ID,
-		Skid:         a.SKID,
+	res, err := client.GetCertificate(context.Background(), &pb.GetCertificateRequest{
+		ID:           a.ID,
+		SKID:         a.SKID,
 		IssuerSerial: is,
 	})
 	if err != nil {
 		return err
 	}
 
-	_ = cli.WriteJSON(res)
-	// TODO: printer
+	_ = cli.Print(res)
 	return nil
 }

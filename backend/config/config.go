@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/effective-security/porto/gserver"
+	"github.com/effective-security/trusty/api/v1/client"
 	"github.com/effective-security/xpki/authority"
 )
 
@@ -59,9 +60,8 @@ type Configuration struct {
 	// HTTPServers specifies a list of servers that expose HTTP or gRPC services
 	HTTPServers map[string]*gserver.Config `json:"servers" yaml:"servers"`
 
-	// TODO: refactor
-	// TrustyClient specifies configurations for the client to connect to the cluster
-	TrustyClient TrustyClient `json:"trusty_client" yaml:"trusty_client"`
+	// Client specifies configurations for the client to connect to the cluster
+	Client client.Config `json:"client" yaml:"client"`
 
 	// Tasks specifies array of tasks
 	Tasks []Task `json:"tasks" yaml:"tasks"`

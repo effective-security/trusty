@@ -196,8 +196,8 @@ servers:
         - /favicon.ico
         - /v1
         - /metrics
-        - /pb.CIService
-        - /pb.StatusService
+        - /pb.CIS
+        - /pb.Status
       # allow any authenticated request that includes a non empty role
       allow_any_role:
       # allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
@@ -229,6 +229,7 @@ servers:
     services:
       - status
       - ca
+      - cis
     logger_skip_paths:
       - path: "/v1/status/node"
         agent: "Google"
@@ -246,22 +247,22 @@ servers:
       # /v1/* is allowed
       allow_any:
         # allow any authenticated request that includes a non empty role
-        - /pb.StatusService
+        - /pb.Status
         - /metrics
         - /v1/status
       allow_any_role:
-        - /pb.CIService
-        - /pb.CAService
+        - /pb.CIS
+        - /pb.CA
       # allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
       allow:
-        - /pb.CAService/SignCertificate:trusty-wfe,trusty-ca,trusty-admin,trusty-ra
-        - /pb.CAService/SignOCSP:trusty-wfe,trusty-ca,trusty-admin,trusty-ra
-        - /pb.CAService/PublishCrls:trusty-ca,trusty-admin,trusty-ra
-        - /pb.CAService/RevokeCertificate:trusty-ca,trusty-admin,trusty-ra
-        - /pb.CAService/RegisterDelegatedIssuer:trusty-ca,trusty-admin,trusty-ra
-        - /pb.CAService/ArchiveDelegatedIssuer:trusty-ca,trusty-admin,trusty-ra
-        - /pb.CAService/UpdateCertificateLabel:trusty-ca,trusty-admin,trusty-ra
-        - /pb.CAService/RegisterProfile:trusty-ca,trusty-admin,trusty-ra
+        - /pb.CA/SignCertificate:trusty-wfe,trusty-ca,trusty-admin,trusty-ra
+        - /pb.CA/SignOCSP:trusty-wfe,trusty-ca,trusty-admin,trusty-ra
+        - /pb.CA/PublishCrls:trusty-ca,trusty-admin,trusty-ra
+        - /pb.CA/RevokeCertificate:trusty-ca,trusty-admin,trusty-ra
+        - /pb.CA/RegisterDelegatedIssuer:trusty-ca,trusty-admin,trusty-ra
+        - /pb.CA/ArchiveDelegatedIssuer:trusty-ca,trusty-admin,trusty-ra
+        - /pb.CA/UpdateCertificateLabel:trusty-ca,trusty-admin,trusty-ra
+        - /pb.CA/RegisterProfile:trusty-ca,trusty-admin,trusty-ra
       # specifies to log allowed access to Any role
       log_allowed_any: true
       # specifies to log allowed access
@@ -296,14 +297,14 @@ servers:
             - denis@ekspand.com
             - denis@effectivesecurity.pt
 
-trusty_client:
+client:
   client_tls:
     cert: /tmp/trusty/certs/trusty_client.pem
     key: /tmp/trusty/certs/trusty_client.key
     trusted_ca: ${TRUSTY_CONFIG_DIR}/roots/trusty_root_ca.pem
   server_url:
-    cis: ["http://localhost:7880"]
-    ca: ["https://localhost:7892"]
+    cis: http://localhost:7880
+    ca: https://localhost:7892
   dial_timeout: 30s
   dial_keep_alive_time: 300s
   dial_keep_alive_timeout: 30s

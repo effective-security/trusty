@@ -57,7 +57,7 @@ func TestProvider(t *testing.T) {
 
 	fn2, err := p.PublishCRL(ctx, &pb.Crl{
 		Pem:  testCRL,
-		Ikid: guid.MustCreate(),
+		IKID: guid.MustCreate(),
 	})
 	require.NoError(t, err)
 

@@ -3,12 +3,12 @@ package status
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/effective-security/porto/xhttp/identity"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/internal/version"
 	"github.com/golang/protobuf/ptypes/empty"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Version returns the server version.
@@ -27,8 +27,8 @@ func (s *Service) Server(_ context.Context, _ *empty.Empty) (*pb.ServerStatusRes
 		Status: &pb.ServerStatus{
 			Name:       s.server.Name(),
 			Hostname:   s.server.Hostname(),
-			ListenUrls: s.server.ListenURLs(),
-			StartedAt:  timestamppb.New(s.server.StartedAt()),
+			ListenURLs: s.server.ListenURLs(),
+			StartedAt:  s.server.StartedAt().Format(time.RFC3339),
 		},
 		Version: &pb.ServerVersion{
 			Build:   v.Build,

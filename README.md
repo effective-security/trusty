@@ -7,14 +7,8 @@ Trusty is a Certification Authority.
 
 ## Requirements
 
-1. GoLang 1.19+
+1. GoLang 1.20+
 1. docker-compose v2.3.3+
-
-```.sh
-	echo "curl -L https://github.com/google/protobuf/releases/download/v3.6.1/protoc-3.6.1-linux-x86_64.zip -o /tmp/protoc.zip"
-	echo "unzip /tmp/protoc.zip -d /usr/local/protoc"
-	echo "export PATH=$PATH:/usr/local/protoc/bin"
-```
 
 To run or test locally, you need GitHub OAuth secret and a random seed.
 Add this to your ~/.profile
@@ -126,3 +120,28 @@ and run commands
 Open http://localhost:8080
 
 Before runing the above command, make sure trusty is running locally using `bin/trusty` command.
+
+### Client config
+
+    cat ~/.config/trusty/config.yaml
+
+```yaml
+---
+clients:
+  local_cis:
+    host: http://localhost:7880
+    tls:
+      trusted_ca: /tmp/trusty/certs/trusty_root_ca.pem
+    request:
+      retry_limit: 3
+      timeout: 6s
+  local_ca:
+    host: https://localhost:7892
+    tls:
+      cert: /tmp/trusty/certs/trusty_client.pem
+      key: /tmp/trusty/certs/trusty_client.key
+      trusted_ca: /tmp/trusty/certs/trusty_root_ca.pem
+    request:
+      retry_limit: 3
+      timeout: 6s
+```

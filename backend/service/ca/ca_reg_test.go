@@ -40,7 +40,7 @@ func TestRegisterIssuer(t *testing.T) {
 		Metadata: map[string]string{
 			"spc": "spc17239471dhqwsd71230e7yqwedhqd1203e18u23ddo120893",
 		},
-		OrgId: iid,
+		OrgID: iid,
 		Subject: &pb.X509Subject{
 			CommonName: fmt.Sprintf("Delegated Subordinate CA %d", iid),
 			Names: []*pb.X509Name{
@@ -49,7 +49,7 @@ func TestRegisterIssuer(t *testing.T) {
 		},
 		Extensions: []*pb.X509Extension{
 			{
-				Id:    []int64{1, 3, 6, 1, 5, 5, 7, 1, 26},
+				ID:    []int64{1, 3, 6, 1, 5, 5, 7, 1, 26},
 				Value: "MAigBhYENzA5Sg==",
 			},
 		},
@@ -106,7 +106,7 @@ func TestRegisterIssuer(t *testing.T) {
 			RequestFormat: pb.EncodingFormat_PEM,
 		})
 		require.NoError(t, err)
-		assert.Equal(t, certutil.GetSubjectID(crt), signRes2.Certificate.Ikid)
+		assert.Equal(t, certutil.GetSubjectID(crt), signRes2.Certificate.IKID)
 	}
 }
 

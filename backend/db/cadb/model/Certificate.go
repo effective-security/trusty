@@ -4,11 +4,10 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"math/big"
-	"time"
 
+	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/xpki/certutil"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Certificate provides X509 Cert information
@@ -18,8 +17,8 @@ type Certificate struct {
 	SKID             string            `db:"skid"`
 	IKID             string            `db:"ikid"`
 	SerialNumber     string            `db:"serial_number"`
-	NotBefore        time.Time         `db:"not_before"`
-	NotAfter         time.Time         `db:"no_tafter"`
+	NotBefore        xdb.Time          `db:"not_before"`
+	NotAfter         xdb.Time          `db:"no_tafter"`
 	Subject          string            `db:"subject"`
 	Issuer           string            `db:"issuer"`
 	ThumbprintSha256 string            `db:"sha256"`
@@ -37,13 +36,13 @@ type Certificates []*Certificate
 // ToPB returns protobuf
 func (r *Certificate) ToPB() *pb.Certificate {
 	return &pb.Certificate{
-		Id:           r.ID,
-		OrgId:        r.OrgID,
-		Skid:         r.SKID,
-		Ikid:         r.IKID,
+		ID:           r.ID,
+		OrgID:        r.OrgID,
+		SKID:         r.SKID,
+		IKID:         r.IKID,
 		SerialNumber: r.SerialNumber,
-		NotBefore:    timestamppb.New(r.NotBefore),
-		NotAfter:     timestamppb.New(r.NotAfter),
+		NotBefore:    r.NotBefore.String(),
+		NotAfter:     r.NotAfter.String(),
 		Subject:      r.Subject,
 		Issuer:       r.Issuer,
 		Sha256:       r.ThumbprintSha256,
@@ -76,13 +75,13 @@ func (r *Certificate) FileName() string {
 // CertificateFromPB returns Certificate
 func CertificateFromPB(r *pb.Certificate) *Certificate {
 	return &Certificate{
-		ID:               r.Id,
-		OrgID:            r.OrgId,
-		SKID:             r.Skid,
-		IKID:             r.Ikid,
+		ID:               r.ID,
+		OrgID:            r.OrgID,
+		SKID:             r.SKID,
+		IKID:             r.IKID,
 		SerialNumber:     r.SerialNumber,
-		NotBefore:        r.NotBefore.AsTime().UTC(),
-		NotAfter:         r.NotAfter.AsTime().UTC(),
+		NotBefore:        xdb.ParseTime(r.NotBefore),
+		NotAfter:         xdb.ParseTime(r.NotAfter),
 		Subject:          r.Subject,
 		Issuer:           r.Issuer,
 		ThumbprintSha256: r.Sha256,
@@ -107,8 +106,8 @@ func NewCertificate(r *x509.Certificate,
 		SKID:             certutil.GetSubjectKeyID(r),
 		IKID:             certutil.GetAuthorityKeyID(r),
 		SerialNumber:     r.SerialNumber.String(),
-		NotBefore:        r.NotBefore.UTC(),
-		NotAfter:         r.NotAfter.UTC(),
+		NotBefore:        xdb.Time(r.NotBefore),
+		NotAfter:         xdb.Time(r.NotAfter),
 		Subject:          r.Subject.String(),
 		Issuer:           r.Issuer.String(),
 		ThumbprintSha256: certutil.SHA256Hex(r.Raw),

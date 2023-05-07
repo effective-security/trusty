@@ -64,5 +64,5 @@ func (s *Service) RegisterRoute(r restserver.Router) {
 
 // RegisterGRPC registers gRPC handler
 func (s *Service) RegisterGRPC(r *grpc.Server) {
-	pb.RegisterStatusServiceServer(r, s)
+	pb.RegisterStatusServer(r, s)
 }

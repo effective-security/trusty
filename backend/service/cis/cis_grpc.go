@@ -27,13 +27,13 @@ func (s *Service) GetRoots(ctx context.Context, _ *empty.Empty) (*pb.RootsRespon
 func (s *Service) GetCertificate(ctx context.Context, in *pb.GetCertificateRequest) (*pb.CertificateResponse, error) {
 	var crt *model.Certificate
 	var err error
-	if in.Id != 0 {
-		crt, err = s.db.GetCertificate(ctx, in.Id)
+	if in.ID != 0 {
+		crt, err = s.db.GetCertificate(ctx, in.ID)
 		if err != nil {
 			return nil, httperror.WrapWithCtx(ctx, err, "unable to find certificate")
 		}
 	} else {
-		crts, err := s.db.GetCertificatesBySKID(ctx, in.Skid)
+		crts, err := s.db.GetCertificatesBySKID(ctx, in.SKID)
 		if err != nil {
 			return nil, httperror.WrapWithCtx(ctx, err, "unable to find certificate")
 		}

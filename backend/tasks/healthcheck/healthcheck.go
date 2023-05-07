@@ -14,9 +14,9 @@ import (
 	"github.com/effective-security/porto/pkg/retriable"
 	"github.com/effective-security/porto/pkg/tasks"
 	"github.com/effective-security/porto/xhttp/correlation"
+	"github.com/effective-security/trusty/api/v1/client"
 	"github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/backend/config"
-	"github.com/effective-security/trusty/client"
 	"github.com/effective-security/trusty/internal/version"
 	"github.com/effective-security/trusty/pkg/metricskey"
 	"github.com/effective-security/xlog"
@@ -38,7 +38,7 @@ type Task struct {
 	schedule   string
 	crypto     *cryptoprov.Crypto
 	factory    client.Factory
-	caClient   client.CAClient
+	caClient   pb.CAServer
 	ocspClient *retriable.Client
 	ocspCerts  []string
 	ctx        context.Context
@@ -121,11 +121,11 @@ func (t *Task) healthHsm(ctx context.Context) error {
 
 func (t *Task) healthCheckIssuers(ctx context.Context) error {
 	if t.caClient == nil {
-		client, err := t.factory.NewClient("ca")
+		cl, err := t.factory.NewClient("ca")
 		if err != nil {
 			return errors.WithMessagef(err, "unable to create client")
 		}
-		t.caClient = client.CAClient()
+		t.caClient = client.CAClient(cl)
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
@@ -167,7 +167,7 @@ func (t *Task) healthCheckOCSP(ctx context.Context, cert string) (*int, error) {
 	issuer := chain[1]
 
 	if len(crt.OCSPServer) == 0 {
-		logger.ContextKV(t.ctx, xlog.ERROR,
+		logger.ContextKV(t.ctx, xlog.WARNING,
 			"reason", "no_ocsp_url",
 			"cert", cert)
 		return nil, nil
@@ -191,7 +191,7 @@ func (t *Task) healthCheckOCSP(ctx context.Context, cert string) (*int, error) {
 	_, _, err = t.ocspClient.Request(
 		ctx,
 		http.MethodPost,
-		[]string{host},
+		host,
 		ur.Path,
 		req,
 		w)
@@ -245,7 +245,7 @@ func create(
 	}
 
 	if caPtr != nil && *caPtr {
-		task.factory = client.NewFactory(&conf.TrustyClient)
+		task.factory = client.NewFactory(&conf.Client)
 	}
 
 	if hsmkeysPtr != nil && *hsmkeysPtr && conf != nil {

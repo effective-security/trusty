@@ -85,9 +85,6 @@ func scanFullRevokedCertificate(row *sql.Row) (*model.RevokedCertificate, error)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	res.Certificate.NotAfter = res.Certificate.NotAfter.UTC()
-	res.Certificate.NotBefore = res.Certificate.NotBefore.UTC()
-	res.RevokedAt = res.RevokedAt.UTC()
 	if len(locations) > 0 {
 		res.Certificate.Locations = strings.Split(locations, ",")
 	}
@@ -122,9 +119,6 @@ func scanShortRevokedCertificate(row *sql.Rows) (*model.RevokedCertificate, erro
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	res.Certificate.NotAfter = res.Certificate.NotAfter.UTC()
-	res.Certificate.NotBefore = res.Certificate.NotBefore.UTC()
-	res.RevokedAt = res.RevokedAt.UTC()
 	if len(locations) > 0 {
 		res.Certificate.Locations = strings.Split(locations, ",")
 	}
@@ -228,7 +222,7 @@ func (p *Provider) RevokeCertificate(ctx context.Context, crt *model.Certificate
 
 	revoked := &model.RevokedCertificate{
 		Certificate: *crt,
-		RevokedAt:   at,
+		RevokedAt:   xdb.Time(at),
 		Reason:      reason,
 	}
 

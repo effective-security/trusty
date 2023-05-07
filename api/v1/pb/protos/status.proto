@@ -1,0 +1,99 @@
+syntax = "proto3";
+package pb;
+
+option go_package = "github.com/effective-security/trusty/api/v1/pb";
+
+//import "rpc.proto";
+import "google/protobuf/empty.proto";
+// for grpc-gateway
+import "google/api/annotations.proto";
+// import "protoc-gen-openapiv2/options/annotations.proto";
+
+// option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+// 	info: {
+// 		title: "Status API";
+// 		version: "1.0";
+// 		contact: {
+// 			name: "Trusty";
+// 			url: "https://github.com/effective-security/trusty";
+// 			email: "denis@effectivesecurity.pt";
+// 		};
+// 		extensions: {
+// 			key: "x-something-something";
+// 			value {
+// 				string_value: "yadda";
+// 			}
+// 		}
+// 	};
+//     // host: "trusty.com:7880";
+//     schemes: HTTP;
+//     // schemes: HTTPS;
+//     consumes: "application/json";
+//     produces: "application/json";
+// };
+
+
+service Status {
+    // Version returns the server version.
+    rpc Version(google.protobuf.Empty) returns (ServerVersion) {
+        option (google.api.http) = {
+            get: "/v1/status/version"
+        };
+    }
+
+    // Server returns the server status.
+    rpc Server(google.protobuf.Empty) returns (ServerStatusResponse) {
+        option (google.api.http) = {
+            get: "/v1/status/server"
+      };
+    }
+
+    // Caller returns the caller status.
+    rpc Caller(google.protobuf.Empty) returns (CallerStatusResponse) {
+        option (google.api.http) = {
+            get: "/v1/status/caller"
+      };
+    }
+}
+
+// ServerVersion provides server build and runtime version
+message ServerVersion {
+    // Build is the server build version.
+    string Build = 1;
+    // Runtime is the runtime version.
+    string Runtime = 2;
+}
+
+// ServerStatus provides server status information
+message ServerStatus {
+    // Name of the server or application.
+    string Name = 1;
+    // Nodename is the human-readable name of the cluster member,
+    // or empty for single host.
+    string Nodename = 2;
+    // Hostname is operating system's host name.
+    string Hostname = 3;
+    // ListenURLs is the list of URLs the service is listening on.
+    repeated string ListenURLs = 4;
+    // StartedAt is the time when the server has started.
+    string StartedAt = 5;
+}
+
+// ServerStatusResponse returns status and version
+message ServerStatusResponse {
+    // Status of the server.
+    ServerStatus Status = 1;
+
+    // Version of the server.
+    ServerVersion Version = 2;
+}
+
+// CallerStatusResponse returns the caller information
+message CallerStatusResponse {
+    // Subject of the caller.
+    string Subject = 1;
+    // Rame of the caller.
+    string Role = 2;
+    // Claims from the token, json encoded map[string]interface{}
+    bytes Claims = 3;
+}

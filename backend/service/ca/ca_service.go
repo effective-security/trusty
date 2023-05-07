@@ -80,7 +80,7 @@ func (s *Service) RegisterRoute(r restserver.Router) {
 
 // RegisterGRPC registers gRPC handler
 func (s *Service) RegisterGRPC(r *grpc.Server) {
-	pb.RegisterCAServiceServer(r, s)
+	pb.RegisterCAServer(r, s)
 }
 
 // OnStarted is called when the server started and

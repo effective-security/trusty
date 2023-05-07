@@ -52,7 +52,7 @@
           },
           {
             "name": "issuerSerial.ikid",
-            "description": "Ikid provides Issuer Key Identifier",
+            "description": "IKID provides Issuer Key Identifier",
             "in": "query",
             "required": false,
             "type": "string"
@@ -106,15 +106,15 @@
         "org_id": {
           "type": "string",
           "format": "uint64",
-          "title": "OrgId of the certificate, only used with Org scope"
+          "title": "OrgID of the certificate, only used with Org scope"
         },
         "skid": {
           "type": "string",
-          "title": "Skid provides Subject Key Identifier"
+          "title": "SKID provides Subject Key Identifier"
         },
         "ikid": {
           "type": "string",
-          "title": "Ikid provides Issuer Key Identifier"
+          "title": "IKID provides Issuer Key Identifier"
         },
         "serialNumber": {
           "type": "string",
@@ -189,7 +189,7 @@
       "properties": {
         "ikid": {
           "type": "string",
-          "title": "Ikid provides Issuer Key Identifier"
+          "title": "IKID provides Issuer Key Identifier"
         },
         "serialNumber": {
           "type": "string",
@@ -207,7 +207,7 @@
         },
         "skid": {
           "type": "string",
-          "title": "Skid provides Subject Key Identifier"
+          "title": "SKID provides Subject Key Identifier"
         },
         "not_before": {
           "type": "string",

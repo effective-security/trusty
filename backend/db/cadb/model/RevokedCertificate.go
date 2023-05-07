@@ -1,24 +1,22 @@
 package model
 
 import (
-	"time"
-
+	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/trusty/api/v1/pb"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // RevokedCertificate provides X509 Cert information
 type RevokedCertificate struct {
 	Certificate Certificate
-	RevokedAt   time.Time `db:"revoked_at"`
-	Reason      int       `db:"reason"`
+	RevokedAt   xdb.Time `db:"revoked_at"`
+	Reason      int      `db:"reason"`
 }
 
 // ToDTO returns DTO
 func (r *RevokedCertificate) ToDTO() *pb.RevokedCertificate {
 	return &pb.RevokedCertificate{
 		Certificate: r.Certificate.ToPB(),
-		RevokedAt:   timestamppb.New(r.RevokedAt),
+		RevokedAt:   r.RevokedAt.String(),
 		Reason:      pb.Reason(r.Reason),
 	}
 }

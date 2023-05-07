@@ -111,12 +111,12 @@ servers:
       # allow any authenticated request that includes a non empty role
       allow_any_role:
         - /v1/wf
-        - /pb.CAService/Issuers
-        - /pb.CAService/Roots
+        - /pb.CA/Issuers
+        - /pb.CA/Roots
       # allow the specified roles access to this path and its children, in format: ${path}:${role},${role}
       allow:
         - /v1/ca:trusty-peer
-        - /pb.CAService:trusty-peer
+        - /pb.CA:trusty-peer
       # specifies to log allowed access to Any role
       log_allowed_any: true
       # specifies to log allowed access
@@ -146,13 +146,12 @@ servers:
     cors: *cors
     authz: *authz
 
-trusty_client:
+client:
   client_tls:
     cert: /tmp/trusty/certs/trusty_${ENVIRONMENT}_client.pem
     key: /tmp/trusty/certs/trusty_${ENVIRONMENT}_client.pem
     trusted_ca: /tmp/trusty/certs/trusty_${ENVIRONMENT}_root_ca.pem
   server_url:
-    cis:
-      - http://localhost:7880
-    wfe:
-      - https://localhost:7891
+    cis: http://localhost:7880
+    wfe: https://localhost:7891
+    ca: https://localhost:7892

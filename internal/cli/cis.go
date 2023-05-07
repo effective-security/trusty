@@ -3,7 +3,6 @@ package cli
 import (
 	"context"
 
-	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/pkg/print"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
@@ -21,21 +20,21 @@ type GetRootsCmd struct {
 
 // Run the command
 func (a *GetRootsCmd) Run(cli *Cli) error {
-	client, err := cli.Client(config.CISServerName)
+	client, err := cli.CISClient()
 	if err != nil {
 		return err
 	}
-	defer client.Close()
 
-	res, err := client.CIClient().GetRoots(context.Background(), &empty.Empty{})
+	res, err := client.GetRoots(context.Background(), &empty.Empty{})
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	if cli.IsJSON() {
-		_ = cli.WriteJSON(res)
+	if a.Pem {
+		print.Roots(cli.Writer(), res.Roots, true)
 	} else {
-		print.Roots(cli.Writer(), res.Roots, a.Pem)
+		_ = cli.Print(res)
 	}
+
 	return nil
 }

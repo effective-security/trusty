@@ -8,9 +8,9 @@ import (
 
 	"github.com/effective-security/porto/pkg/tasks"
 	"github.com/effective-security/porto/x/guid"
+	"github.com/effective-security/trusty/api/v1/client"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/backend/db/cadb"
-	"github.com/effective-security/trusty/client"
 	"github.com/effective-security/trusty/pkg/certpublisher"
 	"github.com/effective-security/xpki/authority"
 	"github.com/effective-security/xpki/cryptoprov"

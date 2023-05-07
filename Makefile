@@ -58,9 +58,6 @@ version:
 	echo "*** building version $(GIT_VERSION)"
 	gofmt -r '"GIT_VERSION" -> "$(GIT_VERSION)"' internal/version/current.template > internal/version/current.go
 
-proto:
-	./genproto.sh
-
 build_trusty:
 	echo "*** Building trusty"
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/trusty ./cmd/trusty
@@ -185,3 +182,22 @@ start-pgadmin:
 			--name trusty-pgadmin \
 			dpage/pgadmin4 ;\
 	elif [ "$$CONTAINER_STATE" = "false" ]; then docker start trusty-pgadmin; fi;
+
+proto:
+	echo "*** building public proto in $(PROJ_ROOT)/api/v1/pb"
+	mkdir -p ./api/v1/pb/mockpb
+	docker run --rm -v $(PROJ_ROOT)/api/v1/pb:/dirs \
+		--name secdi-docker-protobuf \
+		effectivesecurity/protoc-gen-go:main \
+		--i "-I /third_party" \
+		--dirs /dirs/protos \
+		--golang ./.. \
+		--json ./.. \
+		--mock ./.. \
+		--proxy ./.. \
+		--methods ./.. \
+		--oapi /dirs/openapiv2
+	echo "Changing owner for generated files. Please enter your sudo creds"
+	sudo chown -R $(USER) ./api/v1/pb
+	goimports -l -w ./api/v1/pb
+	gofmt -s -l -w ./api/v1/pb

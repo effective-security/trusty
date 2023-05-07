@@ -6,8 +6,10 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
+	"fmt"
 	"testing"
 
+	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/xpki/certutil"
 	"github.com/stretchr/testify/assert"
@@ -25,19 +27,19 @@ func TestPublishCrlsAndOCSP(t *testing.T) {
 	require.NoError(t, err)
 
 	revRes, err := authorityClient.RevokeCertificate(ctx, &pb.RevokeCertificateRequest{
-		Skid:   certRes.Certificate.Skid,
+		SKID:   certRes.Certificate.SKID,
 		Reason: pb.Reason_CA_COMPROMISE,
 	})
 	require.NoError(t, err)
 	assert.Equal(t, pb.Reason_CA_COMPROMISE, revRes.Revoked.Reason)
 
 	pubRes, err := authorityClient.PublishCrls(ctx, &pb.PublishCrlsRequest{
-		Ikid: certRes.Certificate.Ikid,
+		IKID: certRes.Certificate.IKID,
 	})
 	require.NoError(t, err)
-	require.Len(t, pubRes.Clrs, 1)
+	require.Len(t, pubRes.Crls, 1)
 
-	crl, err := x509.ParseCRL([]byte(pubRes.Clrs[0].Pem))
+	crl, err := x509.ParseCRL([]byte(pubRes.Crls[0].Pem))
 	require.NoError(t, err)
 	require.Equal(t, certRes.Certificate.Issuer, crl.TBSCertList.Issuer.String())
 	require.NotEmpty(t, crl.TBSCertList.RevokedCertificates)
@@ -47,9 +49,9 @@ func TestPublishCrlsAndOCSP(t *testing.T) {
 	}
 	require.Contains(t, revokedCerts, certRes.Certificate.SerialNumber)
 
-	crlRes, err := authorityClient.GetCRL(context.Background(), &pb.GetCrlRequest{Ikid: certRes.Certificate.Ikid})
+	crlRes, err := authorityClient.GetCRL(context.Background(), &pb.GetCrlRequest{IKID: certRes.Certificate.IKID})
 	require.NoError(t, err)
-	assert.NotNil(t, crlRes.Clr)
+	assert.NotNil(t, crlRes.Crl)
 
 	{
 		crt, err := certutil.ParseFromPEM([]byte(certRes.Certificate.Pem))
@@ -132,13 +134,16 @@ func TestPublishCrlsAndOCSP(t *testing.T) {
 }
 
 func TestNotFound(t *testing.T) {
-	_, err := authorityClient.RevokeCertificate(context.Background(), &pb.RevokeCertificateRequest{Id: 123})
-	assert.EqualError(t, err, "not_found: unable to find certificate")
+	ctx := correlation.WithID(context.Background())
+	prefix := fmt.Sprintf("request %s: ", correlation.ID(ctx))
 
-	_, err = authorityClient.RevokeCertificate(context.Background(), &pb.RevokeCertificateRequest{Skid: "123123"})
-	assert.EqualError(t, err, "not_found: unable to find certificate")
+	_, err := authorityClient.RevokeCertificate(ctx, &pb.RevokeCertificateRequest{ID: 123})
+	assert.EqualError(t, err, prefix+"not_found: unable to find certificate")
 
-	crlRes, err := authorityClient.GetCRL(context.Background(), &pb.GetCrlRequest{Ikid: "123123"})
+	_, err = authorityClient.RevokeCertificate(ctx, &pb.RevokeCertificateRequest{SKID: "123123"})
+	assert.EqualError(t, err, prefix+"not_found: unable to find certificate")
+
+	crlRes, err := authorityClient.GetCRL(ctx, &pb.GetCrlRequest{IKID: "123123"})
 	require.NoError(t, err)
-	assert.Nil(t, crlRes.Clr)
+	assert.Nil(t, crlRes.Crl)
 }

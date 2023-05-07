@@ -12,10 +12,9 @@ import (
 
 	"github.com/alecthomas/kong"
 	"github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/api/v1/pb/mockpb"
 	"github.com/effective-security/trusty/internal/version"
-	"github.com/effective-security/trusty/tests/mockpb"
 	"github.com/effective-security/xpki/x/ctl"
-	"github.com/gogo/protobuf/proto"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc"
@@ -30,9 +29,10 @@ type testSuite struct {
 	// Out is the outpub buffer
 	Out bytes.Buffer
 
-	MockStatus    *mockpb.MockStatusServer
-	MockAuthority *mockpb.MockCAServer
-	MockCIS       *mockpb.MockCIServer
+	MockStatus    mockpb.MockStatusServer
+	MockAuthority mockpb.MockCAServer
+	MockCIS       mockpb.MockCISServer
+	server        *grpc.Server
 }
 
 func (s *testSuite) SetupSuite() {
@@ -62,8 +62,9 @@ func (s *testSuite) SetupSuite() {
 	cfg, err := filepath.Abs(filepath.Join(projFolder, "etc/dev/trusty-config.yaml"))
 	s.Require().NoError(err)
 
-	flags := []string{"-D", "--cfg", cfg}
+	s.server = s.SetupMockGRPC()
 
+	flags := []string{"-s", s.ctl.Server, "-D", "--cfg", cfg}
 	_, err = parser.Parse(flags)
 	if err != nil {
 		s.FailNow("unexpected error parsing: %+v", err)
@@ -76,6 +77,7 @@ func (s *testSuite) SetupTest() {
 }
 
 func (s *testSuite) TearDownSuite() {
+	s.server.Stop()
 	os.RemoveAll(s.folder)
 }
 
@@ -100,9 +102,9 @@ func (s *testSuite) HasNoText(texts ...string) {
 // SetupMockGRPC for testing
 func (s *testSuite) SetupMockGRPC() *grpc.Server {
 	serv := grpc.NewServer()
-	pb.RegisterStatusServiceServer(serv, s.MockStatus)
-	pb.RegisterCAServiceServer(serv, s.MockAuthority)
-	pb.RegisterCIServiceServer(serv, s.MockCIS)
+	pb.RegisterStatusServer(serv, &s.MockStatus)
+	pb.RegisterCAServer(serv, &s.MockAuthority)
+	pb.RegisterCISServer(serv, &s.MockCIS)
 
 	var lis net.Listener
 	var err error
@@ -141,24 +143,21 @@ func (s *testSuite) TestVersion() {
 		Runtime: "go1.18",
 	}
 
-	s.MockStatus = &mockpb.MockStatusServer{
-		Err:   nil,
-		Resps: []proto.Message{expectedResponse},
-	}
-	srv := s.SetupMockGRPC()
-	defer srv.Stop()
+	s.MockStatus.SetResponse(expectedResponse)
 
 	var a VersionCmd
 	err := a.Run(s.ctl)
 	s.Require().NoError(err)
-	s.HasText("1.2.3 (go1.18)\n")
+	s.Equal("1.2.3 (go1.18)\n", s.Out.String())
 
 	s.ctl.O = "json"
 	s.Out.Reset()
 
 	err = a.Run(s.ctl)
 	s.Require().NoError(err)
-	s.HasText("{\n\t\"build\": \"1.2.3\",\n\t\"runtime\": \"go1.18\"\n}\n")
+	s.Equal(
+		"{\n\t\"Build\": \"1.2.3\",\n\t\"Runtime\": \"go1.18\"\n}\n",
+		s.Out.String())
 }
 
 func (s *testSuite) TestCaller() {
@@ -167,31 +166,29 @@ func (s *testSuite) TestCaller() {
 		Role:    "test_role",
 	}
 
-	s.MockStatus = &mockpb.MockStatusServer{
-		Err:   nil,
-		Resps: []proto.Message{expectedResponse},
-	}
-	srv := s.SetupMockGRPC()
-	defer srv.Stop()
+	s.MockStatus.SetResponse(expectedResponse)
 
 	var a CallerCmd
 	err := a.Run(s.ctl)
 	s.Require().NoError(err)
-	s.HasText("  Subject | guest      \n  Role    | test_role  \n\n")
+	s.Equal(
+		"  Subject | guest      \n"+
+			"  Role    | test_role  \n\n",
+		s.Out.String())
 
 	s.ctl.O = "json"
 	s.Out.Reset()
 
 	err = a.Run(s.ctl)
 	s.Require().NoError(err)
-	s.HasText("{\n\t\"role\": \"test_role\",\n\t\"subject\": \"guest\"\n}\n")
+	s.Equal("{\n\t\"Subject\": \"guest\",\n\t\"Role\": \"test_role\"\n}\n", s.Out.String())
 }
 
 func (s *testSuite) TestServer() {
 	expectedResponse := &pb.ServerStatusResponse{
 		Status: &pb.ServerStatus{
 			Name:       "mock",
-			ListenUrls: []string{"host1:123"},
+			ListenURLs: []string{"host1:123"},
 		},
 		Version: &pb.ServerVersion{
 			Build:   "1.2.3",
@@ -199,56 +196,19 @@ func (s *testSuite) TestServer() {
 		},
 	}
 
-	s.MockStatus = &mockpb.MockStatusServer{
-		Err:   nil,
-		Resps: []proto.Message{expectedResponse},
-	}
-	srv := s.SetupMockGRPC()
-	defer srv.Stop()
+	s.MockStatus.SetResponse(expectedResponse)
 
 	var a ServerStatusCmd
 	err := a.Run(s.ctl)
 	s.Require().NoError(err)
-	s.HasText("  Name        | mock ",
-		"  Node        |            ",
-		"  Host        |            ",
-		"  Listen URLs | host1:123  ",
-		"  Version     | 1.2.3      ",
-		"  Runtime     | go1.15     ",
-		"  Started     |")
-
-	s.ctl.O = "json"
-	s.Out.Reset()
-
-	err = a.Run(s.ctl)
-	s.Require().NoError(err)
-	s.HasText("{\n\t\"status\": {\n\t\t\"listen_urls\": [\n\t\t\t\"host1:123\"\n\t\t],\n\t\t\"name\": \"mock\"\n\t},\n\t\"version\": {\n\t\t\"build\": \"1.2.3\",\n\t\t\"runtime\": \"go1.15\"\n\t}\n}\n")
-}
-
-func (s *testSuite) TestRoots() {
-	expectedResponse := new(pb.RootsResponse)
-	err := loadJSON("testdata/roots.json", expectedResponse)
-	s.Require().NoError(err)
-
-	s.MockCIS = &mockpb.MockCIServer{
-		Err:   nil,
-		Resps: []proto.Message{expectedResponse},
-	}
-	srv := s.SetupMockGRPC()
-	defer srv.Stop()
-
-	a := GetRootsCmd{
-		Pem: false,
-	}
-	err = a.Run(s.ctl)
-	s.Require().NoError(err)
-
-	s.HasText(`==================================== 1 ====================================`,
-		`Subject: CN=[TEST] Trusty Root CA,O=trusty.com,L=WA,C=US`,
-		`  ID: 71835990083240044`,
-		`  SKID: ecc3b5f35b201d5097aa0d577d7bec38775d7c9c`,
-		`  Thumbprint: 57e42e40c81a7486da68687cf236468d131b3d11361131de79800680c2be043f`,
-		`  Trust: Private`,
+	s.Equal("  Name        | mock       \n"+
+		"  Node        |            \n"+
+		"  Host        |            \n"+
+		"  Listen URLs | host1:123  \n"+
+		"  Version     | 1.2.3      \n"+
+		"  Runtime     | go1.15     \n"+
+		"  Started     |            \n\n",
+		s.Out.String(),
 	)
 
 	s.ctl.O = "json"
@@ -257,25 +217,40 @@ func (s *testSuite) TestRoots() {
 	err = a.Run(s.ctl)
 	s.Require().NoError(err)
 
-	s.HasText(`{
-	"roots": [
-		{
-			"id": 71835990083240044,
-			"not_after": {
-				"seconds": 1778332560
-			},
-			"not_before": {
-				"seconds": 1620652560
-			},
-			"pem": "#   Issuer: C=US, L=WA, O=trusty.com, CN=[TEST] Trusty Root CA\n#   Subject: C=US, L=WA, O=trusty.com, CN=[TEST] Trusty Root CA\n#   Validity\n#       Not Before: May 10 13:16:00 2021 GMT\n#       Not After : May  9 13:16:00 2026 GMT\n-----BEGIN CERTIFICATE-----\nMIICHzCCAaWgAwIBAgIUJGKCOrBdCdC5nV7sbJ4McuODu8IwCgYIKoZIzj0EAwMw\nTzELMAkGA1UEBhMCVVMxCzAJBgNVBAcTAldBMRMwEQYDVQQKEwp0cnVzdHkuY29t\nMR4wHAYDVQQDDBVbVEVTVF0gVHJ1c3R5IFJvb3QgQ0EwHhcNMjEwNTEwMTMxNjAw\nWhcNMjYwNTA5MTMxNjAwWjBPMQswCQYDVQQGEwJVUzELMAkGA1UEBxMCV0ExEzAR\nBgNVBAoTCnRydXN0eS5jb20xHjAcBgNVBAMMFVtURVNUXSBUcnVzdHkgUm9vdCBD\nQTB2MBAGByqGSM49AgEGBSuBBAAiA2IABPxFlv2aI1MIc1k+Ss0hYPxeefKqZj9Y\n0GfBxCVd0AcjRt8BQNhxMrEQjCv5pHa8RlInnNX+EQlwhJZ4YVc4gaMSQbbNW26B\nmVHKcgXRKCUTlN8lwbS3c7vssJ1jJz5isaNCMEAwDgYDVR0PAQH/BAQDAgEGMA8G\nA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFOzDtfNbIB1Ql6oNV3177Dh3XXycMAoG\nCCqGSM49BAMDA2gAMGUCMQCyNBtpu5BAIBJpmFrG9sQlxjBAV9JID9TSC04lKGA+\nVgzN1wX6MIyyIbGIKBZqCHwCMGkVPFNgEX3lwLWp3dwLKHy7OPy+s18M5jqmVJAO\n1IhnkKWcz1wGIhD29Um/EBlGfQ==\n-----END CERTIFICATE-----",
-			"sha256": "57e42e40c81a7486da68687cf236468d131b3d11361131de79800680c2be043f",
-			"skid": "ecc3b5f35b201d5097aa0d577d7bec38775d7c9c",
-			"subject": "CN=[TEST] Trusty Root CA,O=trusty.com,L=WA,C=US",
-			"trust": 2
-		}
-	]
+	s.Equal("{\n\t\"Status\": {\n\t\t\"Name\": \"mock\",\n\t\t\"ListenURLs\": [\n\t\t\t\"host1:123\"\n\t\t]\n\t},\n\t\"Version\": {\n\t\t\"Build\": \"1.2.3\",\n\t\t\"Runtime\": \"go1.15\"\n\t}\n}\n",
+		s.Out.String())
 }
-`)
+
+func (s *testSuite) TestRoots() {
+	expectedResponse := new(pb.RootsResponse)
+	err := loadJSON("testdata/roots.json", expectedResponse)
+	s.Require().NoError(err)
+
+	s.MockCIS.SetResponse(expectedResponse)
+
+	a := GetRootsCmd{
+		Pem: false,
+	}
+	err = a.Run(s.ctl)
+	s.Require().NoError(err)
+
+	s.Equal("==================================== 1 ====================================\n"+
+		"Subject: CN=[TEST] Trusty Root CA,O=trusty.com,L=WA,C=US\n"+
+		"  ID: 71835990083240044\n"+
+		"  SKID: ecc3b5f35b201d5097aa0d577d7bec38775d7c9c\n"+
+		"  Thumbprint: 57e42e40c81a7486da68687cf236468d131b3d11361131de79800680c2be043f\n"+
+		"  Trust: Private\n"+
+		"  Issued: 2026-05-09T13:16:00Z\n"+
+		"  Expires: 2021-05-10T13:16:00Z\n",
+		s.Out.String(),
+	)
+
+	s.ctl.O = "json"
+	s.Out.Reset()
+
+	err = a.Run(s.ctl)
+	s.Require().NoError(err)
+	s.HasText("{\n\t\"Roots\"")
 }
 
 func (s *testSuite) TestIssuers() {
@@ -283,12 +258,7 @@ func (s *testSuite) TestIssuers() {
 	err := loadJSON("testdata/issuers.json", expectedResponse)
 	s.Require().NoError(err)
 
-	s.MockAuthority = &mockpb.MockCAServer{
-		Err:   nil,
-		Resps: []proto.Message{expectedResponse},
-	}
-	srv := s.SetupMockGRPC()
-	defer srv.Stop()
+	s.MockAuthority.SetResponse(expectedResponse)
 
 	a := ListIssuersCmd{
 		Limit: int64(100),
@@ -296,15 +266,16 @@ func (s *testSuite) TestIssuers() {
 	err = a.Run(s.ctl)
 	s.Require().NoError(err)
 
-	s.HasText(`=========================================================
-Label: SHAKEN_G1_CA
-Profiles: [SHAKEN]
-Subject: C=US, ST=WA, L=Seattle, O=Effective Security, LLC., OU=Dev, CN=SHAKEN G1
-  Issuer: C=US, ST=WA, L=Seattle, O=Effective Security, LLC., OU=Dev, CN=SHAKEN R1
-  SKID: 5b4fc322f44090fe082520160d160ec2bc3e34d5
-  IKID: 13943384d1806d3c393f646c8b234d93e1583810
-  Serial: 265622861638837071462064479366543661900737170056
-  Issued:`)
+	s.HasText("=========================================================\n"+
+		"Label: SHAKEN_G1_CA\n"+
+		"Profiles: [SHAKEN]\n"+
+		"Subject: C=US, ST=WA, L=Seattle, O=Effective Security, LLC., OU=Dev, CN=SHAKEN G1\n"+
+		"  Issuer: C=US, ST=WA, L=Seattle, O=Effective Security, LLC., OU=Dev, CN=SHAKEN R1\n"+
+		"  SKID: 5b4fc322f44090fe082520160d160ec2bc3e34d5\n"+
+		"  IKID: 13943384d1806d3c393f646c8b234d93e1583810\n"+
+		"  Serial: 265622861638837071462064479366543661900737170056\n"+
+		"  Issued:",
+		s.Out.String())
 
 	s.ctl.O = "json"
 	s.Out.Reset()
@@ -312,7 +283,7 @@ Subject: C=US, ST=WA, L=Seattle, O=Effective Security, LLC., OU=Dev, CN=SHAKEN G
 	err = a.Run(s.ctl)
 	s.Require().NoError(err)
 
-	s.HasText("{\n\t\"issuers\": [\n\t\t{\n\t\t\t\"certificate\": \"#   Issuer: C=US, ST=WA, L=Seattle, O=Effective Security, LLC., OU=Dev, CN=SHAKEN R1\\n#   Subject: C=US, ST=WA, L=Seattle, O=Effective Security, LLC., OU=Dev, CN=SHAKEN G1\\n#   Validity\\n#       Not Before: Nov  6 21:37:00 2021 GMT\\n#       Not After : Nov  5 21:37:00 2026 GMT\\n-----BEGIN CERTIFICATE-----\\nMIICoDCCAkagAwIBAgIULobw6UOmZHjPBjHpTE4PD9WySogwCgYIKoZIzj0EAwIw\\ncTELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAldBMRAwDgYDVQQHEwdTZWF0dGxlMSEw\\nHwYDVQQKExhFZmZlY3RpdmUgU2VjdXJpdHksIExMQy4xDDAKBgNVBAsTA0RldjES\\nMBAGA1UEAxMJU0hBS0VOIFIxMB4XDTIxMTEwNjIxMzcwMFoXDTI2MTEwNTIxMzcw\\nMFowcTELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAldBMRAwDgYDVQQHEwdTZWF0dGxl\\nMSEwHwYDVQQKExhFZmZlY3RpdmUgU2VjdXJpdHksIExMQy4xDDAKBgNVBAsTA0Rl\\ndjESMBAGA1UEAxMJU0hBS0VOIEcxMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE\\ne/AeKIF1tyEeptOVMY5q7aKjSrI57hX20YG9VLkOCVm8uSdJO0lPmjpYbUC1FVWH\\nDjYuJ4gtcSQCKSYZhPh2dqOBuzCBuDAOBgNVHQ8BAf8EBAMCAQYwEgYDVR0TAQH/\\nBAgwBgEB/wIBADAdBgNVHQ4EFgQUW0/DIvRAkP4IJSAWDRYOwrw+NNUwHwYDVR0j\\nBBgwFoAUE5QzhNGAbTw5P2RsiyNNk+FYOBAwUgYDVR0gAQH/BEgwRjAMBgpghkgB\\nhv8JAQEBMDYGCisGAQQBg8R1AQEwKDAmBggrBgEFBQcCARYaaHR0cHM6Ly9zdGly\\nc2hha2VuLmNvbS9DUFMwCgYIKoZIzj0EAwIDSAAwRQIhAJlz09JroD/cHTiIQYlB\\nhsmB3h5u4Z2iKefhYZBQZGYJAiB2f+k4GmdVIgIRU2z1gYCzAs97Kb4UliglatVG\\nT0TbwQ==\\n-----END CERTIFICATE-----\",\n\t\t\t\"label\": \"SHAKEN_G1_CA\",\n\t\t\t\"profiles\": [\n\t\t\t\t\"SHAKEN\"\n\t\t\t],\n\t\t\t\"root\": \"#   Issuer: C=US, ST=WA, L=Seattle, O=Effective Security, LLC., OU=Dev, CN=SHAKEN R1\\n#   Subject: C=US, ST=WA, L=Seattle, O=Effective Security, LLC., OU=Dev, CN=SHAKEN R1\\n#   Validity\\n#       Not Before: Nov  6 21:37:00 2021 GMT\\n#       Not After : Nov  4 21:37:00 2031 GMT\\n-----BEGIN CERTIFICATE-----\\nMIICJjCCAcygAwIBAgIUVaH35KweAkbQ9+Zoh/QfSwP45BUwCgYIKoZIzj0EAwIw\\ncTELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAldBMRAwDgYDVQQHEwdTZWF0dGxlMSEw\\nHwYDVQQKExhFZmZlY3RpdmUgU2VjdXJpdHksIExMQy4xDDAKBgNVBAsTA0RldjES\\nMBAGA1UEAxMJU0hBS0VOIFIxMB4XDTIxMTEwNjIxMzcwMFoXDTMxMTEwNDIxMzcw\\nMFowcTELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAldBMRAwDgYDVQQHEwdTZWF0dGxl\\nMSEwHwYDVQQKExhFZmZlY3RpdmUgU2VjdXJpdHksIExMQy4xDDAKBgNVBAsTA0Rl\\ndjESMBAGA1UEAxMJU0hBS0VOIFIxMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE\\ngaBoImhURVPBeRmG4bKkBqWaXdLPXeCr94UHVY8Qytj5tNWFgC7JKGuYo93GNrYN\\nNlAwYx0tnR2VIozAR+WJFqNCMEAwDgYDVR0PAQH/BAQDAgEGMA8GA1UdEwEB/wQF\\nMAMBAf8wHQYDVR0OBBYEFBOUM4TRgG08OT9kbIsjTZPhWDgQMAoGCCqGSM49BAMC\\nA0gAMEUCIFB8n51NY0QifCwbZaZbD0NWxwCWJDTzaLoyidjZkViNAiEAuP/odPVk\\n4JrhhrAGM3bmaBsOXaxC5QtNs1ThVuPh7rc=\\n-----END CERTIFICATE-----\"\n\t\t}")
+	s.HasText("{\n\t\"Issuers\": [\n\t\t")
 }
 
 func (s *testSuite) TestProfile() {
@@ -320,12 +291,7 @@ func (s *testSuite) TestProfile() {
 	err := loadJSON("testdata/server_profile.json", expectedResponse)
 	s.Require().NoError(err)
 
-	s.MockAuthority = &mockpb.MockCAServer{
-		Err:   nil,
-		Resps: []proto.Message{expectedResponse},
-	}
-	srv := s.SetupMockGRPC()
-	defer srv.Stop()
+	s.MockAuthority.SetResponse(expectedResponse)
 
 	a := GetProfileCmd{
 		Label: "server",
@@ -334,20 +300,20 @@ func (s *testSuite) TestProfile() {
 	s.Require().NoError(err)
 
 	s.Equal(`{
-	"allowed_extensions": [
-		"1.3.6.1.5.5.7.1.1"
-	],
-	"backdate": "30m0s",
-	"ca_constraint": {},
-	"description": "server TLS profile",
-	"expiry": "168h0m0s",
-	"issuer_label": "TrustyCA",
-	"label": "server",
-	"usages": [
+	"Label": "server",
+	"IssuerLabel": "TrustyCA",
+	"Description": "server TLS profile",
+	"Usages": [
 		"signing",
 		"key encipherment",
 		"server auth",
 		"ipsec end system"
+	],
+	"CAConstraint": {},
+	"Expiry": "168h0m0s",
+	"Backdate": "30m0s",
+	"AllowedExtensions": [
+		"1.3.6.1.5.5.7.1.1"
 	]
 }
 `,
@@ -357,20 +323,15 @@ func (s *testSuite) TestProfile() {
 func (s *testSuite) TestSign() {
 	expectedResponse := &pb.CertificateResponse{
 		Certificate: &pb.Certificate{
-			Id:         1234,
-			OrgId:      1,
+			ID:         1234,
+			OrgID:      1,
 			Profile:    "server",
 			Pem:        "cert pem",
 			IssuersPem: "issuers pem",
 		},
 	}
 
-	s.MockAuthority = &mockpb.MockCAServer{
-		Err:   nil,
-		Resps: []proto.Message{expectedResponse},
-	}
-	srv := s.SetupMockGRPC()
-	defer srv.Stop()
+	s.MockAuthority.SetResponse(expectedResponse)
 
 	a := SignCmd{
 		Profile: "server",
@@ -389,17 +350,12 @@ func (s *testSuite) TestListCerts() {
 	err := loadJSON("testdata/certs.json", expectedResponse)
 	s.Require().NoError(err)
 
-	s.MockAuthority = &mockpb.MockCAServer{
-		Err:   nil,
-		Resps: []proto.Message{expectedResponse},
-	}
-	srv := s.SetupMockGRPC()
-	defer srv.Stop()
+	s.MockAuthority.SetResponse(expectedResponse)
 
 	a := ListCertsCmd{
 		Limit: 3,
 		After: "80126629526896740",
-		Ikid:  "401456c5ce07f25ba068e2d191921e807ad486e4",
+		IKID:  "401456c5ce07f25ba068e2d191921e807ad486e4",
 	}
 	err = a.Run(s.ctl)
 	s.Require().NoError(err)
@@ -410,7 +366,7 @@ func (s *testSuite) TestListCerts() {
 
 	err = a.Run(s.ctl)
 	s.Require().NoError(err)
-	s.HasText("list\": [")
+	s.HasText("Certificates\": [")
 }
 
 func (s *testSuite) TestRevokedListCerts() {
@@ -418,17 +374,12 @@ func (s *testSuite) TestRevokedListCerts() {
 	err := loadJSON("testdata/revoked.json", expectedResponse)
 	s.Require().NoError(err)
 
-	s.MockAuthority = &mockpb.MockCAServer{
-		Err:   nil,
-		Resps: []proto.Message{expectedResponse},
-	}
-	srv := s.SetupMockGRPC()
-	defer srv.Stop()
+	s.MockAuthority.SetResponse(expectedResponse)
 
 	a := ListRevokedCertsCmd{
 		Limit: 3,
 		After: "80126629526896740",
-		Ikid:  "401456c5ce07f25ba068e2d191921e807ad486e4",
+		IKID:  "401456c5ce07f25ba068e2d191921e807ad486e4",
 	}
 	err = a.Run(s.ctl)
 	s.Require().NoError(err)
@@ -439,7 +390,7 @@ func (s *testSuite) TestRevokedListCerts() {
 
 	err = a.Run(s.ctl)
 	s.Require().NoError(err)
-	s.HasText("list\": [")
+	s.HasText("RevokedCertificates\": [")
 }
 
 func (s *testSuite) TestUpdateCertLabel() {
@@ -447,12 +398,7 @@ func (s *testSuite) TestUpdateCertLabel() {
 	err := loadJSON("testdata/cert.json", expectedResponse)
 	s.Require().NoError(err)
 
-	s.MockAuthority = &mockpb.MockCAServer{
-		Err:   nil,
-		Resps: []proto.Message{expectedResponse},
-	}
-	srv := s.SetupMockGRPC()
-	defer srv.Stop()
+	s.MockAuthority.SetResponse(expectedResponse)
 
 	a := UpdateCertLabelCmd{
 		Label: "label",
@@ -460,14 +406,31 @@ func (s *testSuite) TestUpdateCertLabel() {
 	}
 	err = a.Run(s.ctl)
 	s.Require().NoError(err)
-	s.HasText(`"label": "new"`)
+	s.Equal(
+		"Subject: CN=localhost,OU=unit1,O=org1\n"+
+			"  Issuer: CN=[TEST] Trusty Level 2 CA,O=trusty.com,L=WA,C=US\n"+
+			"  ID: 97371720557570558\n"+
+			"  SKID: dfe1a870d9a16cdb4391d1ad844cef85e896be8d\n"+
+			"  SN: 536573525424087346736353130750007598603704974904\n"+
+			"  Thumbprint: 82de177f993656b222f8a08d829ef62d4cfe70758836b0200d2052978c59542b\n"+
+			"  Issued: 2026-05-09T13:16:00Z\n"+
+			"  Expires: 2021-05-10T13:16:00Z\n"+
+			"  Profile: test_server\n"+
+			"  Locations:\n"+
+			"    https://dev.trustyca.com/1d47/XfzJ_dePkAvF\n"+
+			"\n"+
+			"-----BEGIN CERTIFICATE-----\n"+
+			"MIIDDzCCArWgAwIBAgIUXfzJ/dePkAvFBoId83lseb/XvjgwCgYIKoZIzj0EAwIw\nUjELMAkGA1UEBhMCVVMxCzAJBgNVBAcTAldBMRMwEQYDVQQKEwp0cnVzdHkuY29t\nMSEwHwYDVQQDDBhbVEVTVF0gVHJ1c3R5IExldmVsIDIgQ0EwHhcNMjExMTAyMTcx\nMTAwWhcNMjExMTAyMTcxNjAwWjAzMQ0wCwYDVQQKEwRvcmcxMQ4wDAYDVQQLEwV1\nbml0MTESMBAGA1UEAxMJbG9jYWxob3N0MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcD\nQgAEwAXDy8FFuGlu9SzMISALLUijUXDzTJpyWFx1NML4GDnp1n9z41naQJhRqAyn\nxQpJxQptT58tDCcqq0cnZzhM2KOCAYYwggGCMA4GA1UdDwEB/wQEAwIFoDAdBgNV\nHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwUwDAYDVR0TAQH/BAIwADAdBgNVHQ4E\nFgQU3+GocNmhbNtDkdGthEzvheiWvo0wHwYDVR0jBBgwFoAUHUd1TsSHbOCwn+fx\ntqnJBDgEbkswgY4GCCsGAQUFBwEBBIGBMH8wKQYIKwYBBQUHMAGGHWh0dHA6Ly9s\nb2NhbGhvc3Q6Nzg4MC92MS9vY3NwMFIGCCsGAQUFBzAChkZodHRwOi8vbG9jYWxo\nb3N0Ojc4ODAvdjEvY2VydC8xZDQ3NzU0ZWM0ODc2Y2UwYjA5ZmU3ZjFiNmE5Yzkw\nNDM4MDQ2ZTRiMFYGA1UdHwRPME0wS6BJoEeGRWh0dHA6Ly9sb2NhbGhvc3Q6Nzg4\nMC92MS9jcmwvMWQ0Nzc1NGVjNDg3NmNlMGIwOWZlN2YxYjZhOWM5MDQzODA0NmU0\nYjAaBgNVHREEEzARgglsb2NhbGhvc3SHBH8AAAEwCgYIKoZIzj0EAwIDSAAwRQIh\nAO+atfqv15TR5mXqeVEhASkE6pjrK+JSpIoA7dWkgkEtAiBMhTgxvMD+udKs2I2v\nKLOwmGQKiW/PZjM9BG7/n594TQ==\n"+
+			"-----END CERTIFICATE-----\n"+
+			"\n",
+		s.Out.String())
 
 	s.ctl.O = "json"
 	s.Out.Reset()
 
 	err = a.Run(s.ctl)
 	s.Require().NoError(err)
-	s.HasText(`"label": "new"`)
+	s.HasText(`"Label": "new"`)
 }
 
 func (s *testSuite) TestPublishCrls() {
@@ -475,15 +438,10 @@ func (s *testSuite) TestPublishCrls() {
 	err := loadJSON("testdata/crls.json", expectedResponse)
 	s.Require().NoError(err)
 
-	s.MockAuthority = &mockpb.MockCAServer{
-		Err:   nil,
-		Resps: []proto.Message{expectedResponse},
-	}
-	srv := s.SetupMockGRPC()
-	defer srv.Stop()
+	s.MockAuthority.SetResponse(expectedResponse)
 
 	a := PublishCrlsCmd{
-		Ikid: "9e0fd4a22cd5aa773de1fe00e5fefa13109849cb",
+		IKID: "9e0fd4a22cd5aa773de1fe00e5fefa13109849cb",
 	}
 	err = a.Run(s.ctl)
 	s.Require().NoError(err)
@@ -494,7 +452,7 @@ func (s *testSuite) TestPublishCrls() {
 
 	err = a.Run(s.ctl)
 	s.Require().NoError(err)
-	s.HasText(`"clrs": [`)
+	s.HasText(`"Crls": [`)
 }
 
 func (s *testSuite) TestGetCertificate() {
@@ -502,26 +460,38 @@ func (s *testSuite) TestGetCertificate() {
 	err := loadJSON("testdata/cert.json", expectedResponse)
 	s.Require().NoError(err)
 
-	s.MockAuthority = &mockpb.MockCAServer{
-		Err:   nil,
-		Resps: []proto.Message{expectedResponse},
-	}
-	srv := s.SetupMockGRPC()
-	defer srv.Stop()
+	s.MockAuthority.SetResponse(expectedResponse)
 
 	a := GetCertificateCmd{
 		ID: uint64(97371720557570558),
 	}
 	err = a.Run(s.ctl)
 	s.Require().NoError(err)
-	s.HasText(`"id": 97371720557570558`)
+	s.Equal(
+		"Subject: CN=localhost,OU=unit1,O=org1\n"+
+			"  Issuer: CN=[TEST] Trusty Level 2 CA,O=trusty.com,L=WA,C=US\n"+
+			"  ID: 97371720557570558\n"+
+			"  SKID: dfe1a870d9a16cdb4391d1ad844cef85e896be8d\n"+
+			"  SN: 536573525424087346736353130750007598603704974904\n"+
+			"  Thumbprint: 82de177f993656b222f8a08d829ef62d4cfe70758836b0200d2052978c59542b\n"+
+			"  Issued: 2026-05-09T13:16:00Z\n"+
+			"  Expires: 2021-05-10T13:16:00Z\n"+
+			"  Profile: test_server\n"+
+			"  Locations:\n"+
+			"    https://dev.trustyca.com/1d47/XfzJ_dePkAvF\n"+
+			"\n"+
+			"-----BEGIN CERTIFICATE-----\n"+
+			"MIIDDzCCArWgAwIBAgIUXfzJ/dePkAvFBoId83lseb/XvjgwCgYIKoZIzj0EAwIw\nUjELMAkGA1UEBhMCVVMxCzAJBgNVBAcTAldBMRMwEQYDVQQKEwp0cnVzdHkuY29t\nMSEwHwYDVQQDDBhbVEVTVF0gVHJ1c3R5IExldmVsIDIgQ0EwHhcNMjExMTAyMTcx\nMTAwWhcNMjExMTAyMTcxNjAwWjAzMQ0wCwYDVQQKEwRvcmcxMQ4wDAYDVQQLEwV1\nbml0MTESMBAGA1UEAxMJbG9jYWxob3N0MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcD\nQgAEwAXDy8FFuGlu9SzMISALLUijUXDzTJpyWFx1NML4GDnp1n9z41naQJhRqAyn\nxQpJxQptT58tDCcqq0cnZzhM2KOCAYYwggGCMA4GA1UdDwEB/wQEAwIFoDAdBgNV\nHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwUwDAYDVR0TAQH/BAIwADAdBgNVHQ4E\nFgQU3+GocNmhbNtDkdGthEzvheiWvo0wHwYDVR0jBBgwFoAUHUd1TsSHbOCwn+fx\ntqnJBDgEbkswgY4GCCsGAQUFBwEBBIGBMH8wKQYIKwYBBQUHMAGGHWh0dHA6Ly9s\nb2NhbGhvc3Q6Nzg4MC92MS9vY3NwMFIGCCsGAQUFBzAChkZodHRwOi8vbG9jYWxo\nb3N0Ojc4ODAvdjEvY2VydC8xZDQ3NzU0ZWM0ODc2Y2UwYjA5ZmU3ZjFiNmE5Yzkw\nNDM4MDQ2ZTRiMFYGA1UdHwRPME0wS6BJoEeGRWh0dHA6Ly9sb2NhbGhvc3Q6Nzg4\nMC92MS9jcmwvMWQ0Nzc1NGVjNDg3NmNlMGIwOWZlN2YxYjZhOWM5MDQzODA0NmU0\nYjAaBgNVHREEEzARgglsb2NhbGhvc3SHBH8AAAEwCgYIKoZIzj0EAwIDSAAwRQIh\nAO+atfqv15TR5mXqeVEhASkE6pjrK+JSpIoA7dWkgkEtAiBMhTgxvMD+udKs2I2v\nKLOwmGQKiW/PZjM9BG7/n594TQ==\n"+
+			"-----END CERTIFICATE-----\n"+
+			"\n",
+		s.Out.String())
 
 	s.ctl.O = "json"
 	s.Out.Reset()
 
 	err = a.Run(s.ctl)
 	s.Require().NoError(err)
-	s.HasText(`"certificate": {`)
+	s.HasText(`"Certificate": {`)
 }
 
 func loadJSON(filename string, v interface{}) error {

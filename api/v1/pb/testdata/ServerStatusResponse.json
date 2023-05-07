@@ -1,17 +1,14 @@
 {
-        "status": {
-            "hostname": "dissoupov",
-            "listen_urls": [
+        "Status": {
+            "Hostname": "dissoupov",
+            "ListenURLs": [
                     "https://0.0.0.0:7891"
             ],
-            "name": "Trusty",
-            "started_at": {
-                    "nanos": 827047031,
-                    "seconds": 1620736448
-            }
+            "Name": "Trusty",
+            "StartedAt": "2020-10-01T00:00:00Z"
     },
-    "version": {
-        "build": "1.1.1",
-        "runtime": "go1.15.1"
+    "Version": {
+        "Build": "1.1.1",
+        "Runtime": "go1.15.1"
     }
 }

@@ -17,14 +17,13 @@ import (
 	"github.com/effective-security/porto/xhttp/header"
 	v1 "github.com/effective-security/trusty/api/v1"
 	"github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/api/v1/pb/proxypb"
 	"github.com/effective-security/trusty/backend/appcontainer"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/backend/db/cadb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/trusty/backend/service/ca"
 	"github.com/effective-security/trusty/backend/service/cis"
-	"github.com/effective-security/trusty/client"
-	"github.com/effective-security/trusty/client/embed"
 	"github.com/effective-security/trusty/tests/testutils"
 	"github.com/effective-security/xpki/certutil"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -38,7 +37,7 @@ const (
 
 var (
 	trustyServer *gserver.Server
-	cisClient    client.CIClient
+	cisClient    pb.CISServer
 	// serviceFactories provides map of trustyserver.ServiceFactory
 	serviceFactories = map[string]gserver.ServiceFactory{
 		cis.ServiceName: cis.Factory,
@@ -74,14 +73,14 @@ func TestMain(m *testing.M) {
 	if err != nil || trustyServer == nil {
 		panic(err)
 	}
-	cisClient = embed.NewCIClient(trustyServer)
+	svc := trustyServer.Service(cis.ServiceName).(*cis.Service)
+	cisClient = proxypb.NewCISClientFromProxy(proxypb.CISServerToClient(svc))
 
 	err = trustyServer.Service(ca.ServiceName).(*ca.Service).OnStarted()
 	if err != nil {
 		panic(err)
 	}
 
-	svc := trustyServer.Service(cis.ServiceName).(*cis.Service)
 	err = svc.OnStarted()
 	if err != nil {
 		panic(err)
@@ -120,7 +119,7 @@ func TestGetCert(t *testing.T) {
 	ctx := context.Background()
 
 	_, err := svc.GetCertificate(ctx,
-		&pb.GetCertificateRequest{Skid: "notfound"})
+		&pb.GetCertificateRequest{SKID: "notfound"})
 	require.Error(t, err)
 }
 

@@ -7,15 +7,12 @@ require (
 	cloud.google.com/go/storage v1.16.0
 	github.com/aws/aws-sdk-go v1.44.75 // indirect
 	github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba
-	github.com/gogo/googleapis v1.4.1
-	github.com/gogo/protobuf v1.3.2
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/googleapis/gax-go/v2 v2.1.1 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.4.0
 	github.com/jinzhu/copier v0.3.5 // indirect
 	github.com/lib/pq v1.10.6
 	github.com/mattn/go-colorable v0.1.8 // indirect
@@ -38,19 +35,21 @@ require (
 	golang.org/x/text v0.5.0 // indirect
 	golang.org/x/tools v0.1.12
 	google.golang.org/api v0.62.0
-	google.golang.org/genproto v0.0.0-20220314164441-57ef72a4c106 // indirect
+	google.golang.org/genproto v0.0.0-20220314164441-57ef72a4c106
 	google.golang.org/grpc v1.51.0
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
-	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
 require (
 	github.com/alecthomas/kong v0.4.0
 	github.com/effective-security/metrics v0.2.1-0.20221221085612-58ef13855049
-	github.com/effective-security/porto v0.0.0-20230409174651-8c25c9bba2af
+	github.com/effective-security/porto v0.0.0-20230507094606-2c9b4cbf37a7
 	github.com/effective-security/xlog v0.5.0
 	github.com/effective-security/xpki v0.7.0
+	github.com/mitchellh/go-homedir v1.1.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -65,7 +64,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/envoyproxy/go-control-plane v0.10.2-0.20220325020618-49ff273808a1 // indirect
 	github.com/envoyproxy/protoc-gen-validate v0.6.2 // indirect
-	github.com/golang/glog v1.0.0 // indirect
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
@@ -76,7 +74,6 @@ require (
 	github.com/mattn/go-runewidth v0.0.12 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/miekg/pkcs11 v1.0.3 // indirect
-	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.39.0 // indirect
@@ -95,5 +92,4 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
