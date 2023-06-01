@@ -36,6 +36,7 @@ func (p *Provider) RegisterIssuer(ctx context.Context, m *model.Issuer) (*model.
 		&res.UpdatedAt,
 	)
 	if err != nil {
+		p.CheckErrIDConflict(ctx, err, id)
 		return nil, errors.WithStack(err)
 	}
 	res.CreatedAt = res.CreatedAt.UTC()

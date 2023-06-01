@@ -118,6 +118,8 @@ type Provider interface {
 
 	// DB returns underlying DB connection
 	DB() *sql.DB
+	// Tx returns underlying DB transaction
+	Tx() *sql.Tx
 
 	// Close connection and release resources
 	Close() (err error)

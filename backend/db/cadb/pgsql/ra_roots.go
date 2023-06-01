@@ -40,6 +40,7 @@ func (p *Provider) RegisterRootCertificate(ctx context.Context, crt *model.RootC
 		&res.Pem,
 	)
 	if err != nil {
+		p.CheckErrIDConflict(ctx, err, id)
 		return nil, errors.WithStack(err)
 	}
 	return res, nil

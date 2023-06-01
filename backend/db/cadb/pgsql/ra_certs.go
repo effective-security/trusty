@@ -46,6 +46,7 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 	)
 	m, err := scanFullCertificate(row)
 	if err != nil {
+		p.CheckErrIDConflict(ctx, err, id)
 		return nil, err
 	}
 	return m, nil

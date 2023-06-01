@@ -48,7 +48,7 @@ func (p *Provider) RegisterCrl(ctx context.Context, crl *model.Crl) (*model.Crl,
 		&res.Pem,
 	)
 	if err != nil {
-		logger.KV(xlog.ERROR, "err", err)
+		p.CheckErrIDConflict(ctx, err, id)
 		return nil, errors.WithStack(err)
 	}
 	return res, nil

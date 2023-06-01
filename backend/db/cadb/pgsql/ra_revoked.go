@@ -54,6 +54,7 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 		revoked.Reason,
 	))
 	if err != nil {
+		p.CheckErrIDConflict(ctx, err, id)
 		return nil, errors.WithStack(err)
 	}
 	return m, nil
