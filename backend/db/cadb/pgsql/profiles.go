@@ -36,6 +36,7 @@ func (p *Provider) RegisterCertProfile(ctx context.Context, m *model.CertProfile
 		&res.UpdatedAt,
 	)
 	if err != nil {
+		p.CheckErrIDConflict(ctx, err, id)
 		return nil, errors.WithStack(err)
 	}
 	res.CreatedAt = res.CreatedAt.UTC()

@@ -73,7 +73,7 @@ func (a *ListCertsCmd) Run(cli *Cli) error {
 
 	after := uint64(0)
 	if a.After != "" {
-		after, err = xdb.ID(a.After)
+		after, err = xdb.ParseUint(a.After)
 		if err != nil {
 			return errors.WithMessage(err, "unable to parse --after")
 		}
@@ -109,7 +109,7 @@ func (a *ListRevokedCertsCmd) Run(cli *Cli) error {
 
 	after := uint64(0)
 	if a.After != "" {
-		after, err = xdb.ID(a.After)
+		after, err = xdb.ParseUint(a.After)
 		if err != nil {
 			return errors.WithMessage(err, "unable to parse --after")
 		}

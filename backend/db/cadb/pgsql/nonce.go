@@ -37,6 +37,7 @@ func (p *Provider) CreateNonce(ctx context.Context, nonce *model.Nonce) (*model.
 		&res.UsedAt,
 	)
 	if err != nil {
+		p.CheckErrIDConflict(ctx, err, id)
 		return nil, err
 	}
 	res.CreatedAt = res.CreatedAt.UTC()
