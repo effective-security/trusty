@@ -1,10 +1,10 @@
 package cis
 
 import (
+	"io"
 	"sync"
 
 	"github.com/effective-security/porto/gserver"
-	"github.com/effective-security/porto/pkg/rpcclient"
 	"github.com/effective-security/porto/restserver"
 	v1 "github.com/effective-security/trusty/api/v1"
 	"github.com/effective-security/trusty/api/v1/client"
@@ -29,7 +29,7 @@ type Service struct {
 	cfg           *config.Configuration
 	clientFactory client.Factory
 
-	grpClient *rpcclient.Client
+	grpClient io.Closer
 	ca        pb.CAServer
 	lock      sync.RWMutex
 }
@@ -131,7 +131,7 @@ func (s *Service) getCAClient() (pb.CAServer, error) {
 	}
 
 	logger.KV(xlog.DEBUG, "status", "creating remote CA client")
-	grpClient, err := s.clientFactory.NewClient("ca")
+	ca, closer, err := s.clientFactory.CAClient("ca")
 	if err != nil {
 		logger.KV(xlog.ERROR,
 			"status", "failed to get CA client",
@@ -144,8 +144,8 @@ func (s *Service) getCAClient() (pb.CAServer, error) {
 	if s.grpClient != nil {
 		s.grpClient.Close()
 	}
-	s.grpClient = grpClient
-	s.ca = client.CAClient(s.grpClient)
+	s.grpClient = closer
+	s.ca = ca
 
 	logger.KV(xlog.INFO, "status", "created CA client")
 
