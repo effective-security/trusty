@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
+	"github.com/effective-security/xdb"
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
 )
@@ -46,13 +46,13 @@ func (p *Provider) RegisterCertificate(ctx context.Context, crt *model.Certifica
 	)
 	m, err := scanFullCertificate(row)
 	if err != nil {
-		p.CheckErrIDConflict(ctx, err, id)
+		p.CheckErrIDConflict(ctx, err, id.UInt64())
 		return nil, err
 	}
 	return m, nil
 }
 
-func scanFullCertificate(row xdb.Scanner) (*model.Certificate, error) {
+func scanFullCertificate(row xdb.Row) (*model.Certificate, error) {
 	res := new(model.Certificate)
 	var locations string
 	var meta string

@@ -31,12 +31,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	projFolder = "../../../"
-)
-
 var (
-	trustyServer *gserver.Server
+	trustyServer gserver.GServer
 	cisClient    pb.CISServer
 	// serviceFactories provides map of trustyserver.ServiceFactory
 	serviceFactories = map[string]gserver.ServiceFactory{
@@ -48,7 +44,7 @@ var (
 func TestMain(m *testing.M) {
 	var err error
 
-	cfg, err := testutils.LoadConfig(projFolder, "UNIT_TEST")
+	cfg, err := testutils.LoadConfig("UNIT_TEST")
 	if err != nil {
 		panic(err)
 	}

@@ -16,20 +16,15 @@ var (
 	ctx      = context.Background()
 )
 
-const (
-	projFolder = "../../../../"
-)
-
 func TestMain(m *testing.M) {
 	xlog.SetGlobalLogLevel(xlog.TRACE)
 
-	cfg, err := testutils.LoadConfig(projFolder, "UNIT_TEST")
+	cfg, err := testutils.LoadConfig("UNIT_TEST")
 	if err != nil {
 		panic(err)
 	}
 
 	p, err := db.New(
-		cfg.CaSQL.Driver,
 		cfg.CaSQL.DataSource,
 		cfg.CaSQL.MigrationsDir,
 		0,

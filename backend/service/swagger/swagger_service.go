@@ -13,12 +13,12 @@ var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/backend
 
 // Service defines the Swagger service
 type Service struct {
-	server *gserver.Server
+	server gserver.GServer
 	cfg    *gserver.Config
 }
 
 // Factory returns a factory of the service
-func Factory(server *gserver.Server) interface{} {
+func Factory(server gserver.GServer) interface{} {
 	if server == nil {
 		logger.Panic("swagger.Factory: invalid parameter")
 	}

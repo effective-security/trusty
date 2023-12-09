@@ -10,18 +10,14 @@ import (
 	"go.uber.org/dig"
 )
 
-var (
-	projFolder = "../../../"
-)
-
 func TestFactory(t *testing.T) {
 	c := dig.New()
 	err := c.Provide(func() (*config.Configuration, error) {
-		return testutils.LoadConfig(projFolder, "UNIT_TEST")
+		return testutils.LoadConfig("UNIT_TEST")
 	})
 	require.NoError(t, err)
 
-	scheduler := &testutils.MockTask{}
+	scheduler := &testutils.MockScheduler{}
 
 	f := Factory(scheduler, "test_run", "Every 30 minutes")
 	require.NotNil(t, f)

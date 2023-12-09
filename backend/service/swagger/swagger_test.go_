@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	trustyServer *gserver.Server
+	trustyServer gserver.GServer
 	httpAddr     string
 	httpsAddr    string
 )

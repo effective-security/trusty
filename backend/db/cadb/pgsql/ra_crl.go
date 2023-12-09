@@ -3,8 +3,8 @@ package pgsql
 import (
 	"context"
 
-	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
+	"github.com/effective-security/xdb"
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
 )
@@ -15,7 +15,7 @@ func (p *Provider) RegisterCrl(ctx context.Context, crl *model.Crl) (*model.Crl,
 	var err error
 
 	if id == 0 {
-		id = p.NextID()
+		id = p.NextID().UInt64()
 	}
 
 	err = xdb.Validate(crl)

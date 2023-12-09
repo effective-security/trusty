@@ -6,14 +6,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/effective-security/porto/gserver/roles"
 	"github.com/effective-security/porto/pkg/discovery"
 	"github.com/effective-security/porto/pkg/flake"
 	"github.com/effective-security/porto/pkg/tasks"
 	"github.com/effective-security/trusty/api/v1/client"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/backend/db/cadb"
-	"github.com/effective-security/trusty/pkg/accesstoken"
 	"github.com/effective-security/trusty/pkg/certpublisher"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/authority"
@@ -22,6 +20,7 @@ import (
 	"github.com/effective-security/xpki/cryptoprov"
 	"github.com/effective-security/xpki/dataprotection"
 	"github.com/effective-security/xpki/jwt"
+	"github.com/effective-security/xpki/jwt/accesstoken"
 	"github.com/pkg/errors"
 	"go.uber.org/dig"
 	"gopkg.in/yaml.v3"
@@ -46,7 +45,7 @@ type ProvideDiscoveryFn func() (discovery.Discovery, error)
 type ProvideSchedulerFn func() (tasks.Scheduler, error)
 
 // ProvideJwtFn defines JWT provider
-type ProvideJwtFn func(cfg *config.Configuration, crypto *cryptoprov.Crypto) (jwt.Parser, jwt.Signer, error)
+type ProvideJwtFn func(cfg *config.Configuration, dp dataprotection.Provider) (jwt.Parser, jwt.Signer, error)
 
 // ProvideCryptoFn defines Crypto provider
 type ProvideCryptoFn func(cfg *config.Configuration) (*cryptoprov.Crypto, error)
@@ -65,9 +64,6 @@ type ProvidePublisherFn func(cfg *config.Configuration) (certpublisher.Publisher
 
 // ProvideDataprotectionFn defines data protection provider
 type ProvideDataprotectionFn func() (dataprotection.Provider, error)
-
-// ProvideAccessTokenFn defines Access Token provider
-type ProvideAccessTokenFn func(dp dataprotection.Provider, parser jwt.Parser) (roles.AccessToken, error)
 
 // CloseRegistrator provides interface to release resources on close
 type CloseRegistrator interface {
@@ -88,7 +84,6 @@ type ContainerFactory struct {
 	clientFactoryProvider ProvideClientFactoryFn
 	publisherProvider     ProvidePublisherFn
 	dpProvider            ProvideDataprotectionFn
-	atProvider            ProvideAccessTokenFn
 }
 
 // NewContainerFactory returns an instance of ContainerFactory
@@ -111,8 +106,7 @@ func NewContainerFactory(closer CloseRegistrator) *ContainerFactory {
 		WithJwtProvider(provideJwt).
 		WithPublisher(providePublisher).
 		WithClientFactoryProvider(provideClientFactory).
-		WithDataprotectionProvider(provideDp).
-		WithAccessTokenProvider(provideAccessToken)
+		WithDataprotectionProvider(provideDp)
 }
 
 // WithConfigurationProvider allows to specify configuration
@@ -130,12 +124,6 @@ func (f *ContainerFactory) WithDiscoveryProvider(p ProvideDiscoveryFn) *Containe
 // WithDataprotectionProvider allows to specify Data protection provider
 func (f *ContainerFactory) WithDataprotectionProvider(p ProvideDataprotectionFn) *ContainerFactory {
 	f.dpProvider = p
-	return f
-}
-
-// WithAccessTokenProvider allows to specify Access Token provider
-func (f *ContainerFactory) WithAccessTokenProvider(p ProvideAccessTokenFn) *ContainerFactory {
-	f.atProvider = p
 	return f
 }
 
@@ -199,7 +187,6 @@ func (f *ContainerFactory) CreateContainerWithDependencies() (*dig.Container, er
 		f.clientFactoryProvider,
 		f.publisherProvider,
 		f.dpProvider,
-		f.atProvider,
 	}
 
 	for idx, c := range constructors {
@@ -216,17 +203,19 @@ func provideDiscovery() (discovery.Discovery, error) {
 	return discovery.New(), nil
 }
 
-func provideJwt(cfg *config.Configuration, crypto *cryptoprov.Crypto) (jwt.Parser, jwt.Signer, error) {
+func provideJwt(cfg *config.Configuration, dp dataprotection.Provider) (jwt.Parser, jwt.Signer, error) {
 	var provider jwt.Provider
 	var err error
 	if cfg.JWT != "" {
-		provider, err = jwt.Load(cfg.JWT, crypto)
+		provider, err = jwt.LoadProvider(cfg.JWT, nil)
 		if err != nil {
 			return nil, nil, err
 		}
 	}
-
-	return provider, provider, nil
+	// we encrypt Admin access token,
+	// the accesstoken provider handles both, encrypted PAT and plain JWT
+	at := accesstoken.New(dp, provider)
+	return at, at, nil
 }
 
 func provideCrypto(cfg *config.Configuration) (*cryptoprov.Crypto, error) {
@@ -335,7 +324,6 @@ func provideAuthority(cfg *config.Configuration, crypto *cryptoprov.Crypto, db c
 
 func provideCaDB(cfg *config.Configuration) (cadb.CaDb, cadb.CaReadonlyDb, error) {
 	d, err := cadb.New(
-		cfg.CaSQL.Driver,
 		cfg.CaSQL.DataSource,
 		cfg.CaSQL.MigrationsDir,
 		cfg.CaSQL.ForceVersion,
@@ -372,8 +360,4 @@ func provideDp() (dataprotection.Provider, error) {
 		return nil, err
 	}
 	return p, nil
-}
-
-func provideAccessToken(dp dataprotection.Provider, parser jwt.Parser) (roles.AccessToken, error) {
-	return accesstoken.New(dp, parser), nil
 }

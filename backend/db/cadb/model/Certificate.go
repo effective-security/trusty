@@ -5,8 +5,8 @@ import (
 	"encoding/base64"
 	"math/big"
 
-	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/xdb"
 	"github.com/effective-security/xpki/certutil"
 )
 

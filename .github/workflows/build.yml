@@ -95,7 +95,7 @@ jobs:
         run: make vars tools folders generate  version change_log
 
       - name: Build
-        run: make build start-local-deps gen_test_certs gen_shaken_certs
+        run: make build start-localstack gen_test_certs gen_shaken_certs
 
       - name: Test
         if: github.event_name == 'push'

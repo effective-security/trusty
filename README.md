@@ -7,8 +7,8 @@ Trusty is a Certification Authority.
 
 ## Requirements
 
-1. GoLang 1.20+
-1. docker-compose v2.3.3+
+1. GoLang 1.21+
+1. docker compose
 
 To run or test locally, you need GitHub OAuth secret and a random seed.
 Add this to your ~/.profile

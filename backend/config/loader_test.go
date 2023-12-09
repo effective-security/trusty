@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/effective-security/porto/pkg/configloader"
+	"github.com/effective-security/x/configloader"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -61,7 +61,7 @@ func TestLoadYAML(t *testing.T) {
 	require.NoError(t, err)
 
 	var c Configuration
-	err = f.Load(cfgFile, &c)
+	_, err = f.Load(cfgFile, &c)
 	require.NoError(t, err, "failed to load config: %v", cfgFile)
 }
 
@@ -75,7 +75,7 @@ func TestLoadYAMLOverrideByHostname(t *testing.T) {
 	os.Setenv("TRUSTY_HOSTNAME", "UNIT_TEST")
 
 	var c Configuration
-	err = f.Load(cfgFile, &c)
+	_, err = f.Load(cfgFile, &c)
 	require.NoError(t, err, "failed to load config: %v", cfgFile)
 	assert.Equal(t, "UNIT_TEST", c.Environment)
 	assert.Equal(t, "local", c.Region)
@@ -117,7 +117,7 @@ func TestLoadYAMLWithOverride(t *testing.T) {
 	os.Setenv("TRUSTY_HOSTNAME", "UNIT_TEST")
 
 	var c Configuration
-	err = f.Load(cfgFile, &c)
+	_, err = f.Load(cfgFile, &c)
 	require.NoError(t, err, "failed to load config: %v", cfgFile)
 	assert.Equal(t, "UNIT_TEST", c.Environment)
 	assert.Equal(t, "local", c.Region)

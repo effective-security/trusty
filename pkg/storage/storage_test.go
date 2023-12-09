@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/effective-security/porto/x/fileutil"
-	"github.com/effective-security/porto/x/guid"
 	"github.com/effective-security/trusty/pkg/storage"
+	"github.com/effective-security/x/fileutil"
+	"github.com/effective-security/x/guid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

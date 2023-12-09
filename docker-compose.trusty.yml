@@ -10,7 +10,7 @@ networks:
 
 services:
   sql:
-    image: ekspand/docker-centos7-postgres:latest
+    image: effectivesecurity/postgres15:sha-0bbf105
     networks:
       private:
         ipv4_address: 168.139.57.20

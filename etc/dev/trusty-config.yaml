@@ -69,8 +69,6 @@ crypto_provider:
 jwt_provider: ${TRUSTY_CONFIG_DIR}/jwt-provider.yaml
 
 ca_sql:
-  # the driver name: postgres|mysql
-  driver: postgres
   # specifies the connection string. It can be prefixed with file:// or env:// to load the source from a file or environment variable.
   data_source: file://${TRUSTY_CONFIG_DIR}/sql-conn-cadb.txt
   # the directory that contains migrations.

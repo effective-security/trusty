@@ -8,6 +8,4 @@ linters:
 
 issues:
   exclude:
-    - S1012 # should use `time.Since` instead of `time.Now().Sub` (gosimple)
     - SA1016 # os.Kill cannot be trapped (did you mean syscall.SIGTERM?) (staticcheck)
-    - SA1019 # grpc.WithInsecure is deprecated: use WithTransportCredentials and insecure.NewCredentials() instead. Will be supported throughout 1.x. (staticcheck)

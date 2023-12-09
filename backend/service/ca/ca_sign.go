@@ -7,15 +7,15 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/porto/xhttp/httperror"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/trusty/pkg/metricskey"
+	"github.com/effective-security/x/slices"
+	"github.com/effective-security/xdb"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/authority"
 	"github.com/effective-security/xpki/csr"
-	"github.com/effective-security/xpki/x/slices"
 	"google.golang.org/grpc/codes"
 )
 

@@ -1,6 +1,7 @@
 package cadb_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -17,20 +18,15 @@ var (
 	provider db.Provider
 )
 
-const (
-	projFolder = "../../../"
-)
-
 func TestMain(m *testing.M) {
 	//xlog.SetGlobalLogLevel(xlog.TRACE)
 
-	cfg, err := testutils.LoadConfig(projFolder, "UNIT_TEST")
+	cfg, err := testutils.LoadConfig("UNIT_TEST")
 	if err != nil {
 		panic(err)
 	}
 
 	p, err := db.New(
-		cfg.CaSQL.Driver,
 		cfg.CaSQL.DataSource,
 		cfg.CaSQL.MigrationsDir,
 		0, 0,
@@ -57,7 +53,7 @@ func Test_ListTables(t *testing.T) {
 	}
 	require.NotNil(t, provider)
 	require.NotNil(t, provider.DB())
-	res, err := provider.DB().Query(fmt.Sprintf(`
+	res, err := provider.QueryContext(context.Background(), fmt.Sprintf(`
 	SELECT
 		tablename
 	FROM

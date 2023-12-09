@@ -1,7 +1,6 @@
 package mockappcontainer
 
 import (
-	"github.com/effective-security/porto/gserver/roles"
 	"github.com/effective-security/porto/pkg/discovery"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/xpki/cryptoprov"
@@ -66,10 +65,10 @@ func (b *Builder) WithDiscovery(d discovery.Discovery) *Builder {
 	return b
 }
 
-// WithAccessToken sets roles.AccessToken
-func (b *Builder) WithAccessToken(a roles.AccessToken) *Builder {
-	_ = b.container.Provide(func() roles.AccessToken {
-		return a
-	})
-	return b
-}
+// // WithAccessToken sets roles.AccessToken
+// func (b *Builder) WithAccessToken(a roles.AccessToken) *Builder {
+// 	_ = b.container.Provide(func() roles.AccessToken {
+// 		return a
+// 	})
+// 	return b
+// }

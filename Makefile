@@ -19,7 +19,7 @@ BUILD_FLAGS=
 
 default: help
 
-all: clean folders tools generate start-local-deps build gen_test_certs gen_shaken_certs test change_log
+all: clean folders tools generate start-localstack build gen_test_certs gen_shaken_certs test change_log
 
 #
 # clean produced files
@@ -108,13 +108,13 @@ gen_shaken_certs:
 		--root-ca-key /tmp/trusty/certs/shaken_root_ca.key \
 		--root --ca --l1_ca --bundle --force
 
-start-local-deps:
+start-localstack:
 	echo "*** starting local-kms"
 	docker compose -f docker-compose.trusty.yml -p trusty up -d --force-recreate --remove-orphans
 	sleep 3
 	docker exec -e 'PGPASSWORD=postgres' trusty-sql-1 psql -h localhost -p 15432 -U postgres -a -f /trusty_sql/cadb/create.sql
 	docker exec -e 'PGPASSWORD=postgres' trusty-sql-1 psql -h localhost -p 15432 -U postgres -lqt
-	echo "host=localhost port=15432 user=postgres password=postgres sslmode=disable dbname=cadb" > etc/dev/sql-conn-cadb.txt
+	echo "postgres://postgres:postgres@localhost:15432?sslmode=disable&dbname=cadb" > etc/dev/sql-conn-cadb.txt
 
 drop-sql:
 	docker exec -e 'PGPASSWORD=postgres' trusty-sql-1 psql -h localhost -p 15432 -U postgres -a -f /trusty_sql/cadb/drop.sql
@@ -128,7 +128,7 @@ docker: change_log
 	docker build --no-cache -f Dockerfile -t effectivesecurity/trusty:main .
 
 docker-compose:
-	docker-compose -f docker-compose.dev.yml up --abort-on-container-exit
+	docker compose -f docker-compose.dev.yml up --abort-on-container-exit
 
 docker-push: docker
 	[ ! -z ${DOCKER_PASSWORD} ] && echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin || echo "skipping docker login"

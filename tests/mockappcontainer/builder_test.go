@@ -14,7 +14,7 @@ func TestBuilder(t *testing.T) {
 		WithCrypto(nil).
 		WithJwtParser(nil).
 		WithJwtSigner(nil).
-		WithAccessToken(nil).
+		//WithAccessToken(nil).
 		WithDiscovery(discovery.New()).
 		Container()
 	require.NotNil(t, container)

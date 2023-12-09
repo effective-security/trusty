@@ -6,8 +6,8 @@ import (
 	"encoding/hex"
 	"time"
 
-	"github.com/effective-security/porto/x/slices"
 	"github.com/effective-security/trusty/pkg/metricskey"
+	"github.com/effective-security/x/slices"
 	"github.com/effective-security/xlog"
 )
 

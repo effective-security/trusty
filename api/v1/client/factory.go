@@ -2,17 +2,14 @@ package client
 
 import (
 	"crypto/tls"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/effective-security/porto/gserver"
 	"github.com/effective-security/porto/pkg/rpcclient"
 	"github.com/effective-security/porto/pkg/tlsconfig"
-	"github.com/effective-security/porto/x/slices"
 	"github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/api/v1/pb/proxypb"
-	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 )
 
@@ -140,12 +137,6 @@ func (f *factory) NewClient(svc string, ops ...Option) (*rpcclient.Client, error
 		Endpoint:             targetHost,
 		TLS:                  tlscfg,
 	}
-
-	storage := slices.StringsCoalesce(
-		os.Getenv("TRUSTY_STORAGE"),
-		DefaultStoragePath,
-	)
-	clientCfg.StorageFolder, _ = homedir.Expand(storage)
 
 	// auth token is not required for trusty, as Client Cert is used
 	client, err := rpcclient.New(clientCfg, true)

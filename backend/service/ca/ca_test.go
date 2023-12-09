@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/effective-security/porto/gserver"
-	"github.com/effective-security/porto/x/guid"
 	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/api/v1/pb/proxypb"
@@ -20,6 +19,7 @@ import (
 	"github.com/effective-security/trusty/backend/service/ca"
 	"github.com/effective-security/trusty/backend/trustymain"
 	"github.com/effective-security/trusty/tests/testutils"
+	"github.com/effective-security/x/guid"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/cryptoprov/inmemcrypto"
 	"github.com/effective-security/xpki/csr"
@@ -28,19 +28,15 @@ import (
 )
 
 var (
-	trustyServer    *gserver.Server
+	trustyServer    gserver.GServer
 	authorityClient pb.CAServer
-)
-
-const (
-	projFolder = "../../../"
 )
 
 func TestMain(m *testing.M) {
 	var err error
 	xlog.SetGlobalLogLevel(xlog.ERROR)
 
-	cfg, err := testutils.LoadConfig(projFolder, "UNIT_TEST")
+	cfg, err := testutils.LoadConfig("UNIT_TEST")
 	if err != nil {
 		panic(err)
 	}

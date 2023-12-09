@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/effective-security/porto/pkg/configloader"
-	"github.com/effective-security/porto/x/guid"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/tests/testutils"
+	"github.com/effective-security/x/configloader"
+	"github.com/effective-security/x/guid"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
