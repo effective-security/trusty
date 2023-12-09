@@ -27,7 +27,7 @@ import (
 )
 
 var (
-	trustyServer *gserver.Server
+	trustyServer gserver.GServer
 	statusClient pb.StatusServer
 	httpAddr     string
 	httpsAddr    string
@@ -67,7 +67,6 @@ func TestMain(m *testing.M) {
 	container := mockappcontainer.NewBuilder().
 		WithCrypto(nil).
 		WithJwtParser(nil).
-		WithAccessToken(nil).
 		WithDiscovery(discovery.New()).
 		Container()
 

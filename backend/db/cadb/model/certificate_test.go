@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
+	"github.com/effective-security/xdb"
 	"github.com/effective-security/xpki/certutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

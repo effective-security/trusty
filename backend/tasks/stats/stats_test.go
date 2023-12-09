@@ -11,17 +11,12 @@ import (
 	"go.uber.org/dig"
 )
 
-const (
-	projFolder = "../../../"
-)
-
 func TestFactory(t *testing.T) {
 
-	cfg, err := testutils.LoadConfig(projFolder, "UNIT_TEST")
+	cfg, err := testutils.LoadConfig("UNIT_TEST")
 	require.NoError(t, err)
 
 	cadbp, err := cadb.New(
-		cfg.CaSQL.Driver,
 		cfg.CaSQL.DataSource,
 		cfg.CaSQL.MigrationsDir,
 		0, 0,
@@ -36,7 +31,7 @@ func TestFactory(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	scheduler := &testutils.MockTask{}
+	scheduler := &testutils.MockScheduler{}
 
 	f := Factory(scheduler, "test_run", "Every 30 minutes")
 	require.NotNil(t, f)

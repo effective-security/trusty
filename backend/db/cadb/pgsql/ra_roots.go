@@ -3,8 +3,8 @@ package pgsql
 import (
 	"context"
 
-	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
+	"github.com/effective-security/xdb"
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
 )
@@ -40,7 +40,7 @@ func (p *Provider) RegisterRootCertificate(ctx context.Context, crt *model.RootC
 		&res.Pem,
 	)
 	if err != nil {
-		p.CheckErrIDConflict(ctx, err, id)
+		p.CheckErrIDConflict(ctx, err, id.UInt64())
 		return nil, errors.WithStack(err)
 	}
 	return res, nil

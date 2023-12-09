@@ -16,11 +16,11 @@ var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/backend
 
 // Service defines the Status service
 type Service struct {
-	server *gserver.Server
+	server gserver.GServer
 }
 
 // Factory returns a factory of the service
-func Factory(server *gserver.Server) interface{} {
+func Factory(server gserver.GServer) interface{} {
 	if server == nil {
 		logger.Panic("status.Factory: invalid parameter")
 	}

@@ -9,11 +9,11 @@ import (
 	"time"
 
 	"github.com/effective-security/porto/pkg/tlsconfig"
-	"github.com/effective-security/porto/x/fileutil"
-	"github.com/effective-security/porto/x/netutil"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/backend/db/cadb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
+	"github.com/effective-security/x/fileutil"
+	"github.com/effective-security/x/netutil"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/authority"
 	"github.com/effective-security/xpki/certutil"

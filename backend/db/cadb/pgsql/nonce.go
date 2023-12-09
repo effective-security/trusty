@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
+	"github.com/effective-security/xdb"
 	"github.com/pkg/errors"
 )
 
@@ -37,7 +37,7 @@ func (p *Provider) CreateNonce(ctx context.Context, nonce *model.Nonce) (*model.
 		&res.UsedAt,
 	)
 	if err != nil {
-		p.CheckErrIDConflict(ctx, err, id)
+		p.CheckErrIDConflict(ctx, err, id.UInt64())
 		return nil, err
 	}
 	res.CreatedAt = res.CreatedAt.UTC()

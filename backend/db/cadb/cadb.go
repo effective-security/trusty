@@ -2,16 +2,12 @@ package cadb
 
 import (
 	"context"
-	"database/sql"
-	"strings"
 	"time"
 
 	"github.com/effective-security/porto/pkg/flake"
-	"github.com/effective-security/porto/x/fileutil"
-	"github.com/effective-security/porto/x/xdb/migrate"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/trusty/backend/db/cadb/pgsql"
-	"github.com/pkg/errors"
+	"github.com/effective-security/xdb"
 
 	// register Postgres driver
 	_ "github.com/lib/pq"
@@ -65,7 +61,8 @@ type CaReadonlyDb interface {
 
 // CaDb defines an interface for CRUD operations on Certs
 type CaDb interface {
-	flake.IDGenerator
+	xdb.IDGenerator
+
 	CaReadonlyDb
 	// RegisterRootCertificate registers Root Cert
 	RegisterRootCertificate(ctx context.Context, crt *model.RootCertificate) (*model.RootCertificate, error)
@@ -113,40 +110,26 @@ type CaDb interface {
 
 // Provider provides complete DB access
 type Provider interface {
-	flake.IDGenerator
+	xdb.Provider
+
 	CaDb
-
-	// DB returns underlying DB connection
-	DB() *sql.DB
-	// Tx returns underlying DB transaction
-	Tx() *sql.Tx
-
-	// Close connection and release resources
-	Close() (err error)
 }
 
 // New creates a Provider instance
-func New(driverName, dataSourceName, migrationsDir string, forceVersion, migrateVersion int, idGen flake.IDGenerator) (Provider, error) {
-	ds, err := fileutil.LoadConfigWithSchema(dataSourceName)
-	if err != nil {
-		return nil, errors.WithStack(err)
+func New(dataSourceName, migrationsDir string, forceVersion, migrateVersion int, idGen flake.IDGenerator) (Provider, error) {
+	var migrateCfg *xdb.MigrationConfig
+	if migrationsDir != "" {
+		migrateCfg = &xdb.MigrationConfig{
+			ForceVersion:   forceVersion,
+			MigrateVersion: migrateVersion,
+			Source:         migrationsDir,
+		}
 	}
 
-	ds = strings.Trim(ds, "\"")
-	d, err := sql.Open(driverName, ds)
+	p, err := xdb.NewProvider(dataSourceName, "", idGen, migrateCfg)
 	if err != nil {
-		return nil, errors.WithMessagef(err, "unable to open DB: %s", driverName)
+		return nil, err
 	}
 
-	err = d.Ping()
-	if err != nil {
-		return nil, errors.WithMessagef(err, "unable to ping DB: %s", driverName)
-	}
-
-	err = migrate.Postgres("cadb", migrationsDir, forceVersion, migrateVersion, d)
-	if err != nil {
-		return nil, errors.WithMessagef(err, "unable to migrate cadb")
-	}
-
-	return pgsql.New(d, idGen)
+	return pgsql.New(p)
 }

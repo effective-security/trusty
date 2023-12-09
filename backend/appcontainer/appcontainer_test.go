@@ -7,11 +7,11 @@ import (
 	"testing"
 
 	"github.com/effective-security/porto/pkg/tasks"
-	"github.com/effective-security/porto/x/guid"
 	"github.com/effective-security/trusty/api/v1/client"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/backend/db/cadb"
 	"github.com/effective-security/trusty/pkg/certpublisher"
+	"github.com/effective-security/x/guid"
 	"github.com/effective-security/xpki/authority"
 	"github.com/effective-security/xpki/cryptoprov"
 	"github.com/effective-security/xpki/jwt"
@@ -86,7 +86,7 @@ func TestAppContainer(t *testing.T) {
 			require.NoError(t, err)
 
 			cfg := new(config.Configuration)
-			err = f.LoadForHostName(cfgPath, "", cfg)
+			_, err = f.LoadForHostName(cfgPath, "", cfg)
 			require.NoError(t, err)
 
 			return cfg, nil

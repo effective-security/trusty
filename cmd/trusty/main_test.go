@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/effective-security/porto/x/guid"
 	"github.com/effective-security/trusty/internal/version"
+	"github.com/effective-security/x/guid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,7 +25,7 @@ func TestMain(m *testing.M) {
 
 func TestGoVersion(t *testing.T) {
 	gv := runtime.Version()
-	vsCheck := strings.HasPrefix(gv, "go1.19") || strings.HasPrefix(gv, "go1.20")
+	vsCheck := strings.HasPrefix(gv, "go1.21") || strings.HasPrefix(gv, "go1.22")
 	assert.True(t, vsCheck, "should be built with go 1.19.+, got: %s", gv)
 }
 

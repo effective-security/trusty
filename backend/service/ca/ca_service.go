@@ -7,12 +7,12 @@ import (
 	"github.com/effective-security/porto/gserver"
 	"github.com/effective-security/porto/pkg/tasks"
 	"github.com/effective-security/porto/restserver"
-	"github.com/effective-security/porto/x/fileutil"
 	pb "github.com/effective-security/trusty/api/v1/pb"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/backend/db/cadb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/trusty/pkg/certpublisher"
+	"github.com/effective-security/x/fileutil"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/authority"
 	"github.com/effective-security/xpki/certutil"
@@ -27,7 +27,7 @@ var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/backend
 
 // Service defines the Status service
 type Service struct {
-	server     *gserver.Server
+	server     gserver.GServer
 	ca         *authority.Authority
 	db         cadb.CaDb
 	publisher  certpublisher.Publisher
@@ -38,7 +38,7 @@ type Service struct {
 }
 
 // Factory returns a factory of the service
-func Factory(server *gserver.Server) interface{} {
+func Factory(server gserver.GServer) interface{} {
 	if server == nil {
 		logger.Panic("status.Factory: invalid parameter")
 	}

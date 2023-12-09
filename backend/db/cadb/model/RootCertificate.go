@@ -3,8 +3,8 @@ package model
 import (
 	"crypto/x509"
 
-	"github.com/effective-security/porto/x/xdb"
 	pb "github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/xdb"
 	"github.com/effective-security/xpki/certutil"
 )
 

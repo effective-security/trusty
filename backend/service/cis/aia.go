@@ -5,11 +5,11 @@ import (
 	"net/http"
 
 	"github.com/effective-security/porto/restserver"
-	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/porto/xhttp/header"
 	"github.com/effective-security/porto/xhttp/httperror"
 	"github.com/effective-security/porto/xhttp/marshal"
 	"github.com/effective-security/trusty/pkg/metricskey"
+	"github.com/effective-security/xdb"
 	"github.com/effective-security/xlog"
 )
 

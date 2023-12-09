@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
+	"github.com/effective-security/xdb"
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
 )
@@ -19,7 +19,7 @@ func (p *Provider) RegisterRevokedCertificate(ctx context.Context, revoked *mode
 	var err error
 
 	if id == 0 {
-		id = p.NextID()
+		id = p.NextID().UInt64()
 	}
 
 	err = xdb.Validate(revoked)
@@ -233,7 +233,7 @@ func (p *Provider) RevokeCertificate(ctx context.Context, crt *model.Certificate
 		"ikid", crt.IKID,
 	)
 
-	tx, err := p.DB().BeginTx(ctx, nil)
+	tx, err := p.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

@@ -18,7 +18,6 @@ import (
 	pmetricskey "github.com/effective-security/porto/metricskey"
 	"github.com/effective-security/porto/pkg/discovery"
 	"github.com/effective-security/porto/pkg/tasks"
-	"github.com/effective-security/porto/x/netutil"
 	"github.com/effective-security/trusty/backend/appcontainer"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/backend/service/ca"
@@ -31,6 +30,7 @@ import (
 	"github.com/effective-security/trusty/backend/tasks/stats"
 	"github.com/effective-security/trusty/internal/version"
 	"github.com/effective-security/trusty/pkg/metricskey"
+	"github.com/effective-security/x/netutil"
 	"github.com/effective-security/xlog"
 	"github.com/effective-security/xlog/logrotate"
 	"github.com/effective-security/xlog/stackdriver"
@@ -102,7 +102,7 @@ type App struct {
 	cfg              *config.Configuration
 	scheduler        tasks.Scheduler
 	containerFactory appcontainer.ContainerFactoryFn
-	servers          map[string]*gserver.Server
+	servers          map[string]gserver.GServer
 }
 
 // NewApp returns new App
@@ -112,7 +112,7 @@ func NewApp(args []string) *App {
 		args:      args,
 		closers:   make([]io.Closer, 0, 8),
 		flags:     new(appFlags),
-		servers:   make(map[string]*gserver.Server),
+		servers:   make(map[string]gserver.GServer),
 	}
 
 	f := appcontainer.NewContainerFactory(app).
@@ -344,7 +344,7 @@ func (a *App) Run(startedCh chan<- bool) error {
 }
 
 // Server returns a running TrustyServer by name
-func (a *App) Server(name string) *gserver.Server {
+func (a *App) Server(name string) gserver.GServer {
 	return a.servers[name]
 }
 
@@ -408,7 +408,7 @@ func (a *App) loadConfig() error {
 	}
 
 	cfg := new(config.Configuration)
-	err = f.LoadForHostName(*flags.cfgFile, "", cfg)
+	_, err = f.LoadForHostName(*flags.cfgFile, "", cfg)
 	if err != nil {
 		return errors.WithMessagef(err, "failed to load configuration %q", *flags.cfgFile)
 	}

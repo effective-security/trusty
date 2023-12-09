@@ -11,7 +11,7 @@ import (
 )
 
 func TestNonces(t *testing.T) {
-	id := provider.NextID()
+	id := provider.NextID().UInt64()
 
 	token := fmt.Sprintf("t-%d", id)
 

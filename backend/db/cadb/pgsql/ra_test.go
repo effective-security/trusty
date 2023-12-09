@@ -4,10 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/effective-security/porto/x/guid"
-	"github.com/effective-security/porto/x/xdb"
 	"github.com/effective-security/trusty/backend/db/cadb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
+	"github.com/effective-security/x/guid"
+	"github.com/effective-security/xdb"
 	"github.com/effective-security/xpki/certutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -58,7 +58,7 @@ func TestGetCertificatesBySKID(t *testing.T) {
 }
 
 func TestRegisterCertificate(t *testing.T) {
-	orgID := provider.NextID()
+	orgID := provider.NextID().UInt64()
 
 	rc := &model.Certificate{
 		OrgID:            orgID,
@@ -194,7 +194,7 @@ func TestRegisterCertificate(t *testing.T) {
 }
 
 func TestRegisterCertificateUniqueIdx(t *testing.T) {
-	orgID := provider.NextID()
+	orgID := provider.NextID().UInt64()
 	rc := &model.Certificate{
 		OrgID:            orgID,
 		SKID:             guid.MustCreate(),
@@ -256,7 +256,7 @@ func TestRegisterCertificateUniqueIdx(t *testing.T) {
 }
 
 func TestRegisterRevokedCertificate(t *testing.T) {
-	orgID := provider.NextID()
+	orgID := provider.NextID().UInt64()
 
 	mrc := &model.RevokedCertificate{
 		Certificate: model.Certificate{
