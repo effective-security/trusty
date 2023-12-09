@@ -121,11 +121,11 @@ func (t *Task) healthHsm(ctx context.Context) error {
 
 func (t *Task) healthCheckIssuers(ctx context.Context) error {
 	if t.caClient == nil {
-		cl, err := t.factory.NewClient("ca")
+		cl, _, err := t.factory.CAClient("ca")
 		if err != nil {
 			return errors.WithMessagef(err, "unable to create client")
 		}
-		t.caClient = client.CAClient(cl)
+		t.caClient = cl
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)

@@ -20,10 +20,18 @@ func TestFactory(t *testing.T) {
 			TrustedCAFile: "/tmp/trusty/certs/trusty_root_ca.pem",
 		},
 	}, client.WithTLS(nil))
-	_, err := f.NewClient("invalid")
+	_, _, err := f.StatusClient("invalid")
 	assert.EqualError(t, err, "service invalid not found")
 
-	c, err := f.NewClient("local")
+	_, closer, err := f.StatusClient("local")
 	require.NoError(t, err)
-	defer c.Close()
+	defer closer.Close()
+
+	_, closer, err = f.CAClient("local")
+	require.NoError(t, err)
+	defer closer.Close()
+
+	_, closer, err = f.CISClient("local")
+	require.NoError(t, err)
+	defer closer.Close()
 }

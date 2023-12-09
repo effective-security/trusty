@@ -2,6 +2,7 @@ package client
 
 import (
 	"crypto/tls"
+	"io"
 	"strings"
 	"time"
 
@@ -40,7 +41,12 @@ type Config struct {
 
 // Factory specifies interface to create Client
 type Factory interface {
-	NewClient(svc string, ops ...Option) (*rpcclient.Client, error)
+	// StatusClient returns Status client
+	StatusClient(svc string, ops ...Option) (pb.StatusServer, io.Closer, error)
+	// CAClient returns CA client from connection
+	CAClient(svc string, ops ...Option) (pb.CAServer, io.Closer, error)
+	// CISClient returns CIS client from connection
+	CISClient(svc string, ops ...Option) (pb.CISServer, io.Closer, error)
 }
 
 // Option configures how we set up the client
@@ -147,16 +153,28 @@ func (f *factory) NewClient(svc string, ops ...Option) (*rpcclient.Client, error
 }
 
 // StatusClient returns Status client from connection
-func StatusClient(c *rpcclient.Client) pb.StatusServer {
-	return proxypb.NewStatusClient(c.Conn(), c.Opts())
+func (f *factory) StatusClient(svc string, ops ...Option) (pb.StatusServer, io.Closer, error) {
+	c, err := f.NewClient(svc, ops...)
+	if err != nil {
+		return nil, nil, err
+	}
+	return proxypb.NewStatusClient(c.Conn(), c.Opts()), c, nil
 }
 
 // CAClient returns CA client from connection
-func CAClient(c *rpcclient.Client) pb.CAServer {
-	return proxypb.NewCAClient(c.Conn(), c.Opts())
+func (f *factory) CAClient(svc string, ops ...Option) (pb.CAServer, io.Closer, error) {
+	c, err := f.NewClient(svc, ops...)
+	if err != nil {
+		return nil, nil, err
+	}
+	return proxypb.NewCAClient(c.Conn(), c.Opts()), c, nil
 }
 
 // CISClient returns CIS client from connection
-func CISClient(c *rpcclient.Client) pb.CISServer {
-	return proxypb.NewCISClient(c.Conn(), c.Opts())
+func (f *factory) CISClient(svc string, ops ...Option) (pb.CISServer, io.Closer, error) {
+	c, err := f.NewClient(svc, ops...)
+	if err != nil {
+		return nil, nil, err
+	}
+	return proxypb.NewCISClient(c.Conn(), c.Opts()), c, nil
 }
