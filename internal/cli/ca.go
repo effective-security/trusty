@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/api/pb"
 	"github.com/effective-security/trusty/pkg/print"
 	"github.com/effective-security/xdb"
 	"github.com/pkg/errors"

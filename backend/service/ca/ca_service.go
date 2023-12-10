@@ -7,7 +7,7 @@ import (
 	"github.com/effective-security/porto/gserver"
 	"github.com/effective-security/porto/pkg/tasks"
 	"github.com/effective-security/porto/restserver"
-	pb "github.com/effective-security/trusty/api/v1/pb"
+	pb "github.com/effective-security/trusty/api/pb"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/backend/db/cadb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"

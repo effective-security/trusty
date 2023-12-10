@@ -13,8 +13,8 @@ import (
 
 	"github.com/effective-security/porto/restserver"
 	"github.com/effective-security/porto/xhttp/header"
-	v1 "github.com/effective-security/trusty/api/v1"
-	pb "github.com/effective-security/trusty/api/v1/pb"
+	v1 "github.com/effective-security/trusty/api"
+	pb "github.com/effective-security/trusty/api/pb"
 	"github.com/effective-security/trusty/backend/service/cis"
 	"github.com/effective-security/xpki/certutil"
 	"github.com/effective-security/xpki/cryptoprov/inmemcrypto"

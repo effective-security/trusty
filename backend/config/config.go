@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/effective-security/porto/gserver"
-	"github.com/effective-security/trusty/api/v1/client"
+	"github.com/effective-security/trusty/api/client"
 	"github.com/effective-security/xpki/authority"
 )
 

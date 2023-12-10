@@ -10,7 +10,7 @@ import (
 	"github.com/effective-security/porto/xhttp/header"
 	"github.com/effective-security/porto/xhttp/httperror"
 	"github.com/effective-security/porto/xhttp/marshal"
-	pb "github.com/effective-security/trusty/api/v1/pb"
+	pb "github.com/effective-security/trusty/api/pb"
 	"github.com/effective-security/trusty/pkg/metricskey"
 	"github.com/effective-security/xlog"
 	"golang.org/x/crypto/ocsp"

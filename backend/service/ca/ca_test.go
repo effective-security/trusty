@@ -13,8 +13,8 @@ import (
 
 	"github.com/effective-security/porto/gserver"
 	"github.com/effective-security/porto/xhttp/correlation"
-	"github.com/effective-security/trusty/api/v1/pb"
-	"github.com/effective-security/trusty/api/v1/pb/proxypb"
+	"github.com/effective-security/trusty/api/pb"
+	"github.com/effective-security/trusty/api/pb/proxypb"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/backend/service/ca"
 	"github.com/effective-security/trusty/backend/trustymain"

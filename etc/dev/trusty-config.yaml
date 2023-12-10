@@ -98,7 +98,7 @@ tasks:
   - name: stats
     schedule: "every 13 minutes"
   - name: health_check
-    schedule: "every 60 seconds"
+    schedule: "every 30 seconds"
     args: ["-hsmkeys", "-ca"]
   - name: health_check
     schedule: "every 60 seconds"
@@ -194,6 +194,7 @@ servers:
         - /favicon.ico
         - /v1
         - /metrics
+        - /healthz
         - /pb.CIS
         - /pb.Status
       # allow any authenticated request that includes a non empty role
@@ -223,7 +224,7 @@ servers:
       cert: /tmp/trusty/certs/trusty_peer_ca.pem
       key: /tmp/trusty/certs/trusty_peer_ca.key
       trusted_ca: ${TRUSTY_CONFIG_DIR}/roots/trusty_root_ca.pem
-      client_cert_auth: true
+      client_cert_auth: false
     services:
       - status
       - ca
@@ -247,7 +248,9 @@ servers:
         # allow any authenticated request that includes a non empty role
         - /pb.Status
         - /metrics
+        - /healthz
         - /v1/status
+        - /pb.Status
       allow_any_role:
         - /pb.CIS
         - /pb.CA

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/api/pb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/trusty/pkg/certpublisher"
 	"github.com/effective-security/x/fileutil"

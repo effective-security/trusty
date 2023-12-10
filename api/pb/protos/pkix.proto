@@ -1,0 +1,242 @@
+syntax = "proto3";
+package pb;
+
+option go_package = "github.com/effective-security/trusty/api/pb";
+
+// for grpc-gateway
+//import "google/api/annotations.proto";
+
+enum Trust {
+	Any = 0;  // default
+	Public = 1;
+	Private = 2;
+}
+
+enum EncodingFormat {
+	PEM = 0; // default, PEM encoded
+	DER = 1;
+	PKCS7 = 2;
+}
+
+// Reason specifies Certificate Revocation Reason from RFC 5280
+// CRLReason ::= ENUMERATED {
+//        unspecified             (0),
+//        keyCompromise           (1),
+//        cACompromise            (2),
+//        affiliationChanged      (3),
+//        superseded              (4),
+//        cessationOfOperation    (5),
+//        certificateHold         (6),
+//             -- value 7 is not used
+//        removeFromCRL           (8),
+//        privilegeWithdrawn      (9),
+//        aACompromise           (10) }
+enum Reason {
+	UNSPECIFIED = 0;
+	KEY_COMPROMISE = 1;
+	CA_COMPROMISE = 2;
+	AFFILIATION_CHANGED = 3;
+	SUPERSEDED = 4;
+	CESSATION_OF_OPERATION = 5;
+	CERTIFICATE_HOLD = 6;
+	REMOVE_FROM_CRL = 8;
+	PRIVILEGE_WITHDRAWN = 9;
+	AA_COMPROMISE = 10;
+}
+
+// Root provides X509 Root Cert information
+message RootCertificate  {
+	// Id of the certificate
+	uint64 ID = 1;
+	// SKID provides Subject Key Identifier
+	string SKID = 2;
+	// NotBefore is the time when the validity period starts
+	string NotBefore = 3;
+	// NotAfter is the time when the validity period ends
+	string NotAfter = 4;
+	// Subject name
+	string Subject = 5;
+	// SHA256 thnumbprint of the cert
+	string Sha256 =6;
+	// Trust scope
+	Trust Trust = 7;
+	// PEM encoded certificate
+	string Pem =8;
+}
+
+// Certificate provides X509 Certificate information
+message Certificate  {
+	// Id of the certificate
+	uint64 ID = 1;
+	// OrgID of the certificate, only used with Org scope
+	uint64 OrgID = 2;
+	// SKID provides Subject Key Identifier
+	string SKID = 3;
+	// IKID provides Issuer Key Identifier
+	string IKID = 4;
+	// SerialNumber provides Serial Number
+	string SerialNumber = 5;
+	// NotBefore is the time when the validity period starts
+	string NotBefore = 6;
+	// NotAfter is the time when the validity period starts
+	string NotAfter = 7;
+	// Subject name
+	string Subject = 8;
+	// Issuer name
+	string Issuer = 9;
+	// SHA256 thnumbprint of the cert
+	string Sha256 = 10;
+	// Profile of the certificate
+	string Profile = 11;
+	// Pem encoded certificate
+	string Pem = 12;
+	// IssuersPem provides PEM encoded issuers
+	string IssuersPem = 13;
+	// Locations of published certificate
+	repeated string Locations = 14;
+	// Label of the certificate provided by the client
+	string Label = 15;
+	// Metadata of the certificate provided by the client
+	map<string, string> Metadata = 16;
+}
+
+// RevokedCertificate provides X509 Cert information
+message RevokedCertificate {
+	Certificate Certificate = 1;
+	string RevokedAt = 2;
+	Reason Reason = 3;
+}
+
+// Crl provides X509 CRL information
+message Crl  {
+	// Id of the CRL
+	uint64 ID = 1;
+	// IKID provides Issuer Key Identifier
+	string IKID = 2;
+	// ThisUpdate is the time when the CRL was issued
+	string ThisUpdate = 3;
+	// NextUpdate is the time for the next update
+	string NextUpdate = 4;
+	// Issuer name
+	string Issuer = 5;
+	// PEM encoded CRL
+	string Pem =6;
+}
+
+// X509Name specifies X509 Name
+message X509Name {
+	string Country = 1;
+	string State = 2;
+	string Locality = 3;
+	string Organisation = 4;
+	string OrganisationalUnit = 5;
+	string SerialNumber = 6;
+}
+
+// X509Subject specifies X509 Subject
+message X509Subject {
+	string CommonName = 1;
+	repeated X509Name Names = 2;
+	string SerialNumber = 3;
+}
+
+// CAConstraint specifies various CA constraints on the signed certificate.
+// CAConstraint would verify against (and override) the CA
+// extensions in the given CSR.
+message CAConstraint {
+	bool IsCA = 1;
+	int32 MaxPathLen = 2;
+}
+
+message CSRAllowedFields {
+	bool Subject = 1;
+	bool Dns = 2;
+	bool Ip = 3;
+	bool Email = 4;
+	bool Uri = 5;
+}
+
+message CertificatePolicyQualifier {
+	string Type  = 1;
+	string Value = 2;
+}
+
+message CertificatePolicy {
+	// Id is OID of Certificate Policy
+	string ID = 1;
+	repeated CertificatePolicyQualifier Qualifiers = 2;
+}
+
+// CertProfile provides certificate profile
+message CertProfile {
+	string Label = 1;
+	string IssuerLabel = 2;
+	string Description = 3;
+
+	// Usage provides a list key usages
+	repeated string Usages = 4;
+
+	CAConstraint CAConstraint  = 5;
+	bool OcspNoCheck  = 6;
+
+	string Expiry = 7;
+	string Backdate = 8;
+
+	repeated string AllowedExtensions = 9;
+
+	// AllowedNames specifies a RegExp to check for allowed names.
+	// If not provided, then all values are allowed
+	string AllowedNames = 10;
+
+	// AllowedDns specifies a RegExp to check for allowed DNS.
+	// If not provided, then all values are allowed
+	string AllowedDns = 11;
+
+	// AllowedEmail specifies a RegExp to check for allowed email.
+	// If not provided, then all values are allowed
+	string AllowedEmail = 12;
+
+	// AllowedUri specifies a RegExp to check for allowed URI.
+	// If not provided, then all values are allowed
+	string AllowedUri = 13;
+
+	// AllowedFields provides booleans for fields in the CSR.
+	// If a AllowedFields is not present in a CertProfile,
+	// all of these fields may be copied from the CSR into the signed certificate.
+	// If a AllowedFields *is* present in a CertProfile,
+	// only those fields with a `true` value in the AllowedFields may
+	// be copied from the CSR to the signed certificate.
+	// Note that some of these fields, like Subject, can be provided or
+	// partially provided through the API.
+	// Since API clients are expected to be trusted, but CSRs are not, fields
+	// provided through the API are not subject to validation through this
+	// mechanism.
+	CSRAllowedFields AllowedFields = 14;
+
+	repeated CertificatePolicy Policies = 15;
+
+	// PoliciesCritical specifies to mark Policies as Critical extension
+	bool PoliciesCritical = 16;
+
+	repeated string AllowedRoles = 17;
+	repeated string DeniedRoles = 18;
+}
+
+message IssuerSerial {
+	// IKID provides Issuer Key Identifier
+	string IKID = 1;
+	
+	// SerialNumber provides certificate's serial number
+	string SerialNumber = 2;
+}
+
+// X509Extension represents a raw extension to be included in the certificate.  The
+// "value" field must be hex encoded.
+message X509Extension {
+	// Id is the extension OID
+	repeated int64 ID = 1;
+	// Critical flag
+	bool Critical = 2;
+	// Value is base64 encoded extension value
+	string Value = 3;
+}

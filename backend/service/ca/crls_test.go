@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/effective-security/porto/xhttp/correlation"
-	"github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/api/pb"
 	"github.com/effective-security/xpki/certutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

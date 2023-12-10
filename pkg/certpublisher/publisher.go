@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/api/pb"
 	"github.com/effective-security/trusty/pkg/storage"
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"

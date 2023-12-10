@@ -3,8 +3,8 @@ package status
 import (
 	"github.com/effective-security/porto/gserver"
 	"github.com/effective-security/porto/restserver"
-	v1 "github.com/effective-security/trusty/api/v1"
-	pb "github.com/effective-security/trusty/api/v1/pb"
+	v1 "github.com/effective-security/trusty/api"
+	pb "github.com/effective-security/trusty/api/pb"
 	"github.com/effective-security/xlog"
 	"google.golang.org/grpc"
 )

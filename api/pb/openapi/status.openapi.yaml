@@ -1,0 +1,152 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: Status API
+    version: 0.0.1
+paths:
+    /v1/status/caller:
+        get:
+            tags:
+                - Status
+            description: Caller returns the caller status.
+            operationId: Status_Caller
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CallerStatusResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v1/status/server:
+        get:
+            tags:
+                - Status
+            description: Server returns the server status.
+            operationId: Status_Server
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ServerStatusResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v1/status/version:
+        get:
+            tags:
+                - Status
+            description: Version returns the server version.
+            operationId: Status_Version
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ServerVersion'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+components:
+    schemas:
+        CallerStatusResponse:
+            type: object
+            properties:
+                Subject:
+                    type: string
+                    description: Subject of the caller.
+                Role:
+                    type: string
+                    description: Rame of the caller.
+                Claims:
+                    type: string
+                    description: Claims from the token, json encoded map[string]interface{}
+                    format: bytes
+            description: CallerStatusResponse returns the caller information
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        ServerStatus:
+            type: object
+            properties:
+                Name:
+                    type: string
+                    description: Name of the server or application.
+                Nodename:
+                    type: string
+                    description: |-
+                        Nodename is the human-readable name of the cluster member,
+                         or empty for single host.
+                Hostname:
+                    type: string
+                    description: Hostname is operating system's host name.
+                ListenURLs:
+                    type: array
+                    items:
+                        type: string
+                    description: ListenURLs is the list of URLs the service is listening on.
+                StartedAt:
+                    type: string
+                    description: StartedAt is the time when the server has started.
+            description: ServerStatus provides server status information
+        ServerStatusResponse:
+            type: object
+            properties:
+                Status:
+                    allOf:
+                        - $ref: '#/components/schemas/ServerStatus'
+                    description: Status of the server.
+                Version:
+                    allOf:
+                        - $ref: '#/components/schemas/ServerVersion'
+                    description: Version of the server.
+            description: ServerStatusResponse returns status and version
+        ServerVersion:
+            type: object
+            properties:
+                Build:
+                    type: string
+                    description: Build is the server build version.
+                Runtime:
+                    type: string
+                    description: Runtime is the runtime version.
+            description: ServerVersion provides server build and runtime version
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+tags:
+    - name: Status

@@ -9,7 +9,7 @@ import (
 	"github.com/effective-security/porto/pkg/discovery"
 	"github.com/effective-security/porto/pkg/flake"
 	"github.com/effective-security/porto/pkg/tasks"
-	"github.com/effective-security/trusty/api/v1/client"
+	"github.com/effective-security/trusty/api/client"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/backend/db/cadb"
 	"github.com/effective-security/trusty/pkg/certpublisher"

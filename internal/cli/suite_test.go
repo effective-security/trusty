@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/alecthomas/kong"
-	"github.com/effective-security/trusty/api/v1/pb"
-	"github.com/effective-security/trusty/api/v1/pb/mockpb"
+	"github.com/effective-security/trusty/api/pb"
+	"github.com/effective-security/trusty/api/pb/mockpb"
 	"github.com/effective-security/trusty/internal/version"
 	"github.com/effective-security/xpki/x/ctl"
 	"github.com/pkg/errors"

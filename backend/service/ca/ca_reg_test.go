@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"testing"
 
-	pb "github.com/effective-security/trusty/api/v1/pb"
+	pb "github.com/effective-security/trusty/api/pb"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/backend/service/ca"
 	"github.com/effective-security/xpki/certutil"
