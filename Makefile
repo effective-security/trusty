@@ -8,7 +8,7 @@ export AWS_DEFAULT_REGION=us-west-2
 export TRUSTY_JWT_SEED=testseed
 
 export GOPRIVATE=github.com/effective-security,github.com/go-phorce
-export COVERAGE_EXCLUSIONS="vendor|tests|api/v1/pb/gw|main.go|testsuite.go|mocks.go|.pb.go|.pb.gw.go"
+export COVERAGE_EXCLUSIONS="vendor|tests|api/pb/gw|main.go|testsuite.go|mocks.go|.pb.go|.pb.gw.go"
 export TRUSTY_DIR=${PROJ_ROOT}
 export GO111MODULE=on
 BUILD_FLAGS=
@@ -184,11 +184,11 @@ start-pgadmin:
 	elif [ "$$CONTAINER_STATE" = "false" ]; then docker start trusty-pgadmin; fi;
 
 proto:
-	echo "*** building public proto in $(PROJ_ROOT)/api/v1/pb"
-	mkdir -p ./api/v1/pb/mockpb
-	docker run --rm -v $(PROJ_ROOT)/api/v1/pb:/dirs \
+	echo "*** building public proto in $(PROJ_ROOT)/api/pb"
+	mkdir -p ./api/pb/mockpb
+	docker run --rm -v $(PROJ_ROOT)/api/pb:/dirs \
 		--name secdi-docker-protobuf \
-		effectivesecurity/protoc-gen-go:main \
+		effectivesecurity/protoc-gen-go:sha-2c297fd \
 		--i "-I /third_party" \
 		--dirs /dirs/protos \
 		--golang ./.. \
@@ -196,8 +196,8 @@ proto:
 		--mock ./.. \
 		--proxy ./.. \
 		--methods ./.. \
-		--oapi /dirs/openapiv2
+		--oapi output_mode=source_relative,naming=proto:./../openapi
 	echo "Changing owner for generated files. Please enter your sudo creds"
-	sudo chown -R $(USER) ./api/v1/pb
-	goimports -l -w ./api/v1/pb
-	gofmt -s -l -w ./api/v1/pb
+	sudo chown -R $(USER) ./api/pb
+	goimports -l -w ./api/pb
+	gofmt -s -l -w -r 'interface{} -> any' ./api/pb

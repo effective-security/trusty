@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/api/pb"
 	"github.com/effective-security/xpki/certutil"
 	"github.com/effective-security/xpki/jwt"
 	"github.com/effective-security/xpki/x/print"

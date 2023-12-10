@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/effective-security/porto/xhttp/identity"
-	pb "github.com/effective-security/trusty/api/v1/pb"
+	pb "github.com/effective-security/trusty/api/pb"
 	"github.com/effective-security/trusty/internal/version"
 	"github.com/golang/protobuf/ptypes/empty"
 )

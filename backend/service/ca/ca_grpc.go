@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/effective-security/porto/xhttp/httperror"
-	pb "github.com/effective-security/trusty/api/v1/pb"
+	pb "github.com/effective-security/trusty/api/pb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/xpki/authority"
 	"google.golang.org/grpc/codes"

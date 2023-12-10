@@ -1,0 +1,197 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: CIS API
+    version: 0.0.1
+paths:
+    /v1/cis/certs/{ID}:
+        get:
+            tags:
+                - CIS
+            description: GetCertificate returns the certificate
+            operationId: CIS_GetCertificate
+            parameters:
+                - name: ID
+                  in: path
+                  description: |-
+                    ID specifies certificate ID.
+                     If it's not set, then SKID must be provided
+                  required: true
+                  schema:
+                    type: string
+                - name: SKID
+                  in: query
+                  description: SKID specifies Subject Key ID to search
+                  schema:
+                    type: string
+                - name: IssuerSerial.IKID
+                  in: query
+                  description: IKID provides Issuer Key Identifier
+                  schema:
+                    type: string
+                - name: IssuerSerial.SerialNumber
+                  in: query
+                  description: SerialNumber provides certificate's serial number
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CertificateResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v1/cis/roots:
+        get:
+            tags:
+                - CIS
+            description: Roots returns the root CAs
+            operationId: CIS_GetRoots
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RootsResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+components:
+    schemas:
+        Certificate:
+            type: object
+            properties:
+                ID:
+                    type: string
+                    description: Id of the certificate
+                OrgID:
+                    type: string
+                    description: OrgID of the certificate, only used with Org scope
+                SKID:
+                    type: string
+                    description: SKID provides Subject Key Identifier
+                IKID:
+                    type: string
+                    description: IKID provides Issuer Key Identifier
+                SerialNumber:
+                    type: string
+                    description: SerialNumber provides Serial Number
+                NotBefore:
+                    type: string
+                    description: NotBefore is the time when the validity period starts
+                NotAfter:
+                    type: string
+                    description: NotAfter is the time when the validity period starts
+                Subject:
+                    type: string
+                    description: Subject name
+                Issuer:
+                    type: string
+                    description: Issuer name
+                Sha256:
+                    type: string
+                    description: SHA256 thnumbprint of the cert
+                Profile:
+                    type: string
+                    description: Profile of the certificate
+                Pem:
+                    type: string
+                    description: Pem encoded certificate
+                IssuersPem:
+                    type: string
+                    description: IssuersPem provides PEM encoded issuers
+                Locations:
+                    type: array
+                    items:
+                        type: string
+                    description: Locations of published certificate
+                Label:
+                    type: string
+                    description: Label of the certificate provided by the client
+                Metadata:
+                    type: object
+                    additionalProperties:
+                        type: string
+                    description: Metadata of the certificate provided by the client
+            description: Certificate provides X509 Certificate information
+        CertificateResponse:
+            type: object
+            properties:
+                Certificate:
+                    $ref: '#/components/schemas/Certificate'
+            description: CertificateResponse returns Certificate
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        RootCertificate:
+            type: object
+            properties:
+                ID:
+                    type: string
+                    description: Id of the certificate
+                SKID:
+                    type: string
+                    description: SKID provides Subject Key Identifier
+                NotBefore:
+                    type: string
+                    description: NotBefore is the time when the validity period starts
+                NotAfter:
+                    type: string
+                    description: NotAfter is the time when the validity period ends
+                Subject:
+                    type: string
+                    description: Subject name
+                Sha256:
+                    type: string
+                    description: SHA256 thnumbprint of the cert
+                Trust:
+                    type: integer
+                    description: Trust scope
+                    format: enum
+                Pem:
+                    type: string
+                    description: PEM encoded certificate
+            description: Root provides X509 Root Cert information
+        RootsResponse:
+            type: object
+            properties:
+                Roots:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/RootCertificate'
+            description: RootsResponse returns Root Certificates
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+tags:
+    - name: CIS

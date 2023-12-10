@@ -3,7 +3,7 @@ package print
 import (
 	"io"
 
-	"github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/api/pb"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 )

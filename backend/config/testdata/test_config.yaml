@@ -104,8 +104,8 @@ servers:
         - /v1/ocsp
         - /v1/ocspca
         - /v1/roots
-        - /pb.CIService
-        - /pb.StatusService
+        - /pb.CIS
+        - /pb.Status
       # allow any authenticated request that includes a non empty role
       allow_any_role:
         - /v1/wf

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/effective-security/porto/gserver"
-	v1 "github.com/effective-security/trusty/api/v1"
+	v1 "github.com/effective-security/trusty/api"
 	"github.com/effective-security/trusty/backend/service"
 	"github.com/effective-security/trusty/backend/service/ca"
 	"github.com/effective-security/trusty/backend/service/status"

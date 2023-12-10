@@ -14,8 +14,8 @@ import (
 	"github.com/effective-security/porto/pkg/retriable"
 	"github.com/effective-security/porto/pkg/tasks"
 	"github.com/effective-security/porto/xhttp/correlation"
-	"github.com/effective-security/trusty/api/v1/client"
-	"github.com/effective-security/trusty/api/v1/pb"
+	"github.com/effective-security/trusty/api/client"
+	"github.com/effective-security/trusty/api/pb"
 	"github.com/effective-security/trusty/backend/config"
 	"github.com/effective-security/trusty/internal/version"
 	"github.com/effective-security/trusty/pkg/metricskey"
@@ -123,7 +123,7 @@ func (t *Task) healthCheckIssuers(ctx context.Context) error {
 	if t.caClient == nil {
 		cl, _, err := t.factory.CAClient("ca")
 		if err != nil {
-			return errors.WithMessagef(err, "unable to create client")
+			return errors.WithMessagef(err, "unable to create CA client")
 		}
 		t.caClient = cl
 	}

@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/effective-security/porto/xhttp/httperror"
-	pb "github.com/effective-security/trusty/api/v1/pb"
+	pb "github.com/effective-security/trusty/api/pb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/trusty/pkg/metricskey"
 	"github.com/effective-security/xdb"
