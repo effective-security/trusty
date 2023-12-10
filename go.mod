@@ -10,7 +10,7 @@ require (
 	github.com/effective-security/x v0.1.1-0.20231127132411-787e96263399
 	github.com/effective-security/xdb v0.8.1
 	github.com/effective-security/xlog v0.6.1-0.20231117065932-e993e47f2aa3
-	github.com/effective-security/xpki v0.14.0
+	github.com/effective-security/xpki v0.14.1-0.20231210145928-ad7d18414053
 	github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba
 	github.com/golang-migrate/migrate/v4 v4.16.2
 	github.com/golang/protobuf v1.5.3
