@@ -2,10 +2,11 @@ run:
   skip-files:
     - ".*_test\\.go$"
 
-linters:
-  enable:
-    - revive
+# linters:
+#   enable:
+#     - revive
 
 issues:
   exclude:
     - SA1016 # os.Kill cannot be trapped (did you mean syscall.SIGTERM?) (staticcheck)
+    - SA1019 # bundle.Cert.CreateCRL has been deprecated since Go 1.19: this method does not generate an RFC 5280 conformant X.509 v2 CRL. To generate a standards compliant CRL, use CreateRevocationList instead.

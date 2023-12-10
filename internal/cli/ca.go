@@ -3,7 +3,7 @@ package cli
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/effective-security/trusty/api/pb"
@@ -198,7 +198,7 @@ func (a *SignCmd) Run(cli *Cli) error {
 
 	w := cli.Writer()
 	if a.Out != "" {
-		err = ioutil.WriteFile(a.Out, []byte(pem), 0664)
+		err = os.WriteFile(a.Out, []byte(pem), 0664)
 		if err != nil {
 			return errors.WithStack(err)
 		}

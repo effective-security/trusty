@@ -2,7 +2,7 @@ package cis
 
 import (
 	"encoding/base64"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 
@@ -82,7 +82,7 @@ func (s *Service) GetOcspHandler() restserver.Handle {
 // OcspHandler returns OCSP
 func (s *Service) OcspHandler() restserver.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ restserver.Params) {
-		requestBody, err := ioutil.ReadAll(r.Body)
+		requestBody, err := io.ReadAll(r.Body)
 		if err != nil {
 			marshal.WriteJSON(w, r, httperror.Unexpected("unable to read request"))
 			return

@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/x509"
 	"encoding/pem"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -161,7 +160,7 @@ func Test_getCRLHandler(t *testing.T) {
 			_, err = x509.ParseCRL(w.Body.Bytes())
 			require.NoError(t, err)
 
-			//dat, err := ioutil.ReadFile(file)
+			//dat, err := os.ReadFile(file)
 			//require.NoError(t, err)
 			//assert.Equal(t, dat, w.Body.Bytes())
 		})
@@ -210,7 +209,7 @@ func Test_getCertHandler(t *testing.T) {
 			_, err = x509.ParseCertificate(w.Body.Bytes())
 			require.NoError(t, err)
 
-			//pem, err := ioutil.ReadFile(file)
+			//pem, err := os.ReadFile(file)
 			//require.NoError(t, err)
 			//crt, err := certutil.ParseFromPEM(pem)
 			//require.NoError(t, err)
@@ -222,7 +221,7 @@ func Test_getCertHandler(t *testing.T) {
 func populateCrl(t *testing.T, db cadb.CaDb, files []string) []*model.Crl {
 	var list []*model.Crl
 	for _, file := range files {
-		crlBytes, err := ioutil.ReadFile(file)
+		crlBytes, err := os.ReadFile(file)
 		require.NoError(t, err)
 
 		m, err := db.RegisterCrl(context.Background(),
@@ -239,7 +238,7 @@ func populateCrl(t *testing.T, db cadb.CaDb, files []string) []*model.Crl {
 func populateCerts(t *testing.T, db cadb.CaDb, files []string) []*model.Certificate {
 	var list []*model.Certificate
 	for _, file := range files {
-		pem, err := ioutil.ReadFile(file)
+		pem, err := os.ReadFile(file)
 		require.NoError(t, err)
 
 		crt, err := certutil.ParseFromPEM(pem)
