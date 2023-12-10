@@ -172,6 +172,11 @@ func (s *Service) createGenericCRL(ctx context.Context, issuer *authority.Issuer
 		}
 	}
 
+	// TODO:
+	// template := &x509.RevocationList{
+	// }
+	// crlBytes, err := x509.CreateRevocationList(rand.Reader, revokedCerts, bundle.Cert,issuer.Signer(),)
+
 	crlBytes, err := bundle.Cert.CreateCRL(rand.Reader, issuer.Signer(), revokedCerts, now, expiryTime)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to create CRL")

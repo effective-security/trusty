@@ -3,7 +3,6 @@ package storage
 import (
 	"context"
 	"io"
-	"io/ioutil"
 	"strings"
 
 	"github.com/effective-security/xlog"
@@ -202,7 +201,7 @@ func ReadFile(ctx context.Context, path string, options ...*Options) ([]byte, er
 		return nil, errors.WithStack(err)
 	}
 	defer reader.Close()
-	ret, err := ioutil.ReadAll(reader)
+	ret, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "failed to read: %s", path)
 	}

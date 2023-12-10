@@ -3,7 +3,7 @@ module github.com/effective-security/trusty
 go 1.21.5
 
 require (
-	cloud.google.com/go/storage v1.30.1
+	cloud.google.com/go/storage v1.35.1
 	github.com/alecthomas/kong v0.8.1
 	github.com/effective-security/metrics v0.2.1-0.20231117075147-3686848ff7a6
 	github.com/effective-security/porto v0.20.1-0.20231209121817-4c9dbf219085
@@ -11,13 +11,10 @@ require (
 	github.com/effective-security/xdb v0.8.1
 	github.com/effective-security/xlog v0.6.1-0.20231117065932-e993e47f2aa3
 	github.com/effective-security/xpki v0.14.1-0.20231210145928-ad7d18414053
-	github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba
 	github.com/golang-migrate/migrate/v4 v4.16.2
 	github.com/golang/protobuf v1.5.3
 	github.com/lib/pq v1.10.9
-	github.com/mattn/goreman v0.3.7
-	github.com/mattn/goveralls v0.0.11
-	github.com/miekg/dns v1.1.43
+	github.com/miekg/dns v1.1.57
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pkg/errors v0.9.1
@@ -26,7 +23,6 @@ require (
 	go.uber.org/dig v1.17.1
 	golang.org/x/crypto v0.16.0
 	golang.org/x/net v0.19.0
-	golang.org/x/tools v0.9.1
 	google.golang.org/api v0.153.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20231106174013-bbf56f31fb17
 	google.golang.org/grpc v1.59.0
@@ -84,10 +80,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
-	github.com/joho/godotenv v1.3.0 // indirect
 	github.com/julienschmidt/httprouter v1.3.0 // indirect
-	github.com/mattn/go-colorable v0.1.8 // indirect
-	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/mattn/go-runewidth v0.0.12 // indirect
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/microsoft/go-mssqldb v1.0.0 // indirect
@@ -99,22 +92,21 @@ require (
 	github.com/prometheus/procfs v0.11.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/rs/cors v1.10.1 // indirect
-	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/soheilhy/cmux v0.1.5 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/yuin/goldmark v1.4.13 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/config v1.4.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
-	golang.org/x/mod v0.10.0 // indirect
+	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/oauth2 v0.15.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
+	golang.org/x/tools v0.13.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20231106174013-bbf56f31fb17 // indirect
