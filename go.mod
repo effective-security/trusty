@@ -3,7 +3,7 @@ module github.com/effective-security/trusty
 go 1.21.5
 
 require (
-	cloud.google.com/go/storage v1.35.1
+	cloud.google.com/go/storage v1.36.0
 	github.com/alecthomas/kong v0.8.1
 	github.com/effective-security/metrics v0.2.1-0.20231117075147-3686848ff7a6
 	github.com/effective-security/porto v0.20.1-0.20231209121817-4c9dbf219085
