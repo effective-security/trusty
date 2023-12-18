@@ -7,8 +7,8 @@ require (
 	github.com/alecthomas/kong v0.8.1
 	github.com/effective-security/metrics v0.2.1-0.20231117075147-3686848ff7a6
 	github.com/effective-security/porto v0.20.1-0.20231209121817-4c9dbf219085
-	github.com/effective-security/x v0.1.1-0.20231127132411-787e96263399
-	github.com/effective-security/xdb v0.8.1
+	github.com/effective-security/x v0.1.1-0.20231213103727-26a6f8d87418
+	github.com/effective-security/xdb v0.10.0
 	github.com/effective-security/xlog v0.6.1-0.20231117065932-e993e47f2aa3
 	github.com/effective-security/xpki v0.14.1-0.20231210145928-ad7d18414053
 	github.com/golang-migrate/migrate/v4 v4.16.2
