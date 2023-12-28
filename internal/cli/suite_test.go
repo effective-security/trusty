@@ -14,7 +14,7 @@ import (
 	"github.com/effective-security/trusty/api/pb"
 	"github.com/effective-security/trusty/api/pb/mockpb"
 	"github.com/effective-security/trusty/internal/version"
-	"github.com/effective-security/xpki/x/ctl"
+	"github.com/effective-security/x/ctl"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc"

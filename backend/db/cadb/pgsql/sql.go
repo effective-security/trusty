@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/effective-security/porto/pkg/flake"
 	"github.com/effective-security/xdb"
+	"github.com/effective-security/xdb/pkg/flake"
 	"github.com/effective-security/xdb/xsql"
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
