@@ -7,7 +7,7 @@ import (
 	"github.com/alecthomas/kong"
 	"github.com/effective-security/trusty/internal/cli"
 	"github.com/effective-security/trusty/internal/version"
-	"github.com/effective-security/xpki/x/ctl"
+	"github.com/effective-security/x/ctl"
 )
 
 type app struct {

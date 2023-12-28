@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/effective-security/porto/pkg/flake"
 	db "github.com/effective-security/trusty/backend/db/cadb"
 	"github.com/effective-security/trusty/tests/testutils"
+	"github.com/effective-security/xdb/pkg/flake"
 	"github.com/effective-security/xlog"
 )
 

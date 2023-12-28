@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/effective-security/porto/pkg/flake"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
 	"github.com/effective-security/trusty/backend/db/cadb/pgsql"
 	"github.com/effective-security/xdb"
+	"github.com/effective-security/xdb/pkg/flake"
 
 	// register Postgres driver
 	_ "github.com/lib/pq"

@@ -3,9 +3,9 @@ package stats
 import (
 	"testing"
 
-	"github.com/effective-security/porto/pkg/flake"
 	"github.com/effective-security/trusty/backend/db/cadb"
 	"github.com/effective-security/trusty/tests/testutils"
+	"github.com/effective-security/xdb/pkg/flake"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/dig"
