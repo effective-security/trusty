@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/effective-security/trusty/pkg/print"
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // CisCmd is the parent for cis command
@@ -25,7 +25,7 @@ func (a *GetRootsCmd) Run(cli *Cli) error {
 		return err
 	}
 
-	res, err := client.GetRoots(context.Background(), &empty.Empty{})
+	res, err := client.GetRoots(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return errors.WithStack(err)
 	}

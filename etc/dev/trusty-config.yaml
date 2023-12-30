@@ -230,10 +230,12 @@ servers:
       - ca
       - cis
     logger_skip_paths:
-      - path: "/v1/status/node"
-        agent: "Google"
-      - path: "/metrics"
-        agent: "Prom"
+      - path: /v1/status/node
+        agent: Google
+      - path: /metrics
+        agent: Prom
+      - path: /pb.CA/ListIssuers
+        agent: trusty-healthcheck
     timeout:
       request: 3s
     keep_alive:

@@ -121,7 +121,7 @@ func (t *Task) healthHsm(ctx context.Context) error {
 
 func (t *Task) healthCheckIssuers(ctx context.Context) error {
 	if t.caClient == nil {
-		cl, _, err := t.factory.CAClient("ca")
+		cl, _, err := t.factory.CAClient("ca", client.WithAgent("trusty-healthcheck"))
 		if err != nil {
 			return errors.WithMessagef(err, "unable to create CA client")
 		}

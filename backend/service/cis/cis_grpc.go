@@ -6,11 +6,11 @@ import (
 	"github.com/effective-security/porto/xhttp/httperror"
 	pb "github.com/effective-security/trusty/api/pb"
 	"github.com/effective-security/trusty/backend/db/cadb/model"
-	"github.com/golang/protobuf/ptypes/empty"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // GetRoots returns the root CAs
-func (s *Service) GetRoots(ctx context.Context, _ *empty.Empty) (*pb.RootsResponse, error) {
+func (s *Service) GetRoots(ctx context.Context, _ *emptypb.Empty) (*pb.RootsResponse, error) {
 	roots, err := s.db.GetRootCertificates(ctx)
 	if err != nil {
 		return nil, httperror.WrapWithCtx(ctx, err, "unable to query root certificates")

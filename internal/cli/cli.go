@@ -13,6 +13,7 @@ import (
 	"github.com/effective-security/trusty/api/client"
 	"github.com/effective-security/trusty/api/pb"
 	"github.com/effective-security/trusty/api/pb/proxypb"
+	"github.com/effective-security/trusty/internal/version"
 	"github.com/effective-security/trusty/pkg/print"
 	"github.com/effective-security/x/ctl"
 	"github.com/effective-security/x/slices"
@@ -146,6 +147,7 @@ func (c *Cli) RPCClient(skipAuth bool) (*rpcclient.Client, error) {
 		DialKeepAliveTimeout: timeout,
 		DialKeepAliveTime:    timeout,
 		Endpoint:             host,
+		UserAgent:            "trustyctl " + version.Current().String(),
 	}
 
 	if strings.HasPrefix(host, "https://") {

@@ -25,9 +25,9 @@ import (
 	"github.com/effective-security/trusty/backend/service/cis"
 	"github.com/effective-security/trusty/tests/testutils"
 	"github.com/effective-security/xpki/certutil"
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 var (
@@ -101,11 +101,11 @@ func TestReady(t *testing.T) {
 }
 
 func TestRoots(t *testing.T) {
-	res, err := cisClient.GetRoots(context.Background(), &empty.Empty{})
+	res, err := cisClient.GetRoots(context.Background(), &emptypb.Empty{})
 	require.NoError(t, err)
 	assert.NotNil(t, res.Roots)
 
-	_, err = cisClient.GetRoots(context.Background(), &empty.Empty{})
+	_, err = cisClient.GetRoots(context.Background(), &emptypb.Empty{})
 	require.NoError(t, err)
 }
 
