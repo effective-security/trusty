@@ -57,6 +57,7 @@ type Option interface {
 type options struct {
 	// cfg    config.Client
 	tlsCfg *tls.Config
+	agent  string
 }
 
 // EmptyOption does not alter the dial configuration.
@@ -86,6 +87,13 @@ func WithTLS(tlsCfg *tls.Config) Option {
 	})
 }
 
+// WithAgent option to provide client Agent
+func WithAgent(agent string) Option {
+	return newFuncOption(func(o *options) {
+		o.agent = agent
+	})
+}
+
 type factory struct {
 	dops options
 	cfg  Config
@@ -111,7 +119,7 @@ func (f *factory) NewClient(svc string, ops ...Option) (*rpcclient.Client, error
 
 	dops := f.dops
 	for _, op := range ops {
-		op.apply(&f.dops)
+		op.apply(&dops)
 	}
 
 	targetHost := f.cfg.ServerURL[svc]
@@ -142,6 +150,7 @@ func (f *factory) NewClient(svc string, ops ...Option) (*rpcclient.Client, error
 		DialKeepAliveTime:    f.cfg.DialKeepAliveTime,
 		Endpoint:             targetHost,
 		TLS:                  tlscfg,
+		UserAgent:            dops.agent,
 	}
 
 	// auth token is not required for trusty, as Client Cert is used

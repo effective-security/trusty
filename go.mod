@@ -12,7 +12,6 @@ require (
 	github.com/effective-security/xlog v0.6.1-0.20231117065932-e993e47f2aa3
 	github.com/effective-security/xpki v0.15.1-0.20231228162539-27062172b411
 	github.com/golang-migrate/migrate/v4 v4.17.0
-	github.com/golang/protobuf v1.5.3
 	github.com/lib/pq v1.10.9
 	github.com/miekg/dns v1.1.57
 	github.com/mitchellh/go-homedir v1.1.0
@@ -73,6 +72,7 @@ require (
 	github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 // indirect
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
