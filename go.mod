@@ -9,8 +9,8 @@ require (
 	github.com/effective-security/porto v0.22.0
 	github.com/effective-security/x v0.1.1-0.20231213103727-26a6f8d87418
 	github.com/effective-security/xdb v0.11.1-0.20231225200340-b40eedd4db6e
-	github.com/effective-security/xlog v0.6.1-0.20231117065932-e993e47f2aa3
-	github.com/effective-security/xpki v0.15.1-0.20231231094750-583d284af37d
+	github.com/effective-security/xlog v0.7.0
+	github.com/effective-security/xpki v0.15.1-0.20231231113631-8fd430fe74bf
 	github.com/golang-migrate/migrate/v4 v4.17.0
 	github.com/lib/pq v1.10.9
 	github.com/miekg/dns v1.1.57
