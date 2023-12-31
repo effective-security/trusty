@@ -6,11 +6,11 @@ require (
 	cloud.google.com/go/storage v1.36.0
 	github.com/alecthomas/kong v0.8.1
 	github.com/effective-security/metrics v0.2.1-0.20231117075147-3686848ff7a6
-	github.com/effective-security/porto v0.21.1-0.20231228170538-1db75a71314b
+	github.com/effective-security/porto v0.22.0
 	github.com/effective-security/x v0.1.1-0.20231213103727-26a6f8d87418
 	github.com/effective-security/xdb v0.11.1-0.20231225200340-b40eedd4db6e
 	github.com/effective-security/xlog v0.6.1-0.20231117065932-e993e47f2aa3
-	github.com/effective-security/xpki v0.15.1-0.20231228162539-27062172b411
+	github.com/effective-security/xpki v0.15.1-0.20231231094750-583d284af37d
 	github.com/golang-migrate/migrate/v4 v4.17.0
 	github.com/lib/pq v1.10.9
 	github.com/miekg/dns v1.1.57

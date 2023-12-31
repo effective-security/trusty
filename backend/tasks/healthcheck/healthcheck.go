@@ -31,6 +31,8 @@ var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/backend
 // TaskName is the name of this task
 const TaskName = "health_check"
 
+const userAgent = "trusty-healthcheck"
+
 // Task defines the healthcheck task
 type Task struct {
 	conf       *config.Configuration
@@ -121,7 +123,7 @@ func (t *Task) healthHsm(ctx context.Context) error {
 
 func (t *Task) healthCheckIssuers(ctx context.Context) error {
 	if t.caClient == nil {
-		cl, _, err := t.factory.CAClient("ca", client.WithAgent("trusty-healthcheck"))
+		cl, _, err := t.factory.CAClient("ca", client.WithAgent(userAgent))
 		if err != nil {
 			return errors.WithMessagef(err, "unable to create CA client")
 		}
@@ -262,6 +264,7 @@ func create(
 			retriable.WithName("ocsphealth"),
 			retriable.WithTLS(nil),
 			retriable.WithTimeout(httpTimeout),
+			retriable.WithUserAgent(userAgent),
 		)
 		if err != nil {
 			return nil, err
