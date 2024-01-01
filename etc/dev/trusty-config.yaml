@@ -8,15 +8,6 @@ service: trusty
 # specifies the cluster name
 cluster: local
 
-# configuration for the logger
-logs:
-  # contains where to store the log files; if value is empty, them stderr is used for output
-  directory:
-  # controls how old files are before deletion / rotation
-  max_age_days: 3
-  # contols how large a single log file can be before its rotated
-  max_size_mb: 10
-
 log_levels:
   - repo: "*"
     level: TRACE

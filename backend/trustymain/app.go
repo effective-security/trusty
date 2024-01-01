@@ -1,91 +1,55 @@
 package trustymain
 
 import (
-	"fmt"
 	"io"
-	"log"
-	"net/http"
 	"os"
 	"os/signal"
-	"runtime/pprof"
 	"sync"
 	"syscall"
 	"time"
 
-	"github.com/effective-security/metrics"
-	"github.com/effective-security/metrics/prometheus"
+	"github.com/alecthomas/kong"
 	"github.com/effective-security/porto/gserver"
-	pmetricskey "github.com/effective-security/porto/metricskey"
+	"github.com/effective-security/porto/pkg/appinit"
+	appinitCfg "github.com/effective-security/porto/pkg/appinit/config"
 	"github.com/effective-security/porto/pkg/discovery"
 	"github.com/effective-security/porto/pkg/tasks"
 	"github.com/effective-security/trusty/backend/appcontainer"
 	"github.com/effective-security/trusty/backend/config"
-	"github.com/effective-security/trusty/backend/service/ca"
-	"github.com/effective-security/trusty/backend/service/cis"
-	"github.com/effective-security/trusty/backend/service/status"
-	"github.com/effective-security/trusty/backend/service/swagger"
+	"github.com/effective-security/trusty/backend/db/cadb"
+	"github.com/effective-security/trusty/backend/service"
 	trustyTasks "github.com/effective-security/trusty/backend/tasks"
-	"github.com/effective-security/trusty/backend/tasks/certsmonitor"
-	"github.com/effective-security/trusty/backend/tasks/healthcheck"
-	"github.com/effective-security/trusty/backend/tasks/stats"
 	"github.com/effective-security/trusty/internal/version"
 	"github.com/effective-security/trusty/pkg/metricskey"
 	"github.com/effective-security/x/netutil"
+	"github.com/effective-security/x/slices"
 	"github.com/effective-security/xlog"
-	"github.com/effective-security/xlog/logrotate"
-	"github.com/effective-security/xlog/stackdriver"
 	"github.com/pkg/errors"
-	prom "github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/collectors"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/dig"
-	kp "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var logger = xlog.NewPackageLogger("github.com/effective-security/trusty/backend", "trusty")
 
-const (
-	nullDevName = "/dev/null"
-)
-
-// ServiceFactories provides map of gserver.ServiceFactory
-var ServiceFactories = map[string]gserver.ServiceFactory{
-	ca.ServiceName:      ca.Factory,
-	cis.ServiceName:     cis.Factory,
-	status.ServiceName:  status.Factory,
-	swagger.ServiceName: swagger.Factory,
-}
-
-var taskFactories = map[string]trustyTasks.Factory{
-	certsmonitor.TaskName: certsmonitor.Factory,
-	stats.TaskName:        stats.Factory,
-	healthcheck.TaskName:  healthcheck.Factory,
-}
-
 // appFlags specifies application flags
 type appFlags struct {
-	cfgFile             *string
-	cfgOverrideFile     *string
-	cpu                 *string
-	isStderr            *bool
-	isStackdriver       *bool
-	dryRun              *bool
-	promAddr            *string
-	hsmCfg              *string
-	caCfg               *string
-	sqlCa               *string
-	cryptoProvs         *[]string
-	cisURLs             *[]string
-	caURLs              *[]string
-	hostNames           *[]string
-	logsDir             *string
-	httpsCertFile       *string
-	httpsKeyFile        *string
-	httpsTrustedCAFile  *string
-	clientCertFile      *string
-	clientKeyFile       *string
-	clientTrustedCAFile *string
-	server              *string
+	appinit.LogConfig
+	appinit.Flags
+
+	PromAddr            string   `help:"Address for Prometheus metrics end point"`
+	HsmCfg              string   `help:"location of the HSM configuration file"`
+	CaCfg               string   `help:"location of the CA configuration file"`
+	CaSql               string   `help:"SQL data source for CA DB"`
+	CryptoProv          []string `help:"path to additional Crypto provider configurations"`
+	CisListenURL        []string `help:"URL for the CIS listening end-point"`
+	CaListenURL         []string `help:"URL for the CA listening end-point"`
+	HostName            []string `help:"hostname to use for the service certificate"`
+	HttpsCertFile       string   `help:"HTTPS server certificate file"`
+	HttpsKeyFile        string   `help:"HTTPS server key file"`
+	HttpsTrustedCAFile  string   `help:"HTTPS server trusted CA file"`
+	ClientCertFile      string   `help:"Client certificate file"`
+	ClientKeyFile       string   `help:"Client key file"`
+	ClientTrustedCAFile string   `help:"Client trusted CA file"`
+	OnlyServer          string   `help:"Only start the specified server"`
 }
 
 // App provides application container
@@ -98,7 +62,7 @@ type App struct {
 	hostname  string
 
 	args             []string
-	flags            *appFlags
+	flags            appFlags
 	cfg              *config.Configuration
 	scheduler        tasks.Scheduler
 	containerFactory appcontainer.ContainerFactoryFn
@@ -111,7 +75,6 @@ func NewApp(args []string) *App {
 		container: nil,
 		args:      args,
 		closers:   make([]io.Closer, 0, 8),
-		flags:     new(appFlags),
 		servers:   make(map[string]gserver.GServer),
 	}
 
@@ -226,29 +189,36 @@ func (a *App) Run(startedCh chan<- bool) error {
 		return err
 	}
 
-	err = a.initLogs()
-	if err != nil {
-		return err
-	}
-
 	ver := version.Current().String()
 	logger.KV(xlog.INFO, "hostname", a.hostname, "ip", ipaddr, "version", ver)
 
-	if a.flags.cpu != nil {
-		err = a.initCPUProfiler(*a.flags.cpu)
+	if a.flags.CPUProfile != "" {
+		closer, err := appinit.CPUProfiler(a.flags.CPUProfile)
 		if err != nil {
 			return err
 		}
+		a.OnClose(closer)
 	}
 
 	if !a.cfg.Metrics.GetDisabled() {
-		err = a.setupMetrics()
+		ver := version.Current()
+		closer, err := appinit.Metrics(
+			&a.cfg.Metrics,
+			a.cfg.ServiceName,
+			a.cfg.ClusterName,
+			ver.String(),
+			int(ver.Commit),
+			metricskey.Metrics,
+		)
 		if err != nil {
 			return err
 		}
+		a.OnClose(closer)
+	} else {
+		logger.KV(xlog.NOTICE, "status", "metrics_disabled")
 	}
 
-	_, err = a.Container()
+	dig, err := a.Container()
 	if err != nil {
 		return err
 	}
@@ -258,15 +228,19 @@ func (a *App) Run(startedCh chan<- bool) error {
 		return err
 	}
 
-	isDryRun := a.flags.dryRun != nil && *a.flags.dryRun
-	if isDryRun {
+	if a.flags.DryRun {
+		err = dig.Invoke(func(_ cadb.CaReadonlyDb) error {
+			// this will force schema migration check
+			return nil
+		})
+
 		logger.KV(xlog.INFO, "status", "exit_on_dry_run")
-		return nil
+		return err
 	}
 
 	for name, svcCfg := range a.cfg.HTTPServers {
 		if !svcCfg.Disabled {
-			httpServer, err := gserver.Start(name, svcCfg, a.container, ServiceFactories)
+			httpServer, err := gserver.Start(name, svcCfg, a.container, service.Factories)
 			if err != nil {
 				a.stopServers()
 				return err
@@ -358,276 +332,109 @@ func (a *App) stopServers() {
 }
 
 func (a *App) loadConfig() error {
-	app := kp.New("trusty", "Trusty certification authority")
-	app.HelpFlag.Short('h')
-	app.Version(fmt.Sprintf("trusty %v", version.Current()))
-
-	flags := a.flags
-
-	flags.cfgFile = app.Flag("cfg", "load configuration file").Default(config.ConfigFileName).Short('c').String()
-	flags.cfgOverrideFile = app.Flag("cfg-override", "configuration override file").String()
-	flags.cpu = app.Flag("cpu", "enable CPU profiling, specify a file to store CPU profiling info").String()
-	flags.isStderr = app.Flag("std", "output logs to stderr").Bool()
-	flags.isStackdriver = app.Flag("stackdriver", "format logs for stackdriver").Bool()
-	flags.dryRun = app.Flag("dry-run", "verify config etc, and do not start the service").Bool()
-	flags.hsmCfg = app.Flag("hsm-cfg", "location of the HSM configuration file").String()
-	flags.caCfg = app.Flag("ca-cfg", "location of the CA configuration file").String()
-	flags.cryptoProvs = app.Flag("crypto-prov", "path to additional Crypto provider configurations").Strings()
-	flags.sqlCa = app.Flag("ca-sql", "SQL data source for CA").String()
-	flags.promAddr = app.Flag("prom-addr", "Address for Prometheus metrics end point").String()
-
-	flags.cisURLs = app.Flag("cis-listen-url", "URL for the CIS listening end-point").Strings()
-	flags.caURLs = app.Flag("ca-listen-url", "URL for the CA listening end-point").Strings()
-	flags.server = app.Flag("only-server", "ca|ra|wfe|cis - name of the server to run, and disable the others.").String()
-
-	flags.hostNames = app.Flag("host-name", "Set of host names to be used in CSR requests to obtaine a server certificate").Strings()
-	flags.logsDir = app.Flag("logs-dir", "Path to the logs folder.").String()
-
-	flags.httpsCertFile = app.Flag("https-server-cert", "Path to the server TLS cert file.").String()
-	flags.httpsKeyFile = app.Flag("https-server-key", "Path to the server TLS key file.").String()
-	flags.httpsTrustedCAFile = app.Flag("https-server-trustedca", "Path to the server TLS trusted CA file.").String()
-
-	flags.clientCertFile = app.Flag("client-cert", "Path to the client TLS cert file.").String()
-	flags.clientKeyFile = app.Flag("client-key", "Path to the client TLS key file.").String()
-	flags.clientTrustedCAFile = app.Flag("client-trustedca", "Path to the client TLS trusted CA file.").String()
-
-	// Parse arguments
-	kp.MustParse(app.Parse(a.args))
-
-	if flags.isStackdriver != nil && *a.flags.isStackdriver {
-		formatter := stackdriver.NewFormatter(os.Stderr, "trusty")
-		xlog.SetFormatter(formatter)
-	}
-
-	f, err := config.DefaultFactory()
+	parser, err := kong.New(&a.flags,
+		kong.Name("trusty"),
+		kong.Description("Trusty certification authority"),
+		kong.ConfigureHelp(kong.HelpOptions{
+			Compact: true,
+		}),
+		kong.Vars{
+			"version": version.Current().String(),
+		},
+	)
 	if err != nil {
-		return errors.WithMessagef(err, "failed to create configuration factory")
+		return errors.WithMessagef(err, "failed to parse arguments: %v", a.args)
 	}
-	if len(*flags.cfgOverrideFile) > 0 {
-		f.WithOverride(*flags.cfgOverrideFile)
-	}
-
-	cfg := new(config.Configuration)
-	_, err = f.LoadForHostName(*flags.cfgFile, "", cfg)
+	_, err = parser.Parse(a.args)
 	if err != nil {
-		return errors.WithMessagef(err, "failed to load configuration %q", *flags.cfgFile)
+		return errors.WithMessagef(err, "failed to parse arguments: %v", a.args)
 	}
-	logger.KV(xlog.INFO, "status", "loaded", "cfg", *flags.cfgFile)
-	a.cfg = cfg
 
-	if *flags.logsDir != "" {
-		cfg.Logs.Directory = *flags.logsDir
+	closer, err := appinit.Logs(&a.flags.LogConfig, "trusty")
+	if err != nil {
+		return err
 	}
-	if *flags.hsmCfg != "" {
-		cfg.CryptoProv.Default = *flags.hsmCfg
+	a.OnClose(closer)
+
+	a.cfg = new(config.Configuration)
+	err = config.LoadWithOverride(
+		slices.StringsCoalesce(a.flags.Cfg, config.ConfigFileName),
+		a.flags.CfgOverride,
+		a.cfg,
+		nil,
+	)
+	if err != nil {
+		return err
 	}
-	if *flags.caCfg != "" {
-		cfg.Authority = *flags.caCfg
-	}
-	if *flags.sqlCa != "" {
-		cfg.CaSQL.DataSource = *flags.sqlCa
-	}
-	if *flags.promAddr != "" {
-		if cfg.Metrics.Prometheus == nil {
-			cfg.Metrics.Prometheus = &config.Prometheus{
-				Addr: *flags.promAddr,
+
+	xlog.SetRepoLevels(a.cfg.LogLevels)
+
+	if a.flags.PromAddr != "" {
+		if a.cfg.Metrics.Prometheus == nil {
+			a.cfg.Metrics.Prometheus = &appinitCfg.Prometheus{
+				Addr: a.flags.PromAddr,
 			}
 		} else {
-			cfg.Metrics.Prometheus.Addr = *flags.promAddr
+			a.cfg.Metrics.Prometheus.Addr = a.flags.PromAddr
 		}
 	}
 
-	if len(*flags.cryptoProvs) > 0 {
-		cfg.CryptoProv.Providers = *flags.cryptoProvs
+	overrideStrings := []struct {
+		to   *string
+		from *string
+	}{
+		{&a.cfg.Environment, &a.flags.Env},
+		{&a.cfg.ServiceName, &a.flags.ServiceName},
+		{&a.cfg.Region, &a.flags.Region},
+		{&a.cfg.ClusterName, &a.flags.Cluster},
+		{&a.cfg.Client.ClientTLS.CertFile, &a.flags.ClientCert},
+		{&a.cfg.Client.ClientTLS.KeyFile, &a.flags.ClientKey},
+		{&a.cfg.Client.ClientTLS.TrustedCAFile, &a.flags.ClientTrustedCA},
+		{&a.cfg.CryptoProv.Default, &a.flags.HsmCfg},
+		{&a.cfg.Authority, &a.flags.CaCfg},
+		{&a.cfg.CaSQL.DataSource, &a.flags.CaSql},
 	}
-	if *flags.clientCertFile != "" {
-		cfg.Client.ClientTLS.CertFile = *flags.clientCertFile
-	}
-	if *flags.clientKeyFile != "" {
-		cfg.Client.ClientTLS.KeyFile = *flags.clientKeyFile
-	}
-	if *flags.clientTrustedCAFile != "" {
-		cfg.Client.ClientTLS.TrustedCAFile = *flags.clientTrustedCAFile
+	for _, o := range overrideStrings {
+		if *o.from != "" {
+			*o.to = *o.from
+		}
 	}
 
-	for name, httpCfg := range cfg.HTTPServers {
+	if len(a.flags.CryptoProv) > 0 {
+		a.cfg.CryptoProv.Providers = a.flags.CryptoProv
+	}
+
+	for name, httpCfg := range a.cfg.HTTPServers {
 		if httpCfg.ServerTLS != nil {
-			if *flags.httpsCertFile != "" {
-				httpCfg.ServerTLS.CertFile = *flags.httpsCertFile
+			if a.flags.HttpsCertFile != "" {
+				httpCfg.ServerTLS.CertFile = a.flags.HttpsCertFile
 			}
-			if *flags.httpsKeyFile != "" {
-				httpCfg.ServerTLS.KeyFile = *flags.httpsKeyFile
+			if a.flags.HttpsKeyFile != "" {
+				httpCfg.ServerTLS.KeyFile = a.flags.HttpsKeyFile
 			}
-			if *flags.httpsTrustedCAFile != "" {
-				httpCfg.ServerTLS.TrustedCAFile = *flags.httpsTrustedCAFile
+			if a.flags.HttpsTrustedCAFile != "" {
+				httpCfg.ServerTLS.TrustedCAFile = a.flags.HttpsTrustedCAFile
 			}
 		}
 
-		if *flags.server != "" {
-			httpCfg.Disabled = name != *flags.server
+		if a.flags.OnlyServer != "" {
+			httpCfg.Disabled = name != a.flags.OnlyServer
 		} else {
 			switch name {
 			case config.CISServerName:
-				if len(*flags.cisURLs) > 0 {
-					httpCfg.ListenURLs = *flags.cisURLs
+				if len(a.flags.CisListenURL) > 0 {
+					httpCfg.ListenURLs = a.flags.CisListenURL
 					httpCfg.Disabled = len(httpCfg.ListenURLs) == 1 && httpCfg.ListenURLs[0] == "none"
 				}
 
 			case config.CAServerName:
-				if len(*flags.caURLs) > 0 {
-					httpCfg.ListenURLs = *flags.caURLs
+				if len(a.flags.CaListenURL) > 0 {
+					httpCfg.ListenURLs = a.flags.CaListenURL
 					httpCfg.Disabled = len(httpCfg.ListenURLs) == 1 && httpCfg.ListenURLs[0] == "none"
 				}
 			default:
 				return errors.Errorf("unknows server name in configuration: %s", name)
 			}
-		}
-	}
-
-	return nil
-}
-
-func (a *App) initLogs() error {
-	cfg := a.cfg
-	if a.flags != nil && a.flags.isStackdriver != nil && *a.flags.isStackdriver {
-		formatter := stackdriver.NewFormatter(os.Stderr, cfg.Logs.LogsName)
-		xlog.SetFormatter(formatter)
-	} else if cfg.Logs.Directory != "" && cfg.Logs.Directory != nullDevName {
-		_ = os.MkdirAll(cfg.Logs.Directory, 0644)
-
-		var sink io.Writer
-		if a.flags != nil && a.flags.isStderr != nil && *a.flags.isStderr {
-			sink = os.Stderr
-			xlog.SetFormatter(xlog.NewPrettyFormatter(os.Stderr).Options(xlog.FormatSkipTime, xlog.FormatWithColor))
-		} else {
-			// do not redirect stderr to our log files
-			log.SetOutput(os.Stderr)
-		}
-
-		logRotate, err := logrotate.Initialize(cfg.Logs.Directory, cfg.ServiceName, cfg.Logs.MaxAgeDays, cfg.Logs.MaxSizeMb, true, sink)
-		if err != nil {
-			return errors.WithMessage(err, "failed to initialize log rotate")
-		}
-		a.OnClose(logRotate)
-	} else {
-		formatter := xlog.NewPrettyFormatter(os.Stderr).Options(xlog.FormatSkipTime, xlog.FormatWithColor)
-		xlog.SetFormatter(formatter)
-	}
-
-	// Set log levels for each repo
-	if cfg.LogLevels != nil {
-		for _, ll := range cfg.LogLevels {
-			l, _ := xlog.ParseLevel(ll.Level)
-			if ll.Repo == "*" {
-				xlog.SetGlobalLogLevel(l)
-			} else {
-				xlog.SetPackageLogLevel(ll.Repo, ll.Package, l)
-			}
-			logger.KV(xlog.INFO, "logger", ll.Repo, "level", l)
-		}
-	}
-	logger.KV(xlog.INFO, "status", "service_starting", "version", version.Current(), "args", os.Args)
-	xlog.GetFormatter().Options(xlog.FormatWithLocation)
-
-	xlog.OnError(func(pkg string) {
-		metricskey.HealthLogErrors.IncrCounter(1, pkg)
-	})
-	metricskey.HealthLogErrors.IncrCounter(0, "trusty")
-
-	return nil
-}
-
-func (a *App) initCPUProfiler(file string) error {
-	// create CPU Profiler
-	if file != "" && file != nullDevName {
-		cpuf, err := os.Create(file)
-		if err != nil {
-			return errors.WithMessage(err, "unable to create CPU profile")
-		}
-		logger.KV(xlog.INFO, "status", "starting_cpu_profiling", "file", file)
-
-		_ = pprof.StartCPUProfile(cpuf)
-		a.OnClose(&cpuProfileCloser{file: file})
-	}
-	return nil
-}
-
-// can be initialized only once per process.
-// keep global for tests
-var promSink metrics.Sink
-
-func (a *App) setupMetrics() error {
-	cfg := a.cfg
-
-	var err error
-	var sink metrics.Sink
-
-	mcfg := &metrics.Config{
-		EnableHostname:       false,
-		EnableHostnameLabel:  false, // added in GlobalTags
-		EnableServiceLabel:   false, // added in GlobalTags
-		FilterDefault:        true,
-		EnableRuntimeMetrics: cfg.Metrics.EnableRuntimeMetrics,
-		TimerGranularity:     time.Millisecond,
-		ProfileInterval:      time.Second,
-		GlobalPrefix:         cfg.Metrics.Prefix,
-		AllowedPrefixes:      cfg.Metrics.AllowedPrefixes,
-		BlockedPrefixes:      cfg.Metrics.BlockedPrefixes,
-	}
-
-	for _, tag := range cfg.Metrics.GlobalTags {
-		switch tag {
-		case "host":
-			mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: a.hostname})
-		case "service":
-			mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: cfg.ServiceName})
-		case "env":
-			mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: a.cfg.Environment})
-		case "region":
-			mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: a.cfg.Region})
-		case "cluster_id":
-			mcfg.GlobalTags = append(mcfg.GlobalTags, metrics.Tag{Name: tag, Value: a.cfg.ClusterName})
-		}
-	}
-
-	switch cfg.Metrics.Provider {
-	case "prometheus":
-		if promSink == nil {
-			// Remove Go collector
-			prom.Unregister(collectors.NewGoCollector())
-			prom.Unregister(collectors.NewBuildInfoCollector())
-			prom.Unregister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
-
-			ops := prometheus.Opts{
-				Expiration: cfg.Metrics.Prometheus.Expiration,
-				Registerer: prom.DefaultRegisterer,
-				Help:       mcfg.Help(metricskey.Metrics, pmetricskey.Metrics),
-			}
-
-			promSink, err = prometheus.NewSinkFrom(ops)
-			if err != nil {
-				return err
-			}
-
-			if cfg.Metrics.Prometheus != nil && cfg.Metrics.Prometheus.Addr != "" {
-				go func() {
-					logger.KV(xlog.INFO, "status", "starting_metrics", "endpoint", cfg.Metrics.Prometheus.Addr)
-					// remove Prom metrics
-					h := promhttp.HandlerFor(prom.DefaultGatherer, promhttp.HandlerOpts{})
-					logger.Fatal(http.ListenAndServe(cfg.Metrics.Prometheus.Addr, h).Error())
-				}()
-			}
-		}
-		sink = promSink
-	case "inmem", "inmemory":
-	default:
-		return errors.Errorf("metrics provider %q not supported", cfg.Metrics.Provider)
-	}
-
-	if sink != nil {
-		_, err := metrics.NewGlobal(mcfg, sink)
-		if err != nil {
-			return err
 		}
 	}
 
@@ -643,7 +450,7 @@ func (a *App) scheduleTasks() error {
 		return errors.WithMessagef(err, "failed to create scheduler")
 	}
 	for _, task := range a.cfg.Tasks {
-		tf := taskFactories[task.Name]
+		tf := trustyTasks.Factories[task.Name]
 		if tf == nil {
 			return errors.Errorf("task not registered: %s", task.Name)
 		}

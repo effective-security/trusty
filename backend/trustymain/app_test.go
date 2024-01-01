@@ -42,8 +42,7 @@ func Test_App_NoConfig(t *testing.T) {
 
 	err := app.Run(nil)
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to load configuration \"trusty-config.yaml\"")
-	assert.Contains(t, err.Error(), "file \"trusty-config.yaml\" not found in")
+	assert.Contains(t, err.Error(), "failed to load configuration: file \"trusty-config.yaml\" not found in")
 }
 
 func Test_AppOnClose(t *testing.T) {
@@ -52,7 +51,7 @@ func Test_AppOnClose(t *testing.T) {
 
 	c := &closer{}
 	app := NewApp([]string{
-		"--std",
+		"--log-std",
 		"--cfg", cfgFile,
 		"--cis-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--ca-listen-url", testutils.CreateURLs("http", "localhost"),
@@ -111,22 +110,6 @@ func Test_AppInitWithCfg(t *testing.T) {
 	err = app.loadConfig()
 	require.NoError(t, err)
 
-	// logs to file
-	app.cfg.Logs.Directory = filepath.Join(testDirPath, "logs")
-	err = app.initLogs()
-	require.NoError(t, err)
-
-	// logs to std
-	app.cfg.Logs.Directory = ""
-	err = app.initLogs()
-	require.NoError(t, err)
-
-	// TODO: initMetrics
-
-	// CPU profiler
-	err = app.initCPUProfiler(cpuf)
-	require.NoError(t, err)
-
 	_, err = app.containerFactory()
 	require.NoError(t, err)
 }
@@ -139,7 +122,7 @@ func Test_AppInstance_StartFailOnPort(t *testing.T) {
 
 	sigs := make(chan os.Signal, 2)
 	app := NewApp([]string{
-		"--std",
+		"--log-std",
 		"--cfg", cfgPath,
 		"--cis-listen-url", listenURL,
 		"--ca-listen-url", listenURL,
@@ -192,7 +175,7 @@ func Test_AppInstance_CryptoProvError(t *testing.T) {
 
 	sigs := make(chan os.Signal, 2)
 	app := NewApp([]string{
-		"--std",
+		"--log-std",
 		"--cfg", cfgPath,
 		"--cis-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--ca-listen-url", testutils.CreateURLs("http", "localhost"),
@@ -245,7 +228,7 @@ func Test_AppInstance_StartStop(t *testing.T) {
 
 	sigs := make(chan os.Signal, 2)
 	app := NewApp([]string{
-		"--std",
+		"--log-std",
 		"--cfg", cfgPath,
 		"--cis-listen-url", testutils.CreateURLs("http", "localhost"),
 		"--ca-listen-url", testutils.CreateURLs("http", "localhost"),

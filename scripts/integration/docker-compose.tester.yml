@@ -113,12 +113,11 @@ services:
           --root-ca /tmp/trusty/certs/shaken_root_ca.pem \
           --root-ca-key /tmp/trusty/certs/shaken_root_ca.key \
           --root --ca --l1_ca --bundle --force && \
-        /opt/trusty/bin/trusty --std \
+        /opt/trusty/bin/trusty --log-std \
           --hsm-cfg=/tmp/trusty/softhsm/unittest_hsm.json \
           --crypto-prov=/opt/trusty/tests/aws-test-kms.json \
           --cfg=/opt/trusty/etc/dev/trusty-config.yaml \
           --ca-sql=env://TRUSTY_CA_SQL_CONN \
-          --logs-dir=/var/trusty/logs \
           --host-name=168.138.72.101 \
           --cis-listen-url=http://168.138.72.101:7880 \
           --ca-listen-url=https://168.138.72.101:7892
@@ -181,11 +180,10 @@ services:
           --root-ca /tmp/trusty/certs/shaken_root_ca.pem \
           --root-ca-key /tmp/trusty/certs/shaken_root_ca.key \
           --root --ca --l1_ca --bundle --force && \
-        /opt/trusty/bin/trusty --std \
+        /opt/trusty/bin/trusty --log-std \
           --hsm-cfg=/opt/trusty/tests/aws-test-kms.json \
           --cfg=/opt/trusty/etc/dev/trusty-config.yaml \
           --ca-sql=env://TRUSTY_CA_SQL_CONN \
-          --logs-dir=/var/trusty/logs \
           --host-name=168.138.72.102 \
           --cis-listen-url=http://168.138.72.102:7880 \
           --ca-listen-url=https://168.138.72.102:7892

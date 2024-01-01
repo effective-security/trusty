@@ -2,6 +2,9 @@ package tasks
 
 import (
 	"github.com/effective-security/porto/pkg/tasks"
+	"github.com/effective-security/trusty/backend/tasks/certsmonitor"
+	"github.com/effective-security/trusty/backend/tasks/healthcheck"
+	"github.com/effective-security/trusty/backend/tasks/stats"
 )
 
 // Status indicates whether the task failed or succeeded
@@ -22,3 +25,10 @@ type Factory func(
 	schedule string,
 	args ...string,
 ) interface{}
+
+// Factories provides map of Factory
+var Factories = map[string]Factory{
+	certsmonitor.TaskName: certsmonitor.Factory,
+	stats.TaskName:        stats.Factory,
+	healthcheck.TaskName:  healthcheck.Factory,
+}

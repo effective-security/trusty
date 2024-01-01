@@ -92,7 +92,7 @@ Add the launch configuration to .vscode/launch.json:
             "program": "${workspaceRoot}/cmd/trusty",
             "env": {},
             "args": [
-                "--std",
+                "--log-std",
                 "--cfg",
                 "${workspaceRoot}/etc/dev/trusty-config.yaml"
             ],
