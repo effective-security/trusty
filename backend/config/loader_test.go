@@ -82,10 +82,6 @@ func TestLoadYAMLOverrideByHostname(t *testing.T) {
 	assert.Equal(t, "trusty-pod", c.ServiceName)
 	assert.NotEmpty(t, c.ClusterName)
 
-	assert.Equal(t, "/tmp/trusty/logs", c.Logs.Directory)
-	assert.Equal(t, 3, c.Logs.MaxAgeDays)
-	assert.Equal(t, 10, c.Logs.MaxSizeMb)
-
 	assert.Len(t, c.LogLevels, 4)
 
 	assert.NotEmpty(t, c.CryptoProv.Providers)
@@ -123,10 +119,6 @@ func TestLoadYAMLWithOverride(t *testing.T) {
 	assert.Equal(t, "local", c.Region)
 	assert.Equal(t, "trusty-pod", c.ServiceName)
 	assert.NotEmpty(t, c.ClusterName)
-
-	assert.Equal(t, "/tmp/trusty/logs", c.Logs.Directory)
-	assert.Equal(t, 3, c.Logs.MaxAgeDays)
-	assert.Equal(t, 10, c.Logs.MaxSizeMb)
 
 	assert.Len(t, c.LogLevels, 4)
 

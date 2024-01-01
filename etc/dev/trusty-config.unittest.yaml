@@ -4,9 +4,6 @@ metrics:
   prometheus:
     addr:
 
-logs:
-  directory: /dev/null
-
 servers:
   cis:
     disabled: false

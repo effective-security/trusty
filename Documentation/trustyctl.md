@@ -1,70 +1,38 @@
 # trustyctl
 
 ```.sh
-usage: trustyctl [<flags>] <command> [<args> ...]
+Usage: trustyctl <command>
 
-A command-line utility for controlling Trusty.
+CTL for trusty server
 
 Flags:
-      --help               Show context-sensitive help (also try --help-long and --help-man).
-      --version            Show application version.
-  -V, --verbose            verbose output
-  -D, --debug              redirect logs to stderr
-      --cfg="trusty-config.yaml"
-                           trusty configuration file
-      --hsm-cfg=HSM-CFG    HSM provider configuration file
-      --crypto-prov=CRYPTO-PROV ...
-                           path to additional Crypto provider configurations
-  -c, --tls-cert=TLS-CERT  client certificate for TLS connection
-  -k, --tls-key=TLS-KEY    key file for client certificate
-  -r, --tls-trusted-ca=""  trusted CA certificate file for TLS connection
-  -s, --server=SERVER      URL of the server to control
-      --retries=0          number of retries for connect failures
-      --timeout=6          timeout in seconds
-      --json               print responses as JSON
+  -h, --help                                  Show context-sensitive help.
+  -D, --debug                                 Enable debug mode
+  -l, --log-level="critical"                  Set the logging level (debug|info|warn|error|critical)
+      --o=STRING                              Print output format
+      --cfg="~/.config/trusty/config.yaml"    Service configuration file
+  -s, --server=STRING                         Address of the remote server to connect. Use TRUSTY_SERVER environment to override
+  -c, --cert=STRING                           Client certificate file for mTLS
+  -k, --cert-key=STRING                       Client certificate key for mTLS
+  -r, --trusted-ca=STRING                     Trusted CA store for server TLS
+  -t, --timeout=6                             Timeout in seconds
 
 Commands:
-  help [<command>...]
-    Show help.
+  version               print remote server version
+  status                print remote server status
+  caller                print identity of the current user
+  ca issuers            list issuers certificates
+  ca certs              list certificates
+  ca revoked            list revoked certificates
+  ca profile            show certificate profile
+  ca sign               sign certificate
+  ca publish-crl        publish CRL
+  ca revoke             revoke certificate
+  ca set-cert-label     set certificate label
+  ca get-certificate    get certificate
+  cis roots             list Root certificates
 
-  status
-    show the server status
-
-  version
-    show the server version
-
-  caller
-    show the caller info
-
-  ca issuers [<flags>]
-    show the issuing CAs
-
-  ca profile [<flags>]
-    show the certificate profile
-
-  ca sign --csr=CSR --profile=PROFILE [<flags>]
-    sign CSR
-
-  ca certs --ikid=IKID [<flags>]
-    print the certificates
-
-  ca label [<flags>]
-    update the certificate label
-
-  ca revoked --ikid=IKID [<flags>]
-    print the revoked certificates
-
-  ca publish_crl --ikid=IKID
-    publish CRL
-
-  ca revoke [<flags>]
-    revoke a certificate
-
-  ca certificate [<flags>]
-    get a certificate
-
-  cis roots [<flags>]
-    show the roots
+Run "trustyctl <command> --help" for more information on a command.
 ```
 
 ## Export the host to be used

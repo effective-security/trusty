@@ -2,7 +2,9 @@ package config
 
 import (
 	"github.com/effective-security/porto/gserver"
+	appinit "github.com/effective-security/porto/pkg/appinit/config"
 	"github.com/effective-security/trusty/api/client"
+	"github.com/effective-security/xlog"
 	"github.com/effective-security/xpki/authority"
 )
 
@@ -31,13 +33,10 @@ type Configuration struct {
 	ClusterName string `json:"cluster,omitempty" yaml:"cluster,omitempty"`
 
 	// Metrics specifies the metrics pipeline configuration
-	Metrics Metrics `json:"metrics" yaml:"metrics"`
-
-	// Logs contains configuration for the logger
-	Logs Logger `json:"logs" yaml:"logs"`
+	Metrics appinit.Metrics `json:"metrics" yaml:"metrics"`
 
 	// LogLevels specifies the log levels per package
-	LogLevels []RepoLogLevel `json:"log_levels" yaml:"log_levels"`
+	LogLevels []xlog.RepoLogLevel `json:"log_levels" yaml:"log_levels"`
 
 	// CryptoProv specifies the configuration for crypto providers
 	CryptoProv CryptoProv `json:"crypto_provider" yaml:"crypto_provider"`

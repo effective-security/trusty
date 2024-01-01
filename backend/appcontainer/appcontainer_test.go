@@ -32,21 +32,8 @@ func TestNewContainerFactory(t *testing.T) {
 		cfg  *config.Configuration
 	}{
 		{
-			name: "no_logs",
-			cfg: &config.Configuration{
-				Logs: config.Logger{Directory: "/dev/null"},
-			},
-		},
-		{
-			name: "with_logs",
-			cfg: &config.Configuration{
-				/*
-					Metrics: {
-						Disabled: &falseVal,
-					},
-				*/
-				Logs: config.Logger{Directory: output},
-			},
+			name: "default",
+			cfg:  &config.Configuration{},
 		},
 	}
 
