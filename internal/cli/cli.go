@@ -16,7 +16,7 @@ import (
 	"github.com/effective-security/trusty/internal/version"
 	"github.com/effective-security/trusty/pkg/print"
 	"github.com/effective-security/x/ctl"
-	"github.com/effective-security/x/slices"
+	"github.com/effective-security/x/values"
 	"github.com/effective-security/xlog"
 	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
@@ -137,7 +137,7 @@ func (c *Cli) RPCClient(skipAuth bool) (*rpcclient.Client, error) {
 		return c.rpcClient, nil
 	}
 
-	host := slices.StringsCoalesce(c.Server, os.Getenv("TRUSTY_SERVER"), DefaultServer)
+	host := values.StringsCoalesce(c.Server, os.Getenv("TRUSTY_SERVER"), DefaultServer)
 
 	var err error
 
@@ -157,7 +157,7 @@ func (c *Cli) RPCClient(skipAuth bool) (*rpcclient.Client, error) {
 		if err == nil {
 			rc := f.ConfigForHost(host)
 			if rc != nil {
-				storage := slices.StringsCoalesce(
+				storage := values.StringsCoalesce(
 					//c.Storage,
 					os.Getenv("TRUSTY_STORAGE"),
 					rc.StorageFolder,
