@@ -7,7 +7,7 @@ require (
 	github.com/alecthomas/kong v0.8.1
 	github.com/effective-security/metrics v0.2.1-0.20240101104213-da18109a2223
 	github.com/effective-security/porto v0.22.1-0.20240101120841-093998c2328e
-	github.com/effective-security/x v0.1.1-0.20231213103727-26a6f8d87418
+	github.com/effective-security/x v0.3.0
 	github.com/effective-security/xdb v0.13.1-0.20240106190446-d833ce0ce8a5
 	github.com/effective-security/xlog v0.7.1
 	github.com/effective-security/xpki v0.16.0
