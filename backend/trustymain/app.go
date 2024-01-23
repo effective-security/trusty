@@ -22,7 +22,7 @@ import (
 	"github.com/effective-security/trusty/internal/version"
 	"github.com/effective-security/trusty/pkg/metricskey"
 	"github.com/effective-security/x/netutil"
-	"github.com/effective-security/x/slices"
+	"github.com/effective-security/x/values"
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
 	"go.uber.org/dig"
@@ -358,7 +358,7 @@ func (a *App) loadConfig() error {
 
 	a.cfg = new(config.Configuration)
 	err = config.LoadWithOverride(
-		slices.StringsCoalesce(a.flags.Cfg, config.ConfigFileName),
+		values.StringsCoalesce(a.flags.Cfg, config.ConfigFileName),
 		a.flags.CfgOverride,
 		a.cfg,
 		nil,
