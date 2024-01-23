@@ -69,7 +69,7 @@ jobs:
       # Cache go build cache, used to speedup go test
       - name: Go Build Cache
         id: go-build-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.go-cache-paths.outputs.go-build }}
           key: ${{ runner.os }}-go-build-${{ env.GO_CACHE_BUSTER }}-${{ hashFiles('**/go.sum') }}
@@ -78,7 +78,7 @@ jobs:
       # Cache go mod cache, used to speedup builds
       - name: Go Mod Cache
         id: go-mod-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.go-cache-paths.outputs.go-mod }}
           key: ${{ runner.os }}-go-mod-${{ env.GO_CACHE_BUSTER }}-${{ hashFiles('**/go.sum') }}
@@ -125,7 +125,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Cache Docker layers
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
