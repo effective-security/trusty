@@ -3,7 +3,7 @@ module github.com/effective-security/trusty
 go 1.21.5
 
 require (
-	cloud.google.com/go/storage v1.36.0
+	cloud.google.com/go/storage v1.37.0
 	github.com/alecthomas/kong v0.8.1
 	github.com/effective-security/metrics v0.2.1-0.20240118133551-e7be2d9e6e70
 	github.com/effective-security/porto v0.22.1-0.20240118135802-d43794c4a9ff
@@ -23,14 +23,14 @@ require (
 	golang.org/x/crypto v0.18.0
 	golang.org/x/net v0.20.0
 	google.golang.org/api v0.157.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20240102182953-50ed04b92917
+	google.golang.org/genproto/googleapis/api v0.0.0-20240122161410-6c6643bf1457
 	google.golang.org/grpc v1.60.1
 	google.golang.org/protobuf v1.32.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
-	cloud.google.com/go v0.111.0 // indirect
+	cloud.google.com/go v0.112.0 // indirect
 	cloud.google.com/go/compute v1.23.3 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v1.1.5 // indirect
@@ -114,7 +114,7 @@ require (
 	golang.org/x/time v0.5.0 // indirect
 	golang.org/x/tools v0.17.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto v0.0.0-20240102182953-50ed04b92917 // indirect
+	google.golang.org/genproto v0.0.0-20240116215550-a9fa1716bcac // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240116215550-a9fa1716bcac // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
