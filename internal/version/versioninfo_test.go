@@ -7,19 +7,19 @@ import (
 )
 
 func TestInfo_ParseBuild(t *testing.T) {
-	v := Info{Build: "1.2.114"}
+	v := Info{Build: "v1.2.114"}
 	v.PopulateFromBuild()
 	assert.Equal(t, uint(1), v.Major, "Major version")
 	assert.Equal(t, uint(2), v.Minor, "MajMinoror version")
 	assert.Equal(t, uint(114), v.Commit, "Commit")
-	assert.Equal(t, float32(1.2*1000000+114), v.Float(), "Float")
+	assert.Equal(t, float32(120.114006), v.Float(), "Float")
 
-	v = Info{Build: "1.2.114-dirty"}
+	v = Info{Build: "v1.2.114-dirty"}
 	v.PopulateFromBuild()
 	assert.Equal(t, uint(1), v.Major, "Major version")
 	assert.Equal(t, uint(2), v.Minor, "MajMinoror version")
 	assert.Equal(t, uint(114), v.Commit, "Commit")
-	assert.Equal(t, float32(1.2*1000000+114), v.Float(), "Float")
+	assert.Equal(t, float32(120.114006), v.Float(), "Float")
 }
 
 func TestInfo_GreaterOrEqual(t *testing.T) {

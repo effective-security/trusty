@@ -226,7 +226,7 @@ func (c *Cli) CISClient() (pb.CISServer, error) {
 }
 
 // Print response to out
-func (c *Cli) Print(value interface{}) error {
+func (c *Cli) Print(value any) error {
 	return print.Object(c.Writer(), c.O, value)
 }
 

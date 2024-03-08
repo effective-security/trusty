@@ -112,7 +112,7 @@ func Factory(
 	name string,
 	schedule string,
 	args ...string,
-) interface{} {
+) any {
 	return func() error {
 		task, err := create(name, schedule, args...)
 		if err != nil {

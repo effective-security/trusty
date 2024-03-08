@@ -494,7 +494,7 @@ func (s *testSuite) TestGetCertificate() {
 	s.HasText(`"Certificate": {`)
 }
 
-func loadJSON(filename string, v interface{}) error {
+func loadJSON(filename string, v any) error {
 	cfr, err := os.Open(filename)
 	if err != nil {
 		return errors.WithStack(err)

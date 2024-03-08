@@ -195,7 +195,7 @@ Subject: C=US, L=WA, O=trusty.com, CN=[TEST] Trusty Level 2 CA
 `)
 }
 
-func loadJSON(filename string, v interface{}) error {
+func loadJSON(filename string, v any) error {
 	cfr, err := os.Open(filename)
 	if err != nil {
 		return errors.WithStack(err)
