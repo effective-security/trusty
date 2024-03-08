@@ -9,7 +9,7 @@ import (
 )
 
 // JSON prints value to out
-func JSON(w io.Writer, value interface{}) error {
+func JSON(w io.Writer, value any) error {
 	json, err := pb.MarshalJSON(value)
 	if err != nil {
 		return errors.WithMessage(err, "failed to encode")
@@ -20,7 +20,7 @@ func JSON(w io.Writer, value interface{}) error {
 }
 
 // Yaml prints value  to out
-func Yaml(w io.Writer, value interface{}) error {
+func Yaml(w io.Writer, value any) error {
 	y, err := yaml.Marshal(value)
 	if err != nil {
 		return errors.WithMessage(err, "failed to encode")
@@ -30,7 +30,7 @@ func Yaml(w io.Writer, value interface{}) error {
 }
 
 // Object prints value to out in format
-func Object(w io.Writer, format string, value interface{}) error {
+func Object(w io.Writer, format string, value any) error {
 	if format == "yaml" {
 		return Yaml(w, value)
 	}
@@ -42,7 +42,7 @@ func Object(w io.Writer, format string, value interface{}) error {
 }
 
 // Print value
-func Print(w io.Writer, value interface{}) {
+func Print(w io.Writer, value any) {
 	switch t := value.(type) {
 	case *pb.ServerVersion:
 		ServerVersion(w, t)

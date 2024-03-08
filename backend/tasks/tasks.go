@@ -24,7 +24,7 @@ type Factory func(
 	name string,
 	schedule string,
 	args ...string,
-) interface{}
+) any
 
 // Factories provides map of Factory
 var Factories = map[string]Factory{

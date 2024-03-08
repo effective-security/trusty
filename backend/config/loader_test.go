@@ -21,7 +21,7 @@ func TestConfigFilesAreYAML(t *testing.T) {
 		f, err := os.Open(abs)
 		require.NoError(t, err, "Unable to open file: %v", file)
 		defer f.Close()
-		var v map[string]interface{}
+		var v map[string]any
 		assert.NoError(t, yaml.NewDecoder(f).Decode(&v), "YAML parser error for file %v", file)
 	}
 	isJSON("etc/dev/" + ConfigFileName)

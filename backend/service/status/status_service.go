@@ -20,7 +20,7 @@ type Service struct {
 }
 
 // Factory returns a factory of the service
-func Factory(server gserver.GServer) interface{} {
+func Factory(server gserver.GServer) any {
 	if server == nil {
 		logger.Panic("status.Factory: invalid parameter")
 	}

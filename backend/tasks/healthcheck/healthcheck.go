@@ -279,7 +279,7 @@ func Factory(
 	name string,
 	schedule string,
 	args ...string,
-) interface{} {
+) any {
 	return func(cfg *config.Configuration) error {
 		task, err := create(name, cfg, schedule, args)
 		if err != nil {

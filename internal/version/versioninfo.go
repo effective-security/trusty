@@ -3,13 +3,14 @@ package version
 import (
 	"fmt"
 	"runtime"
+	"strings"
 )
 
 // Info describes a version of an executable
 type Info struct {
 	Major   uint   `json:"major"`
 	Minor   uint   `json:"minor"`
-	Commit  uint   `json:"commi"`
+	Commit  uint   `json:"commit"`
 	Build   string `json:"build"`
 	Runtime string `json:"runtime"`
 	flt     float32
@@ -24,9 +25,30 @@ type Info struct {
 //
 // and then using gofmt to substitute it into a template
 func (v *Info) PopulateFromBuild() {
-	fmt.Sscanf(v.Build, "%d.%d.%d", &v.Major, &v.Minor, &v.Commit)
-	fmt.Sscanf(v.Build, "%f-", &v.flt)
-	v.flt = v.flt*1000000 + float32(v.Commit)
+	bld := strings.Split(v.Build, "-")[0]
+
+	fmt.Sscanf(bld, "v%d.%d.%d", &v.Major, &v.Minor, &v.Commit)
+	fmt.Sscanf(bld, "v%f.", &v.flt)
+
+	var fCommit float32
+	switch {
+	case v.Commit > 1000000:
+		fCommit = 0.0000001 * float32(v.Commit)
+	case v.Commit > 100000:
+		fCommit = 0.000001 * float32(v.Commit)
+	case v.Commit > 10000:
+		fCommit = 0.00001 * float32(v.Commit)
+	case v.Commit > 1000:
+		fCommit = 0.0001 * float32(v.Commit)
+	case v.Commit > 100:
+		fCommit = 0.001 * float32(v.Commit)
+	case v.Commit > 10:
+		fCommit = 0.01 * float32(v.Commit)
+	case v.Commit > 1:
+		fCommit = 0.1 * float32(v.Commit)
+	}
+
+	v.flt = v.flt*100 + fCommit
 	v.Runtime = runtime.Version()
 }
 

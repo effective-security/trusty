@@ -81,7 +81,7 @@ func Factory(
 	name string,
 	schedule string,
 	args ...string,
-) interface{} {
+) any {
 	return func(ca cadb.CaReadonlyDb) error {
 		task, err := create(name, ca, schedule)
 		if err != nil {
