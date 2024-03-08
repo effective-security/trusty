@@ -67,3 +67,7 @@ func (m *MockScheduler) RunPending() {
 		}
 	}
 }
+
+// Publish the tasks to Publisher
+func (m *MockScheduler) Publish() {
+}
