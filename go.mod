@@ -8,7 +8,7 @@ require (
 	github.com/effective-security/metrics v0.5.101
 	github.com/effective-security/porto v0.25.559
 	github.com/effective-security/x v0.4.31
-	github.com/effective-security/xdb v0.13.152
+	github.com/effective-security/xdb v0.13.158
 	github.com/effective-security/xlog v0.8.79
 	github.com/effective-security/xpki v0.18.381
 	github.com/golang-migrate/migrate/v4 v4.17.0
