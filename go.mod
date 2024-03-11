@@ -4,7 +4,7 @@ go 1.22.1
 
 require (
 	cloud.google.com/go/storage v1.39.0
-	github.com/alecthomas/kong v0.8.1
+	github.com/alecthomas/kong v0.9.0
 	github.com/effective-security/metrics v0.5.101
 	github.com/effective-security/porto v0.25.559
 	github.com/effective-security/x v0.4.31
