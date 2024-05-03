@@ -8,7 +8,7 @@ require (
 	github.com/effective-security/metrics v0.6.49
 	github.com/effective-security/porto v0.27.261
 	github.com/effective-security/x v0.6.37
-	github.com/effective-security/xdb v0.13.152
+	github.com/effective-security/xdb v0.13.158
 	github.com/effective-security/xlog v0.9.39
 	github.com/effective-security/xpki v0.19.158
 	github.com/golang-migrate/migrate/v4 v4.17.0
@@ -22,7 +22,7 @@ require (
 	go.uber.org/dig v1.17.1
 	golang.org/x/crypto v0.22.0
 	golang.org/x/net v0.24.0
-	google.golang.org/api v0.176.1
+	google.golang.org/api v0.177.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240415141817-7cd4c1c1f9ec
 	google.golang.org/grpc v1.63.2
 	google.golang.org/protobuf v1.34.0
@@ -116,7 +116,7 @@ require (
 	golang.org/x/time v0.5.0 // indirect
 	golang.org/x/tools v0.20.0 // indirect
 	google.golang.org/genproto v0.0.0-20240415180920-8c6c420018be // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240415180920-8c6c420018be // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240429193739-8cf5692501f6 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
