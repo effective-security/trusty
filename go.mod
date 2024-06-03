@@ -8,10 +8,10 @@ require (
 	github.com/effective-security/metrics v0.6.49
 	github.com/effective-security/porto v0.27.261
 	github.com/effective-security/x v0.6.37
-	github.com/effective-security/xdb v0.13.158
+	github.com/effective-security/xdb v0.15.71
 	github.com/effective-security/xlog v0.9.39
 	github.com/effective-security/xpki v0.19.158
-	github.com/golang-migrate/migrate/v4 v4.17.0
+	github.com/golang-migrate/migrate/v4 v4.17.1
 	github.com/lib/pq v1.10.9
 	github.com/miekg/dns v1.1.58
 	github.com/mitchellh/go-homedir v1.1.0
