@@ -137,7 +137,7 @@ jobs:
 
       - name: Docker trusty
         id: docker_build_trusty_ci
-        uses: docker/build-push-action@v6.2.0
+        uses: docker/build-push-action@v6.4.1
         with:
           file: ./Dockerfile
           context: .
@@ -173,7 +173,7 @@ jobs:
       - name: Docker trusty
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         id: docker_build_trusty
-        uses: docker/build-push-action@v6.2.0
+        uses: docker/build-push-action@v6.4.1
         with:
           file: ./Dockerfile
           context: .
