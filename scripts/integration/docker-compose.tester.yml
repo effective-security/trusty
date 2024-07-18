@@ -26,7 +26,7 @@ services:
       - PORT=14599
 
   trusty-sql:
-    image: effectivesecurity/postgres15:sha-0bbf105
+    image: effectivesecurity/postgres15:sha-d151f03
     domainname: trusty-sql.effectivesecurity.pt
     networks:
       trusty_private:
