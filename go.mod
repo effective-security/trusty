@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/storage v1.43.0
 	github.com/alecthomas/kong v0.9.0
 	github.com/effective-security/metrics v0.6.55
-	github.com/effective-security/porto v0.27.265
+	github.com/effective-security/porto v0.27.267
 	github.com/effective-security/x v0.6.40
 	github.com/effective-security/xdb v0.17.77
 	github.com/effective-security/xlog v0.9.39
