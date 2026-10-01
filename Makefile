@@ -34,11 +34,11 @@ clean:
 		${COVPATH} \
 
 tools:
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54
-	go install github.com/go-phorce/cov-report/cmd/cov-report@latest
-	go install github.com/mattn/goveralls@latest
-	go install github.com/effective-security/xpki/cmd/hsm-tool@latest
-	go install github.com/effective-security/xpki/cmd/xpki-tool@latest
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
+	go install github.com/go-phorce/cov-report/cmd/cov-report@v1.1.0
+	go install github.com/mattn/goveralls@v0.0.12
+	go install github.com/effective-security/xpki/cmd/hsm-tool
+	go install github.com/effective-security/xpki/cmd/xpki-tool
 
 folders:
 	mkdir -p /tmp/trusty/softhsm/tokens \

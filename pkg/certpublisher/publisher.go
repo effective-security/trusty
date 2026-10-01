@@ -45,7 +45,7 @@ func (p *publisher) PublishCertificate(ctx context.Context, cert *pb.Certificate
 
 	_, err := storage.WriteFile(ctx, location, []byte(pem))
 	if err != nil {
-		return "", errors.WithMessagef(err, "unable to write file to: "+location)
+		return "", errors.WithMessagef(err, "unable to write file to: %s", location)
 	}
 
 	err = storage.SetMetadata(ctx, location, map[string]string{
@@ -71,7 +71,7 @@ func (p *publisher) PublishCRL(ctx context.Context, crl *pb.Crl) (string, error)
 
 	_, err := storage.WriteFile(ctx, fileName, block.Bytes)
 	if err != nil {
-		return "", errors.WithMessagef(err, "unable to write file to: "+fileName)
+		return "", errors.WithMessagef(err, "unable to write file to: %s", fileName)
 	}
 
 	err = storage.SetMetadata(ctx, fileName, map[string]string{

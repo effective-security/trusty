@@ -76,7 +76,7 @@ func (s *Service) SignCertificate(ctx context.Context, req *pb.SignCertificateRe
 
 	if ca.Profile(req.Profile) == nil {
 		msg := fmt.Sprintf("%q issuer does not support the requested profile: %q", ca.Label(), req.Profile)
-		return nil, httperror.NewGrpcFromCtx(ctx, codes.InvalidArgument, msg)
+		return nil, httperror.NewGrpcFromCtx(ctx, codes.InvalidArgument, "%s", msg)
 	}
 
 	cr := csr.SignRequest{

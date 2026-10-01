@@ -44,6 +44,11 @@ func (p *Provider) Name() string {
 	return p.prov.Name()
 }
 
+// ConnectionString returns the underlying provider's connection string.
+func (p *Provider) ConnectionString() string {
+	return p.prov.ConnectionString()
+}
+
 // BeginTx starts a transaction.
 //
 // The provided context is used until the transaction is committed or rolled back.

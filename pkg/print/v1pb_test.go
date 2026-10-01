@@ -49,13 +49,13 @@ func TestServerStatusResponse(t *testing.T) {
 
 	out := w.String()
 	assert.Equal(t,
-		"  Name        | Trusty                \n"+
-			"  Node        | local                 \n"+
-			"  Host        | dissoupov             \n"+
-			"  Listen URLs | https://0.0.0.0:7891  \n"+
-			"  Version     | 1.1.1                 \n"+
-			"  Runtime     | go1.15.1              \n"+
-			"  Started     | 2020-10-01T00:00:00Z  \n\n",
+		" Name        | Trusty               \n"+
+			" Node        | local                \n"+
+			" Host        | dissoupov            \n"+
+			" Listen URLs | https://0.0.0.0:7891 \n"+
+			" Version     | 1.1.1                \n"+
+			" Runtime     | go1.15.1             \n"+
+			" Started     | 2020-10-01T00:00:00Z \n\n",
 		out)
 }
 
@@ -71,9 +71,9 @@ func TestCallerStatusResponse(t *testing.T) {
 	print.Print(w, r)
 
 	out := w.String()
-	assert.Equal(t, "  Subject   | 12341234-1234124  \n"+
-		"  Role      | trusty            \n"+
-		"  claim:sub | d@test.com        \n\n", out)
+	assert.Equal(t, " Subject   | 12341234-1234124 \n"+
+		" Role      | trusty           \n"+
+		" claim:sub | d@test.com       \n\n", out)
 }
 
 func TestRoots(t *testing.T) {
@@ -123,9 +123,9 @@ func TestCertificatesTable(t *testing.T) {
 	print.CertificatesTable(w, list)
 	out := w.String()
 	assert.Equal(t,
-		"  ID  | ORGID | SKID  | SERIAL |           FROM            |            TO             | SUBJECT | PROFILE | LABEL  \n"+
-			"------+-------+-------+--------+---------------------------+---------------------------+---------+---------+--------\n"+
-			"  123 | 1000  | 23423 |        | 2012-11-01T22:08:41+00:00 | 2012-12-01T22:08:41+00:00 | CN=cert | prof    | label  \n\n",
+		" ID  | ORGID | SKID  | SERIAL |           FROM            |            TO             | SUBJECT | PROFILE | LABEL \n"+
+			"-----+-------+-------+--------+---------------------------+---------------------------+---------+---------+-------\n"+
+			" 123 | 1000  | 23423 |        | 2012-11-01T22:08:41+00:00 | 2012-12-01T22:08:41+00:00 | CN=cert | prof    | label \n\n",
 		out,
 	)
 }
@@ -153,9 +153,9 @@ func TestRevokedCertificatesTable(t *testing.T) {
 	print.RevokedCertificatesTable(w, list)
 	out := w.String()
 	assert.Equal(t, out,
-		"  ID  | ORGID | SKID  | SERIAL |           FROM            |            TO             | SUBJECT | PROFILE | LABEL |          REVOKED          |     REASON      \n"+
-			"------+-------+-------+--------+---------------------------+---------------------------+---------+---------+-------+---------------------------+-----------------\n"+
-			"  123 | 1000  | 23423 |        | 2012-11-01T22:08:41+00:00 | 2012-12-01T22:08:41+00:00 | CN=cert | prof    | label | 2012-11-01T22:08:41+00:00 | KEY_COMPROMISE  \n\n")
+		" ID  | ORGID | SKID  | SERIAL |           FROM            |            TO             | SUBJECT | PROFILE | LABEL |          REVOKED          |     REASON     \n"+
+			"-----+-------+-------+--------+---------------------------+---------------------------+---------+---------+-------+---------------------------+----------------\n"+
+			" 123 | 1000  | 23423 |        | 2012-11-01T22:08:41+00:00 | 2012-12-01T22:08:41+00:00 | CN=cert | prof    | label | 2012-11-01T22:08:41+00:00 | KEY_COMPROMISE \n\n")
 }
 
 func TestCrlTable(t *testing.T) {
@@ -172,9 +172,9 @@ func TestCrlTable(t *testing.T) {
 	print.CrlsTable(w, list)
 	out := w.String()
 	assert.Equal(t, out,
-		"  ID  |  IKID  |        THIS UPDATE        |        NEXT UPDATE        | ISSUER  \n"+
-			"------+--------+---------------------------+---------------------------+---------\n"+
-			"  123 | 123456 | 2012-11-01T22:08:41+00:00 | 2012-12-01T22:08:41+00:00 | CN=ca   \n\n")
+		" ID  |  IKID  |        THIS UPDATE        |        NEXT UPDATE        | ISSUER \n"+
+			"-----+--------+---------------------------+---------------------------+--------\n"+
+			" 123 | 123456 | 2012-11-01T22:08:41+00:00 | 2012-12-01T22:08:41+00:00 | CN=ca  \n\n")
 }
 
 func Test_Issuers(t *testing.T) {
