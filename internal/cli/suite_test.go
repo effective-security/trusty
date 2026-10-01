@@ -172,8 +172,8 @@ func (s *testSuite) TestCaller() {
 	err := a.Run(s.ctl)
 	s.Require().NoError(err)
 	s.Equal(
-		"  Subject | guest      \n"+
-			"  Role    | test_role  \n\n",
+		" Subject | guest     \n"+
+			" Role    | test_role \n\n",
 		s.Out.String())
 
 	s.ctl.O = "json"
@@ -201,13 +201,13 @@ func (s *testSuite) TestServer() {
 	var a ServerStatusCmd
 	err := a.Run(s.ctl)
 	s.Require().NoError(err)
-	s.Equal("  Name        | mock       \n"+
-		"  Node        |            \n"+
-		"  Host        |            \n"+
-		"  Listen URLs | host1:123  \n"+
-		"  Version     | 1.2.3      \n"+
-		"  Runtime     | go1.15     \n"+
-		"  Started     |            \n\n",
+	s.Equal(" Name        | mock      \n"+
+		" Node        |           \n"+
+		" Host        |           \n"+
+		" Listen URLs | host1:123 \n"+
+		" Version     | 1.2.3     \n"+
+		" Runtime     | go1.15    \n"+
+		" Started     |           \n\n",
 		s.Out.String(),
 	)
 

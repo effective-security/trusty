@@ -26,6 +26,13 @@ func main() {
 }
 
 func realMain(args []string, out io.Writer, errout io.Writer, exit func(int)) {
+	normalizedExit := func(code int) {
+		if code != 0 {
+			code = 1
+		}
+		exit(code)
+	}
+
 	cl := app{
 		Cli: cli.Cli{
 			Version: ctl.VersionFlag("0.0.1"),
@@ -39,7 +46,7 @@ func realMain(args []string, out io.Writer, errout io.Writer, exit func(int)) {
 		kong.Description("CTL for trusty server"),
 		//kong.UsageOnError(),
 		kong.Writers(out, errout),
-		kong.Exit(exit),
+		kong.Exit(normalizedExit),
 		ctl.BoolPtrMapper,
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact: true,

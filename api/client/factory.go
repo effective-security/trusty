@@ -154,7 +154,7 @@ func (f *factory) NewClient(svc string, ops ...Option) (*rpcclient.Client, error
 	}
 
 	// auth token is not required for trusty, as Client Cert is used
-	client, err := rpcclient.New(clientCfg, true)
+	client, err := rpcclient.New(clientCfg)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "unable to create client: %v", targetHost)
 	}

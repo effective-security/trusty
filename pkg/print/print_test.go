@@ -122,9 +122,9 @@ func TestPrint(t *testing.T) {
 		list := []*pb.Certificate{
 			cert,
 		}
-		exp := "  ID  | ORGID | SKID  | SERIAL |         FROM         |          TO          | SUBJECT | PROFILE | LABEL  \n" +
-			"------+-------+-------+--------+----------------------+----------------------+---------+---------+--------\n" +
-			"  123 | 1000  | 23423 | 1234   | 2012-11-01T22:08:41Z | 2012-12-01T22:08:41Z | CN=cert | prof    | label  \n\n"
+		exp := " ID  | ORGID | SKID  | SERIAL |         FROM         |          TO          | SUBJECT | PROFILE | LABEL \n" +
+			"-----+-------+-------+--------+----------------------+----------------------+---------+---------+-------\n" +
+			" 123 | 1000  | 23423 | 1234   | 2012-11-01T22:08:41Z | 2012-12-01T22:08:41Z | CN=cert | prof    | label \n\n"
 		checkFormat(list, exp)
 		checkFormat(&pb.CertificatesResponse{Certificates: list}, exp)
 	})
@@ -161,9 +161,9 @@ func TestPrint(t *testing.T) {
 				RevokedAt:   "2012-12-01T22:08:41Z",
 			},
 		}
-		exp := "  ID  | ORGID | SKID  | SERIAL |         FROM         |          TO          | SUBJECT | PROFILE | LABEL |       REVOKED        |     REASON      \n" +
-			"------+-------+-------+--------+----------------------+----------------------+---------+---------+-------+----------------------+-----------------\n" +
-			"  123 | 1000  | 23423 | 1234   | 2012-11-01T22:08:41Z | 2012-12-01T22:08:41Z | CN=cert | prof    | label | 2012-12-01T22:08:41Z | KEY_COMPROMISE  \n\n"
+		exp := " ID  | ORGID | SKID  | SERIAL |         FROM         |          TO          | SUBJECT | PROFILE | LABEL |       REVOKED        |     REASON     \n" +
+			"-----+-------+-------+--------+----------------------+----------------------+---------+---------+-------+----------------------+----------------\n" +
+			" 123 | 1000  | 23423 | 1234   | 2012-11-01T22:08:41Z | 2012-12-01T22:08:41Z | CN=cert | prof    | label | 2012-12-01T22:08:41Z | KEY_COMPROMISE \n\n"
 		checkFormat(list, exp)
 		checkFormat(&pb.RevokedCertificatesResponse{RevokedCertificates: list}, exp)
 
@@ -200,9 +200,9 @@ func TestPrint(t *testing.T) {
 				NextUpdate: "2012-12-01T22:08:41Z",
 			},
 		}
-		exp := "  ID  |  IKID  |     THIS UPDATE      |     NEXT UPDATE      | ISSUER  \n" +
-			"------+--------+----------------------+----------------------+---------\n" +
-			"  123 | 123456 | 2012-11-01T22:08:41Z | 2012-12-01T22:08:41Z | CN=ca   \n\n"
+		exp := " ID  |  IKID  |     THIS UPDATE      |     NEXT UPDATE      | ISSUER \n" +
+			"-----+--------+----------------------+----------------------+--------\n" +
+			" 123 | 123456 | 2012-11-01T22:08:41Z | 2012-12-01T22:08:41Z | CN=ca  \n\n"
 		checkFormat(list, exp)
 		checkFormat(&pb.CrlsResponse{Crls: list}, exp)
 	})

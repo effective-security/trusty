@@ -14,7 +14,27 @@ import (
 	"github.com/effective-security/xpki/jwt"
 	"github.com/effective-security/xpki/x/print"
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/tw"
 )
+
+func newTable(w io.Writer, disableWrapping bool) *tablewriter.Table {
+	options := []tablewriter.Option{
+		tablewriter.WithRendition(tw.Rendition{
+			Borders: tw.BorderNone,
+			Symbols: tw.NewSymbols(tw.StyleASCII),
+		}),
+		tablewriter.WithRowAlignment(tw.AlignLeft),
+		tablewriter.WithHeaderAutoFormat(tw.Off),
+	}
+	if disableWrapping {
+		options = append(options,
+			tablewriter.WithHeaderAutoWrap(tw.WrapNone),
+			tablewriter.WithRowAutoWrap(tw.WrapNone),
+			tablewriter.WithFooterAutoWrap(tw.WrapNone),
+		)
+	}
+	return tablewriter.NewTable(w, options...)
+}
 
 // ServerVersion prints ServerVersion
 func ServerVersion(w io.Writer, r *pb.ServerVersion) {
@@ -23,9 +43,7 @@ func ServerVersion(w io.Writer, r *pb.ServerVersion) {
 
 // ServerStatusResponse prints pb.ServerStatusResponse
 func ServerStatusResponse(w io.Writer, r *pb.ServerStatusResponse) {
-	table := tablewriter.NewWriter(w)
-	table.SetBorder(false)
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table := newTable(w, false)
 	table.Append([]string{"Name", r.Status.Name})
 	table.Append([]string{"Node", r.Status.Nodename})
 	table.Append([]string{"Host", r.Status.Hostname})
@@ -40,10 +58,7 @@ func ServerStatusResponse(w io.Writer, r *pb.ServerStatusResponse) {
 
 // CallerStatusResponse prints pb.CallerStatusResponse
 func CallerStatusResponse(w io.Writer, r *pb.CallerStatusResponse) {
-	table := tablewriter.NewWriter(w)
-	table.SetBorder(false)
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetAutoWrapText(false)
+	table := newTable(w, true)
 	table.Append([]string{"Subject", r.Subject})
 	table.Append([]string{"Role", r.Role})
 
@@ -196,10 +211,8 @@ func Roots(w io.Writer, roots []*pb.RootCertificate, withPem bool) {
 
 // CertificatesTable prints list of Certificates
 func CertificatesTable(w io.Writer, list []*pb.Certificate) {
-	table := tablewriter.NewWriter(w)
-	table.SetBorder(false)
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetHeader([]string{"Id", "OrgID", "SKID", "Serial", "From", "To", "Subject", "Profile", "Label"})
+	table := newTable(w, false)
+	table.Header("ID", "ORGID", "SKID", "SERIAL", "FROM", "TO", "SUBJECT", "PROFILE", "LABEL")
 
 	for _, c := range list {
 		table.Append([]string{
@@ -220,10 +233,8 @@ func CertificatesTable(w io.Writer, list []*pb.Certificate) {
 
 // RevokedCertificatesTable prints list of Revoked Certificates
 func RevokedCertificatesTable(w io.Writer, list []*pb.RevokedCertificate) {
-	table := tablewriter.NewWriter(w)
-	table.SetBorder(false)
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetHeader([]string{"Id", "OrgID", "SKID", "Serial", "From", "To", "Subject", "Profile", "Label", "Revoked", "Reason"})
+	table := newTable(w, false)
+	table.Header("ID", "ORGID", "SKID", "SERIAL", "FROM", "TO", "SUBJECT", "PROFILE", "LABEL", "REVOKED", "REASON")
 
 	for _, r := range list {
 		c := r.Certificate
@@ -248,10 +259,8 @@ func RevokedCertificatesTable(w io.Writer, list []*pb.RevokedCertificate) {
 
 // CrlsTable prints list of CRL
 func CrlsTable(w io.Writer, list []*pb.Crl) {
-	table := tablewriter.NewWriter(w)
-	table.SetBorder(false)
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetHeader([]string{"Id", "IKID", "This Update", "Next Update", "Issuer"})
+	table := newTable(w, false)
+	table.Header("ID", "IKID", "THIS UPDATE", "NEXT UPDATE", "ISSUER")
 
 	for _, c := range list {
 		table.Append([]string{

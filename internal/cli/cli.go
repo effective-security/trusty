@@ -132,7 +132,7 @@ func (c *Cli) AfterApply(app *kong.Kong, vars kong.Vars) error {
 }
 
 // RPCClient returns gRPC client
-func (c *Cli) RPCClient(skipAuth bool) (*rpcclient.Client, error) {
+func (c *Cli) RPCClient() (*rpcclient.Client, error) {
 	if c.rpcClient != nil {
 		return c.rpcClient, nil
 	}
@@ -165,8 +165,6 @@ func (c *Cli) RPCClient(skipAuth bool) (*rpcclient.Client, error) {
 				)
 
 				clientCfg.StorageFolder, _ = homedir.Expand(storage)
-				clientCfg.EnvAuthTokenName = rc.EnvAuthTokenName
-
 				if rc.TLS != nil {
 					if cert == "" {
 						cert = rc.TLS.CertFile
@@ -186,7 +184,7 @@ func (c *Cli) RPCClient(skipAuth bool) (*rpcclient.Client, error) {
 		}
 	}
 
-	grpcClient, err := rpcclient.New(clientCfg, skipAuth)
+	grpcClient, err := rpcclient.New(clientCfg)
 	if err != nil {
 		return nil, errors.WithMessage(err, "unable to create client")
 	}
@@ -200,7 +198,7 @@ func (c *Cli) RPCClient(skipAuth bool) (*rpcclient.Client, error) {
 
 // StatusClient returns Status client from connection
 func (c *Cli) StatusClient() (pb.StatusServer, error) {
-	r, err := c.RPCClient(true)
+	r, err := c.RPCClient()
 	if err != nil {
 		return nil, err
 	}
@@ -209,7 +207,7 @@ func (c *Cli) StatusClient() (pb.StatusServer, error) {
 
 // CAClient returns CA client from connection
 func (c *Cli) CAClient() (pb.CAServer, error) {
-	r, err := c.RPCClient(true)
+	r, err := c.RPCClient()
 	if err != nil {
 		return nil, err
 	}
@@ -218,7 +216,7 @@ func (c *Cli) CAClient() (pb.CAServer, error) {
 
 // CISClient returns CA client from connection
 func (c *Cli) CISClient() (pb.CISServer, error) {
-	r, err := c.RPCClient(true)
+	r, err := c.RPCClient()
 	if err != nil {
 		return nil, err
 	}
